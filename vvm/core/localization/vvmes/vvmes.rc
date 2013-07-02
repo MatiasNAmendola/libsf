@@ -1,0 +1,145 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Spanish (Castilian) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ESP)
+#ifdef _WIN32
+LANGUAGE LANG_SPANISH, SUBLANG_SPANISH
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_VVM_LOAD_ERROR      "Error al cargar VVM"
+    IDS_VVM_FAILURE_TO_LOAD_MINUS_1 
+                            "Falla al cargar: se requiere vvmoss.dll.\nTerminando con codigo de error -1."
+    IDS_VVM_FAILURE_TO_INITIALIZE_MINUS_2 
+                            "Error al inicializar el VVM.\nTerminando con codigo de error -2."
+    IDS_VVM_INITIALIZE_ERROR "Error al inicializar VVM"
+    IDS_LANGUAGE            "Español"
+    IDS_VVM_FAILURE_TO_LOAD_VVMMC_MINUS_3 
+                            "Falla al cargar: se requiere vvmmc.dll\nTerminando con codigo de error -3."
+    IDS_VVM_TEST_OK         "GT:Todas las pruebas pasado."
+    IDS_VVM_TEST_FAILURE    "GT:El incumplimiento por lo menos una prueba (véase la línea de comandos)."
+    IDS_VVM_TEST_HEADING    "GT:VVM Autoprueba"
+    IDS_VVM_RUNNING         "GT:Funcionamiento...\n"
+    IDS_VVM_TESTING         "GT:Prueba...\n"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_BXML_NO_ERROR       "GT:sin error"
+    IDS_BXML_UNABLE_TO_CREATE_BXML "GT:incapaz de crear nodo bxml"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_VVM_TEST_FAILURE_DISPLAY "GT:Faller %u\n"
+    IDS_VVM_TEST_OK_DISPLAY "GT:Ok.\n"
+    IDS_VVM_TEST_SHA1_TESTING "GT:Prueba SHA-1...\n"
+    IDS_VVM_TEST_SHA1_PASSED "GT:SHA-1 pasado.\n"
+    IDS_VVM_TEST_SHA1_FIPS_PUB_180_1 "GT:\tFIPS PUB 180-1..."
+    IDS_VVM_TEST_PASS       "GT:pasado\n"
+    IDS_VVM_TEST_FAIL       "GT:faller\n"
+    IDS_VVM_TEST_BXML_TESTING "GT:Preuba BXML...\n"
+    IDS_VVM_TEST_BXML_PASSED "GT:BXML pasado.\n"
+    IDS_VVM_TEST_BXML_1     "GT:\tCargar bxml muestra..."
+    IDS_VVM_1DOTDOTDOT      "1..."
+    IDS_VVM_2DOTDOTDOT      "2..."
+    IDS_VVM_3DOTDOTDOT      "3..."
+    IDS_VVM_4DOTDOTDOT      "4..."
+    IDS_VVM_5DOTDOTDOT      "5..."
+    IDS_VVM_6DOTDOTDOT      "6..."
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_VVM_7DOTDOTDOT      "7..."
+    IDS_VVM_8DOTDOTDOT      "8..."
+    IDS_VVM_9DOTDOTDOT      "9..."
+    IDS_VVM_TEST_BXML_INVALID_FILE 
+                            "GT:Caso de prueba interna bxml archivo no es válido"
+    IDS_VVM_TEST_BXML_UNABLE_TO_LOAD "GT:Error al cargar archivo interno bxml"
+    IDS_VVM_TEST_BXML_2     "GT:\tEscribir bxml en el disco, comparar con interior..."
+    IDS_VVM_TEST_BXML_UNABLE_TO_GET_TEMP_FILE 
+                            "GT:No se puede obtener nombre de archivo temporal"
+    IDS_VVM_TEST_BXML_UNABLE_TO_RELOAD_TEMP_FILE 
+                            "GT:Incapaz de volver a cargar el archivo temporal del disco bxml"
+    IDS_VVM_TEST_BXML_RELOAD_DOES_NOT_MATCH 
+                            "GT:Archivo bxml no coincide con línea de base"
+    IDS_VVM_TEST_BXML_3     "GT:\tCrear nuevo bxml desde cero..."
+    IDS_VVM_TEST_BXML_COPY_FAILED "GT:copia no"
+    IDS_VVM_TEST_CANVAS_TESTING "GT:Preuba Canvas...\n"
+    IDS_VVM_TEST_CANVAS_PASSED "GT:Canvas passado.\n"
+    IDS_VVM_TEST_CANVAS_1   "GT:\tCrear y ampliar la canvas..."
+    IDS_VVM_TEST_CANVAS_INVALID_GRADIENT "GT:Failure on gradient"
+    IDS_VVM_TEST_CANVAS_SCALED_INVALID_GRADIENT 
+                            "GT:Failure on gradient scaled"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_VVM_TEST_CANVAS_CANNOT_CREATE "GT:Unable to create canvas for test"
+    IDS_VVM_TEST_CANVAS_SCALED_CANNOT_CREATE 
+                            "GT:Unable to create scaled canvas for test"
+END
+
+#endif    // Spanish (Castilian) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

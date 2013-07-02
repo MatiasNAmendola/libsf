@@ -1,0 +1,111 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_ASSEMBLING          "--- Assembling %s:\n"
+    IDS_UNABLE_TO_READ_BYTES_FROM 
+                            "--- Unable to read %u bytes from %s, read %u\n"
+    IDS_ERROR_ALLOCATING    "--- Error allocating %u bytes to read %s\n"
+    IDS_FILE_IS_ZERO_BYTES  "--- File %s is 0 bytes\n"
+    IDS_FILE_IS_TOO_BIG     "--- File %s is too big\n"
+    IDS_UNABLE_TO_OPEN      "--- Unable to open %s\n"
+    IDS_LOADED              "--- Loaded %s\n"
+    IDS_FILES_PROCESSED     "--- %u files processed, %u errors, %u warnings.\n"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ERRORS_WARNINGS_FOUND "--- %u errors, %u warnings found in %s\n"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SYNTAX_ERROR        "syntax error"
+    IDS_INVALID_VARIABLE_NAME "invalid variable name"
+    IDS_ERROR_UNABLE_TO_OPEN "file could not be opened"
+    IDS_ERROR_FILE_IS_TOO_BIG "file is too big"
+    IDS_ERROR_ALLOCATING_MEMORY "error allocating memory"
+    IDS_ERROR_UNABLE_TO_READ_BYTES_FROM "unable to read bytes from"
+    IDS_UNRECOVERABLE_ERROR "unrecoverable error"
+    IDS_WARNING_FILE_IS_0_BYTES "file is 0 bytes"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_UNMATCHED_BLOCK     "unmatched block"
+    IDS_EXPECTED_END        "expected 'END' keyword"
+    IDS_LABEL_OUTSIDE_OF_BLOCK "label is outside of code block"
+    IDS_ERROR_UNEXPECTED_KEYWORD "unexpected keyword"
+    IDS_ERROR_DSNIP_NOT_ALLOWED_AT_COMPILE_TIME 
+                            "'DSNIP' definitions not allowed at compile time"
+    IDS_ERROR_INTERNAL_COMPILER_ERROR "internal compiler error"
+    IDS_ERROR_EXPECTED_QUOTED_PATHNAME "expected a quoted pathname"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

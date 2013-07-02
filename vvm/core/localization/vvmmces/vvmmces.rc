@@ -1,0 +1,112 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_ASSEMBLING          "--- GT:Montaje %s:\n"
+    IDS_UNABLE_TO_READ_BYTES_FROM 
+                            "--- GT:No se puede leer bytes %u de %s, leer %u\n"
+    IDS_ERROR_ALLOCATING    "--- GT:Error al asignar %u bytes a leer %s\n"
+    IDS_FILE_IS_ZERO_BYTES  "--- GT:Archivo %s es 0 bytes\n"
+    IDS_FILE_IS_TOO_BIG     "--- GT:El archivo %s es demasiado grande\n"
+    IDS_UNABLE_TO_OPEN      "--- GT:No se puede abrir %s\n"
+    IDS_LOADED              "--- GT:Cargado %s\n"
+    IDS_FILES_PROCESSED     "--- GT:%u expedientes tramitados, %u errores, %u advertencias.\n"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_ERRORS_WARNINGS_FOUND 
+                            "--- GT:%u errores, %u advertencias que se encuentran en %sn"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SYNTAX_ERROR        "GT:error de sintaxis"
+    IDS_INVALID_VARIABLE_NAME "GT:nombre de variable no válido"
+    IDS_ERROR_UNABLE_TO_OPEN "GT:el archivo no se puede abrir"
+    IDS_ERROR_FILE_IS_TOO_BIG "GT:archivo es demasiado grande"
+    IDS_ERROR_ALLOCATING_MEMORY "GT:error al asignar memoria"
+    IDS_ERROR_UNABLE_TO_READ_BYTES_FROM "GT:incapaz de leer bytes de"
+    IDS_UNRECOVERABLE_ERROR "GT:error irrecuperable"
+    IDS_WARNING_FILE_IS_0_BYTES "GT:archivo es 0 bytes"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_UNMATCHED_BLOCK     "GT:bloque sin igual"
+    IDS_EXPECTED_END        "GT:se esperaba 'END' palabra clave"
+    IDS_LABEL_OUTSIDE_OF_BLOCK "GT:etiqueta está fuera del bloque de código"
+    IDS_ERROR_UNEXPECTED_KEYWORD "GT:palabra clave inesperado"
+    IDS_ERROR_DSNIP_NOT_ALLOWED_AT_COMPILE_TIME 
+                            "GT:'DSNIP' definiciones no se permite en tiempo de compilación"
+    IDS_ERROR_INTERNAL_COMPILER_ERROR "GT:error interno del compilador"
+    IDS_ERROR_EXPECTED_QUOTED_PATHNAME "GT:espera un nombre de ruta citado"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

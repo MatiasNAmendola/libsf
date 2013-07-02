@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vvmt_core", "vvmtests\vvmt_core\vvmt_core.vcproj", "{2A9A8478-654D-49A6-9940-24FF5DE94BE0}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vvmt_canvas", "vvmtests\vvmt_canvas\vvmt_canvas.vcproj", "{742C30D6-EB4F-41E3-BF37-4842315E12F4}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		debug_vasm|Win32 = debug_vasm|Win32
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2A9A8478-654D-49A6-9940-24FF5DE94BE0}.debug_vasm|Win32.ActiveCfg = Debug|Win32
+		{2A9A8478-654D-49A6-9940-24FF5DE94BE0}.debug_vasm|Win32.Build.0 = Debug|Win32
+		{2A9A8478-654D-49A6-9940-24FF5DE94BE0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2A9A8478-654D-49A6-9940-24FF5DE94BE0}.Debug|Win32.Build.0 = Debug|Win32
+		{2A9A8478-654D-49A6-9940-24FF5DE94BE0}.Release|Win32.ActiveCfg = Release|Win32
+		{2A9A8478-654D-49A6-9940-24FF5DE94BE0}.Release|Win32.Build.0 = Release|Win32
+		{742C30D6-EB4F-41E3-BF37-4842315E12F4}.debug_vasm|Win32.ActiveCfg = Debug|Win32
+		{742C30D6-EB4F-41E3-BF37-4842315E12F4}.debug_vasm|Win32.Build.0 = Debug|Win32
+		{742C30D6-EB4F-41E3-BF37-4842315E12F4}.Debug|Win32.ActiveCfg = Debug|Win32
+		{742C30D6-EB4F-41E3-BF37-4842315E12F4}.Debug|Win32.Build.0 = Debug|Win32
+		{742C30D6-EB4F-41E3-BF37-4842315E12F4}.Release|Win32.ActiveCfg = Release|Win32
+		{742C30D6-EB4F-41E3-BF37-4842315E12F4}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

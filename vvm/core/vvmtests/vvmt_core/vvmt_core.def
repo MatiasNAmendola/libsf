@@ -1,0 +1,14 @@
+LIBRARY	"vvmt_core"
+
+EXPORTS
+
+; This one export is the only function the VVM calls to initiate the interface
+	vvmt_firstCallback
+	vvmt_bootstrapInitialization
+	vvmt_initialization
+	vvmt_getVersion
+	
+	vvmt_executeTests
+
+	vvmt_enableBreakpoints
+	vvmt_disableBreakpoints

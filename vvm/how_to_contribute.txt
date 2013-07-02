@@ -1,0 +1,104 @@
+How to contribute to the Visual FreePro Project?
+by Rick C. Hodgin
+February 12, 2013
+------------------------------------------------
+
+Practice, practice, practice. :-)
+
+Development in C/C++ Visual FreePro is advanced software development,
+design, and theory.  If you are an experienced C/C++ developer who
+understands the language syntax, then you are about half way to being
+able to contribute to the Visual FreePro project in general.  The rest
+requires some advanced knowledge on system design and programming
+theory.  That being said, I welcome anyone to come on board and help.
+
+I have created videos for installing Git and cloning the "libsf"
+repository from GitHub.com:  http://www.visual-freepro.org/videos/2013_02_09__how_to_install_git.ogv
+
+The "libsf" project for Visual FreePro is written using Visual Studio
+2008 Professional.  If you do not have a Visual Studio 2008 version,
+you can download and install Visual C++ 2008 Express, a free (gratis)
+version available from Microsoft:  http://www.microsoft.com/en-us/download/details.aspx?id=3092
+
+I have also created a video on how to install and setup the developer
+environment to some necessary or typical defaults:  http://www.visual-freepro.org/videos/2013_02_08__how_to_install_vs2008_express.ogv
+
+
+FIRST STEPS
+-----------
+
+(1) Install Visual C++ 2008 Express if you don't have Visual Studio 2008.
+(2) Install Git if you don't have Git.
+(3) Clone the repository from github:
+    C:\> git clone https://github.com/RickCHodgin/libsf.git
+    Note: Cloning will take a minutor or so.  Once cloned, do the following:
+(4) Open solution:  c:\libsf\vvm\localization\localization\localization.sln
+(5) Build -> Rebuild solution.  If no compile errors, go to (5).  If compile errors, contact rick.c.hodgin@gmail.com and ask for assistance.
+(6) Open solution:  c:\libsf\vvm\vvm\vvm.sln
+(7) Build -> Rebuild solution.  If no compile errors, go to (8).  If compile errors, contact rick.c.hodgin@gmail.com and ask for assistance.
+(8) Debug -> Step Into (F11).  This will run the VVM ([V]isual FreePro [V]irtual [M]achine).
+
+At this point, you should see a yellow arrow (and possibly arrow line) appear
+at the opening brace in the program's main function.  You can step through
+the code using F10 to step over each line, and F11 to step into each line.
+It will take some time to get used to the way Visual FreePro sets up its
+internal environment.  This is handled in this unique and special way to
+allow for future platforms to be migrated to with only minimal code changes.
+
+In order to make the VVM do anything useful, it is required that you also
+build one more project.  Follow these steps:
+
+(09) Open another instance of Visual Studio or Visual C++ 2008.
+(10) Open solution:  c:\libsf\vvm\VDebugLauncher\VDebugLauncher.sln
+(11) Build -> Rebuild solution.  If no compile errors, go to (12).  If compile errors, contact rick.c.hodgin@gmail.com and ask for assistance.
+(12) Debug -> Run.
+
+This is the debugger launcher. It goes through a startup protocol and instructs
+the VVM to load and instantiate an instance of the debugger.  The debugger as of
+February 12, 2013 is extremely primitive, written only as a test vehicle for the
+GUI portions of the VVM's graphical engine.  It is not designed to do any real
+work as of yet.  However, it will launch other screens.  Press the F-keys to see
+new windows appear.  They all appear in the upper-left for now.  Again, no special
+programming exists within the debugger.
+
+Play around with it until you are ready to move on, then close all the windows.
+Once you have closed all the debugger windows the VVM is still running.  For the
+time being, you will have to launch the Task Manager, go to processes, and locate
+the running "vvm.exe" and terminate it.  It will exit politely as it responds
+properly to the WM_CLOSE message.
+
+Once you have done these things you are, more or less, to the extent of the
+current visible capabilities of the VVM and Visual FreePro in general.  While
+this may not seem like much, there is a host of abilities which exist inside
+the VVM's engine, many of which are often found on separate free/liberty software
+projects.  However, with the VVM there are no other software projects in use.
+All source code within has been designed and written for the Visual FreePro
+project.
+
+Begin playing around with the source code.  I would suggest looking at the top
+of the VVM solution at the common_*.h files.  These convey the visible APIs that
+are exposed to each of the loaded DLLs, and to software which will run atop the
+VVM.  Look at the documentation directory, and specifically OBED version 0.60,
+which is the current version as of February 12, 2013.  It will show you the
+internal design and some of the philosophy as to why the VVM exists the way it
+does.
+
+I am currently working on completing the BXML engine, and the virtual machine
+execution engine.  Once those are completed, then work will truly begin on the
+xbase portion of Visual FreePro itself, with the xbase language being called
+VXB++ (for [V]isual FreePro [XB]ase and the ++ is like C/C++).
+
+See the wiki pages for more information on Visual FreePro:
+Main page:  http://www.visual-freepro.org/wiki/index.php/Main_Page
+
+The following two pages work in tandem with one another, outlining the
+published changes involved in Visual FreePro's xbase language, VXB++.
+More changes will be published over time:
+    VXB++:  http://www.visual-freepro.org/wiki/index.php/VXB%2B%2B
+  Changes:  http://www.visual-freepro.org/wiki/index.php/VFrP_changes
+
+If you have any questions, please email me:  rick.c.hodgin@gmail.com.
+
+May The Lord bless you richly as you participate in this project.  May He
+guide and direct all your paths, keeping your heart forever focused on Him.
+In the sweet and precious name of Jesus Christ I pray.  Amen. :-)

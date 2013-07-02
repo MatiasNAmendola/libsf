@@ -1,0 +1,143 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_VVM_LOAD_ERROR      "VVM Load Error"
+    IDS_VVM_FAILURE_TO_LOAD_MINUS_1 
+                            "Failure to load required vvmoss.dll\nTerminating with error code -1."
+    IDS_VVM_FAILURE_TO_INITIALIZE_MINUS_2 
+                            "Failure to initialize the VVM.\nTerminating with error code -2."
+    IDS_VVM_INITIALIZE_ERROR "VVM Initialize Error"
+    IDS_LANGUAGE            "English"
+    IDS_VVM_FAILURE_TO_LOAD_VVMMC_MINUS_3 
+                            "Failure to load required vvmmc.dll\nTerminating with error code -3."
+    IDS_VVM_TEST_OK         "All tests passed."
+    IDS_VVM_TEST_FAILURE    "Failure on at least one test (see command line)."
+    IDS_VVM_TEST_HEADING    "VVM Self Test"
+    IDS_VVM_RUNNING         "Running...\n"
+    IDS_VVM_TESTING         "Testing...\n"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_BXML_NO_ERROR       "no error"
+    IDS_BXML_UNABLE_TO_CREATE_BXML "unable to create bxml node"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_VVM_TEST_FAILURE_DISPLAY "Fail: %u\n"
+    IDS_VVM_TEST_OK_DISPLAY "Ok.\n"
+    IDS_VVM_TEST_SHA1_TESTING "Testing SHA-1...\n"
+    IDS_VVM_TEST_SHA1_PASSED "SHA-1 passed.\n"
+    IDS_VVM_TEST_SHA1_FIPS_PUB_180_1 "\tFIPS PUB 180-1..."
+    IDS_VVM_TEST_PASS       "pass\n"
+    IDS_VVM_TEST_FAIL       "fail\n"
+    IDS_VVM_TEST_BXML_TESTING "Testing BXML...\n"
+    IDS_VVM_TEST_BXML_PASSED "BXML passed.\n"
+    IDS_VVM_TEST_BXML_1     "\tLoad sample bxml..."
+    IDS_VVM_1DOTDOTDOT      "1..."
+    IDS_VVM_2DOTDOTDOT      "2..."
+    IDS_VVM_3DOTDOTDOT      "3..."
+    IDS_VVM_4DOTDOTDOT      "4..."
+    IDS_VVM_5DOTDOTDOT      "5..."
+    IDS_VVM_6DOTDOTDOT      "6..."
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_VVM_7DOTDOTDOT      "7..."
+    IDS_VVM_8DOTDOTDOT      "8..."
+    IDS_VVM_9DOTDOTDOT      "9..."
+    IDS_VVM_TEST_BXML_INVALID_FILE "Internal test case bxml file is invalid"
+    IDS_VVM_TEST_BXML_UNABLE_TO_LOAD "Error loading internal bxml file"
+    IDS_VVM_TEST_BXML_2     "\tSave bxml to disk, compare with internal..."
+    IDS_VVM_TEST_BXML_UNABLE_TO_GET_TEMP_FILE 
+                            "Unable to get temporary filename"
+    IDS_VVM_TEST_BXML_UNABLE_TO_RELOAD_TEMP_FILE 
+                            "Unable to reload temporary bxml file from disk"
+    IDS_VVM_TEST_BXML_RELOAD_DOES_NOT_MATCH 
+                            "Reloaded bxml file does not match baseline"
+    IDS_VVM_TEST_BXML_3     "\tCreate new bxml from scratch..."
+    IDS_VVM_TEST_BXML_COPY_FAILED "copy failed"
+    IDS_VVM_TEST_CANVAS_TESTING "Testing Canvas...\n"
+    IDS_VVM_TEST_CANVAS_PASSED "Canvas passed.\n"
+    IDS_VVM_TEST_CANVAS_1   "\tCreate and scale canvas..."
+    IDS_VVM_TEST_CANVAS_INVALID_GRADIENT "Failure on gradient"
+    IDS_VVM_TEST_CANVAS_SCALED_INVALID_GRADIENT "Failure on gradient scaled"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_VVM_TEST_CANVAS_CANNOT_CREATE "Unable to create canvas for test"
+    IDS_VVM_TEST_CANVAS_SCALED_CANNOT_CREATE 
+                            "Unable to create scaled canvas for test"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

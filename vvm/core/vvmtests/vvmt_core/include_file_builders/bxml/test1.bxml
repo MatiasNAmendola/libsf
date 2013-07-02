@@ -1,0 +1,25 @@
+<root>
+	<first zero="hello" one:5=world two:10:6=sample three::20 short:1=1 long:32=12345678901234567890123456789012>
+		<child1/>
+		<child2 food:5=pizza>
+			<grandchild1/>
+			<grandchild2 food:7=lasagna/>
+		</child2>
+	</first>
+	<sib>
+		<child>
+			<grandchild>
+				<ggrandchild/>
+			</grandchild>
+		</child>
+		<child2/>
+		<child3/>
+		<child4>
+			<grandchild4_1/>
+			<grandchild4_2>
+				<ggrandchild4_1/>
+			</grandchild4_2>
+		</child4>
+	</sib>
+	<!-- This comment should be appended to sib as an autoComment -->
+</root>

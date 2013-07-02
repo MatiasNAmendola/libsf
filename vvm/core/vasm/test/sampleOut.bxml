@@ -1,0 +1,50 @@
+<cpu zero:5=hello one:4=auto two::10 three:20:5=12345>
+	<grandchild/>
+	<grand2 food:5=pizza>
+		<ggrand/>
+		<ggrand2 food:7=lasagna/>
+	</grand2>
+</cpu>
+<def autoComment:417=<!--
+<cpu zero="hello" one:4=auto two::10 three:20:5=12345>
+	<grandchild/>
+	<grand2 food="pizza">
+		<ggrand/>
+		<ggrand2 food="lasagna"/>
+	</grand2>
+</cpu>
+<def>
+	<child>
+..!--
+	this one's a child
+--..
+		<grandchild>
+			<ggrandchild/>
+		</grandchild>
+	</child>
+	<child2/>
+	<child3/>
+	<child4>
+		<grandchild4_1/>
+		<grandchild4_2>
+			<ggrandchild4_1/>
+		</grandchild4_2>
+	</child4>
+</def>
+-->>
+	<child autoComment:30=<!--
+	this one's a child
+-->>
+		<grandchild>
+			<ggrandchild/>
+		</grandchild>
+	</child>
+	<child2/>
+	<child3/>
+	<child4>
+		<grandchild4_1/>
+		<grandchild4_2>
+			<ggrandchild4_1/>
+		</grandchild4_2>
+	</child4>
+</def>

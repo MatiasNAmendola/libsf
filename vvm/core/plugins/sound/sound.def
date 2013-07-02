@@ -1,0 +1,12 @@
+LIBRARY	"sound"
+
+
+EXPORTS
+
+	oss_soundInitialize
+	oss_soundCreateTone
+	oss_soundCreateStream
+	oss_soundSetVolume
+	oss_soundPlayStart
+	oss_soundPlayCancel
+	oss_soundDelete

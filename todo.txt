@@ -1,0 +1,28 @@
+May.11.2013 - Rewrite the test harness to be slew of separate plugins.
+              Jun.07.2013 - in progress
+
+May.31.2013 - Load SDL sound plugin, get frequency and stream playback working.
+              Jun.05.2013 - complete
+
+Jun.20.2013 - Refactor RXML into BXML
+			  Jun.20.2013 - complete
+			  
+Jun.20.2013 - Refactor VVM test DLLs
+			  Incomplete
+
+
+			  
+Future Tasks
+============
+	Canvas tests
+	Region tests (events, custom callbacks)
+	WhiteBox GUI design
+	WhiteBox logic
+	WideEdit project (VVM execution engine, opcodes)
+	WideEdit project (VVM execution engine, assembler)
+	WideEdit project (VVM execution engine, debugger)
+	WideEdit project (VVM execution engine, compiler)
+	WideEdit project (GUI design)
+	WideEdit project (TouchView)
+	WideEdit project (TouchView, BounceMode)
+	WideEdit project (TouchView, ChainMode)

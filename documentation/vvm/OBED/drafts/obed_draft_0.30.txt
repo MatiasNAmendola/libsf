@@ -1,0 +1,578 @@
++---------------------------------------+
+|               OBED VM                 |
+|                                       |
+|  OBJECT/EVENT DRIVEN VIRTUAL MACHINE  |
+|                                       |
+|         SEPTEMBER 11, 2012            |
+|             DRAFT 0.30                |
+|          BY RICK C. HODGIN            |
+|                                       |
+|   RELEASED FOR COMMUNITY DISCUSSION   |
+|    A FUTURE DRAFT WILL REPLACE THIS   |
+|     DRAFT, HOWEVER DEVELOPMENT HAS    |
+|     BEGUN, AND WILL CONTINUE. -RCH    |
++----------------------------------------
+
++---------------------------------------+
+|   A REQUEST IN PRAYER THROUGH FAITH   |
+|---------------------------------------|
+| MAY THE LORD, JESUS CHRIST, BLESS THE |
+| WORK OF MY HANDS ON THIS PROJECT, AS  |
+| I GIVE ALL CREDIT, HONOR AND GLORY TO |
+| HIM.  AMEN.                           |
+|---------------------------------------|
+| MAY THE LORD, JESUS CHRIST, BLESS THE |
+| WORK OF ALL HANDS ON THIS PROJECT, AS |
+| WE GIVE ALL CREDIT, HONOR AND GLORY   |
+| TO HIM.  AMEN.                        |
++---------------------------------------+
+
+
+
+OBJECT EVENT DRIVEN VIRTUAL MACHINE (OBED)
+------------------------------------------
+MACHINE BOOTS UP WITH A MEMORY BUFFER BEGINNING
+AT OFFSET 0.  INSTANTIATES WITH A SINGLE PROGRAM
+OBJECT, WHICH POINTS TO AN INITIAL ENVIRONMENT.
+THIS PROGRAM WAS PREVIOUSLY COMPILED FOR EXECUTION
+ON THE OBED VM.  IT IS AN RXML FILE THAT CONTAINS
+SPECIFIC INFORMATION FOR LOADING INTO THE OBED VM.
+
+VARIABLE DEFINITIONS
+--------------------
+ALL OBED VM NAMES ARE PREFIXED WITH A FOUR-CHARACTER
+SEQUENCE IDENTIFYING THEIR TYPE AND LOCALITY.
+
+EXAMPLE:  p,l,g,r			= PARAMETER, LOCAL, GLOBAL AND RETURN
+          s08,s16,s32,s64	= SIGNED 8-BIT, 16-BIT, 32-BIT AND 64-BIT
+          u08,u16,u32,u64	= UNSIGNED 8-BIT, 16-BIT, 32-BIT AND 64-BIT
+          f32,f64			= FLOATING POINT 32-BIT, 64-BIT
+
+NOTE:  These are defined in the code executed on the VM.
+       The IDE can use any variable name to hide this requirement
+       and allow for other variable forms.  An example of a
+       simplified variable name:
+              OBED VM SEES:  ls64Foo
+              SHOWN IN IDE:  foo or lnFoo
+
+GLOBAL OBJECTS
+--------------
+	prg								-- A running program
+	thr								-- Thread (child of PRG) 
+	sta								-- Stack
+	tmr								-- Timer
+	gui								-- Graphical User Interface
+	com								-- Communications object
+	scr								-- Screen (child of GUI)
+	cvs								-- Canvas (child of SCREEN)
+
+OBJECT DETAILS
+--------------
+	gui								-- User Interface object, everything the VM is aware of for input
+	gui._kbd						-- Stores keystroke information
+	gui._mou						-- Stores mouse information
+
+	tmr								-- Global timer object
+	tmr._0.nam						-- Name of the first global timer
+	tmr._0.enabled					-- Is this item enabled?
+	tmr._0.interval					-- length of time in milliseconds between triggers
+	tmr._0.timerSnippet				-- Code snippet to execute upon timer trigger
+
+	com								-- Communications object
+	com._ip4						-- IPv4 network communication (to be defined later, ip+port based)
+	com._ip6						-- IPv6 network communication (to be defined later)
+	
+	prg								-- Global program object
+	prg.sta							-- Stack
+	prg.glo							-- Global variable definitions
+	prg.snp							-- All code snippets known to the executing environment
+	prg.dyn							-- All code snippets that are loaded dynamically while running in the executing environment
+	prg.glo._N.nam					-- global variable definition for data quantities referenced in snippets
+	prg.snp._N.nam					-- Name of the code snippet which exists in the project / program
+	prg.dyn._N.nam					-- Name of the dynamic code snippet which exists in the loaded module
+
+	thr._0							-- First thread
+	thr._0.threadName				-- First thread, name of this thread (if specified)
+	thr._0.stack					-- First thread, stack space
+	thr._0.registers				-- First thread, register + scratch space
+	thr._0.tmr._0.nam				-- First thread, first timer for the thread
+	thr._0.snp						-- First thread, executing code snippet (program, function, method, event, etc.)
+	
+	As each thread calls child functions, is interrupted by a timer, whatever it is, these objects are added:
+	x.snp.call.snp					-- On this thread, an explicit call was made, the result of source code
+	x.snp.event.snp					-- On this thread, an implicit call was made, the result of an event
+	
+	Subsequent calls are treed like this:
+	x.snp.call.call.snp				-- Another explicit call
+	x.snp.call.event.snp			-- An event occurred after an explicit call
+	x.snp.event.call.snp			-- An explicit call was made after an event was triggered
+	x.snp.event.event.snp			-- A secondary event occurred after a primary event
+		and so on...				-- every call or event triggers the addition of a new child level
+	
+	Every child thread level has inherited the same items:
+	thr._N.snp.parameters			-- parameters
+	thr._N.snp.returns				-- return variables
+	thr._N.snp.locals				-- local variables
+
+VARIABLES
+---------
+	x.var.nam						-- Name and value of variable in ASCII
+	x.var._uni						-- (if defined) name of the variable in UNICODE
+	x.var._xunderflow				-- (If defined) Exception to trigger on variable underflow
+	x.var._xoverflow				-- (If defined) Exception to trigger on variable overflow
+	x.var._min						-- (If defined) Minimum value that can be stored in this value
+	x.var._max						-- (If defined) Maximum value that can be stored in this value
+
+INSTANTIATES WITH THE SPECIFIED NUMBER OF SCREEN OBJECTS, ALWAYS HAS AT LEAST ONE WITH ONE CANVAS, WHICH POINTS TO AN INITIAL ENVIRONMENT:
+	scr._0.cvs
+	scr._0.caption
+
+EACH SCREEN OBJECT INSTANTIATES WITH A CHILD CANVAS OBJECT, WHICH POINTS TO AN INITIAL ENVIRONMENT:
+	cvs.left						-- Left coordinate on parent canvas
+	cvs.top							-- Top coordinate on parent canvas
+	cvs.width						-- Width of the canvas
+	cvs.height						-- Height of the canvas
+	cvs.bitBuffer					-- Pointer to 32-bit bit buffer for this canvas
+	cvs.renderSnippet				-- Code to call to render this canvas
+	cvs.parentCanvas				-- The canvas object this item is a child of
+
+THINGS
+------
+	A THING IS THE LOWEST LEVEL PRIMITIVE FOR STORING SOMETHING.  IT ALWAYS EXISTS ON AN OBJECT, ITS PARENT.
+	A THING CONTAINS A NAME AND ASSOCIATED DATA.
+	SINCE OBED IS OBJECT EVENT DRIVEN, EVERYTHING HAS A NAME.
+	EVERY NAME HAS A LENGTH AND THE ASCII NAME BYTES.
+	EVERY NAME CAN HAVE AN OPTIONAL UNICODE NAME.
+	ALL DATA HAS A LENGTH AND THE DATA BYTES.
+
+OBJECTS
+-------
+	EVERY OBJECT IS A CONTAINER.
+	EVERY OBJECT HAS NEXT, PREV WHICH POINT TO ITS SIBLINGS.
+	EVERY OBJECT HAS PARENT, FIRST CHILD WHICH POINT TO ITS LINEAGE.
+	EVERY OBJECT HAS A FIRST THING WHICH CONTAINS ATTRIBUTE ITEMS FOR THE OBJECT, INCLUDING BASICS LIKE A NAME.
+
+MEMORY
+------
+	ALL MEMORY IS LINEAR.  NO PAGING.  NO SWAPPING TO DISK.  THIS IS HANDLED BY THE HOST OS AS NEEDED.
+	MEMORY IS INITIALLY ALLOCATED BEGINNING AT OFFSET 0 FOR SOME SIZE (A VM INSTANCE SETTING, MINIMUM OF 4 MB).
+	THE VM CAN LAUNCH PAUSED WITH NO PROGRAM TO RUN.  FROM THERE, PRIOR SAVED SESSIONS CAN BE RESTORED.
+	THE PROGRAM TO RUN IS LOADED BEGINNING AT THAT LOCATION.
+	ONCE LOADED CONTROL IS TRANSFERRED TO THE INSTRUCTION AT OFFSET 0.
+
+	VARIOUS FIXED INTERNAL OBJECTS ARE MAINTAINED OUTSIDE OF MAIN MEMORY WHICH HOLD
+	INFORMATION ABOUT THE RUNNING VM.  THESE ARE QUERIED BY THE HOST AND GUEST THROUGH
+	A SPECIAL API.
+
+	DYNAMIC CODE CAN BE LOADED AND IS UPDATED IN THE FIXED INTERNAL OBJECTS, AND IS
+	STORED IN THE AREAS OF AVAILABLE MEMORY.
+
+	EVERY OBJECT HAS A POINTER TO THE START OF THE NAME, OR START OF ASSOCIATED DATA.
+	ALL REFERENCES TO EVERY THING WHICH EXIST ARE BY OBJECT NAMES.
+
+EDIT-AND-CONTINUE
+-----------------
+	ALL CODE SUPPORTS EDIT-AND-CONTINUE.
+	A THREAD CAN BE PAUSED, CODE CHANGED/REPLACED, AND THEN RESUMED ON A RUNNING VM.  IF OBED VM
+    IDENTIFIES THAT ITEMS BEING UPDATED ARE IN USE IN OTHER THREADS, THOSE THREADS ARE SUSPENDED
+    AUTOMATICALLY WHILE THE UPDATE TAKES PLACE.  THIS IS SUPPORTED USING THIS MODEL:
+
+		LINE 1	-	JUMPS TO SNIPPET FOR LINE 1
+					EXECUTES THAT LINE'S SNIPPET
+                    JUMPS TO START OF LINE 2
+		LINE 2	-	JUMPS TO SNIPPET FOR LINE 2
+
+		PROCESS REPEATS FOR EACH SUCCESSIVE LINE.
+
+	WHEN CHANGES ARE MADE, THE PROGRAM PORTIONS FOR EACH LINE ARE CHANGED,
+	WITH NEW LINES BEING INSERTED, DELETED LINES BEING REMOVED, ETC.
+
+	BY MAINTAINING THIS LINE-TO-SNIPPET RELATIONSHIP, EDIT-AND-CONTINUE
+	BECOMES VERY EASY TO IMPLEMENT.  HOWEVER, THIS IS NOT THE ONLY MODEL.
+	THE ENTIRE ABI CAN BE SWAPPED OUT AND REPLACED AS NECESSARY, PROVIDED
+	THE INTEGRITY OF THE ENTIRE MACHINE STATE IS MAINTAINED.
+
+REGISTERS
+------------------------------------------
+	REGISTERS ARE AUTOMATICALLY ALLOCATED FOR EACH CALLED SNIPPET.
+	REGISTERS ARE RELATIONAL TO ONE ANOTHER IN THE SAME PHYSICAL REGISTER SPACE.
+	THE LOWER 8-BITS ARE THE BASE.
+	EACH SUCCESSIVE LARGER SIZE REGISTER INCLUDES THE LOWER REGISTER, PLUS NEW SPACE.
+	HERE WE SEE BIT POSITIONS FOR REGISTERS.
+
+     ___________________________________ _________________ ________ ________
+    |                 X64               |       X32       |  X16   |   X8   |
+    |........|........|........|........|........|........|........|........|
+    63                                32                16        8        0
+
+     ___________________________________ _________________ ________ ________
+    |                FX64               |                FX32               |
+    |........|........|........|........|........|........|........|........|
+    63                                32                                   0
+
+	OFFSET		CODE	INTEGER REGISTERS
+	------		----	-----------------
+	+008		0000	A8		A16		A32		A64		; INTEGER, POINTER AND GENERAL PURPOSE REGISTERS
+	+016		0001	B8		B16		B32		B64
+	+024		0010	C8		C16		C32		C64
+	+032		0011	D8		D16		D32		D64
+	+040		0100	E8		E16		E32		E64
+	+048		0101	F8		F16		F32		F64
+	+056		0110	G8		G16		G32		G64
+	+064		0111	H8		H16		H32		H64
+	+072		1000	I8		I16		I32		I64
+	+080		1001	J8		J16		J32		J64
+	+088		1010	K8		K16		K32		K64
+	+096		1011	L8		L16		L32		L64
+	+104		1100	M8		M16		M32		M64
+	+112		1101	N8		N16		N32		N64
+	+120		1110	O8		O16		O32		A64
+	+128		1111	P8		P16		P32		P64
+	
+	+136		0000	FA32	FA64					;  FLOATING POINT REGISTERS
+	+144		0001	FB32	FB64
+	+152		0010	FC32	FC64
+	+160		0011	FD32	FD64
+	+168		0100	FE32	FE64
+	+176		0101	FF32	FF64
+	+184		0110	FG32	FG64
+	+192		0111	FH32	FH64
+	+200		1000	FI32	FI64
+	+208		1001	FJ32	FJ64
+	+216		1010	FK32	FK64
+	+224		1011	FL32	FL64
+	+232		1100	FM32	FM64
+	+240		1101	FN32	FN64
+	+248		1110	FO32	FO64
+	+256		1111	FP32	FP64
+
+	OTHER REGISTERS (ACCESSIBLE ONLY BY SPECIAL INSTRUCTIONS)
+	---------------------------------------------------------
+	+264		FLAG	- FLAGS
+	+272		IP		- INSTRUCTION POINTER
+	+280		CTHR	- CURRENT THREAD NUMBER
+	+284		XSNP	- EXCEPTION SNIPPET NUMBER
+	+288		RESERVED
+	+292		STACK	- STACK POINTER
+	
+	// Used for rapid access to related data
+	+296		PPO		- PARENT PROGRAM OBJECT NUMBER
+	+300		PLOC	- PARENT LOCAL OBJECT NUMBER
+	+304		PREG	- PARENT REGISTER OBJECT NUMBER
+	+308		PPAR	- PARENT PARAMETER OBJECT NUMBER
+	+312		PRET	- PARENT RETURN OBJECT NUMBER
+	
+	// Used for rapid access to current data
+	+316		CPO		- CURRENT PROGRAM OBJECT NUMBER
+	+320		CLOC	- CURRENT LOCAL OBJECT NUMBER
+	+324		CREG	- CURRENT REGISTER OBJECT NUMBER
+	+328		CPAR	- CURRENT PARAMETER OBJECT NUMBER
+	+332		CRET	- CURRENT PARAMETER OBJECT NUMBER
+	+336		SCRATCH	- BYTES UP TO 512 ARE RESERVED FOR SCRATCH SPACE
+	+512				- TOTAL SIZE DEFINED IN 0.20, FUTURE REGISTER USES
+						  WILL USE RESERVED 4 BYTES ABOVE, OR ADDITIONAL
+						  SPACE BEYOND THIS.
+
+FLAGS
+---------------
+	00000001	- CARRY?
+	00000010	- OVERFLOW?
+	00000100	- UNDERFLOW?
+	00001000	- EQUAL?
+	00010000	- ZERO?
+	00100000	- RESERVED
+	01000000	- RESERVED
+	10000000	- APP - AVAILABLE TO APPLICATION
+
+INSTRUCTION FORMAT
+------------------
+[4:PREDICATE] IS USED IF MOST SIGNIFICANT BIT OF INSTRUCTION BYTE IS SET
+	0000	- CARRY?
+	0001	- !CARRY?
+	0010	- EQUAL?
+	0011	- !EQUAL?
+	0100	- ZERO?
+	0101	- !ZERO?
+	0110	- ABOVE?
+	0111	- !ABOVE?
+	1000	- BELOW?
+	1001	- !BELOW?
+	1010	- OVERFLOW?
+	1011	- !OVERFLOW?
+	1100	- UNDERFLOW?
+	1101	- !UNDERFLOW?
+	1110	- APP?
+	1111	- [EXTENDED PREDICATE]
+
+[4:EXTENDED PREDICATE]
+	xxxx	- NOT CURRENTLY DEFINED, RESERVED FOR FUTURE USE
+
+	
+[4:SOURCES]
+	0000	LITERAL12			[12:ENCODED IMMEDIATELY AFTER THE OPCODES]
+	0001	STACK				[28:OFFSET]
+	0010	REGISTER			[12:OFFSET--ONLY LOWER 9 BITS ARE USED, REGISTER SPACE IS 512 BYTES]
+	0011	PARAMETERS			[12:NUMBER]
+	0100	RETURNS				[12:NUMBER]
+	0101	LOCAL				[28:NUMBER]
+	0110	GLOBALS				[28:NUMBER]
+	0111	OBJECT				[28:NUMBER]
+	1000	LITERAL28			[28:ENCODED IMMEDIATELY AFTER THE OPCODES]
+	1001	LITERAL60			[60:ENCODED IMMEDIATELY AFTER THE OPCODES]
+	1010	RESERVED
+	1011	RESERVED
+	1100	[OBJECT]			[28:NUMBER]
+	1101	[REG]
+	1110	[REG+REG]
+	1111	[REG+REG+LITERAL12]
+	
+[4:SIZE]
+	0000	8-bit signed integer
+	0001	16-bit signed integer
+	0010	32-bit signed integer
+	0011	64-bit signed integer
+	0100	32-bit floating point
+	0101	64-bit floating point
+	0110	RESERVED
+	0111	RESERVED
+	1000	8-bit unsigned integer
+	1001	16-bit unsigned integer
+	1010	32-bit unsigned integer
+	1011	64-bit unsigned integer
+	1100	8-bit immediate
+	1101	16-bit immediate
+	1110	32-bit immediate
+	1111	64-bit immediate
+
+[8:INSTRUCTION] - INSTRUCTION SET (OPCODE BYTE VALUES TO BE DEFINED LATER)
+	x0000000	- ADD
+	x0000000	- SUBTRACT
+	x0000000	- MULTIPLY
+	x0000000	- DIVIDE
+	x0000000	- COMPARE
+	x0000000	- COPY
+	x0000000	- MOVE
+	x0000000	- EXCHANGE
+	x0000000	- EXCHANGE AND ADD
+	x0000000	- EXCHANGE AND MULTIPLY
+	x0000000	- AND
+	x0000000	- OR
+	x0000000	- NOT
+	x0000000	- XOR
+	x0000000	- NEG
+	x0000000	- INCREMENT
+	x0000000	- DECREMENT
+	x0000000	- SHIFT LEFT
+	x0000000	- SHIFT RIGHT UNSIGNED
+	x0000000	- SHIFT RIGHT SIGNED
+	x0000000	- ROTATE LEFT
+	x0000000	- ROTATE RIGHT
+	x0000000	- CONVERT x TO y [TAKES SIZE AND CONVERTS TO NEW SIZE]
+
+	x0000000	- DEBUG
+	x0000000	- HALT
+	x0000000	- NO OPERATION	[USED FOR PADDING]
+    
+	x0000000	- ADDRESS OF OBJECT NUMBER
+	x0000000	- ADDRESS OF OBJECT ASCII NAME
+	x0000000	- ADDRESS OF OBJECT UNICODE NAME
+	x0000000	- GET NEXT UNIQUE NAME
+	
+	x0000000	- JUMP TO SNIPPET + OFFSET
+	x0000000	- JUMP FORWARD
+	x0000000	- JUMP BACKWARD
+    
+	x0000000	- CALL HOST NUMBER
+	x0000000	- CALL HOST NAME
+	x0000000	- CALL SNIPPET NUMBER
+	x0000000	- CALL SNIPPET NAME
+	x0000000	- CALL DYNAMIC SNIPPET NUMBER
+	x0000000	- CALL DYNAMIC SNIPPET NAME
+
+	x0000000	- PUSH
+	x0000000	- POP
+	x0000000	- STACK COPY
+	
+	x0000000	- RETURN
+	x0000000	- RETURN TO OBJECT NAME IN PARENT LINEAGE
+    
+	x0000000	- SET CARRY?
+	x0000000	- CLEAR CARRY?
+	x0000000	- SET OVERFLOW?
+	x0000000	- CLEAR OVERFLOW?
+	x0000000	- SET UNDERFLOW?
+	x0000000	- CLEAR UNDERFLOW?
+	x0000000	- SET EQUAL?
+	x0000000	- CLEAR EQUAL?
+	x0000000	- SET ZERO?
+	x0000000	- CLEAR ZERO?
+	x0000000	- SET APP?
+	x0000000	- CLEAR APP?
+    
+	x0000000	- RENDER CANVAS NUMBER
+	x0000000	- RENDER CANVAS NAME
+	x0000000	- RENDER CANVAS NUMBER USING SNIPPET NUMBER
+	x0000000	- RENDER CANVAS NUMBER USING SNIPPET NAME
+	x0000000	- RENDER CANVAS NAME USING SNIPPET NUMBER
+	x0000000	- RENDER CANVAS NAME USING SNIPPET NAME
+    
+	x0000000	- OBJECT ADD AS PARENT
+	x0000000	- OBJECT ADD AS CHILD
+	x0000000	- OBJECT ADD AS PREV
+	x0000000	- OBJECT ADD AS NEXT
+	x0000000	- OBJECT STORE ASCII NAME
+	x0000000	- OBJECT STORE UNICODE NAME
+	x0000000	- OBJECT STORE DATA
+	x0000000	- OBJECT PRUNE
+	x0000000	- OBJECT GRAFT
+    
+	x0000000	- OBJECT ISCATTER  TO NUMBER, START, COUNT
+	x0000000	- OBJECT ISCATTER  TO NAME,   START, COUNT
+	x0000000	- OBJECT FSCATTER  TO NUMBER, START, COUNT
+	x0000000	- OBJECT FSCATTER  TO NAME,   START, COUNT
+	x0000000	- OBJECT IGATHER FROM NUMBER, START, COUNT
+	x0000000	- OBJECT IGATHER FROM NAME,   START, COUNT
+	x0000000	- OBJECT FGATHER FROM NUMBER, START, COUNT
+	x0000000	- OBJECT FGATHER FROM NAME,   START, COUNT
+    
+	x0000000	- TIMER ADD GLOBAL
+	x0000000	- TIMER ADD THREAD
+	x0000000	- TIMER DELETE GLOBAL
+	x0000000	- TIMER DELETE THREAD
+	x0000000	- TIMER ENABLE GLOBAL
+	x0000000	- TIMER ENABLE THREAD
+	x0000000	- TIMER DISABLE GLOBAL
+	x0000000	- TIMER DISABLE THREAD
+    
+	x0000000	- WAIT FOR NEXT EVENT
+
+	x0000000	- EXCEPTION SET SNIPPET              [32:NUMBER]
+	x0000000	- EXCEPTION TRIGGER                  [32:NUMBER]
+	x0000000	- EXCEPTION TRIGGER EXPLICIT SNIPPET [32:NUMBER]
+    
+	x0000000	- THREAD ADD
+	x0000000	- THREAD ASCRIBE AFFINITY [8:CPU]
+	x0000000	- THREAD TERMINATE SELF
+	x0000000	- THREAD TERMINATE [32:NUMBER]
+	x0000000	- THREAD PAUSE SELF
+	x0000000	- THREAD PAUSE  [32:NUMBER]
+	x0000000	- THREAD RESUME [32:NUMBER]
+	x0000000	- THREAD JOIN [32:NUMBER]
+    
+	x0000000	- SEMAPHORE CREATE
+	x0000000	- SEMAPHORE LOCK
+	x0000000	- SEMAPHORE UNLOCK
+	x0000000	- SEMAPHORE DELETE
+
+	x1111111	- EXTENDED INSTRUCTION BYTE FOLLOWS (TO BE DEFINED / ADDED LATER)
+				EXAMPLES:
+					SINE
+					COSINE
+					TANGENT
+					ARCSINE
+					ARCCOSINE
+					ARCTANGENT
+					SQUARE ROOT
+					ROUND
+					ISINT
+
+DEBUGGER API
+------------
+	THIS API IS DESIGNED SO NUMEROUS EXTERNAL DEBUGGERS CAN CONNECT
+	TO ANY RUNNING VM INSTANCE AND MONITOR, INFLUENCE OR DEVASTATE
+	ITS NORMAL OPERATION INDEPENDENTLY.
+
+	NOTE: THIS DEBUGGER INTERFACE IS SEPARATE AND ISOLATED FROM NORMAL
+	WINDOW DEBUGGER ADHERENCE.  IT IS ITS OWN PROTOCOL AND WILL BE
+	IMPLEMENTED IDENTICALLY ON ALL PLATFORMS, ALLOWING THE SAME DEBUGGER
+	CODE TO OPERATE ON ALL PLATFORMS.
+	
+	THE FOLLOWING LIST OF FUNCTIONS ARE AVAILABLE TO EXTERNAL
+	DEBUGGERS WISHING TO CONNECT TO A RUNNING VM INSTANCE.
+	
+	THESE TWO FUNCTIONS ARE USED TO ATTACH A DEBUGGER.  THEY ARE
+	AVAILABLE BY SENDING MESSAGES TO THE RUNNING VM INSTANCE.
+	THE RESPONSE GIVEN BY THE VM INDICATES SUCCESS OR FAILURE:
+	u32			debuggerRequestUniqueID						(void);
+	u32			debuggerConnect								(u32 id, s8* tcPath);
+	u32			debuggerConnectRemote						(u32 id, s8* tcPath, s8* ipAddressOrMachineName);
+
+	THE UNIQUE ID IS USED AS A "vvm_########.ini" FILE THAT IS POPULATED
+	IN GENERAL WITH THIS INFORMATION:
+		name=My Debugger's Name
+		dll=c:\path\to\debugger.dll
+
+	THE VVM ATTEMPTS TO LOCATE THE "vvmDebugger()" FUNCTION AND BEGINS
+	A PROTOCOL TO IDENTIFY MUTUALLY REQUIRED PROCEDURE / FUNCTION
+	LOCATIONS, ALLOWING THE VVM TO CALL THE DEBUGGER CODE DIRECTLY,
+	AND THE DEBUGGER CODE TO CALL THE VVM DIRECTLY, ASYNCHRONOUSLY,
+	AND IN A MULTI-THREADED CAPACITY (ALL FUNCTIONS ARE FULLY REENTRANT).
+	
+	// For drawing onto the debugger screen + canvas
+	u32				debuggerRequestScreen						(u32 id, u32 width, u32 height);
+	u32				debuggerRequestCanvasForScreen				(u32 id, u32 screen);
+	u32				debuggerRequestCanvas						(u32 id, u32 width, u32 height);
+	u32				debuggerRequestFontHandle					(u32 id, u32 canvas, s8* fontName, u32 fontWidth, bool bold, bool italics, bool underline, bool strikethrough);
+	u32				debuggerCanvasWriteFixedPointText			(u32 id, u32 canvas, u32 fontWidth, u32 fontHeight, u32 ulx, u32 uly, s8*  text, u32 characterCount, RGBA foreground, RGBA background);
+	u32				debuggerCanvasWriteText						(u32 id, u32 canvas, u32 fontHandle, u32 ulx, u32 uly, u32 lrx, u32 lry, s8*  text, u32 characterCount, RGBA foreground, RGBA background);
+	u32				debuggerCanvasWriteUnicode					(u32 id, u32 canvas, u32 fontHandle, u32 ulx, u32 uly, u32 lrx, u32 lry, s16* text, u32 characterCount, RGBA foreground, RGBA background);
+	u32				debuggerCanvasFrameRect						(u32 id, u32 canvas, u32 ulx, u32 uly, u32 lrx, u32 lry, u32 borderThickness, RGBA border);
+	u32				debuggerCanvasFillRect						(u32 id, u32 canvas, u32 ulx, u32 uly, u32 lrx, u32 lry, u32 borderThickness, RGBA border, RGBA background);
+	u32				debuggerCanvasLine							(u32 id, u32 canvas, u32 ulx, u32 uly, u32 lrx, u32 lry, u32 lineThickness, RGBA line);
+	u32				debuggerCanvasArc							(u32 id, u32 canvas, u32 ox, u32 oy, f32 start, f32 end, u32 lineThickness, RGBA line);
+	u32				debuggerCanvasExtract						(u32 id, u32 canvas, u32 ulx, u32 uly, u32 lrx, u32 lry);
+	u32				debuggerCanvasColorize						(u32 id, u32 canvas, u32 ulx, u32 uly, u32 lrx, u32 lry, RGBA color);
+	u32				debuggerCanvasGrayscale						(u32 id, u32 canvas, u32 ulx, u32 uly, u32 lrx, u32 lry);
+	u32				debuggerCanvasBitBlt						(u32 id, u32 canvasDest, u32 dulx, u32 duly, u32 dlrx, u32 dlry, u32 canvasSource, u32 sulx, u32 suly, u32 slrx, u32 slry, bool overlay);
+	void			debuggerCanvasRefresh						(u32 id, u32 canvas);
+	
+	// For information about the VM
+	void			debuggerCopyProgramList						(u32 id, SProgram** list, u32* count);
+	void			debuggerProgramCopyScreensList				(u32 id, SProgram* program, SScreen**  list, u32* count);
+	void			debuggerProgramCopyGlobalsList				(u32 id, SProgram* program, SGlobal**  list, u32* count);
+	void			debuggerProgramCopySnippetsList				(u32 id, SProgram* program, SSnippet** list, u32* count);
+	void			debuggerProgramCopyDynamicSnippetsList		(u32 id, SProgram* program, SDynSnip** list, u32* count);
+	void			debuggerProgramCopyTimersList				(u32 id, SProgram* program, STimer**   list, u32* count);
+	void			debuggerProgramCopyThreadsList				(u32 id, SProgram* program, SThread**  list, u32* count);
+	
+	// For controlling the VM
+	u32				debuggerProgramPause						(u32 id, SProgram* program);
+	u32				debuggerProgramResume						(u32 id, SProgram* program, bool singleStep);
+	u32				debuggerProgramTerminate					(u32 id, SProgram* program);
+	u32				debuggerThreadPause							(u32 id, SThread* thread);
+	u32				debuggerThreadResume						(u32 id, SThread* thread, bool singleStep);
+	u32				debuggerThreadTerminate						(u32 id, SThread* thread);
+	
+	// Breakpoints
+	void			debuggerGetBreakpointList					(u32 id, SBreakpoint** root, u32* count);
+	SBreakpoint*	debuggerBreakpointSet						(u32 id, SSnippet* snippet, SLine* line, SBreakCond* bc, bool enable);
+	bool			debuggerBreakpointClear						(u32 id, SBreakpoint* bp);
+	
+	// For retrieving running content (thread may be temporarily paused upon request to retrieve data, and resumes after fill)
+	bool			debuggerCopyProgram							(u32 id, SProgram* program,   SProgram** copy);
+	bool			debuggerCopyThread							(u32 id, SThread*  thread,    SThread**  copy);
+	bool			debuggerCopyStack							(u32 id, SThread*  thread,    SStack**   copy);
+	bool			debuggerCopyRegisters						(u32 id, SThread*  thread,    SStack**   copy);
+	bool			debuggerCopyGlobal							(u32 id, SGlobal*  global,    SGlobal**  copy);
+	bool			debuggerCopyTimer							(u32 id, STimer*   timer,     STimer**   copy);
+	bool			debuggerCopyScreen							(u32 id, SCreen*   screen,    SCreen**   copyScreen,    SCanvas** copyCanvas);
+	bool			debuggerCopyCanvas							(u32 id, SCanvas*  canvas,    SCreen**   copy);
+
+	// The following snippets are copied with original source code lines for each snippet
+	bool			debuggerCopySnippet							(u32 id, SThread*  snippet,    SSnippet** copyS,   SDynSnip* copyDS,   bool* isDynSnip);
+	bool			debuggerCopySnippetParent					(u32 id, SSnippet* snippet,    SSnippet** copyS,   SDynSnip* copyDS,   bool* isDynSnip);
+	bool			debuggerCopySnippet							(u32 id, SSnippet* snippet,    SSnippet** copy);
+	bool			debuggerCopyDynamicSnippet					(u32 id, SDynSnip* dynSnippet, SDynSnip** copy);
+	
+	// For edit-and-continue (SUpSnip is SSnippet with _prevLine member, indicating the relationship of the old snippet code to the new snippet code)
+	SUpSnip*		debuggerSnippetCompile						(u32 id, SLine* firstLineOfSnippetSourceCode);
+	SUpLine*		debuggerSnippetCompileLine					(u32 id, SSnippet* snippet,    SLine* originalLineOfSnippetSourceCode, SLine* replacementLineOfSnippetSourceCode, bool commitIfCompilesOkay);
+	SUpLine*		debuggerDynSnipCompileLine					(u32 id, SDynSnip* dynSnippet, SLine* originalLineOfDynSnipSourceCode, SLine* replacementLineOfDynSnipSourceCode, bool commitIfCompilesOkay);
+	bool			debuggerSnippetDelete						(u32 id, SSnippet* snippet);
+	bool			debuggerSnippetUpdate						(u32 id, SSnippet* snippet,    SUpSnip* newSnippet);
+	u32				debuggerSnippetAppend						(u32 id, SSnippet* snippet);
+	bool			debuggerDynamicSnippetDelete				(u32 id, SDynSnip* dynSnippet);
+	bool			debuggerDynamicSnippetUpdate				(u32 id, SDynSnip* dynSnippet, SUpSnip* newSnippet);
+	u32				debuggerDynamicSnippetAppend				(u32 id, SDynSnip* dynSnippet);
+	bool			debuggerFlushChangesToRxml					(u32 id, SProgram* program);
+
