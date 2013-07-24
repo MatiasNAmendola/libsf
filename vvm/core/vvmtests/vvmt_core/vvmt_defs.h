@@ -58,15 +58,35 @@
 
 	//////////
 	// SHA-1 tests
-	// vvmt_sha1.cpp
+	// vvmt_sha1_test.cpp
 	//////
 		bool					ivvmt_testSha1											(u64 lnHandleLog);
 		bool					iivvmt_testSha1_1										(u64 lnHandleLog);
 
 
 	//////////
+	// SLL tests
+	// vvmt_sll_test.cpp
+	//////
+		bool					ivvmt_testSll											(u64 lnHandleLog);
+		bool					iivvmt_testSll_1										(u64 lnHandleLog);
+		bool					iivvmt_testSll_2										(u64 lnHandleLog);
+		bool					iivvmt_testSll_3										(u64 lnHandleLog);
+
+
+	//////////
+	// SLL4 tests
+	// vvmt_sll4_test.cpp
+	//////
+		bool					ivvmt_testSll4											(u64 lnHandleLog);
+		bool					iivvmt_testSll4_1										(u64 lnHandleLog);
+		bool					iivvmt_testSll4_2										(u64 lnHandleLog);
+		bool					iivvmt_testSll4_3										(u64 lnHandleLog);
+
+
+	//////////
 	// BXML
-	// vvmt_Bxml.cpp
+	// vvmt_bxml_test.cpp
 	//////
 		bool					ivvmt_testBxml											(u64 lnHandleLog);
 		void					iivvmt_testBxml_computeSha1CallbackBxml					(void* ptr, u64 tnExtra/*u8 context[_SHA1_CONTEXT_SIZE] pointer*/);

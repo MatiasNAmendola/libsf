@@ -206,7 +206,7 @@ struct SCallbacks;
 	{
 		SLL4			ll4;											// 4-way link list, holds parent, child, and sibling (next/prev) Bxml nodes
 		u32				level;											// root=0, first child=1, etc.
-		bool			closed;											// Is this level closed?
+		bool			closed;											// Is this level closed?  This is used during loading to determine if the closing </tag> was found.
 
 		// All attributes (if any) are here
 		SDatum			_name;											// Name of this tag

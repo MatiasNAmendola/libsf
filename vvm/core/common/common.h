@@ -423,14 +423,13 @@ struct SBxmla;
 	s32					icommon_memicmpDatum2Datum2								(SDatum2* datum2L, SDatum2* datum2R);
 	void				icommon_deriveRGBA										(u32 tnColor, u8* tnRed, u8* tnGrn, u8* tnBlu, f32* tfAlp);
 
-	bool				icommon_ll4OrphanizeAsBxml								(SLL4* bxml);
-	bool				icommon_ll4OrphanizeAsNode								(SLL4* node);
-
-	bool				icommon_ll4InsertAsBxml									(SLL4* bxml, SLL4* bxmlRef,                   bool tlAfter);
-	bool				icommon_ll4InsertAsBxmlAsChild							(SLL4* bxml, SLL4* bxmlParent,                bool tlPrepend);
-	bool				icommon_ll4InsertAsBxmlAsChildRegarding					(SLL4* bxml, SLL4* bxmlParent, SLL4* bxmlRef, bool tlAfter);
-	bool				icommon_ll4InsertAsNodeNorthSouth						(SLL4* node, SLL4* nodeRef,                   bool tlAfter);
-	bool				icommon_ll4InsertAsNodeEastWest							(SLL4* node, SLL4* nodeRef,                   bool tlAfter);
+	bool				icommon_ll4_orphanizeAsBxml								(SLL4* bxml);
+	bool				icommon_ll4_orphanizeAsNode								(SLL4* node);
+	bool				icommon_ll4_insertAsBxml								(SLL4* bxml, SLL4* bxmlRef,                   bool tlAfter);
+	bool				icommon_ll4_insertAsBxmlAsChild							(SLL4* bxml, SLL4* bxmlParent,                bool tlPrepend);
+	bool				icommon_ll4_insertAsBxmlAsChildRegarding				(SLL4* bxml, SLL4* bxmlParent, SLL4* bxmlRef, bool tlAfter);
+	bool				icommon_ll4_insertAsNodeNorthSouth						(SLL4* node, SLL4* nodeRef,                   bool tlAfter);
+	bool				icommon_ll4_insertAsNodeEastWest						(SLL4* node, SLL4* nodeRef,                   bool tlAfter);
 
 	void*				icommon_SEChain_prepend									(SStartEnd* ptrSE, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool* tlResult);
 	void*				icommon_SEChain_append									(SStartEnd* ptrSE, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool* tlResult);
@@ -1221,10 +1220,11 @@ struct SBxmla;
 //////
 	// Note:  The common code itself knows nothing about SBxml structure formally, but it
 	//        has at its header the SLL4 structure, which it does know about.
+	//
 	// In SBxml structures, we always update siblings, but if we have no previous entry,
 	// then we must make the parent (if any) point to our next sibling, and we always
 	// keep the children (for they are indeed most important!) :-)
-	bool icommon_ll4OrphanizeAsBxml(SLL4* bxml)
+	bool icommon_ll4_orphanizeAsBxml(SLL4* bxml)
 	{
 		bool	llResult;
 
@@ -1262,7 +1262,7 @@ struct SBxmla;
 
 	// In nodes, we always update north/south paths, as well as east/west paths, as the node is
 	// just a point on a mesh or clutter mesh.
-	bool icommon_ll4OrphanizeAsNode(SLL4* node)
+	bool icommon_ll4_orphanizeAsNode(SLL4* node)
 	{
 		bool llResult;
 
@@ -1297,7 +1297,7 @@ struct SBxmla;
 //
 //////
 	// Inserts only as a sibling, either before or after the reference bxml
-	bool icommon_ll4InsertAsBxml(SLL4* bxml, SLL4* bxmlRef, bool tlAfter)
+	bool icommon_ll4_insertAsBxml(SLL4* bxml, SLL4* bxmlRef, bool tlAfter)
 	{
 		bool	llResult;
 		SLL4*	bxmlNext;
@@ -1355,7 +1355,7 @@ struct SBxmla;
 	}
 
 	// Positions the element as a child either at the start (faster) or end (slower)
-	bool icommon_ll4InsertAsBxmlAsChild(SLL4* bxml, SLL4* bxmlParent, bool tlAfter)
+	bool icommon_ll4_insertAsBxmlAsChild(SLL4* bxml, SLL4* bxmlParent, bool tlAfter)
 	{
 		bool	llResult;
 		SLL4*	bxmlRunner;
@@ -1416,7 +1416,7 @@ struct SBxmla;
 
 	// Positions the element relative to the bxml reference, either before or after, and
 	// therefore "regarding" it.
-	bool icommon_ll4InsertAsBxmlAsChildRegarding(SLL4* bxml, SLL4* bxmlParent, SLL4* BxmlRef, bool tlAfter)
+	bool icommon_ll4_insertAsBxmlAsChildRegarding(SLL4* bxml, SLL4* bxmlParent, SLL4* BxmlRef, bool tlAfter)
 	{
 		bool	llResult;
 		SLL4*	BxmlNext;
@@ -1481,7 +1481,7 @@ struct SBxmla;
 	}
 
 	// Inserts the node before or after the indicated node
-	bool icommon_ll4InsertAsNodeNorthSouth(SLL4* node, SLL4* nodeRef, bool tlAfter)
+	bool icommon_ll4_insertAsNodeNorthSouth(SLL4* node, SLL4* nodeRef, bool tlAfter)
 	{
 		bool	llResult;
 		SLL4*	nodePrev;
@@ -1544,7 +1544,7 @@ struct SBxmla;
 	}
 
 	// Inserts the node before or after the indicated node
-	bool icommon_ll4InsertAsNodeEastWest(SLL4* node, SLL4* nodeRef, bool tlAfter)
+	bool icommon_ll4_insertAsNodeEastWest(SLL4* node, SLL4* nodeRef, bool tlAfter)
 	{
 		bool	llResult;
 		SLL4*	nodeWest;

@@ -4551,7 +4551,7 @@ _asm nop;
 		if (bxml)
 		{
 			// Deletes the indicated node from wherever it is in the parent chain
-			llResult = icommon_ll4OrphanizeAsBxml((SLL4*)bxml);
+			llResult = icommon_ll4_orphanizeAsBxml((SLL4*)bxml);
 
 			// When we get here, it has been disconnected, which means it now exists as an orphan
 			// Now we need to delete everything (if indeed we do), clearing up the entire path, including all attributes, children, everything
@@ -4584,7 +4584,7 @@ _asm nop;
 		if (bxml)
 		{
 			// Inserts the node before or after the reference node as a sibling
-			llResult = icommon_ll4InsertAsBxml((SLL4*)bxml, (SLL4*)bxmlRef, tlAfter);
+			llResult = icommon_ll4_insertAsBxml((SLL4*)bxml, (SLL4*)bxmlRef, tlAfter);
 
 			// If we were successful, update the level
 			if (llResult)
@@ -4604,7 +4604,7 @@ _asm nop;
 		if (bxml)
 		{
 			// Inserts the node relative tothe reference node as a child
-			llResult = icommon_ll4InsertAsBxmlAsChild((SLL4*)bxml, (SLL4*)bxmlParent, tlAfter);
+			llResult = icommon_ll4_insertAsBxmlAsChild((SLL4*)bxml, (SLL4*)bxmlParent, tlAfter);
 
 			// If we were successful, update the level
 			if (llResult)
@@ -4624,7 +4624,7 @@ _asm nop;
 		if (bxml)
 		{
 			// Deletes the indicated node from wherever it is in the parent chain
-			llResult = icommon_ll4InsertAsBxmlAsChildRegarding((SLL4*)bxml, (SLL4*)bxmlParent, (SLL4*)bxmlRef, tlAfter);
+			llResult = icommon_ll4_insertAsBxmlAsChildRegarding((SLL4*)bxml, (SLL4*)bxmlParent, (SLL4*)bxmlRef, tlAfter);
 
 			// If we were successful, update the level
 			if (llResult)

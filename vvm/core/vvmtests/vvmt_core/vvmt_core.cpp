@@ -75,7 +75,9 @@
 
 // Test source files
 #include "vvmt_sha1_test.cpp"
-#include "vvmt_BXML_test.cpp"
+#include "vvmt_bxml_test.cpp"
+#include "vvmt_sll_test.cpp"
+#include "vvmt_sll4_test.cpp"
 
 
 
@@ -187,6 +189,8 @@
 		// If any test fails, early out
 		//////
 			llResult =	(true		& ivvmt_testSha1(lnHandleLog));
+			llResult =	(llResult	& ivvmt_testSll(lnHandleLog));
+			llResult =	(llResult	& ivvmt_testSll4(lnHandleLog));
 			llResult =	(llResult	& ivvmt_testBxml(lnHandleLog));
 
 

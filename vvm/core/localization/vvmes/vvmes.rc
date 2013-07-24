@@ -126,6 +126,16 @@ BEGIN
     IDS_VVM_TEST_CANVAS_CANNOT_CREATE "GT:Unable to create canvas for test"
     IDS_VVM_TEST_CANVAS_SCALED_CANNOT_CREATE 
                             "GT:Unable to create scaled canvas for test"
+    IDS_VVM_TEST_SLL_TESTING "ENU:Testing Linked  List...\n"
+    IDS_VVM_TEST_SLL_PASSED "ENU:Linked List passed.\n"
+    IDS_VVM_TEST_SLL_CREATE "ENU:\tCreate linked list..."
+    IDS_VVM_TEST_SLL_APPEND "ENU:\tAppend to linked list..."
+    IDS_VVM_TEST_SLL_DELETE "ENU:\tDelete from linked list..."
+    IDS_VVM_TEST_SLL4_TESTING "ENU:Testing 4-way Linked List...\n"
+    IDS_VVM_TEST_SLL4_PASSED "ENU:4-way Linked List passed.\n"
+    IDS_VVM_TEST_SLL4_CREATE "ENU:\tCreate 4-way linked list..."
+    IDS_VVM_TEST_SLL4_APPEND "ENU:\tAppend to 4-way linked list..."
+    IDS_VVM_TEST_SLL4_DELETE "ENU:\tDelete from 4-way linked list..."
 END
 
 #endif    // Spanish (Castilian) resources

@@ -793,7 +793,7 @@ oss_bxmlSave(bxml, "c:\\temp\\bxml_8delete.bxml", -1, true, true, NULL);
 			// Insert grandchild2 before grandchild1
 			//////
 // TODO:  Working here.  I think the insert child is not updating the prev links properly, such as on grandchild1->prev pointing back to prependNode6
-				oss_bxmlNode Insert(bxmlReference2, bxmlReference1, false);
+				oss_bxmlNodeInsert(bxmlReference2, bxmlReference1, false);
 oss_bxmlSave(bxml, "c:\\temp\\bxml_8insertbefore.bxml", -1, true, true, NULL);
 				// Note, at this point we leave them installed in the original bxml file, where they are
 

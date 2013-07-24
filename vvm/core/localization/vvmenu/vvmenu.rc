@@ -124,6 +124,16 @@ BEGIN
     IDS_VVM_TEST_CANVAS_CANNOT_CREATE "Unable to create canvas for test"
     IDS_VVM_TEST_CANVAS_SCALED_CANNOT_CREATE 
                             "Unable to create scaled canvas for test"
+    IDS_VVM_TEST_SLL_TESTING "Testing Linked  List...\n"
+    IDS_VVM_TEST_SLL_PASSED "Linked List passed.\n"
+    IDS_VVM_TEST_SLL_CREATE "\tCreate linked list..."
+    IDS_VVM_TEST_SLL_APPEND "\tAppend to linked list..."
+    IDS_VVM_TEST_SLL_DELETE "\tDelete from linked list..."
+    IDS_VVM_TEST_SLL4_TESTING "Testing 4-way Linked List...\n"
+    IDS_VVM_TEST_SLL4_PASSED "4-way Linked List passed.\n"
+    IDS_VVM_TEST_SLL4_CREATE "\tCreate 4-way linked list..."
+    IDS_VVM_TEST_SLL4_APPEND "\tAppend to 4-way linked list..."
+    IDS_VVM_TEST_SLL4_DELETE "\tDelete from 4-way linked list..."
 END
 
 #endif    // English (U.S.) resources
