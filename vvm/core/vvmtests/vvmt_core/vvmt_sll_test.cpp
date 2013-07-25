@@ -87,6 +87,12 @@
 			vvm_resourcePrintf(IDS_VVM_TEST_SLL_CREATE);
 
 
+		//////////
+		// Create a single node
+		//////
+
+
+
 		// If we get here, we're good
 		vvm_resourcePrintf(IDS_VVM_TEST_PASS);
 		return(true);

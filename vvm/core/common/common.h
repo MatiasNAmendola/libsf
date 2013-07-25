@@ -423,6 +423,10 @@ struct SBxmla;
 	s32					icommon_memicmpDatum2Datum2								(SDatum2* datum2L, SDatum2* datum2R);
 	void				icommon_deriveRGBA										(u32 tnColor, u8* tnRed, u8* tnGrn, u8* tnBlu, f32* tfAlp);
 
+	SLL*				icommon_ll_create										(SLL* nodePrev, SLL* nodeNext, u64 tnUniqueId, u32  tnSize);
+	bool				icommon_ll_insert										(SLL* node, SLL* nodeRef, bool tlAfter);
+	void				icommon_ll_orphanize									(SLL* node);
+
 	bool				icommon_ll4_orphanizeAsBxml								(SLL4* bxml);
 	bool				icommon_ll4_orphanizeAsNode								(SLL4* node);
 	bool				icommon_ll4_insertAsBxml								(SLL4* bxml, SLL4* bxmlRef,                   bool tlAfter);
@@ -1205,6 +1209,148 @@ struct SBxmla;
 		*tnGrn = grn(tnColor);
 		*tnBlu = blu(tnColor);
 		*tfAlp = (f32)(alp(tnColor)) / 255.0f;
+	}
+
+
+
+
+//////////
+//
+// Creates a new 2-way linked list with optional nodePrev and nodeNext info, using
+// the indicated size for the allocation (which includes the SLL portion at the head)
+//
+//////
+	SLL* icommon_ll_create(SLL* nodePrev, SLL* nodeNext, u64 tnUniqueId, u32 tnSize)
+	{
+		SLL* node;
+
+
+// TODO:  UNTESTED CODE
+		// Make sure we're allocating enough space
+		if ((s32)tnSize < sizeof(SLL))
+			tnSize = sizeof(SLL);
+
+		// Allocate the size
+		node = (SLL*)malloc(tnSize);
+		if (node)
+		{
+			// We're good
+			memset(node, 0, tnSize);
+			
+			// Store a unique id
+			node->uniqueId	= tnUniqueId;
+
+			// Update our pointers
+			node->prev		= nodePrev;
+			node->next		= nodeNext;
+		}
+
+		// Indicate our success or failure
+		return(node);
+	}
+
+
+
+
+//////////
+//
+// Inserts a 2-way linked relative to the nodeRef, either before or after.  If the
+// node is already connected, it is disconnected.
+//
+//////
+	bool icommon_ll_insert(SLL* node,  SLL* nodeRef,  bool tlAfter)
+	{
+// TODO:  UNTESTED CODE
+		// Is our environment sane?
+		if (nodeRef)
+		{
+			//////////
+			// Disconnect
+			//////
+				if (node && (node->prev || node->next))
+					icommon_ll_orphanize(node);
+
+
+			//////////
+			// Is it going before or after?
+			//////
+				if (tlAfter)
+				{
+					// Point the one after this back to node to be inserted
+					if (nodeRef->next)
+						nodeRef->next->prev	= node;		// The one after points back to the node we're inserting
+
+					// Are we updating to a valid node?
+					if (node)
+					{
+						// The node is valid, so we can update relative pointers
+						// Point this node to the one that will be after
+						node->next = nodeRef->next;
+						node->prev = nodeRef;
+					}
+
+					// Store the pointer to the node
+					nodeRef->next = node;
+
+
+				} else {
+					// Positioning this node before
+					// Point the one before this forward to the node to be inserted
+					if (nodeRef->prev)
+						nodeRef->prev->next = node;
+
+					// Are we updating to a valid node?
+					if (node)
+					{
+						// The node is valid, so we can update relative pointers
+						// Point this node to the one that will be after
+						node->prev = nodeRef->prev;
+						node->next = nodeRef;
+					}
+
+					// Store the pointer to the node
+					nodeRef->prev = node;
+				}
+		}
+		// Failure
+		return(false);
+	}
+
+
+
+
+//////////
+//
+// Disconnects a node from its existing chain
+//
+//////
+	void icommon_ll_orphanize(SLL* node)
+	{
+// TODO:  UNTESTED CODE
+		// Is our environment sane?
+		if (node)
+		{
+
+			//////////
+			// Is there one before?
+			//////
+				if (node->prev)
+				{
+					// Make the one before point to the one after
+					node->prev->next	= node->next;
+					node->next			= NULL;
+				}
+
+			//////////
+			// Is there one after?
+			//////
+				if (node->next)
+				{
+					// Make the one after point to the one before
+					node->next->prev	= node->prev;
+					node->prev			= NULL;
+				}
+		}
 	}
 
 
