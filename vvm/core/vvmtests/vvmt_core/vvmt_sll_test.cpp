@@ -89,9 +89,11 @@
 
 	bool iivvmt_testSll_1(u64 lnHandleLog, SLL** root)
 	{
-		u64		lnSha1As64Bit;
-		u32		lnSha1As32Bit, lnSize;
-		u8		sha20Bytes[20];
+		SOssCbData2Void		cb;
+		u64					lnSha1As64Bit;
+		u32					lnSha1As32Bit;
+		u8					sha20Bytes[20];
+		u8					context[92];
 
 
 		//////////
@@ -103,8 +105,7 @@
 		//////////
 		// Create a single node
 		//////
-			lnSize	= sizeof(SLL) + 50;
-			*root	= oss_ll_create(NULL, NULL, oss_getNextUniqueId(), lnSize);
+			*root = i3vvmt_testSll_1_createSll(cgnBufferSize);
 			if (!*root)
 			{
 				// Failure
@@ -117,7 +118,17 @@
 		//////////
 		// Determine the SHA-1 on it
 		//////
-			lnSha1As64Bit	= oss_ll_sha1Chain(*root, lnSize, sha20Bytes);
+			oss_sha1ComputeSha1_Start(context);
+
+			cb._callback	= (u64)&i3vvmt_testSll_1_sha1Callback;
+			cb.extra1		= (u64)&context[0];
+			cb.extra2		= (u64)&sha20Bytes[0];
+			oss_ll_iterateViaCallback(*root, &cb);
+
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
 			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTestLl1NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl1NodeSha1As32Bit)
 			{
@@ -164,4 +175,50 @@
 		// If we get here, we're good
 		vvm_resourcePrintf(IDS_VVM_TEST_PASS);
 		return(true);
+	}
+
+
+
+
+	SLL* i3vvmt_testSll_1_createSll(u32 tnSize)
+	{
+		u32		lnI;
+		SLL*	ll;
+		u8*		llInit;
+		
+		
+		//////////
+		// Create the SLL
+		//////
+			ll = oss_ll_create(NULL, NULL, oss_getNextUniqueId(), tnSize);
+
+
+		//////////
+		// Prepare that value
+		//////
+			if (ll)
+			{
+				// Iterate through every portion to initialize
+				llInit = (u8*)ll + sizeof(SLL);
+				for (lnI = 0; lnI < tnSize; lnI++)
+					llInit[lnI] = oss_getPredictableSequentialPattern(lnI, gnInitializerValue++);
+			}
+
+
+		//////////
+		// Indicate our success or failure
+		//////
+			return(ll);
+	}
+
+
+
+
+	void i3vvmt_testSll_1_sha1Callback(SOssCbData2Void* cb)
+	{
+		if (cb)
+		{
+			// Conduct our processing
+			oss_sha1ComputeSha1_ProcessThisData((u8*)cb->extra1, (s8*)cb->ptr + sizeof(SLL), cgnBufferSize);
+		}
 	}

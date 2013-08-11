@@ -147,13 +147,15 @@ EXPORTS
 	oss_memicmpDatumDatum
 	oss_memicmpDatum2Datum2
 	oss_deriveRGBA
+	oss_getPredictableSequentialPattern
 
 	oss_ll_create
 	oss_ll_insert
 	oss_ll_orphanize
 	oss_ll_deleteChainWithCallback
-	oss_ll_sha1Chain
+	oss_ll_iterateViaCallback
 
+	oss_ll4_create
 	oss_ll4_orphanizeAsBxml
 	oss_ll4_orphanizeAsNode
 	oss_ll4_insertAsBxml

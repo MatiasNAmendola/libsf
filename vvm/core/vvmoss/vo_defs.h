@@ -249,13 +249,15 @@
 		s32 CALLTYPE			oss_memicmpDatumDatum						(SDatum*  datumL,  SDatum*  datumR);
 		s32 CALLTYPE			oss_memicmpDatum2Datum2						(SDatum2* datum2L, SDatum2* datum2R);
 		void CALLTYPE			oss_deriveRGBA								(u32 tnColor, u8* tnRed, u8* tnGrn, u8* tnBlu, f32* tfAlp);
+		u8 CALLTYPE				oss_getPredictableSequentialPattern			(u32 tnIterator, u32 tnValue);
 
 		SLL* CALLTYPE			oss_ll_create								(SLL* nodePrev, SLL* nodeNext, u64 tnUniqueId, u32  tnSize);
 		bool CALLTYPE			oss_ll_insert								(SLL* node, SLL* nodeRef, bool tlAfter);
 		void CALLTYPE			oss_ll_orphanize							(SLL* node);
-		void CALLTYPE			oss_ll_deleteChainWithCallback				(SLL* node, u64 iiCallbackFunction, u64 tnExtra);
-		u64 CALLTYPE			oss_ll_sha1Chain							(SLL* node, u32 tnSize, u8 sha20Bytes[20]);
+		void CALLTYPE			oss_ll_deleteChainWithCallback				(SLL* node, u64 func, u64 tnExtra);
+		void CALLTYPE			oss_ll_iterateViaCallback					(SLL* node, SOssCbData2Void* cb);
 
+		SLL4* CALLTYPE			oss_ll4_create								(SLL4* nodeWest, SLL4* nodeEast, SLL4* nodeNorth, SLL4* nodeSouth, u64 tnUniqueId, u32 tnSize);
 		bool CALLTYPE			oss_ll4_orphanizeAsBxml						(SLL4* bxml);
 		bool CALLTYPE			oss_ll4_orphanizeAsNode						(SLL4* node);
 		bool CALLTYPE			oss_ll4_insertAsBxml						(SLL4* bxml, SLL4* bxmlRef,                   bool tlAfter);
@@ -263,7 +265,7 @@
 		bool CALLTYPE			oss_ll4_insertAsBxmlAsChildRegarding		(SLL4* bxml, SLL4* bxmlParent, SLL4* bxmlRef, bool tlAfter);
 		bool CALLTYPE			oss_ll4_insertAsNodeNorthSouth				(SLL4* node, SLL4* nodeRef,                   bool tlAfter);
 		bool CALLTYPE			oss_ll4_insertAsNodeEastWest				(SLL4* node, SLL4* nodeRef,                   bool tlAfter);
-		void CALLTYPE			oss_ll4_deleteChainWithCallback				(SLL4* node, u64 iiCallbackFunction, u64 tnExtra);
+		void CALLTYPE			oss_ll4_deleteChainWithCallback				(SLL4Callback* cb);
 
 		void* CALLTYPE			oss_SEChain_prepend							(SStartEnd* ptrSE, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool* tlResult);
 		void* CALLTYPE			oss_SEChain_append							(SStartEnd* ptrSE, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool* tlResult);
@@ -279,13 +281,13 @@
 		u32 CALLTYPE			oss_SEChain_countValids						(SStartEnd* ptrSE);
 		u32 CALLTYPE			oss_SEChain_delete							(SStartEnd* ptrSE, u64 tnCallback, u64 tnParam, bool tlDeletePointers);
 		void CALLTYPE			oss_SEChain_deleteFrom						(SStartEnd* ptrSE, void* ptrDel, bool tlDeletePointers);
-		bool CALLTYPE			oss_SEChain_deleteFromAfterCallback			(SStartEnd* ptrSE, bool tlDeletePointers, u64 iiCallbackFunction, u64 tnExtra);
+		bool CALLTYPE			oss_SEChain_deleteFromAfterCallback			(SStartEnd* ptrSE, bool tlDeletePointers, SStartEndCallback* cb);
 
 		bool CALLTYPE			oss_allocateAdditionalStartEndMasterSlots	(SStartEnd* ptrSE, u32 tnBlockSize);
 		void* CALLTYPE			oss_searchSEChainByUniqueId					(SStartEnd* ptrSE, u64 tnUniqueId);
-		void* CALLTYPE			oss_searchSEChainByCallback					(SStartEnd* ptrSE, u64 iiCallbackFunction, u64 tnExtra);
-		void CALLTYPE			oss_iterateThroughStartEndForCallback		(SStartEnd* ptrSE, u64 iiCallbackFunction, u64 tnExtra);
-		void CALLTYPE			oss_validateStartEnd						(SStartEnd* ptrSE, u64 iiCallbackFunction);
+		void* CALLTYPE			oss_searchSEChainByCallback					(SStartEnd* ptrSE, SStartEndCallback* cb);
+		void CALLTYPE			oss_iterateThroughStartEndForCallback		(SStartEnd* ptrSE, SStartEndCallback* cb);
+		void CALLTYPE			oss_validateStartEnd						(SStartEnd* ptrSE, SStartEndCallback* cb);
 		u32 CALLTYPE			oss_swapEndian								(u32 tnValue);
 		u32 CALLTYPE			oss_RGBA2BGRA								(u32 tnColor);
 		void* CALLTYPE			oss_allocateAndNull							(u32 tnSize, bool tnInitToZeros);
@@ -451,7 +453,7 @@
 // vo_sup.cpp
 //////
 	// Callbacks related to above
-	bool					iioss_findSystemFontByHandleCallback			(void* ptr, u64 /*tnExtra*/tnFontHandle);
+	bool					iioss_findSystemFontByHandleCallback			(SStartEndCallback* cb);
 	bool					ioss_registerWindowClasses						(u32* tnError);
 	HWND					ioss_createMessageWindow						(void);
 	DWORD CALLTYPE			ioss_messageLoop								(LPVOID lpParameter);
@@ -477,11 +479,11 @@
 	u32						ioss_computeActualWidth							(u32 tnWidth);
 	bool					ioss_paintWindow								(HWND hwnd);
 	_iswSOssWindowLL*		ioss_findSOssWindowLLByHwnd						(HWND hwnd);
-	bool					iioss_findSOssWindowLLByHwndCallback			(void* ptr, u64 tnExtra);
+	bool					iioss_findSOssWindowLLByHwndCallback			(SStartEndCallback* cb);
 	_iswSOssWindowLL*		ioss_findSOssWindowLLByScreenId					(u64 tnScreenId);
-	bool					iioss_findSOssWindowLLByScreenId				(void* ptr, u64 tnExtra);
+	bool					iioss_findSOssWindowLLByScreenId				(SStartEndCallback* cb);
 	_iswSOssWindowLL*		ioss_findSOssWindowLLByOssWindowId				(u64 tnOssWindowId);
-	bool					iioss_findSOssWindowByOssWindowIdCallback		(void* ptr, u64 tnExtra);
+	bool					iioss_findSOssWindowByOssWindowIdCallback		(SStartEndCallback* cb);
 	void					ioss_deriveMouseInformation						(u32* tnX, u32* tnY, u32* tnButtons, u32* tnKeyFlags, u32 tnWinKeys, u32 tnXlowYhigh);
 	void					ioss_recordMouseEvent							(HWND hwnd, u32 tnEVent, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeyFlags);
 	void					ioss_deriveKeyboardInformation					(u32* tnKey, u32* tnKeyFlags, s8* tcAscii, s16* tuUnicode, u32 tnVkey, _iswSwindowExtraKeyData* tsXKeyInfo);
@@ -491,7 +493,7 @@
 	u32						ioss_getWindowStyle								(SOssWindow* tisw);
 	f32						ioss_distanceBetween							(u32 tnX1, u32 tnY1, u32 tnX2, u32 tnY2);
 	void					ioss_translateWindowsToVvmKey					(u32* tnKey, u32 tnVkey);
-	bool					iioss_signalWindowFocusCallbacksCallback		(void* ptr, u64 tnExtra);
+	bool					iioss_signalWindowFocusCallbacksCallback		(SStartEndCallback* cb);
 	void					ioss_signalWindowUnloadCallback					(HWND hwnd);
 	void					ioss_signalWindowClosedCallback					(_iswSOssWindowLL* w);
 	u64						ivvm_bitBltAll										(_iswSOssWindowLL* tow, SRGBA* bd, u32 width, u32 height);
@@ -505,13 +507,13 @@
 	DWORD CALLTYPE			iioss_1MsTimerThread							(LPVOID lpParameter);
 	VOID CALLBACK			iiioss_1MsTimerThreadTimerAPCProc				(LPVOID lpArgToCompletionRoutine, DWORD dwTimerLowValue, DWORD dwTimerHighValue);
 	void					iioss_sharedAsciiCloseFileLocksCallback			(void* ptr, u64 tnParam);
-	bool					iioss_reallocAndFreeCallback					(void* ptr, u64 tnExtra);
+	bool					iioss_reallocAndFreeCallback					(SStartEndCallback* cb);
 	u64						ioss_breakoutAsciiTextDataIntoLines_ScanLine	(s8* tcData, u64 tnMaxLength, u64* tnLength, u64* tnWhitespaces);
 	u64						ioss_skipWhitespaces							(s8* tcData, u64 tnMaxLength);
 	u64						ioss_skipWhitespacesAndCrLf						(s8* tcData, u64 tnMaxLength);
 	u64						ioss_skipToCarriageReturnLineFeed				(s8* tcData, u64 tnMaxLength, u64* tnCRLF_Length);
 	s32						ioss_translateSOssLinesToSOssCompsTest			(s8* tcHaystack, s8* tcNeedle, s32 tnLength);
-	bool					iioss_translateSOssCompsToOthersCallback		(void* ptr, u64 tnExtra);
+	bool					iioss_translateSOssCompsToOthersCallback		(SStartEndCallback* cb);
 inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	bool					ioss_isAlpha									(s8 c);
 	bool					ioss_isNumeric									(s8 c);
@@ -547,10 +549,10 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 
 	// TODO:  to be added later: regions need to be able to trigger custom region events (see common.h's Custom event)
 	SScreen*				ioss_findScreenByActiveCanvas					(u64 canvasId);
-	bool					iioss_findScreenByActiveCanvasCallback			(void *ptr, u64 tnExtra);
+	bool					iioss_findScreenByActiveCanvasCallback			(SStartEndCallback* cb);
 	SCanvasList*			ioss_findCanvasListOfScreen						(SScreen* ts, SCanvas* tc);
 	SCanvasList*			ioss_findCanvasListOfCanvas						(SCanvas* tcHaystack, SCanvas* tcNeedle);
-	bool					iioss_findCanvasCallback						(void* ptr, u64 tnExtra);
+	bool					iioss_findCanvasCallback						(SStartEndCallback* cb);
 	SCanvasList*			ioss_deepFindCanvasListOfCanvas					(SCanvas* tcHaystack, SCanvas* tcNeedle);
 	SRegionList*			ioss_findRegionListOfCanvas						(SCanvas* tc, SRegion* tr);
 	SRegionList*			ioss_findRegionListOfRegion						(SRegion* trHaystack, SRegion* trNeedle);
@@ -568,7 +570,7 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	void					iioss_bitBltSection_Opaque						(SRGBA* trgbaDstRoot, SCanvas* tsDst, s32 dulx, s32 duly, SRGBA* trgbaSrcRoot, SCanvas* tsSrc, u32 sulx, u32 suly, u32 slrx, u32 slry);
 	void					iioss_bitBltSection_Alpha						(SRGBA* trgbaDstRoot, SCanvas* tsDst, s32 dulx, s32 duly, SRGBA* trgbaSrcRoot, SCanvas* tsSrc, u32 sulx, u32 suly, u32 slrx, u32 slry);
 	u32						iioss_gradient									(SCanvas* tc, SRGBA* bd, SRGBA ul, SRGBA ur, SRGBA lr, SRGBA ll);
-	void					iioss_createRegionCallback						(void* ptr, u64 tnExtra);
+	void					iioss_createRegionCallback						(SStartEndCallback* cb);
 
 	void*					ioss_SEChain_appendOrPrepend					(SStartEnd* ptrSE, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool tlPrepend, bool* tlResult);
 	void*					ioss_SEChain_appendOrPrependExisting			(SStartEnd* ptrSE, SLL* ptrExisting, u32 tnBlockSizeIfNewBlockNeeded, bool tlPrepend, bool* tlResult);

@@ -81,8 +81,8 @@
 //////
 	void			isound_playControl			(bool tlShouldBePlaying);
 	void			isound_sdl_callback			(void* user, Uint8* stream, int length);
-	bool			isound_DeleteValidate		(void* ptr, u64 tnExtra);
-	void			isound_requestStreams		(void* ptr, u64 tnExtra);
+	bool			isound_DeleteValidate		(SStartEndCallback* cb);
+	void			isound_requestStreams		(SStartEndCallback* cb);
 	void			iisound_generateTones		(_isSSound* tss, u32 tnSamples);
 
 
@@ -146,11 +146,12 @@
 //////
 	void isound_sdl_callback(void* user, Uint8* stream, int length)
 	{
-		f64				lfSampleTotal;
-		u32				lnI, lnLength, lnSampleCount;
-		Sint16*			stream16;
-		_isSSound*		lss;
-		SMasterList*	lml;
+		f64					lfSampleTotal;
+		u32					lnI, lnLength, lnSampleCount;
+		Sint16*				stream16;
+		_isSSound*			lss;
+		SMasterList*		lml;
+		SStartEndCallback	cb;
 
 
 		// Make sure our environment is sane
@@ -158,7 +159,9 @@
 		{
 			// Populate the streams based on inputs
 			lnLength = length / sizeof(Sint16);
-			oss_iterateThroughStartEndForCallback(&gseRootSounds, (u64)&isound_requestStreams, lnLength);
+			cb._func	= (u64)&isound_requestStreams;
+			cb.extra	= lnLength;
+			oss_iterateThroughStartEndForCallback(&gseRootSounds, &cb);
 			// Once we get here, all streams have been populated
 
 			// Iterate through each channel merging them together
@@ -217,10 +220,10 @@
 // Returns the first item it finds playing
 //
 //////
-	bool isound_DeleteValidate(void* ptr, u64 tnExtra)
+	bool isound_DeleteValidate(SStartEndCallback* cb)
 	{
 		// Make sure our environment is sane
-		if (ptr && ((_isSSound*)ptr)->isPlaying)
+		if (cb && cb->ptr && ((_isSSound*)cb->ptr)->isPlaying)
 			return(true);		// This is the match
 
 		// If we get here, this item is not playing
@@ -235,16 +238,16 @@
 // Called to request that each stream populate itself
 //
 //////
-	void isound_requestStreams(void* ptr, u64 tnExtra)
+	void isound_requestStreams(SStartEndCallback* cb)
 	{
 		_isSSound* lss;
 
 
 		// Make sure our environment is sane
-		if (ptr)
+		if (cb && cb->ptr)
 		{
 			// Grab our pointer
-			lss = (_isSSound*)ptr;
+			lss = (_isSSound*)cb->ptr;
 
 			// Is this item being processed?
 			if (lss->isPlaying && lss->samples)
@@ -253,11 +256,11 @@
 				if (lss->isStream)
 				{
 					// Ask the stream to fill itself
-					lss->stream.filler.callback(lss->samples, (u32)tnExtra, &lss->isPlaying);
+					lss->stream.filler.callback(lss->samples, (u32)cb->extra, &lss->isPlaying);
 
 				} else {
 					// Generate the tone(s)
-					iisound_generateTones(lss, (u32)tnExtra);
+					iisound_generateTones(lss, (u32)cb->extra);
 				}
 			}
 		}
@@ -662,8 +665,9 @@
 //////
 	u64 CALLTYPE oss_soundDelete(u64 tnHandle)
 	{
-		_isSSound*	lss;
-		_isSSound*	lssPlaying;
+		_isSSound*			lss;
+		_isSSound*			lssPlaying;
+		SStartEndCallback	cb;
 
 
 		// Search for the indicated handle
@@ -675,7 +679,8 @@
 			lss->inDeleteQueue	= true;
 
 			// We need to see if this is the last item playing, and if so, then turn off SDL
-			lssPlaying = (_isSSound*)oss_searchSEChainByCallback(&gseRootSounds, (u64)&isound_DeleteValidate, 0);
+			cb._func	= (u64)&isound_DeleteValidate;
+			lssPlaying	= (_isSSound*)oss_searchSEChainByCallback(&gseRootSounds, &cb);
 
 			// Is anything else still playing?
 			if (!lssPlaying)

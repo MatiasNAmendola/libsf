@@ -65,8 +65,8 @@
 	SBxml*				iibxml_createNewSBxml							(u32 tnLevel, SBxml* bxmlRelation, bool tlIsChild, SBxml* next, SBxml* prev, SBxml* parent, SBxml* child);
 	void				iibxml_storeErrorCode							(u64* tnErrorOffsetStore, u64 tnErrorOffset, u64* tnErrorCodeStore, u64 tnErrorCode);
 	void				ibxml_saveNode									(SBuffer* build, SBxml* bxml, bool tlSaveChildNodes, bool tlSaveSiblings, u64* lnError);
-	void				iibxml_saveNodeCallback							(void* ptr, u64 tnExtra);
-	bool				iibxml_AttributeDeleteCallback					(void* ptr, u64 tnExtra);
+	void				iibxml_saveNodeCallback							(SStartEndCallback* cb);
+	bool				iibxml_AttributeDeleteCallback					(SStartEndCallback* cb);
 	bool				iibxml_attributeInsertCallback					(void* ptr, u64 tnExtra);
 	SBxmla*				ibxml_attributeDuplicate						(SBxmla* bxmlaOriginal);
 	SBxmla*				ibxml_attributeDuplicateAs						(SBxmla* bxmlaOriginal, s8* tcNewName, u32 tnNewNameLength);
@@ -75,7 +75,7 @@
 	SBxml*				ibxml_nodeCreateAs								(s8* tcNewName, u32 tnNewNameLength);
 	SBxml*				ibxml_nodeCopyAs								(SBxml* bxmlSrc, s8* tcNewName, u64 tnNewNameLength, bool tlCopyAttributes, bool tlCopyChildren, bool* tlResult);
 	void				iibxml_nodeCopyAttributes						(SBxml* bxmlDst, SBxml* bxmlSrc, bool* tlResult);
-	void				iibxml_nodeCopyAttributesCallback				(void* ptr, u64 tnExtra);
+	void				iibxml_nodeCopyAttributesCallback				(SStartEndCallback* cb);
 	void				iibxml_nodeCopyChildren							(SBxml* bxmlDst, SBxml* bxmlSrc, bool tlCopyAttributes, bool* tlResult);
 	void				iibxml_recordLastError							(u32 tnResourceNumber, u32 tnErrorNumber, s8* tcDescriptionZ, SBxml* bxml, SBxmla* bxmla, u64 tnErrorOffset);
 	bool				ibxml_nodeDeleteBranch							(SBxml* bxml);
@@ -88,7 +88,7 @@
 	u64					ioss_bxmlNodeSha1Tag							(SBxml*  bxml,  u8 sha20Bytes[20]);
 	u64					ioss_bxmlNodeSha1Data							(SBxml*  bxml,  u8 sha20Bytes[20]);
 	void				iioss_bxmlComputeSha1OnNode						(SBxml*  bxml,  u8 handle[92], u8 buffer[64], u32 tnLevel, bool tlAttributes, bool tlChildren, bool tlSiblings);
-	void				iioss_bxmlComputeSha1OnNodeAttributeCallback				(void* ptrSE, u64 tnExtra);
+	void				iioss_bxmlComputeSha1OnNodeAttributeCallback	(SStartEndCallback* cb);
 	void				iioss_bxmlComputeSha1OnAttribute				(SBxmla* bxmla, u8 handle[92], u8 buffer[64], bool tlName, bool tlData);
 
 

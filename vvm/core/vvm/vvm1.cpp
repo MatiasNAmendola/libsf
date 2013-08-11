@@ -89,10 +89,13 @@
 		u32					lnLength;
 		SVvmmcResourceText*	lr;
 		s8					buffer[1024];
+		SStartEndCallback	cb;
 
 
 		// Try to find the resource we've already loaded
-		lr = (SVvmmcResourceText*)oss_searchSEChainByCallback(&gsVvm.gseRootResourceTexts, (u64)&iivvm_loadResourceAsciiTextCallback, tnResourceNumber);
+		cb._func	= (u64)&iivvm_loadResourceAsciiTextCallback;
+		cb.extra	= tnResourceNumber;
+		lr = (SVvmmcResourceText*)oss_searchSEChainByCallback(&gsVvm.gseRootResourceTexts, &cb);
 		if (lr)
 			return(lr->text);		// It's already been loaded
 

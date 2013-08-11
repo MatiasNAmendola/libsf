@@ -71,7 +71,7 @@
 	// vvmmc_sup.cpp
 	//////
 		bool				iLoadResource												(s8* tcLanguage);
-		bool				iivvmmc_loadResourceAsciiTextCallback						(void* ptr, u64 tnExtra);
+		bool				iivvmmc_loadResourceAsciiTextCallback						(SStartEndCallback* cb);
 		// Warning and error functions
 		void				ivvmmc_appendError											(SStartEnd* tseErrors,		SOssLine* line, SOssComp* comp, u32 tnResource);
 		void				ivvmmc_appendWarning										(SStartEnd* tseWarnings,	SOssLine* line, SOssComp* comp, u32 tnResource);
@@ -87,7 +87,7 @@
 		SStartEnd*			ivvmmc_programGetDefines									(SStartEnd* tseProg);
 		// Search defines
 		SVariable*			ivvmmc_searchVariablesByName								(SStartEnd* tseVariables, SDatum* tsDatum);
-		bool				iivvmmc_searchVariablesByNameCallback						(void* ptr, u64 tnExtra);
+		bool				iivvmmc_searchVariablesByNameCallback						(SStartEndCallback* cb);
 		bool				iivvmmc_validateStartEndCompsCallback						(void* ptr, u64 tnExtra);
 		// Used by vvmmc_asm.cpp as internal functions, but exist in vvmmc_sup.cpp
 		void				ivvmmc_assemblyPass0										(SAssembly* ta, SSourceFile* tsf);

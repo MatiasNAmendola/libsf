@@ -270,6 +270,54 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 //       to some external areas for a post-return respond in another thread.
 //
 //////
+	struct SOssCbData1Boolean
+	{
+		union {
+			u64		_callback;
+			bool	(*callback)(SOssCbData1Boolean* ptr);
+		};
+		void*			ptr;					// Related pointer
+		u64				extra;					// Data item
+	};
+
+	struct SOssCbData2Boolean
+	{
+		union {
+			u64		_callback;
+			bool	(*callback)(SOssCbData2Boolean* ptr);
+		};
+		void*			ptr;					// Related pointer
+		union {									// Data item 1
+			u64			extra;
+			u64			extra1;
+		};
+		u64				extra2;					// Data item 2
+	};
+
+	struct SOssCbData1Void
+	{
+		union {
+			u64		_callback;
+			void	(*callback)(SOssCbData1Void* ptr);
+		};
+		void*			ptr;					// Related pointer
+		u64				extra;					// Data item
+	};
+
+	struct SOssCbData2Void
+	{
+		union {
+			u64		_callback;
+			void	(*callback)(SOssCbData2Void* ptr);
+		};
+		void*			ptr;					// Related pointer
+		union {									// Data item 1
+			u64			extra;
+			u64			extra1;
+		};
+		u64				extra2;					// Data item 2
+	};
+
 	// Generic callbacks
 	struct SCallbacks
 	{
@@ -575,42 +623,56 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	{
 		union
 		{
-			u64		_iiCallbackFunction;
-			bool	(*iiCallbackFunctionBool)	(SLL* node, u64 tnExtra);
-			void	(*iiCallbackFunctionVoid)	(SLL* node, u64 tnExtra);
+			u64		_func;
+			bool	(*funcBool)	(SLLCallback* cb);
+			void	(*funcVoid)	(SLLCallback* cb);
 			//////
 			// Uses the following format for the callback:
-			//		bool iiCallbackFunction(SLL* node, u64 tnExtra)
+			//		void func(SLLCallback* cb)
+			//		bool func(SLLCallback* cb)
 			//////////
 		};
+
+		// Data items for this callback
+		SLL*	node;
+		u64		extra;
 	};
 
 	struct SLL4Callback
 	{
 		union
 		{
-			u64		_iiCallbackFunction;
-			bool	(*iiCallbackFunctionBool)	(SLL4* node, u64 tnExtra);
-			void	(*iiCallbackFunctionVoid)	(SLL4* node, u64 tnExtra);
+			u64		_func;
+			bool	(*funcBool)	(SLL4Callback* cb);
+			void	(*funcVoid)	(SLL4Callback* cb);
 			//////
 			// Uses the following format for the callback:
-			//		bool iiCallbackFunction(SLL4* node, u64 tnExtra)
+			//		void func(SLL4Callback* cb)
+			//		bool func(SLL4Callback* cb)
 			//////////
 		};
+
+		// Data items for this callback
+		SLL4*	node;
+		u64		extra;
 	};
 
 	struct SStartEndCallback
 	{
 		union
 		{
-			u64		_iiCallbackFunction;
-			bool	(*iiCallbackFunctionBool)	(void* ptr, u64 tnExtra);
-			void	(*iiCallbackFunctionVoid)	(void* ptr, u64 tnExtra);
+			u64		_func;
+			bool	(*funcBool)	(SStartEndCallback* cb);
+			void	(*funcVoid)	(SStartEndCallback* cb);
 			//////
 			// Uses the following format for the callback:
-			//		bool iiCallbackFunction(void* ptr, u64 tnExtra)
+			//		bool func(void* ptr, u64 tnExtra)
 			//////////
 		};
+
+		// Data items for this callback
+		void*	ptr;
+		u64		extra;
 	};
 
 	// The values here have been changed into VVMOSS_* values, which are common throughout the system externally.

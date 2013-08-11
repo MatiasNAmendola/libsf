@@ -702,7 +702,8 @@ _asm nop;
 //////
 	void ibxml_saveNode(SBuffer* build, SBxml* bxml, bool tlSaveChildNodes, bool tlSaveSiblings, u64* tnError)
 	{
-		u32 lnI;
+		u32					lnI;
+		SStartEndCallback	cb;
 
 
 // TODO:  this code works and has been tested, though not as thoroughly as it should be
@@ -749,7 +750,9 @@ _asm nop;
 				{
 					// There are attributes
 					// Iterate through each attribute, appending them as we go
-					oss_iterateThroughStartEndForCallback(&bxml->_attributes, (u64)&iibxml_saveNodeCallback, (u64)(void*)build);
+					cb._func	= (u64)&iibxml_saveNodeCallback;
+					cb.extra	= (u64)(void*)build;
+					oss_iterateThroughStartEndForCallback(&bxml->_attributes, &cb);
 				}
 
 				// Add the closer for this tag
@@ -804,7 +807,7 @@ _asm nop;
 	}
 
 	// One callback for every attribute
-	void iibxml_saveNodeCallback(void* ptr, u64 tnExtra)
+	void iibxml_saveNodeCallback(SStartEndCallback* cb)
 	{
 		SBxmla*		bxmla;
 		SBuffer*	build;
@@ -814,13 +817,13 @@ _asm nop;
 
 // TODO:  this code works and has been tested, though not as thoroughly as it should be
 		// Make sure our environment is sane
-		if (ptr && tnExtra != 0)
+		if (cb && cb->ptr && cb->extra != 0)
 		{
 		//////////
 		// Restore our pointers
 		//////
-			bxmla	= (SBxmla*)ptr;
-			build	= (SBuffer*)tnExtra;
+			bxmla	= (SBxmla*)cb->ptr;
+			build	= (SBuffer*)cb->extra;
 
 
 		//////////
@@ -895,7 +898,7 @@ _asm nop;
 // Also guarantees that the indicated Bxmla is actually a member of bxml
 //
 //////
-	bool iibxml_AttributeDeleteCallback(void* ptr, u64 tnExtra)
+	bool iibxml_AttributeDeleteCallback(SStartEndCallback* cb)
 	{
 		_isSBxmlAttributeDeleteParams*	lbadp;
 		SBxml*							bxml;
@@ -904,11 +907,11 @@ _asm nop;
 
 // TODO:  untested code, breakpoint and examine
 		// Make sure our environment is sane
-		if (ptr && tnExtra != 0)
+		if (cb && cb->ptr && cb->extra != 0)
 		{
 			// Get our pointers back
-			bxmla		= (SBxmla*)ptr;
-			lbadp		= (_isSBxmlAttributeDeleteParams*)tnExtra;
+			bxmla		= (SBxmla*)cb->ptr;
+			lbadp		= (_isSBxmlAttributeDeleteParams*)cb->extra;
 
 			// See if this is our man
 			if (bxmla == lbadp->bxmla)
@@ -1197,6 +1200,8 @@ _asm nop;
 	void iibxml_nodeCopyAttributes(SBxml* bxmlDst, SBxml* bxmlSrc, bool* tlResult)
 	{
 		_isSBxmlCopyAttrParams	params;
+		SStartEndCallback		cb;
+
 
 
 // TODO:  tested and functioning correctly, but not tested thoroughly
@@ -1208,7 +1213,9 @@ _asm nop;
 			params.tlResult	= tlResult;
 
 			// Iterate through each attribute copying them out
-			oss_iterateThroughStartEndForCallback(&bxmlSrc->_attributes, (u64)&iibxml_nodeCopyAttributesCallback, (u64)(void*)&params);
+			cb._func	= (u64)&iibxml_nodeCopyAttributesCallback;
+			cb.extra	= (u64)(void*)&params;
+			oss_iterateThroughStartEndForCallback(&bxmlSrc->_attributes, &cb);
 
 			// Update the result if we failed
 			if (tlResult && !*params.tlResult)
@@ -1216,7 +1223,7 @@ _asm nop;
 		}
 	}
 
-	void iibxml_nodeCopyAttributesCallback(void* ptr, u64 tnExtra)
+	void iibxml_nodeCopyAttributesCallback(SStartEndCallback* cb)
 	{
 		SBxmla*					bxmla;
 		SBxmla*					bxmlaNew;
@@ -1226,11 +1233,11 @@ _asm nop;
 
 // TODO:  tested and functioning correctly, but not tested thoroughly
 		// Make sure our environment is sane
-		if (ptr && tnExtra != 0)
+		if (cb && cb->ptr && cb->extra != 0)
 		{
 			// Restore our pointers
-			bxmla		= (SBxmla*)ptr;
-			params		= (_isSBxmlCopyAttrParams*)tnExtra;
+			bxmla		= (SBxmla*)cb->ptr;
+			params		= (_isSBxmlCopyAttrParams*)cb->extra;
 
 			// Duplicate this attribute
 			bxmlaNew	= ibxml_attributeDuplicate(bxmla);
@@ -1631,6 +1638,8 @@ _asm nop;
 	void iioss_bxmlComputeSha1OnNode(SBxml* bxml, u8 handle[92], u8 buffer[64], u32 tnLevel, bool tlAttributes, bool tlChildren, bool tlSiblings)
 	{
 		_isSBxmlComputeSha1NodeParams	cbParams;
+		SStartEndCallback				cb;
+
 
 
 		// Make sure our environment is sane
@@ -1645,7 +1654,11 @@ _asm nop;
 
 			// If we are to process attributes, process them next
 			if (tlAttributes && bxml->_attributes.masterCount != 0)
-				oss_iterateThroughStartEndForCallback(&bxml->_attributes, (u64)&iioss_bxmlComputeSha1OnNodeAttributeCallback, (u64)(void*)&cbParams);
+			{
+				cb._func	= (u64)&iioss_bxmlComputeSha1OnNodeAttributeCallback;
+				cb.extra	= (u64)(void*)&cbParams;
+				oss_iterateThroughStartEndForCallback(&bxml->_attributes, &cb);
+			}
 
 			// If we are to process children, process them next
 			if (tlChildren)
@@ -1667,18 +1680,18 @@ _asm nop;
 		}
 	}
 
-	void iioss_bxmlComputeSha1OnNodeAttributeCallback(void* ptrSE, u64 tnExtra)
+	void iioss_bxmlComputeSha1OnNodeAttributeCallback(SStartEndCallback* cb)
 	{
 		_isSBxmlComputeSha1NodeParams*	cbParams;
 
 
-		if (ptrSE && tnExtra != 0)
+		if (cb && cb->ptr && cb->extra != 0)
 		{
 			// Get our parameters back
-			cbParams = (_isSBxmlComputeSha1NodeParams*)tnExtra;
+			cbParams = (_isSBxmlComputeSha1NodeParams*)cb->extra;
 
 			// Process this attribute
-			iioss_bxmlComputeSha1OnAttribute((SBxmla*)ptrSE, cbParams->handle92Bytes, cbParams->buffer64Bytes, true, true);
+			iioss_bxmlComputeSha1OnAttribute((SBxmla*)cb->ptr, cbParams->handle92Bytes, cbParams->buffer64Bytes, true, true);
 		}
 	}
 

@@ -319,16 +319,16 @@
 // Callback to search for matching resources to those already loaded
 //
 //////
-	bool iivvm_loadResourceAsciiTextCallback(void* ptr, u64 tnExtra)
+	bool iivvm_loadResourceAsciiTextCallback(SStartEndCallback* cb)
 	{
 		SVvmResourceText*	lr;
 
 
 		// Make sure the environment is sane
-		if (ptr)
+		if (cb && cb->ptr)
 		{
-			lr = (SVvmResourceText*)ptr;
-			if (lr->resourceNumber == tnExtra)
+			lr = (SVvmResourceText*)cb->ptr;
+			if (lr->resourceNumber == cb->extra)
 				return(true);		// It's a match
 		}
 		// Not a match

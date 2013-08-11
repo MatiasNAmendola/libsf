@@ -349,7 +349,7 @@
 	int						ivvm_unicodeMemicmp							(w16* l, w16* r, u32 tnLength);
 	w16						ivvm_lowerCaseW								(w16 u);
 	int						ivvm_scanStringAndNullTerminateAtNextWhitespaceW(w16* tcString);
-	bool					iivvm_loadResourceAsciiTextCallback			(void* ptr, u64 tnExtra);
+	bool					iivvm_loadResourceAsciiTextCallback			(SStartEndCallback* cb);
 	bool					ivvm_debugBreaksOn							(void);
 	bool					ivvm_debugBreaksOff							(void);
 	void					ivvm_debugBreak								(void);

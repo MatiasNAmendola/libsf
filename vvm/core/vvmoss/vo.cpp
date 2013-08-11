@@ -1549,11 +1549,15 @@
 	u64 CALLTYPE oss_findSystemFontByHandle(u64 tnFontHandle)
 	{
 		_iswSSystemFont*	lsf;
+		SStartEndCallback	cb;
+
 
 
 // UNTESTED CODE:  breakpoint and examine
 		// Find the indicated font by its uniqueId, which the systems uses as its handle between VVM and VVMOSS
-		lsf = (_iswSSystemFont*)oss_searchSEChainByCallback(&gseRootFonts, (u64)&iioss_findSystemFontByHandleCallback, tnFontHandle);
+		cb._func	= (u64)&iioss_findSystemFontByHandleCallback;
+		cb.extra	= tnFontHandle;
+		lsf = (_iswSSystemFont*)oss_searchSEChainByCallback(&gseRootFonts, &cb);
 
 		// Based on return result, indicate our handle or failure
 		if (lsf)	return((u64)lsf->handle);		// Return the HFONT for immediate use by caller
@@ -1978,8 +1982,10 @@
 //////
 	void* CALLTYPE oss_realloc(void* ptrOld, u64 tnNewSize)
 	{
-		void*		txPtrNew;
-		SDatumLL*	ldll;
+		void*				txPtrNew;
+		SDatumLL*			ldll;
+		SStartEndCallback	cb;
+
 
 
 		// Make sure the environment's sane
@@ -1989,7 +1995,9 @@
 
 
 		// Locate the existing master list pointer
-		ldll = (SDatumLL*)oss_searchSEChainByCallback(&gseRootMemoryBlocks, (u64)iioss_reallocAndFreeCallback, (u64)ptrOld);
+		cb._func	= (u64)iioss_reallocAndFreeCallback;
+		cb.extra	= (u64)ptrOld;
+		ldll = (SDatumLL*)oss_searchSEChainByCallback(&gseRootMemoryBlocks, &cb);
 		if (!ldll)
 			return(NULL);		// It's not one of our pointers, tisk, tisk!
 
@@ -2021,7 +2029,8 @@
 //////
 	void* CALLTYPE oss_free(void* ptr)
 	{
-		SDatumLL* ldll;
+		SDatumLL*			ldll;
+		SStartEndCallback	cb;
 
 
 		// Make sure the environment's sane
@@ -2030,7 +2039,9 @@
 
 
 		// Locate the existing master list pointer
-		ldll = (SDatumLL*)oss_searchSEChainByCallback(&gseRootMemoryBlocks, (u64)iioss_reallocAndFreeCallback, (u64)ptr);
+		cb._func	= (u64)iioss_reallocAndFreeCallback;
+		cb.extra	= (u64)ptr;
+		ldll = (SDatumLL*)oss_searchSEChainByCallback(&gseRootMemoryBlocks, &cb);
 		if (!ldll)
 			return(NULL);		// It's not one of our pointers, tisk, tisk!
 
@@ -2153,7 +2164,7 @@ _asm nop;
 									haystack	= _csu8p(candidate._u8			+ lnC);
 
 									// Search forward for it
-									if (!oss_isNeedleInHaystack(haystack, oss_strlen(candidate) - lnC, needle, lnNeedleLength, tlCaseSensitive, &lnFoundPosition))
+									if (!oss_isNeedleInHaystack(haystack, (u32)oss_strlen(candidate) - lnC, needle, lnNeedleLength, tlCaseSensitive, &lnFoundPosition))
 										return(-1);		// Not found, the candidate is less than the wildcardPattern
 
 									// If we get here, then it was found, so we continue on
@@ -2442,7 +2453,12 @@ storeFirstOne:
 //////
 	void CALLTYPE oss_translateSOssCompsToOthers(SAsciiCompSearcher* tsComps, SOssLine* line)
 	{
-		oss_searchSEChainByCallback(&line->comps, (u64)iioss_translateSOssCompsToOthersCallback, (u64)tsComps);
+		SStartEndCallback cb;
+
+
+		cb._func	= (u64)iioss_translateSOssCompsToOthersCallback;
+		cb.extra	= (u64)tsComps;
+		oss_searchSEChainByCallback(&line->comps, &cb);
 	}
 
 
@@ -4517,8 +4533,66 @@ openAgain:
 
 //////////
 //
+// Called to create a non-pseudo-random, but predictable pattern that can be used to create
+// testable values or patterns to ensure that something hasn't been altered.
+//
+//////
+	u8 CALLTYPE oss_getPredictableSequentialPattern(u32 tnIterator, u32 tnValue)
+	{
+		u32 ln1, ln2, ln3, ln4, lnTotal, lnResult;
+
+
+		//////////
+		// Create the four forms
+		//////
+			ln1 = _rotl(  tnValue,         (tnIterator / 2) % 32);
+			ln2 = _rotl(~(tnValue * 100),  (tnIterator / 4) % 32);
+			ln3 = _rotl( (tnValue * 1000),  tnIterator      % 32);
+			ln4 = _rotl(~(tnValue * 10000), tnIterator      % 32);
+
+
+		//////////
+		// Put the four forms together
+		//////
+			lnTotal = ln1 + ln2 + ln3 + ln4;
+
+
+		//////////
+		// Extract a single byte
+		//////
+			lnResult =	((lnTotal & 0xff000000) >> 24) +
+						((lnTotal & 0x00ff0000) >> 16) +
+						((lnTotal & 0x0000ff00) >>  8) +
+						((lnTotal & 0x000000ff));
+
+
+		//////////
+		// And compute the final result as a single 8-bit value
+		//////
+			while (lnResult > 255)
+			{
+				lnResult =	((lnResult & 0x0000ff00) >> 8) +
+							((lnResult & 0x000000ff));
+			}
+
+
+		//////////
+		// All done
+		//////
+			return((u8)lnResult);
+	}
+
+
+
+
+
+//////////
+//
 // Creates a new 2-way linked list with optional nodePrev and nodeNext info, using
-// the indicated size for the allocation (which includes the SLL portion at the head)
+// the indicated size for the allocation (which includes the SLL portion at the head).
+// The value of tnSize is the number of extra bytes required for the structure.  It
+// should always be greater than zero because if it is only zero, that means only a
+// raw SLL will be created.
 //
 //////
 	SLL* CALLTYPE oss_ll_create(SLL* nodePrev, SLL* nodeNext, u64 tnUniqueId, u32 tnSize)
@@ -4526,13 +4600,8 @@ openAgain:
 		SLL* node;
 
 
-// TODO:  UNTESTED CODE
-		// Make sure we're allocating enough space
-		if ((s32)tnSize < sizeof(SLL))
-			tnSize = sizeof(SLL);
-
 		// Allocate the size
-		node = (SLL*)malloc(tnSize);
+		node = (SLL*)malloc(sizeof(SLL) + tnSize);
 		if (node)
 		{
 			// We're good
@@ -4663,30 +4732,25 @@ openAgain:
 // The callback should not delete the node, but only anything the node points to.
 //
 //////
-	void CALLTYPE oss_ll_deleteChainWithCallback(SLL* node, u64 iiCallbackFunction, u64 tnExtra)
+	void CALLTYPE oss_ll_deleteChainWithCallback(SLLCallback* cb)
 	{
-		SLL*			nodeNext;
-		SLLCallback		cb;
+		SLL* nodeNext;
 
-
-		// Store the callback
-		cb._iiCallbackFunction = iiCallbackFunction;
 
 		// Iterate through the master list until we find the associated entry
-		while (node)
+		while (cb->node)
 		{
 			// Grab the next node
-			nodeNext = node->next;
+			nodeNext = cb->node->next;
 
 			// Perform the callback
-			if (iiCallbackFunction)
-				cb.iiCallbackFunctionBool(node, tnExtra);
+			cb->funcBool(cb);
 
 			// Delete the node
-			free(node);
+			free(cb->node);
 
 			// Move to next node
-			node = nodeNext;
+			cb->node = nodeNext;
 		}
 		// All done
 	}
@@ -4698,37 +4762,73 @@ openAgain:
 //
 // Called to compute the SHA-1 of the current node as a 64-bit quantity
 //
+// The parameters in the callback are:
+//		ptr			-- LL node
 //////
-	u64 CALLTYPE oss_ll_sha1Chain(SLL* node, u32 tnSize, u8 sha20Bytes[20])
+	void CALLTYPE oss_ll_iterateViaCallback(SLL* node, SOssCbData2Void* cb)
 	{
-		u8	context[92];
-		u8	buffer[64];
-
-
 		// Make sure the environment is sane
 		if (node)
 		{
-			// Begin at the beginning
-			oss_sha1ComputeSha1_Start(context);
-
+			//////////
 			// For each node, process its portion
-			while (node)
-			{
-				oss_sha1ComputeSha1_ProcessThisData(context, (s8*)node, tnSize);
-				node = node->next;
-			}
+			//////
+				while (node)
+				{
 
-			// Tally up
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+					//////////
+					// Callback to compute the SHA1 on this item
+					//////
+						cb->ptr = (void*)node;
+						cb->callback(cb);
+						//oss_sha1ComputeSha1_ProcessThisData(context, (s8*)node, tnSize);
 
-			// And indicate our 64-bit version of the same
-			return(oss_sha1Compute64BitFromSha1(sha20Bytes));
+
+					//////////
+					// Move to next node
+					//////
+						node = node->next;
+				}
 		}
-
-		// If we get here, failure
-		return(0);
 	}
 
+
+
+
+//////////
+//
+// Creates a new 2-way linked list with optional nodePrev and nodeNext info, using
+// the indicated size for the allocation (which includes the SLL portion at the head).
+// The value of tnSize is the number of extra bytes required for the structure.  It
+// should always be greater than zero because if it is only zero, that means only a
+// raw SLL will be created.
+//
+//////
+	SLL4* CALLTYPE oss_ll4_create(SLL4* nodeWest, SLL4* nodeEast, SLL4* nodeNorth, SLL4* nodeSouth, u64 tnUniqueId, u32 tnSize)
+	{
+		SLL4* node;
+
+
+		// Allocate the size
+		node = (SLL4*)malloc(sizeof(SLL4) + tnSize);
+		if (node)
+		{
+			// We're good
+			memset(node, 0, sizeof(SLL4) + tnSize);
+			
+			// Store a unique id
+			node->uniqueId	= tnUniqueId;
+
+			// Update our pointers
+			node->prev		= nodeWest;
+			node->next		= nodeEast;
+			node->north		= nodeNorth;
+			node->south		= nodeSouth;
+		}
+
+		// Indicate our success or failure
+		return(node);
+	}
 
 
 
@@ -5140,30 +5240,25 @@ openAgain:
 
 //
 //////
-	void CALLTYPE oss_ll4_deleteChainWithCallback(SLL4* node, u64 iiCallbackFunction, u64 tnExtra)
+	void CALLTYPE oss_ll4_deleteChainWithCallback(SLL4Callback* cb)
 	{
-		SLL4*			nodeNext;
-		SLL4Callback	cb;
+		SLL4* nodeNext;
 
-
-		// Store the callback
-		cb._iiCallbackFunction = iiCallbackFunction;
 
 		// Iterate through the master list until we find the associated entry
-		while (node)
+		while (cb->node)
 		{
 			// Grab the next node
-			nodeNext = node->next;
+			nodeNext = cb->node->next;
 
 			// Perform the callback
-			if (iiCallbackFunction)
-				cb.iiCallbackFunctionBool(node, tnExtra);
+			cb->funcBool(cb);
 
 			// Delete the node
-			free(node);
+			free(cb->node);
 
 			// Move to next node
-			node = nodeNext;
+			cb->node = nodeNext;
 		}
 		// All done
 	}
@@ -6067,30 +6162,33 @@ _asm int 3;
 // Search by callback for the indicated element, and when found delete it
 //
 //////
-	bool CALLTYPE oss_SEChain_deleteFromAfterCallback(SStartEnd* ptrSE, bool tlDeletePointers, u64 iiCallbackFunction, u64 tnExtra)
+	bool CALLTYPE oss_SEChain_deleteFromAfterCallback(SStartEnd* ptrSE, bool tlDeletePointers, SStartEndCallback* cb)
 	{
-		u32					lnI;
-		SStartEndCallback	cb;
-		bool				llResult;
+		u32		lnI;
+		bool	llResult;
 
 
 		// Make sure the environment is sane
 		llResult = false;
-		if (ptrSE && iiCallbackFunction != 0)
+		if (ptrSE)
 		{
-			// Store the callback
-			cb._iiCallbackFunction = iiCallbackFunction;
-
 			// Iterate through the master list until we find the associated entry
 			for (lnI = 0; lnI < ptrSE->masterCount; lnI++)
 			{
 				// Ask the caller if this is it
-				if (ptrSE->master[lnI] && ptrSE->master[lnI]->used && cb.iiCallbackFunctionBool(ptrSE->master[lnI]->ptr, tnExtra))
+				if (ptrSE->master[lnI] && ptrSE->master[lnI]->used)
 				{
-					// This is the entry they want to delete
-					oss_SEChain_deleteFrom(ptrSE, ptrSE->master[lnI]->ptr, tlDeletePointers);
-					llResult = true;
-					break;
+					// Store the pointer for reference
+					cb->ptr = ptrSE->master[lnI]->ptr;
+
+					// Perform the call
+					if (cb->funcBool(cb))
+					{
+						// This is the entry they want to delete
+						oss_SEChain_deleteFrom(ptrSE, ptrSE->master[lnI]->ptr, tlDeletePointers);
+						llResult = true;
+						break;
+					}
 				}
 			}
 		}
@@ -6163,26 +6261,26 @@ _asm int 3;
 //		The associated pointer if found
 //
 //////
-	void* CALLTYPE oss_searchSEChainByCallback(SStartEnd* ptrSE, u64 iiCallbackFunction, u64 tnExtra)
+	void* CALLTYPE oss_searchSEChainByCallback(SStartEnd* ptrSE, SStartEndCallback* cb)
 	{
-		u32					lnI;
-		SStartEndCallback	cb;
+		u32 lnI;
 
 
 		// Make sure the environment is sane
-		if (ptrSE && iiCallbackFunction != 0)
+		if (ptrSE)
 		{
-			// Store the callback
-			cb._iiCallbackFunction = iiCallbackFunction;
-
 			// Iterate through the master list until we find the associated entry
 			for (lnI = 0; lnI < ptrSE->masterCount; lnI++)
 			{
 				// Ask the caller if this is it
-				if (ptrSE->master[lnI] && ptrSE->master[lnI]->used && cb.iiCallbackFunctionBool(ptrSE->master[lnI]->ptr, tnExtra))
+				if (ptrSE->master[lnI] && ptrSE->master[lnI]->used)
 				{
-					// We've found our man
-					return(ptrSE->master[lnI]->ptr);
+					// Store the pointer for the caller
+					cb->ptr = ptrSE->master[lnI]->ptr;
+
+					// Perform the call
+					if (cb->funcBool(cb))
+						return(ptrSE->master[lnI]->ptr);	// We've found our man
 				}
 			}
 		}
@@ -6198,24 +6296,26 @@ _asm int 3;
 // Iterates through the indicated Start/End list, calling back the callback function for every item.
 //
 //////
-	void CALLTYPE oss_iterateThroughStartEndForCallback(SStartEnd* ptrSE, u64 iiCallbackFunction, u64 tnExtra)
+	void CALLTYPE oss_iterateThroughStartEndForCallback(SStartEnd* ptrSE, SStartEndCallback* cb)
 	{
-		u32					lnI;
-		SStartEndCallback	cb;
+		u32 lnI;
 
 
 		// Make sure the environment is sane
-		if (ptrSE && iiCallbackFunction != 0)
+		if (ptrSE)
 		{
-			// Store the callback
-			cb._iiCallbackFunction = iiCallbackFunction;
-
 			// Iterate through the master list calling every valid entry
 			for (lnI = 0; lnI < ptrSE->masterCount; lnI++)
 			{
 				// Give this to the caller for their processing
 				if (ptrSE->master[lnI] && ptrSE->master[lnI]->used)
-					cb.iiCallbackFunctionVoid(ptrSE->master[lnI]->ptr, tnExtra);
+				{
+					// Store the pointer for the caller
+					cb->ptr = ptrSE->master[lnI]->ptr;
+
+					// Perform the call
+					cb->funcVoid(cb);
+				}
 			}
 		}
 	}
@@ -6230,30 +6330,26 @@ _asm int 3;
 // in tracking down future bugs.  I intend for these Start/end functions to be heavily tested
 // and made completely reliable in all conditions.
 //
-// If the iiCallbackFunction is populated, then if it returns:
+// If the func is populated, then if it returns:
 //			true		- test was good
 //			false		- test failed
 // Note:  The callback is only needed if the lml->ptr structure itself has Start/end members
-//        that need to be examined.  If iiCallbackFunction is not populated, only tests
+//        that need to be examined.  If func is not populated, only tests
 //        the members contained in the ptrSE Start/end structure.
 //
 // This function doesn't return anything.
 // If there is an error, it will trap to the debugger so the machine state can be examined.
 //
 //////
-	void CALLTYPE oss_validateStartEnd(SStartEnd* ptrSE, u64 iiCallbackFunction)
+	void CALLTYPE oss_validateStartEnd(SStartEnd* ptrSE, SStartEndCallback* cb)
 	{
-		u32					lnI;
-		SMasterList*		lml;
-		SStartEndCallback	cb;
+		u32				lnI;
+		SMasterList*	lml;
 
 
 		// Make sure the environment is sane
-		if (ptrSE)
+		if (ptrSE && cb)
 		{
-			// Store the callback
-			cb._iiCallbackFunction = iiCallbackFunction;
-
 			// Iterate through the master list until we find the associated entry
 			for (lnI = 0; lnI < ptrSE->masterCount; lnI++)
 			{
@@ -6300,7 +6396,8 @@ _asm int 3;
 
 					// If there's a callback on this entry, try it out
 					// If it returns false, there's an issue, if it returns true it's okay
-					if (iiCallbackFunction != 0 && !cb.iiCallbackFunctionBool(lml->ptr, 0))
+					cb->ptr = lml->ptr;
+					if (!cb->funcBool(cb))
 						_asm int 3;
 				}
 			}
@@ -7148,6 +7245,8 @@ _asm nop;
 	SBxmla* CALLTYPE oss_bxmlaDelete(SBxmla* bxmla, bool tlFreeMemory)
 	{
 		_isSBxmlAttributeDeleteParams	lbadp;
+		SStartEndCallback				cb;
+
 
 // TODO:  untested code, breakpoint and examine
 		// Make sure our environment is sane
@@ -7155,7 +7254,11 @@ _asm nop;
 		{
 			// Remove this entry (if it exists in this parent)
 			if (bxmla->_parent)
-				oss_SEChain_deleteFromAfterCallback(&bxmla->_parent->_attributes, true, (u64)&iibxml_AttributeDeleteCallback, (u64)&lbadp);
+			{
+				cb._func	= (u64)&iibxml_AttributeDeleteCallback;
+				cb.extra	= (u64)&lbadp;
+				oss_SEChain_deleteFromAfterCallback(&bxmla->_parent->_attributes, true, &cb);
+			}
 			// When we get here, it's either been removed, or not
 		}
 		// If we get here, failure

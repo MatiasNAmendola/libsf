@@ -72,6 +72,9 @@
 		bool					iivvmt_testSll_1										(u64 lnHandleLog, SLL** root);
 		bool					iivvmt_testSll_2										(u64 lnHandleLog, SLL* root);
 		bool					iivvmt_testSll_3										(u64 lnHandleLog, SLL* root);
+		// Related functions
+		SLL*					i3vvmt_testSll_1_createSll								(u32 tnSize);
+		void					i3vvmt_testSll_1_sha1Callback							(SOssCbData2Void* cb);
 
 
 	//////////
@@ -89,9 +92,9 @@
 	// vvmt_bxml_test.cpp
 	//////
 		bool					ivvmt_testBxml											(u64 lnHandleLog);
-		void					iivvmt_testBxml_computeSha1CallbackBxml					(void* ptr, u64 tnExtra/*u8 context[_SHA1_CONTEXT_SIZE] pointer*/);
-		void					iivvmt_testBxml_computeSha1CallbackBxmla				(void* ptr, u64 tnExtra/*u8 context[_SHA1_CONTEXT_SIZE] pointer*/);
-		void					iivvmt_testBxml_computeSha1CallbackBxmlaData			(void* ptr, u64 tnExtra/*u8 context[_SHA1_CONTEXT_SIZE] pointer*/);
+		void					iivvmt_testBxml_computeSha1CallbackBxml					(SStartEndCallback* cb);
+		void					iivvmt_testBxml_computeSha1CallbackBxmla				(SStartEndCallback* cb);
+		void					iivvmt_testBxml_computeSha1CallbackBxmlaData			(SStartEndCallback* cb);
 		bool					iivvmt_testBxml_1										(u64 lnHandleLog, SBxml** bxml);
 		bool					iivvmt_testBxml_2										(u64 lnHandleLog, SBxml*  bxml);
 		bool					iivvmt_testBxml_3										(u64 lnHandleLog, SBxml*  bxml);

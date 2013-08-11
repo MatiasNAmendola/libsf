@@ -179,13 +179,15 @@
 	const s8		cgcOssMemicmpDatumDatum[]								= "oss_memicmpDatumDatum";
 	const s8		cgcOssMemicmpDatum2Datum2[]								= "oss_memicmpDatum2Datum2";
 	const s8		cgcOssDeriveRGBA[]										= "oss_deriveRGBA";
+	const s8		cgcOssGetPredictableSequentialPattern[]					= "oss_getPredictableSequentialPattern";
 
 	const s8		cgcOssLlCreate[]										= "oss_ll_create";
 	const s8		cgcOssLlInsert[]										= "oss_ll_insert";
 	const s8		cgcOssLlOrphanize[]										= "oss_ll_orphanize";
 	const s8		cgcOssLlDeleteChainWithCallback[]						= "oss_ll_deleteChainWithCallback";
-	const s8		cgcOssLlSha1Chain[]										= "oss_ll_sha1Chain";
+	const s8		cgcOssLlSha1Chain[]										= "oss_ll_iterateViaCallback";
 
+	const s8		cgcOssLl4Create[]										= "oss_ll4_create";
 	const s8		cgcOssLl4OrphanizeAsBxml[]								= "oss_ll4_orphanizeAsBxml";
 	const s8		cgcOssLl4OrphanizeAsNode[]								= "oss_ll4_orphanizeAsNode";
 	const s8		cgcOssLl4InsertAsBxml[]									= "oss_ll4_insertAsBxml";
@@ -546,13 +548,15 @@
 		s32				(CALLBACK *oss_memicmpDatumDatum)					(SDatum*  datumL,  SDatum*  datumR);
 		s32				(CALLBACK *oss_memicmpDatum2Datum2)					(SDatum2* datum2L, SDatum2* datum2R);
 		void			(CALLBACK *oss_deriveRGBA)							(u32 tnColor, u8* tnRed, u8* tnGrn, u8* tnBlu, f32* tfAlp);
+		u8				(CALLTYPE *oss_getPredictableSequentialPattern)		(u32 tnIterator, u32 tnValue);
 
 		SLL*			(CALLBACK *oss_ll_create)							(SLL* nodePrev, SLL* nodeNext, u64 tnUniqueId, u32  tnSize);
 		bool			(CALLBACK *oss_ll_insert)							(SLL* node, SLL* nodeRef, bool tlAfter);
 		void			(CALLBACK *oss_ll_orphanize)						(SLL* node);
-		void			(CALLBACK *oss_ll_deleteChainWithCallback)			(SLL* node, u64 iiCallbackFunction, u64 tnExtra);
-		u64				(CALLBACK *oss_ll_sha1Chain)						(SLL* node, u32 tnSize, u8 sha20Bytes[20]);
+		void			(CALLBACK *oss_ll_deleteChainWithCallback)			(SLL* node, u64 func, u64 tnExtra);
+		void			(CALLTYPE *oss_ll_iterateViaCallback)				(SLL* node, SOssCbData2Void* cb);
 
+		SLL4*			(CALLTYPE *oss_ll4_create)							(SLL4* nodeWest, SLL4* nodeEast, SLL4* nodeNorth, SLL4* nodeSouth, u64 tnUniqueId, u32 tnSize);
 		bool			(CALLBACK *oss_ll4_orphanizeAsBxml)					(SLL4* bxml);
 		bool			(CALLBACK *oss_ll4_orphanizeAsNode)					(SLL4* node);
 		bool			(CALLBACK *oss_ll4_insertAsBxml)					(SLL4* bxml, SLL4* bxmlRef,                   bool tlAfter);
@@ -560,7 +564,7 @@
 		bool			(CALLBACK *oss_ll4_insertAsBxmlAsChildRegarding)	(SLL4* bxml, SLL4* bxmlParent, SLL4* bxmlRef, bool tlAfter);
 		bool			(CALLBACK *oss_ll4_insertAsNodeNorthSouth)			(SLL4* node, SLL4* nodeRef,                   bool tlAfter);
 		bool			(CALLBACK *oss_ll4_insertAsNodeEastWest)			(SLL4* node, SLL4* nodeRef,                   bool tlAfter);
-		void			(CALLBACK *oss_ll4_deleteChainWithCallback)			(SLL4* node, u64 iiCallbackFunction, u64 tnExtra);
+		void			(CALLTYPE *oss_ll4_deleteChainWithCallback)			(SLL4Callback* cb);
 
 		void*			(CALLBACK *oss_SEChain_prepend)						(SStartEnd* ptrSE, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool* tlResult);
 		void*			(CALLBACK *oss_SEChain_append)						(SStartEnd* ptrSE, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool* tlResult);
@@ -576,13 +580,13 @@
 		u32				(CALLBACK *oss_SEChain_countValids)					(SStartEnd* ptrSE);
 		u32				(CALLBACK *oss_SEChain_delete)						(SStartEnd* ptrSE, u64 tnCallback, u64 tnParam, bool tlDeletePointers);
 		void			(CALLBACK *oss_SEChain_deleteFrom)					(SStartEnd* ptrSE, void* ptrDel, bool tlDeletePointers);
-		bool			(CALLBACK *oss_SEChain_deleteFromAfterCallback)		(SStartEnd* ptrSE, bool tlDeletePointers, u64 iiCallbackFunction, u64 tnExtra);
+		bool			(CALLTYPE *oss_SEChain_deleteFromAfterCallback)		(SStartEnd* ptrSE, bool tlDeletePointers, SStartEndCallback* cb);
 
 		bool			(CALLBACK *oss_allocateAdditionalStartEndMasterSlots)(SStartEnd* ptrSE, u32 tnBlockSize);
-		void*			(CALLBACK *oss_searchSEChainByUniqueId)		(SStartEnd* ptrSE, u64 tnUniqueId);
-		void*			(CALLBACK *oss_searchSEChainByCallback)		(SStartEnd* ptrSE, u64 iiCallbackFunction, u64 tnExtra);
-		void			(CALLBACK *oss_iterateThroughStartEndForCallback)	(SStartEnd* ptrSE, u64 iiCallbackFunction, u64 tnExtra);
-		void			(CALLBACK *oss_validateStartEnd)					(SStartEnd* ptrSE, u64 iiCallbackFunction);
+		void*			(CALLBACK *oss_searchSEChainByUniqueId)				(SStartEnd* ptrSE, u64 tnUniqueId);
+		void*			(CALLTYPE *oss_searchSEChainByCallback)				(SStartEnd* ptrSE, SStartEndCallback* cb);
+		void			(CALLTYPE *oss_iterateThroughStartEndForCallback)	(SStartEnd* ptrSE, SStartEndCallback* cb);
+		void			(CALLTYPE *oss_validateStartEnd)					(SStartEnd* ptrSE, SStartEndCallback* cb);
 		u32				(CALLBACK *oss_swapEndian)							(u32 tnValue);
 		u32				(CALLBACK *oss_RGBA2BGRA)							(u32 tnColor);
 		void*			(CALLBACK *oss_allocateAndNull)						(u32 tnSize, bool tnInitToZeros);
@@ -887,13 +891,15 @@
 		(void*)&oss_memicmpDatumDatum,										(void*)cgcOssMemicmpDatumDatum,
 		(void*)&oss_memicmpDatum2Datum2,									(void*)cgcOssMemicmpDatum2Datum2,
 		(void*)&oss_deriveRGBA,												(void*)cgcOssDeriveRGBA,
+		(void*)&oss_getPredictableSequentialPattern,						(void*)cgcOssGetPredictableSequentialPattern,
 
 		(void*)&oss_ll_create,												(void*)cgcOssLlCreate,
 		(void*)&oss_ll_insert,												(void*)cgcOssLlInsert,
 		(void*)&oss_ll_orphanize,											(void*)cgcOssLlOrphanize,
 		(void*)&oss_ll_deleteChainWithCallback,								(void*)cgcOssLlDeleteChainWithCallback,
-		(void*)&oss_ll_sha1Chain,											(void*)cgcOssLlSha1Chain,
+		(void*)&oss_ll_iterateViaCallback,									(void*)cgcOssLlSha1Chain,
 
+		(void*)&oss_ll4_create,												(void*)cgcOssLl4Create,
 		(void*)&oss_ll4_orphanizeAsBxml,									(void*)cgcOssLl4OrphanizeAsBxml,
 		(void*)&oss_ll4_orphanizeAsNode,									(void*)cgcOssLl4OrphanizeAsNode,
 		(void*)&oss_ll4_insertAsBxml,										(void*)cgcOssLl4InsertAsBxml,

@@ -88,15 +88,15 @@
 // Called to compute the SHA1 of the bxml attribute
 //
 //////
-	void iivvmt_testBxml_computeSha1CallbackBxml(void* ptr, u64 tnExtra/*u8 context[_SHA1_CONTEXT_SIZE] pointer*/)
+	void iivvmt_testBxml_computeSha1CallbackBxml(SStartEndCallback* cb)
 	{
 		SBxmlList*		bxmlList;
 		SBxml*			bxml;
 
 
-		bxmlList	= (SBxmlList*)ptr;
+		bxmlList	= (SBxmlList*)cb->ptr;
 		bxml		= bxmlList->bxml;
-		oss_sha1ComputeSha1_ProcessThisData((u8*)tnExtra, bxml->_name.data._s8, (u32)bxml->_name.length);
+		oss_sha1ComputeSha1_ProcessThisData((u8*)cb->extra, bxml->_name.data._s8, (u32)bxml->_name.length);
 	}
 
 
@@ -107,15 +107,15 @@
 // Called to compute the SHA1 of the bxml attribute
 //
 //////
-	void iivvmt_testBxml_computeSha1CallbackBxmla(void* ptr, u64 tnExtra/*u8 context[_SHA1_CONTEXT_SIZE] pointer*/)
+	void iivvmt_testBxml_computeSha1CallbackBxmla(SStartEndCallback* cb)
 	{
 		SBxmlaList*	bxmlaList;
 		SBxmla*		bxmla;
 
 
-		bxmlaList	= (SBxmlaList*)ptr;
+		bxmlaList	= (SBxmlaList*)cb->ptr;
 		bxmla		= bxmlaList->bxmla;
-		oss_sha1ComputeSha1_ProcessThisData((u8*)tnExtra, bxmla->_name.data._s8, (u32)bxmla->_name.length);
+		oss_sha1ComputeSha1_ProcessThisData((u8*)cb->extra, bxmla->_name.data._s8, (u32)bxmla->_name.length);
 	}
 
 
@@ -126,15 +126,15 @@
 // Called to compute the SHA1 of the bxml attribute's data
 //
 //////
-	void iivvmt_testBxml_computeSha1CallbackBxmlaData(void* ptr, u64 tnExtra/*u8 context[_SHA1_CONTEXT_SIZE] pointer*/)
+	void iivvmt_testBxml_computeSha1CallbackBxmlaData(SStartEndCallback* cb)
 	{
 		SBxmlaList*	bxmlaList;
 		SBxmla*		bxmla;
 
 
-		bxmlaList	= (SBxmlaList*)ptr;
+		bxmlaList	= (SBxmlaList*)cb->ptr;
 		bxmla		= bxmlaList->bxmla;
-		oss_sha1ComputeSha1_ProcessThisData((u8*)tnExtra, bxmla->_data.datum.data._s8, (u32)bxmla->_data.datum.length);
+		oss_sha1ComputeSha1_ProcessThisData((u8*)cb->extra, bxmla->_data.datum.data._s8, (u32)bxmla->_data.datum.length);
 	}
 
 
@@ -411,11 +411,15 @@
 				oss_bxmlFindAllAsStartEndLists(bxml, NULL,			&bxmlaFinds,	&wildcardSearchAttributes,	&lnCountAttributes,	true, true);
 
 				// Compute SHA-1 of bxml node finds
-				oss_iterateThroughStartEndForCallback(&bxmlFinds,	(u64)&iivvmt_testBxml_computeSha1CallbackBxml,	(u64)&context[0]);
+				SStartEndCallback cb;
+				cb._func = (u64)&iivvmt_testBxml_computeSha1CallbackBxml;
+				cb.extra = (u64)&context[0];
+				oss_iterateThroughStartEndForCallback(&bxmlFinds, &cb);
 				oss_SEChain_delete(&bxmlFinds, 0, 0, false);
 
 				// And continue by computing SHA-1 of bxmla attribute name finds on top of the just computed SHA-1 from bxml node finds
-				oss_iterateThroughStartEndForCallback(&bxmlaFinds,	(u64)&iivvmt_testBxml_computeSha1CallbackBxmla,	(u64)&context[0]);
+				cb._func = (u64)&iivvmt_testBxml_computeSha1CallbackBxmla;
+				oss_iterateThroughStartEndForCallback(&bxmlaFinds, &cb);
 				oss_SEChain_delete(&bxmlaFinds, 0, 0, false);
 
 				// Determine the SHA-1 based on the finds
@@ -438,7 +442,8 @@
 				oss_bxmlDataFindAllAsStartEndList(bxml, &bxmlaFinds, &wildcardSearchData, &lnDataCount, true);
 
 				// Compute SHA-1 of bxmla attribute data finds
-				oss_iterateThroughStartEndForCallback(&bxmlDataFinds, (u64)&iivvmt_testBxml_computeSha1CallbackBxmlaData, (u64)&context[0]);
+				cb._func = (u64)&iivvmt_testBxml_computeSha1CallbackBxmlaData;
+				oss_iterateThroughStartEndForCallback(&bxmlDataFinds, &cb);
 				oss_SEChain_delete(&bxmlDataFinds,	0, 0, false);
 
 				// Determine the SHA-1 based on the finds

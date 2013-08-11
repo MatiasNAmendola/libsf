@@ -53,10 +53,10 @@
 // Callback for enumerating through the cached fonts we've already allocated
 //
 //////
-	bool iioss_findSystemFontByHandleCallback(void* ptr, u64 /*tnExtra*/tnFontHandle)
+	bool iioss_findSystemFontByHandleCallback(SStartEndCallback* cb)
 	{
 		// See if this is the font handle we're looking for
-		return(((_iswSSystemFont*)ptr)->handle == (HFONT)tnFontHandle);
+		return(((_iswSSystemFont*)cb->ptr)->handle == (HFONT)cb->extra/*fontHandle*/);
 	}
 
 
@@ -583,11 +583,14 @@
 	{
 		SOssWindow			lisw;
 		_iswSFocusCallback	lfc;
+		SStartEndCallback	cb;
 
 
 		lfc.forFocus	= NULL;
 		lfc.osHandle	= tnOsHandle;
-		oss_searchSEChainByCallback(&gseRootWindows, (u64)iioss_signalWindowFocusCallbacksCallback, (u64)&lfc);
+		cb._func		= (u64)iioss_signalWindowFocusCallbacksCallback;
+		cb.extra		= (u64)&lfc;
+		oss_searchSEChainByCallback(&gseRootWindows, &cb);
 
 		// Signal the new window that it has focus (if it was found, and doesn't already have focus)
 		if (lfc.forFocus && !lfc.forFocus->isw.hasFocus)
@@ -1085,19 +1088,24 @@ _asm int 3;
 //////
 	_iswSOssWindowLL* ioss_findSOssWindowLLByHwnd(HWND hwnd)
 	{
-		return((_iswSOssWindowLL*)oss_searchSEChainByCallback(&gseRootWindows, (u64)iioss_findSOssWindowLLByHwndCallback, (u64)hwnd));
+		SStartEndCallback cb;
+
+
+		cb._func	= (u64)iioss_findSOssWindowLLByHwndCallback;
+		cb.extra	= (u64)hwnd;
+		return((_iswSOssWindowLL*)oss_searchSEChainByCallback(&gseRootWindows, &cb));
 	}
 
-	bool iioss_findSOssWindowLLByHwndCallback(void* ptr, u64 tnExtra)
+	bool iioss_findSOssWindowLLByHwndCallback(SStartEndCallback* cb)
 	{
 		_iswSOssWindowLL* low;
 
 
 		// Make sure our environment is sane
-		if (ptr)
+		if (cb && cb->ptr)
 		{
-			low = (_iswSOssWindowLL*)ptr;
-			if (low->isw.osHandle == tnExtra)
+			low = (_iswSOssWindowLL*)cb->ptr;
+			if (low->isw.osHandle == cb->extra)
 				return(true);		// It's a match
 		}
 		// If we get here, not found
@@ -1115,19 +1123,24 @@ _asm int 3;
 //////
 	_iswSOssWindowLL* ioss_findSOssWindowLLByScreenId(u64 tnScreenId)
 	{
-		return((_iswSOssWindowLL*)oss_searchSEChainByCallback(&gseRootWindows, (u64)iioss_findSOssWindowLLByScreenId, (u64)tnScreenId));
+		SStartEndCallback cb;
+
+
+		cb._func	= (u64)iioss_findSOssWindowLLByScreenId;
+		cb.extra	= (u64)tnScreenId;
+		return((_iswSOssWindowLL*)oss_searchSEChainByCallback(&gseRootWindows, &cb));
 	}
 
-	bool iioss_findSOssWindowLLByScreenId(void* ptr, u64 tnExtra)
+	bool iioss_findSOssWindowLLByScreenId(SStartEndCallback* cb)
 	{
 		_iswSOssWindowLL* low;
 
 
 		// Make sure our environment is sane
-		if (ptr)
+		if (cb && cb->ptr)
 		{
-			low = (_iswSOssWindowLL*)ptr;
-			if (low->isw.screenId == tnExtra)
+			low = (_iswSOssWindowLL*)cb->ptr;
+			if (low->isw.screenId == cb->extra)
 				return(true);		// It's a match
 		}
 		// If we get here, not found
@@ -1145,20 +1158,25 @@ _asm int 3;
 //////
 	_iswSOssWindowLL* ioss_findSOssWindowLLByOssWindowId(u64 tnOssWindowId)
 	{
+		SStartEndCallback cb;
+
+
 		// Try to find it using the callback
-		return((_iswSOssWindowLL*)oss_searchSEChainByCallback(&gseRootWindows, (u64)&iioss_findSOssWindowByOssWindowIdCallback, tnOssWindowId));
+		cb._func	= (u64)&iioss_findSOssWindowByOssWindowIdCallback;
+		cb.extra	= tnOssWindowId;
+		return((_iswSOssWindowLL*)oss_searchSEChainByCallback(&gseRootWindows, &cb));
 	}
 
-	bool iioss_findSOssWindowByOssWindowIdCallback(void* ptr, u64 tnExtra)
+	bool iioss_findSOssWindowByOssWindowIdCallback(SStartEndCallback* cb)
 	{
 		_iswSOssWindowLL* low;
 
 
 		// Make sure the environment is sane
-		if (ptr)
+		if (cb && cb->ptr)
 		{
-			low = (_iswSOssWindowLL*)ptr;
-			if (low->ll.uniqueId == tnExtra)
+			low = (_iswSOssWindowLL*)cb->ptr;
+			if (low->ll.uniqueId == cb->extra)
 				return(true);
 		}
 		// If we get here, not a match
@@ -2194,7 +2212,7 @@ _asm int 3;
 // window that it has lost focus.
 //
 //////
-	bool iioss_signalWindowFocusCallbacksCallback(void* ptr, u64 tnExtra)
+	bool iioss_signalWindowFocusCallbacksCallback(SStartEndCallback* cb)
 	{
 		_iswSOssWindowLL*		low;
 		SOssWindow			lisw;
@@ -2202,10 +2220,10 @@ _asm int 3;
 
 
 		// Make sure our environment is sane
-		if (ptr)
+		if (cb && cb->ptr)
 		{
-			low = (_iswSOssWindowLL*)ptr;
-			lfc = (_iswSFocusCallback*)tnExtra;
+			low = (_iswSOssWindowLL*)cb->ptr;
+			lfc = (_iswSFocusCallback*)cb->extra;
 
 			// See if this is the window that should receive focus
 			if (low->isw.osHandle == lfc->osHandle)
@@ -2748,8 +2766,12 @@ _asm int 3;
 //////
 	LRESULT CALLBACK iioss_timerProc_10ms(HWND hwnd, UINT msg, UINT_PTR idEvent, DWORD dwTime)
 	{
+		SStartEndCallback cb;
+
+
 		// The timer has fired, updating timers and trigger any hover events
-		oss_searchSEChainByCallback(&gseRootWindows, (u64)iioss_update10msTimersCallback, 0);
+		cb._func = (u64)iioss_update10msTimersCallback;
+		oss_searchSEChainByCallback(&gseRootWindows, &cb);
 
 		// All done
 		return 0;
@@ -2912,16 +2934,16 @@ _asm int 3;
 // trying to realloc or free matches that stored in the SDatumLL structure.
 //
 //////
-	bool iioss_reallocAndFreeCallback(void* ptr, u64 tnExtra)
+	bool iioss_reallocAndFreeCallback(SStartEndCallback* cb)
 	{
 		SDatumLL* ldll;
 
 
 		// Convert to our SDatumLL structure
-		ldll = (SDatumLL*)ptr;
+		ldll = (SDatumLL*)cb->ptr;
 
 		// See if this is our man
-		if (ldll->datum.data._s8 == (void*)tnExtra)
+		if (ldll->datum.data._s8 == (void*)cb->extra)
 			return(true);
 
 		// Nope
@@ -3141,7 +3163,7 @@ _asm int 3;
 // Note:  Always returns false, so it will continue being fed every component
 //
 //////
-	bool iioss_translateSOssCompsToOthersCallback(void* ptr, u64 tnExtra)
+	bool iioss_translateSOssCompsToOthersCallback(SStartEndCallback* cb)
 	{
 		s32					lnLacsLength;
 		SOssComp*			comp;
@@ -3149,11 +3171,11 @@ _asm int 3;
 
 
 		// Make sure the environment is sane
-		if (ptr)
+		if (cb && cb->ptr)
 		{
 			// Grab our pointers into recognizable thingamajigs
-			comp	= (SOssComp*)ptr;
-			lacs	= (SAsciiCompSearcher*)tnExtra;
+			comp	= (SOssComp*)cb->ptr;
+			lacs	= (SAsciiCompSearcher*)cb->extra;
 
 			// Iterate through this item to see if any match
 			for (	/* lacs is initialize above */;
@@ -4482,7 +4504,8 @@ continueToNextAttribute:
 //////
 	SRegion* ioss_createRegion(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, u32 tnWidth, u32 tnHeight, SCallbacks* callback, SStartEnd* events)
 	{
-		SRegion*	lr;
+		SRegion*			lr;
+		SStartEndCallback	cb;
 
 
 		// Lock the canvas access semaphore
@@ -4510,7 +4533,12 @@ continueToNextAttribute:
 			if (callback)		memcpy(&lr->callback, callback, sizeof(SCallbacks));
 
 			// Copy the events if specified
-			if (events)			oss_iterateThroughStartEndForCallback(events, (u64)iioss_createRegionCallback, (u64)lr);
+			if (events)
+			{
+				cb._func	= (u64)iioss_createRegionCallback;
+				cb.extra	= (u64)lr;
+				oss_iterateThroughStartEndForCallback(events, &cb);
+			}
 		}
 
 		// Unlock the canvas access semaphore
@@ -4530,20 +4558,25 @@ continueToNextAttribute:
 //////
 	SScreen* ioss_findScreenByActiveCanvas(u64 canvasId)
 	{
+		SStartEndCallback cb;
+
+
 		// Locate the screen by the indicated canvas ID
-		return((SScreen*)oss_searchSEChainByCallback(&gseRootScreen, (u64)iioss_findScreenByActiveCanvasCallback, canvasId));
+		cb._func	= (u64)iioss_findScreenByActiveCanvasCallback;
+		cb.extra	= canvasId;
+		return((SScreen*)oss_searchSEChainByCallback(&gseRootScreen, &cb));
 	}
 
-	bool iioss_findScreenByActiveCanvasCallback(void *ptr, u64 tnExtra)
+	bool iioss_findScreenByActiveCanvasCallback(SStartEndCallback* cb)
 	{
 		SScreen* ls;
 
 
 		// Make sure the environment is sane
-		if (ptr)
+		if (cb && cb->ptr)
 		{
-			ls = (SScreen*)ptr;
-			if (ls->activeCanvas && ls->activeCanvas->ll.uniqueId == tnExtra)
+			ls = (SScreen*)cb->ptr;
+			if (ls->activeCanvas && ls->activeCanvas->ll.uniqueId == cb->extra)
 				return(true);		// Found it
 		}
 		// If we get here, not this one
@@ -4560,9 +4593,16 @@ continueToNextAttribute:
 //////
 	SCanvasList* ioss_findCanvasListOfScreen(SScreen* ts, SCanvas* tc)
 	{
+		SStartEndCallback cb;
+
+
 		// Make sure there's something to do
 		if (ts && tc && ts->canvasList.root)
-			return((SCanvasList*)oss_searchSEChainByCallback(&ts->canvasList, (u64)iioss_findCanvasCallback, (u64)tc));
+		{
+			cb._func	= (u64)iioss_findCanvasCallback;
+			cb.extra	= (u64)tc;
+			return((SCanvasList*)oss_searchSEChainByCallback(&ts->canvasList, &cb));
+		}
 
 		// Failure
 		return(NULL);
@@ -4578,26 +4618,33 @@ continueToNextAttribute:
 //////
 	SCanvasList* ioss_findCanvasListOfCanvas(SCanvas* tcHaystack, SCanvas* tcNeedle)
 	{
+		SStartEndCallback cb;
+
+
 		// Make sure there's something to do
 		if (tcHaystack && tcNeedle && tcHaystack->canvasList.root)
-			return((SCanvasList*)oss_searchSEChainByCallback(&tcHaystack->canvasList, (u64)iioss_findCanvasCallback, (u64)tcNeedle));
+		{
+			cb._func	= (u64)iioss_findCanvasCallback;
+			cb.extra	= (u64)tcNeedle;
+			return((SCanvasList*)oss_searchSEChainByCallback(&tcHaystack->canvasList, &cb));
+		}
 
 		// Failure
 		return(NULL);
 	}
 
-	bool iioss_findCanvasCallback(void* ptr, u64 tnExtra)
+	bool iioss_findCanvasCallback(SStartEndCallback* cb)
 	{
 		SCanvasList* lcl;
 
 
 		// Make sure our environment is sane
-		if (ptr && tnExtra != 0)
+		if (cb && cb->ptr && cb->extra != 0)
 		{
-			lcl	= (SCanvasList*)ptr;
+			lcl	= (SCanvasList*)cb->ptr;
 
 			// Is this the canvas?
-			if (lcl->canvas == (SCanvas*)tnExtra)
+			if (lcl->canvas == (SCanvas*)cb->extra)
 				return(true);	// Yes
 			// If we get here, no
 		}
@@ -5659,7 +5706,7 @@ continueToNextAttribute:
 // list from the template for the new region.
 //
 //////
-	void iioss_createRegionCallback(void* ptr, u64 tnExtra)
+	void iioss_createRegionCallback(SStartEndCallback* cb)
 	{
 		bool		llResult;
 		SEvent*		le;
@@ -5668,10 +5715,10 @@ continueToNextAttribute:
 
 
 		// Make sure our environment is sane
-		if (ptr && tnExtra)
+		if (cb && cb->ptr && cb->extra)
 		{
-			le = (SEvent*)ptr;
-			lr = (SRegion*)tnExtra;
+			le = (SEvent*)cb->ptr;
+			lr = (SRegion*)cb->extra;
 
 			// Add a copy of this event to the region
 			leNew = (SEvent*)oss_SEChain_append(&lr->events, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SEvent), _COMMON_START_END_BLOCK_SIZE, &llResult);
