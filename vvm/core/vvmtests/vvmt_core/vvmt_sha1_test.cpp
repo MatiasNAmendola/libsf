@@ -86,7 +86,7 @@
 		//////
 			vvm_resourcePrintf(IDS_VVM_1DOTDOTDOT);
 			oss_sha1ComputeSha1AsHex((s8*)cgc_Test_Sha1_1_1, sizeof(cgc_Test_Sha1_1_1) - 1, cgc_Test_Sha1_1_3, true);;
-			if (icommon_memicmp(_csu8p(cgc_Test_Sha1_1_2), _csu8p(cgc_Test_Sha1_1_3), sizeof(cgc_Test_Sha1_1_2) - 1) != 0)
+			if (oss_memicmp(_csu8p(cgc_Test_Sha1_1_2), _csu8p(cgc_Test_Sha1_1_3), sizeof(cgc_Test_Sha1_1_2) - 1) != 0)
 			{
 failure:
 				// Error
@@ -103,7 +103,7 @@ failure:
 		//////
 			vvm_resourcePrintf(IDS_VVM_2DOTDOTDOT);
 			oss_sha1ComputeSha1AsHex((s8*)cgc_Test_Sha1_2_1, sizeof(cgc_Test_Sha1_2_1) - 1, cgc_Test_Sha1_2_3, true);;
-			if (icommon_memicmp(_csu8p(cgc_Test_Sha1_2_2), _csu8p(cgc_Test_Sha1_2_3), sizeof(cgc_Test_Sha1_2_2) - 1) != 0)
+			if (oss_memicmp(_csu8p(cgc_Test_Sha1_2_2), _csu8p(cgc_Test_Sha1_2_3), sizeof(cgc_Test_Sha1_2_2) - 1) != 0)
 				goto failure;		// Failure
 
 
@@ -122,7 +122,7 @@ failure:
 
 			// Finalize and compute the value a hex
 			oss_sha1ComputeSha1_FinishAsHex(context, cgc_Test_Sha1_3_3, true, true);
-			if (icommon_memicmp(_csu8p(cgc_Test_Sha1_3_2), _csu8p(cgc_Test_Sha1_3_3), sizeof(cgc_Test_Sha1_3_2) - 1) != 0)
+			if (oss_memicmp(_csu8p(cgc_Test_Sha1_3_2), _csu8p(cgc_Test_Sha1_3_3), sizeof(cgc_Test_Sha1_3_2) - 1) != 0)
 				goto failure;		// Failure
 
 

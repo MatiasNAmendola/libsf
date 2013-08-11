@@ -134,6 +134,8 @@ BEGIN
     IDS_VVM_TEST_SLL4_CREATE "\tCreate 4-way linked list..."
     IDS_VVM_TEST_SLL4_APPEND "\tAppend to 4-way linked list..."
     IDS_VVM_TEST_SLL4_DELETE "\tDelete from 4-way linked list..."
+    IDS_VVM_TEST_SLL_UNABLE_TO_CREATE "Failure on create linked list node"
+    IDS_VVM_TEST_SLL_SHA1_FAILURE "Failure on linked list SHA-1"
 END
 
 #endif    // English (U.S.) resources

@@ -69,7 +69,7 @@
 		//////////
 		// For each core, create a thread control structure slot
 		//////
-			llResult = icommon_allocateAdditionalStartEndMasterSlots(&gsVvm.gseRootThreadMizer, gsVvmSysInfo.cores);
+			llResult = oss_allocateAdditionalStartEndMasterSlots(&gsVvm.gseRootThreadMizer, gsVvmSysInfo.cores);
 
 
 		// Enter a loop (for breaking out of)
@@ -81,7 +81,7 @@
 				//////////
 				// Create its entry in the next free slot
 				//////
-					ltm = (SThreadMizer*)icommon_SEChain_append(&gsVvm.gseRootThreadMizer, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SThreadMizer), 1, NULL);
+					ltm = (SThreadMizer*)oss_SEChain_append(&gsVvm.gseRootThreadMizer, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SThreadMizer), 1, NULL);
 					if (!ltm)
 					{
 						// Should not happen, but it did

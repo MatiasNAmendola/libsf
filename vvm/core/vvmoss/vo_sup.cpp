@@ -430,8 +430,8 @@
 		lnResult = -1;
 
 		// Copy the pathname
-		icommon_memset(buffer, 0, sizeof(buffer));
-		icommon_memcpy(buffer, tcDllPathname, tnDllPathnameLength);
+		oss_memset(buffer, 0, sizeof(buffer));
+		oss_memcpy(buffer, tcDllPathname, tnDllPathnameLength);
 
 		// Try to open it
 		dllInstance = LoadLibraryA(buffer);
@@ -501,7 +501,7 @@
 		tisw->heightMin	+= lnHeightDelta;
 
 		// Store this window to the queue
-		low = (_iswSOssWindowLL*)icommon_SEChain_append(&gseRootWindows, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(_iswSOssWindowLL), _COMMON_START_END_BLOCK_SIZE, NULL);
+		low = (_iswSOssWindowLL*)oss_SEChain_append(&gseRootWindows, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(_iswSOssWindowLL), _COMMON_START_END_BLOCK_SIZE, NULL);
 		if (low)
 		{
 			// We're good, copy everything to our permanent area
@@ -517,7 +517,7 @@
 			*tow = low;
 
 		// Create the physical window
-		luCaption	= icommon_asciiToUnicode((u8*)low->isw.caption, low->isw.captionLength + 1);
+		luCaption	= oss_asciiToUnicode((u8*)low->isw.caption, low->isw.captionLength + 1);
 		low->isw.osHandle = (u64)CreateWindowW(	guVvmOssVisibleClass,
 												luCaption,
 												lnWindowStyle,
@@ -587,7 +587,7 @@
 
 		lfc.forFocus	= NULL;
 		lfc.osHandle	= tnOsHandle;
-		icommon_searchStartEndChainByCallback(&gseRootWindows, (u64)iioss_signalWindowFocusCallbacksCallback, (u64)&lfc);
+		oss_searchSEChainByCallback(&gseRootWindows, (u64)iioss_signalWindowFocusCallbacksCallback, (u64)&lfc);
 
 		// Signal the new window that it has focus (if it was found, and doesn't already have focus)
 		if (lfc.forFocus && !lfc.forFocus->isw.hasFocus)
@@ -655,7 +655,7 @@
 //			if (w->isw.osBitData)	free(w->isw.osBitData);	// Handled automatically by the DeleteObject() which is linked to the bitmap data
 
 			// Delete the window from our known chain
-			icommon_SEChain_deleteFrom(&gseRootWindows, (SLL*)w, true);
+			oss_SEChain_deleteFrom(&gseRootWindows, (SLL*)w, true);
 		}
 	}
 
@@ -1085,7 +1085,7 @@ _asm int 3;
 //////
 	_iswSOssWindowLL* ioss_findSOssWindowLLByHwnd(HWND hwnd)
 	{
-		return((_iswSOssWindowLL*)icommon_searchStartEndChainByCallback(&gseRootWindows, (u64)iioss_findSOssWindowLLByHwndCallback, (u64)hwnd));
+		return((_iswSOssWindowLL*)oss_searchSEChainByCallback(&gseRootWindows, (u64)iioss_findSOssWindowLLByHwndCallback, (u64)hwnd));
 	}
 
 	bool iioss_findSOssWindowLLByHwndCallback(void* ptr, u64 tnExtra)
@@ -1115,7 +1115,7 @@ _asm int 3;
 //////
 	_iswSOssWindowLL* ioss_findSOssWindowLLByScreenId(u64 tnScreenId)
 	{
-		return((_iswSOssWindowLL*)icommon_searchStartEndChainByCallback(&gseRootWindows, (u64)iioss_findSOssWindowLLByScreenId, (u64)tnScreenId));
+		return((_iswSOssWindowLL*)oss_searchSEChainByCallback(&gseRootWindows, (u64)iioss_findSOssWindowLLByScreenId, (u64)tnScreenId));
 	}
 
 	bool iioss_findSOssWindowLLByScreenId(void* ptr, u64 tnExtra)
@@ -1146,7 +1146,7 @@ _asm int 3;
 	_iswSOssWindowLL* ioss_findSOssWindowLLByOssWindowId(u64 tnOssWindowId)
 	{
 		// Try to find it using the callback
-		return((_iswSOssWindowLL*)icommon_searchStartEndChainByCallback(&gseRootWindows, (u64)&iioss_findSOssWindowByOssWindowIdCallback, tnOssWindowId));
+		return((_iswSOssWindowLL*)oss_searchSEChainByCallback(&gseRootWindows, (u64)&iioss_findSOssWindowByOssWindowIdCallback, tnOssWindowId));
 	}
 
 	bool iioss_findSOssWindowByOssWindowIdCallback(void* ptr, u64 tnExtra)
@@ -2749,7 +2749,7 @@ _asm int 3;
 	LRESULT CALLBACK iioss_timerProc_10ms(HWND hwnd, UINT msg, UINT_PTR idEvent, DWORD dwTime)
 	{
 		// The timer has fired, updating timers and trigger any hover events
-		icommon_searchStartEndChainByCallback(&gseRootWindows, (u64)iioss_update10msTimersCallback, 0);
+		oss_searchSEChainByCallback(&gseRootWindows, (u64)iioss_update10msTimersCallback, 0);
 
 		// All done
 		return 0;
@@ -3403,8 +3403,8 @@ _asm int 3;
 				bp.lry	= bp.uly + bp.ratioV;
 				bp.lrx	= bp.ulx + bp.ratioH;
 
-if ((lnY == 2 && lnX == 516) || (lnY == 5 && lnX == 516) || (lnY == 798 && lnX == 516))
-	_asm nop;
+// if ((lnY == 2 && lnX == 516) || (lnY == 5 && lnX == 516) || (lnY == 798 && lnX == 516))
+// 	_asm nop;
 
 				// Get all the color information for this potentially spanned pixel
 				iioss_getSpannedPixelColors(&bp);
@@ -3926,15 +3926,15 @@ if ((lnY == 2 && lnX == 516) || (lnY == 5 && lnX == 516) || (lnY == 798 && lnX =
 			//////
 				// Primary filename
 				memset(buffer, 0, sizeof(buffer));
-				if (tcPath._u8) icommon_memcpy(buffer, tcPath._s8, icommon_strlen(tcPath));
-				icommon_memcpy(buffer + icommon_strlen(_csu8p(buffer)), twfd->cFileName, icommon_strlen(_csu8p(twfd->cFileName)));
-				icommon_duplicateStringIntoDatum(&tsFileInfo->file, (u8*)buffer, icommon_strlen(_csu8p(buffer)), true);
+				if (tcPath._u8) oss_memcpy(buffer, tcPath._s8, oss_strlen(tcPath));
+				oss_memcpy(buffer + oss_strlen(_csu8p(buffer)), twfd->cFileName, oss_strlen(_csu8p(twfd->cFileName)));
+				oss_duplicateStringIntoDatum(&tsFileInfo->file, (u8*)buffer, oss_strlen(_csu8p(buffer)), true);
 
 				// Alternate filename
 				memset(buffer, 0, sizeof(buffer));
-				if (tcPath._s8) icommon_memcpy(buffer, tcPath._s8, icommon_strlen(tcPath));
+				if (tcPath._s8) oss_memcpy(buffer, tcPath._s8, oss_strlen(tcPath));
 				memcpy(buffer + strlen(buffer), twfd->cAlternateFileName, strlen(twfd->cAlternateFileName));
-				icommon_duplicateStringIntoDatum(&tsFileInfo->file2, (u8*)buffer, icommon_strlen(_csu8p(buffer)), true);
+				oss_duplicateStringIntoDatum(&tsFileInfo->file2, (u8*)buffer, oss_strlen(_csu8p(buffer)), true);
 
 			// Store the file size
 			tsFileInfo->size		= ((u64)twfd->nFileSizeHigh < 32) | ((u64)twfd->nFileSizeLow);
@@ -4091,7 +4091,7 @@ if ((lnY == 2 && lnX == 516) || (lnY == 5 && lnX == 516) || (lnY == 798 && lnX =
 				//////////
 				// Is this node name a match?
 				//////
-					if (bxmlFind->bxmlNodeFound && oss_wildcardMatch(&bxmlFind->bxml->_name, bxmlFind->wildcard, false) == 0)
+					if (bxmlFind->bxmlNodeFound && oss_wildcardMatch(_csu8p(bxmlFind->bxml->_name.data._u8), _csu8p(bxmlFind->wildcard->data._u8), false) == 0)
 					{
 						// Yes, store the found information node
 															*bxmlFind->bxmlNodeFound		= bxmlFind->bxml;	// Store the found node
@@ -4124,7 +4124,7 @@ continueToAttributes:
 								bxmlFind->bxmla = (SBxmla*)bxmlFind->_ml->ptr;
 
 								// Does this attribute name match
-								if (bxmlFind->bxmla && oss_wildcardMatch(&bxmlFind->bxmla->_name, bxmlFind->wildcard, false) == 0)
+								if (bxmlFind->bxmla && oss_wildcardMatch(_csu8p(bxmlFind->bxmla->_name.data._u8), _csu8p(bxmlFind->wildcard->data._u8), false) == 0)
 								{
 									// Yes, store the found information node
 																	*bxmlFind->bxmlaAttributeFound	= bxmlFind->bxmla;	// Store the found attribute
@@ -4310,7 +4310,7 @@ continueToNextAttribute:
 							bxmlFind->bxmla = (SBxmla*)bxmlFind->_ml->ptr;
 
 							// Does this attribute name match
-							if (bxmlFind->bxmla && oss_wildcardMatch(&bxmlFind->bxmla->_data.datum, bxmlFind->wildcard, false) == 0)
+							if (bxmlFind->bxmla && oss_wildcardMatch(_csu8p(bxmlFind->bxmla->_data.datum.data._u8), _csu8p(bxmlFind->wildcard->data._u8), false) == 0)
 							{
 								// Yes, store the found information node
 								*bxmlFind->bxmlaAttributeFound	= bxmlFind->bxmla;	// Store the found attribute
@@ -4389,7 +4389,7 @@ continueToNextAttribute:
 		oss_lockSemaphore(gsemScreenAccess);
 
 		// Create the canvas
-		ls = (SScreen*)icommon_SEChain_append(&gseRootScreen, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SScreen), 1, NULL);
+		ls = (SScreen*)oss_SEChain_append(&gseRootScreen, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SScreen), 1, NULL);
 		if (ls)
 		{
 			// Store the associated id
@@ -4427,7 +4427,7 @@ continueToNextAttribute:
 		oss_lockSemaphore(gsemCanvasAccess);
 
 		// Create the canvas
-		lc = (SCanvas*)icommon_SEChain_append(&gseRootCanvas, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SCanvas), _COMMON_START_END_BLOCK_SIZE, NULL);
+		lc = (SCanvas*)oss_SEChain_append(&gseRootCanvas, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SCanvas), _COMMON_START_END_BLOCK_SIZE, NULL);
 
 		// If the user wants a copy, give it to them
 		if (tsCanvas)
@@ -4453,8 +4453,8 @@ continueToNextAttribute:
 			lc->bd_vvmoss		= oss_requestSystemBitmap(tnWidth, tnHeight);				// Used primarily for rendering system fonts
 
 			// Initialize it with the default background color
-			if (lc->bd)			icommon_memset4((u32*)lc->bd,  icommon_swapEndian(icommon_RGBA2BGRA(tnBackColor)), tnHeight * tnWidth);	// Initialize bd to the indicated color
-			if (lc->bda)		icommon_memset4((u32*)lc->bda, icommon_swapEndian(icommon_RGBA2BGRA(tnBackColor)), tnHeight * tnWidth);	// Initialize bda to the indicated color
+			if (lc->bd)			oss_memset4((u32*)lc->bd,  oss_swapEndian(oss_RGBA2BGRA(tnBackColor)), tnHeight * tnWidth);	// Initialize bd to the indicated color
+			if (lc->bda)		oss_memset4((u32*)lc->bda, oss_swapEndian(oss_RGBA2BGRA(tnBackColor)), tnHeight * tnWidth);	// Initialize bda to the indicated color
 
 			// Store the state
 			memcpy(&lc->state, tsState, sizeof(SCanvasState));								// Use provided information
@@ -4489,7 +4489,7 @@ continueToNextAttribute:
 		oss_lockSemaphore(gsemRegionAccess);
 
 		// Create the canvas
-		lr = (SRegion*)icommon_SEChain_append(&gseRootRegion, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SRegion), _COMMON_START_END_BLOCK_SIZE, NULL);
+		lr = (SRegion*)oss_SEChain_append(&gseRootRegion, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SRegion), _COMMON_START_END_BLOCK_SIZE, NULL);
 		if (lr)
 		{
 			// Store any associated information
@@ -4510,7 +4510,7 @@ continueToNextAttribute:
 			if (callback)		memcpy(&lr->callback, callback, sizeof(SCallbacks));
 
 			// Copy the events if specified
-			if (events)			icommon_iterateThroughStartEndForCallback(events, (u64)iioss_createRegionCallback, (u64)lr);
+			if (events)			oss_iterateThroughStartEndForCallback(events, (u64)iioss_createRegionCallback, (u64)lr);
 		}
 
 		// Unlock the canvas access semaphore
@@ -4531,7 +4531,7 @@ continueToNextAttribute:
 	SScreen* ioss_findScreenByActiveCanvas(u64 canvasId)
 	{
 		// Locate the screen by the indicated canvas ID
-		return((SScreen*)icommon_searchStartEndChainByCallback(&gseRootScreen, (u64)iioss_findScreenByActiveCanvasCallback, canvasId));
+		return((SScreen*)oss_searchSEChainByCallback(&gseRootScreen, (u64)iioss_findScreenByActiveCanvasCallback, canvasId));
 	}
 
 	bool iioss_findScreenByActiveCanvasCallback(void *ptr, u64 tnExtra)
@@ -4562,7 +4562,7 @@ continueToNextAttribute:
 	{
 		// Make sure there's something to do
 		if (ts && tc && ts->canvasList.root)
-			return((SCanvasList*)icommon_searchStartEndChainByCallback(&ts->canvasList, (u64)iioss_findCanvasCallback, (u64)tc));
+			return((SCanvasList*)oss_searchSEChainByCallback(&ts->canvasList, (u64)iioss_findCanvasCallback, (u64)tc));
 
 		// Failure
 		return(NULL);
@@ -4580,7 +4580,7 @@ continueToNextAttribute:
 	{
 		// Make sure there's something to do
 		if (tcHaystack && tcNeedle && tcHaystack->canvasList.root)
-			return((SCanvasList*)icommon_searchStartEndChainByCallback(&tcHaystack->canvasList, (u64)iioss_findCanvasCallback, (u64)tcNeedle));
+			return((SCanvasList*)oss_searchSEChainByCallback(&tcHaystack->canvasList, (u64)iioss_findCanvasCallback, (u64)tcNeedle));
 
 		// Failure
 		return(NULL);
@@ -4713,7 +4713,7 @@ continueToNextAttribute:
 				// If we get here, it doesn't already exist
 
 				// Create the new SCanvasList entry
-				lcl = (SCanvasList*)icommon_SEChain_append(&ts->canvasList, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SCanvasList), _COMMON_START_END_BLOCK_SIZE, NULL);
+				lcl = (SCanvasList*)oss_SEChain_append(&ts->canvasList, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SCanvasList), _COMMON_START_END_BLOCK_SIZE, NULL);
 				break;
 			}
 
@@ -4780,7 +4780,7 @@ continueToNextAttribute:
 			// If we get here, we need to create a new CanvasList entry
 
 			// Create the new SCanvasList entry
-			lcl = (SCanvasList*)icommon_SEChain_append(&tcParent->canvasList, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SCanvasList), _COMMON_START_END_BLOCK_SIZE, NULL);
+			lcl = (SCanvasList*)oss_SEChain_append(&tcParent->canvasList, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SCanvasList), _COMMON_START_END_BLOCK_SIZE, NULL);
 			break;
 		}
 
@@ -4830,7 +4830,7 @@ continueToNextAttribute:
 				// If we get here, we need to create a new RegionList entry
 
 				// Create the new SRegionList entry
-				lrl = (SRegionList*)icommon_SEChain_append(&tc->canvasList, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SRegionList), _COMMON_START_END_BLOCK_SIZE, NULL);
+				lrl = (SRegionList*)oss_SEChain_append(&tc->canvasList, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SRegionList), _COMMON_START_END_BLOCK_SIZE, NULL);
 				break;
 			}
 
@@ -4892,7 +4892,7 @@ continueToNextAttribute:
 			// If we get here, we need to create a new RegionList entry
 
 			// Create the new SRegionList entry
-			lrl = (SRegionList*)icommon_SEChain_append(&trParent->regionList, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SRegionList), _COMMON_START_END_BLOCK_SIZE, NULL);
+			lrl = (SRegionList*)oss_SEChain_append(&trParent->regionList, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SRegionList), _COMMON_START_END_BLOCK_SIZE, NULL);
 			break;
 		}
 
@@ -5295,7 +5295,7 @@ continueToNextAttribute:
 
 // TODO:  this algorithm needs to more properly consider transparency, of the source to destination, along with individual bits within
 		// Derive the colors from the back color
-		icommon_deriveRGBA(tsDst->backColor, &redd, &grnd, &blud, &malp);
+		oss_deriveRGBA(tsDst->backColor, &redd, &grnd, &blud, &malp);
 		alp		= (f32)alp(tsSrc->backColor) / 255.0f;
 		malp	= 1.0f - alp;
 
@@ -5460,7 +5460,7 @@ continueToNextAttribute:
 
 // TODO:  this algorithm needs to more properly consider transparency, of the source to destination, along with individual bits within
 		// Derive the colors from the back color
-		icommon_deriveRGBA(tsDst->backColor, &redd, &grnd, &blud, &malp);
+		oss_deriveRGBA(tsDst->backColor, &redd, &grnd, &blud, &malp);
 		alp		= (f32)alp(tsSrc->backColor) / 255.0f;
 		malp	= 1.0f - alp;
 
@@ -5674,7 +5674,7 @@ continueToNextAttribute:
 			lr = (SRegion*)tnExtra;
 
 			// Add a copy of this event to the region
-			leNew = (SEvent*)icommon_SEChain_append(&lr->events, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SEvent), _COMMON_START_END_BLOCK_SIZE, &llResult);
+			leNew = (SEvent*)oss_SEChain_append(&lr->events, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SEvent), _COMMON_START_END_BLOCK_SIZE, &llResult);
 			if (llResult && leNew)
 			{
 				// Copy over the relevant parts

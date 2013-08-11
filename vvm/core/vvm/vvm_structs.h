@@ -483,29 +483,6 @@ struct	SUpSnip;
 
 //////////
 //
-// Data structures used throughout the system, VVM defined, VVMOSS employs for all date/time references
-//
-//////
-	struct SDateTime
-	{
-		s16			year;						// Literal value for all dates, meaning -32,767 to 32,768 for year
-		u8			month;						// Month number, 1=January
-		u8			day;						// Day of month, 1=First
-		u8			hour;						// Hour of day, 0=midnight
-		u8			minute;						// Minute of hour, 0=top of hour
-		u8			second;						// Second of minute, 0=start of minute
-		u16			millisecond;				// Milliseconds
-
-		// Using machine-dependent high resolution timer
-		u64			tickCount;					// For high resolution purposes
-		u64			frequency;					// Frequency at which the tick count ticks, used to compute time deltas
-	};
-
-
-
-
-//////////
-//
 // 8-bit, 16-bit, 32-bit and 64-bit integer registers
 //  ___________________________________ _________________ ________ ________
 // |                 X64               |       X32       |  X16   |   X8   |

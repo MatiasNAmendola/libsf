@@ -166,7 +166,7 @@
 				ivvm_debugBreak();
 			}
 			// Create a copy to be used
-			*tuString = icommon_duplicateUnicodeString(luMessage);
+			*tuString = oss_duplicateUnicodeString(luMessage);
 		}
 	}
 
@@ -224,21 +224,21 @@
 		for (lnI = 0; lnI < lnLength; lnI++)
 		{
 			// Did they specify "-r:" (which is a resource override, using an alternate language, like -r:es for Spanish)
-			if (lnLength - lnI >= 3 && icommon_unicodeMemicmp(tuCmdLine + lnI, L"-r:", 3) == 0)
+			if (lnLength - lnI >= 3 && oss_unicodeMemicmp(tuCmdLine + lnI, L"-r:", 3) == 0)
 			{
 				// Find out how long this string portion is
 				lnSkip					= ivvm_scanStringAndNullTerminateAtNextWhitespaceW(tuCmdLine + lnI + 3) + 3;
-				gsVvm.gcVvmResourceLang	= icommon_unicodeToAscii(tuCmdLine + lnI + 3, wcslen(tuCmdLine + lnI + 3));
+				gsVvm.gcVvmResourceLang	= oss_unicodeToAscii(tuCmdLine + lnI + 3, wcslen(tuCmdLine + lnI + 3));
 
 				// Blank out that portion of the command line
-				icommon_unicodeMemset(tuCmdLine + lnI, (w16)' ', lnSkip);
+				oss_unicodeMemset(tuCmdLine + lnI, (w16)' ', lnSkip);
 
 				// Move past ti
 				lnI += lnSkip;
 
 
 			// Do they want to run the gambit of test cases?
-			} else if (lnLength - lnI >= 5 && icommon_unicodeMemicmp(tuCmdLine + lnI, L"-test", 5) == 0) {
+			} else if (lnLength - lnI >= 5 && oss_unicodeMemicmp(tuCmdLine + lnI, L"-test", 5) == 0) {
 				// Yes
 				*tlTestCasesOnly = true;
 // TODO:  a future syntax will allow for -test:file.bxml to run the tests identified within an executable file.

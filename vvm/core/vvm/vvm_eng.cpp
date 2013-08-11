@@ -66,7 +66,7 @@
 
 
 		// Create the base VVM state
-		lp = (SProgram*)icommon_SEChain_append(&gsVvm.gseRootPrograms, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SProgram), 1, NULL);
+		lp = (SProgram*)oss_SEChain_append(&gsVvm.gseRootPrograms, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SProgram), 1, NULL);
 
 
 		// Enter a loop so we can break out
@@ -90,7 +90,7 @@
 
 
 		// See if the command line contains the "-test" option
-		if (tlTestCasesOnly && icommon_isNeedleInHaystack_Unicode(tcCmdLine, L"-test"))
+		if (tlTestCasesOnly && oss_isNeedleInHaystack_Unicode(tcCmdLine, L"-test"))
 			*tlTestCasesOnly = true;	// Raise the flag
 
 		// Indicate our success or failure

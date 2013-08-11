@@ -122,14 +122,14 @@
 			lnStart = ptrSEVar->masterCount;
 
 			// Increase our buffer by the block size
-			llResult = icommon_allocateAdditionalStartEndMasterSlots(ptrSEVar, tnAllocationSize);
+			llResult = oss_allocateAdditionalStartEndMasterSlots(ptrSEVar, tnAllocationSize);
 			if (llResult)
 			{
 				// From our initial value to the end, allocate space for each variable
 				for (lnI = lnStart; llResult && lnI < ptrSEVar->masterCount; lnI++)
 				{
 					// Allocate the new entry
-					lv = (SVariable*)icommon_SEChain_append(ptrSEVar, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SVariable), tnAllocationSize, NULL);
+					lv = (SVariable*)oss_SEChain_append(ptrSEVar, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SVariable), tnAllocationSize, NULL);
 					if (lv)
 					{
 						// Indicate no variables initially exist here, and that this is an empty slot
@@ -198,15 +198,15 @@
 			// If we get here, we need to increase the allocation
 
 			// Allocate our new entry
-			if (icommon_allocateAdditionalStartEndMasterSlots(ptrSEVar, 1))
+			if (oss_allocateAdditionalStartEndMasterSlots(ptrSEVar, 1))
 			{
 				// We know we have our slot now
 				// Allocate our new entry
-				ltNew = (SThread*)icommon_SEChain_append(ptrSEVar, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SThread), 1, NULL);
+				ltNew = (SThread*)oss_SEChain_append(ptrSEVar, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SThread), 1, NULL);
 				if (ltNew)
 				{
 					// Allocate the stack size, we will use our 
-					ltNew->stack.data._u8			= (u8*)icommon_allocateAndNull(gsVvm.gnStackAllocationBlockSize, true);
+					ltNew->stack.data._u8			= (u8*)oss_allocateAndNull(gsVvm.gnStackAllocationBlockSize, true);
 					ltNew->stack.length				= gsVvm.gnStackAllocationBlockSize;
 					ltNew->status.semaphoreAccess	= oss_createSemaphore();
 
@@ -247,14 +247,14 @@
 			lnStart = ptrSESnip->masterCount;
 
 			// Increase our buffer by the block size
-			llResult = icommon_allocateAdditionalStartEndMasterSlots(ptrSESnip, gsVvm.gnSnippetAllocationBlockSize);
+			llResult = oss_allocateAdditionalStartEndMasterSlots(ptrSESnip, gsVvm.gnSnippetAllocationBlockSize);
 			if (llResult)
 			{
 				// From our initial value to the end, allocate space for each snippet
 				for (lnI = lnStart; llResult && lnI < ptrSESnip->masterCount; lnI++)
 				{
 					// Allocate the new entry
-					lse = (SSnipExec*)icommon_SEChain_append(ptrSESnip, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SSnipExec), gsVvm.gnSnippetAllocationBlockSize, NULL);
+					lse = (SSnipExec*)oss_SEChain_append(ptrSESnip, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SSnipExec), gsVvm.gnSnippetAllocationBlockSize, NULL);
 					if (lse)
 					{
 						// Indicate no parameters are initially populated at each snippet level
@@ -325,14 +325,14 @@
 			lnStart = ptrSEVar->masterCount;
 
 			// Increase our buffer by the block size
-			llResult = icommon_allocateAdditionalStartEndMasterSlots(ptrSEVar, tnAllocationSize);
+			llResult = oss_allocateAdditionalStartEndMasterSlots(ptrSEVar, tnAllocationSize);
 			if (llResult)
 			{
 				// From our initial value to the end, allocate space for each snippet
 				for (lnI = lnStart; llResult && lnI < ptrSEVar->masterCount; lnI++)
 				{
 					// Allocate the new entry
-					lv = (SVariable*)icommon_SEChain_append(ptrSEVar, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SVariable), tnAllocationSize, NULL);
+					lv = (SVariable*)oss_SEChain_append(ptrSEVar, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SVariable), tnAllocationSize, NULL);
 					if (lv)
 					{
 						// Indicate no variables initially exist here, and that this is an empty slot

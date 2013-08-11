@@ -77,7 +77,6 @@ EXPORTS
 	oss_alloc
 	oss_realloc
 	oss_free
-	oss_wildcardMatch
 	
 	oss_soundInitialize
 	oss_soundCreateTone
@@ -114,6 +113,84 @@ EXPORTS
 	oss_sharedAsciiGetTempFilename
 	oss_sharedAsciiDeleteFile
 	oss_sharedAsciiWriteOutFile
+	
+	oss_duplicateString
+	oss_duplicateUnicodeString
+	oss_duplicateStringIntoDatum
+	oss_duplicateStringIntoDatum2
+	oss_duplicateDatum
+	oss_duplicateDatum2
+	oss_deleteDatum
+	oss_deleteDatum2
+	oss_allocateNullStringIntoDatum2
+	oss_copyUpToShortestString
+	oss_wildcardMatch
+	oss_asciiToUnicode
+	oss_unicodeToAscii
+	oss_asciiToUnicodeChar
+	oss_unicodeToAsciiCharacter
+	oss_scanForwardUntilCharacterChanges
+	oss_scanForwardUntilCharacter
+	oss_unicodeMemcmp
+	oss_unicodeMemicmp
+	oss_unicodeMemset
+	oss_upperCaseW
+	oss_lowerCaseW
+	oss_memset
+	oss_memset4
+	oss_memcpy
+	oss_memcmp
+	oss_memicmp
+	oss_memicmpTwoLengths
+	oss_memicmpDatum
+	oss_memicmpDatum2
+	oss_memicmpDatumDatum
+	oss_memicmpDatum2Datum2
+	oss_deriveRGBA
+
+	oss_ll_create
+	oss_ll_insert
+	oss_ll_orphanize
+	oss_ll_deleteChainWithCallback
+	oss_ll_sha1Chain
+
+	oss_ll4_orphanizeAsBxml
+	oss_ll4_orphanizeAsNode
+	oss_ll4_insertAsBxml
+	oss_ll4_insertAsBxmlAsChild
+	oss_ll4_insertAsBxmlAsChildRegarding
+	oss_ll4_insertAsNodeNorthSouth
+	oss_ll4_insertAsNodeEastWest
+	oss_ll4_deleteChainWithCallback
+
+	oss_SEChain_prepend
+	oss_SEChain_append
+	oss_SEChain_appendRelativeToMember
+	oss_SEChain_appendExistingRelativeToMember
+
+	oss_SEChain_migrateAll
+	oss_SEChain_migrateByPtr
+	oss_SEChain_migrateByNum
+	oss_SEChain_completelyMigrateSLLByPtr
+	oss_SEChain_completelyMigrateSLLByNum
+
+	oss_SEChain_countValids
+	oss_SEChain_delete
+	oss_SEChain_deleteFrom
+	oss_SEChain_deleteFromAfterCallback
+
+	oss_allocateAdditionalStartEndMasterSlots
+	oss_searchSEChainByUniqueId
+	oss_searchSEChainByCallback
+	oss_iterateThroughStartEndForCallback
+	oss_validateStartEnd
+	oss_swapEndian
+	oss_RGBA2BGRA
+	oss_allocateAndNull
+	oss_isNeedleInHaystack
+	oss_isNeedleInHaystack_Unicode
+	oss_countConsecutiveAsciiNumericDigits
+	oss_convertTextToU32
 	
 	oss_fileFindFirst
 	oss_fileFindNext

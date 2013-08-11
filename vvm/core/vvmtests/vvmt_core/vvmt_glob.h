@@ -58,6 +58,14 @@
 			s8		cgc_Test_Sha1_3_3[]		= "........ ........ ........ ........ ........";		// Actual result
 
 
+//////////
+//
+// Linked List required constants and variables
+//
+//////
+	const	u64		cgnTestLl1NodeSha1As64Bit					= 0xfdb64befd4f70df4;						// fdb6 4bef d4f7 0df4
+	const	u32		cgnTestLl1NodeSha1As32Bit					= 0xf5d6783e;								// f5d6 783e
+
 
 
 //////////

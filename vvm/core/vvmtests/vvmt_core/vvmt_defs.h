@@ -69,9 +69,9 @@
 	// vvmt_sll_test.cpp
 	//////
 		bool					ivvmt_testSll											(u64 lnHandleLog);
-		bool					iivvmt_testSll_1										(u64 lnHandleLog);
-		bool					iivvmt_testSll_2										(u64 lnHandleLog);
-		bool					iivvmt_testSll_3										(u64 lnHandleLog);
+		bool					iivvmt_testSll_1										(u64 lnHandleLog, SLL** root);
+		bool					iivvmt_testSll_2										(u64 lnHandleLog, SLL* root);
+		bool					iivvmt_testSll_3										(u64 lnHandleLog, SLL* root);
 
 
 	//////////

@@ -116,7 +116,6 @@
 	const s8		cgcOssAlloc[]											= "oss_alloc";
 	const s8		cgcOssRealloc[]											= "oss_realloc";
 	const s8		cgcOssFree[]											= "oss_free";
-	const s8		cgcOssWildcardMatch[]									= "oss_wildcardMatch";
 
 	#include "common_vvmoss_plugins.h"
 
@@ -147,6 +146,83 @@
 	const s8		cgcOssSharedAsciiDeleteFile[]							= "oss_sharedAsciiDeleteFile";
 	const s8		cgcOssSharedAsciiWriteOutFile[]							= "oss_sharedAsciiWriteOutFile";
 
+	const s8		cgcOssDuplicateString[]									= "oss_duplicateString";
+	const s8		cgcOssDuplicateUnicodeString[]							= "oss_duplicateUnicodeString";
+	const s8		cgcOssDuplicateStringIntoDatum[]						= "oss_duplicateStringIntoDatum";
+	const s8		cgcOssDuplicateStringIntoDatum2[]						= "oss_duplicateStringIntoDatum2";
+	const s8		cgcOssDuplicateDatum[]									= "oss_duplicateDatum";
+	const s8		cgcOssDuplicateDatum2[]									= "oss_duplicateDatum2";
+	const s8		cgcOssDeleteDatum[]										= "oss_deleteDatum";
+	const s8		cgcOssDeleteDatum2[]									= "oss_deleteDatum2";
+	const s8		cgcOssAllocateNullStringIntoDatum2[]					= "oss_allocateNullStringIntoDatum2";
+	const s8		cgcOssCopyUpToShortestString[]							= "oss_copyUpToShortestString";
+	const s8		cgcOssWildcardMatch[]									= "oss_wildcardMatch";
+	const s8		cgcOssAsciiToUnicode[]									= "oss_asciiToUnicode";
+	const s8		cgcOssUnicodeToAscii[]									= "oss_unicodeToAscii";
+	const s8		cgcOssAsciiToUnicodeChar[]								= "oss_asciiToUnicodeChar";
+	const s8		cgcOssUnicodeToAsciiCharacter[]							= "oss_unicodeToAsciiCharacter";
+	const s8		cgcOssScanForwardUntilCharacterChanges[]				= "oss_scanForwardUntilCharacterChanges";
+	const s8		cgcOssScanForwardUntilCharacter[]						= "oss_scanForwardUntilCharacter";
+	const s8		cgcOssUnicodeMemcmp[]									= "oss_unicodeMemcmp";
+	const s8		cgcOssUnicodeMemicmp[]									= "oss_unicodeMemicmp";
+	const s8		cgcOssUnicodeMemset[]									= "oss_unicodeMemset";
+	const s8		cgcOssUpperCaseW[]										= "oss_upperCaseW";
+	const s8		cgcOssLowerCaseW[]										= "oss_lowerCaseW";
+	const s8		cgcOssMemset[]											= "oss_memset";
+	const s8		cgcOssMemset4[]											= "oss_memset4";
+	const s8		cgcOssMemcpy[]											= "oss_memcpy";
+	const s8		cgcOssMemcmp[]											= "oss_memcmp";
+	const s8		cgcOssMemicmp[]											= "oss_memicmp";
+	const s8		cgcOssMemicmpTwoLengths[]								= "oss_memicmpTwoLengths";
+	const s8		cgcOssMemicmpDatum[]									= "oss_memicmpDatum";
+	const s8		cgcOssMemicmpDatum2[]									= "oss_memicmpDatum2";
+	const s8		cgcOssMemicmpDatumDatum[]								= "oss_memicmpDatumDatum";
+	const s8		cgcOssMemicmpDatum2Datum2[]								= "oss_memicmpDatum2Datum2";
+	const s8		cgcOssDeriveRGBA[]										= "oss_deriveRGBA";
+
+	const s8		cgcOssLlCreate[]										= "oss_ll_create";
+	const s8		cgcOssLlInsert[]										= "oss_ll_insert";
+	const s8		cgcOssLlOrphanize[]										= "oss_ll_orphanize";
+	const s8		cgcOssLlDeleteChainWithCallback[]						= "oss_ll_deleteChainWithCallback";
+	const s8		cgcOssLlSha1Chain[]										= "oss_ll_sha1Chain";
+
+	const s8		cgcOssLl4OrphanizeAsBxml[]								= "oss_ll4_orphanizeAsBxml";
+	const s8		cgcOssLl4OrphanizeAsNode[]								= "oss_ll4_orphanizeAsNode";
+	const s8		cgcOssLl4InsertAsBxml[]									= "oss_ll4_insertAsBxml";
+	const s8		cgcOssLl4InsertAsBxmlAsChild[]							= "oss_ll4_insertAsBxmlAsChild";
+	const s8		cgcOssLl4InsertAsBxmlAsChildRegarding[]					= "oss_ll4_insertAsBxmlAsChildRegarding";
+	const s8		cgcOssLl4InsertAsNodeNorthSouth[]						= "oss_ll4_insertAsNodeNorthSouth";
+	const s8		cgcOssLl4InsertAsNodeEastWest[]							= "oss_ll4_insertAsNodeEastWest";
+	const s8		cgcOssLl4DeleteChainWithCallback[]						= "oss_ll4_deleteChainWithCallback";
+
+	const s8		cgcOssSEChainPrepend[]									= "oss_SEChain_prepend";
+	const s8		cgcOssSEChainAppend[]									= "oss_SEChain_append";
+	const s8		cgcOssSEChainAppendRelativeToMember[]					= "oss_SEChain_appendRelativeToMember";
+	const s8		cgcOssSEChainAppendExistingRelativeToMember[]			= "oss_SEChain_appendExistingRelativeToMember";
+
+	const s8		cgcOssSEChainMigrateAll[]								= "oss_SEChain_migrateAll";
+	const s8		cgcOssSEChainMigrateByPtr[]								= "oss_SEChain_migrateByPtr";
+	const s8		cgcOssSEChainMigrateByNum[]								= "oss_SEChain_migrateByNum";
+	const s8		cgcOssSEChainCompletelyMigrateSLLByPtr[]				= "oss_SEChain_completelyMigrateSLLByPtr";
+	const s8		cgcOssSEChainCompletelyMigrateSLLByNum[]				= "oss_SEChain_completelyMigrateSLLByNum";
+
+	const s8		cgcOssSEChainCountValids[]								= "oss_SEChain_countValids";
+	const s8		cgcOssSEChainDelete[]									= "oss_SEChain_delete";
+	const s8		cgcOssSEChainDeleteFrom[]								= "oss_SEChain_deleteFrom";
+	const s8		cgcOssSEChainDeleteFromAfterCallback[]					= "oss_SEChain_deleteFromAfterCallback";
+
+	const s8		cgcOssAllocateAdditionalStartEndMasterSlots[]			= "oss_allocateAdditionalStartEndMasterSlots";
+	const s8		cgcOssSearchSEChainByUniqueId[]							= "oss_searchSEChainByUniqueId";
+	const s8		cgcOssSearchSEChainByCallback[]							= "oss_searchSEChainByCallback";
+	const s8		cgcOssIterateThroughStartEndForCallback[]				= "oss_iterateThroughStartEndForCallback";
+	const s8		cgcOssValidateStartEnd[]								= "oss_validateStartEnd";
+	const s8		cgcOssSwapEndian[]										= "oss_swapEndian";
+	const s8		cgcOssRGA2BGRA[]										= "oss_RGBA2BGRA";
+	const s8		cgcOssAllocateAndNull[]									= "oss_allocateAndNull";
+	const s8		cgcOssIsNeedleInHaystack[]								= "oss_isNeedleInHaystack";
+	const s8		cgcOssIsNeedleInHaystackUnicode[]						= "oss_isNeedleInHaystack_Unicode";
+	const s8		cgcOssCountConsecutiveAsciiNumericDigits[]				= "oss_countConsecutiveAsciiNumericDigits";
+	const s8		cgcOssConvertTextToU32[]								= "oss_convertTextToU32";
 
 	const s8		cgcOssFindFirstFile[]									= "oss_fileFindFirst";
 	const s8		cgcOssFindNextFile[]									= "oss_fileFindNext";
@@ -371,7 +447,6 @@
 		void*			(CALLTYPE *oss_alloc)								(u64 tnSize, bool tlInitialize);
 		void*			(CALLTYPE *oss_realloc)								(void* ptrOld, u64 tnNewSize);
 		void*			(CALLTYPE *oss_free)								(void* ptr);
-		s32				(CALLTYPE *oss_wildcardMatch)						(SDatum* candidate, SDatum* wildcardPattern, bool tlCaseSensitive);
 
 
 //////////
@@ -430,6 +505,91 @@
 		s8*				(CALLTYPE *oss_sharedAsciiGetTempFilename)			(void);
 		bool			(CALLBACK *oss_sharedAsciiDeleteFile)				(s8* tcFullPathname);
 		bool			(CALLTYPE *oss_sharedAsciiWriteOutFile)				(s8* tcFullPathname, s8* tcData, u32 tnDataLength);
+
+
+//////////
+//
+// Common functions
+//
+//////
+		// Prototype definitions
+		u8*				(CALLBACK *oss_duplicateString)						(u8* ptr, u64 length);
+		w16*			(CALLBACK *oss_duplicateUnicodeString)				(w16* tuText);
+		void			(CALLBACK *oss_duplicateStringIntoDatum)			(SDatum*  datum,  u8* ptr, u64 length,                  bool tlFreeExisting);
+		void			(CALLBACK *oss_duplicateStringIntoDatum2)			(SDatum2* datum2, u8* ptr, u64 length, u64 totalLength, bool tlFreeExisting);
+		void			(CALLBACK *oss_duplicateDatum)						(SDatum*  datumDst,  SDatum*  datumSrc);
+		void			(CALLBACK *oss_duplicateDatum2)						(SDatum2* datum2Dst, SDatum2* datum2Src);
+		void			(CALLBACK *oss_deleteDatum)							(SDatum*  datum);
+		void			(CALLBACK *oss_deleteDatum2)						(SDatum2* datum2);
+		void			(CALLBACK *oss_allocateNullStringIntoDatum2)		(SDatum2* datum2, u64 length, bool tlInitialize);
+		void			(CALLBACK *oss_copyUpToShortestString)				(u8* dst, u32 tnDstLength, u8* src, u32 tnSrcLength);
+		s32				(CALLBACK *oss_wildcardMatch)						(csu8p candidate, csu8p wildcardPattern, bool tlCaseSensitive);
+		w16*			(CALLBACK *oss_asciiToUnicode)						(u8* tcText, u32 tnTextLength);
+		s8*				(CALLBACK *oss_unicodeToAscii)						(w16* tuText, u32 tnTextLength);
+		w16				(CALLBACK *oss_asciiToUnicodeChar)					(u8 tcChar);
+		s8				(CALLBACK *oss_unicodeToAsciiCharacter)				(w16 tuChar);
+		u64				(CALLBACK *oss_scanForwardUntilCharacterChanges)	(csu8p tcData, u64 tnMaxLength);
+		u64				(CALLBACK *oss_scanForwardUntilCharacter)			(csu8p tcData, s8 c);
+		int				(CALLBACK *oss_unicodeMemcmp)						(w16* l, w16* r, u32 tnLength);
+		int				(CALLBACK *oss_unicodeMemicmp)						(w16* l, w16* r, u32 tnLength);
+		int				(CALLBACK *oss_unicodeMemset)						(w16* p, w16 c, u32 tnLength);
+		w16				(CALLBACK *oss_upperCaseW)							(w16 u);
+		w16				(CALLBACK *oss_lowerCaseW)							(w16 u);
+		void			(CALLBACK *oss_memset)								(s8* dst, s8 c, u64 tnCount);
+		void			(CALLBACK *oss_memset4)								(u32* dst, u32 val, u64 tnCount);
+		void			(CALLBACK *oss_memcpy)								(s8* dst, s8* src, u64 tnCount);
+		s32				(CALLBACK *oss_memcmp)								(csu8p l/*eft*/, csu8p r/*ight*/, u64 tnCount);
+		s32				(CALLBACK *oss_memicmp)								(csu8p l/*eft*/, csu8p r/*ight*/, u64 tnCount);
+		s32				(CALLBACK *oss_memicmpTwoLengths)					(csu8p l/*eft*/, u64 tnLeftLength, csu8p r/*ight*/, u64 tnRightLength);
+		s32				(CALLBACK *oss_memicmpDatum)						(SDatum*  datum,  csu8p r/*ight*/, u64 tnRightLength);
+		s32				(CALLBACK *oss_memicmpDatum2)						(SDatum2* datum2, csu8p r/*ight*/, u64 tnRightLength);
+		s32				(CALLBACK *oss_memicmpDatumDatum)					(SDatum*  datumL,  SDatum*  datumR);
+		s32				(CALLBACK *oss_memicmpDatum2Datum2)					(SDatum2* datum2L, SDatum2* datum2R);
+		void			(CALLBACK *oss_deriveRGBA)							(u32 tnColor, u8* tnRed, u8* tnGrn, u8* tnBlu, f32* tfAlp);
+
+		SLL*			(CALLBACK *oss_ll_create)							(SLL* nodePrev, SLL* nodeNext, u64 tnUniqueId, u32  tnSize);
+		bool			(CALLBACK *oss_ll_insert)							(SLL* node, SLL* nodeRef, bool tlAfter);
+		void			(CALLBACK *oss_ll_orphanize)						(SLL* node);
+		void			(CALLBACK *oss_ll_deleteChainWithCallback)			(SLL* node, u64 iiCallbackFunction, u64 tnExtra);
+		u64				(CALLBACK *oss_ll_sha1Chain)						(SLL* node, u32 tnSize, u8 sha20Bytes[20]);
+
+		bool			(CALLBACK *oss_ll4_orphanizeAsBxml)					(SLL4* bxml);
+		bool			(CALLBACK *oss_ll4_orphanizeAsNode)					(SLL4* node);
+		bool			(CALLBACK *oss_ll4_insertAsBxml)					(SLL4* bxml, SLL4* bxmlRef,                   bool tlAfter);
+		bool			(CALLBACK *oss_ll4_insertAsBxmlAsChild)				(SLL4* bxml, SLL4* bxmlParent,                bool tlPrepend);
+		bool			(CALLBACK *oss_ll4_insertAsBxmlAsChildRegarding)	(SLL4* bxml, SLL4* bxmlParent, SLL4* bxmlRef, bool tlAfter);
+		bool			(CALLBACK *oss_ll4_insertAsNodeNorthSouth)			(SLL4* node, SLL4* nodeRef,                   bool tlAfter);
+		bool			(CALLBACK *oss_ll4_insertAsNodeEastWest)			(SLL4* node, SLL4* nodeRef,                   bool tlAfter);
+		void			(CALLBACK *oss_ll4_deleteChainWithCallback)			(SLL4* node, u64 iiCallbackFunction, u64 tnExtra);
+
+		void*			(CALLBACK *oss_SEChain_prepend)						(SStartEnd* ptrSE, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool* tlResult);
+		void*			(CALLBACK *oss_SEChain_append)						(SStartEnd* ptrSE, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool* tlResult);
+		void*			(CALLBACK *oss_SEChain_appendRelativeToMember)		(SStartEnd* ptrSE, SLL* ptrRef, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize,     u32 tnBlockSizeIfNewBlockNeeded, bool tlAfter, bool* tlResult);
+		void*			(CALLBACK *oss_SEChain_appendExistingRelativeToMember)(SStartEnd* ptrSE, SLL* ptrRef,                 u64 tnUniqueIdExtra, SLL* ptrCaller, u32 tnBlockSizeIfNewBlockNeeded, bool tlAfter, bool* tlResult);
+
+		void*			(CALLBACK *oss_SEChain_migrateAll)					(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc);
+		SMasterList*	(CALLBACK *oss_SEChain_migrateByPtr)				(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, void* ptr,    u32 tnHint, u32 tnBlockSize);
+		SMasterList*	(CALLBACK *oss_SEChain_migrateByNum)				(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, u32 lnSrcNum, u32 tnHint, u32 tnBlockSize);
+		SLL*			(CALLBACK *oss_SEChain_completelyMigrateSLLByPtr)	(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, SLL* ptr,     u32 tnHint, u32 tnBlockSize);
+		SLL*			(CALLBACK *oss_SEChain_completelyMigrateSLLByNum)	(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, u32 lnSrcNum, u32 tnHint, u32 tnBlockSize);
+
+		u32				(CALLBACK *oss_SEChain_countValids)					(SStartEnd* ptrSE);
+		u32				(CALLBACK *oss_SEChain_delete)						(SStartEnd* ptrSE, u64 tnCallback, u64 tnParam, bool tlDeletePointers);
+		void			(CALLBACK *oss_SEChain_deleteFrom)					(SStartEnd* ptrSE, void* ptrDel, bool tlDeletePointers);
+		bool			(CALLBACK *oss_SEChain_deleteFromAfterCallback)		(SStartEnd* ptrSE, bool tlDeletePointers, u64 iiCallbackFunction, u64 tnExtra);
+
+		bool			(CALLBACK *oss_allocateAdditionalStartEndMasterSlots)(SStartEnd* ptrSE, u32 tnBlockSize);
+		void*			(CALLBACK *oss_searchSEChainByUniqueId)		(SStartEnd* ptrSE, u64 tnUniqueId);
+		void*			(CALLBACK *oss_searchSEChainByCallback)		(SStartEnd* ptrSE, u64 iiCallbackFunction, u64 tnExtra);
+		void			(CALLBACK *oss_iterateThroughStartEndForCallback)	(SStartEnd* ptrSE, u64 iiCallbackFunction, u64 tnExtra);
+		void			(CALLBACK *oss_validateStartEnd)					(SStartEnd* ptrSE, u64 iiCallbackFunction);
+		u32				(CALLBACK *oss_swapEndian)							(u32 tnValue);
+		u32				(CALLBACK *oss_RGBA2BGRA)							(u32 tnColor);
+		void*			(CALLBACK *oss_allocateAndNull)						(u32 tnSize, bool tnInitToZeros);
+		bool			(CALLBACK *oss_isNeedleInHaystack)					(csu8p tcHaystack, s32 tnHaystackLength, csu8p tcNeedle, s32 tnNeedleLength, bool tlCaseSensitive, u32* tnFoundPosition);
+		bool			(CALLBACK *oss_isNeedleInHaystack_Unicode)			(w16* twHaystack, w16* twNeedle);
+		u32				(CALLBACK *oss_countConsecutiveAsciiNumericDigits)	(s8* buffer, u32 tnMaxLength);
+		u32				(CALLBACK *oss_convertTextToU32)					(s8* tcNumbers, u32 tnMaxLength);
 
 
 //////////
@@ -656,7 +816,6 @@
 		(void *)&oss_alloc,													(void *)cgcOssAlloc,
 		(void *)&oss_realloc,												(void *)cgcOssRealloc,
 		(void *)&oss_free,													(void *)cgcOssFree,
-		(void *)&oss_wildcardMatch,											(void *)cgcOssWildcardMatch,
 
 		(void *)&oss_soundInitialize,										(void *)cgcOssSoundInitialize,
 		(void *)&oss_soundCreateTone,										(void *)cgcOssSoundCreateTone,
@@ -693,9 +852,87 @@
 		(void *)&oss_sharedAsciiDeleteFile,									(void *)cgcOssSharedAsciiDeleteFile,
 		(void *)&oss_sharedAsciiWriteOutFile,								(void *)cgcOssSharedAsciiWriteOutFile,
 
+		(void*)&oss_duplicateString,										(void*)cgcOssDuplicateString,
+		(void*)&oss_duplicateUnicodeString,									(void*)cgcOssDuplicateUnicodeString,
+		(void*)&oss_duplicateStringIntoDatum,								(void*)cgcOssDuplicateStringIntoDatum,
+		(void*)&oss_duplicateStringIntoDatum2,								(void*)cgcOssDuplicateStringIntoDatum2,
+		(void*)&oss_duplicateDatum,											(void*)cgcOssDuplicateDatum,
+		(void*)&oss_duplicateDatum2,										(void*)cgcOssDuplicateDatum2,
+		(void*)&oss_deleteDatum,											(void*)cgcOssDeleteDatum,
+		(void*)&oss_deleteDatum2,											(void*)cgcOssDeleteDatum2,
+		(void*)&oss_allocateNullStringIntoDatum2,							(void*)cgcOssAllocateNullStringIntoDatum2,
+		(void*)&oss_copyUpToShortestString,									(void*)cgcOssCopyUpToShortestString,
+		(void*)&oss_wildcardMatch,											(void*)cgcOssWildcardMatch,
+		(void*)&oss_asciiToUnicode,											(void*)cgcOssAsciiToUnicode,
+		(void*)&oss_unicodeToAscii,											(void*)cgcOssUnicodeToAscii,
+		(void*)&oss_asciiToUnicodeChar,										(void*)cgcOssAsciiToUnicodeChar,
+		(void*)&oss_unicodeToAsciiCharacter,								(void*)cgcOssUnicodeToAsciiCharacter,
+		(void*)&oss_scanForwardUntilCharacterChanges,						(void*)cgcOssScanForwardUntilCharacterChanges,
+		(void*)&oss_scanForwardUntilCharacter,								(void*)cgcOssScanForwardUntilCharacter,
+		(void*)&oss_unicodeMemcmp,											(void*)cgcOssUnicodeMemcmp,
+		(void*)&oss_unicodeMemicmp,											(void*)cgcOssUnicodeMemicmp,
+		(void*)&oss_unicodeMemset,											(void*)cgcOssUnicodeMemset,
+		(void*)&oss_upperCaseW,												(void*)cgcOssUpperCaseW,
+		(void*)&oss_lowerCaseW,												(void*)cgcOssLowerCaseW,
+		(void*)&oss_memset,													(void*)cgcOssMemset,
+		(void*)&oss_memset4,												(void*)cgcOssMemset4,
+		(void*)&oss_memcpy,													(void*)cgcOssMemcpy,
+		(void*)&oss_memcmp,													(void*)cgcOssMemcmp,
+		(void*)&oss_memicmp,												(void*)cgcOssMemicmp,
+		(void*)&oss_memicmpTwoLengths,										(void*)cgcOssMemicmpTwoLengths,
+		(void*)&oss_memicmpDatum,											(void*)cgcOssMemicmpDatum,
+		(void*)&oss_memicmpDatum2,											(void*)cgcOssMemicmpDatum2,
+		(void*)&oss_memicmpDatumDatum,										(void*)cgcOssMemicmpDatumDatum,
+		(void*)&oss_memicmpDatum2Datum2,									(void*)cgcOssMemicmpDatum2Datum2,
+		(void*)&oss_deriveRGBA,												(void*)cgcOssDeriveRGBA,
+
+		(void*)&oss_ll_create,												(void*)cgcOssLlCreate,
+		(void*)&oss_ll_insert,												(void*)cgcOssLlInsert,
+		(void*)&oss_ll_orphanize,											(void*)cgcOssLlOrphanize,
+		(void*)&oss_ll_deleteChainWithCallback,								(void*)cgcOssLlDeleteChainWithCallback,
+		(void*)&oss_ll_sha1Chain,											(void*)cgcOssLlSha1Chain,
+
+		(void*)&oss_ll4_orphanizeAsBxml,									(void*)cgcOssLl4OrphanizeAsBxml,
+		(void*)&oss_ll4_orphanizeAsNode,									(void*)cgcOssLl4OrphanizeAsNode,
+		(void*)&oss_ll4_insertAsBxml,										(void*)cgcOssLl4InsertAsBxml,
+		(void*)&oss_ll4_insertAsBxmlAsChild,								(void*)cgcOssLl4InsertAsBxmlAsChild,
+		(void*)&oss_ll4_insertAsBxmlAsChildRegarding,						(void*)cgcOssLl4InsertAsBxmlAsChildRegarding,
+		(void*)&oss_ll4_insertAsNodeNorthSouth,								(void*)cgcOssLl4InsertAsNodeNorthSouth,
+		(void*)&oss_ll4_insertAsNodeEastWest,								(void*)cgcOssLl4InsertAsNodeEastWest,
+		(void*)&oss_ll4_deleteChainWithCallback,							(void*)cgcOssLl4DeleteChainWithCallback,
+
+		(void*)&oss_SEChain_prepend,										(void*)cgcOssSEChainPrepend,
+		(void*)&oss_SEChain_append,											(void*)cgcOssSEChainAppend,
+		(void*)&oss_SEChain_appendRelativeToMember,							(void*)cgcOssSEChainAppendRelativeToMember,
+		(void*)&oss_SEChain_appendExistingRelativeToMember,					(void*)cgcOssSEChainAppendExistingRelativeToMember,
+
+		(void*)&oss_SEChain_migrateAll,										(void*)cgcOssSEChainMigrateAll,
+		(void*)&oss_SEChain_migrateByPtr,									(void*)cgcOssSEChainMigrateByPtr,
+		(void*)&oss_SEChain_migrateByNum,									(void*)cgcOssSEChainMigrateByNum,
+		(void*)&oss_SEChain_completelyMigrateSLLByPtr,						(void*)cgcOssSEChainCompletelyMigrateSLLByPtr,
+		(void*)&oss_SEChain_completelyMigrateSLLByNum,						(void*)cgcOssSEChainCompletelyMigrateSLLByNum,
+
+		(void*)&oss_SEChain_countValids,									(void*)cgcOssSEChainCountValids,
+		(void*)&oss_SEChain_delete,											(void*)cgcOssSEChainDelete,
+		(void*)&oss_SEChain_deleteFrom,										(void*)cgcOssSEChainDeleteFrom,
+		(void*)&oss_SEChain_deleteFromAfterCallback,						(void*)cgcOssSEChainDeleteFromAfterCallback,
+
+		(void*)&oss_allocateAdditionalStartEndMasterSlots,					(void*)cgcOssAllocateAdditionalStartEndMasterSlots,
+		(void*)&oss_searchSEChainByUniqueId,							(void*)cgcOssSearchSEChainByUniqueId,
+		(void*)&oss_searchSEChainByCallback,							(void*)cgcOssSearchSEChainByCallback,
+		(void*)&oss_iterateThroughStartEndForCallback,						(void*)cgcOssIterateThroughStartEndForCallback,
+		(void*)&oss_validateStartEnd,										(void*)cgcOssValidateStartEnd,
+		(void*)&oss_swapEndian,												(void*)cgcOssSwapEndian,
+		(void*)&oss_RGBA2BGRA,												(void*)cgcOssRGA2BGRA,
+		(void*)&oss_allocateAndNull,										(void*)cgcOssAllocateAndNull,
+		(void*)&oss_isNeedleInHaystack,										(void*)cgcOssIsNeedleInHaystack,
+		(void*)&oss_isNeedleInHaystack_Unicode,								(void*)cgcOssIsNeedleInHaystackUnicode,
+		(void*)&oss_countConsecutiveAsciiNumericDigits,						(void*)cgcOssCountConsecutiveAsciiNumericDigits,
+		(void*)&oss_convertTextToU32,										(void*)cgcOssConvertTextToU32,
+
 		(void *)&oss_fileFindFirst,											(void *)cgcOssFindFirstFile,
 		(void *)&oss_fileFindNext,											(void *)cgcOssFindNextFile,
-		(void *)&oss_fileFindClose,												(void *)cgcOssFindClose,
+		(void *)&oss_fileFindClose,											(void *)cgcOssFindClose,
 
 		(void *)&oss_buildBufferCreateAndInitialize,						(void *)cgcOssBuildBufferCreateAndInitialize,
 		(void *)&oss_buildBufferAppendText,									(void *)cgcOssBuildBufferAppendText,
@@ -721,22 +958,22 @@
 		(void *)&oss_bxmlSave,												(void *)cgcOssBxmlSave,
 		(void *)&oss_bxmlSaveToBuffer,										(void *)cgcOssBxmlSaveToBuffer,
 
-		(void *)&oss_bxmlaCreate,									(void *)cgcOssBxmlAttributeCreate,
-		(void *)&oss_bxmlaSetName,									(void *)cgcOssBxmlAttributeSetName,
-		(void *)&oss_bxmlaSetData,									(void *)cgcOssBxmlAttributeSetData,
-		(void *)&oss_bxmlaSetTotalLength,							(void *)cgcOssBxmlAttributeSetTotalLength,
-		(void *)&oss_bxmlaDelete,									(void *)cgcOssBxmlAttributeDelete,
-		(void *)&oss_bxmlaInsert,									(void *)cgcOssBxmlAttributeInsert,
-		(void *)&oss_bxmlaInsertExisting,							(void *)cgcOssBxmlAttributeInsertExisting,
-		(void *)&oss_bxmlaCopy,										(void *)cgcOssBxmlAttributeCopy,
-		(void *)&oss_bxmlaCopyAs,									(void *)cgcOssBxmlAttributeCopyAs,
-		(void *)&oss_bxmlaSha1One,									(void *)cgcOssBxmlAttributeSha1One,
-		(void *)&oss_bxmlaSha1,										(void *)cgcOssBxmlAttributeSha1,
-		(void *)&oss_bxmlaSha1Tag,									(void *)cgcOssBxmlAttributeSha1Tag,
-		(void *)&oss_bxmlaSha1Data,									(void *)cgcOssBxmlAttributeSha1Data,
+		(void *)&oss_bxmlaCreate,											(void *)cgcOssBxmlAttributeCreate,
+		(void *)&oss_bxmlaSetName,											(void *)cgcOssBxmlAttributeSetName,
+		(void *)&oss_bxmlaSetData,											(void *)cgcOssBxmlAttributeSetData,
+		(void *)&oss_bxmlaSetTotalLength,									(void *)cgcOssBxmlAttributeSetTotalLength,
+		(void *)&oss_bxmlaDelete,											(void *)cgcOssBxmlAttributeDelete,
+		(void *)&oss_bxmlaInsert,											(void *)cgcOssBxmlAttributeInsert,
+		(void *)&oss_bxmlaInsertExisting,									(void *)cgcOssBxmlAttributeInsertExisting,
+		(void *)&oss_bxmlaCopy,												(void *)cgcOssBxmlAttributeCopy,
+		(void *)&oss_bxmlaCopyAs,											(void *)cgcOssBxmlAttributeCopyAs,
+		(void *)&oss_bxmlaSha1One,											(void *)cgcOssBxmlAttributeSha1One,
+		(void *)&oss_bxmlaSha1,												(void *)cgcOssBxmlAttributeSha1,
+		(void *)&oss_bxmlaSha1Tag,											(void *)cgcOssBxmlAttributeSha1Tag,
+		(void *)&oss_bxmlaSha1Data,											(void *)cgcOssBxmlAttributeSha1Data,
 
-		(void *)&oss_bxmlaGetNext,									(void *)cgcOssBxmlAttributeGetNext,
-		(void *)&oss_bxmlaGetPrev,									(void *)cgcOssBxmlAttributeGetPrev,
+		(void *)&oss_bxmlaGetNext,											(void *)cgcOssBxmlAttributeGetNext,
+		(void *)&oss_bxmlaGetPrev,											(void *)cgcOssBxmlAttributeGetPrev,
 
 		(void *)&oss_bxmlNodeCreate,										(void *)cgcOssBxmlNodeCreate,
 		(void *)&oss_bxmlNodeSetName,										(void *)cgcOssBxmlNodeSetName,

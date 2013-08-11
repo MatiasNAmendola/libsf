@@ -208,7 +208,7 @@
 
 
 		// Try to find the resource we've already loaded
-		lr = (SVvmmcResourceText*)icommon_searchStartEndChainByCallback(&gseRootResourceTexts, (u64)&iivvmmc_loadResourceAsciiTextCallback, tnResourceNumber);
+		lr = (SVvmmcResourceText*)oss_searchSEChainByCallback(&gseRootResourceTexts, (u64)&iivvmmc_loadResourceAsciiTextCallback, tnResourceNumber);
 		if (lr)
 			return(lr->text);		// It's already been loaded
 
@@ -217,7 +217,7 @@
 			return((s8*)cgcUnableToLocateResource);		// Use the default failure string
 
 		// Allocate the new item
-		lr = (SVvmmcResourceText*)icommon_SEChain_append(&gseRootResourceTexts, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SVvmmcResourceText), _COMMON_START_END_BLOCK_SIZE, NULL);
+		lr = (SVvmmcResourceText*)oss_SEChain_append(&gseRootResourceTexts, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SVvmmcResourceText), _COMMON_START_END_BLOCK_SIZE, NULL);
 		if (lr)
 		{
 			// Store the resource information

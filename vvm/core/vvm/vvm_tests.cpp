@@ -92,7 +92,7 @@
 		// Initialize
 		//////
 			memset(&lff, 0, sizeof(lff));
-			lnExclusionListLength	= (u32)icommon_strlen(tcExclusionList);
+			lnExclusionListLength	= (u32)oss_strlen(tcExclusionList);
 			llCumulativeResult		= true;
 
 
@@ -106,7 +106,7 @@
 				while (llMore)
 				{
 					// Make sure it's not a file to exclude
-					if (!icommon_isNeedleInHaystack(tcExclusionList, lnExclusionListLength, lff.file.data, (u32)lff.file.length, false, NULL))
+					if (!oss_isNeedleInHaystack(tcExclusionList, lnExclusionListLength, lff.file.data, (u32)lff.file.length, false, NULL))
 					{
 						//////////
 						// Run this test
@@ -123,8 +123,8 @@
 				oss_fileFindClose(lnHandleFind);
 
 				// Release any allocated memory blocks
-				icommon_deleteDatum(&lff.file);
-				icommon_deleteDatum(&lff.file2);
+				oss_deleteDatum(&lff.file);
+				oss_deleteDatum(&lff.file2);
 			}
 
 

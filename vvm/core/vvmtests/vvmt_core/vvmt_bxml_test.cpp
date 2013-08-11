@@ -411,12 +411,12 @@
 				oss_bxmlFindAllAsStartEndLists(bxml, NULL,			&bxmlaFinds,	&wildcardSearchAttributes,	&lnCountAttributes,	true, true);
 
 				// Compute SHA-1 of bxml node finds
-				icommon_iterateThroughStartEndForCallback(&bxmlFinds,	(u64)&iivvmt_testBxml_computeSha1CallbackBxml,	(u64)&context[0]);
-				icommon_SEChain_delete(&bxmlFinds, 0, 0, false);
+				oss_iterateThroughStartEndForCallback(&bxmlFinds,	(u64)&iivvmt_testBxml_computeSha1CallbackBxml,	(u64)&context[0]);
+				oss_SEChain_delete(&bxmlFinds, 0, 0, false);
 
 				// And continue by computing SHA-1 of bxmla attribute name finds on top of the just computed SHA-1 from bxml node finds
-				icommon_iterateThroughStartEndForCallback(&bxmlaFinds,	(u64)&iivvmt_testBxml_computeSha1CallbackBxmla,	(u64)&context[0]);
-				icommon_SEChain_delete(&bxmlaFinds, 0, 0, false);
+				oss_iterateThroughStartEndForCallback(&bxmlaFinds,	(u64)&iivvmt_testBxml_computeSha1CallbackBxmla,	(u64)&context[0]);
+				oss_SEChain_delete(&bxmlaFinds, 0, 0, false);
 
 				// Determine the SHA-1 based on the finds
 				oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, true);
@@ -438,8 +438,8 @@
 				oss_bxmlDataFindAllAsStartEndList(bxml, &bxmlaFinds, &wildcardSearchData, &lnDataCount, true);
 
 				// Compute SHA-1 of bxmla attribute data finds
-				icommon_iterateThroughStartEndForCallback(&bxmlDataFinds, (u64)&iivvmt_testBxml_computeSha1CallbackBxmlaData, (u64)&context[0]);
-				icommon_SEChain_delete(&bxmlDataFinds,	0, 0, false);
+				oss_iterateThroughStartEndForCallback(&bxmlDataFinds, (u64)&iivvmt_testBxml_computeSha1CallbackBxmlaData, (u64)&context[0]);
+				oss_SEChain_delete(&bxmlDataFinds,	0, 0, false);
 
 				// Determine the SHA-1 based on the finds
 				oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, true);

@@ -177,7 +177,7 @@
 						++lnLength;
 
 					// Append an attribute which contains the comment data
-					bxmlaNew = (SBxmla*)icommon_SEChain_append(&bxml->_attributes, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
+					bxmlaNew = (SBxmla*)oss_SEChain_append(&bxml->_attributes, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 					if (!bxmlaNew)
 						return((SBxml*)-1);
 
@@ -185,8 +185,8 @@
 					bxmlaNew->_parent = bxml;
 
 					// Store the tag name and allocate space for the data, set it to NULLs
-					icommon_duplicateStringIntoDatum (&bxmlaNew->_name,	(u8*)cgcAutoComment,		sizeof(cgcAutoComment) - 1,					false);
-					icommon_duplicateStringIntoDatum2(&bxmlaNew->_data,	(u8*)buffer + lnOffset,		lnLength + 3,				lnLength + 3,	false);
+					oss_duplicateStringIntoDatum (&bxmlaNew->_name,	(u8*)cgcAutoComment,		sizeof(cgcAutoComment) - 1,					false);
+					oss_duplicateStringIntoDatum2(&bxmlaNew->_data,	(u8*)buffer + lnOffset,		lnLength + 3,				lnLength + 3,	false);
 
 					// If we're at the end of the input, syntax error
 					if (!ioss_verifyLength(lnOffset + 2, tnMaxLength))
@@ -275,7 +275,7 @@
 						return((SBxml*)-1);		// Memory error??
 
 					// Store the tag name
-					icommon_duplicateStringIntoDatum(&bxml->_name, (u8*)buffer + lnOffset, lnLength, false);
+					oss_duplicateStringIntoDatum(&bxml->_name, (u8*)buffer + lnOffset, lnLength, false);
 
 					// Skip past the name
 					lnOffset += lnLength;
@@ -346,7 +346,7 @@ _asm nop;
 
 											// We're sitting no the closing quote character
 											// Append this attribute
-											bxmlaNew = (SBxmla*)icommon_SEChain_append(&bxml->_attributes, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
+											bxmlaNew = (SBxmla*)oss_SEChain_append(&bxml->_attributes, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 											if (!bxmlaNew)
 												return((SBxml*)-1);
 
@@ -354,8 +354,8 @@ _asm nop;
 											bxmlaNew->_parent = bxml;
 
 											// Store the tag name and data
-											icommon_duplicateStringIntoDatum (&bxmlaNew->_name, (u8*)buffer + lnOffset,								lnAttrTagLength,						false);
-											icommon_duplicateStringIntoDatum2(&bxmlaNew->_data, (u8*)buffer + lnOffset + lnAttrTagLength + 1 + 1,	lnAttrDataLength, lnAttrDataLength,		false);
+											oss_duplicateStringIntoDatum (&bxmlaNew->_name, (u8*)buffer + lnOffset,								lnAttrTagLength,						false);
+											oss_duplicateStringIntoDatum2(&bxmlaNew->_data, (u8*)buffer + lnOffset + lnAttrTagLength + 1 + 1,	lnAttrDataLength, lnAttrDataLength,		false);
 
 											// Move past this attribute
 											lnOffset += lnAttrTagLength + 1 + 1 + lnAttrDataLength + 1;
@@ -385,7 +385,7 @@ _asm nop;
 												lnValue = ioss_convertValidatedNumericStringToU32(buffer + lnOffset + lnAttrTagLength + 2, (u32)lnNumberLength);
 
 												// Append this attribute
-												bxmlaNew = (SBxmla*)icommon_SEChain_append(&bxml->_attributes, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
+												bxmlaNew = (SBxmla*)oss_SEChain_append(&bxml->_attributes, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 												if (!bxmlaNew)
 													return((SBxml*)-1);
 
@@ -393,8 +393,8 @@ _asm nop;
 												bxmlaNew->_parent = bxml;
 
 												// Store the tag name and allocate space for the data, set it to NULLs
-												icommon_duplicateStringIntoDatum    (&bxmlaNew->_name,	(u8*)buffer + lnOffset,		lnAttrTagLength,	false);
-												icommon_allocateNullStringIntoDatum2(&bxmlaNew->_data,								 lnValue,			true);
+												oss_duplicateStringIntoDatum    (&bxmlaNew->_name,	(u8*)buffer + lnOffset,		lnAttrTagLength,	false);
+												oss_allocateNullStringIntoDatum2(&bxmlaNew->_data,								 lnValue,			true);
 
 												// Move past this attribute size allocator
 												lnOffset += lnAttrTagLength + 2 + lnNumberLength;
@@ -441,7 +441,7 @@ _asm nop;
 														}
 
 														// Append this attribute
-														bxmlaNew = (SBxmla*)icommon_SEChain_append(&bxml->_attributes, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
+														bxmlaNew = (SBxmla*)oss_SEChain_append(&bxml->_attributes, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 														if (!bxmlaNew)
 															return((SBxml*)-1);
 
@@ -449,8 +449,8 @@ _asm nop;
 														bxmlaNew->_parent = bxml;
 
 														// Store the tag name and allocate space for the data, set it to NULLs
-														icommon_duplicateStringIntoDatum (&bxmlaNew->_name,	(u8*)buffer + lnOffset,																		lnAttrTagLength,				false);
-														icommon_duplicateStringIntoDatum2(&bxmlaNew->_data,	(u8*)buffer + lnOffset + lnAttrTagLength + 1 + lnNumberLength1 + 1 + lnNumberLength2 + 1,	lnValue2,			lnValue1,	false);
+														oss_duplicateStringIntoDatum (&bxmlaNew->_name,	(u8*)buffer + lnOffset,																		lnAttrTagLength,				false);
+														oss_duplicateStringIntoDatum2(&bxmlaNew->_data,	(u8*)buffer + lnOffset + lnAttrTagLength + 1 + lnNumberLength1 + 1 + lnNumberLength2 + 1,	lnValue2,			lnValue1,	false);
 
 														// Move past this attribute size allocator
 														lnOffset += lnAttrTagLength + 1 + lnNumberLength1 + 1 + lnNumberLength2 + 1 + lnValue2;
@@ -465,7 +465,7 @@ _asm nop;
 														lnValue = ioss_convertValidatedNumericStringToU32(buffer + lnOffset + lnAttrTagLength + 1, (u32)lnNumberLength1);
 
 														// Append this attribute
-														bxmlaNew = (SBxmla*)icommon_SEChain_append(&bxml->_attributes, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
+														bxmlaNew = (SBxmla*)oss_SEChain_append(&bxml->_attributes, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 														if (!bxmlaNew)
 															return((SBxml*)-1);
 
@@ -473,8 +473,8 @@ _asm nop;
 														bxmlaNew->_parent = bxml;
 
 														// Store the tag name and allocate space for the data, set it to NULLs
-														icommon_duplicateStringIntoDatum (&bxmlaNew->_name,	(u8*)buffer + lnOffset,												lnAttrTagLength,			false);
-														icommon_duplicateStringIntoDatum2(&bxmlaNew->_data,	(u8*)buffer + lnOffset + lnAttrTagLength + 1 + lnNumberLength1 + 1,	lnValue,		lnValue,	false);
+														oss_duplicateStringIntoDatum (&bxmlaNew->_name,	(u8*)buffer + lnOffset,												lnAttrTagLength,			false);
+														oss_duplicateStringIntoDatum2(&bxmlaNew->_data,	(u8*)buffer + lnOffset + lnAttrTagLength + 1 + lnNumberLength1 + 1,	lnValue,		lnValue,	false);
 
 														// Move past this attribute size allocator
 														lnOffset += lnAttrTagLength + 1 + lnNumberLength1 + 1 + lnValue;
@@ -749,7 +749,7 @@ _asm nop;
 				{
 					// There are attributes
 					// Iterate through each attribute, appending them as we go
-					icommon_iterateThroughStartEndForCallback(&bxml->_attributes, (u64)&iibxml_saveNodeCallback, (u64)(void*)build);
+					oss_iterateThroughStartEndForCallback(&bxml->_attributes, (u64)&iibxml_saveNodeCallback, (u64)(void*)build);
 				}
 
 				// Add the closer for this tag
@@ -839,7 +839,7 @@ _asm nop;
 				{
 					// Both the attribute length and the total length are the same, so we can store it as one attr:##=
 					// However, if the data allocated is all NULLs, then we don't need to store it
-					if (bxmla->_data.datum.length >= 1 && bxmla->_data.datum.data._s8[0] == 0 && icommon_scanForwardUntilCharacterChanges(bxmla->_data.datum.data, bxmla->_data.datum.length) == bxmla->_data.datum.length)
+					if (bxmla->_data.datum.length >= 1 && bxmla->_data.datum.data._s8[0] == 0 && oss_scanForwardUntilCharacterChanges(bxmla->_data.datum.data, bxmla->_data.datum.length) == bxmla->_data.datum.length)
 					{
 						// It's all NULL, we need to write, so we write "attr::##"
 						sprintf_s(buffer, sizeof(buffer), "%u\0", bxmla->_data.lengthTotal);
@@ -936,10 +936,10 @@ _asm nop;
 				}
 
 				// Delete the name
-				icommon_deleteDatum(&bxmla->_name);
+				oss_deleteDatum(&bxmla->_name);
 
 				// Delete the data
-				icommon_deleteDatum2(&bxmla->_data);
+				oss_deleteDatum2(&bxmla->_data);
 
 				// Now that we've deleted the subordinate structure components, we are free to release the structure itself, both happily, and obediently. :-)
 				// Indicate we found our man
@@ -1029,7 +1029,7 @@ _asm nop;
 
 			// If we're valid, duplicate the source entry's data component
 			if (bxmlaNew)
-				icommon_duplicateDatum2(&bxmlaNew->_data, &bxmlaOriginal->_data);
+				oss_duplicateDatum2(&bxmlaNew->_data, &bxmlaOriginal->_data);
 		}
 		// Indicate our status
 		return(bxmlaNew);
@@ -1066,7 +1066,7 @@ _asm nop;
 				bxmlaNew->ll.uniqueId = oss_getNextUniqueId();
 
 				// Duplicate the source entry's components
-				icommon_duplicateStringIntoDatum(&bxmlaNew->_name, (u8*)tcNewName, tnNewNameLength, false);
+				oss_duplicateStringIntoDatum(&bxmlaNew->_name, (u8*)tcNewName, tnNewNameLength, false);
 			}
 		}
 		// Indicate our status
@@ -1091,7 +1091,7 @@ _asm nop;
 		if (bxmlaNew)
 		{
 			// Append the data
-			icommon_duplicateStringIntoDatum2(&bxmlaNew->_data, (u8*)tcData, tnDataLength, tnTotalDataLength, false);
+			oss_duplicateStringIntoDatum2(&bxmlaNew->_data, (u8*)tcData, tnDataLength, tnTotalDataLength, false);
 
 		}
 		// Indicate our status
@@ -1129,7 +1129,7 @@ _asm nop;
 				bxmlNew->ll4.uniqueId = oss_getNextUniqueId();
 
 				// Duplicate the source entry's components
-				icommon_duplicateStringIntoDatum(&bxmlNew->_name, (u8*)tcNewName, tnNewNameLength, false);
+				oss_duplicateStringIntoDatum(&bxmlNew->_name, (u8*)tcNewName, tnNewNameLength, false);
 			}
 		}
 		// Indicate our status
@@ -1166,7 +1166,7 @@ _asm nop;
 			if (bxmlNew)
 			{
 				// Duplicate the name
-				icommon_duplicateStringIntoDatum(&bxmlNew->_name, (u8*)tcNewName, tnNewNameLength, false);
+				oss_duplicateStringIntoDatum(&bxmlNew->_name, (u8*)tcNewName, tnNewNameLength, false);
 
 				// If we are to copy attributes, do so
 				if (tlCopyAttributes && bxmlSrc->_attributes.masterCount != 0)
@@ -1208,7 +1208,7 @@ _asm nop;
 			params.tlResult	= tlResult;
 
 			// Iterate through each attribute copying them out
-			icommon_iterateThroughStartEndForCallback(&bxmlSrc->_attributes, (u64)&iibxml_nodeCopyAttributesCallback, (u64)(void*)&params);
+			oss_iterateThroughStartEndForCallback(&bxmlSrc->_attributes, (u64)&iibxml_nodeCopyAttributesCallback, (u64)(void*)&params);
 
 			// Update the result if we failed
 			if (tlResult && !*params.tlResult)
@@ -1236,7 +1236,7 @@ _asm nop;
 			bxmlaNew	= ibxml_attributeDuplicate(bxmla);
 
 			// Append this attribute to the destination
-			if (bxmlaNew)		iicommon_SEChain_appendOrPrependExisting(&params->bxmlDst->_attributes, (SLL*)bxmlaNew, _COMMON_START_END_SMALL_BLOCK_SIZE, false, &llResult);
+			if (bxmlaNew)		ioss_SEChain_appendOrPrependExisting(&params->bxmlDst->_attributes, (SLL*)bxmlaNew, _COMMON_START_END_SMALL_BLOCK_SIZE, false, &llResult);
 			else				llResult = false;
 
 			// Update our status if we fail
@@ -1308,7 +1308,7 @@ _asm nop;
 					//////////
 					// Append the duplicated tag name
 					//////
-						icommon_duplicateDatum(&bxmlNew->_name, &bxmlSrcChild->_name);
+						oss_duplicateDatum(&bxmlNew->_name, &bxmlSrcChild->_name);
 
 
 					//////////
@@ -1374,7 +1374,7 @@ _asm nop;
 		gsLastErrorInfo.lastErrorCode	= tnErrorNumber;
 
 		// Update the last error structure
-		icommon_duplicateStringIntoDatum(&gsLastErrorInfo.description, (u8*)tcDescriptionZ, icommon_strlen(_csu8p(tcDescriptionZ)), true);
+		oss_duplicateStringIntoDatum(&gsLastErrorInfo.description, (u8*)tcDescriptionZ, oss_strlen(_csu8p(tcDescriptionZ)), true);
 		// When we get here, the last error has been updated
 	}
 
@@ -1407,8 +1407,8 @@ _asm nop;
 			if (bxml->_attributes.masterCount != 0)
 			{
 				// Get the count of items that should be deleted
-				lnOriginalCount	= icommon_SEChain_countValids(&bxml->_attributes);
-				lnDeletedCount	= icommon_SEChain_delete(&bxml->_attributes, (u64)&iibxml_nodeDeleteBranchAttributeCallback, (u64)(void*)bxml, true);
+				lnOriginalCount	= oss_SEChain_countValids(&bxml->_attributes);
+				lnDeletedCount	= oss_SEChain_delete(&bxml->_attributes, (u64)&iibxml_nodeDeleteBranchAttributeCallback, (u64)(void*)bxml, true);
 
 				// Our success indicates whether or not they were completely deleted
 				llResult = (lnOriginalCount == lnDeletedCount);
@@ -1437,8 +1437,8 @@ _asm nop;
 			bxml	= (SBxml*)tnExtra;
 
 			// Delete this attribute's datum and datum2 items
-			icommon_deleteDatum(&bxmla->_name);
-			icommon_deleteDatum2(&bxmla->_data);
+			oss_deleteDatum(&bxmla->_name);
+			oss_deleteDatum2(&bxmla->_data);
 		}
 	}
 
@@ -1645,7 +1645,7 @@ _asm nop;
 
 			// If we are to process attributes, process them next
 			if (tlAttributes && bxml->_attributes.masterCount != 0)
-				icommon_iterateThroughStartEndForCallback(&bxml->_attributes, (u64)&iioss_bxmlComputeSha1OnNodeAttributeCallback, (u64)(void*)&cbParams);
+				oss_iterateThroughStartEndForCallback(&bxml->_attributes, (u64)&iioss_bxmlComputeSha1OnNodeAttributeCallback, (u64)(void*)&cbParams);
 
 			// If we are to process children, process them next
 			if (tlChildren)

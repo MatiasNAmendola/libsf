@@ -57,18 +57,18 @@
 #include <windows.h>
 #include <math.h>
 #include "\libsf\vvm\core\common\common.h"
-#include "\libsf\vvm\core\localization\vvmenu\resource.h"					// Resource constants
-#include "vo_const.h"
-#include "\libsf\vvm\core\vvm\vvm_structs.h"
 #include "\libsf\vvm\core\common\common_vvm.h"
 #include "\libsf\vvm\core\common\common_vvmoss_plugins.h"
 #include "\libsf\vvm\core\common\common_vvmmc.h"
+#include "\libsf\vvm\core\localization\vvmenu\resource.h"					// Resource constants
+#include "vo_const.h"
 #include "\libsf\vvm\core\common\fonts\font8x6.h"
 #include "\libsf\vvm\core\common\fonts\font8x8.h"
 #include "\libsf\vvm\core\common\fonts\font8x14.h"
 #include "\libsf\vvm\core\common\fonts\font8x16.h"
 #include "vo_structs.h"
 #include "vo_istructs.h"
+#include "\libsf\vvm\core\vvm\vvm_structs.h"
 #include "vo_plugins.h"
 #include "vo_defs.h"
 #include "vo_glob.h"
@@ -1472,7 +1472,7 @@
 		if (lf)
 		{
 			// Append it to our start/end list
-			lsf = (_iswSSystemFont*)icommon_SEChain_append(&gseRootFonts, 0, ioss_getNextUniqueId(), sizeof(_iswSSystemFont), _COMMON_START_END_BLOCK_SIZE, NULL);
+			lsf = (_iswSSystemFont*)oss_SEChain_append(&gseRootFonts, 0, ioss_getNextUniqueId(), sizeof(_iswSSystemFont), _COMMON_START_END_BLOCK_SIZE, NULL);
 			if (lsf)
 			{
 				// Prepare our structure
@@ -1483,7 +1483,7 @@
 				lsf->handle			= lf;
 
 				// Store the font's attributes
-				lsf->fontName		= (s8*)icommon_duplicateString((u8*)fontName, max(strlen(fontName), 128));
+				lsf->fontName		= (s8*)oss_duplicateString((u8*)fontName, max(strlen(fontName), 128));
 				lsf->fontPointSize	= fontPointSize;
 				lsf->bold			= bold;
 				lsf->italics		= italics;
@@ -1553,7 +1553,7 @@
 
 // UNTESTED CODE:  breakpoint and examine
 		// Find the indicated font by its uniqueId, which the systems uses as its handle between VVM and VVMOSS
-		lsf = (_iswSSystemFont*)icommon_searchStartEndChainByCallback(&gseRootFonts, (u64)&iioss_findSystemFontByHandleCallback, tnFontHandle);
+		lsf = (_iswSSystemFont*)oss_searchSEChainByCallback(&gseRootFonts, (u64)&iioss_findSystemFontByHandleCallback, tnFontHandle);
 
 		// Based on return result, indicate our handle or failure
 		if (lsf)	return((u64)lsf->handle);		// Return the HFONT for immediate use by caller
@@ -1593,7 +1593,7 @@
 			tisw->uniqueId					= uniqueScreenId;
 
 			// Visible identifier
-			tisw->caption					= (s8*)icommon_duplicateString((u8*)tcCaption, tnCaptionLength + 1);
+			tisw->caption					= (s8*)oss_duplicateString((u8*)tcCaption, tnCaptionLength + 1);
 			tisw->captionLength				= tnCaptionLength;
 
 			// Position
@@ -1944,7 +1944,7 @@
 
 
 		// Append it to the list of memory blocks we have
-		ldll = (SDatumLL*)icommon_SEChain_append(&gseRootMemoryBlocks, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SDatumLL), _COMMON_START_END_BLOCK_SIZE, NULL);
+		ldll = (SDatumLL*)oss_SEChain_append(&gseRootMemoryBlocks, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SDatumLL), _COMMON_START_END_BLOCK_SIZE, NULL);
 		if (ldll)
 		{
 			// Allocate this datum's data.  Think through that a few times... :-)
@@ -1956,13 +1956,13 @@
 
 				// Initialize to NULLs
 				if (tlInitialize)
-					icommon_memset(ldll->datum.data._s8, 0, tnSize);
+					oss_memset(ldll->datum.data._s8, 0, tnSize);
 
 				// Indicate our success
 				return(ldll->datum.data._v);
 			}
 			// Failure!
-			icommon_SEChain_deleteFrom(&gseRootMemoryBlocks, (SLL*)ldll, true);
+			oss_SEChain_deleteFrom(&gseRootMemoryBlocks, (SLL*)ldll, true);
 		}
 		// Indicate failure
 		return(NULL);
@@ -1989,7 +1989,7 @@
 
 
 		// Locate the existing master list pointer
-		ldll = (SDatumLL*)icommon_searchStartEndChainByCallback(&gseRootMemoryBlocks, (u64)iioss_reallocAndFreeCallback, (u64)ptrOld);
+		ldll = (SDatumLL*)oss_searchSEChainByCallback(&gseRootMemoryBlocks, (u64)iioss_reallocAndFreeCallback, (u64)ptrOld);
 		if (!ldll)
 			return(NULL);		// It's not one of our pointers, tisk, tisk!
 
@@ -2030,7 +2030,7 @@
 
 
 		// Locate the existing master list pointer
-		ldll = (SDatumLL*)icommon_searchStartEndChainByCallback(&gseRootMemoryBlocks, (u64)iioss_reallocAndFreeCallback, (u64)ptr);
+		ldll = (SDatumLL*)oss_searchSEChainByCallback(&gseRootMemoryBlocks, (u64)iioss_reallocAndFreeCallback, (u64)ptr);
 		if (!ldll)
 			return(NULL);		// It's not one of our pointers, tisk, tisk!
 
@@ -2040,7 +2040,7 @@
 
 
 		// Delete its associated entry in the chain
-		icommon_SEChain_deleteFrom(&gseRootMemoryBlocks, (SLL*)ldll, true);
+		oss_SEChain_deleteFrom(&gseRootMemoryBlocks, (SLL*)ldll, true);
 
 
 		// Indicate success
@@ -2066,7 +2066,7 @@
 //		1		-- candidate is greater than wildcardPattern
 //
 ///////
-	s32 CALLTYPE oss_wildcardMatch(SDatum* candidate, SDatum* wildcardPattern, bool tlCaseSensitive)
+	s32 CALLTYPE oss_wildcardMatch(csu8p candidate, csu8p wildcardPattern, bool tlCaseSensitive)
 	{
 		u8		c, w;
 		u32		lnC, lnW, lnNeedleLength, lnFoundPosition;
@@ -2076,16 +2076,16 @@
 // TODO:  breakpoint and examine
 _asm nop;
 		// Make sure the environment is sane
-		if (candidate->data._u8 && wildcardPattern->data._u8)
+		if (candidate._u8 && wildcardPattern._u8)
 		{
 			// Repeat for every character in the wildcardPattern
-			for (lnC = 0, lnW = 0;	wildcardPattern->data._u8[lnW] != 0;	)
+			for (lnC = 0, lnW = 0;	wildcardPattern._u8[lnW] != 0;	)
 			{
 				//////////
 				// Grab the characters
 				//////
-					c = candidate->data._u8[lnC];
-					w = wildcardPattern->data._u8[lnW];
+					c = candidate._u8[lnC];
+					w = wildcardPattern._u8[lnW];
 
 
 				//////////
@@ -2100,12 +2100,12 @@ _asm nop;
 
 					} else if (w == '*') {
 						// The rest of c can be anything, unless there is something more in w after the asterisk
-						if (wildcardPattern->data._u8[lnW + 1] == 0)
+						if (wildcardPattern._u8[lnW + 1] == 0)
 						{
 							// We're done, the rest of candidate can be anything
 							return(0);		// Match
 
-						} else if (wildcardPattern->data._u8[lnW + 1] == '*' || wildcardPattern->data._u8[lnW + 1] == '?') {
+						} else if (wildcardPattern._u8[lnW + 1] == '*' || wildcardPattern._u8[lnW + 1] == '?') {
 							// Syntax error
 							return(-2);
 
@@ -2120,13 +2120,13 @@ _asm nop;
 								lnNeedleLength = 0;
 								do {
 									// Are we done with the wildcard?
-									if (wildcardPattern->data._u8[lnW + lnNeedleLength] == 0)
+									if (wildcardPattern._u8[lnW + lnNeedleLength] == 0)
 									{
 										// Yes
 										break;
 
 									// Have we reached a terminating character for this leg?
-									} else if (wildcardPattern->data._u8[lnW + lnNeedleLength] == '?' || wildcardPattern->data._u8[lnW + lnNeedleLength] == '*') {
+									} else if (wildcardPattern._u8[lnW + lnNeedleLength] == '?' || wildcardPattern._u8[lnW + lnNeedleLength] == '*') {
 										// Yes
 										break;
 
@@ -2149,11 +2149,11 @@ _asm nop;
 									// We have a segment to match up
 
 									// Setup the needle and haystack
-									needle		= _csu8p(wildcardPattern->data._u8	+ lnW);
-									haystack	= _csu8p(candidate->data._u8		+ lnC);
+									needle		= _csu8p(wildcardPattern._u8	+ lnW);
+									haystack	= _csu8p(candidate._u8			+ lnC);
 
 									// Search forward for it
-									if (!icommon_isNeedleInHaystack(haystack, (u32)candidate->length - lnC, needle, lnNeedleLength, tlCaseSensitive, &lnFoundPosition))
+									if (!oss_isNeedleInHaystack(haystack, oss_strlen(candidate) - lnC, needle, lnNeedleLength, tlCaseSensitive, &lnFoundPosition))
 										return(-1);		// Not found, the candidate is less than the wildcardPattern
 
 									// If we get here, then it was found, so we continue on
@@ -2188,8 +2188,8 @@ _asm nop;
 			// When we get here, the wildcardPattern is done being searched
 
 			// Are we done scanning the candidate yet?
-			if (candidate->data._u8[lnC] == 0)	return(0);		// Yes, everything matched
-			else								return(1);		// Nope, it didn't match, the candidate is greater than the wildcardPattern
+			if (candidate._u8[lnC] == 0)	return(0);			// Yes, everything matched
+			else							return(1);			// Nope, it didn't match, the candidate is greater than the wildcardPattern
 
 		} else {
 			// Something's awry
@@ -2259,7 +2259,7 @@ storeFirstOne:
 					//////////
 					// Allocate this entry
 					///////
-						line = (SOssLine*)icommon_SEChain_append(tseLines, ioss_getNextUniqueId(), ioss_getNextUniqueId(), sizeof(SOssLine), _COMMON_START_END_BLOCK_SIZE, NULL);
+						line = (SOssLine*)oss_SEChain_append(tseLines, ioss_getNextUniqueId(), ioss_getNextUniqueId(), sizeof(SOssLine), _COMMON_START_END_BLOCK_SIZE, NULL);
 
 
 					//////////
@@ -2286,7 +2286,7 @@ storeFirstOne:
 									else					line->extra = malloc((u32)tnAllocSize);
 
 									// Initialize it to its empty state
-									if (line->extra)		icommon_memset((s8*)line->extra, 0, tnAllocSize);
+									if (line->extra)		oss_memset((s8*)line->extra, 0, tnAllocSize);
 								}
 
 								// Increase our line count
@@ -2377,7 +2377,7 @@ storeFirstOne:
 							//////////
 							// Allocate this entry
 							///////
-								comp = (SOssComp*)icommon_SEChain_append(&line->comps, ioss_getNextUniqueId(), ioss_getNextUniqueId(), sizeof(SOssComp), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
+								comp = (SOssComp*)oss_SEChain_append(&line->comps, ioss_getNextUniqueId(), ioss_getNextUniqueId(), sizeof(SOssComp), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 
 
 							//////////
@@ -2442,7 +2442,7 @@ storeFirstOne:
 //////
 	void CALLTYPE oss_translateSOssCompsToOthers(SAsciiCompSearcher* tsComps, SOssLine* line)
 	{
-		icommon_searchStartEndChainByCallback(&line->comps, (u64)iioss_translateSOssCompsToOthersCallback, (u64)tsComps);
+		oss_searchSEChainByCallback(&line->comps, (u64)iioss_translateSOssCompsToOthersCallback, (u64)tsComps);
 	}
 
 
@@ -2520,7 +2520,7 @@ storeFirstOne:
 		if (lnHandle >= 0)
 		{
 			// Initialize our buffer one time up front
-			icommon_memset(buffer, 32, sizeof(buffer));
+			oss_memset(buffer, 32, sizeof(buffer));
 
 			// Iterate through every line, providing each component
 			line = (SOssLine*)tseLines->root->ptr;
@@ -2532,7 +2532,7 @@ storeFirstOne:
 					// Prepare this line into a buffer which will be used for writing
 					// Prepend any whitespace characters
 					if (line->whitespace > 0)
-						icommon_memcpy(buffer, line->base + line->start, line->whitespace);
+						oss_memcpy(buffer, line->base + line->start, line->whitespace);
 
 					// Do each component in turn, populating the line
 					comp		= (SOssComp*)line->comps.root->ptr;
@@ -2546,7 +2546,7 @@ storeFirstOne:
 						// If it will fit, populate it into our write buffer
 						if (lnStart + lnLength < sizeof(buffer))
 						{
-							icommon_memcpy(buffer + lnStart, line->base + line->start + lnStart, lnLength);
+							oss_memcpy(buffer + lnStart, line->base + line->start + lnStart, lnLength);
 							if (lnStart + lnLength > lnMaxLength)
 								lnMaxLength = lnStart + lnLength;
 						}
@@ -2560,7 +2560,7 @@ storeFirstOne:
 					lnBytesWritten += lnMaxLength;
 
 					// Reset the portion we just used
-					icommon_memset(buffer, 32, lnMaxLength);
+					oss_memset(buffer, 32, lnMaxLength);
 				}
 
 				// Write the trailing CR/LF
@@ -2629,7 +2629,7 @@ storeFirstOne:
 						// If it will fit, populate it into our write buffer
 						if (lnStart + lnLength < sizeof(buffer))
 						{
-							icommon_memcpy(buffer + lnBufLength, line->base + line->start + lnStart, lnLength);
+							oss_memcpy(buffer + lnBufLength, line->base + line->start + lnStart, lnLength);
 							lnBufLength += lnLength;
 						}
 
@@ -2641,7 +2641,7 @@ storeFirstOne:
 						lnBytesWritten += lnBufLength;
 
 						// Reset the portion we just used
-						icommon_memset(buffer, 0, lnBufLength);
+						oss_memset(buffer, 0, lnBufLength);
 
 						// Move to the next component in the chain
 						comp = (SOssComp*)comp->ll.next;
@@ -2829,7 +2829,7 @@ storeFirstOne:
 							// Increase comp1's length, then move comp2 from line->comps to line->compsCombined
 							comp1->length	+= comp2->length;
 							comp1->iCode	= tniCodeCombined;
-							icommon_SEChain_completelyMigrateSLL(&line->compsCombined, &line->comps, (SLL*)comp2, 0, _COMMON_START_END_BLOCK_SIZE);
+							oss_SEChain_completelyMigrateSLLByPtr(&line->compsCombined, &line->comps, (SLL*)comp2, 0, _COMMON_START_END_BLOCK_SIZE);
 
 						//////////
 						// Point to the new next thing, which is now the thing after what previously had been comp2, but is now simply comp->ll.next (which could now be nothing)
@@ -2914,8 +2914,8 @@ storeFirstOne:
 							// Increase comp1's length, then move comp2 from line->comps to line->compsCombined
 							comp1->length	+= comp2->length + comp3->length;
 							comp1->iCode	= tniCodeCombined;
-							icommon_SEChain_completelyMigrateSLL(&line->compsCombined, &line->comps, (SLL*)comp2, 0, _COMMON_START_END_BLOCK_SIZE);
-							icommon_SEChain_completelyMigrateSLL(&line->compsCombined, &line->comps, (SLL*)comp3, 0, _COMMON_START_END_BLOCK_SIZE);
+							oss_SEChain_completelyMigrateSLLByPtr(&line->compsCombined, &line->comps, (SLL*)comp2, 0, _COMMON_START_END_BLOCK_SIZE);
+							oss_SEChain_completelyMigrateSLLByPtr(&line->compsCombined, &line->comps, (SLL*)comp3, 0, _COMMON_START_END_BLOCK_SIZE);
 
 						//////////
 						// Point to the new next thing, which is now the thing after what previously had been comp2, but is now simply comp->ll.next (which could now be nothing)
@@ -2991,7 +2991,7 @@ storeFirstOne:
 								++lnCount;
 
 								// Migrate this one (as it was technically merged above with the comp->length = line)
-								icommon_SEChain_completelyMigrateSLL(&line->compsCombined, &line->comps, (SLL*)compNext, 0, _COMMON_START_END_BLOCK_SIZE);
+								oss_SEChain_completelyMigrateSLLByPtr(&line->compsCombined, &line->comps, (SLL*)compNext, 0, _COMMON_START_END_BLOCK_SIZE);
 
 								// See if we're done
 								if (compNext == compSearcher)
@@ -3075,7 +3075,7 @@ storeFirstOne:
 							++lnCount;
 
 							// Move this one along
-							icommon_SEChain_completelyMigrateSLL(&line->compsCombined, &line->comps, (SLL*)compNext, 0, _COMMON_START_END_BLOCK_SIZE);
+							oss_SEChain_completelyMigrateSLLByPtr(&line->compsCombined, &line->comps, (SLL*)compNext, 0, _COMMON_START_END_BLOCK_SIZE);
 
 							// Move to next component (which is now again the comp->ll.next entry, because we've just migrated the prior compNext entry to compsCombined)
 							compNext = (SOssComp*)comp->ll.next;
@@ -3202,7 +3202,7 @@ openAgain:
 
 		// If we get here, we're good
 		// Create the entry in the open files listing
-		_iswSSharedFile* lsf = (_iswSSharedFile*)icommon_SEChain_append(&gseRootForeignFiles, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(_iswSSharedFile), _COMMON_START_END_BLOCK_SIZE, NULL);
+		_iswSSharedFile* lsf = (_iswSSharedFile*)oss_SEChain_append(&gseRootForeignFiles, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(_iswSSharedFile), _COMMON_START_END_BLOCK_SIZE, NULL);
 		if (lsf)
 		{
 			// Populate it with file data
@@ -3242,7 +3242,7 @@ openAgain:
 
 
 		// Make sure the indicated file exists
-		lsf = (_iswSSharedFile*)icommon_searchStartEndChainByUniqueId(&gseRootForeignFiles, tnFileHandle);
+		lsf = (_iswSSharedFile*)oss_searchSEChainByUniqueId(&gseRootForeignFiles, tnFileHandle);
 		if (!lsf)	return(-1);		// Invalid file handle
 
 
@@ -3292,7 +3292,7 @@ openAgain:
 			return(-4);
 
 		// Make sure the indicated file exists
-		lsf = (_iswSSharedFile*)icommon_searchStartEndChainByUniqueId(&gseRootForeignFiles, tnFileHandle);
+		lsf = (_iswSSharedFile*)oss_searchSEChainByUniqueId(&gseRootForeignFiles, tnFileHandle);
 		if (!lsf)	return(-1);			// Invalid file handle
 
 
@@ -3345,7 +3345,7 @@ openAgain:
 
 
 		// Make sure the indicated file exists
-		lsf = (_iswSSharedFile*)icommon_searchStartEndChainByUniqueId(&gseRootForeignFiles, tnFileHandle);
+		lsf = (_iswSSharedFile*)oss_searchSEChainByUniqueId(&gseRootForeignFiles, tnFileHandle);
 		if (!lsf)	return(-1);			// Invalid file handle
 
 
@@ -3390,7 +3390,7 @@ openAgain:
 
 
 		// Make sure the indicated file exists
-		lsf = (_iswSSharedFile*)icommon_searchStartEndChainByUniqueId(&gseRootForeignFiles, tnFileHandle);
+		lsf = (_iswSSharedFile*)oss_searchSEChainByUniqueId(&gseRootForeignFiles, tnFileHandle);
 		if (!lsf)	return(-1);			// Invalid file handle
 
 
@@ -3413,7 +3413,7 @@ openAgain:
 		// If we get here, we're good
 		//////
 			// Add the lock to the list of locks for this file
-			lsfl = (_iswSSharedFileLocks*)icommon_SEChain_append(&lsf->locks, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(_iswSSharedFileLocks), _COMMON_START_END_BLOCK_SIZE, NULL);
+			lsfl = (_iswSSharedFileLocks*)oss_SEChain_append(&lsf->locks, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(_iswSSharedFileLocks), _COMMON_START_END_BLOCK_SIZE, NULL);
 			if (lsfl)
 			{
 				// Store lock time
@@ -3457,10 +3457,10 @@ openAgain:
 
 
 		// Make sure the indicated file exists
-		lsf = (_iswSSharedFile*)icommon_searchStartEndChainByUniqueId(&gseRootForeignFiles, tnFileHandle);
+		lsf = (_iswSSharedFile*)oss_searchSEChainByUniqueId(&gseRootForeignFiles, tnFileHandle);
 		if (!lsf)	return(-1);			// Invalid file handle
 
-		lsfl = (_iswSSharedFileLocks*)icommon_searchStartEndChainByUniqueId(&lsf->locks, tnLockHandle);
+		lsfl = (_iswSSharedFileLocks*)oss_searchSEChainByUniqueId(&lsf->locks, tnLockHandle);
 		if (!lsfl)	return(-2);			// Invalid lock handle
 
 
@@ -3483,7 +3483,7 @@ openAgain:
 		// If we get here, we're good
 		//////
 			// Delete this lock
-			icommon_SEChain_deleteFrom(&lsf->locks, (SLL*)lsfl, true);
+			oss_SEChain_deleteFrom(&lsf->locks, (SLL*)lsfl, true);
 
 			// Increase the number of unlocks made
 			++lsf->locksCleared;
@@ -3510,17 +3510,17 @@ openAgain:
 
 
 		// Make sure the indicated file exists
-		lsf = (_iswSSharedFile*)icommon_searchStartEndChainByUniqueId(&gseRootForeignFiles, tnFileHandle);
+		lsf = (_iswSSharedFile*)oss_searchSEChainByUniqueId(&gseRootForeignFiles, tnFileHandle);
 		if (!lsf)	return(-1);			// Invalid file handle
 
 		// Close the handle
 		_close(lsf->handle);
 
 		// Delete any locks, with a callback to unlock any active locks
-		icommon_SEChain_delete(&lsf->locks, (u64)&iioss_sharedAsciiCloseFileLocksCallback, (u64)lsf, true);
+		oss_SEChain_delete(&lsf->locks, (u64)&iioss_sharedAsciiCloseFileLocksCallback, (u64)lsf, true);
 
 		// Delete this entry
-		icommon_SEChain_deleteFrom(&gseRootForeignFiles, (SLL*)lsf, true);
+		oss_SEChain_deleteFrom(&gseRootForeignFiles, (SLL*)lsf, true);
 
 		// Indicate success
 		return(0);
@@ -3545,7 +3545,7 @@ openAgain:
 
 
 		// Make sure the indicated file exists
-		lsf = (_iswSSharedFile*)icommon_searchStartEndChainByUniqueId(&gseRootForeignFiles, tnFileHandle);
+		lsf = (_iswSSharedFile*)oss_searchSEChainByUniqueId(&gseRootForeignFiles, tnFileHandle);
 		if (!lsf)	return(-1);			// Invalid file handle
 
 
@@ -3656,11 +3656,2863 @@ openAgain:
 
 //////////
 //
+// Duplicate the indicated ASCII string
+//
+//////
+	u8* CALLTYPE oss_duplicateString(u8* ptr, u64 length)
+	{
+		u8* ptrNew;
+
+
+		// Make sure our environment is sane
+		ptrNew = NULL;
+		if (ptr && length < 0xffffffff)
+		{
+			// Try to create the new string
+			ptrNew = (u8*)malloc((u32)length + 1);
+
+			//  Copy the string if successful
+			if (ptrNew)
+			{
+				// Copy the string and null-terminate it
+				memcpy(ptrNew, ptr, (u32)length);
+				ptrNew[(u32)length] = 0;
+			}
+		}
+		// All done
+		return(ptrNew);
+	}
+
+
+
+
+//////////
+//
+// Duplicate the unicode string
+//
+//////
+	w16* CALLTYPE oss_duplicateUnicodeString(w16* tuText)
+	{
+		u32		tnLength;
+		w16*	tuNewText;
+
+
+		// Make sure our environment is sane
+		tuNewText = NULL;
+		if (tuText)
+		{
+			// Get the length
+			tnLength = wcslen(tuText) * sizeof(w16);
+
+			// Allocate that much space
+			tuNewText = (w16*)malloc(tnLength);
+
+			// If we're good, complete the copy
+			if (tuNewText)
+				memcpy(tuNewText, tuText, tnLength);
+		}
+		// Indicate our status
+		return(tuNewText);
+	}
+
+
+
+
+//////////
+//
+// Duplicate and store to a datum structure
+//
+//////
+	void CALLTYPE oss_duplicateStringIntoDatum(SDatum* datum, u8* ptr, u64 length, bool tlFreeExisting)
+	{
+		u8* lptr;
+
+
+		// Make sure our environment is sane
+		if (datum)
+		{
+			if (length != 0)
+			{
+				// If there is already a value here, free it up
+				if (tlFreeExisting && datum->data._u8)
+				{
+					// Grab the pointer
+					lptr				= datum->data._u8;
+
+					// Indicate it is NULL in the structure (in case a task switch happens right now)
+					datum->data._u8		= NULL;
+					datum->length		= 0;
+
+					// Release the allocated memory
+					free(lptr);
+				}
+
+				if (ptr)
+				{
+					// Duplicate the string
+					datum->data._u8 = oss_duplicateString(ptr, length);
+
+				} else {
+					// Create a blank string and initialize it to NULLs
+					datum->data._u8 = (u8*)malloc((u32)length);
+					if (datum->data._u8)
+						memset(datum->data._u8, 0, (u32)length);
+				}
+
+				// Verify our string was allocated properly
+				if (datum->data._u8)	datum->length = length;
+				else					datum->length = 0;
+
+			} else {
+				// Initialize it to NULL
+				datum->data._u8		= NULL;
+				datum->length		= 0;
+			}
+		}
+	}
+
+
+
+
+//////////
+//
+// Duplicate and store to a datum2 structure
+//
+//////
+	void CALLTYPE oss_duplicateStringIntoDatum2(SDatum2* datum2, u8* ptr, u64 length, u64 lengthTotal, bool tlFreeExisting)
+	{
+		// Make sure our environment is sane
+		if (datum2)
+		{
+			if (length != 0)
+			{
+				// Duplicate the datum string
+				oss_duplicateStringIntoDatum(&datum2->datum, ptr, length, tlFreeExisting);
+
+				// Update our totals if the string was allocated appropriately
+				if (datum2->datum.data._u8)
+				{
+					// We allocated and copied correctly
+					datum2->lengthTotal	= lengthTotal;
+
+				} else {
+					// We did not, so this string is not valid
+					datum2->lengthTotal	= 0;
+				}
+
+			} else {
+				// They are clearing out whatever is already there
+				oss_deleteDatum(&datum2->datum);
+
+				// Initialize it to NULL
+				datum2->lengthTotal	= lengthTotal;
+			}
+		}
+	}
+
+
+
+
+//////////
+//
+// Duplicates a datum into another datum
+//
+//////
+	void CALLTYPE oss_duplicateDatum(SDatum* datumDst, SDatum* datumSrc)
+	{
+		// Make sure our environment is sane
+		if (datumDst && datumSrc && datumSrc->data._u8 && datumSrc->length != 0)
+		{
+			// If it's already populated, release it
+			if (datumDst->data._u8)
+				free(datumDst->data._u8);
+
+			// Copy the item
+			datumDst->data._u8 = oss_duplicateString(datumSrc->data._u8, datumSrc->length);
+
+			// If it was copied, update the length
+			if (datumDst->data._u8)		datumDst->length	= datumSrc->length;
+			else						datumDst->length	= 0;
+		}
+	}
+
+
+
+
+//////////
+//
+// Duplicates a datum2 into another datum2
+//
+//////
+	void CALLTYPE oss_duplicateDatum2(SDatum2* datum2Dst, SDatum2* datum2Src)
+	{
+		// Make sure our environment is sane
+		if (datum2Dst && datum2Src && datum2Src->datum.data._u8 && datum2Src->datum.length != 0)
+		{
+			// If it's already populated, release it
+			if (datum2Dst->datum.data._u8)
+				free(datum2Dst->datum.data._u8);
+
+			// Copy the item
+			datum2Dst->datum.data._u8 = oss_duplicateString(datum2Src->datum.data._u8, datum2Src->datum.length);
+
+			// If it was copied, update the length
+			if (datum2Dst->datum.data._u8)
+			{
+				// Success
+				datum2Dst->datum.length		= datum2Src->datum.length;
+				datum2Dst->lengthTotal		= datum2Src->lengthTotal;
+
+			} else {
+				// Failure
+				datum2Dst->datum.length		= 0;
+				datum2Dst->lengthTotal		= 0;
+			}
+		}
+	}
+
+
+
+
+//////////
+//
+// Deletes the indicated datum
+//
+//////
+	void CALLTYPE oss_deleteDatum(SDatum* datum)
+	{
+		if (datum)
+		{
+			if (datum->data._u8)
+			{
+				// Free the memory
+				free(datum->data._u8);
+
+				// Reset the datum structure
+				datum->data._u8 = NULL;
+			}
+
+			// Reset the length
+			datum->length = 0;
+		}
+	}
+
+
+
+
+//////////
+//
+// Delete the indicated datum2
+//
+//////
+	void CALLTYPE oss_deleteDatum2(SDatum2* datum2)
+	{
+		if (datum2 && datum2->datum.data._u8)
+		{
+			// Free the memory
+			oss_deleteDatum(&datum2->datum);
+
+			// Reset the datum2 total size
+			datum2->lengthTotal	= 0;
+		}
+	}
+
+
+
+
+//////////
+//
+// Allocate an empty string into datum2
+//
+//////
+	void CALLTYPE oss_allocateNullStringIntoDatum2(SDatum2* datum2, u64 length, bool tlInitialize)
+	{
+		// Make sure our environment is sane
+		if (datum2)
+		{
+			if (length != 0)
+			{
+				// Create the string space
+				datum2->datum.data._u8 = (u8*)malloc((u32)length);		// Note:  This function does not automatically allocate the trailing NULL as the iDuplicateStringIntoDatum() function does
+				if (datum2->datum.data._u8)
+				{
+					// We're good, set up the length
+					datum2->datum.length	= length;
+					datum2->lengthTotal		= length;
+
+					// Set it to NULLs if we need to
+					if (tlInitialize)
+						memset(datum2->datum.data._u8, 0, (u32)length);
+
+				} else {
+					// Store the length value of 0
+					datum2->datum.length	= 0;
+					datum2->lengthTotal		= 0;
+				}
+
+			} else {
+				// Initialize it to NULL
+				datum2->datum.data._u8		= NULL;
+				datum2->datum.length		= 0;
+				datum2->lengthTotal			= 0;
+			}
+		}
+	}
+
+
+
+
+//////////
+//
+// Copy up to the shortest string of the two from source to destination
+//
+//////
+	void CALLTYPE oss_copyUpToShortestString(u8* dst, u32 tnDstLength, u8* src, u32 tnSrcLength)
+	{
+		u32 lnI;
+
+
+		// Copy as many characters as are allowed
+		for (lnI = 0; lnI < tnDstLength && lnI < tnSrcLength; lnI++)
+			dst[lnI] = src[lnI];
+	}
+
+
+
+
+//////////
+//
+// ASCII to unicode conversion
+//
+//////
+	w16* CALLTYPE oss_asciiToUnicode(u8* tcText, u32 tnTextLength)
+	{
+		u32		lnI;
+		w16*	luOut;
+
+
+		// Allocate 2 bytes for every ascii byte, plus 2 more for the trailing s16 null
+		luOut = (w16*)malloc((tnTextLength * 2) + 2);
+		if (luOut)
+		{
+			// Convert to 16-bit forms
+			for (lnI = 0; lnI < tnTextLength; lnI++)
+				luOut[lnI] = (w16)tcText[lnI];
+
+			// Append an extra trailing null
+			luOut[lnI] = 0;
+		}
+		return(luOut);
+	}
+
+
+
+
+//////////
+//
+// Unicode to ASCII conversion
+//
+//////
+	s8* CALLTYPE oss_unicodeToAscii(w16* tuText, u32 tnTextLength)
+	{
+		u32		lnI;
+		s8*		lcOut;
+
+
+		// Allocate 2 bytes for every ascii byte, plus 2 more for the trailing s16 null
+		lcOut = (s8*)malloc(tnTextLength + 1);
+		if (lcOut)
+		{
+			// Convert to 16-bit forms
+			for (lnI = 0; lnI < tnTextLength; lnI++)
+				lcOut[lnI] = (s8)tuText[lnI];
+
+			// Append an extra trailing null
+			lcOut[lnI] = 0;
+		}
+		return(lcOut);
+	}
+
+
+
+
+//////////
+//
+// Convert a single ASCII character to unicode
+//
+//////
+	w16 CALLTYPE oss_asciiToUnicodeChar(u8 tcChar)
+	{
+		return((w16)tcChar);
+	}
+
+
+
+
+//////////
+//
+// Convert unicode to single ASCII
+//
+//////
+	s8 CALLTYPE oss_unicodeToAsciiCharacter(w16 tuChar)
+	{
+		return((s8)tuChar);
+	}
+
+
+
+
+//////////
+//
+// Scans forward in the indicated string until the character changes, or until the maximum
+// length is reached.
+//
+//////
+	u64 CALLTYPE oss_scanForwardUntilCharacterChanges(csu8p tcData, u64 tnMaxLength)
+	{
+		u64 lnI;
+
+
+		// Make sure our environment is sane
+		lnI = 0;
+		if (tcData._cu8 && tnMaxLength != 0)
+		{
+			// Continue comparing every character
+			for (++lnI; lnI < tnMaxLength; lnI++)
+			{
+				// If the character changes, we're done
+				if (tcData._cu8[lnI] != tcData._cu8[0])
+					return(lnI);		// We're done
+			}
+		}
+		// When we get here, lnI is how far we skipped
+		return(lnI);
+	}
+
+
+
+
+//////////
+//
+// Scan forward until the indicated character is found without regards to length
+//
+//////
+	u64 CALLTYPE oss_scanForwardUntilCharacter(csu8p tcData, s8 c)
+	{
+		u64 lnI;
+
+
+		// Scan through the data
+		lnI = 0;
+		if (tcData._cu8)
+		{
+			for ( ; tcData._cu8[lnI] != c; )
+				++lnI;
+		}
+		// Indicate our length
+		return(lnI);
+	}
+
+
+
+
+//////////
+//
+// Unicode memory compare
+//
+//////
+	int CALLTYPE oss_unicodeMemcmp(w16* l, w16* r, u32 tnLength)
+	{
+		u32 lnI;
+
+
+		// For every character in the length, compare left to right
+		for (lnI = 0; lnI < tnLength; lnI++)
+		{
+			if (l[lnI] != r[lnI])
+			{
+				if (l[lnI] < r[lnI])
+					return -1;		// Left is less than right
+				return 1;			// Left is greater than right
+			}
+		}
+		// They're equal
+		return 0;
+	}
+
+
+
+
+//////////
+//
+// Unicode memory compare without regards to case
+//
+//////
+	int CALLTYPE oss_unicodeMemicmp(w16* l, w16* r, u32 tnLength)
+	{
+		w16		ll, rl;		// Left- and right-lower
+		u32		lnI;
+
+
+		// For every character in the length, compare left to right
+		for (lnI = 0; lnI < tnLength; lnI++)
+		{
+			ll = oss_lowerCaseW(l[lnI]);
+			rl = oss_lowerCaseW(r[lnI]);
+			if (ll != rl)
+			{
+				if (ll < rl)
+					return -1;		// Left is less than right
+				return 1;			// Left is greater than right
+			}
+		}
+		// They're equal
+		return 0;
+	}
+
+
+
+
+//////////
+//
+// Unicode memory set (initialize)
+//
+//////
+	int CALLTYPE oss_unicodeMemset(w16* p, w16 uc, u32 tnLength)
+	{
+		u32 lnI;
+
+
+		// Make sure the environment is sane
+		lnI = 0;
+		if (p)
+		{
+			// For the indicated length, stick the indicated unicode character in there
+			for (; lnI < tnLength; lnI++)
+				p[lnI + lnI] = uc;
+		}
+
+		// Indicate the number of characters we processed
+		return(lnI);
+	}
+
+
+
+
+//////////
+//
+// Convert the indicated wide characgter to upper-case
+//
+//////
+	w16 CALLTYPE oss_upperCaseW(w16 u)
+	{
+		s8 c;
+// TODO:  (unicode) foreign languages will need to have other tests here
+
+		// See if it's a lower-case character in ASCII
+		c = (s8)u;
+		if (c >= 'a' && c <= 'z')
+			return((w16)(c - 0x20));		// It is, convert to upper-case
+
+		// If we get here, we're good as we are
+		return(u);
+	}
+
+
+
+
+//////////
+//
+// Convert the indicated wide character to lower-case
+//
+//////
+	w16 CALLTYPE oss_lowerCaseW(w16 u)
+	{
+		s8 c;
+// TODO:  (unicode) foreign languages will need to have other tests here
+
+
+		// See if it's a lower-case character in ASCII
+		c = (s8)u;
+		if (c >= 'A' && c <= 'Z')
+			return((w16)(c + 0x20));		// It is, convert to lower-case
+
+		// If we get here, we're good as we are
+		return(u);
+	}
+
+
+
+
+//////////
+//
+// ASCII memory set byte by byte
+//
+//////
+	void CALLTYPE oss_memset(s8* dst, s8 c, u64 tnCount)
+	{
+		u64 lnI;
+
+
+		// Make sure our environment is sane
+		if (dst)
+		{
+			// Iterate for every indicated character
+			for (lnI = 0; lnI < tnCount; lnI++)
+				dst[lnI] = c;
+		}
+	}
+
+
+
+
+//////////
+//
+// ASCII memory set as a series of integer values
+//
+//////
+	void CALLTYPE oss_memset4(u32* dst, u32 val, u64 tnCount)
+	{
+		u64 lnI;
+
+
+		// Make sure our environment is sane
+		if (dst)
+		{
+			// Iterate for every indicated dword
+			for (lnI = 0; lnI < tnCount; lnI++)
+				dst[lnI] = val;
+		}
+	}
+
+
+
+
+//////////
+//
+// Memory copy byte by byte
+//
+//////
+	void CALLTYPE oss_memcpy(s8* dst, s8* src, u64 tnCount)
+	{
+		u64 lnI;
+
+
+		// Make sure our environment is sane
+		if (dst && src)
+		{
+			// Copy everything
+			for (lnI = 0; lnI < tnCount; lnI++)
+				dst[lnI] = src[lnI];
+		}
+	}
+
+
+
+
+//////////
+//
+// Memory compare left and right
+//
+//////
+	s32 CALLTYPE oss_memcmp(csu8p l/*eft*/, csu8p r/*ight*/, u64 tnCount)
+	{
+		u64 lnI;
+
+
+		// Make sure our environment is sane
+		if (l._cu8 && r._cu8)
+		{
+			for (lnI = 0; lnI < tnCount; lnI++)
+			{
+				if (l._cu8[lnI] != r._cu8[lnI])
+				{
+					if (l._cu8[lnI] < r._cu8[lnI])		return(-1);		// left is less than right
+					else								return(1);		// left is greater than right
+				}
+				// Still good, keep going
+			}
+			// When we get here, they're equal
+			return(0);
+		}
+		// Invalid configuration
+		return(-2);
+	}
+
+
+
+
+//////////
+//
+// Memory compare left and right without regards to case
+//
+//////
+	s32 CALLTYPE oss_memicmp(csu8p l/*eft*/, csu8p r/*ight*/, u64 tnCount)
+	{
+		u64		lnI;
+		u8		cl, cr;
+
+
+		// Make sure our environment is sane
+		if (l._cu8 && r._cu8 && tnCount != 0)
+		{
+			for (lnI = 0; lnI < tnCount; lnI++)
+			{
+				// Grab the bytes
+				cl = l._cu8[lnI];
+				cr = r._cu8[lnI];
+
+				// Ignore case
+				if (cl >= 'A' && cl <= 'Z')		cl |= 0x20;
+				if (cr >= 'A' && cr <= 'Z')		cr |= 0x20;
+
+				if (cl != cr)
+				{
+					if (cl < cr)		return(-1);		// left is less than right
+					else				return(1);		// left is greater than right
+				}
+				// Still good, keep going
+			}
+			// When we get here, they're equal
+			return(0);
+		}
+		// Invalid configuration
+		return(-2);
+	}
+
+
+
+
+//////////
+//
+// Compare two strings possibly of different lengths without regards to case
+//
+//////
+	s32 CALLTYPE oss_memicmpTwoLengths(csu8p l/*eft*/, u64 tnLeftLength, csu8p r/*ight*/, u64 tnRightLength)
+	{
+		u64		lnI;
+		u8		cl, cr;
+
+
+		// Make sure our environment is sane
+		if (l._cu8 && r._cu8 && tnLeftLength != 0 && tnRightLength != 0)
+		{
+			for (lnI = 0; lnI < tnLeftLength && lnI < tnRightLength; lnI++)
+			{
+				// Grab the bytes
+				cl = l._cu8[lnI];
+				cr = r._cu8[lnI];
+
+				// Ignore case
+				if (cl >= 'A' && cl <= 'Z')		cl |= 0x20;
+				if (cr >= 'A' && cr <= 'Z')		cr |= 0x20;
+
+				if (cl != cr)
+				{
+					if (cl < cr)		return(-1);		// left is less than right
+					else				return(1);		// left is greater than right
+				}
+				// Still good, keep going
+			}
+			// When we get here, they're equal
+			if (tnLeftLength == tnRightLength)
+				return(0);		// They're equal
+
+			// If we get here, they're different lengths, so based on whichever one is shorter, return that result
+			if (tnRightLength >= tnLeftLength)		return(1);		// Left is shorter
+			else									return(-1);		// Right is shorter
+		}
+		// Invalid configuration
+		return(-2);
+	}
+
+
+
+
+//////////
+//
+// Compare a string to a datum without regards to case
+//
+//////
+	s32 CALLTYPE oss_memicmpDatum(SDatum* datum, csu8p r/*ight*/, u64 tnRightLength)
+	{
+		// Make sure our environment is sane
+		if (datum && r._cu8 && tnRightLength != 0 && datum->length != 0)
+			return(oss_memicmpTwoLengths(datum->data, datum->length, r, tnRightLength));
+
+		// If we get here, failure
+		return(-2);
+	}
+
+
+
+
+//////////
+//
+// Compare a string to a datum2 without regards to case
+//
+//////
+	s32 CALLTYPE oss_memicmpDatum2(SDatum2* datum2, csu8p r/*ight*/, u64 tnRightLength)
+	{
+		// Make sure our environment is sane
+		if (datum2 && r._cu8 && tnRightLength != 0 && datum2->datum.length != 0)
+			return(oss_memicmpTwoLengths(datum2->datum.data, datum2->datum.length, r, tnRightLength));
+
+		// If we get here, failure
+		return(-2);
+	}
+
+
+
+
+//////////
+//
+// Compare a datum to a datum without regards to case
+//
+//////
+	s32 CALLTYPE oss_memicmpDatumDatum(SDatum* datumL, SDatum* datumR)
+	{
+		if (datumL && datumR)
+			return(oss_memicmpTwoLengths(datumL->data, datumL->length, datumR->data, datumR->length));
+
+		// If we get here, failure
+		return(-2);
+	}
+
+
+
+
+//////////
+//
+// Compare a datum2 to a datum2 without regards to case
+//
+//////
+	s32 CALLTYPE oss_memicmpDatum2Datum2(SDatum2* datum2L, SDatum2* datum2R)
+	{
+		if (datum2L && datum2R)
+			return(oss_memicmpTwoLengths(datum2L->datum.data, datum2L->datum.length, datum2R->datum.data, datum2R->datum.length));
+
+		// If we get here, failure
+		return(-2);
+	}
+
+
+
+
+//////////
+//
+// Extract the red, green, blue, and alpha components from the indicated color
+//
+//////
+	void CALLTYPE oss_deriveRGBA(u32 tnColor, u8* tnRed, u8* tnGrn, u8* tnBlu, f32* tfAlp)
+	{
+		*tnRed = red(tnColor);
+		*tnGrn = grn(tnColor);
+		*tnBlu = blu(tnColor);
+		*tfAlp = (f32)(alp(tnColor)) / 255.0f;
+	}
+
+
+
+
+//////////
+//
+// Creates a new 2-way linked list with optional nodePrev and nodeNext info, using
+// the indicated size for the allocation (which includes the SLL portion at the head)
+//
+//////
+	SLL* CALLTYPE oss_ll_create(SLL* nodePrev, SLL* nodeNext, u64 tnUniqueId, u32 tnSize)
+	{
+		SLL* node;
+
+
+// TODO:  UNTESTED CODE
+		// Make sure we're allocating enough space
+		if ((s32)tnSize < sizeof(SLL))
+			tnSize = sizeof(SLL);
+
+		// Allocate the size
+		node = (SLL*)malloc(tnSize);
+		if (node)
+		{
+			// We're good
+			memset(node, 0, tnSize);
+			
+			// Store a unique id
+			node->uniqueId	= tnUniqueId;
+
+			// Update our pointers
+			node->prev		= nodePrev;
+			node->next		= nodeNext;
+		}
+
+		// Indicate our success or failure
+		return(node);
+	}
+
+
+
+
+//////////
+//
+// Inserts a 2-way linked relative to the nodeRef, either before or after.  If the
+// node is already connected, it is disconnected.
+//
+//////
+	bool CALLTYPE oss_ll_insert(SLL* node,  SLL* nodeRef,  bool tlAfter)
+	{
+// TODO:  UNTESTED CODE
+		// Is our environment sane?
+		if (nodeRef)
+		{
+			//////////
+			// Disconnect
+			//////
+				if (node && (node->prev || node->next))
+					oss_ll_orphanize(node);
+
+
+			//////////
+			// Is it going before or after?
+			//////
+				if (tlAfter)
+				{
+					// Point the one after this back to node to be inserted
+					if (nodeRef->next)
+						nodeRef->next->prev	= node;		// The one after points back to the node we're inserting
+
+					// Are we updating to a valid node?
+					if (node)
+					{
+						// The node is valid, so we can update relative pointers
+						// Point this node to the one that will be after
+						node->next = nodeRef->next;
+						node->prev = nodeRef;
+					}
+
+					// Store the pointer to the node
+					nodeRef->next = node;
+
+
+				} else {
+					// Positioning this node before
+					// Point the one before this forward to the node to be inserted
+					if (nodeRef->prev)
+						nodeRef->prev->next = node;
+
+					// Are we updating to a valid node?
+					if (node)
+					{
+						// The node is valid, so we can update relative pointers
+						// Point this node to the one that will be after
+						node->prev = nodeRef->prev;
+						node->next = nodeRef;
+					}
+
+					// Store the pointer to the node
+					nodeRef->prev = node;
+				}
+		}
+		// Failure
+		return(false);
+	}
+
+
+
+
+//////////
+//
+// Disconnects a node from its existing chain
+//
+//////
+	void CALLTYPE oss_ll_orphanize(SLL* node)
+	{
+// TODO:  UNTESTED CODE
+		// Is our environment sane?
+		if (node)
+		{
+
+			//////////
+			// Is there one before?
+			//////
+				if (node->prev)
+				{
+					// Make the one before point to the one after
+					node->prev->next	= node->next;
+					node->next			= NULL;
+				}
+
+			//////////
+			// Is there one after?
+			//////
+				if (node->next)
+				{
+					// Make the one after point to the one before
+					node->next->prev	= node->prev;
+					node->prev			= NULL;
+				}
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to delete the entire chain (beginning from where it's at on) using an optional callback.
+// The callback should not delete the node, but only anything the node points to.
+//
+//////
+	void CALLTYPE oss_ll_deleteChainWithCallback(SLL* node, u64 iiCallbackFunction, u64 tnExtra)
+	{
+		SLL*			nodeNext;
+		SLLCallback		cb;
+
+
+		// Store the callback
+		cb._iiCallbackFunction = iiCallbackFunction;
+
+		// Iterate through the master list until we find the associated entry
+		while (node)
+		{
+			// Grab the next node
+			nodeNext = node->next;
+
+			// Perform the callback
+			if (iiCallbackFunction)
+				cb.iiCallbackFunctionBool(node, tnExtra);
+
+			// Delete the node
+			free(node);
+
+			// Move to next node
+			node = nodeNext;
+		}
+		// All done
+	}
+
+
+
+
+//////////
+//
+// Called to compute the SHA-1 of the current node as a 64-bit quantity
+//
+//////
+	u64 CALLTYPE oss_ll_sha1Chain(SLL* node, u32 tnSize, u8 sha20Bytes[20])
+	{
+		u8	context[92];
+		u8	buffer[64];
+
+
+		// Make sure the environment is sane
+		if (node)
+		{
+			// Begin at the beginning
+			oss_sha1ComputeSha1_Start(context);
+
+			// For each node, process its portion
+			while (node)
+			{
+				oss_sha1ComputeSha1_ProcessThisData(context, (s8*)node, tnSize);
+				node = node->next;
+			}
+
+			// Tally up
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+
+			// And indicate our 64-bit version of the same
+			return(oss_sha1Compute64BitFromSha1(sha20Bytes));
+		}
+
+		// If we get here, failure
+		return(0);
+	}
+
+
+
+
+
+//////////
+//
+// Disconnects an SLL4 structure from either an BXML or a traditional node configuration.
+// LL4 entries go off in four directions, toward siblings (prev/next), and toward parents
+// and children.  These can be thought of as the cardinal directions as well (north/east/
+// south/west).
+//
+//////
+	// Note:  The common code itself knows nothing about SBxml structure formally, but it
+	//        has at its header the SLL4 structure, which it does know about.
+	//
+	// In SBxml structures, we always update siblings, but if we have no previous entry,
+	// then we must make the parent (if any) point to our next sibling, and we always
+	// keep the children (for they are indeed most important!) :-)
+	bool CALLTYPE oss_ll4_orphanizeAsBxml(SLL4* bxml)
+	{
+		bool	llResult;
+
+
+// TODO:  tested code working properly, but not tested thoroughly enough
+		// Make sure our environment is sane
+		llResult = false;
+		if (bxml)
+		{
+			// We have something to work with, but of what caliber is it?
+			// Should we accept it on its word that it is a good bxml and not being merely deceptive so as to harm our system? :-)
+
+			// Update its elements if any
+			// See if this is the first child
+			if (!bxml->prev && bxml->parent)
+				bxml->parent->child = bxml->next;		// This is the first item, so our parent must now point to our next sibling
+
+			// Disconnect this node from its siblings
+			if (bxml->next)		bxml->next->prev = bxml->prev;
+			if (bxml->prev)		bxml->prev->next = bxml->next;
+
+			// When we get here, this node has been made an orphan
+			// Let it now believe so
+			bxml->parent	= NULL;
+			bxml->next		= NULL;
+			bxml->prev		= NULL;
+			// Note:  It will still keep its children
+
+			// If we get here, we were good
+			llResult = true;
+		}
+		// Indicate our status
+		return(llResult);
+	}
+
+	// In nodes, we always update north/south paths, as well as east/west paths, as the node is
+	// just a point on a mesh or clutter mesh.
+	bool CALLTYPE oss_ll4_orphanizeAsNode(SLL4* node)
+	{
+		bool llResult;
+
+
+// TODO:  untested code, breakpoint and examine
+		// Make sure our environment is sane
+		llResult = false;
+		if (node)
+		{
+			// Disconnect this node in/from the four cardinal directions
+			if (node->north)	node->north->south = node->south;		// It points to an entry above itself
+			if (node->south)	node->south->north = node->north;		// It points to an entry below itself
+			if (node->east)		node->east->west = node->west;			// It points to an entry to the right
+			if (node->west)		node->west->east = node->east;			// It points to an entry to the left
+
+			// Update the node to reflects its new orphaned status
+			node->north		= NULL;
+			node->south		= NULL;
+			node->east		= NULL;
+			node->west		= NULL;
+		}
+		// Indicate our status
+		return(llResult);
+	}
+
+
+
+
+//////////
+//
+// Called to insert the indicated node where it should go
+//
+//////
+	// Inserts only as a sibling, either before or after the reference bxml
+	bool CALLTYPE oss_ll4_insertAsBxml(SLL4* bxml, SLL4* bxmlRef, bool tlAfter)
+	{
+		bool	llResult;
+		SLL4*	bxmlNext;
+		SLL4*	bxmlPrev;
+
+
+// TODO:  untested code, breakpoint and examine
+		// Make sure our environment's sane
+		if (bxml && bxmlRef)
+		{
+			// Only success at this point. :-)
+			llResult = true;
+
+			// Are we inserting before or after?
+			if (tlAfter)
+			{
+				// We're inserting this one AFTER the reference bxml
+				bxmlNext		= bxmlRef->next;			// Grab the original next
+
+				// Going between BxmlRef and BxmlNext
+				bxml->prev		= bxmlRef;					// The one we're inserting points back to the reference
+				bxml->next		= bxmlNext;					// The one we're inserting points forward to what used to be the next
+				bxmlRef->next	= bxml;						// The reference points forward to the one we're inserting
+
+				// Update the other one that's out there, you know, "on the other side"
+				if (bxmlNext)
+					bxmlNext->prev = bxml;					// The original next now points backward to the one we're inserting
+
+			} else {
+				// We're inserting this one BEFORE the reference bxml
+				bxmlPrev		= bxmlRef->prev;			// Grab original previous
+
+				// Going between BxmlPrev and BxmlRef
+				bxml->prev		= bxmlPrev;					// The one we're inserting before points back to the original previous
+				bxml->next		= bxmlRef;					// The one we're inserting before points forward to the reference
+				bxmlRef->prev	= bxml;						// The reference points back to the one we're inserting before
+				if (bxmlPrev)
+					bxmlPrev->next = bxml;					// The previous points forward to the one we're inserting
+
+				// Was this the first item we just inserted before?
+				if (bxmlRef->parent && bxmlRef->parent->firstChild == bxmlRef)
+				{
+					// Yes, it needs to now point to the new item
+					bxmlRef->parent->firstChild = bxml;
+				}
+			}
+
+		} else {
+			// Failure on parameters
+			llResult = false;
+		}
+
+		// Indicate our status
+		return(llResult);
+	}
+
+	// Positions the element as a child either at the start (faster) or end (slower)
+	bool CALLTYPE oss_ll4_insertAsBxmlAsChild(SLL4* bxml, SLL4* bxmlParent, bool tlAfter)
+	{
+		bool	llResult;
+		SLL4*	bxmlRunner;
+
+
+// TODO:  untested code, breakpoint and examine
+		// Make sure our environment's sane
+		if (bxml && bxmlParent)
+		{
+			// Only success at this point
+			llResult = true;
+
+			// Before or after?
+			if (tlAfter)
+			{
+				// Going to the tail
+				if (bxmlParent->child)
+				{
+					// We need to iterate to the end
+					bxmlRunner = bxmlParent->child;
+					while (bxmlRunner->next)
+						bxmlRunner = bxmlRunner->next;
+
+					// When we get here, we have the last child
+					bxmlRunner->next		= bxml;
+					bxml->prev				= bxmlRunner;
+
+				} else {
+					// First child
+					bxmlParent->firstChild	= bxml;
+					bxml->prev				= NULL;
+				}
+				// Nothing point after
+				bxml->next = NULL;
+
+			} else {
+				// Going to the start
+				if (bxmlParent->child)
+					bxml->next = bxmlParent->child;		// There is already a child, make sure this new one points to that child
+
+				// Update the parent to point to its new first child
+				bxmlParent->firstChild		= bxml;
+
+				// Nothing pointing before
+				bxml->prev					= NULL;
+			}
+			// If we get here, we're good
+			llResult = true;
+
+		} else {
+			// Invalid parameters
+			llResult = false;
+		}
+
+		// Indicate our status
+		return(llResult);
+	}
+
+	// Positions the element relative to the bxml reference, either before or after, and
+	// therefore "regarding" it.
+	bool CALLTYPE oss_ll4_insertAsBxmlAsChildRegarding(SLL4* bxml, SLL4* bxmlParent, SLL4* BxmlRef, bool tlAfter)
+	{
+		bool	llResult;
+		SLL4*	BxmlNext;
+		SLL4*	BxmlPrev;
+
+
+// TODO:  untested code, breakpoint and examine
+		// Make sure our environment is sane
+		llResult = false;
+		if (bxml && bxmlParent && BxmlRef)
+		{
+			if (tlAfter)
+			{
+				// It's going AFTER the reference entry
+				if (BxmlRef->next)
+				{
+					// There IS an entry after this one
+					// bxml is going between BxmlRef and BxmlNext
+					BxmlNext = BxmlRef->next;
+
+					// Insert the node
+					bxml->prev			= BxmlRef;
+					bxml->next			= BxmlNext;
+					BxmlRef->next		= bxml;
+					BxmlNext->prev		= bxml;
+
+				} else {
+					// BxmlRef is the last entry
+					BxmlRef->next		= bxml;
+					bxml->prev			= BxmlRef;
+					bxml->next			= NULL;
+				}
+
+			} else {
+				// It's going BEFORE the reference entry
+				if (BxmlRef->prev)
+				{
+					// There IS an entry before this one
+					BxmlPrev = BxmlRef->prev;
+					// This is going between BxmlPrev and BxmlRef
+					bxml->prev				= BxmlPrev;
+					bxml->next				= BxmlRef;
+					BxmlPrev->next			= bxml;
+					BxmlRef->prev			= bxml;
+
+				} else {
+					// xmlRef is the first entry
+					bxml->prev				= NULL;
+					bxml->next				= BxmlRef;
+					bxmlParent->firstChild	= bxml;
+					BxmlRef->prev			= bxml;
+				}
+			}
+			// Update the pointer to point back up to its new parent.
+			bxml->parent = bxmlParent;
+
+			// Success
+			llResult = true;
+		}
+		// Indicate our status
+		return(llResult);
+	}
+
+	// Inserts the node before or after the indicated node
+	bool CALLTYPE oss_ll4_insertAsNodeNorthSouth(SLL4* node, SLL4* nodeRef, bool tlAfter)
+	{
+		bool	llResult;
+		SLL4*	nodePrev;
+		SLL4*	nodeNext;
+
+
+// TODO:  untested code, breakpoint and examine
+		// Make sure our environment is sane
+		llResult = false;
+		if (node && nodeRef)
+		{
+			if (tlAfter)
+			{
+				// node is going after nodeRef
+				if (nodeRef->south)
+				{
+					// There is an entry after nodeRef, so we insert it between nodeRef and nodeRef->next
+					nodeNext		= nodeRef->next;
+
+					// Update nodeRef to point to this one
+					node->next		= nodeRef->next;
+					nodeRef->next	= node;
+
+					// Update nodeNext to point back to this one
+					node->prev		= nodeNext->prev;
+					nodeNext->prev	= node;
+
+				} else {
+					// There is no entry after nodeRef, so we just put it after
+					nodeRef->south	= node;
+					node->north		= nodeRef;
+					node->south		= NULL;				// Make sure this entry is not hooked up otherwise
+				}
+
+			} else {
+				// node is going before nodeRef
+				if (nodeRef->north)
+				{
+					// There is an entry before nodeRef, so we insert it between nodeRef and nodeRef->prev
+					nodePrev		= nodeRef->next;
+
+					// Update nodeRef to point to this one
+					node->prev		= nodeRef->prev;
+					nodeRef->prev	= node;
+
+					// Update nodePrev to point forward to this one
+					node->next		= nodeRef;
+					nodePrev->next	= node;
+
+				} else {
+					// There is no entry before nodeRef, so we just put it before
+					nodeRef->north	= node;
+					node->south		= nodeRef;
+					node->north		= NULL;				// Make sure this entry is not hooked up otherwise
+				}
+			}
+		}
+		// Indicate our status
+		return(llResult);
+	}
+
+	// Inserts the node before or after the indicated node
+	bool CALLTYPE oss_ll4_insertAsNodeEastWest(SLL4* node, SLL4* nodeRef, bool tlAfter)
+	{
+		bool	llResult;
+		SLL4*	nodeWest;
+		SLL4*	nodeEast;
+
+
+// TODO:  untested code, breakpoint and examine
+		// Make sure our environment is sane
+		llResult = false;
+		if (node && nodeRef)
+		{
+			if (tlAfter)
+			{
+				// node is going after (east) nodeRef
+				if (nodeRef->east)
+				{
+					// There is an entry after nodeRef, so we insert it between nodeRef and nodeRef->next
+					nodeEast		= nodeRef->east;
+
+					// Update nodeRef to point to this one
+					node->east		= nodeRef->east;
+					nodeRef->east	= node;
+
+					// Update nodeNext to point back to this one
+					node->west		= nodeEast->west;
+					nodeEast->west	= node;
+
+				} else {
+					// There is no entry after nodeRef, so we just put it after
+					nodeRef->south	= node;
+					node->north		= nodeRef;
+					node->south		= NULL;				// Make sure this entry is not hooked up otherwise
+				}
+
+			} else {
+				// node is going before (west) nodeRef
+				if (nodeRef->north)
+				{
+					// There is an entry before nodeRef, so we insert it between nodeRef and nodeRef->west
+					nodeWest		= nodeRef->east;
+
+					// Update nodeRef to point to this one
+					node->west		= nodeRef->west;
+					nodeRef->west	= node;
+
+					// Update nodePrev to point forward to this one
+					node->east		= nodeRef;
+					nodeWest->east	= node;
+
+				} else {
+					// There is no entry before nodeRef, so we just put it before
+					nodeRef->north	= node;
+					node->south		= nodeRef;
+					node->north		= NULL;				// Make sure this entry is not hooked up otherwise
+				}
+			}
+		}
+		// Indicate our status
+		return(llResult);
+	}
+
+
+
+
+//////////
+//
+// 
+// Called to delete the entire chain (beginning from where it's at on) using an optional callback.
+// The callback should not delete the node, but only anything the node points to.
+
+//
+//////
+	void CALLTYPE oss_ll4_deleteChainWithCallback(SLL4* node, u64 iiCallbackFunction, u64 tnExtra)
+	{
+		SLL4*			nodeNext;
+		SLL4Callback	cb;
+
+
+		// Store the callback
+		cb._iiCallbackFunction = iiCallbackFunction;
+
+		// Iterate through the master list until we find the associated entry
+		while (node)
+		{
+			// Grab the next node
+			nodeNext = node->next;
+
+			// Perform the callback
+			if (iiCallbackFunction)
+				cb.iiCallbackFunctionBool(node, tnExtra);
+
+			// Delete the node
+			free(node);
+
+			// Move to next node
+			node = nodeNext;
+		}
+		// All done
+	}
+
+
+
+
+//////////
+//
+// Append a new record of indicated size to the start/end chain
+//
+// Returns:
+//		NULL		- If error
+//		other		- A pointer to the new object
+//
+// Note:  Initializes memory block of tnSize to NULLs upon successful allocation
+//
+//////
+	void* CALLTYPE oss_SEChain_prepend(SStartEnd* ptrSE, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool* tlResult)
+	{
+		return(ioss_SEChain_appendOrPrepend(ptrSE, tnUniqueId, tnUniqueIdExtra, tnSize, tnBlockSizeIfNewBlockNeeded, true, tlResult));
+	}
+
+	void* CALLTYPE oss_SEChain_append(SStartEnd* ptrSE, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool* tlResult)
+	{
+		return(ioss_SEChain_appendOrPrepend(ptrSE, tnUniqueId, tnUniqueIdExtra, tnSize, tnBlockSizeIfNewBlockNeeded, false, tlResult));
+	}
+
+	// Prepends or appends to the Start/end chain
+	void* ioss_SEChain_appendOrPrepend (SStartEnd* ptrSE, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool tlPrepend, bool* tlResult)
+	{
+		SLL*			ptrCaller;
+		SMasterList*	ptrNew;
+		SMasterList*	ptrPrev;
+		SMasterList**	prev;
+
+
+// TODO:  untested code, breakpoint and examine
+// Note:  This code has been tested, but it is truly essential to operations of the VVM, and needs thoroughly tested many, many, many times. :-)
+		// See where we are
+		ptrCaller = NULL;
+		if (ptrSE)
+		{
+			if (!ptrSE->root)
+			{
+				// This is the first item
+				ptrPrev	= NULL;
+				prev	= &ptrSE->root;
+
+			} else {
+				// We're appending
+				if (tlPrepend)
+				{
+					// We go to the beginning
+					ptrPrev	= ptrSE->root;
+					prev	= &ptrSE->root;
+
+				} else {
+					// We are appending to the end
+					ptrPrev	= ptrSE->last;
+					prev	= (SMasterList**)&ptrSE->last->ll.next;
+				}
+			}
+
+			// Allocate for our SMasterList pointer
+			ptrNew = (SMasterList*)malloc(sizeof(SMasterList));
+			if (ptrNew)
+			{
+				// We have our new pointer, initialize the structure
+				memset(ptrNew, 0, sizeof(SMasterList));
+
+				// Create the new caller structure
+				ptrCaller = (SLL*)malloc(tnSize);
+				if (ptrCaller)
+				{
+					// Initialize the structure
+					memset(ptrCaller, 0, tnSize);
+
+					// Indicate its unique ID
+					ptrCaller->uniqueId	= tnUniqueId;
+
+					// Store the memory variable for the caller memory block
+					ptrNew->ptr			= ptrCaller;
+
+					// Update the back-link
+					*prev				= ptrNew;
+
+					// Update the other part of the back link
+					ptrNew->ll.uniqueId	= tnUniqueIdExtra;
+					if (tlPrepend)
+					{
+						// Previous ptrSE->root points backward to ptrNew, which is now the entry pointed to by ptrSE->root
+						ptrPrev->ll.prev	= (SLL*)ptrNew;		// Old first entry points backward to new first entry
+						ptrNew->ll.next		= (SLL*)ptrPrev;	// New first entry points forward to old first entry
+						ptrSE->root			= ptrNew;			// New first entry
+
+					} else {
+						// We are appending to the end
+						ptrNew->ll.prev		= (SLL*)ptrPrev;	// Previous last entry pointing forward to new last entry
+						ptrSE->last			= ptrNew;			// New last entry
+					}
+
+					// Store it in the master list (so when VM is suspended, this data gets saved)
+					ioss_SEChain_appendMasterList(ptrSE, ptrNew, 0, tnBlockSizeIfNewBlockNeeded);
+
+					// All done!
+				}
+				// When we get here, ptrCaller is either populated or NULL
+			}
+		}
+		// Indicate our success or failure explicitly if required
+		if (tlResult)
+			*tlResult = !(ptrCaller == NULL);
+
+		// Return our pointer
+		return(ptrCaller);
+	}
+
+
+
+
+	// Appends or prepends an existing (already allocated) orphan pointer to the indicated Start/end list
+	void* ioss_SEChain_appendOrPrependExisting(SStartEnd* ptrSE, SLL* ptrExisting, u32 tnBlockSizeIfNewBlockNeeded, bool tlPrepend, bool* tlResult)
+	{
+		SMasterList*	ptrNew;
+		SMasterList*	ptrPrev;
+		SMasterList**	prev;
+
+
+// TODO:  untested code, breakpoint and examine
+// Note:  This code has been tested, but it is truly essential to operations of the VVM, and needs thoroughly tested many, many, many times. :-)
+		// See where we are
+		if (ptrSE)
+		{
+			if (!ptrSE->root)
+			{
+				// This is the first item
+				ptrPrev	= NULL;
+				prev	= &ptrSE->root;
+
+			} else {
+				// We're appending
+				if (tlPrepend)
+				{
+					// We go to the beginning
+					ptrPrev	= ptrSE->root;
+					prev	= &ptrSE->root;
+
+				} else {
+					// We are appending to the end
+					ptrPrev	= ptrSE->last;
+					prev	= (SMasterList**)&ptrSE->last->ll.next;
+				}
+			}
+
+			// Allocate for our SMasterList pointer
+			ptrNew = (SMasterList*)malloc(sizeof(SMasterList));
+			if (ptrNew)
+			{
+				// We have our new pointer, initialize the structure
+				memset(ptrNew, 0, sizeof(SMasterList));
+
+				// Create the new caller structure
+				// Store the memory variable for the caller memory block
+				ptrNew->ptr			= ptrExisting;
+
+				// Update the back-link
+				*prev				= ptrNew;
+
+				// Update the other part of the back link
+				if (tlPrepend)
+				{
+					// Previous ptrSE->root points backward to ptrNew, which is now the entry pointed to by ptrSE->root
+					ptrPrev->ll.prev	= (SLL*)ptrNew;		// Old first entry points backward to new first entry
+					ptrNew->ll.next		= (SLL*)ptrPrev;	// New first entry points forward to old first entry
+					ptrSE->root			= ptrNew;			// New first entry
+
+				} else {
+					// We are appending to the end
+					ptrNew->ll.prev		= (SLL*)ptrPrev;	// Previous last entry pointing forward to new last entry
+					ptrSE->last			= ptrNew;			// New last entry
+				}
+
+				// Store it in the master list (so when VM is suspended, this data gets saved)
+				ioss_SEChain_appendMasterList(ptrSE, ptrNew, 0, tnBlockSizeIfNewBlockNeeded);
+				// All done!
+
+				// Indicate our success
+				return(ptrExisting);
+			}
+		}
+		// Indicate our failure
+		return(NULL);
+	}
+
+
+
+
+	// Appends an entry relative to the indicated SMasterList* member (either before or after the entry)
+	void* CALLTYPE oss_SEChain_appendRelativeToMember(SStartEnd* ptrSE, SLL* ptrRef, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool tlAfter, bool* tlResult)
+	{
+		SLL* ptrCaller;
+
+
+		// See where we are
+		if (ptrSE)
+		{
+			if (!ptrSE->root)
+				return(NULL);		// There are no entries, so we can't be adding relative to the reference pointer
+
+			// Create the new caller structure
+			ptrCaller = (SLL*)malloc(tnSize);
+			if (ptrCaller)
+			{
+				// Initialize the structure
+				memset(ptrCaller, 0, tnSize);
+
+				// Indicate its unique ID
+				ptrCaller->uniqueId	= tnUniqueId;
+
+				// Append the now existing pointer
+				return(oss_SEChain_appendExistingRelativeToMember(ptrSE, ptrRef, tnUniqueIdExtra, ptrCaller, tnBlockSizeIfNewBlockNeeded, tlAfter, tlResult));
+			}
+		}
+		// If we get here, error
+		return(NULL);
+	}
+
+	void* CALLTYPE oss_SEChain_appendExistingRelativeToMember(SStartEnd* ptrSE, SLL* ptrRef, u64 tnUniqueIdExtra, SLL* ptrCaller, u32 tnBlockSizeIfNewBlockNeeded, bool tlAfter, bool* tlResult)
+	{
+		u32				lnI, lnHint;
+		bool			llFound;
+		SMasterList*	lmlNew;
+
+
+		// See where we are
+// TODO:  untested code, breakpoint and examine
+// Note:  This code has been tested, but it is truly essential to operations of the VVM, and needs thoroughly tested
+		if (ptrSE)
+		{
+			if (!ptrSE->root)
+				return(NULL);		// There are no entries, so we can't be adding relative to the reference pointer
+
+			// Locate the indicated reference in this list
+			llFound = false;
+			for (lnI = 0; lnI < ptrSE->masterCount; lnI++)
+			{
+				if (ptrSE->master[lnI]->used && ptrSE->master[lnI]->ptr == ptrRef)
+				{
+					// We found our match
+					if (tlAfter)		lnHint = lnI + 1;		// Should go after
+					else				lnHint = lnI;			// Should go before, which means where the current entry was found
+
+					// Make sure there's room
+					ioss_SEChain_freeUpSlot(ptrSE, lnHint, tnBlockSizeIfNewBlockNeeded);
+
+					// Continue to insert this item
+					llFound = true;
+					break;
+				}
+			}
+
+			// See if we found our entry
+			if (!llFound)
+				return(NULL);		// The indicated ptrRef was not found as a member of this Start/End list
+
+			// When we get here, we have the relative of where the new entry will go
+
+			// Allocate for our SMasterList pointer
+			lmlNew = (SMasterList*)malloc(sizeof(SMasterList));
+			if (lmlNew)
+			{
+				// We have our new pointer, initialize the structure
+				memset(lmlNew, 0, sizeof(SMasterList));
+
+				// Store the data
+				lmlNew->ll.uniqueId	= tnUniqueIdExtra;
+				lmlNew->ptr			= ptrCaller;
+
+				// Store it in the master list (so when VM is suspended, this data gets saved)
+				ioss_SEChain_appendMasterList(ptrSE, lmlNew, lnHint, tnBlockSizeIfNewBlockNeeded);
+
+
+				///////////
+				// Adjust this item relative to its ptrRef
+				//////
+					if (tlAfter)
+					{
+						// ptrNew goes after ptrRef
+						ptrCaller->prev		= ptrRef;			// New one points backward to reference
+						ptrCaller->next		= ptrRef->next;		// New one points forward to what reference used to point to
+						ptrRef->next		= ptrCaller;		// Reference points forward to thew new one
+
+						// Update the one after where reference used to be
+						if (ptrCaller->next)
+							ptrCaller->next->prev = ptrCaller;	// One originally after reference points backward to new one
+
+					} else {
+						// ptrNew goes before ptrRef
+						ptrCaller->next		= ptrRef;			// New one points forward to what reference
+						ptrCaller->prev		= ptrRef->prev;		// New one points backward to what reference used to point backward to
+						ptrRef->prev		= ptrCaller;		// Reference points backward to the new one
+
+						// Update the one before where reference used to be
+						if (ptrCaller->prev)
+							ptrCaller->prev->next = ptrCaller;	// One originally before reference points forward to new one
+					}
+
+
+				// When we get here, ptrCaller is either populated or NULL indicating success or failure
+				return(ptrCaller);
+			}
+		}
+		// If we get here, error
+		return(NULL);
+	}
+
+
+
+
+	// NOTE!  Do not call this function directly!  Call iAppendToStarEndChain() only.
+	void ioss_SEChain_appendMasterList(SStartEnd* ptrSE, SMasterList* ptrNew, u32 tnHint, u32 tnBlockSizeIfNewBlockNeeded)
+	{
+		// This function should not be called directly.  It is automatically called from
+		// iAppendToStarEndChain().  It stores pointers in the master list, pointers
+		// which are part of the chain in ptrSE->root..ptrSE->last.
+		u32 lnI;
+
+
+// UNTESTED CODE:  Breakpoint and examine!
+		lnI = tnHint;
+		while (1)
+		{
+			// Search for first unused item
+			if (ptrSE->master)
+			{
+				// Check to see if there is an unused slot
+				for ( ; lnI < ptrSE->masterCount; lnI++)
+				{
+					if (!ptrSE->master[lnI])
+					{
+						// This slot is unused, store it
+						ptrSE->master[lnI] = ptrNew;
+
+						// Update it
+						ptrNew->used = true;
+
+						// All done
+						return;
+					}
+				}
+				// If we get here, there were no unused slots
+			}
+			// If we get here, no slots are available, add some more
+
+			// Allocate some pointer space
+			oss_allocateAdditionalStartEndMasterSlots(ptrSE, tnBlockSizeIfNewBlockNeeded);
+			// We never break out of this loop because we will always return above from it
+		}
+	}
+
+
+	void ioss_SEChain_freeUpSlot(SStartEnd* ptrSE, u32 tnSlot, u32 tnBlockSizeIfNewBlockNeeded)
+	{
+		u32		lnI;
+		bool	llFound;
+
+
+		//////////
+		// See if the indicated slot is already open
+		//////
+			if (!ptrSE->master[tnSlot] || !ptrSE->master[tnSlot]->used)
+				return;	// We're good already, the slot is free
+
+
+		//////////
+		// If we get here, we have to make room
+		//////
+			do {
+
+				//////////
+				// Find the first free slot after the indicated slot
+				//////
+					llFound = false;
+					for (lnI = tnSlot + 1; lnI < ptrSE->masterCount; lnI++)
+					{
+						// Is this slot open?
+						if (!ptrSE->master[lnI] || !ptrSE->master[lnI]->used)
+						{
+							// Yes
+							llFound = true;
+							break;
+						}
+					}
+
+
+				//////////
+				// Did we find a free slot?
+				//////
+					if (llFound)
+						break;	// Yes
+
+
+				//////////
+				// We did not find room
+				// Allocate some pointer space
+				//////
+					oss_allocateAdditionalStartEndMasterSlots(ptrSE, tnBlockSizeIfNewBlockNeeded);
+					// We never break out of this loop because we will always return above from it
+
+			} while (1);
+
+
+		//////////
+		// When we get here, lnI is the free slot
+		//////
+			for (--lnI; lnI <= tnSlot; lnI--)
+			{
+				// Move this slot to the next slot
+				ptrSE->master[lnI+1] = ptrSE->master[lnI];
+			}
+
+
+		//////////
+		// Free up the new slot
+		//////
+			ptrSE->master[tnSlot] = NULL;
+	}
+
+	bool CALLTYPE oss_allocateAdditionalStartEndMasterSlots(SStartEnd* ptrSE, u32 tnBlockSize)
+	{
+		bool			llResult;
+		SMasterList**	lml;
+
+
+		// Indicate failure initially
+		llResult = false;
+
+		// Make sure our environment is sane
+		if (ptrSE)
+		{
+			// Make sure we're really doing something
+			tnBlockSize = max(tnBlockSize, 1);
+
+			// See where we are
+			if (ptrSE->master)
+			{
+				// Allocate another _COMMON_START_END_BLOCK_SIZE pointers
+				lml = (SMasterList**)realloc(ptrSE->master, sizeof(SMasterList*) * (ptrSE->masterCount + tnBlockSize));
+				if (lml)
+				{
+					// We're good, initialize the new section
+					ptrSE->master = lml;
+					memset(&ptrSE->master[ptrSE->masterCount], 0, sizeof(SMasterList*) * tnBlockSize);
+					ptrSE->masterCount += tnBlockSize;
+					llResult = true;
+
+				} else {
+					// It failed here
+// TODO:  Something major needs to happen here.  This is more or less a catastrophic failure.  It could require shutting down the VVM.
+_asm int 3;
+					ptrSE->masterCount += tnBlockSize;
+				}
+
+			} else {
+				// Allocate the first 32 pointers
+				ptrSE->master = (SMasterList**)malloc(sizeof(SMasterList*) * tnBlockSize);
+				if (ptrSE->master)
+				{
+					// We're good, initialize the new section
+					memset(&ptrSE->master[0], 0, sizeof(SMasterList*) * tnBlockSize);
+					ptrSE->masterCount	= tnBlockSize;
+					llResult = true;
+				}
+			}
+		}
+		// If we get here, failure
+		return(llResult);
+	}
+
+
+
+
+//////////
+//
+// Migrate all SMasterList items from source to destination
+//
+//////
+	void* CALLTYPE oss_SEChain_migrateAll(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc)
+	{
+		u32 lnI, lnStartCount;
+
+
+		// Make sure our environment is sane
+		if (ptrSEDst && ptrSESrc && ptrSESrc->masterCount > 0)
+		{
+			// Grab a reasonable starting point (the end), for the first hint
+			lnStartCount = (ptrSEDst->masterCount >= _COMMON_START_END_BLOCK_SIZE) ? (ptrSEDst->masterCount - _COMMON_START_END_BLOCK_SIZE) : 0;
+
+			// Iterate through every source
+			for (lnI = 0; lnI < ptrSESrc->masterCount; lnI++)
+			{
+				// Copy every populated slot
+				if (ptrSESrc->master[lnI] && ptrSESrc->master[lnI]->used)
+				{
+					// Append it to the destination list
+					ioss_SEChain_appendMasterList(ptrSEDst, ptrSESrc->master[lnI], lnStartCount + lnI, _COMMON_START_END_BLOCK_SIZE);
+
+					// Clear out the source slot
+					ptrSESrc->master[lnI] = NULL;
+				}
+			}
+		}
+		// Failure if we get here
+		return(NULL);
+	}
+
+
+
+
+//////////
+//
+// Migrate the existing SMasterList item from one Start/end chain to another, by either pointer
+// or physical position number
+//
+//////
+	SMasterList* CALLTYPE oss_SEChain_migrateByPtr(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, void* ptr, u32 tnHint, u32 tnBlockSize)
+	{
+		u32 lnI;
+
+
+		// Make sure our environment is sane
+		if (ptrSEDst && ptrSESrc && ptrSESrc->masterCount >= 1)
+		{
+			for (lnI = 0; lnI < ptrSESrc->masterCount; lnI++)
+			{
+				// Is this our pointer?
+				if (ptrSESrc->master[lnI] && ptrSESrc->master[lnI]->ptr == ptr)
+				{
+					// This is our man, migrate it
+// TODO:  (enhancement) we want some kind of better hinting algorithm here, such as the end of the list - common block size, for now we'll just pass 0
+					return(oss_SEChain_migrateByNum(ptrSEDst, ptrSESrc, lnI, 0, tnBlockSize));
+				}
+			}
+			// If we get here, not found
+		}
+		// Indicate failure
+		return(NULL);
+	}
+
+	SMasterList* CALLTYPE oss_SEChain_migrateByNum(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, u32 lnSrcNum, u32 tnHint, u32 tnBlockSize)
+	{
+		u32				lnI;
+		SMasterList*	lml;
+
+
+		// Make sure our environment is sane
+		if (ptrSEDst && ptrSESrc && lnSrcNum < ptrSESrc->masterCount && lnSrcNum <= ptrSESrc->masterCount)
+		{
+			// We enter an infinite loop in case we have to
+			while (1)
+			{
+				// Find an empty slot in the destination
+				for (lnI = tnHint; lnI < ptrSEDst->masterCount; lnI++)
+				{
+					if (!ptrSEDst->master[lnI] || !ptrSEDst->master[lnI]->used)
+					{
+						// We found an empty slot, migrate it
+						lml							= ptrSESrc->master[lnSrcNum];
+						ptrSEDst->master[lnI]		= lml;
+
+						// Clear out the source slot
+						ptrSESrc->master[lnSrcNum]	= NULL;
+
+						// See if the thing that was pointed to was the first or last entry (or both (only entry))
+						if (ptrSESrc->root == lml)
+						{
+							// This was the first entry
+							if (ptrSESrc->last == lml)
+							{
+								// And it was the last entry, making it the ONLY entry
+								ptrSESrc->root = NULL;
+								ptrSESrc->last = NULL;
+
+							} else {
+								// It was just the first entry
+								ptrSESrc->root = (SMasterList*)lml->ll.next;
+							}
+
+						} else if (ptrSESrc->last == lml) {
+							// It was the last entry
+							ptrSESrc->last = (SMasterList*)lml->ll.prev;
+						}
+						//else it's just one in the middle, so no worries
+
+						// Detach from its former list (former's previous points to former's next, former's next points to former's previous, basically they both skip over this item)
+						if (lml->ll.prev)	((SMasterList*)(lml->ll.prev))->ll.next = lml->ll.next;
+						if (lml->ll.next)	((SMasterList*)(lml->ll.next))->ll.prev = lml->ll.prev;
+						// Right now, lml is an orphan, but it has pointers to its old slots
+
+						// Append it to the new list, and update its pointers to its new home
+						if (!ptrSEDst->root)
+						{
+							// This is the first item in the destination
+							ptrSEDst->root	= lml;
+							ptrSEDst->last	= lml;
+							lml->ll.prev	= NULL;
+
+						} else {
+							// Append it to the end of the chain
+							ptrSEDst->last->ll.next = (SLL*)lml;
+							lml->ll.prev			= (SLL*)ptrSEDst->last;
+							ptrSEDst->last			= lml;
+						}
+						// Make the newly migrated item now point to nothing, because it is the last item
+						lml->ll.next = NULL;
+
+						// All done!
+						return(lml);
+					}
+				}
+				// If we get here, no empty slots. Allocate some, rinse, and repeat. :-)
+				oss_allocateAdditionalStartEndMasterSlots(ptrSEDst, tnBlockSize);
+
+				// Process through again beginning at the newly added portion
+				tnHint = lnI;
+				// We'll never break out of this loop because we will always return above
+			}
+			// Control will never get here
+		}
+		// If we get here, error
+		return(NULL);
+	}
+
+
+
+
+//////////
+//
+// Migrate the existing SMasterList item, and its associated SLL item, from one Start/end chain
+// to another, by either pointer or physical position number.
+//
+//////
+	SLL* CALLTYPE oss_SEChain_completelyMigrateSLLByPtr(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, SLL* ptr, u32 tnHint, u32 tnBlockSize)
+	{
+		u32 lnI;
+
+
+		// Make sure our environment is sane
+		if (ptrSEDst && ptrSESrc && ptrSESrc->masterCount >= 1)
+		{
+			for (lnI = 0; lnI < ptrSESrc->masterCount; lnI++)
+			{
+				// Is this our pointer?
+				if (ptrSESrc->master[lnI] && ptrSESrc->master[lnI]->ptr == (void*)ptr)
+				{
+					// This is our man, migrate it
+// TODO:  (enhancement) we want some kind of better hinting algorithm here, such as the end of the list - common block size, for now we'll just pass 0
+					return(oss_SEChain_completelyMigrateSLLByNum(ptrSEDst, ptrSESrc, lnI, 0, tnBlockSize));
+				}
+			}
+			// If we get here, not found
+		}
+		// Indicate failure
+		return(NULL);
+	}
+
+	SLL* CALLTYPE oss_SEChain_completelyMigrateSLLByNum(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, u32 lnSrcNum, u32 tnHint, u32 tnBlockSize)
+	{
+		SLL*			lllPrev;
+		SLL*			lllNext;
+		SLL*			lll;
+		SMasterList*	lml;
+
+
+		// Make sure our environment is sane
+		if (ptrSEDst && ptrSESrc && lnSrcNum < ptrSESrc->masterCount && lnSrcNum <= ptrSESrc->masterCount)
+		{
+			// Migrate it, and get its SMasterList entry
+			lml = oss_SEChain_migrateByNum(ptrSEDst, ptrSESrc, lnSrcNum, tnHint, tnBlockSize);
+			if (lml && lml->ptr)
+			{
+				// Grab the pointer to the SLL entry
+				lll = (SLL*)lml->ptr;
+				// Right now, lll points to the SLL* object from ptrSESrc
+
+				// Grab ptrSESrc's preceding, and following objects (if any)
+				lllPrev	= lll->prev;
+				lllNext = lll->next;
+
+
+				//////////
+				// Update the ptrSESrc entry, to remove this lll entry from its lists
+				//////
+					// Update the pointer for the preceding entry
+					if (lllPrev)
+						lllPrev->next = lllNext;
+					// Update the pointer for the following entry
+					if (lllNext)
+						lllNext->prev = lllPrev;
+					// Right now, lllPrev points forward past lll, and lllNext points backward past lll
+
+
+				//////////
+				// lll is currently an orphan entry that thinks it's not orphaned because it still has prev and next pointers potentially pointing off somewhere
+				//////
+					// Update lll's prev and next entries to point nowhere
+					lll->next = NULL;
+					lll->prev = NULL;
+					// At this point, lll is only pointed to by its lml entry.
+
+
+				// All done!
+				return(lll);
+			}
+		}
+		// If we get here, invalid environment
+		return(NULL);
+	}
+
+
+
+
+//////////
+//
+// Counts how many actual items in the masterCount are valid (contain entries that are in use,
+// versus
+//
+//////
+	u32 CALLTYPE oss_SEChain_countValids(SStartEnd* ptrSE)
+	{
+		u32	lnI, lnValidCount;
+
+
+		// Make sure our environment is sane
+		if (!ptrSE)
+			return(0);
+
+		// Iterate through each one, and for every valid entry increase our count
+		for (lnValidCount = 0, lnI = 0; 
+			 lnI < ptrSE->masterCount; 
+			 lnI++)
+		{
+			// If this entry is valid, increase our count
+			if (ptrSE->master[lnI] && ptrSE->master[lnI]->used)
+				++lnValidCount;
+		}
+		// Return our value
+		return(lnValidCount);
+	}
+
+
+
+
+//////////
+//
+// Called to delete an entire Start/end chain
+//
+// Returns:
+//		-1 error in ptrSE, ptrSE->master or ptrSE->masterCount
+//		Number of records deleted
+//
+//////
+	u32 CALLTYPE oss_SEChain_delete(SStartEnd* ptrSE, u64 tnCallback, u64 tnParam, bool tlDeletePointers)
+	{
+		u32			lnI, lnDeletedCount;
+		union {
+			u64		_callbackAddress;
+			void	(*callbackAddress)(void* ptrSE, u64 tnParam);
+		};
+
+
+		// Make sure the environment's sane
+		if (ptrSE && ptrSE->master && ptrSE->masterCount != 0)
+		{
+			// Store our callback address
+			_callbackAddress = tnCallback;
+
+			//  Iterate through all entries
+			lnDeletedCount = 0;
+			for (lnI = 0; lnI < ptrSE->masterCount; lnI++)
+			{
+				if (ptrSE->master[lnI] && ptrSE->master[lnI]->used)
+				{
+					// Callback to the caller if they need to do something special to delete this entry
+					if (tnCallback != 0)
+						callbackAddress(ptrSE->master[lnI]->ptr, tnParam);
+
+					// Delete the pointer from the list
+					oss_SEChain_deleteFrom(ptrSE, ptrSE->master[lnI]->ptr, tlDeletePointers);
+					++lnDeletedCount;
+				}
+			}
+			// When we get here, everything's deleted, now delete the container for everything. :-)
+			free(ptrSE->master);
+			ptrSE->master = NULL;
+
+			// Indicate the number we deleted
+			return(lnDeletedCount);
+		}
+		// Indicate failure
+		return(-1);
+	}
+
+
+
+
+//////////
+//
+// Delete the indicated item from the chain
+//
+//////
+	void CALLTYPE oss_SEChain_deleteFrom(SStartEnd* ptrSE, void* ptrCaller, bool tlDeletePointers)
+	{
+		u32				lnI;
+		SMasterList*	ptrDel;
+		SMasterList**	master;
+
+
+		// See where we are
+// UNTESTED CODE:  Breakpoint and examine!
+		if (ptrSE)
+		{
+			if (!ptrSE->root)
+			{
+				// There are no existing items, nothing to do, why are they messing around with our brains? :-)
+				return;
+			}
+
+			// Iterate through the master list to find the matching record to delete in the chain
+			master = ptrSE->master;
+			for (lnI = 0; lnI < ptrSE->masterCount; lnI++)
+			{
+				// See if this item matches
+				ptrDel = master[lnI];
+				if (ptrDel && ptrDel->used && ptrDel->ptr == ptrCaller)
+				{
+					// Mark it as not being used
+					ptrDel->used = false;
+
+					// Remove it from its chain
+					if (ptrDel == ptrSE->root)
+					{
+//////////
+// This is the first item
+//////
+						// We are deleting the first item in the list
+						if (ptrDel == ptrSE->last)
+						{
+							// Which is also the last item in the list
+							ptrSE->root = NULL;
+							ptrSE->last = NULL;
+							// No items exist after this
+
+						} else {
+							// It's just the first item in a chain
+							ptrSE->root = (SMasterList*)ptrDel->ll.next;
+						}
+
+
+					} else if (ptrDel == ptrSE->last) {
+//////////
+// This is the last item
+//////
+						// We are deleting the last item in the list
+						ptrSE->last									= (SMasterList*)ptrDel->ll.prev;	// This will never be NULL because we've already checked the first condition
+						((SMasterList*)(ptrDel->ll.prev))->ll.next	= NULL;								// Make the one before this point to nothing, because it is now the last item
+
+
+					} else {
+//////////
+// This is an entry in the middle somewhere
+//////
+						// We are deleting an entry in the middle somewhere
+						((SMasterList*)(ptrDel->ll.prev))->ll.next	= ptrDel->ll.next;		// Make the one before this point to the one after this
+						((SMasterList*)(ptrDel->ll.next))->ll.prev	= ptrDel->ll.prev;		// Make the one after this point to the one before this
+					}
+					// When we get here, the start/end chain is updated
+
+
+					// Release our SMasterList pointer
+					free(ptrDel);
+					master[lnI] = NULL;
+
+
+					// Release the caller's memory (or not if they want to keep it)
+					if (tlDeletePointers)
+						free(ptrCaller);		// Delete this pointer
+					// All done
+				}
+			}
+		}
+		//else not found
+	}
+
+
+
+
+//////////
+//
+// Search by callback for the indicated element, and when found delete it
+//
+//////
+	bool CALLTYPE oss_SEChain_deleteFromAfterCallback(SStartEnd* ptrSE, bool tlDeletePointers, u64 iiCallbackFunction, u64 tnExtra)
+	{
+		u32					lnI;
+		SStartEndCallback	cb;
+		bool				llResult;
+
+
+		// Make sure the environment is sane
+		llResult = false;
+		if (ptrSE && iiCallbackFunction != 0)
+		{
+			// Store the callback
+			cb._iiCallbackFunction = iiCallbackFunction;
+
+			// Iterate through the master list until we find the associated entry
+			for (lnI = 0; lnI < ptrSE->masterCount; lnI++)
+			{
+				// Ask the caller if this is it
+				if (ptrSE->master[lnI] && ptrSE->master[lnI]->used && cb.iiCallbackFunctionBool(ptrSE->master[lnI]->ptr, tnExtra))
+				{
+					// This is the entry they want to delete
+					oss_SEChain_deleteFrom(ptrSE, ptrSE->master[lnI]->ptr, tlDeletePointers);
+					llResult = true;
+					break;
+				}
+			}
+		}
+		// If we get here, it wasn't found
+		return(llResult);
+	}
+
+
+
+
+
+
+//////////
+//
+// Search for the indicated uniqueId in the chain.
+//
+// Returns:
+//		NULL if error
+//		The associated pointer if found
+//
+//////
+	struct SScreen2
+	{
+		SLL				ll;						// 2-way link list
+		u64				associatedId;			// A user-defined id of something associated with this screen
+
+		// Limited access is granted during a refresh operation
+		u64				semRefresh;				// Limited access to 
+		bool			isRefreshing;			// Is this screen refreshing?
+
+		// Associated canvas for this screen
+		void*			activeCanvas;			// Pointer to this screen's active canvas (must be a member of the canvastList
+		SStartEnd		canvasList;				// Pointer to this screen's first SCanvasList entry
+
+		// Internal information used to make it happen for the target OS
+		u64				ossWindowId;			// information necessary to render this screen on the OSS (pointer to _iSWindow struct, for example)
+	};
+	void* CALLTYPE oss_searchSEChainByUniqueId(SStartEnd* ptrSE, u64 tnUniqueId)
+	{
+		u32 lnI;
+
+
+		// Make sure the environment is sane
+		if (ptrSE)
+		{
+			// Iterate through the master list until we find the associated entry
+			for (lnI = 0; lnI < ptrSE->masterCount; lnI++)
+			{
+				if (ptrSE->master[lnI] && ptrSE->master[lnI]->used && ((SLL*)(ptrSE->master[lnI]->ptr))->uniqueId == tnUniqueId)
+				{
+					// We've found our man
+					return(ptrSE->master[lnI]->ptr);
+				}
+			}
+		}
+		// If we get here, failure
+		return(NULL);
+	}
+
+
+
+
+//////////
+//
+// Search for the indicated record in the chain by using a user-defined callback on the pointer.
+// Callback function should return true when found, false to continue sending other items back.
+//
+// Returns:
+//		NULL if error
+//		The associated pointer if found
+//
+//////
+	void* CALLTYPE oss_searchSEChainByCallback(SStartEnd* ptrSE, u64 iiCallbackFunction, u64 tnExtra)
+	{
+		u32					lnI;
+		SStartEndCallback	cb;
+
+
+		// Make sure the environment is sane
+		if (ptrSE && iiCallbackFunction != 0)
+		{
+			// Store the callback
+			cb._iiCallbackFunction = iiCallbackFunction;
+
+			// Iterate through the master list until we find the associated entry
+			for (lnI = 0; lnI < ptrSE->masterCount; lnI++)
+			{
+				// Ask the caller if this is it
+				if (ptrSE->master[lnI] && ptrSE->master[lnI]->used && cb.iiCallbackFunctionBool(ptrSE->master[lnI]->ptr, tnExtra))
+				{
+					// We've found our man
+					return(ptrSE->master[lnI]->ptr);
+				}
+			}
+		}
+		// If we get here, failure
+		return(NULL);
+	}
+
+
+
+
+//////////
+//
+// Iterates through the indicated Start/End list, calling back the callback function for every item.
+//
+//////
+	void CALLTYPE oss_iterateThroughStartEndForCallback(SStartEnd* ptrSE, u64 iiCallbackFunction, u64 tnExtra)
+	{
+		u32					lnI;
+		SStartEndCallback	cb;
+
+
+		// Make sure the environment is sane
+		if (ptrSE && iiCallbackFunction != 0)
+		{
+			// Store the callback
+			cb._iiCallbackFunction = iiCallbackFunction;
+
+			// Iterate through the master list calling every valid entry
+			for (lnI = 0; lnI < ptrSE->masterCount; lnI++)
+			{
+				// Give this to the caller for their processing
+				if (ptrSE->master[lnI] && ptrSE->master[lnI]->used)
+					cb.iiCallbackFunctionVoid(ptrSE->master[lnI]->ptr, tnExtra);
+			}
+		}
+	}
+
+
+
+
+//////////
+//
+// Added for debugging.  Validates that all of the entries in a Start/end chain have proper
+// ll.prev and ll.next members.  Should only need to be used during initial development, and
+// in tracking down future bugs.  I intend for these Start/end functions to be heavily tested
+// and made completely reliable in all conditions.
+//
+// If the iiCallbackFunction is populated, then if it returns:
+//			true		- test was good
+//			false		- test failed
+// Note:  The callback is only needed if the lml->ptr structure itself has Start/end members
+//        that need to be examined.  If iiCallbackFunction is not populated, only tests
+//        the members contained in the ptrSE Start/end structure.
+//
+// This function doesn't return anything.
+// If there is an error, it will trap to the debugger so the machine state can be examined.
+//
+//////
+	void CALLTYPE oss_validateStartEnd(SStartEnd* ptrSE, u64 iiCallbackFunction)
+	{
+		u32					lnI;
+		SMasterList*		lml;
+		SStartEndCallback	cb;
+
+
+		// Make sure the environment is sane
+		if (ptrSE)
+		{
+			// Store the callback
+			cb._iiCallbackFunction = iiCallbackFunction;
+
+			// Iterate through the master list until we find the associated entry
+			for (lnI = 0; lnI < ptrSE->masterCount; lnI++)
+			{
+				// Ask the caller if this is it
+				lml = ptrSE->master[lnI];
+				if (lml && lml->used)
+				{
+					if (lml == ptrSE->root)
+					{
+						if (lml == ptrSE->last)
+						{
+							// This is the ONLY entry
+							// ll.prev and ll.next need to be null
+							if (lml->ll.prev != NULL)
+								_asm int 3;
+							if (lml->ll.next != NULL)
+								_asm int 3;
+
+						} else {
+							// This is the first entry
+							// ll.prev needs to be null, ll.next needs to be not null
+							if (lml->ll.prev != NULL)
+								_asm int 3;
+							if (lml->ll.next == NULL)
+								_asm int 3;
+						}
+
+					} else if (lml == ptrSE->last) {
+						// This is the last entry
+						// ll.prev needs to be not null, ll.next needs to be null
+						if (lml->ll.prev == NULL)
+							_asm int 3;
+						if (lml->ll.next != NULL)
+							_asm int 3;
+
+					} else {
+						// Somewhere in the middle
+						// ll.prev and ll.next need to be not null
+						if (lml->ll.prev == NULL)
+							_asm int 3;
+						if (lml->ll.next == NULL)
+							_asm int 3;
+					}
+
+					// If there's a callback on this entry, try it out
+					// If it returns false, there's an issue, if it returns true it's okay
+					if (iiCallbackFunction != 0 && !cb.iiCallbackFunctionBool(lml->ptr, 0))
+						_asm int 3;
+				}
+			}
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to reverse the endian
+//
+//////
+	u32 CALLTYPE oss_swapEndian(u32 tnValue)
+	{
+		_asm {
+			mov		eax,tnValue
+			bswap	eax
+			mov		tnValue,eax
+		}
+		return tnValue;
+	}
+
+
+
+
+//////////
+//
+// For certain operations, colors are reversed
+//
+//////
+	u32 CALLTYPE oss_RGBA2BGRA(u32 tnColor)
+	{
+		u8 lnRed, lnGrn, lnBlu, lnAlp;
+
+
+		// Grab the indicated colors
+		lnRed	= red(tnColor);
+		lnGrn	= grn(tnColor);
+		lnBlu	= blu(tnColor);
+		lnAlp	= alp(tnColor);
+
+		// Encode and return the new color
+		return(rgba(lnBlu, lnGrn, lnRed, lnAlp));
+	}
+
+
+
+
+//////////
+//
+// Allocate the indicated size memory block, and initialize it to nulls
+//
+// Returns:
+//		pointer to the newly allocated block
+//
+// Note:  The allocated memory is initialized to null if allocated successfully
+//
+//////
+	void* CALLTYPE oss_allocateAndNull(u32 tnSize, bool tnInitToZeros)
+	{
+		s8* lp;
+
+
+		// Allocate
+		lp = (s8*)malloc(tnSize);
+
+		// Null if valid
+		if (lp && tnInitToZeros)
+			oss_memset(lp, 0, tnSize);
+
+		// Return the fruits of our labor
+		return(lp);
+	}
+
+
+
+
+//////////
+//
+// Called to search the haystack for the needle
+//
+//////
+	bool CALLTYPE oss_isNeedleInHaystack(csu8p tcHaystack, s32 tnHaystackLength, csu8p tcNeedle, s32 tnNeedleLength, bool tlCaseSensitive, u32* tnFoundPosition)
+	{
+		s32		lnI;
+		u32		lnResult;
+		csu8p	ptr;
+
+
+		// Make sure our environment's sane
+		if (tcHaystack._cu8 && tcNeedle._cu8 && tnHaystackLength > 0 && tnNeedleLength > 0 && tnHaystackLength >= tnNeedleLength)
+		{
+			// Iterate until we reach the end
+			for (lnI = 0; lnI + tnNeedleLength <= tnHaystackLength; lnI++)
+			{
+				// Get this offset to this location
+				ptr._cu8 = tcHaystack._cu8 + lnI;
+
+				// Scan from this location
+				if (tlCaseSensitive)	lnResult = oss_memcmp(ptr, tcNeedle, tnNeedleLength);
+				else					lnResult = oss_memicmp(ptr, tcNeedle, tnNeedleLength);
+
+				// What were the findings?
+				if (lnResult == 0)
+				{
+					// It was found, store the position
+					if (tnFoundPosition)
+						*tnFoundPosition = lnI;
+
+					// Indicate success
+					return(true);
+				}
+			}
+		}
+		// If we get here, failure
+		if (tnFoundPosition)
+			*tnFoundPosition = -1;
+
+		// Indicate failure
+		return(false);
+	}
+
+
+
+
+//////////
+//
+// Search the specified unicode string haystack for the needle
+//
+//////
+	bool CALLTYPE oss_isNeedleInHaystack_Unicode(w16* twHaystack, w16* twNeedle)
+	{
+		s32 lnI, lnLengthHaystack, lnLengthNeedle;
+
+
+		// Make sure our environment's sane
+		if (twHaystack && twNeedle)
+		{
+			// Get the lengths
+			lnLengthHaystack	= wcslen(twHaystack);
+			lnLengthNeedle		= wcslen(twNeedle);
+
+			// Repeat throughout the unicode string
+			for (lnI = 0; lnI <= lnLengthHaystack - lnLengthNeedle; lnI++)
+			{
+				// Did we find a match?
+				if (_wcsicmp(twHaystack + lnI, twNeedle) == 0)
+					return(true);
+			}
+		}
+		// If we get here, not found
+		return(false);
+	}
+
+
+
+
+//////////
+//
+// Scans forward so long as there are numerical digits (ASCII-48 through ASCII-57, "0" through "9")
+//
+//////
+	u32 CALLTYPE oss_countConsecutiveAsciiNumericDigits(s8* buffer, u32 tnMaxLength)
+	{
+		u32 lnLength;
+
+
+		// While we have numbers, continue
+		for (lnLength = 0;		lnLength < tnMaxLength && buffer[lnLength] >= '0' && buffer[lnLength] <= '9';		)
+			++lnLength;
+
+		// We have our length
+		return(lnLength);
+	}
+
+
+
+
+//////////
+//
+// Reads through the numbers, presumably previously determined by iScanConsecutiveNumbers(),
+// to obtain the numerical value after converting from text to an unsigned integer
+//
+//////
+	u32 CALLTYPE oss_convertTextToU32(s8* tcNumbers, u32 tnMaxLength)
+	{
+		u32 lnLength, lnValue, lnMultiplier;
+
+
+		// Scan through every number
+		for (lnLength = 0, lnValue = 0, lnMultiplier = 10;
+			 lnLength < tnMaxLength;
+			 lnLength++)
+		{
+			lnValue = (lnValue * lnMultiplier) + (u32)(tcNumbers[lnLength] - '0');
+		}
+
+		// We have our converted value
+		return(lnValue);
+	}
+
+
+
+//////////
+//
 // Called in a two or three part sequence, used to find the files in an indicated
 // directory using the specified initial template
 //
 //////
-	u64 CALLBACK oss_fileFindFirst(csu8p tcPathname, csu8p tcFilenameTemplate, SFindFile* tsFileInfo)
+	u64 CALLTYPE CALLBACK oss_fileFindFirst(csu8p tcPathname, csu8p tcFilenameTemplate, SFindFile* tsFileInfo)
 	{
 		u32					lnLength;
 		HANDLE				lnHandle;
@@ -3680,10 +6532,10 @@ openAgain:
 			// Create the filename
 			//////
 				memset(buffer, 0, sizeof(buffer));
-				lnLength = (u32)icommon_strlen(tcPathname);
+				lnLength = (u32)oss_strlen(tcPathname);
 
 				// Copy the pathname part (if any)
-				icommon_memcpy(buffer, tcPathname._s8, lnLength);
+				oss_memcpy(buffer, tcPathname._s8, lnLength);
 
 				// Make sure it is terminated with a backslash
 				if (buffer[lnLength - 1] != '\\')
@@ -3693,7 +6545,7 @@ openAgain:
 					++lnLength;
 				}
 				// Append on the file spec
-				icommon_memcpy(buffer + lnLength, tcFilenameTemplate._s8, icommon_strlen(tcFilenameTemplate));
+				oss_memcpy(buffer + lnLength, tcFilenameTemplate._s8, oss_strlen(tcFilenameTemplate));
 				// Right now, the buffer is something like ".\plugins\sound.dll"
 			
 
@@ -3817,7 +6669,7 @@ openAgain:
 
 				// If we're still valid, proceed with the copy
 				if (buffRoot->data)
-					icommon_memcpy(buffRoot->data + buffRoot->populatedLength - tnDataLength, tcData, tnDataLength);
+					oss_memcpy(buffRoot->data + buffRoot->populatedLength - tnDataLength, tcData, tnDataLength);
 			}
 			// Indicate where we are
 			return(buffRoot->data + buffRoot->populatedLength - tnDataLength);
@@ -3996,7 +6848,7 @@ openAgain:
 
 		// Copy our filename locally for NULL-termination
 		memset(buffer, 0, sizeof(buffer));
-		icommon_copyUpToShortestString((u8*)buffer, sizeof(buffer), (u8*)tcPathname, tnPathnameLength);
+		oss_copyUpToShortestString((u8*)buffer, sizeof(buffer), (u8*)tcPathname, tnPathnameLength);
 
 		// Physically process the incoming file, and return the result
 		return(ibxml_asciiLoadFile(buffer, tnBytesRead, tnErrorOffset, tnErrorCode));
@@ -4038,7 +6890,7 @@ openAgain:
 		// Initialize our return values
 		llResult = false;
 		if (tnBytesWritten)							*tnBytesWritten = 0;
-		if (tcPathname && tnPathnameLength == 0)	tnPathnameLength = (u32)icommon_strlen(_csu8p(tcPathname));
+		if (tcPathname && tnPathnameLength == 0)	tnPathnameLength = (u32)oss_strlen(_csu8p(tcPathname));
 
 		// Make sure our environment is sane
 		if (bxml && tcPathname)
@@ -4140,7 +6992,7 @@ openAgain:
 		if (bxmla && tcNewName && tnNewNameLength != 0)
 		{
 			// Create the new data block based on what is requested
-			icommon_duplicateStringIntoDatum(&bxmla->_name, (u8*)tcNewName, tnNewNameLength, true);
+			oss_duplicateStringIntoDatum(&bxmla->_name, (u8*)tcNewName, tnNewNameLength, true);
 			llResult = (bxmla->_name.data._s8 != NULL);
 		}
 		// Indicate our success or failure
@@ -4167,7 +7019,7 @@ openAgain:
 		if (bxmla && tcData)
 		{
 			// Create the new data block based on what is requested
-			icommon_duplicateStringIntoDatum2(&bxmla->_data, (u8*)tcData, tnDataLength, bxmla->_data.lengthTotal, true);
+			oss_duplicateStringIntoDatum2(&bxmla->_data, (u8*)tcData, tnDataLength, bxmla->_data.lengthTotal, true);
 
 			// Update our new total length (if need be)
 			bxmla->_data.lengthTotal = max(tnDataLength, bxmla->_data.lengthTotal);
@@ -4274,7 +7126,7 @@ openAgain:
 					// We are creating the first data that will go here
 // TODO:  untested code, breakpoint and examine
 _asm nop;
-					icommon_duplicateStringIntoDatum2(&bxmla->_data, NULL, tnDataLengthTotal, tnDataLengthTotal, false);
+					oss_duplicateStringIntoDatum2(&bxmla->_data, NULL, tnDataLengthTotal, tnDataLengthTotal, false);
 				}
 				// When we get here, we're done
 				break;
@@ -4303,7 +7155,7 @@ _asm nop;
 		{
 			// Remove this entry (if it exists in this parent)
 			if (bxmla->_parent)
-				icommon_SEChain_deleteFromAfterCallback(&bxmla->_parent->_attributes, true, (u64)&iibxml_AttributeDeleteCallback, (u64)&lbadp);
+				oss_SEChain_deleteFromAfterCallback(&bxmla->_parent->_attributes, true, (u64)&iibxml_AttributeDeleteCallback, (u64)&lbadp);
 			// When we get here, it's either been removed, or not
 		}
 		// If we get here, failure
@@ -4388,7 +7240,7 @@ _asm nop;
 			// When we get here, we know where we're adding it
 
 			// Append it to the chain after the entry
-			icommon_SEChain_appendExistingRelativeToMember(&bxml->_attributes, (SLL*)bxmlaRef, oss_getNextUniqueId(), (SLL*)bxmlaNew, _COMMON_START_END_BLOCK_SIZE, tlAfter, &llResult);
+			oss_SEChain_appendExistingRelativeToMember(&bxml->_attributes, (SLL*)bxmlaRef, oss_getNextUniqueId(), (SLL*)bxmlaNew, _COMMON_START_END_BLOCK_SIZE, tlAfter, &llResult);
 
 		} else {
 			// Invalid parameters
@@ -4525,7 +7377,7 @@ _asm nop;
 		if (bxml && tcNewName && tnNewNameLength != 0)
 		{
 			// Create the new data block based on what is requested
-			icommon_duplicateStringIntoDatum(&bxml->_name, (u8*)tcNewName, tnNewNameLength, true);
+			oss_duplicateStringIntoDatum(&bxml->_name, (u8*)tcNewName, tnNewNameLength, true);
 			llResult = (bxml->_name.data._s8 != NULL);
 		}
 		// Indicate our success or failure
@@ -4551,7 +7403,7 @@ _asm nop;
 		if (bxml)
 		{
 			// Deletes the indicated node from wherever it is in the parent chain
-			llResult = icommon_ll4_orphanizeAsBxml((SLL4*)bxml);
+			llResult = oss_ll4_orphanizeAsBxml((SLL4*)bxml);
 
 			// When we get here, it has been disconnected, which means it now exists as an orphan
 			// Now we need to delete everything (if indeed we do), clearing up the entire path, including all attributes, children, everything
@@ -4584,7 +7436,7 @@ _asm nop;
 		if (bxml)
 		{
 			// Inserts the node before or after the reference node as a sibling
-			llResult = icommon_ll4_insertAsBxml((SLL4*)bxml, (SLL4*)bxmlRef, tlAfter);
+			llResult = oss_ll4_insertAsBxml((SLL4*)bxml, (SLL4*)bxmlRef, tlAfter);
 
 			// If we were successful, update the level
 			if (llResult)
@@ -4604,7 +7456,7 @@ _asm nop;
 		if (bxml)
 		{
 			// Inserts the node relative tothe reference node as a child
-			llResult = icommon_ll4_insertAsBxmlAsChild((SLL4*)bxml, (SLL4*)bxmlParent, tlAfter);
+			llResult = oss_ll4_insertAsBxmlAsChild((SLL4*)bxml, (SLL4*)bxmlParent, tlAfter);
 
 			// If we were successful, update the level
 			if (llResult)
@@ -4624,7 +7476,7 @@ _asm nop;
 		if (bxml)
 		{
 			// Deletes the indicated node from wherever it is in the parent chain
-			llResult = icommon_ll4_insertAsBxmlAsChildRegarding((SLL4*)bxml, (SLL4*)bxmlParent, (SLL4*)bxmlRef, tlAfter);
+			llResult = oss_ll4_insertAsBxmlAsChildRegarding((SLL4*)bxml, (SLL4*)bxmlParent, (SLL4*)bxmlRef, tlAfter);
 
 			// If we were successful, update the level
 			if (llResult)
@@ -4858,7 +7710,7 @@ _asm nop;
 							if (bxml)
 							{
 								// A node was found
-								bxmlList = (SBxmlList*)icommon_SEChain_append(bxmlFinds, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmlList), _COMMON_START_END_BLOCK_SIZE, &llResult);
+								bxmlList = (SBxmlList*)oss_SEChain_append(bxmlFinds, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmlList), _COMMON_START_END_BLOCK_SIZE, &llResult);
 
 								// Store that node
 								if (bxmlList)
@@ -4869,7 +7721,7 @@ _asm nop;
 
 							} else {
 								// An attribute was found
-								bxmlaList = (SBxmlaList*)icommon_SEChain_append(bxmlaFinds, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmlaList), _COMMON_START_END_BLOCK_SIZE, &llResult);
+								bxmlaList = (SBxmlaList*)oss_SEChain_append(bxmlaFinds, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmlaList), _COMMON_START_END_BLOCK_SIZE, &llResult);
 
 								// Store that attribute
 								if (bxmlaList)
@@ -4986,7 +7838,7 @@ _asm nop;
 							if (bxmla)
 							{
 								// An attribute was found
-								bxmlaList = (SBxmlaList*)icommon_SEChain_append(bxmlaFinds, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmlaList), _COMMON_START_END_BLOCK_SIZE, &llResult);
+								bxmlaList = (SBxmlaList*)oss_SEChain_append(bxmlaFinds, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmlaList), _COMMON_START_END_BLOCK_SIZE, &llResult);
 
 								// Store that attribute
 								if (bxmlaList)
@@ -5028,7 +7880,7 @@ _asm nop;
 	{
 // TODO:  we need to record more explicit error messages so they can be reported on politely
 #pragma message("vo.cpp::oss_bxmlGetLastError() contains the ability to retrieve the last bxml error, however not all errors are being captured or recorded.")
-		icommon_memcpy((s8*)errorInfo, (s8*)&gsLastErrorInfo, sizeof(SBxmlError));
+		oss_memcpy((s8*)errorInfo, (s8*)&gsLastErrorInfo, sizeof(SBxmlError));
 	}
 
 
@@ -5057,7 +7909,7 @@ _asm nop;
 			//////////
 			// Create its entry in the next free slot
 			//////
-			lt = (_iswSThreads*)icommon_SEChain_append(&gseRootForeignThreads, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(_iswSThreads), _COMMON_START_END_BLOCK_SIZE, NULL);
+			lt = (_iswSThreads*)oss_SEChain_append(&gseRootForeignThreads, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(_iswSThreads), _COMMON_START_END_BLOCK_SIZE, NULL);
 				if (!lt)
 				{
 					// Should not happen, but it did
@@ -5135,7 +7987,7 @@ _asm nop;
 		lnResult = 0;
 
 		// Locate the indicated thread
-		lt = (_iswSThreads*)icommon_searchStartEndChainByUniqueId(&gseRootForeignThreads, ossData);
+		lt = (_iswSThreads*)oss_searchSEChainByUniqueId(&gseRootForeignThreads, ossData);
 		while (lt && lt->isViable && !lt->isSuspended)
 		{
 			// Suspend the thread
@@ -5179,7 +8031,7 @@ _asm nop;
 		lnResult = 0;
 
 		// Locate the indicated thread
-		lt = (_iswSThreads*)icommon_searchStartEndChainByUniqueId(&gseRootForeignThreads, ossData);
+		lt = (_iswSThreads*)oss_searchSEChainByUniqueId(&gseRootForeignThreads, ossData);
 		while (lt && lt->isViable && lt->isSuspended)
 		{
 			// Resume the thread
@@ -5223,14 +8075,14 @@ _asm nop;
 		lnResult = 0;
 
 		// Locate the indicated thread
-		lt = (_iswSThreads*)icommon_searchStartEndChainByUniqueId(&gseRootForeignThreads, ossData);
+		lt = (_iswSThreads*)oss_searchSEChainByUniqueId(&gseRootForeignThreads, ossData);
 		while (lt && lt->isViable)
 		{
 			// Resume the thread
 			TerminateThread(lt->os_threadHandle, tnTerminationCode);
 
 			// Delete the item from the Start/end chain
-			icommon_SEChain_deleteFrom(&gseRootForeignThreads, (SLL*)lt, true);
+			oss_SEChain_deleteFrom(&gseRootForeignThreads, (SLL*)lt, true);
 
 			// Return the tick count to indicate success
 			lnResult = gnTickCount;
