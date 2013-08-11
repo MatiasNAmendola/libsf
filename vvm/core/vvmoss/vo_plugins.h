@@ -59,7 +59,7 @@
 			//////
 				union {
 					u64		_sound_initialize;
-					u64		(CALLTYPE *sound_initialize)			(void);
+					u64		(CALLTYPE *sound_initialize)			(u64 tnDebuggerInterfaceAddress);
 				};
 
 

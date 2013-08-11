@@ -224,7 +224,7 @@
 		for (lnI = 0; lnI < lnLength; lnI++)
 		{
 			// Did they specify "-r:" (which is a resource override, using an alternate language, like -r:es for Spanish)
-			if (lnLength - lnI >= 3 && oss_unicodeMemicmp(tuCmdLine + lnI, L"-r:", 3) == 0)
+			if (lnLength - lnI >= 3 && ivvm_unicodeMemicmp(tuCmdLine + lnI, L"-r:", 3) == 0)
 			{
 				// Find out how long this string portion is
 				lnSkip					= ivvm_scanStringAndNullTerminateAtNextWhitespaceW(tuCmdLine + lnI + 3) + 3;
@@ -238,7 +238,7 @@
 
 
 			// Do they want to run the gambit of test cases?
-			} else if (lnLength - lnI >= 5 && oss_unicodeMemicmp(tuCmdLine + lnI, L"-test", 5) == 0) {
+			} else if (lnLength - lnI >= 5 && ivvm_unicodeMemicmp(tuCmdLine + lnI, L"-test", 5) == 0) {
 				// Yes
 				*tlTestCasesOnly = true;
 // TODO:  a future syntax will allow for -test:file.bxml to run the tests identified within an executable file.
@@ -246,6 +246,43 @@
 			}
 // TODO:  future command line switches can be added here as needed
 		}
+	}
+
+	int ivvm_unicodeMemicmp(w16* l, w16* r, u32 tnLength)
+	{
+		w16		ll, rl;		// Left- and right-lower
+		u32		lnI;
+
+
+		// For every character in the length, compare left to right
+		for (lnI = 0; lnI < tnLength; lnI++)
+		{
+			ll = ivvm_lowerCaseW(l[lnI]);
+			rl = ivvm_lowerCaseW(r[lnI]);
+			if (ll != rl)
+			{
+				if (ll < rl)
+					return -1;		// Left is less than right
+				return 1;			// Left is greater than right
+			}
+		}
+		// They're equal
+		return 0;
+	}
+
+	w16 ivvm_lowerCaseW(w16 u)
+	{
+		s8 c;
+		// TODO:  (unicode) foreign languages will need to have other tests here
+
+
+		// See if it's a lower-case character in ASCII
+		c = (s8)u;
+		if (c >= 'A' && c <= 'Z')
+			return((w16)(c + 0x20));		// It is, convert to lower-case
+
+		// If we get here, we're good as we are
+		return(u);
 	}
 
 

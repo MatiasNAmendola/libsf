@@ -159,12 +159,12 @@
 // Returns a handle to the sound play.
 //
 //////
-	void CALLTYPE oss_soundInitialize(void)
+	void CALLTYPE oss_soundInitialize(u64 tnDebuggerInterfaceAddress)
 	{
 		if (gsSoundPlugin.DllInstance && gsSoundPlugin._sound_initialize)
 		{
 			// Call the plugin to handle the load
-			gsSoundPlugin.sound_initialize();
+			gsSoundPlugin.sound_initialize(tnDebuggerInterfaceAddress);
 		}
 	}
 

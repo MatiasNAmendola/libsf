@@ -179,7 +179,7 @@
 		// functions so their code does not need changed.
 		//
 		//////
-			oss_soundInitialize();
+			oss_soundInitialize(tnDebuggerInterfaceAddress);
 	}
 	
 

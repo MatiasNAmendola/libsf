@@ -57,24 +57,13 @@
 // vo.cpp, sound.cpp
 //////
 #ifdef _NATIVE_CALLS
-	void CALLTYPE			oss_soundInitialize							(void);
+	void CALLTYPE			oss_soundInitialize							(u64 tnDebuggerInterfaceAddress);
 	u64 CALLTYPE			oss_soundCreateTone							(f32 tnHertz1, f32 tnHertz2, f32 tnHertz3, f32 tnHertz4, u32 tnDurationMilliseconds);
 	u64 CALLTYPE			oss_soundCreateStream						(u32 tnSamplesPerSecond, u64 tnSoundFillerCallbackFunction);
 	u64 CALLTYPE			oss_soundSetVolume							(u64 tnHandle, f32 tfVolume);
 	u64 CALLTYPE			oss_soundPlayStart							(u64 tnHandle, f32 tfVolume);
 	u64 CALLTYPE			oss_soundPlayCancel							(u64 tnHandle);
 	u64 CALLTYPE			oss_soundDelete								(u64 tnHandle);
-#else
-	void (CALLTYPE			*oss_soundInitialize)						(void);
-	u64	(CALLTYPE			*oss_soundCreateTone)						(f32 tnHertz1, f32 tnHertz2, f32 tnHertz3, f32 tnHertz4, u32 tnDurationMilliseconds);
-	u64	(CALLTYPE			*oss_soundCreateStream)						(u32 tnSamplesPerSecond, u64 tnSoundFillerCallbackFunction);
-	u64 (CALLTYPE			*oss_soundSetVolume)						(u64 tnHandle, f32 tfVolume);
-	u64	(CALLTYPE			*oss_soundPlayStart)						(u64 tnHandle, f32 tfVolume);
-	u64	(CALLTYPE			*oss_soundPlayCancel)						(u64 tnHandle);
-	u64	(CALLTYPE			*oss_soundDelete)							(u64 tnHandle);
-#endif
-
-
 
 //////////
 // For oss_soundCreateStream()'s callback to populate each stream.
@@ -87,3 +76,14 @@
 			void	(CALLBACK *callback)				(f32* sampleBuffer, u32 tnSamples, bool* tlContinueAfterThisSampleSet);
 		};
 	};
+
+
+#else
+	void (CALLTYPE			*oss_soundInitialize)						(u64 tnDebuggerInterfaceAddress);
+	u64	(CALLTYPE			*oss_soundCreateTone)						(f32 tnHertz1, f32 tnHertz2, f32 tnHertz3, f32 tnHertz4, u32 tnDurationMilliseconds);
+	u64	(CALLTYPE			*oss_soundCreateStream)						(u32 tnSamplesPerSecond, u64 tnSoundFillerCallbackFunction);
+	u64 (CALLTYPE			*oss_soundSetVolume)						(u64 tnHandle, f32 tfVolume);
+	u64	(CALLTYPE			*oss_soundPlayStart)						(u64 tnHandle, f32 tfVolume);
+	u64	(CALLTYPE			*oss_soundPlayCancel)						(u64 tnHandle);
+	u64	(CALLTYPE			*oss_soundDelete)							(u64 tnHandle);
+#endif

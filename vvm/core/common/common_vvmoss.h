@@ -817,6 +817,7 @@
 		(void *)&oss_realloc,												(void *)cgcOssRealloc,
 		(void *)&oss_free,													(void *)cgcOssFree,
 
+#ifndef _NATIVE_CALLS
 		(void *)&oss_soundInitialize,										(void *)cgcOssSoundInitialize,
 		(void *)&oss_soundCreateTone,										(void *)cgcOssSoundCreateTone,
 		(void *)&oss_soundCreateStream,										(void *)cgcOssSoundCreateStream,
@@ -824,6 +825,7 @@
 		(void *)&oss_soundPlayStart,										(void *)cgcOssSoundPlayStart,
 		(void *)&oss_soundPlayCancel,										(void *)cgcOssSoundPlayCancel,
 		(void *)&oss_soundDelete,											(void *)cgcOssSoundDelete,
+#endif
 
 		(void *)&oss_breakoutAsciiTextIntoSOssLines,						(void *)cgcOssBreakoutAsciiTextDataIntoSOssLines,
 		(void *)&oss_translateSOssLinesToSOssComps,							(void *)cgcOssTranslateSOssLinesToSOssComps,
@@ -918,8 +920,8 @@
 		(void*)&oss_SEChain_deleteFromAfterCallback,						(void*)cgcOssSEChainDeleteFromAfterCallback,
 
 		(void*)&oss_allocateAdditionalStartEndMasterSlots,					(void*)cgcOssAllocateAdditionalStartEndMasterSlots,
-		(void*)&oss_searchSEChainByUniqueId,							(void*)cgcOssSearchSEChainByUniqueId,
-		(void*)&oss_searchSEChainByCallback,							(void*)cgcOssSearchSEChainByCallback,
+		(void*)&oss_searchSEChainByUniqueId,								(void*)cgcOssSearchSEChainByUniqueId,
+		(void*)&oss_searchSEChainByCallback,								(void*)cgcOssSearchSEChainByCallback,
 		(void*)&oss_iterateThroughStartEndForCallback,						(void*)cgcOssIterateThroughStartEndForCallback,
 		(void*)&oss_validateStartEnd,										(void*)cgcOssValidateStartEnd,
 		(void*)&oss_swapEndian,												(void*)cgcOssSwapEndian,

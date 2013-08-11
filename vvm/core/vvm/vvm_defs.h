@@ -346,6 +346,8 @@
 	void					ivvm_resourcePrintf							(int tnMessage);
 	void					ivvm_resourcePrintf1						(int tnMessage, void* p1);
 	void					ivvm_parseCommandLine						(w16* tcCmdLine, bool* tlTestCasesOnly);
+	int						ivvm_unicodeMemicmp							(w16* l, w16* r, u32 tnLength);
+	w16						ivvm_lowerCaseW								(w16 u);
 	int						ivvm_scanStringAndNullTerminateAtNextWhitespaceW(w16* tcString);
 	bool					iivvm_loadResourceAsciiTextCallback			(void* ptr, u64 tnExtra);
 	bool					ivvm_debugBreaksOn							(void);

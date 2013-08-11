@@ -51,7 +51,7 @@
 #include <stdio.h>
 #include <windows.h>
 #include "\libsf\vvm\core\common\common.h"
-#include "\libsf\vvm\core\common\common_vvmoss_plugins.h"
+#include "\libsf\vvm\core\common\common_vvmoss.h"
 #include <sdl/SDL.h>
 #include <sdl/SDL_audio.h>
 #include <queue>
@@ -420,8 +420,14 @@
 // Called one time at startup to initialize the SDL library to handle the sound requests.
 //
 //////
-	void CALLTYPE oss_soundInitialize(void)
+	void CALLTYPE oss_soundInitialize(u64 tnDebuggerInterfaceAddress)
 	{
+		//////////
+		// Retrieve the necessary callbacks
+		//////
+			iLoadVvmOssFunctionsFromVVM((void**)tnDebuggerInterfaceAddress);
+			
+
 		//////////
 		// Setup the desired structure
 		//////
