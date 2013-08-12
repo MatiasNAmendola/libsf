@@ -666,7 +666,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 			void	(*funcVoid)	(SStartEndCallback* cb);
 			//////
 			// Uses the following format for the callback:
-			//		bool func(void* ptr, u64 tnExtra)
+			//		bool func(SStartEndCallback* cb)
 			//////////
 		};
 

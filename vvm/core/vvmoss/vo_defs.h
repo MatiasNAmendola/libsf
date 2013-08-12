@@ -256,6 +256,9 @@
 		void CALLTYPE			oss_ll_orphanize							(SLL* node);
 		void CALLTYPE			oss_ll_deleteChainWithCallback				(SLL* node, u64 func, u64 tnExtra);
 		void CALLTYPE			oss_ll_iterateViaCallback					(SLL* node, SOssCbData2Void* cb);
+		void CALLTYPE			oss_ll_iterateBackwardViaCallback			(SLL* node, SOssCbData2Void* cb);
+		SLL* CALLTYPE			oss_ll_getFirstNode							(SLL* node);
+		SLL* CALLTYPE			oss_ll_getLastNode							(SLL* node);
 
 		SLL4* CALLTYPE			oss_ll4_create								(SLL4* nodeWest, SLL4* nodeEast, SLL4* nodeNorth, SLL4* nodeSouth, u64 tnUniqueId, u32 tnSize);
 		bool CALLTYPE			oss_ll4_orphanizeAsBxml						(SLL4* bxml);
@@ -503,7 +506,7 @@
 	void					ioss_allocateSRGBAandCopy24Bit_BitmapTopDown	(SRGBA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SRGB*  lrgbsRoot, u32* tnResult, u32 tnErrorValue);
 	void					ioss_allocateSRGBAandCopy24Bit_BitmapBottomUp	(SRGBA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SRGB*  lrgbsRoot, u32* tnResult, u32 tnErrorValue);
 	LRESULT CALLBACK		iioss_timerProc_10ms							(HWND hwnd, UINT msg, UINT_PTR idEvent, DWORD dwTime);
-	bool					iioss_update10msTimersCallback					(void* ptr, u64 tnExtra);
+	bool					iioss_update10msTimersCallback					(SStartEndCallback* cb);
 	DWORD CALLTYPE			iioss_1MsTimerThread							(LPVOID lpParameter);
 	VOID CALLBACK			iiioss_1MsTimerThreadTimerAPCProc				(LPVOID lpArgToCompletionRoutine, DWORD dwTimerLowValue, DWORD dwTimerHighValue);
 	void					iioss_sharedAsciiCloseFileLocksCallback			(void* ptr, u64 tnParam);

@@ -185,7 +185,11 @@
 	const s8		cgcOssLlInsert[]										= "oss_ll_insert";
 	const s8		cgcOssLlOrphanize[]										= "oss_ll_orphanize";
 	const s8		cgcOssLlDeleteChainWithCallback[]						= "oss_ll_deleteChainWithCallback";
-	const s8		cgcOssLlSha1Chain[]										= "oss_ll_iterateViaCallback";
+	const s8		cgcOssLlIterateViaCallback[]							= "oss_ll_iterateViaCallback";
+	const s8		cgcOssLlIterateBackwardViaCallback[]					= "oss_ll_iterateBackwardViaCallback";
+	const s8		cgcOssLlGetFirstNode[]									= "oss_ll_getFirstNode";
+	const s8		cgcOssLlGetLastNode[]									= "oss_ll_getLastNode";
+
 
 	const s8		cgcOssLl4Create[]										= "oss_ll4_create";
 	const s8		cgcOssLl4OrphanizeAsBxml[]								= "oss_ll4_orphanizeAsBxml";
@@ -555,6 +559,9 @@
 		void			(CALLBACK *oss_ll_orphanize)						(SLL* node);
 		void			(CALLBACK *oss_ll_deleteChainWithCallback)			(SLL* node, u64 func, u64 tnExtra);
 		void			(CALLTYPE *oss_ll_iterateViaCallback)				(SLL* node, SOssCbData2Void* cb);
+		void			(CALLTYPE *oss_ll_iterateBackwardViaCallback)		(SLL* node, SOssCbData2Void* cb);
+		SLL*			(CALLTYPE *oss_ll_getFirstNode)						(SLL* node);
+		SLL*			(CALLTYPE *oss_ll_getLastNode)						(SLL* node);
 
 		SLL4*			(CALLTYPE *oss_ll4_create)							(SLL4* nodeWest, SLL4* nodeEast, SLL4* nodeNorth, SLL4* nodeSouth, u64 tnUniqueId, u32 tnSize);
 		bool			(CALLBACK *oss_ll4_orphanizeAsBxml)					(SLL4* bxml);
@@ -897,7 +904,10 @@
 		(void*)&oss_ll_insert,												(void*)cgcOssLlInsert,
 		(void*)&oss_ll_orphanize,											(void*)cgcOssLlOrphanize,
 		(void*)&oss_ll_deleteChainWithCallback,								(void*)cgcOssLlDeleteChainWithCallback,
-		(void*)&oss_ll_iterateViaCallback,									(void*)cgcOssLlSha1Chain,
+		(void*)&oss_ll_iterateViaCallback,									(void*)cgcOssLlIterateViaCallback,
+		(void*)&oss_ll_iterateBackwardViaCallback,							(void*)cgcOssLlIterateBackwardViaCallback,
+		(void*)&oss_ll_getFirstNode,										(void*)cgcOssLlGetFirstNode,
+		(void*)&oss_ll_getLastNode,											(void*)cgcOssLlGetLastNode,
 
 		(void*)&oss_ll4_create,												(void*)cgcOssLl4Create,
 		(void*)&oss_ll4_orphanizeAsBxml,									(void*)cgcOssLl4OrphanizeAsBxml,

@@ -88,7 +88,7 @@
 		// Search defines
 		SVariable*			ivvmmc_searchVariablesByName								(SStartEnd* tseVariables, SDatum* tsDatum);
 		bool				iivvmmc_searchVariablesByNameCallback						(SStartEndCallback* cb);
-		bool				iivvmmc_validateStartEndCompsCallback						(void* ptr, u64 tnExtra);
+		bool				iivvmmc_validateStartEndCompsCallback						(SStartEndCallback* cb);
 		// Used by vvmmc_asm.cpp as internal functions, but exist in vvmmc_sup.cpp
 		void				ivvmmc_assemblyPass0										(SAssembly* ta, SSourceFile* tsf);
 		void				ivvmmc_assemblyPass1										(SAssembly* ta, SSourceFile* tsf);

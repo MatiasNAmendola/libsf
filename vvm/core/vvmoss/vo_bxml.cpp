@@ -961,7 +961,7 @@ _asm nop;
 // Callback to find the location of the item they want to add the entry relative to
 //
 //////
-	bool iibxml_attributeInsertCallback(void* ptr, u64 tnExtra)
+	bool iibxml_attributeInsertCallback(SStartEndCallback* cb)
 	{
 		SBxmla*		bxmla;
 		SBxmla*		bxmlaRef;
@@ -969,11 +969,11 @@ _asm nop;
 
 // TODO:  untested code, breakpoint and examine
 		// Make sure our environment is sane
-		if (ptr)
+		if (cb && cb->ptr)
 		{
 			// Restore our pointers
-			bxmla		= (SBxmla*)ptr;
-			bxmlaRef	= (SBxmla*)tnExtra;
+			bxmla		= (SBxmla*)cb->ptr;
+			bxmlaRef	= (SBxmla*)cb->extra;
 
 			// See if this is our target
 			if (bxmla == bxmlaRef)
@@ -1430,18 +1430,18 @@ _asm nop;
 	}
 
 	// Callback to delete the components of every Start/end entry
-	void iibxml_nodeDeleteBranchAttributeCallback(void* ptr, u64 tnExtra)
+	void iibxml_nodeDeleteBranchAttributeCallback(SStartEndCallback* cb)
 	{
 		SBxml*	bxml;
 		SBxmla*	bxmla;
 
 
 		// Make sure our environment is sane
-		if (ptr && tnExtra != 0)
+		if (cb && cb->ptr && cb->extra != 0)
 		{
 			// Restore our pointers
-			bxmla	= (SBxmla*)ptr;
-			bxml	= (SBxml*)tnExtra;
+			bxmla	= (SBxmla*)cb->ptr;
+			bxml	= (SBxml*)cb->extra;
 
 			// Delete this attribute's datum and datum2 items
 			oss_deleteDatum(&bxmla->_name);

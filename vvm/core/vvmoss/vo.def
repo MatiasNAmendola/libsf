@@ -154,6 +154,9 @@ EXPORTS
 	oss_ll_orphanize
 	oss_ll_deleteChainWithCallback
 	oss_ll_iterateViaCallback
+	oss_ll_iterateBackwardViaCallback
+	oss_ll_getFirstNode
+	oss_ll_getLastNode
 
 	oss_ll4_create
 	oss_ll4_orphanizeAsBxml

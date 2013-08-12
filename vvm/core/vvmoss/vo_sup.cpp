@@ -2777,7 +2777,7 @@ _asm int 3;
 		return 0;
 	}
 
-	bool iioss_update10msTimersCallback(void* ptr, u64 tnExtra)
+	bool iioss_update10msTimersCallback(SStartEndCallback* cb)
 	{
 		u64				lnTimerDiff;
 		_iswSOssWindowLL*	low;
@@ -2785,9 +2785,9 @@ _asm int 3;
 
 
 		// Make sure our environment's sane
-		if (ptr)
+		if (cb && cb->ptr)
 		{
-			low = (_iswSOssWindowLL*)ptr;
+			low = (_iswSOssWindowLL*)cb->ptr;
 			// Increase the timer
 			low->isw.timer += 10;
 

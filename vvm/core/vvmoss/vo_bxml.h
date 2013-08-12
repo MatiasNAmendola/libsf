@@ -67,7 +67,7 @@
 	void				ibxml_saveNode									(SBuffer* build, SBxml* bxml, bool tlSaveChildNodes, bool tlSaveSiblings, u64* lnError);
 	void				iibxml_saveNodeCallback							(SStartEndCallback* cb);
 	bool				iibxml_AttributeDeleteCallback					(SStartEndCallback* cb);
-	bool				iibxml_attributeInsertCallback					(void* ptr, u64 tnExtra);
+	bool				iibxml_attributeInsertCallback					(SStartEndCallback* cb);
 	SBxmla*				ibxml_attributeDuplicate						(SBxmla* bxmlaOriginal);
 	SBxmla*				ibxml_attributeDuplicateAs						(SBxmla* bxmlaOriginal, s8* tcNewName, u32 tnNewNameLength);
 	SBxmla*				ibxml_attributeCreateAs							(s8* tcNewName, u32 tnNewNameLength);
@@ -79,7 +79,7 @@
 	void				iibxml_nodeCopyChildren							(SBxml* bxmlDst, SBxml* bxmlSrc, bool tlCopyAttributes, bool* tlResult);
 	void				iibxml_recordLastError							(u32 tnResourceNumber, u32 tnErrorNumber, s8* tcDescriptionZ, SBxml* bxml, SBxmla* bxmla, u64 tnErrorOffset);
 	bool				ibxml_nodeDeleteBranch							(SBxml* bxml);
-	void				iibxml_nodeDeleteBranchAttributeCallback		(void* ptr, u64 tnExtra);
+	void				iibxml_nodeDeleteBranchAttributeCallback		(SStartEndCallback* cb);
 	u64					ioss_bxmlAttributeSha1One						(SBxmla* bxmla, u8 sha20Bytes[20]);
 	u64					ioss_bxmlAttributeSha1							(SBxml*  bxml,  u8 sha20Bytes[20]);
 	u64					ioss_bxmlAttributeSha1Tag						(SBxml*  bxml,  u8 sha20Bytes[20]);

@@ -282,16 +282,16 @@
 // Callback for validating the line comps (used during initial development/debugging only)
 //
 //////
-	bool iivvmmc_validateStartEndCompsCallback(void* ptr, u64 tnExtra)
+	bool iivvmmc_validateStartEndCompsCallback(SStartEndCallback* cb)
 	{
 		SOssLine* line;
 
 
 		// Make sure our environment is sane
-		if (ptr)
+		if (cb && cb->ptr)
 		{
 			// Grab the ptr as what it is, a line
-			line = (SOssLine*)ptr;
+			line = (SOssLine*)cb->ptr;
 
 			// Validate any of the line's components or combined components
 			oss_validateStartEnd(&line->comps, 0);

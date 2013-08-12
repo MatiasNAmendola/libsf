@@ -4632,12 +4632,12 @@ openAgain:
 	{
 // TODO:  UNTESTED CODE
 		// Is our environment sane?
-		if (nodeRef)
+		if (node && nodeRef)
 		{
 			//////////
 			// Disconnect
 			//////
-				if (node && (node->prev || node->next))
+				if (node->prev || node->next)
 					oss_ll_orphanize(node);
 
 
@@ -4762,34 +4762,105 @@ openAgain:
 //
 // Called to compute the SHA-1 of the current node as a 64-bit quantity
 //
-// The parameters in the callback are:
-//		ptr			-- LL node
 //////
 	void CALLTYPE oss_ll_iterateViaCallback(SLL* node, SOssCbData2Void* cb)
+	{
+		//////////
+		// For each node, process its portion
+		//////
+			while (node)
+			{
+
+				//////////
+				// Callback to compute the SHA1 on this item
+				//////
+					cb->ptr = (void*)node;
+					cb->callback(cb);
+					//oss_sha1ComputeSha1_ProcessThisData(context, (s8*)node, tnSize);
+
+
+				//////////
+				// Move to next node
+				//////
+					node = node->next;
+			}
+	}
+
+
+
+
+//////////
+//
+// Called to iterate from the indicated node backwards
+//
+//////
+	void CALLTYPE oss_ll_iterateBackwardViaCallback(SLL* node, SOssCbData2Void* cb)
+	{
+		//////////
+		// For each node, process its portion
+		//////
+			while (node)
+			{
+
+				//////////
+				// Callback to compute the SHA1 on this item
+				//////
+					cb->ptr = (void*)node;
+					cb->callback(cb);
+					//oss_sha1ComputeSha1_ProcessThisData(context, (s8*)node, tnSize);
+
+
+				//////////
+				// Move to next node
+				//////
+					node = node->prev;
+			}
+	}
+
+
+
+
+//////////
+//
+// Called to compute the SHA-1 of the current node as a 64-bit quantity
+//
+//////
+	SLL* CALLTYPE oss_ll_getFirstNode(SLL* node)
 	{
 		// Make sure the environment is sane
 		if (node)
 		{
-			//////////
-			// For each node, process its portion
-			//////
-				while (node)
-				{
-
-					//////////
-					// Callback to compute the SHA1 on this item
-					//////
-						cb->ptr = (void*)node;
-						cb->callback(cb);
-						//oss_sha1ComputeSha1_ProcessThisData(context, (s8*)node, tnSize);
-
-
-					//////////
-					// Move to next node
-					//////
-						node = node->next;
-				}
+			// Iterate backwards to the top
+			while (node->prev)
+				node = node->prev;
 		}
+
+		// Indicate where we are
+		return(node);
+	}
+
+
+
+
+//////////
+//
+// Called to compute the SHA-1 of the current node as a 64-bit quantity
+//
+// The parameters in the callback are:
+//		ptr			-- LL node
+//////
+	SLL* CALLTYPE oss_ll_getLastNode(SLL* node)
+	{
+		// Make sure the environment is sane
+		if (node)
+		{
+			// Iterate forwards to the end
+			while (node->next)
+				node = node->next;
+		}
+
+		// Indicate where we are
+		return(node);
 	}
 
 
@@ -4820,8 +4891,8 @@ openAgain:
 			node->uniqueId	= tnUniqueId;
 
 			// Update our pointers
-			node->prev		= nodeWest;
-			node->next		= nodeEast;
+			node->west		= nodeWest;
+			node->east		= nodeEast;
 			node->north		= nodeNorth;
 			node->south		= nodeSouth;
 		}

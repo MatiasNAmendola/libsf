@@ -94,6 +94,8 @@
 		u32					lnSha1As32Bit;
 		u8					sha20Bytes[20];
 		u8					context[92];
+		SLL*				nodePrev;
+		SLL*				nodeNext;
 
 
 		//////////
@@ -116,7 +118,7 @@
 
 
 		//////////
-		// Determine the SHA-1 on it
+		// Determine the SHA-1 on that one node
 		//////
 			oss_sha1ComputeSha1_Start(context);
 
@@ -140,6 +142,110 @@
 			// If we get here, we're good
 
 
+		//////////
+		// Create a node to go before
+		//////
+			nodePrev = i3vvmt_testSll_1_createSll(cgnBufferSize);
+			if (!nodePrev)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL_UNABLE_TO_CREATE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+
+		//////////
+		// Create a node to go after
+		//////
+			nodeNext = i3vvmt_testSll_1_createSll(cgnBufferSize);
+			if (!nodeNext)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL_UNABLE_TO_CREATE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+
+		//////////
+		// Insert the node after
+		//////
+			oss_ll_insert(nodeNext, *root, true);
+
+
+		//////////
+		// Determine the SHA-1 on the two nodes
+		//////
+			oss_sha1ComputeSha1_Start(context);
+
+			oss_ll_iterateViaCallback(*root, &cb);
+
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTestLl2NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl2NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Insert the node before
+		//////
+			oss_ll_insert(nodePrev, *root, false);
+
+
+		//////////
+		// Determine the SHA-1 on the three nodes
+		//////
+			oss_sha1ComputeSha1_Start(context);
+
+			oss_ll_iterateViaCallback(nodePrev, &cb);
+
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTestLl3NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl3NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Determine the SHA-1 on the three nodes going backwards
+		//////
+			oss_sha1ComputeSha1_Start(context);
+
+			oss_ll_iterateBackwardViaCallback(nodeNext, &cb);
+
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTestLl4NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl4NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
 		// If we get here, we're good
 		vvm_resourcePrintf(IDS_VVM_TEST_PASS);
 		return(true);
@@ -150,10 +256,131 @@
 
 	bool iivvmt_testSll_2(u64 lnHandleLog, SLL* root)
 	{
+		SOssCbData2Void		cb;
+		u64					lnSha1As64Bit;
+		u32					lnSha1As32Bit;
+		u8					sha20Bytes[20];
+		u8					context[92];
+		SLL*				nodePrev;
+		SLL*				nodeNext;
+
+
 		//////////
 		// Tell them which test we're running
 		//////
 			vvm_resourcePrintf(IDS_VVM_TEST_SLL_APPEND);
+
+
+		//////////
+		// Prepare for our callbacks
+		//////
+			cb._callback	= (u64)&i3vvmt_testSll_1_sha1Callback;
+			cb.extra1		= (u64)&context[0];
+			cb.extra2		= (u64)&sha20Bytes[0];
+
+
+		//////////
+		// Create a node to go before
+		//////
+			nodePrev = i3vvmt_testSll_1_createSll(cgnBufferSize);
+			if (!nodePrev)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL_UNABLE_TO_CREATE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+
+		//////////
+		// Create a node to go after
+		//////
+			nodeNext = i3vvmt_testSll_1_createSll(cgnBufferSize);
+			if (!nodeNext)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL_UNABLE_TO_CREATE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+
+		//////////
+		// Insert the node after
+		//////
+			oss_ll_insert(nodeNext, root, true);
+
+
+		//////////
+		// Determine the SHA-1 on that one node
+		//////
+			oss_sha1ComputeSha1_Start(context);
+
+			oss_ll_iterateViaCallback(root->prev, &cb);
+
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTestLl5NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl5NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Insert the node before
+		//////
+			oss_ll_insert(nodePrev, root, false);
+
+
+		//////////
+		// Determine the SHA-1 on that one node
+		//////
+			oss_sha1ComputeSha1_Start(context);
+
+			oss_ll_iterateViaCallback(nodePrev->prev, &cb);
+
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTestLl6NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl6NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Determine the SHA-1 on that one node
+		//////
+			oss_sha1ComputeSha1_Start(context);
+
+			oss_ll_iterateBackwardViaCallback(nodeNext->next, &cb);
+
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTestLl7NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl7NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
 
 
 		// If we get here, we're good
