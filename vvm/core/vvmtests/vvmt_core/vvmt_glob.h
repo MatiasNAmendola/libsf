@@ -86,6 +86,18 @@
 	const	u64		cgnTestLl7NodeSha1As64Bit					= 0x57571b0fc22491a6;				// 5757 1b0f c224 91a6
 	const	u32		cgnTestLl7NodeSha1As32Bit					= 0x2a0e94c3;						// 2a0e 94c3
 
+	const	u64		cgnTestLl8NodeSha1As64Bit					= 0x71e72704128c31eb;				// 71e7 2704 128c 31eb
+	const	u32		cgnTestLl8NodeSha1As32Bit					= 0x10eca433;						// 10ec a433
+
+	const	u64		cgnTestLl9NodeSha1As64Bit					= 0x5830322388a9b487;				// 5830 3223 88a9 b487
+	const	u32		cgnTestLl9NodeSha1As32Bit					= 0x363059a9;						// 3630 59a9
+
+	const	u64		cgnTestLl10NodeSha1As64Bit					= 0xcd3e8d48ae26895a;				// cd3e 8d48 ae26 895a
+	const	u32		cgnTestLl10NodeSha1As32Bit					= 0x8ac9817b;						// 8ac9 817b
+
+	const	u64		cgnTestLl11NodeSha1As64Bit					= 0xdd5f61c2cbd5d283;				// dd5f 61c2 cbd5 d283
+	const	u32		cgnTestLl11NodeSha1As32Bit					= 0x4e96bd41;						// 4e96 bd41
+
 
 //////////
 //

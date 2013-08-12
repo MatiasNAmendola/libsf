@@ -151,7 +151,10 @@ EXPORTS
 
 	oss_ll_create
 	oss_ll_insert
+	oss_ll_delete
+	oss_ll_deleteWithCallback
 	oss_ll_orphanize
+	oss_ll_deleteChain
 	oss_ll_deleteChainWithCallback
 	oss_ll_iterateViaCallback
 	oss_ll_iterateBackwardViaCallback

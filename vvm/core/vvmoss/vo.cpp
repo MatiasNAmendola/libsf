@@ -4624,6 +4624,65 @@ openAgain:
 
 //////////
 //
+// Called to delete a link list node.  If need be it orphanizes the node first.
+//
+//////
+	void CALLBACK oss_ll_delete(SLL* node)
+	{
+		if (node)
+		{
+			//////////
+			// Disconnect
+			//////
+				if (node->prev || node->next)
+					oss_ll_orphanize(node);
+
+
+			//////////
+			// Delete the node
+			//////
+				free(node);
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to delete a link list node with a callback.  If need be it orphanizes the node first.
+//
+//////
+	void CALLBACK oss_ll_deleteWithCallback(SLL* node, SLLCallback* cb)
+	{
+		if (node)
+		{
+			//////////
+			// Disconnect
+			//////
+				if (node->prev || node->next)
+					oss_ll_orphanize(node);
+
+
+			//////////
+			// Let the user say their goodbyes
+			//////
+				if (cb)
+					cb->funcVoid(cb);
+
+
+			//////////
+			// Delete the node
+			//////
+				free(node);
+		}
+	}
+
+
+
+
+//////////
+//
 // Inserts a 2-way linked relative to the nodeRef, either before or after.  If the
 // node is already connected, it is disconnected.
 //
@@ -4705,21 +4764,55 @@ openAgain:
 			// Is there one before?
 			//////
 				if (node->prev)
-				{
-					// Make the one before point to the one after
-					node->prev->next	= node->next;
-					node->next			= NULL;
-				}
+					node->prev->next = node->next;		// Make the one before point to the one after
 
 			//////////
 			// Is there one after?
 			//////
 				if (node->next)
-				{
-					// Make the one after point to the one before
-					node->next->prev	= node->prev;
-					node->prev			= NULL;
-				}
+					node->next->prev = node->prev;		// Make the one after point to the one before
+
+			//////////
+			// Free up all parts
+			//////
+				node->next	= NULL;
+				node->prev	= NULL;
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to delete the entire chain (beginning from where it's at
+//
+//////
+	void CALLBACK oss_ll_deleteChain(SLL** root)
+	{
+		SLL* node;
+		SLL* nodeNext;
+
+
+		// Make sure the environment is sane
+		if (root)
+		{
+			// Iterate through deleting each entry
+			node = *root;
+			while (node)
+			{
+				// Grab the next node
+				nodeNext = node->next;
+				
+				// Delete the node
+				free(node);
+
+				// Move to next item
+				node = nodeNext;
+			}
+
+			// Reset the pointer
+			*root = NULL;
 		}
 	}
 
@@ -4737,22 +4830,27 @@ openAgain:
 		SLL* nodeNext;
 
 
-		// Iterate through the master list until we find the associated entry
-		while (cb->node)
+		// Make sure the environment is sane
+		if (cb)
 		{
-			// Grab the next node
-			nodeNext = cb->node->next;
+			// Iterate through deleting each entry
+			while (cb->node)
+			{
+				// Grab the next node
+				nodeNext = cb->node->next;
 
-			// Perform the callback
-			cb->funcBool(cb);
+				// Perform the callback
+				if (cb->_func)
+					cb->funcVoid(cb);
 
-			// Delete the node
-			free(cb->node);
+				// Delete the node
+				free(cb->node);
 
-			// Move to next node
-			cb->node = nodeNext;
+				// Move to next node
+				cb->node = nodeNext;
+			}
+			// All done
 		}
-		// All done
 	}
 
 

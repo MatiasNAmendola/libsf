@@ -270,6 +270,21 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 //       to some external areas for a post-return respond in another thread.
 //
 //////
+	struct SOssCallback
+	{
+		union
+		{
+			u64		_func;
+			void	(*funcBool)	(SOssCallback* cb);
+			void	(*funcVoid)	(SOssCallback* cb);
+			//////
+			// Uses the following format for the callback:
+			//		void func(SOssCallback* cb)
+			//		bool func(SOssCallback* cb)
+			//////////
+		};
+	};
+
 	struct SOssCbData1Boolean
 	{
 		union {

@@ -252,9 +252,12 @@
 		u8 CALLTYPE				oss_getPredictableSequentialPattern			(u32 tnIterator, u32 tnValue);
 
 		SLL* CALLTYPE			oss_ll_create								(SLL* nodePrev, SLL* nodeNext, u64 tnUniqueId, u32  tnSize);
+		void CALLBACK			oss_ll_delete								(SLL* node);
+		void CALLBACK			oss_ll_deleteWithCallback					(SLL* node, SLLCallback* cb);
 		bool CALLTYPE			oss_ll_insert								(SLL* node, SLL* nodeRef, bool tlAfter);
 		void CALLTYPE			oss_ll_orphanize							(SLL* node);
-		void CALLTYPE			oss_ll_deleteChainWithCallback				(SLL* node, u64 func, u64 tnExtra);
+		void CALLBACK			oss_ll_deleteChain							(SLL** root);
+		void CALLTYPE			oss_ll_deleteChainWithCallback				(SLLCallback* cb);
 		void CALLTYPE			oss_ll_iterateViaCallback					(SLL* node, SOssCbData2Void* cb);
 		void CALLTYPE			oss_ll_iterateBackwardViaCallback			(SLL* node, SOssCbData2Void* cb);
 		SLL* CALLTYPE			oss_ll_getFirstNode							(SLL* node);
