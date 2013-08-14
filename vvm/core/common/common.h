@@ -370,6 +370,12 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		u64				uniqueId;				// Unique id associated with this object
 	};
 
+	// Direction for navigation through an SLL4
+	const u32 _LL4_WEST			= 1;
+	const u32 _LL4_EAST			= 2;
+	const u32 _LL4_NORTH		= 4;
+	const u32 _LL4_SOUTH		= 8;
+	const u32 _LL4_ALL			= 16;			// Go out in every direction (only valid on oss_ll4_deleteChain() and oss_ll4_deleteChainWithCallback())
 	struct SLL4
 	{
 		union {

@@ -253,7 +253,7 @@
 
 		SLL* CALLTYPE			oss_ll_create								(SLL* nodePrev, SLL* nodeNext, u64 tnUniqueId, u32  tnSize);
 		void CALLBACK			oss_ll_delete								(SLL* node);
-		void CALLBACK			oss_ll_deleteWithCallback					(SLL* node, SLLCallback* cb);
+		void CALLBACK			oss_ll_deleteWithCallback					(SLLCallback* cb);
 		bool CALLTYPE			oss_ll_insert								(SLL* node, SLL* nodeRef, bool tlAfter);
 		void CALLTYPE			oss_ll_orphanize							(SLL* node);
 		void CALLBACK			oss_ll_deleteChain							(SLL** root);
@@ -264,14 +264,19 @@
 		SLL* CALLTYPE			oss_ll_getLastNode							(SLL* node);
 
 		SLL4* CALLTYPE			oss_ll4_create								(SLL4* nodeWest, SLL4* nodeEast, SLL4* nodeNorth, SLL4* nodeSouth, u64 tnUniqueId, u32 tnSize);
-		bool CALLTYPE			oss_ll4_orphanizeAsBxml						(SLL4* bxml);
-		bool CALLTYPE			oss_ll4_orphanizeAsNode						(SLL4* node);
-		bool CALLTYPE			oss_ll4_insertAsBxml						(SLL4* bxml, SLL4* bxmlRef,                   bool tlAfter);
-		bool CALLTYPE			oss_ll4_insertAsBxmlAsChild					(SLL4* bxml, SLL4* bxmlParent,                bool tlPrepend);
-		bool CALLTYPE			oss_ll4_insertAsBxmlAsChildRegarding		(SLL4* bxml, SLL4* bxmlParent, SLL4* bxmlRef, bool tlAfter);
-		bool CALLTYPE			oss_ll4_insertAsNodeNorthSouth				(SLL4* node, SLL4* nodeRef,                   bool tlAfter);
-		bool CALLTYPE			oss_ll4_insertAsNodeEastWest				(SLL4* node, SLL4* nodeRef,                   bool tlAfter);
-		void CALLTYPE			oss_ll4_deleteChainWithCallback				(SLL4Callback* cb);
+		void CALLBACK			oss_ll4_delete								(SLL4* node);
+		void CALLBACK			oss_ll4_deleteWithCallback					(SLL4* node);
+		bool CALLTYPE			oss_ll4_orphanize							(SLL4* node);
+		bool CALLTYPE			oss_ll4_insertNorthSouth					(SLL4* node, SLL4* nodeRef, bool tlAfter);
+		bool CALLTYPE			oss_ll4_insertEastWest						(SLL4* node, SLL4* nodeRef, bool tlAfter);
+		void CALLTYPE			oss_ll4_deleteChain							(SLL4** root, u32 tnDirection);
+		void CALLTYPE			oss_ll4_deleteChainWithCallback				(SLL4Callback* cb, u32 tnDirection);
+		void CALLTYPE			oss_ll4_iterateViaCallback					(SLL4Callback* cb, u32 tnDirection);
+	
+		bool CALLTYPE			oss_ll4bxml_orphanize						(SLL4* bxml);
+		bool CALLTYPE			oss_ll4bxml_insert							(SLL4* bxmlSibling,	SLL4* bxmlRef,							bool tlAfter);
+		bool CALLTYPE			oss_ll4bxml_insertAsChild					(SLL4* bxmlChild,	SLL4* bxmlParent,						bool tlPrepend);
+		bool CALLTYPE			oss_ll4bxml_insertAsChildRegarding			(SLL4* bxmlChild,	SLL4* bxmlParent, SLL4* bxmlRegarding,	bool tlAfter);
 
 		void* CALLTYPE			oss_SEChain_prepend							(SStartEnd* ptrSE, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool* tlResult);
 		void* CALLTYPE			oss_SEChain_append							(SStartEnd* ptrSE, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool* tlResult);

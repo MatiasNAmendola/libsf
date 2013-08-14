@@ -46,6 +46,9 @@
 //////
 	bool ivvmt_testSll4(u64 lnHandleLog)
 	{
+		SLL4* root;
+
+
 		// Indicate which test
 		vvm_resourcePrintf(IDS_VVM_TEST_SLL4_TESTING);
 
@@ -53,22 +56,28 @@
 		//////////
 		// #01 - Create a five element 4-way linked list, one in the middle one at each point
 		//////
-			if (!iivvmt_testSll4_1(lnHandleLog))
+			if (!iivvmt_testSll4_1(lnHandleLog, &root))
 				return false;		// failure
 
 
 		//////////
 		// #02 - Append an item before and after each element in all directions
 		//////
-			if (!iivvmt_testSll4_2(lnHandleLog))
+			if (!iivvmt_testSll4_2(lnHandleLog, root))
 				return false;		// failure
 
 
 		//////////
 		// #03 - Delete first item, middle, last item in each direction
 		//////
-			if (!iivvmt_testSll4_3(lnHandleLog))
+			if (!iivvmt_testSll4_3(lnHandleLog, &root))
 				return false;		// failure
+
+
+		//////////
+		// Clean house
+		//////
+			oss_ll4_deleteChain(&root, _LL4_ALL);
 
 
 		// When we get here, success
@@ -79,7 +88,7 @@
 
 
 
-	bool iivvmt_testSll4_1(u64 lnHandleLog)
+	bool iivvmt_testSll4_1(u64 lnHandleLog, SLL4** root)
 	{
 		//////////
 		// Tell them which test we're running
@@ -95,7 +104,7 @@
 
 
 
-	bool iivvmt_testSll4_2(u64 lnHandleLog)
+	bool iivvmt_testSll4_2(u64 lnHandleLog, SLL4* root)
 	{
 		//////////
 		// Tell them which test we're running
@@ -111,7 +120,7 @@
 
 
 
-	bool iivvmt_testSll4_3(u64 lnHandleLog)
+	bool iivvmt_testSll4_3(u64 lnHandleLog, SLL4** root)
 	{
 		//////////
 		// Tell them which test we're running

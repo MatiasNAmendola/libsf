@@ -4653,28 +4653,28 @@ openAgain:
 // Called to delete a link list node with a callback.  If need be it orphanizes the node first.
 //
 //////
-	void CALLBACK oss_ll_deleteWithCallback(SLL* node, SLLCallback* cb)
+	void CALLBACK oss_ll_deleteWithCallback(SLLCallback* cb)
 	{
-		if (node)
+		if (cb && cb->node)
 		{
 			//////////
 			// Disconnect
 			//////
-				if (node->prev || node->next)
-					oss_ll_orphanize(node);
+				if (cb->node->prev || cb->node->next)
+					oss_ll_orphanize(cb->node);
 
 
 			//////////
 			// Let the user say their goodbyes
 			//////
-				if (cb)
+				if (cb->_func)
 					cb->funcVoid(cb);
 
 
 			//////////
 			// Delete the node
 			//////
-				free(node);
+				free(cb->node);
 		}
 	}
 
@@ -4861,7 +4861,7 @@ openAgain:
 // Called to compute the SHA-1 of the current node as a 64-bit quantity
 //
 //////
-	void CALLTYPE oss_ll_iterateViaCallback(SLL* node, SOssCbData2Void* cb)
+	void CALLTYPE oss_ll_iterateViaCallback(SLL* node, SLLCallback* cb)
 	{
 		//////////
 		// For each node, process its portion
@@ -4872,8 +4872,8 @@ openAgain:
 				//////////
 				// Callback to compute the SHA1 on this item
 				//////
-					cb->ptr = (void*)node;
-					cb->callback(cb);
+					cb->node = node;
+					cb->funcVoid(cb);
 					//oss_sha1ComputeSha1_ProcessThisData(context, (s8*)node, tnSize);
 
 
@@ -4892,7 +4892,7 @@ openAgain:
 // Called to iterate from the indicated node backwards
 //
 //////
-	void CALLTYPE oss_ll_iterateBackwardViaCallback(SLL* node, SOssCbData2Void* cb)
+	void CALLTYPE oss_ll_iterateBackwardViaCallback(SLL* node, SLLCallback* cb)
 	{
 		//////////
 		// For each node, process its portion
@@ -4903,8 +4903,8 @@ openAgain:
 				//////////
 				// Callback to compute the SHA1 on this item
 				//////
-					cb->ptr = (void*)node;
-					cb->callback(cb);
+					cb->node = node;
+					cb->funcVoid(cb);
 					//oss_sha1ComputeSha1_ProcessThisData(context, (s8*)node, tnSize);
 
 
@@ -5004,6 +5004,58 @@ openAgain:
 
 //////////
 //
+// Called to delete a single node from the four-way link list
+//
+//////
+	void CALLBACK oss_ll4_delete(SLL4* node)
+	{
+		if (node)
+		{
+			// Disconnect from everything
+			oss_ll4_orphanize(node);
+
+			// Free it
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to delete a four-way link list node with a callback.  If need be it orphanizes
+// the node first.
+//
+//////
+	void CALLBACK oss_ll4_deleteWithCallback(SLL4Callback* cb)
+	{
+		if (cb && cb->node)
+		{
+			//////////
+			// Disconnect
+			//////
+				oss_ll4_orphanize(cb->node);
+
+
+			//////////
+			// Let the user say their goodbyes
+			//////
+				if (cb->_func)
+					cb->funcVoid(cb);
+
+
+			//////////
+			// Delete the node
+			//////
+				free(cb->node);
+		}
+	}
+
+
+
+
+//////////
+//
 // Disconnects an SLL4 structure from either an BXML or a traditional node configuration.
 // LL4 entries go off in four directions, toward siblings (prev/next), and toward parents
 // and children.  These can be thought of as the cardinal directions as well (north/east/
@@ -5016,7 +5068,7 @@ openAgain:
 	// In SBxml structures, we always update siblings, but if we have no previous entry,
 	// then we must make the parent (if any) point to our next sibling, and we always
 	// keep the children (for they are indeed most important!) :-)
-	bool CALLTYPE oss_ll4_orphanizeAsBxml(SLL4* bxml)
+	bool CALLTYPE oss_ll4bxml_orphanize(SLL4* bxml)
 	{
 		bool	llResult;
 
@@ -5054,7 +5106,7 @@ openAgain:
 
 	// In nodes, we always update north/south paths, as well as east/west paths, as the node is
 	// just a point on a mesh or clutter mesh.
-	bool CALLTYPE oss_ll4_orphanizeAsNode(SLL4* node)
+	bool CALLTYPE oss_ll4_orphanize(SLL4* node)
 	{
 		bool llResult;
 
@@ -5089,7 +5141,7 @@ openAgain:
 //
 //////
 	// Inserts only as a sibling, either before or after the reference bxml
-	bool CALLTYPE oss_ll4_insertAsBxml(SLL4* bxml, SLL4* bxmlRef, bool tlAfter)
+	bool CALLTYPE oss_ll4bxml_insert(SLL4* bxmlSibling, SLL4* bxmlRef, bool tlAfter)
 	{
 		bool	llResult;
 		SLL4*	bxmlNext;
@@ -5098,7 +5150,7 @@ openAgain:
 
 // TODO:  untested code, breakpoint and examine
 		// Make sure our environment's sane
-		if (bxml && bxmlRef)
+		if (bxmlSibling && bxmlRef)
 		{
 			// Only success at this point. :-)
 			llResult = true;
@@ -5110,30 +5162,30 @@ openAgain:
 				bxmlNext		= bxmlRef->next;			// Grab the original next
 
 				// Going between BxmlRef and BxmlNext
-				bxml->prev		= bxmlRef;					// The one we're inserting points back to the reference
-				bxml->next		= bxmlNext;					// The one we're inserting points forward to what used to be the next
-				bxmlRef->next	= bxml;						// The reference points forward to the one we're inserting
+				bxmlSibling->prev		= bxmlRef;					// The one we're inserting points back to the reference
+				bxmlSibling->next		= bxmlNext;					// The one we're inserting points forward to what used to be the next
+				bxmlRef->next	= bxmlSibling;						// The reference points forward to the one we're inserting
 
 				// Update the other one that's out there, you know, "on the other side"
 				if (bxmlNext)
-					bxmlNext->prev = bxml;					// The original next now points backward to the one we're inserting
+					bxmlNext->prev = bxmlSibling;					// The original next now points backward to the one we're inserting
 
 			} else {
 				// We're inserting this one BEFORE the reference bxml
 				bxmlPrev		= bxmlRef->prev;			// Grab original previous
 
 				// Going between BxmlPrev and BxmlRef
-				bxml->prev		= bxmlPrev;					// The one we're inserting before points back to the original previous
-				bxml->next		= bxmlRef;					// The one we're inserting before points forward to the reference
-				bxmlRef->prev	= bxml;						// The reference points back to the one we're inserting before
+				bxmlSibling->prev		= bxmlPrev;					// The one we're inserting before points back to the original previous
+				bxmlSibling->next		= bxmlRef;					// The one we're inserting before points forward to the reference
+				bxmlRef->prev	= bxmlSibling;						// The reference points back to the one we're inserting before
 				if (bxmlPrev)
-					bxmlPrev->next = bxml;					// The previous points forward to the one we're inserting
+					bxmlPrev->next = bxmlSibling;					// The previous points forward to the one we're inserting
 
 				// Was this the first item we just inserted before?
 				if (bxmlRef->parent && bxmlRef->parent->firstChild == bxmlRef)
 				{
 					// Yes, it needs to now point to the new item
-					bxmlRef->parent->firstChild = bxml;
+					bxmlRef->parent->firstChild = bxmlSibling;
 				}
 			}
 
@@ -5147,7 +5199,7 @@ openAgain:
 	}
 
 	// Positions the element as a child either at the start (faster) or end (slower)
-	bool CALLTYPE oss_ll4_insertAsBxmlAsChild(SLL4* bxml, SLL4* bxmlParent, bool tlAfter)
+	bool CALLTYPE oss_ll4bxml_insertAsChild(SLL4* bxmlChild, SLL4* bxmlParent, bool tlAfter)
 	{
 		bool	llResult;
 		SLL4*	bxmlRunner;
@@ -5155,7 +5207,7 @@ openAgain:
 
 // TODO:  untested code, breakpoint and examine
 		// Make sure our environment's sane
-		if (bxml && bxmlParent)
+		if (bxmlChild && bxmlParent)
 		{
 			// Only success at this point
 			llResult = true;
@@ -5172,27 +5224,27 @@ openAgain:
 						bxmlRunner = bxmlRunner->next;
 
 					// When we get here, we have the last child
-					bxmlRunner->next		= bxml;
-					bxml->prev				= bxmlRunner;
+					bxmlRunner->next			= bxmlChild;
+					bxmlChild->prev				= bxmlRunner;
 
 				} else {
 					// First child
-					bxmlParent->firstChild	= bxml;
-					bxml->prev				= NULL;
+					bxmlParent->firstChild		= bxmlChild;
+					bxmlChild->prev				= NULL;
 				}
 				// Nothing point after
-				bxml->next = NULL;
+				bxmlChild->next = NULL;
 
 			} else {
 				// Going to the start
 				if (bxmlParent->child)
-					bxml->next = bxmlParent->child;		// There is already a child, make sure this new one points to that child
+					bxmlChild->next = bxmlParent->child;		// There is already a child, make sure this new one points to that child
 
 				// Update the parent to point to its new first child
-				bxmlParent->firstChild		= bxml;
+				bxmlParent->firstChild			= bxmlChild;
 
 				// Nothing pointing before
-				bxml->prev					= NULL;
+				bxmlChild->prev					= NULL;
 			}
 			// If we get here, we're good
 			llResult = true;
@@ -5208,7 +5260,7 @@ openAgain:
 
 	// Positions the element relative to the bxml reference, either before or after, and
 	// therefore "regarding" it.
-	bool CALLTYPE oss_ll4_insertAsBxmlAsChildRegarding(SLL4* bxml, SLL4* bxmlParent, SLL4* BxmlRef, bool tlAfter)
+	bool CALLTYPE oss_ll4bxml_insertAsChildRegarding(SLL4* bxmlChild, SLL4* bxmlParent, SLL4* bxmlRegarding, bool tlAfter)
 	{
 		bool	llResult;
 		SLL4*	BxmlNext;
@@ -5218,52 +5270,52 @@ openAgain:
 // TODO:  untested code, breakpoint and examine
 		// Make sure our environment is sane
 		llResult = false;
-		if (bxml && bxmlParent && BxmlRef)
+		if (bxmlChild && bxmlParent && bxmlRegarding)
 		{
 			if (tlAfter)
 			{
 				// It's going AFTER the reference entry
-				if (BxmlRef->next)
+				if (bxmlRegarding->next)
 				{
 					// There IS an entry after this one
 					// bxml is going between BxmlRef and BxmlNext
-					BxmlNext = BxmlRef->next;
+					BxmlNext = bxmlRegarding->next;
 
 					// Insert the node
-					bxml->prev			= BxmlRef;
-					bxml->next			= BxmlNext;
-					BxmlRef->next		= bxml;
-					BxmlNext->prev		= bxml;
+					bxmlChild->prev			= bxmlRegarding;
+					bxmlChild->next			= BxmlNext;
+					bxmlRegarding->next		= bxmlChild;
+					BxmlNext->prev			= bxmlChild;
 
 				} else {
 					// BxmlRef is the last entry
-					BxmlRef->next		= bxml;
-					bxml->prev			= BxmlRef;
-					bxml->next			= NULL;
+					bxmlRegarding->next		= bxmlChild;
+					bxmlChild->prev			= bxmlRegarding;
+					bxmlChild->next			= NULL;
 				}
 
 			} else {
 				// It's going BEFORE the reference entry
-				if (BxmlRef->prev)
+				if (bxmlRegarding->prev)
 				{
 					// There IS an entry before this one
-					BxmlPrev = BxmlRef->prev;
+					BxmlPrev = bxmlRegarding->prev;
 					// This is going between BxmlPrev and BxmlRef
-					bxml->prev				= BxmlPrev;
-					bxml->next				= BxmlRef;
-					BxmlPrev->next			= bxml;
-					BxmlRef->prev			= bxml;
+					bxmlChild->prev				= BxmlPrev;
+					bxmlChild->next				= bxmlRegarding;
+					BxmlPrev->next				= bxmlChild;
+					bxmlRegarding->prev			= bxmlChild;
 
 				} else {
 					// xmlRef is the first entry
-					bxml->prev				= NULL;
-					bxml->next				= BxmlRef;
-					bxmlParent->firstChild	= bxml;
-					BxmlRef->prev			= bxml;
+					bxmlChild->prev				= NULL;
+					bxmlChild->next				= bxmlRegarding;
+					bxmlParent->firstChild		= bxmlChild;
+					bxmlRegarding->prev			= bxmlChild;
 				}
 			}
 			// Update the pointer to point back up to its new parent.
-			bxml->parent = bxmlParent;
+			bxmlChild->parent = bxmlParent;
 
 			// Success
 			llResult = true;
@@ -5273,7 +5325,7 @@ openAgain:
 	}
 
 	// Inserts the node before or after the indicated node
-	bool CALLTYPE oss_ll4_insertAsNodeNorthSouth(SLL4* node, SLL4* nodeRef, bool tlAfter)
+	bool CALLTYPE oss_ll4_insertNorthSouth(SLL4* node, SLL4* nodeRef, bool tlAfter)
 	{
 		bool	llResult;
 		SLL4*	nodePrev;
@@ -5336,7 +5388,7 @@ openAgain:
 	}
 
 	// Inserts the node before or after the indicated node
-	bool CALLTYPE oss_ll4_insertAsNodeEastWest(SLL4* node, SLL4* nodeRef, bool tlAfter)
+	bool CALLTYPE oss_ll4_insertEastWest(SLL4* node, SLL4* nodeRef, bool tlAfter)
 	{
 		bool	llResult;
 		SLL4*	nodeWest;
@@ -5403,33 +5455,263 @@ openAgain:
 
 //////////
 //
+// Called to delete the chain of items in the indicated direction
+//
+//////
+	void CALLTYPE oss_ll4_deleteChain(SLL4** root, u32 tnDirection)
+	{
+		SLL4*	node;
+		SLL4*	nodeNext;
+		SLL4*	nodeDirection;
+
+
+		// Make sure our environment is sane
+		if (root && *root)
+		{
+			// Iterate through every node in the indicated direction
+			node = *root;
+			while (node)
+			{
+				//////////
+				// Grab the next node
+				/////
+					switch (tnDirection)
+					{
+						case _LL4_NORTH:
+							nodeNext = node->north;
+							break;
+
+						case _LL4_SOUTH:
+							nodeNext = node->south;
+							break;
+
+						case _LL4_WEST:
+							nodeNext = node->west;
+							break;
+
+						case _LL4_EAST:
+							nodeNext = node->east;
+							break;
+
+						case _LL4_ALL:
+							// For the all, we will naturally navigate east here, but we will spawn off in all directions other entries
+
+							// Delete everything down (all children)
+							if (node->south)
+							{
+								node->south->north	= NULL;							// Delete south's item's reference back north to us
+								nodeDirection		= node->south;					// Create a "false root" from which too proceed
+								node->south			= NULL;							// Disconnect us from them
+								oss_ll4_deleteChain(&nodeDirection, _LL4_ALL);		// Proceed
+							}
+
+							// Delete everything up (all parents)
+							if (node->north)
+							{
+								node->north->south	= NULL;							// Delete south's item's reference back north to us
+								nodeDirection		= node->north;					// Create a "false root" from which too proceed
+								node->north			= NULL;							// Disconnect us from them
+								oss_ll4_deleteChain(&nodeDirection, _LL4_ALL);		// Proceed
+							}
+
+							// Delete everything left (all previous entries)
+							if (node->west)
+							{
+								node->west->east	= NULL;							// Delete west's item's reference back east to us
+								nodeDirection		= node->west;					// Create a "false root" from which too proceed
+								node->west			= NULL;							// Disconnect us from them
+								oss_ll4_deleteChain(&nodeDirection, _LL4_ALL);		// Proceed
+							}
+
+							// When we get here, everything up/down/left has been deleted.
+							// We proceed right (east)
+							nodeNext = node->east;
+							break;
+
+						default:
+							// Invalid direction, abort
+							return;
+					}
+
+
+				//////////
+				// Disconnect if we are not deleting all
+				//////
+					if (tnDirection != _LL4_ALL)
+						oss_ll4_orphanize(node);
+
+
+				//////////
+				// Delete this entry
+				/////
+					free(node);
+
+
+				//////////
+				// Move to the next node
+				/////
+					node = nodeNext;
+			}
+
+			// All done, update our root pointer
+			*root = NULL;
+		}
+	}
+
+
+
+
+//////////
+//
 // 
 // Called to delete the entire chain (beginning from where it's at on) using an optional callback.
 // The callback should not delete the node, but only anything the node points to.
-
 //
 //////
-	void CALLTYPE oss_ll4_deleteChainWithCallback(SLL4Callback* cb)
+	void CALLTYPE oss_ll4_deleteChainWithCallback(SLL4Callback* cb, u32 tnDirection)
 	{
 		SLL4* nodeNext;
+		SLL4* nodeDirection;
 
 
 		// Iterate through the master list until we find the associated entry
 		while (cb->node)
 		{
+			//////////
 			// Grab the next node
-			nodeNext = cb->node->next;
+			/////
+				switch (tnDirection)
+				{
+					case _LL4_NORTH:
+						nodeNext = cb->node->north;
+						break;
 
+					case _LL4_SOUTH:
+						nodeNext = cb->node->south;
+						break;
+
+					case _LL4_WEST:
+						nodeNext = cb->node->west;
+						break;
+
+					case _LL4_EAST:
+						nodeNext = cb->node->east;
+						break;
+
+					case _LL4_ALL:
+						// For the all, we will naturally navigate east here, but we will spawn off in all directions other entries
+
+						// Delete everything down (all children)
+						if (cb->node->south)
+						{
+							cb->node->south->north	= NULL;						// Delete south's item's reference back north to us
+							nodeDirection			= cb->node->south;			// Create a "false root" from which too proceed
+							cb->node->south			= NULL;						// Disconnect us from them
+							oss_ll4_deleteChain(&nodeDirection, _LL4_ALL);		// Proceed
+						}
+
+						// Delete everything up (all parents)
+						if (cb->node->north)
+						{
+							cb->node->north->south	= NULL;						// Delete south's item's reference back north to us
+							nodeDirection			= cb->node->north;			// Create a "false root" from which too proceed
+							cb->node->north			= NULL;						// Disconnect us from them
+							oss_ll4_deleteChain(&nodeDirection, _LL4_ALL);		// Proceed
+						}
+
+						// Delete everything left (all previous entries)
+						if (cb->node->west)
+						{
+							cb->node->west->east	= NULL;						// Delete west's item's reference back east to us
+							nodeDirection			= cb->node->west;			// Create a "false root" from which too proceed
+							cb->node->west			= NULL;						// Disconnect us from them
+							oss_ll4_deleteChain(&nodeDirection, _LL4_ALL);		// Proceed
+						}
+
+						// When we get here, everything up/down/left has been deleted.
+						// We proceed right (east)
+						nodeNext = cb->node->east;
+						break;
+
+					default:
+						// Invalid direction, abort
+						return;
+				}
+
+
+			//////////
+			// Disconnect if we are not deleting all
+			//////
+				if (tnDirection != _LL4_ALL)
+					oss_ll4_orphanize(cb->node);
+
+
+			//////////
 			// Perform the callback
-			cb->funcBool(cb);
+			//////
+				cb->funcBool(cb);
 
-			// Delete the node
-			free(cb->node);
 
-			// Move to next node
-			cb->node = nodeNext;
+			//////////
+			// Delete this entry
+			/////
+				free(cb->node);
+
+
+			//////////
+			// Move to the next node
+			/////
+				cb->node = nodeNext;
 		}
 		// All done
+	}
+
+
+
+
+//////////
+//
+// Called to navigate through an entire list
+	void CALLTYPE oss_ll4_iterateViaCallback(SLL4Callback* cb, u32 tnDirection)
+	{
+		// Make sure the environment is sane
+		if (cb && cb->node && cb->_func)
+		{
+			//////////
+			// For each node, process its portion
+			//////
+				while (cb->node)
+				{
+					//////////
+					// Callback to compute the SHA1 on this item
+					//////
+						cb->funcVoid(cb);
+						//oss_sha1ComputeSha1_ProcessThisData(context, (s8*)node, tnSize);
+
+
+					//////////
+					// Move to "next" node
+					//////
+						switch (tnDirection)
+						{
+							case _LL4_WEST:
+								cb->node = cb->node->west;
+								break;
+
+							case _LL4_EAST:
+								cb->node = cb->node->east;
+								break;
+
+							case _LL4_NORTH:
+								cb->node = cb->node->north;
+								break;
+
+							case _LL4_SOUTH:
+								cb->node = cb->node->south;
+								break;
+						}
+				}
+		}
 	}
 
 
@@ -7675,7 +7957,7 @@ _asm nop;
 		if (bxml)
 		{
 			// Deletes the indicated node from wherever it is in the parent chain
-			llResult = oss_ll4_orphanizeAsBxml((SLL4*)bxml);
+			llResult = oss_ll4bxml_orphanize((SLL4*)bxml);
 
 			// When we get here, it has been disconnected, which means it now exists as an orphan
 			// Now we need to delete everything (if indeed we do), clearing up the entire path, including all attributes, children, everything
@@ -7708,7 +7990,7 @@ _asm nop;
 		if (bxml)
 		{
 			// Inserts the node before or after the reference node as a sibling
-			llResult = oss_ll4_insertAsBxml((SLL4*)bxml, (SLL4*)bxmlRef, tlAfter);
+			llResult = oss_ll4bxml_insert((SLL4*)bxml, (SLL4*)bxmlRef, tlAfter);
 
 			// If we were successful, update the level
 			if (llResult)
@@ -7728,7 +8010,7 @@ _asm nop;
 		if (bxml)
 		{
 			// Inserts the node relative tothe reference node as a child
-			llResult = oss_ll4_insertAsBxmlAsChild((SLL4*)bxml, (SLL4*)bxmlParent, tlAfter);
+			llResult = oss_ll4bxml_insertAsChild((SLL4*)bxml, (SLL4*)bxmlParent, tlAfter);
 
 			// If we were successful, update the level
 			if (llResult)
@@ -7748,7 +8030,7 @@ _asm nop;
 		if (bxml)
 		{
 			// Deletes the indicated node from wherever it is in the parent chain
-			llResult = oss_ll4_insertAsBxmlAsChildRegarding((SLL4*)bxml, (SLL4*)bxmlParent, (SLL4*)bxmlRef, tlAfter);
+			llResult = oss_ll4bxml_insertAsChildRegarding((SLL4*)bxml, (SLL4*)bxmlParent, (SLL4*)bxmlRef, tlAfter);
 
 			// If we were successful, update the level
 			if (llResult)
