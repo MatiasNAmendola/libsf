@@ -54,7 +54,7 @@
 
 
 		//////////
-		// #01 - Create a five element 4-way linked list, one in the middle one at each point
+		// #01 - Create a nine element 4-way linked list, one in the middle, and two extending out in all four directions
 		//////
 			if (!iivvmt_testSll4_1(lnHandleLog, &root))
 				return false;		// failure
@@ -88,6 +88,25 @@
 
 
 
+//////////
+//
+// The 4-way link-list test builds everything off the root.  It first adds the "2" nodes,
+// which initially occupy the positions immediate off root.  It then adds the "1" nodes, which
+// are inserted between the "2" nodes and root in each direction.
+//
+//	           ____ north
+//	          | n2 |
+//	          |____|
+//	          | n1 |
+//	 ____ ____|____|____ ____ 
+//	| w2 | w1 |root| e1 | e2 |
+//	|____|____|____|____|____|
+//	west      | s1 |      east
+//	          |____|
+//	          | s2 |
+//	          |____|
+//       south
+//////
 	bool iivvmt_testSll4_1(u64 lnHandleLog, SLL4** root)
 	{
 		SLL4Callback	cb;
@@ -95,10 +114,14 @@
 		u32				lnSha1As32Bit;
 		u8				sha20Bytes[20];
 		u8				context[92];
-		SLL4*			nodeNorth;
-		SLL4*			nodeSouth;
-		SLL4*			nodeWest;
-		SLL4*			nodeEast;
+		SLL4*			nodeNorth2;
+		SLL4*			nodeSouth2;
+		SLL4*			nodeWest2;
+		SLL4*			nodeEast2;
+		SLL4*			nodeNorth1;
+		SLL4*			nodeSouth1;
+		SLL4*			nodeWest1;
+		SLL4*			nodeEast1;
 
 
 		//////////
@@ -110,7 +133,7 @@
 		//////////
 		// Create a single node
 		//////
-			*root = i3vvmt_testSll4_1_createSll(cgnLlBufferSize);
+			*root = i3vvmt_testSll4_1_createSll4(cgnLl4BufferSize);
 			if (!*root)
 			{
 				// Failure
@@ -120,7 +143,6 @@
 			}
 			// Initialize our callback data
 			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
-			cb.node		= *root;
 			cb.extra1	= (u64)&context[0];
 			cb.extra2	= (u64)&sha20Bytes[0];
 
@@ -129,6 +151,7 @@
 		// Determine the SHA-1 on that one node
 		//////
 			oss_sha1ComputeSha1_Start(context);
+			cb.node = *root;
 			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
 			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
 			oss_sha1Compute64BitFromSha1(sha20Bytes);
@@ -139,6 +162,366 @@
 			{
 				// Failure
 				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Create a node to go to the west
+		//////
+			nodeWest2 = i3vvmt_testSll4_1_createSll4(cgnLl4BufferSize);
+			if (!nodeWest2)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_CREATE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+
+		//////////
+		// Create a node to go to the east
+		//////
+			nodeEast2 = i3vvmt_testSll4_1_createSll4(cgnLl4BufferSize);
+			if (!nodeEast2)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_CREATE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+
+		//////////
+		// Create a node to go to the north
+		//////
+			nodeNorth2 = i3vvmt_testSll4_1_createSll4(cgnLl4BufferSize);
+			if (!nodeNorth2)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_CREATE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+
+		//////////
+		// Create a node to go to the south
+		//////
+			nodeSouth2 = i3vvmt_testSll4_1_createSll4(cgnLl4BufferSize);
+			if (!nodeSouth2)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_CREATE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+
+		//////////
+		// Insert the node to the west
+		//////
+			oss_ll4_insertEastWest(nodeWest2, *root, false);
+
+
+		//////////
+		// Determine the SHA-1 on the two nodes
+		//////
+			oss_sha1ComputeSha1_Start(context);
+			cb.node = nodeWest2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			cb.node = *root;
+			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTestLl42NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl42NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Insert the node to the east
+		//////
+			oss_ll4_insertEastWest(nodeEast2, *root, true);
+
+
+		//////////
+		// Determine the SHA-1 on the three nodes
+		//////
+			oss_sha1ComputeSha1_Start(context);
+			cb.node = nodeWest2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			cb.node = nodeEast2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTestLl43NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl43NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Insert the node to the north
+		//////
+			oss_ll4_insertNorthSouth(nodeNorth2, *root, false);
+
+
+		//////////
+		// Determine the SHA-1 on the two nodes
+		//////
+			oss_sha1ComputeSha1_Start(context);
+			cb.node = nodeNorth2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			cb.node = *root;
+			oss_ll4_iterateViaCallback(&cb, _LL4_NORTH);
+			cb.node = nodeWest2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			cb.node = nodeEast2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTestLl44NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl44NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Insert the node to the south
+		//////
+			oss_ll4_insertNorthSouth(nodeSouth2, *root, true);
+
+
+		//////////
+		// Determine the SHA-1 on the three nodes
+		//////
+			oss_sha1ComputeSha1_Start(context);
+			cb.node = nodeNorth2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			cb.node = nodeSouth2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_NORTH);
+			cb.node = nodeWest2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			cb.node = nodeEast2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTestLl45NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl45NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Create a node to go to the west
+		//////
+			nodeWest1 = i3vvmt_testSll4_1_createSll4(cgnLl4BufferSize);
+			if (!nodeWest1)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_CREATE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+
+		//////////
+		// Create a node to go to the east
+		//////
+			nodeEast1 = i3vvmt_testSll4_1_createSll4(cgnLl4BufferSize);
+			if (!nodeEast1)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_CREATE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+
+		//////////
+		// Create a node to go to the north
+		//////
+			nodeNorth1 = i3vvmt_testSll4_1_createSll4(cgnLl4BufferSize);
+			if (!nodeNorth1)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_CREATE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+
+		//////////
+		// Create a node to go to the south
+		//////
+			nodeSouth1 = i3vvmt_testSll4_1_createSll4(cgnLl4BufferSize);
+			if (!nodeSouth1)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_CREATE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+
+		//////////
+		// Insert the node to the west
+		//////
+			oss_ll4_insertEastWest(nodeWest1, *root, false);
+
+
+		//////////
+		// Determine the SHA-1 on the two nodes
+		//////
+			oss_sha1ComputeSha1_Start(context);
+			cb.node = nodeNorth2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			cb.node = nodeSouth2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_NORTH);
+			cb.node = nodeWest2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			cb.node = nodeEast2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTestLl46NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl46NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Insert the node to the east
+		//////
+			oss_ll4_insertEastWest(nodeEast1, *root, true);
+
+
+		//////////
+		// Determine the SHA-1 on the three nodes
+		//////
+			oss_sha1ComputeSha1_Start(context);
+			cb.node = nodeNorth2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			cb.node = nodeSouth2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_NORTH);
+			cb.node = nodeWest2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			cb.node = nodeEast2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTestLl47NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl47NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Insert the node to the north
+		//////
+			oss_ll4_insertNorthSouth(nodeNorth1, *root, false);
+
+
+		//////////
+		// Determine the SHA-1 on the two nodes
+		//////
+			oss_sha1ComputeSha1_Start(context);
+			cb.node = nodeNorth2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			cb.node = nodeSouth2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_NORTH);
+			cb.node = nodeWest2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			cb.node = nodeEast2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTestLl48NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl48NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Insert the node to the south
+		//////
+			oss_ll4_insertNorthSouth(nodeSouth1, *root, true);
+
+
+		//////////
+		// Determine the SHA-1 on the three nodes
+		//////
+			oss_sha1ComputeSha1_Start(context);
+			cb.node = nodeNorth2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			cb.node = nodeSouth2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_NORTH);
+			cb.node = nodeWest2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			cb.node = nodeEast2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTestLl49NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl49NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
 				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
 				return(false);
 			}
@@ -185,7 +568,7 @@
 
 
 
-	SLL4* i3vvmt_testSll4_1_createSll(u32 tnSize)
+	SLL4* i3vvmt_testSll4_1_createSll4(u32 tnSize)
 	{
 		u32		lnI;
 		SLL4*	ll4;

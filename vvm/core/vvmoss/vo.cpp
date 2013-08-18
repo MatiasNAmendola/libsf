@@ -5326,8 +5326,8 @@ openAgain:
 	bool CALLTYPE oss_ll4_insertNorthSouth(SLL4* node, SLL4* nodeRef, bool tlAfter)
 	{
 		bool	llResult;
-		SLL4*	nodePrev;
-		SLL4*	nodeNext;
+		SLL4*	nodeNorth;
+		SLL4*	nodeSouth;
 
 
 // TODO:  untested code, breakpoint and examine
@@ -5341,21 +5341,21 @@ openAgain:
 				if (nodeRef->south)
 				{
 					// There is an entry after nodeRef, so we insert it between nodeRef and nodeRef->next
-					nodeNext		= nodeRef->next;
+					nodeSouth			= nodeRef->south;
 
 					// Update nodeRef to point to this one
-					node->next		= nodeRef->next;
-					nodeRef->next	= node;
+					node->south			= nodeSouth;
+					nodeRef->south		= node;
 
 					// Update nodeNext to point back to this one
-					node->prev		= nodeNext->prev;
-					nodeNext->prev	= node;
+					node->north			= nodeSouth->north;
+					nodeSouth->north	= node;
 
 				} else {
 					// There is no entry after nodeRef, so we just put it after
-					nodeRef->south	= node;
-					node->north		= nodeRef;
-					node->south		= NULL;				// Make sure this entry is not hooked up otherwise
+					nodeRef->south		= node;
+					node->north			= nodeRef;
+					node->south			= NULL;				// Make sure this entry is not hooked up otherwise
 				}
 
 			} else {
@@ -5363,21 +5363,21 @@ openAgain:
 				if (nodeRef->north)
 				{
 					// There is an entry before nodeRef, so we insert it between nodeRef and nodeRef->prev
-					nodePrev		= nodeRef->next;
+					nodeNorth			= nodeRef->north;
 
 					// Update nodeRef to point to this one
-					node->prev		= nodeRef->prev;
-					nodeRef->prev	= node;
+					node->north			= nodeNorth;
+					nodeRef->north		= node;
 
 					// Update nodePrev to point forward to this one
-					node->next		= nodeRef;
-					nodePrev->next	= node;
+					node->south			= nodeRef;
+					nodeNorth->south	= node;
 
 				} else {
 					// There is no entry before nodeRef, so we just put it before
-					nodeRef->north	= node;
-					node->south		= nodeRef;
-					node->north		= NULL;				// Make sure this entry is not hooked up otherwise
+					nodeRef->north		= node;
+					node->south			= nodeRef;
+					node->north			= NULL;				// Make sure this entry is not hooked up otherwise
 				}
 			}
 		}
@@ -5407,7 +5407,7 @@ openAgain:
 					nodeEast		= nodeRef->east;
 
 					// Update nodeRef to point to this one
-					node->east		= nodeRef->east;
+					node->east		= nodeEast;
 					nodeRef->east	= node;
 
 					// Update nodeNext to point back to this one
@@ -5416,20 +5416,20 @@ openAgain:
 
 				} else {
 					// There is no entry after nodeRef, so we just put it after
-					nodeRef->south	= node;
-					node->north		= nodeRef;
-					node->south		= NULL;				// Make sure this entry is not hooked up otherwise
+					nodeRef->east	= node;
+					node->west		= nodeRef;
+					node->east		= NULL;				// Make sure this entry is not hooked up otherwise
 				}
 
 			} else {
 				// node is going before (west) nodeRef
-				if (nodeRef->north)
+				if (nodeRef->west)
 				{
 					// There is an entry before nodeRef, so we insert it between nodeRef and nodeRef->west
-					nodeWest		= nodeRef->east;
+					nodeWest		= nodeRef->west;
 
 					// Update nodeRef to point to this one
-					node->west		= nodeRef->west;
+					node->west		= nodeWest;
 					nodeRef->west	= node;
 
 					// Update nodePrev to point forward to this one
@@ -5438,9 +5438,9 @@ openAgain:
 
 				} else {
 					// There is no entry before nodeRef, so we just put it before
-					nodeRef->north	= node;
-					node->south		= nodeRef;
-					node->north		= NULL;				// Make sure this entry is not hooked up otherwise
+					nodeRef->west	= node;
+					node->east		= nodeRef;
+					node->west		= NULL;				// Make sure this entry is not hooked up otherwise
 				}
 			}
 		}

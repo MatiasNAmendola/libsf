@@ -88,6 +88,15 @@
 
 
 
+//////////
+//
+// The 2-way link-list test builds everything off the root.  This function adds the previous
+// and next nodes.
+//	 ____ ____ ____ 
+//	| p1 |root| n1 |
+//	|____|____|____|
+//
+//////
 	bool iivvmt_testSll_1(u64 lnHandleLog, SLL** root)
 	{
 		SLLCallback		cb;
@@ -251,6 +260,15 @@
 
 
 
+//////////
+//
+// This test adds the "1" nodes, which make the former "1" nodes become "2" nodes, as they are
+// 2 hops away from root.
+//	 ____ ____ ____ ____ ____ 
+//	| p2 | p1 |root| n1 | n2 |
+//	|____|____|____|____|____|
+//
+//////
 	bool iivvmt_testSll_2(u64 lnHandleLog, SLL* root)
 	{
 		SLLCallback		cb;
