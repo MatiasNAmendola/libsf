@@ -85,6 +85,7 @@
 		bool					iivvmt_testSll4_1										(u64 lnHandleLog, SLL4** root);
 		bool					iivvmt_testSll4_2										(u64 lnHandleLog, SLL4*  root);
 		bool					iivvmt_testSll4_3										(u64 lnHandleLog, SLL4** root);
+		bool					iivvmt_testSll4_4										(u64 lnHandleLog, SLL4** root);
 		// Related functions
 		SLL4*					i3vvmt_testSll4_1_createSll4							(u32 tnSize);
 		void					i3vvmt_testSll4_initiallyPopulateCallback				(SLL4Callback* cb);

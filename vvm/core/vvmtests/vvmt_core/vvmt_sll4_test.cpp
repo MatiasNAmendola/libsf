@@ -61,23 +61,24 @@
 
 
 		//////////
-		// #02 - Append an item before and after each element in all directions
+		// #02 - Append a chain
 		//////
 			if (!iivvmt_testSll4_2(lnHandleLog, root))
 				return false;		// failure
 
 
 		//////////
-		// #03 - Delete first item, middle, last item in each direction
+		// #03 - Delete everything in pieces and in chains
 		//////
 			if (!iivvmt_testSll4_3(lnHandleLog, &root))
 				return false;		// failure
 
 
 		//////////
-		// Clean house
+		// #04 - Re-create everything as in test #01, then delete the entire chain
 		//////
-			oss_ll4_deleteChain(&root, _LL4_ALL);
+			if (!iivvmt_testSll4_4(lnHandleLog, &root))
+				return false;		// failure
 
 
 		// When we get here, success
@@ -223,7 +224,7 @@
 		//////////
 		// Insert the node to the west
 		//////
-			oss_ll4_insertEastWest(nodeWest2, *root, false);
+			oss_ll4_insertWestEast(nodeWest2, *root, false);
 
 
 		//////////
@@ -242,7 +243,7 @@
 			if (lnSha1As64Bit != cgnTest1Ll42NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll42NodeSha1As32Bit)
 			{
 				// Failure
-				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE);
 				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
 				return(false);
 			}
@@ -252,7 +253,7 @@
 		//////////
 		// Insert the node to the east
 		//////
-			oss_ll4_insertEastWest(nodeEast2, *root, true);
+			oss_ll4_insertWestEast(nodeEast2, *root, true);
 
 
 		//////////
@@ -271,7 +272,7 @@
 			if (lnSha1As64Bit != cgnTest1Ll43NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll43NodeSha1As32Bit)
 			{
 				// Failure
-				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE);
 				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
 				return(false);
 			}
@@ -304,7 +305,7 @@
 			if (lnSha1As64Bit != cgnTest1Ll44NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll44NodeSha1As32Bit)
 			{
 				// Failure
-				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE);
 				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
 				return(false);
 			}
@@ -337,7 +338,7 @@
 			if (lnSha1As64Bit != cgnTest1Ll45NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll45NodeSha1As32Bit)
 			{
 				// Failure
-				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE);
 				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
 				return(false);
 			}
@@ -399,7 +400,7 @@
 		//////////
 		// Insert the node to the west
 		//////
-			oss_ll4_insertEastWest(nodeWest1, *root, false);
+			oss_ll4_insertWestEast(nodeWest1, *root, false);
 
 
 		//////////
@@ -422,7 +423,7 @@
 			if (lnSha1As64Bit != cgnTest1Ll46NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll46NodeSha1As32Bit)
 			{
 				// Failure
-				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE);
 				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
 				return(false);
 			}
@@ -432,7 +433,7 @@
 		//////////
 		// Insert the node to the east
 		//////
-			oss_ll4_insertEastWest(nodeEast1, *root, true);
+			oss_ll4_insertWestEast(nodeEast1, *root, true);
 
 
 		//////////
@@ -455,7 +456,7 @@
 			if (lnSha1As64Bit != cgnTest1Ll47NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll47NodeSha1As32Bit)
 			{
 				// Failure
-				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE);
 				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
 				return(false);
 			}
@@ -488,7 +489,7 @@
 			if (lnSha1As64Bit != cgnTest1Ll48NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll48NodeSha1As32Bit)
 			{
 				// Failure
-				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE);
 				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
 				return(false);
 			}
@@ -521,7 +522,7 @@
 			if (lnSha1As64Bit != cgnTest1Ll49NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll49NodeSha1As32Bit)
 			{
 				// Failure
-				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE);
 				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
 				return(false);
 			}
@@ -569,12 +570,137 @@
 		u8				context[92];
 		u32				lnCount;
 		SLL4*			ll4x1;
+		SLL4*			ll4w1;
+		SLL4*			ll4w2;
+		SLL4*			ll4e1;
+		SLL4*			ll4e2;
+		SLL4*			ll4n1;
+		SLL4*			ll4n2;
+		SLL4*			ll4s1;
+		SLL4*			ll4s2;
 
 
 		//////////
 		// Tell them which test we're running
 		//////
 			vvm_resourcePrintf(IDS_VVM_TEST_SLL4_APPEND);
+
+
+		///////////
+		// Verify we still have our root setup properly
+		//////
+			// Check w2..root
+			if (!root->west || !root->west->west || root->west->west->west)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_CORRUPT_ROOT_STRUCTURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// Check root..e2
+			if (!root->east || !root->east->east || root->east->east->east)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_CORRUPT_ROOT_STRUCTURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// Check root..n2
+			if (!root->north || !root->north->north || root->north->north->north)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_CORRUPT_ROOT_STRUCTURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// Check root..s2
+			if (!root->south || !root->south->south || root->south->south->south)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_CORRUPT_ROOT_STRUCTURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+			// Grab w2 by navigation the chain
+			ll4w2 = oss_ll4_getLastNode(root, _LL4_WEST);
+			if (ll4w2 != root->west->west)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_NAVIGATE_CHAIN);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+			// Grab w1
+			ll4w1 = ll4w2->east;
+			if (ll4w1 != root->west)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_NAVIGATE_CHAIN);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+			// Grab e2 by navigation the chain
+			ll4e2 = oss_ll4_getLastNode(root, _LL4_EAST);
+			if (ll4e2 != root->east->east)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_NAVIGATE_CHAIN);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+			// Grab e1
+			ll4e1 = ll4e2->west;
+			if (ll4e1 != root->east)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_NAVIGATE_CHAIN);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+			// Grab n2 by navigation the chain
+			ll4n2 = oss_ll4_getLastNode(root, _LL4_NORTH);
+			if (ll4n2 != root->north->north)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_NAVIGATE_CHAIN);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+			// Grab n1
+			ll4n1 = ll4n2->south;
+			if (ll4n1 != root->north)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_NAVIGATE_CHAIN);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+			// Grab s2 by navigation the chain
+			ll4s2 = oss_ll4_getLastNode(root, _LL4_SOUTH);
+			if (ll4s2 != root->south->south)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_NAVIGATE_CHAIN);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+			// Grab s1
+			ll4s1 = ll4s2->north;
+			if (ll4s1 != root->south)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_NAVIGATE_CHAIN);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
 
 
 		//////////
@@ -592,10 +718,10 @@
 
 
 		//////////
-		// Populate the chain
+		// Populate the chain with known data
 		//////
-			cb.node		= ll4x1;
 			cb._func	= (u64)&i3vvmt_testSll4_initiallyPopulateCallback;
+			cb.node		= ll4x1;
 			cb.extra1	= (u64)&context[0];
 			cb.extra2	= (u64)&sha20Bytes[0];
 			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
@@ -605,8 +731,8 @@
 		// Validate that it was setup and populated correctly
 		//////
 			oss_sha1ComputeSha1_Start(context);
-			cb.node		= ll4x1;
 			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
+			cb.node		= ll4x1;
 			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
 			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
 			oss_sha1Compute64BitFromSha1(sha20Bytes);
@@ -616,7 +742,7 @@
 			if (lnSha1As64Bit != cgnTest2Ll41NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll41NodeSha1As32Bit)
 			{
 				// Failure
-				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE);
 				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
 				return(false);
 			}
@@ -624,9 +750,503 @@
 
 
 		//////////
-		// Attach x1 onto w2
+		// Attach x1 onto w2's west, and validate it's on there good
 		//////
-// TODO:  working here
+			oss_ll4_insertWestEast(ll4x1, ll4w2, false);
+
+			oss_sha1ComputeSha1_Start(context);
+			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
+			cb.node		= ll4e2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			cb.node		= ll4x1;
+			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTest2Ll42NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll42NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		// If we get here, we're good, only root remains
+		vvm_resourcePrintf(IDS_VVM_TEST_PASS);
+		return(true);
+	}
+
+
+
+
+//////////
+//
+// #03 - Delete everything in pieces and in chains
+//
+//////
+	bool iivvmt_testSll4_3(u64 lnHandleLog, SLL4** root)
+	{
+		SLL4Callback	cb;
+		u64				lnSha1As64Bit;
+		u32				lnSha1As32Bit;
+		u8				sha20Bytes[20];
+		u8				context[92];
+		SLL4*			ll4x1;
+		SLL4*			ll4x2;
+		SLL4*			ll4x3;
+		SLL4*			ll4x4;
+		SLL4*			ll4x5;
+		SLL4*			ll4w1;
+		SLL4*			ll4w2;
+		SLL4*			ll4e1;
+		SLL4*			ll4e2;
+		SLL4*			ll4n1;
+		SLL4*			ll4n2;
+		SLL4*			ll4s1;
+		SLL4*			ll4s2;
+
+
+		//////////
+		// Tell them which test we're running
+		//////
+			vvm_resourcePrintf(IDS_VVM_TEST_SLL4_DELETE);
+
+
+		///////////
+		// Verify we still have our root setup properly
+		//////
+			// Check w2..root
+			if (!(*root)->west || !(*root)->west->west || !(*root)->west->west->west)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_CORRUPT_ROOT_STRUCTURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// Check root..e2
+			if (!(*root)->east || !(*root)->east->east || (*root)->east->east->east)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_CORRUPT_ROOT_STRUCTURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// Check root..n2
+			if (!(*root)->north || !(*root)->north->north || (*root)->north->north->north)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_CORRUPT_ROOT_STRUCTURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// Check root..s2
+			if (!(*root)->south || !(*root)->south->south || (*root)->south->south->south)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_CORRUPT_ROOT_STRUCTURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+			// Grab w2 by navigation the chain
+			ll4x1 = oss_ll4_getLastNode(*root, _LL4_WEST);
+			if (ll4x1 != (*root)->west->west->west)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_NAVIGATE_CHAIN);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+			// Grab w2
+			ll4w2 = ll4x1->east;
+			if (ll4w2 != (*root)->west->west)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_NAVIGATE_CHAIN);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+			// Grab w1
+			ll4w1 = ll4w2->east;
+			if (ll4w1 != (*root)->west)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_NAVIGATE_CHAIN);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+			// Grab e2 by navigation the chain
+			ll4e2 = oss_ll4_getLastNode(*root, _LL4_EAST);
+			if (ll4e2 != (*root)->east->east)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_NAVIGATE_CHAIN);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+			// Grab e1
+			ll4e1 = ll4e2->west;
+			if (ll4e1 != (*root)->east)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_NAVIGATE_CHAIN);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+			// Grab n2 by navigation the chain
+			ll4n2 = oss_ll4_getLastNode(*root, _LL4_NORTH);
+			if (ll4n2 != (*root)->north->north)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_NAVIGATE_CHAIN);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+			// Grab n1
+			ll4n1 = ll4n2->south;
+			if (ll4n1 != (*root)->north)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_NAVIGATE_CHAIN);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+			// Grab s2 by navigation the chain
+			ll4s2 = oss_ll4_getLastNode(*root, _LL4_SOUTH);
+			if (ll4s2 != (*root)->south->south)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_NAVIGATE_CHAIN);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+			// Grab s1
+			ll4s1 = ll4s2->north;
+			if (ll4s1 != (*root)->south)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_NAVIGATE_CHAIN);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+			// Grab each item down from ll4x1
+			if (!ll4x1->south || !ll4x1->south->south || !ll4x1->south->south->south || !ll4x1->south->south->south->south)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_NAVIGATE_CHAIN);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			ll4x2 = ll4x1->south;
+			ll4x3 = ll4x2->south;
+			ll4x4 = ll4x3->south;
+			ll4x5 = ll4x4->south;
+
+
+		//////////
+		// Delete x2
+		//////
+			oss_ll4_delete(ll4x2);
+
+			oss_sha1ComputeSha1_Start(context);
+			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
+			cb.node		= ll4x1;
+			cb.extra1	= (u64)&context[0];
+			cb.extra2	= (u64)&sha20Bytes[0];
+			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			cb.node		= ll4x5;
+			oss_ll4_iterateViaCallback(&cb, _LL4_NORTH);
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTest2Ll43NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll43NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE_AFTER_DELETE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Delete x5
+		//////
+			oss_ll4_delete(ll4x5);
+
+			oss_sha1ComputeSha1_Start(context);
+			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
+			cb.node		= ll4x1;
+			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			cb.node		= ll4x4;
+			oss_ll4_iterateViaCallback(&cb, _LL4_NORTH);
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTest2Ll44NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll44NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE_AFTER_DELETE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Delete x3
+		//////
+			oss_ll4_delete(ll4x3);
+
+			oss_sha1ComputeSha1_Start(context);
+			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
+			cb.node		= ll4x1;
+			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			cb.node		= ll4x4;
+			oss_ll4_iterateViaCallback(&cb, _LL4_NORTH);
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTest2Ll45NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll45NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE_AFTER_DELETE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Delete x4
+		//////
+			oss_ll4_delete(ll4x4);
+
+			oss_sha1ComputeSha1_Start(context);
+			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
+			cb.node		= ll4x1;
+			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTest2Ll46NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll46NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE_AFTER_DELETE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Delete x1
+		//////
+			oss_ll4_delete(ll4x1);
+
+			oss_sha1ComputeSha1_Start(context);
+			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
+			cb.node		= ll4e2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTest2Ll47NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll47NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE_AFTER_DELETE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Delete e2
+		//////
+			oss_ll4_delete(ll4e2);
+
+			oss_sha1ComputeSha1_Start(context);
+			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
+			cb.node		= ll4e1;
+			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			cb.node		= ll4w2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTest2Ll48NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll48NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE_AFTER_DELETE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Delete w1
+		//////
+			oss_ll4_delete(ll4w1);
+
+			oss_sha1ComputeSha1_Start(context);
+			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
+			cb.node		= ll4e1;
+			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			cb.node		= ll4w2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTest2Ll49NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll49NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE_AFTER_DELETE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Delete e1 and chain east
+		//////
+			oss_ll4_deleteChain(&ll4e1, _LL4_EAST);
+
+			oss_sha1ComputeSha1_Start(context);
+			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
+			cb.node		= *root;
+			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			cb.node		= ll4w2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTest2Ll410NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll410NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE_AFTER_DELETE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Delete w2 and chain west
+		//////
+			oss_ll4_deleteChain(&ll4w2, _LL4_WEST);
+
+			oss_sha1ComputeSha1_Start(context);
+			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
+			cb.node		= *root;
+			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTest2Ll411NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll411NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE_AFTER_DELETE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Delete n1 and chain north
+		//////
+			oss_ll4_deleteChain(&ll4n1, _LL4_NORTH);
+
+			oss_sha1ComputeSha1_Start(context);
+			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
+			cb.node		= ll4s2;
+			oss_ll4_iterateViaCallback(&cb, _LL4_NORTH);
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTest2Ll412NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll412NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE_AFTER_DELETE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Delete s1 and chain south
+		//////
+			oss_ll4_deleteChain(&ll4s1, _LL4_SOUTH);
+
+			oss_sha1ComputeSha1_Start(context);
+			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
+			cb.node		= *root;
+			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTest2Ll413NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll413NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE_AFTER_DELETE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Delete root and chain south
+		//////
+			oss_ll4_deleteChain(root, _LL4_SOUTH);
+			if (root)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE_AFTER_DELETE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
 
 
 		// If we get here, we're good
@@ -637,12 +1257,38 @@
 
 
 
-	bool iivvmt_testSll4_3(u64 lnHandleLog, SLL4** root)
+//////////
+//
+// #04 - Re-create everything as in test #01, then delete the entire chain
+//
+//////
+	bool iivvmt_testSll4_4(u64 lnHandleLog, SLL4** root)
 	{
 		//////////
 		// Tell them which test we're running
 		//////
-			vvm_resourcePrintf(IDS_VVM_TEST_SLL4_DELETE);
+			vvm_resourcePrintf(IDS_VVM_TEST_SLL4_DELETE_CHAIN);
+
+
+		//////////
+		// Populate the root with our original 9-panel arrangement
+		// Note:  If we are at this point it the test, we know it will pass
+		//////
+			iivvmt_testSll4_1(lnHandleLog, root);
+
+
+		//////////
+		// Clean house
+		//////
+// TODO:  working here
+			oss_ll4_deleteChain(root, _LL4_ALL);
+			if (*root)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE_AFTER_DELETE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
 
 
 		// If we get here, we're good

@@ -269,10 +269,11 @@
 		void CALLBACK			oss_ll4_deleteWithCallback					(SLL4* node);
 		bool CALLTYPE			oss_ll4_orphanize							(SLL4* node);
 		bool CALLTYPE			oss_ll4_insertNorthSouth					(SLL4* node, SLL4* nodeRef, bool tlAfter);
-		bool CALLTYPE			oss_ll4_insertEastWest						(SLL4* node, SLL4* nodeRef, bool tlAfter);
+		bool CALLTYPE			oss_ll4_insertWestEast						(SLL4* node, SLL4* nodeRef, bool tlAfter);
 		void CALLTYPE			oss_ll4_deleteChain							(SLL4** root, u32 tnDirection);
 		void CALLTYPE			oss_ll4_deleteChainWithCallback				(SLL4Callback* cb, u32 tnDirection);
 		void CALLTYPE			oss_ll4_iterateViaCallback					(SLL4Callback* cb, u32 tnDirection);
+		SLL4* CALLTYPE			oss_ll4_getLastNode							(SLL4* node, u32 tnDirection);
 	
 		bool CALLTYPE			oss_ll4bxml_orphanize						(SLL4* bxml);
 		bool CALLTYPE			oss_ll4bxml_insert							(SLL4* bxmlSibling,	SLL4* bxmlRef,							bool tlAfter);

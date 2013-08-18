@@ -166,10 +166,11 @@ EXPORTS
 	oss_ll4_delete
 	oss_ll4_orphanize
 	oss_ll4_insertNorthSouth
-	oss_ll4_insertEastWest
+	oss_ll4_insertWestEast
 	oss_ll4_deleteChain
 	oss_ll4_deleteChainWithCallback
 	oss_ll4_iterateViaCallback
+	oss_ll4_getLastNode
 
 	oss_ll4bxml_orphanize
 	oss_ll4bxml_insert

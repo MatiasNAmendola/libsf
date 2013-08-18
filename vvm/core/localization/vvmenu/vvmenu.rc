@@ -145,6 +145,14 @@ STRINGTABLE
 BEGIN
     IDS_VVM_TEST_SLL4_UNABLE_TO_CREATE_CHAIN 
                             "Failure on create 4-way linked list chain"
+    IDS_VVM_TEST_SLL4_CORRUPT_ROOT_STRUCTURE 
+                            "Corrupt root node found on 4-way linked list test"
+    IDS_VVM_TEST_SLL4_UNABLE_TO_NAVIGATE_CHAIN 
+                            "Failure navigating a 4-way linked list chain"
+    IDS_VVM_TEST_SLL4_SHA1_FAILURE_AFTER_DELETE 
+                            "Failure on 4-way linked list SHA-1 after delete"
+    IDS_VVM_TEST_SLL4_DELETE_CHAIN 
+                            "ENU:\tDelete chain from 4-way linked list..."
 END
 
 #endif    // English (U.S.) resources

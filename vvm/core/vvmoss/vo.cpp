@@ -5079,6 +5079,7 @@ openAgain:
 			oss_ll4_orphanize(node);
 
 			// Free it
+			free(node);
 		}
 	}
 
@@ -5168,29 +5169,49 @@ openAgain:
 		return(llResult);
 	}
 
-	// In nodes, we always update north/south paths, as well as east/west paths, as the node is
-	// just a point on a mesh or clutter mesh.
+
+
+
+//////////
+//
+// In nodes, we always update north/south paths, as well as east/west paths, as the node is
+// just a point on a mesh or clutter mesh.
+//
+//////
 	bool CALLTYPE oss_ll4_orphanize(SLL4* node)
 	{
 		bool llResult;
 
 
-// TODO:  untested code, breakpoint and examine
 		// Make sure our environment is sane
 		llResult = false;
 		if (node)
 		{
-			// Disconnect this node in/from the four cardinal directions
-			if (node->north)	node->north->south = node->south;		// It points to an entry above itself
-			if (node->south)	node->south->north = node->north;		// It points to an entry below itself
-			if (node->east)		node->east->west = node->west;			// It points to an entry to the right
-			if (node->west)		node->west->east = node->east;			// It points to an entry to the left
 
+			//////////
+			// Disconnect this node in/from the four cardinal directions
+			//////
+				if (node->north)
+					node->north->south = node->south;		// It points to an entry above itself
+
+				if (node->south)
+					node->south->north = node->north;		// It points to an entry below itself
+
+				if (node->east)
+					node->east->west = node->west;			// It points to an entry to the right
+
+				if (node->west)
+					node->west->east = node->east;			// It points to an entry to the left
+
+
+			//////////
 			// Update the node to reflects its new orphaned status
-			node->north		= NULL;
-			node->south		= NULL;
-			node->east		= NULL;
-			node->west		= NULL;
+			//////
+				node->north		= NULL;
+				node->south		= NULL;
+				node->east		= NULL;
+				node->west		= NULL;
+
 		}
 		// Indicate our status
 		return(llResult);
@@ -5452,7 +5473,7 @@ openAgain:
 	}
 
 	// Inserts the node before or after the indicated node
-	bool CALLTYPE oss_ll4_insertEastWest(SLL4* node, SLL4* nodeRef, bool tlAfter)
+	bool CALLTYPE oss_ll4_insertWestEast(SLL4* node, SLL4* nodeRef, bool tlAfter)
 	{
 		bool	llResult;
 		SLL4*	nodeWest;
@@ -5735,7 +5756,10 @@ openAgain:
 
 //////////
 //
-// Called to navigate through an entire list
+// Called to navigate through an entire list of nodes, calling the indicated function on
+// each one.
+//
+//////
 	void CALLTYPE oss_ll4_iterateViaCallback(SLL4Callback* cb, u32 tnDirection)
 	{
 		// Make sure the environment is sane
@@ -5776,6 +5800,51 @@ openAgain:
 						}
 				}
 		}
+	}
+
+
+
+
+//////////
+//
+// Called to iterate in the indicated direction until we reach the furthest extent.
+// Note:  This can be a dangerous function because there is no iterative exit.  Any circular
+//        pointer will cause the system to go into an unbreakable loop.
+//
+//////
+	SLL4* CALLTYPE oss_ll4_getLastNode(SLL4* node, u32 tnDirection)
+	{
+		// Make sure the environment is sane
+		if (node)
+		{
+			// Iterate so long as there's something to which to iterate toward. :-)
+			do {
+				if (tnDirection == _LL4_WEST)
+				{
+					if (node->west)		node = node->west;
+					else				break;
+
+				} else if (tnDirection == _LL4_EAST) {
+					if (node->east)		node = node->east;
+					else				break;
+
+				} else if (tnDirection == _LL4_NORTH) {
+					if (node->north)	node = node->north;
+					else				break;
+
+				} else if (tnDirection == _LL4_SOUTH) {
+					if (node->south)	node = node->south;
+					else				break;
+
+				} else {
+					// Unknown item
+					break;
+				}
+				// Repeat until we find the end
+			} while (1);
+		}
+		// Indicate our success or failure
+		return(node);
 	}
 
 

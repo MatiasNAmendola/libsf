@@ -136,17 +136,25 @@ BEGIN
     IDS_VVM_TEST_SLL4_CREATE "ENU:\tCreate 4-way linked list..."
     IDS_VVM_TEST_SLL4_APPEND "ENU:\tAppend to 4-way linked list..."
     IDS_VVM_TEST_SLL4_DELETE "ENU:\tDelete from 4-way linked list..."
-    IDS_VVM_TEST_SLL_UNABLE_TO_CREATE "Failure on create linked list node"
+    IDS_VVM_TEST_SLL_UNABLE_TO_CREATE "ENU:Failure on create linked list node"
     IDS_VVM_TEST_SLL4_UNABLE_TO_CREATE 
-                            "Failure on create 4-way linked list node"
-    IDS_VVM_TEST_SLL_SHA1_FAILURE "Failure on linked list SHA-1"
-    IDS_VVM_TEST_SLL4_SHA1_FAILURE "Failure on 4-way linked list SHA-1"
+                            "ENU:Failure on create 4-way linked list node"
+    IDS_VVM_TEST_SLL_SHA1_FAILURE "ENU:Failure on linked list SHA-1"
+    IDS_VVM_TEST_SLL4_SHA1_FAILURE "ENU:Failure on 4-way linked list SHA-1"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_VVM_TEST_SLL4_UNABLE_TO_CREATE_CHAIN 
-                            "Failure on create 4-way linked list chain"
+                            "ENU:Failure on create 4-way linked list chain"
+    IDS_VVM_TEST_SLL4_CORRUPT_ROOT_STRUCTURE 
+                            "ENU:Corrupt root node found on 4-way linked list test"
+    IDS_VVM_TEST_SLL4_UNABLE_TO_NAVIGATE_CHAIN 
+                            "ENU:Failure navigating a 4-way linked list chain"
+    IDS_VVM_TEST_SLL4_SHA1_FAILURE_AFTER_DELETE 
+                            "ENU:Failure on 4-way linked list SHA-1 after delete"
+    IDS_VVM_TEST_SLL4_DELETE_CHAIN 
+                            "ENU:\tDelete chain from 4-way linked list..."
 END
 
 #endif    // Spanish (Castilian) resources
