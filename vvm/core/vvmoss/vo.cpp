@@ -4861,18 +4861,17 @@ openAgain:
 // Called to compute the SHA-1 of the current node as a 64-bit quantity
 //
 //////
-	void CALLTYPE oss_ll_iterateViaCallback(SLL* node, SLLCallback* cb)
+	void CALLTYPE oss_ll_iterateViaCallback(SLLCallback* cb)
 	{
 		//////////
 		// For each node, process its portion
 		//////
-			while (node)
+			while (cb->node)
 			{
 
 				//////////
 				// Callback to compute the SHA1 on this item
 				//////
-					cb->node = node;
 					cb->funcVoid(cb);
 					//oss_sha1ComputeSha1_ProcessThisData(context, (s8*)node, tnSize);
 
@@ -4880,7 +4879,7 @@ openAgain:
 				//////////
 				// Move to next node
 				//////
-					node = node->next;
+					cb->node = cb->node->next;
 			}
 	}
 
@@ -4892,18 +4891,17 @@ openAgain:
 // Called to iterate from the indicated node backwards
 //
 //////
-	void CALLTYPE oss_ll_iterateBackwardViaCallback(SLL* node, SLLCallback* cb)
+	void CALLTYPE oss_ll_iterateBackwardViaCallback(SLLCallback* cb)
 	{
 		//////////
 		// For each node, process its portion
 		//////
-			while (node)
+			while (cb->node)
 			{
 
 				//////////
 				// Callback to compute the SHA1 on this item
 				//////
-					cb->node = node;
 					cb->funcVoid(cb);
 					//oss_sha1ComputeSha1_ProcessThisData(context, (s8*)node, tnSize);
 
@@ -4911,7 +4909,7 @@ openAgain:
 				//////////
 				// Move to next node
 				//////
-					node = node->prev;
+					cb->node = cb->node->prev;
 			}
 	}
 
@@ -5675,7 +5673,7 @@ openAgain:
 	void CALLTYPE oss_ll4_iterateViaCallback(SLL4Callback* cb, u32 tnDirection)
 	{
 		// Make sure the environment is sane
-		if (cb && cb->node && cb->_func)
+		if (cb && cb->_func)
 		{
 			//////////
 			// For each node, process its portion

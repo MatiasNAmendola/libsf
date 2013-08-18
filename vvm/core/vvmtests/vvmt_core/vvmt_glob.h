@@ -63,8 +63,8 @@
 // Linked List required constants and variables
 //
 //////
-			u32		gnInitializerValue							= 1;								// Begin at our initializer value
-	const	u32		cgnBufferSize								= 256 * sizeof(u32);				// Enough room for 256 32-bit quantities
+			u32		gnLlInitializerValue						= 1;								// Begin at our initializer value
+	const	u32		cgnLlBufferSize								= 256 * sizeof(u32);				// Enough room for 256 32-bit quantities
 	const	u64		cgnTestLl1NodeSha1As64Bit					= 0x8e187bd07652c715;				// 8e18 7bd0 7652 c715
 	const	u32		cgnTestLl1NodeSha1As32Bit					= 0x05b45f4b;						// 05b4 5f4b
 
@@ -97,6 +97,17 @@
 
 	const	u64		cgnTestLl11NodeSha1As64Bit					= 0xdd5f61c2cbd5d283;				// dd5f 61c2 cbd5 d283
 	const	u32		cgnTestLl11NodeSha1As32Bit					= 0x4e96bd41;						// 4e96 bd41
+
+
+//////////
+//
+// 4-way Linked List required constants and variables
+//
+//////
+			u32		gnLl4InitializerValue						= 1;								// Begin at our initializer value
+	const	u32		cgnLl4BufferSize							= 256 * sizeof(u32);				// Enough room for 256 32-bit quantities
+	const	u64		cgnTestLl41NodeSha1As64Bit					= 0xa3d2dbacfbf105b7;				// a3d2 dbac fbf1 05b7
+	const	u32		cgnTestLl41NodeSha1As32Bit					= 0xf6019c40;						// f601 9c40
 
 
 //////////

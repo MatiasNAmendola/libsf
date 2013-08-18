@@ -90,13 +90,13 @@
 
 	bool iivvmt_testSll_1(u64 lnHandleLog, SLL** root)
 	{
-		SOssCbData2Void		cb;
-		u64					lnSha1As64Bit;
-		u32					lnSha1As32Bit;
-		u8					sha20Bytes[20];
-		u8					context[92];
-		SLL*				nodePrev;
-		SLL*				nodeNext;
+		SLLCallback		cb;
+		u64				lnSha1As64Bit;
+		u32				lnSha1As32Bit;
+		u8				sha20Bytes[20];
+		u8				context[92];
+		SLL*			nodePrev;
+		SLL*			nodeNext;
 
 
 		//////////
@@ -108,7 +108,7 @@
 		//////////
 		// Create a single node
 		//////
-			*root = i3vvmt_testSll_1_createSll(cgnBufferSize);
+			*root = i3vvmt_testSll_1_createSll(cgnLlBufferSize);
 			if (!*root)
 			{
 				// Failure
@@ -117,16 +117,17 @@
 				return(false);
 			}
 			// Initialize our callback data
-			cb._callback	= (u64)&i3vvmt_testSll_1_sha1Callback;
-			cb.extra1		= (u64)&context[0];
-			cb.extra2		= (u64)&sha20Bytes[0];
+			cb._func	= (u64)&i3vvmt_testSll_1_sha1Callback;
+			cb.node		= *root;
+			cb.extra1	= (u64)&context[0];
+			cb.extra2	= (u64)&sha20Bytes[0];
 
 
 		//////////
 		// Determine the SHA-1 on that one node
 		//////
 			oss_sha1ComputeSha1_Start(context);
-			oss_ll_iterateViaCallback(*root, &cb);
+			oss_ll_iterateViaCallback(&cb);
 			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
 			oss_sha1Compute64BitFromSha1(sha20Bytes);
 
@@ -145,7 +146,7 @@
 		//////////
 		// Create a node to go before
 		//////
-			nodePrev = i3vvmt_testSll_1_createSll(cgnBufferSize);
+			nodePrev = i3vvmt_testSll_1_createSll(cgnLlBufferSize);
 			if (!nodePrev)
 			{
 				// Failure
@@ -158,7 +159,7 @@
 		//////////
 		// Create a node to go after
 		//////
-			nodeNext = i3vvmt_testSll_1_createSll(cgnBufferSize);
+			nodeNext = i3vvmt_testSll_1_createSll(cgnLlBufferSize);
 			if (!nodeNext)
 			{
 				// Failure
@@ -178,7 +179,7 @@
 		// Determine the SHA-1 on the two nodes
 		//////
 			oss_sha1ComputeSha1_Start(context);
-			oss_ll_iterateViaCallback(*root, &cb);
+			oss_ll_iterateViaCallback(&cb);
 			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
 			oss_sha1Compute64BitFromSha1(sha20Bytes);
 
@@ -204,7 +205,8 @@
 		// Determine the SHA-1 on the three nodes
 		//////
 			oss_sha1ComputeSha1_Start(context);
-			oss_ll_iterateViaCallback(nodePrev, &cb);
+			cb.node = nodePrev;
+			oss_ll_iterateViaCallback(&cb);
 			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
 			oss_sha1Compute64BitFromSha1(sha20Bytes);
 
@@ -224,7 +226,8 @@
 		// Determine the SHA-1 on the three nodes going backwards
 		//////
 			oss_sha1ComputeSha1_Start(context);
-			oss_ll_iterateBackwardViaCallback(nodeNext, &cb);
+			cb.node = nodeNext;
+			oss_ll_iterateBackwardViaCallback(&cb);
 			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
 			oss_sha1Compute64BitFromSha1(sha20Bytes);
 
@@ -250,13 +253,13 @@
 
 	bool iivvmt_testSll_2(u64 lnHandleLog, SLL* root)
 	{
-		SOssCbData2Void		cb;
-		u64					lnSha1As64Bit;
-		u32					lnSha1As32Bit;
-		u8					sha20Bytes[20];
-		u8					context[92];
-		SLL*				nodePrev;
-		SLL*				nodeNext;
+		SLLCallback		cb;
+		u64				lnSha1As64Bit;
+		u32				lnSha1As32Bit;
+		u8				sha20Bytes[20];
+		u8				context[92];
+		SLL*			nodePrev;
+		SLL*			nodeNext;
 
 
 		//////////
@@ -268,15 +271,16 @@
 		//////////
 		// Prepare for our callbacks
 		//////
-			cb._callback	= (u64)&i3vvmt_testSll_1_sha1Callback;
-			cb.extra1		= (u64)&context[0];
-			cb.extra2		= (u64)&sha20Bytes[0];
+			cb._func	= (u64)&i3vvmt_testSll_1_sha1Callback;
+			cb.node		= root->prev;
+			cb.extra1	= (u64)&context[0];
+			cb.extra2	= (u64)&sha20Bytes[0];
 
 
 		//////////
 		// Create a node to go before
 		//////
-			nodePrev = i3vvmt_testSll_1_createSll(cgnBufferSize);
+			nodePrev = i3vvmt_testSll_1_createSll(cgnLlBufferSize);
 			if (!nodePrev)
 			{
 				// Failure
@@ -289,7 +293,7 @@
 		//////////
 		// Create a node to go after
 		//////
-			nodeNext = i3vvmt_testSll_1_createSll(cgnBufferSize);
+			nodeNext = i3vvmt_testSll_1_createSll(cgnLlBufferSize);
 			if (!nodeNext)
 			{
 				// Failure
@@ -309,7 +313,7 @@
 		// Determine the SHA-1 on that one node
 		//////
 			oss_sha1ComputeSha1_Start(context);
-			oss_ll_iterateViaCallback(root->prev, &cb);
+			oss_ll_iterateViaCallback(&cb);
 			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
 			oss_sha1Compute64BitFromSha1(sha20Bytes);
 
@@ -335,7 +339,8 @@
 		// Determine the SHA-1 on that one node
 		//////
 			oss_sha1ComputeSha1_Start(context);
-			oss_ll_iterateViaCallback(nodePrev->prev, &cb);
+			cb.node = nodePrev->prev;
+			oss_ll_iterateViaCallback(&cb);
 			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
 			oss_sha1Compute64BitFromSha1(sha20Bytes);
 
@@ -355,7 +360,8 @@
 		// Determine the SHA-1 on that one node
 		//////
 			oss_sha1ComputeSha1_Start(context);
-			oss_ll_iterateBackwardViaCallback(nodeNext->next, &cb);
+			cb.node = nodeNext->next;
+			oss_ll_iterateBackwardViaCallback(&cb);
 			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
 			oss_sha1Compute64BitFromSha1(sha20Bytes);
 
@@ -381,12 +387,12 @@
 
 	bool iivvmt_testSll_3(u64 lnHandleLog, SLL** root)
 	{
-		SOssCbData2Void		cb;
-		u64					lnSha1As64Bit;
-		u32					lnSha1As32Bit;
-		u8					sha20Bytes[20];
-		u8					context[92];
-		SLL*				nodePrev;
+		SLLCallback		cb;
+		u64				lnSha1As64Bit;
+		u32				lnSha1As32Bit;
+		u8				sha20Bytes[20];
+		u8				context[92];
+		SLL*			nodePrev;
 
 
 		//////////
@@ -398,9 +404,10 @@
 		//////////
 		// Prepare for our callbacks
 		//////
-			cb._callback	= (u64)&i3vvmt_testSll_1_sha1Callback;
-			cb.extra1		= (u64)&context[0];
-			cb.extra2		= (u64)&sha20Bytes[0];
+			cb._func	= (u64)&i3vvmt_testSll_1_sha1Callback;
+			cb.node		= (*root)->prev;
+			cb.extra1	= (u64)&context[0];
+			cb.extra2	= (u64)&sha20Bytes[0];
 
 
 		//////////
@@ -413,7 +420,7 @@
 		// Determine the SHA-1 on that one node
 		//////
 			oss_sha1ComputeSha1_Start(context);
-			oss_ll_iterateViaCallback((*root)->prev, &cb);
+			oss_ll_iterateViaCallback(&cb);
 			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
 			oss_sha1Compute64BitFromSha1(sha20Bytes);
 
@@ -439,7 +446,8 @@
 		// Determine the SHA-1 on that one node
 		//////
 			oss_sha1ComputeSha1_Start(context);
-			oss_ll_iterateViaCallback((*root)->prev, &cb);
+			cb.node = (*root)->prev;
+			oss_ll_iterateViaCallback(&cb);
 			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
 			oss_sha1Compute64BitFromSha1(sha20Bytes);
 
@@ -472,7 +480,8 @@
 		// Determine the SHA-1 on the remaining two nodes going forward
 		//////
 			oss_sha1ComputeSha1_Start(context);
-			oss_ll_iterateViaCallback(nodePrev, &cb);
+			cb.node = nodePrev;
+			oss_ll_iterateViaCallback(&cb);
 			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
 			oss_sha1Compute64BitFromSha1(sha20Bytes);
 
@@ -492,7 +501,8 @@
 		// Determine the SHA-1 on the remaining two nodes going backward
 		//////
 			oss_sha1ComputeSha1_Start(context);
-			oss_ll_iterateBackwardViaCallback(nodePrev->next, &cb);
+			cb.node = nodePrev->next;
+			oss_ll_iterateBackwardViaCallback(&cb);
 			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
 			oss_sha1Compute64BitFromSha1(sha20Bytes);
 
@@ -538,7 +548,7 @@
 				// Iterate through every portion to initialize
 				llInit = (u8*)ll + sizeof(SLL);
 				for (lnI = 0; lnI < tnSize; lnI++)
-					llInit[lnI] = oss_getPredictableSequentialPattern(lnI, gnInitializerValue++);
+					llInit[lnI] = oss_getPredictableSequentialPattern(lnI, gnLlInitializerValue++);
 			}
 
 
@@ -556,6 +566,6 @@
 		if (cb)
 		{
 			// Conduct our processing
-			oss_sha1ComputeSha1_ProcessThisData((u8*)cb->extra1, (s8*)cb->ptr + sizeof(SLL), cgnBufferSize);
+			oss_sha1ComputeSha1_ProcessThisData((u8*)cb->extra1, (s8*)cb->ptr + sizeof(SLL), cgnLlBufferSize);
 		}
 	}

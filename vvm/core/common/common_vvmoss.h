@@ -564,8 +564,8 @@
 		void			(CALLBACK *oss_ll_orphanize)						(SLL* node);
 		void			(CALLBACK *oss_ll_deleteChain)						(SLL** root);
 		void			(CALLBACK *oss_ll_deleteChainWithCallback)			(SLLCallback* cb);
-		void			(CALLTYPE *oss_ll_iterateViaCallback)				(SLL* node, SOssCbData2Void* cb);
-		void			(CALLTYPE *oss_ll_iterateBackwardViaCallback)		(SLL* node, SOssCbData2Void* cb);
+		void			(CALLTYPE *oss_ll_iterateViaCallback)				(SLLCallback* cb);
+		void			(CALLTYPE *oss_ll_iterateBackwardViaCallback)		(SLLCallback* cb);
 		SLL*			(CALLTYPE *oss_ll_getFirstNode)						(SLL* node);
 		SLL*			(CALLTYPE *oss_ll_getLastNode)						(SLL* node);
 

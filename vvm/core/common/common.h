@@ -656,7 +656,11 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 
 		// Data items for this callback
 		SLL*	node;
-		u64		extra;
+		union {
+			u64		extra;
+			u64		extra1;
+		};
+		u64		extra2;
 	};
 
 	struct SLL4Callback
@@ -675,7 +679,11 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 
 		// Data items for this callback
 		SLL4*	node;
-		u64		extra;
+		union {
+			u64		extra;
+			u64		extra1;
+		};
+		u64		extra2;
 	};
 
 	struct SStartEndCallback
