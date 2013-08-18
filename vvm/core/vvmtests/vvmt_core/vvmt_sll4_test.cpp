@@ -158,7 +158,7 @@
 
 			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
 			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
-			if (lnSha1As64Bit != cgnTestLl41NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl41NodeSha1As32Bit)
+			if (lnSha1As64Bit != cgnTest1Ll41NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll41NodeSha1As32Bit)
 			{
 				// Failure
 				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE);
@@ -239,7 +239,7 @@
 
 			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
 			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
-			if (lnSha1As64Bit != cgnTestLl42NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl42NodeSha1As32Bit)
+			if (lnSha1As64Bit != cgnTest1Ll42NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll42NodeSha1As32Bit)
 			{
 				// Failure
 				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
@@ -268,7 +268,7 @@
 
 			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
 			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
-			if (lnSha1As64Bit != cgnTestLl43NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl43NodeSha1As32Bit)
+			if (lnSha1As64Bit != cgnTest1Ll43NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll43NodeSha1As32Bit)
 			{
 				// Failure
 				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
@@ -301,7 +301,7 @@
 
 			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
 			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
-			if (lnSha1As64Bit != cgnTestLl44NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl44NodeSha1As32Bit)
+			if (lnSha1As64Bit != cgnTest1Ll44NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll44NodeSha1As32Bit)
 			{
 				// Failure
 				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
@@ -334,7 +334,7 @@
 
 			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
 			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
-			if (lnSha1As64Bit != cgnTestLl45NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl45NodeSha1As32Bit)
+			if (lnSha1As64Bit != cgnTest1Ll45NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll45NodeSha1As32Bit)
 			{
 				// Failure
 				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
@@ -419,7 +419,7 @@
 
 			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
 			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
-			if (lnSha1As64Bit != cgnTestLl46NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl46NodeSha1As32Bit)
+			if (lnSha1As64Bit != cgnTest1Ll46NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll46NodeSha1As32Bit)
 			{
 				// Failure
 				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
@@ -452,7 +452,7 @@
 
 			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
 			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
-			if (lnSha1As64Bit != cgnTestLl47NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl47NodeSha1As32Bit)
+			if (lnSha1As64Bit != cgnTest1Ll47NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll47NodeSha1As32Bit)
 			{
 				// Failure
 				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
@@ -485,7 +485,7 @@
 
 			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
 			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
-			if (lnSha1As64Bit != cgnTestLl48NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl48NodeSha1As32Bit)
+			if (lnSha1As64Bit != cgnTest1Ll48NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll48NodeSha1As32Bit)
 			{
 				// Failure
 				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
@@ -518,7 +518,7 @@
 
 			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
 			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
-			if (lnSha1As64Bit != cgnTestLl49NodeSha1As64Bit || lnSha1As32Bit != cgnTestLl49NodeSha1As32Bit)
+			if (lnSha1As64Bit != cgnTest1Ll49NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll49NodeSha1As32Bit)
 			{
 				// Failure
 				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
@@ -536,12 +536,97 @@
 
 
 
+//////////
+//
+// The 4-way link-list will be of the w2..e2 and n2..s2 form.  This process creates a north/south
+// chain and inserts it west of w2, calling it x1..x5.  After doing this, it deletes x2, then x5,
+// then x3, then x4, leaving x1.  Then it deletes x1, e2, w1, then the chain east from e1, and west
+// from w2.  Then it deletes the chain north from n1, and south from s1, leaving only root.
+//
+//	                    ____ north
+//	                   | n2 |
+//	                   |____|
+//	                   | n1 |
+//	     ____ ____ ____|____|____ ____ 
+//	    | x1 | w2 | w1 |root| e1 | e2 |
+//	    |____|____|____|____|____|____|
+//	    | x2 |west     | s1 |      east
+//	    |____|         |____|
+//	    | x3 |         | s2 |
+//	    |____|         |____|
+//	    | x4 |               south
+//	    |____|
+//	    | x5 |
+//	    |____|
+//
+//////
 	bool iivvmt_testSll4_2(u64 lnHandleLog, SLL4* root)
 	{
+		SLL4Callback	cb;
+		u64				lnSha1As64Bit;
+		u32				lnSha1As32Bit;
+		u8				sha20Bytes[20];
+		u8				context[92];
+		u32				lnCount;
+		SLL4*			ll4x1;
+
+
 		//////////
 		// Tell them which test we're running
 		//////
 			vvm_resourcePrintf(IDS_VVM_TEST_SLL4_APPEND);
+
+
+		//////////
+		// Create the chain
+		//////
+			lnCount	= 5;
+			ll4x1	= oss_ll4_createChain(cgnLl4BufferSize, &lnCount, _LL4_SOUTH);
+			if (lnCount != 5 || !ll4x1)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_UNABLE_TO_CREATE_CHAIN);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+
+
+		//////////
+		// Populate the chain
+		//////
+			cb.node		= ll4x1;
+			cb._func	= (u64)&i3vvmt_testSll4_initiallyPopulateCallback;
+			cb.extra1	= (u64)&context[0];
+			cb.extra2	= (u64)&sha20Bytes[0];
+			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+
+
+		//////////
+		// Validate that it was setup and populated correctly
+		//////
+			oss_sha1ComputeSha1_Start(context);
+			cb.node		= ll4x1;
+			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
+			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			oss_sha1Compute64BitFromSha1(sha20Bytes);
+
+			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			if (lnSha1As64Bit != cgnTest2Ll41NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll41NodeSha1As32Bit)
+			{
+				// Failure
+				vvm_resourcePrintf(IDS_VVM_TEST_SLL_SHA1_FAILURE);
+				vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
+				return(false);
+			}
+			// If we get here, we're good
+
+
+		//////////
+		// Attach x1 onto w2
+		//////
+// TODO:  working here
 
 
 		// If we get here, we're good
@@ -570,9 +655,7 @@
 
 	SLL4* i3vvmt_testSll4_1_createSll4(u32 tnSize)
 	{
-		u32		lnI;
-		SLL4*	ll4;
-		u8*		llInit;
+		SLL4* ll4;
 		
 		
 		//////////
@@ -585,12 +668,7 @@
 		// Prepare that value
 		//////
 			if (ll4)
-			{
-				// Iterate through every portion to initialize
-				llInit = (u8*)ll4 + sizeof(SLL4);
-				for (lnI = 0; lnI < tnSize; lnI++)
-					llInit[lnI] = oss_getPredictableSequentialPattern(lnI, gnLlInitializerValue++);
-			}
+				i3vvmt_testSll4_initiallyPopulate(ll4, tnSize);
 
 
 		//////////
@@ -602,11 +680,36 @@
 
 
 
-	void i3vvmt_testSll4_1_sha1Callback(SOssCbData2Void* cb)
+	void i3vvmt_testSll4_initiallyPopulateCallback(SLL4Callback* cb)
+	{
+		// Pass along to the initialization function
+		i3vvmt_testSll4_initiallyPopulate(cb->node, cgnLl4BufferSize);
+	}
+
+
+
+
+	void i3vvmt_testSll4_initiallyPopulate(SLL4* ll4, u32 tnSize)
+	{
+		u32		lnI;
+		u8*		llInit;
+
+
+		// Iterate through every portion to initialize
+		llInit = (u8*)ll4 + sizeof(SLL4);
+		for (lnI = 0; lnI < tnSize; lnI++)
+			llInit[lnI] = oss_getPredictableSequentialPattern(lnI, gnLlInitializerValue++);
+
+	}
+
+
+
+
+	void i3vvmt_testSll4_1_sha1Callback(SLL4Callback* cb)
 	{
 		if (cb)
 		{
 			// Conduct our processing
-			oss_sha1ComputeSha1_ProcessThisData((u8*)cb->extra1, (s8*)cb->ptr + sizeof(SLL4), cgnLlBufferSize);
+			oss_sha1ComputeSha1_ProcessThisData((u8*)cb->extra1, (s8*)cb->node + sizeof(SLL4), cgnLlBufferSize);
 		}
 	}

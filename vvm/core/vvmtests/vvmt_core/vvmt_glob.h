@@ -106,32 +106,38 @@
 //////
 			u32		gnLl4InitializerValue						= 1;								// Begin at our initializer value
 	const	u32		cgnLl4BufferSize							= 256 * sizeof(u32);				// Enough room for 256 32-bit quantities
-	const	u64		cgnTestLl41NodeSha1As64Bit					= 0xa3d2dbacfbf105b7;				// a3d2 dbac fbf1 05b7
-	const	u32		cgnTestLl41NodeSha1As32Bit					= 0xf6019c40;						// f601 9c40
 
-	const	u64		cgnTestLl42NodeSha1As64Bit					= 0x7f446e8c2b9e6011;				// 7f44 6e8c 2b9e 6011
-	const	u32		cgnTestLl42NodeSha1As32Bit					= 0x0890465e;						// 0890 465e
+	// Test 1
+	const	u64		cgnTest1Ll41NodeSha1As64Bit					= 0xa3d2dbacfbf105b7;				// a3d2 dbac fbf1 05b7
+	const	u32		cgnTest1Ll41NodeSha1As32Bit					= 0xf6019c40;						// f601 9c40
 
-	const	u64		cgnTestLl43NodeSha1As64Bit					= 0xc0eb50ede7565199;				// c0eb 50ed e756 5199
-	const	u32		cgnTestLl43NodeSha1As32Bit					= 0x90f1ac8c;						// 90f1 ac8c
+	const	u64		cgnTest1Ll42NodeSha1As64Bit					= 0x7f446e8c2b9e6011;				// 7f44 6e8c 2b9e 6011
+	const	u32		cgnTest1Ll42NodeSha1As32Bit					= 0x0890465e;						// 0890 465e
 
-	const	u64		cgnTestLl44NodeSha1As64Bit					= 0x2c832db8d8702880;				// 2c83 2db8 d870 2880
-	const	u32		cgnTestLl44NodeSha1As32Bit					= 0x16c611d1;						// 16c6 11d1
+	const	u64		cgnTest1Ll43NodeSha1As64Bit					= 0xc0eb50ede7565199;				// c0eb 50ed e756 5199
+	const	u32		cgnTest1Ll43NodeSha1As32Bit					= 0x90f1ac8c;						// 90f1 ac8c
 
-	const	u64		cgnTestLl45NodeSha1As64Bit					= 0xd7d495da9574cb51;				// d7d4 95da 9574 cb51
-	const	u32		cgnTestLl45NodeSha1As32Bit					= 0xad0836ce;						// ad08 36ce
+	const	u64		cgnTest1Ll44NodeSha1As64Bit					= 0x2c832db8d8702880;				// 2c83 2db8 d870 2880
+	const	u32		cgnTest1Ll44NodeSha1As32Bit					= 0x16c611d1;						// 16c6 11d1
 
-	const	u64		cgnTestLl46NodeSha1As64Bit					= 0x11f15e25fc6455d4;				// 11f1 5e25 fc64 55d4
-	const	u32		cgnTestLl46NodeSha1As32Bit					= 0x06e91813;						// 06e9 1813
+	const	u64		cgnTest1Ll45NodeSha1As64Bit					= 0xd7d495da9574cb51;				// d7d4 95da 9574 cb51
+	const	u32		cgnTest1Ll45NodeSha1As32Bit					= 0xad0836ce;						// ad08 36ce
 
-	const	u64		cgnTestLl47NodeSha1As64Bit					= 0x121cbfe4229907be;				// 121c bfe4 2299 07be
-	const	u32		cgnTestLl47NodeSha1As32Bit					= 0x680ab4d3;						// 680a b4d3
+	const	u64		cgnTest1Ll46NodeSha1As64Bit					= 0x11f15e25fc6455d4;				// 11f1 5e25 fc64 55d4
+	const	u32		cgnTest1Ll46NodeSha1As32Bit					= 0x06e91813;						// 06e9 1813
 
-	const	u64		cgnTestLl48NodeSha1As64Bit					= 0xa8e69aa91b0f1fe5;				// a8e6 9aa9 1b0f 1fe5
-	const	u32		cgnTestLl48NodeSha1As32Bit					= 0xc72895a9;						// c728 95a9
+	const	u64		cgnTest1Ll47NodeSha1As64Bit					= 0x121cbfe4229907be;				// 121c bfe4 2299 07be
+	const	u32		cgnTest1Ll47NodeSha1As32Bit					= 0x680ab4d3;						// 680a b4d3
 
-	const	u64		cgnTestLl49NodeSha1As64Bit					= 0xcaa6bb3c5a223cee;				// caa6 bb3c 5a22 3cee
-	const	u32		cgnTestLl49NodeSha1As32Bit					= 0xf2013210;						// f201 3210
+	const	u64		cgnTest1Ll48NodeSha1As64Bit					= 0xa8e69aa91b0f1fe5;				// a8e6 9aa9 1b0f 1fe5
+	const	u32		cgnTest1Ll48NodeSha1As32Bit					= 0xc72895a9;						// c728 95a9
+
+	const	u64		cgnTest1Ll49NodeSha1As64Bit					= 0xcaa6bb3c5a223cee;				// caa6 bb3c 5a22 3cee
+	const	u32		cgnTest1Ll49NodeSha1As32Bit					= 0xf2013210;						// f201 3210
+
+	// Test 2
+	const	u64		cgnTest2Ll41NodeSha1As64Bit					= 0x3bb2033bbf61e292;				// 3bb2 033b bf61 e292
+	const	u32		cgnTest2Ll41NodeSha1As32Bit					= 0x66312552;						// 6631 2552
 
 
 //////////

@@ -5002,6 +5002,72 @@ openAgain:
 
 //////////
 //
+// Called to create a 4-way linked list chain in a particular direction, for the indicated number
+// of entries.
+//
+//////
+	SLL4* CALLTYPE oss_ll4_createChain(u32 tnSize, u32* tnCount, u32 tnDirection)
+	{
+		u32		lnI;
+		SLL4*	ll4;
+		SLL4*	ll4Root;
+		SLL4*	ll4Last;
+
+
+		// Iterate until our count is consumed, or we fail
+		ll4		= NULL;
+		ll4Root = NULL;
+		ll4Last	= NULL;
+		for (lnI = 0; lnI < *tnCount; lnI++)
+		{
+			// Create the new entry
+			switch (tnDirection)
+			{
+				case _LL4_WEST:
+					ll4 = oss_ll4_create(NULL, ll4Last, NULL, NULL, oss_getNextUniqueId(), tnSize);
+					if (ll4Last)
+						ll4Last->west = ll4;
+					break;
+
+				case _LL4_EAST:
+					ll4 = oss_ll4_create(ll4Last, NULL, NULL, NULL, oss_getNextUniqueId(), tnSize);
+					if (ll4Last)
+						ll4Last->east = ll4;
+					break;
+
+				case _LL4_NORTH:
+					ll4 = oss_ll4_create(NULL, NULL, NULL, ll4Last, oss_getNextUniqueId(), tnSize);
+					if (ll4Last)
+						ll4Last->north = ll4;
+					break;
+
+				case _LL4_SOUTH:
+					ll4 = oss_ll4_create(NULL, NULL, ll4Last, NULL, oss_getNextUniqueId(), tnSize);
+					if (ll4Last)
+						ll4Last->south = ll4;
+					break;
+
+				default:
+					// Unknown, failure.
+					*tnCount = lnI;
+					return(ll4Root);
+			}
+			// When we get here, we have our new entry
+			if (!ll4Root)
+				ll4Root = ll4;
+
+			// Update the last pointer
+			ll4Last = ll4;
+		}
+		// When we get here, we're good
+		return(ll4Root);
+	}
+
+
+
+
+//////////
+//
 // Called to delete a single node from the four-way link list
 //
 //////

@@ -264,6 +264,7 @@
 		SLL* CALLTYPE			oss_ll_getLastNode							(SLL* node);
 
 		SLL4* CALLTYPE			oss_ll4_create								(SLL4* nodeWest, SLL4* nodeEast, SLL4* nodeNorth, SLL4* nodeSouth, u64 tnUniqueId, u32 tnSize);
+		SLL4* CALLTYPE			oss_ll4_createChain							(u32 tnSize, u32* tnCount, u32 tnDirection);
 		void CALLBACK			oss_ll4_delete								(SLL4* node);
 		void CALLBACK			oss_ll4_deleteWithCallback					(SLL4* node);
 		bool CALLTYPE			oss_ll4_orphanize							(SLL4* node);

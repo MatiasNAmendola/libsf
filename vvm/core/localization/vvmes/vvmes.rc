@@ -143,6 +143,12 @@ BEGIN
     IDS_VVM_TEST_SLL4_SHA1_FAILURE "Failure on 4-way linked list SHA-1"
 END
 
+STRINGTABLE 
+BEGIN
+    IDS_VVM_TEST_SLL4_UNABLE_TO_CREATE_CHAIN 
+                            "Failure on create 4-way linked list chain"
+END
+
 #endif    // Spanish (Castilian) resources
 /////////////////////////////////////////////////////////////////////////////
 

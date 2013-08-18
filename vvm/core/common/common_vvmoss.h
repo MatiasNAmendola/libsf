@@ -194,15 +194,19 @@
 	const s8		cgcOssLlGetLastNode[]									= "oss_ll_getLastNode";
 
 	const s8		cgcOssLl4Create[]										= "oss_ll4_create";
-	const s8		cgcOssLl4OrphanizeAsBxml[]								= "oss_ll4bxml_orphanize";
+	const s8		cgcOssLl4CreateChain[]									= "oss_ll4_createChain";
+	const s8		cgcOssLl4Delete[]										= "oss_ll4_delete";
 	const s8		cgcOssLl4OrphanizeAsNode[]								= "oss_ll4_orphanize";
-	const s8		cgcOssLl4InsertAsBxml[]									= "oss_ll4bxml_insert";
-	const s8		cgcOssLl4InsertAsBxmlAsChild[]							= "oss_ll4bxml_insertAsChild";
-	const s8		cgcOssLl4InsertAsBxmlAsChildRegarding[]					= "oss_ll4bxml_insertAsChildRegarding";
 	const s8		cgcOssLl4InsertAsNodeNorthSouth[]						= "oss_ll4_insertNorthSouth";
 	const s8		cgcOssLl4InsertAsNodeEastWest[]							= "oss_ll4_insertEastWest";
+	const s8		cgcOssLl4DeleteChain[]									= "oss_ll4_deleteChain";
 	const s8		cgcOssLl4DeleteChainWithCallback[]						= "oss_ll4_deleteChainWithCallback";
 	const s8		cgcOssLl4IterateViaCallback[]							= "oss_ll4_iterateViaCallback";
+
+	const s8		cgcOssLl4BxmlInsert[]									= "oss_ll4bxml_insert";
+	const s8		cgcOssLl4BxmlOrphanize[]								= "oss_ll4bxml_orphanize";
+	const s8		cgcOssLl4BxmlInsertAsChild[]							= "oss_ll4bxml_insertAsChild";
+	const s8		cgcOssLl4BxmlInsertAsChildRegarding[]					= "oss_ll4bxml_insertAsChildRegarding";
 
 	const s8		cgcOssSEChainPrepend[]									= "oss_SEChain_prepend";
 	const s8		cgcOssSEChainAppend[]									= "oss_SEChain_append";
@@ -570,6 +574,7 @@
 		SLL*			(CALLTYPE *oss_ll_getLastNode)						(SLL* node);
 
 		SLL4*			(CALLTYPE *oss_ll4_create)							(SLL4* nodeWest, SLL4* nodeEast, SLL4* nodeNorth, SLL4* nodeSouth, u64 tnUniqueId, u32 tnSize);
+		SLL4*			(CALLTYPE *oss_ll4_createChain)						(u32 tnSize, u32* tnCount, u32 tnDirection);
 		void			(CALLBACK *oss_ll4_delete)							(SLL4* node);
 		bool			(CALLBACK *oss_ll4_orphanize)						(SLL4* node);
 		bool			(CALLBACK *oss_ll4_insertNorthSouth)				(SLL4* node, SLL4* nodeRef,                   bool tlAfter);
@@ -923,15 +928,19 @@
 		(void*)&oss_ll_getLastNode,											(void*)cgcOssLlGetLastNode,
 
 		(void*)&oss_ll4_create,												(void*)cgcOssLl4Create,
-		(void*)&oss_ll4bxml_orphanize,									(void*)cgcOssLl4OrphanizeAsBxml,
-		(void*)&oss_ll4_orphanize,									(void*)cgcOssLl4OrphanizeAsNode,
-		(void*)&oss_ll4bxml_insert,										(void*)cgcOssLl4InsertAsBxml,
-		(void*)&oss_ll4bxml_insertAsChild,								(void*)cgcOssLl4InsertAsBxmlAsChild,
-		(void*)&oss_ll4bxml_insertAsChildRegarding,						(void*)cgcOssLl4InsertAsBxmlAsChildRegarding,
-		(void*)&oss_ll4_insertNorthSouth,								(void*)cgcOssLl4InsertAsNodeNorthSouth,
-		(void*)&oss_ll4_insertEastWest,								(void*)cgcOssLl4InsertAsNodeEastWest,
+		(void*)&oss_ll4_createChain,										(void*)cgcOssLl4CreateChain,
+		(void*)&oss_ll4_delete,												(void*)cgcOssLl4Delete,
+		(void*)&oss_ll4_orphanize,											(void*)cgcOssLl4OrphanizeAsNode,
+		(void*)&oss_ll4_insertNorthSouth,									(void*)cgcOssLl4InsertAsNodeNorthSouth,
+		(void*)&oss_ll4_insertEastWest,										(void*)cgcOssLl4InsertAsNodeEastWest,
+		(void*)&oss_ll4_deleteChain,										(void*)cgcOssLl4DeleteChain,
 		(void*)&oss_ll4_deleteChainWithCallback,							(void*)cgcOssLl4DeleteChainWithCallback,
 		(void*)&oss_ll4_iterateViaCallback,									(void*)cgcOssLl4IterateViaCallback,
+
+		(void*)&oss_ll4bxml_orphanize,										(void*)cgcOssLl4BxmlOrphanize,
+		(void*)&oss_ll4bxml_insert,											(void*)cgcOssLl4BxmlInsert,
+		(void*)&oss_ll4bxml_insertAsChild,									(void*)cgcOssLl4BxmlInsertAsChild,
+		(void*)&oss_ll4bxml_insertAsChildRegarding,							(void*)cgcOssLl4BxmlInsertAsChildRegarding,
 
 		(void*)&oss_SEChain_prepend,										(void*)cgcOssSEChainPrepend,
 		(void*)&oss_SEChain_append,											(void*)cgcOssSEChainAppend,

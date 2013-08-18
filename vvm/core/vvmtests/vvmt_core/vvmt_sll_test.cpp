@@ -579,11 +579,11 @@
 
 
 
-	void i3vvmt_testSll_1_sha1Callback(SOssCbData2Void* cb)
+	void i3vvmt_testSll_1_sha1Callback(SLLCallback* cb)
 	{
 		if (cb)
 		{
 			// Conduct our processing
-			oss_sha1ComputeSha1_ProcessThisData((u8*)cb->extra1, (s8*)cb->ptr + sizeof(SLL), cgnLlBufferSize);
+			oss_sha1ComputeSha1_ProcessThisData((u8*)cb->extra1, (s8*)cb->node + sizeof(SLL), cgnLlBufferSize);
 		}
 	}

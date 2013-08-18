@@ -74,7 +74,7 @@
 		bool					iivvmt_testSll_3										(u64 lnHandleLog, SLL** root);
 		// Related functions
 		SLL*					i3vvmt_testSll_1_createSll								(u32 tnSize);
-		void					i3vvmt_testSll_1_sha1Callback							(SOssCbData2Void* cb);
+		void					i3vvmt_testSll_1_sha1Callback							(SLLCallback* cb);
 
 
 	//////////
@@ -86,8 +86,10 @@
 		bool					iivvmt_testSll4_2										(u64 lnHandleLog, SLL4*  root);
 		bool					iivvmt_testSll4_3										(u64 lnHandleLog, SLL4** root);
 		// Related functions
-		SLL4*					i3vvmt_testSll4_1_createSll4								(u32 tnSize);
-		void					i3vvmt_testSll4_1_sha1Callback							(SOssCbData2Void* cb);
+		SLL4*					i3vvmt_testSll4_1_createSll4							(u32 tnSize);
+		void					i3vvmt_testSll4_initiallyPopulateCallback				(SLL4Callback* cb);
+		void					i3vvmt_testSll4_initiallyPopulate						(SLL4* ll4, u32 tnSize);
+		void					i3vvmt_testSll4_1_sha1Callback							(SLL4Callback* cb);
 
 
 	//////////
