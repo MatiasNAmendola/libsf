@@ -1239,7 +1239,7 @@
 		// Delete root and chain south
 		//////
 			oss_ll4_deleteChain(root, _LL4_SOUTH);
-			if (root)
+			if (*root)
 			{
 				// Failure
 				vvm_resourcePrintf(IDS_VVM_TEST_SLL4_SHA1_FAILURE_AFTER_DELETE);
@@ -1280,7 +1280,6 @@
 		//////////
 		// Clean house
 		//////
-// TODO:  working here
 			oss_ll4_deleteChain(root, _LL4_ALL);
 			if (*root)
 			{

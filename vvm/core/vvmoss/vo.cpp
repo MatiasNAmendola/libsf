@@ -5547,95 +5547,69 @@ openAgain:
 	{
 		SLL4*	node;
 		SLL4*	nodeNext;
-		SLL4*	nodeDirection;
 
 
 		// Make sure our environment is sane
 		if (root && *root)
 		{
-			// Iterate through every node in the indicated direction
+			// Grab the node
 			node = *root;
-			while (node)
+
+			// Are we deleting all, or just in a particular direction?
+			if (tnDirection == _LL4_ALL)
 			{
-				//////////
-				// Grab the next node
-				/////
-					switch (tnDirection)
-					{
-						case _LL4_NORTH:
-							nodeNext = node->north;
-							break;
+				// Delete everything
+				ioss_ll4_deleteChainAllNodes(NULL, *root);
 
-						case _LL4_SOUTH:
-							nodeNext = node->south;
-							break;
+			} else {
+				// Iterate through every node in the indicated direction
+				while (node)
+				{
+					//////////
+					// Grab the next node
+					/////
+						switch (tnDirection)
+						{
+							case _LL4_NORTH:
+								nodeNext = node->north;
+								break;
 
-						case _LL4_WEST:
-							nodeNext = node->west;
-							break;
+							case _LL4_SOUTH:
+								nodeNext = node->south;
+								break;
 
-						case _LL4_EAST:
-							nodeNext = node->east;
-							break;
+							case _LL4_WEST:
+								nodeNext = node->west;
+								break;
 
-						case _LL4_ALL:
-							// For the all, we will naturally navigate east here, but we will spawn off in all directions other entries
+							case _LL4_EAST:
+								nodeNext = node->east;
+								break;
 
-							// Delete everything down (all children)
-							if (node->south)
-							{
-								node->south->north	= NULL;							// Delete south's item's reference back north to us
-								nodeDirection		= node->south;					// Create a "false root" from which too proceed
-								node->south			= NULL;							// Disconnect us from them
-								oss_ll4_deleteChain(&nodeDirection, _LL4_ALL);		// Proceed
-							}
-
-							// Delete everything up (all parents)
-							if (node->north)
-							{
-								node->north->south	= NULL;							// Delete south's item's reference back north to us
-								nodeDirection		= node->north;					// Create a "false root" from which too proceed
-								node->north			= NULL;							// Disconnect us from them
-								oss_ll4_deleteChain(&nodeDirection, _LL4_ALL);		// Proceed
-							}
-
-							// Delete everything left (all previous entries)
-							if (node->west)
-							{
-								node->west->east	= NULL;							// Delete west's item's reference back east to us
-								nodeDirection		= node->west;					// Create a "false root" from which too proceed
-								node->west			= NULL;							// Disconnect us from them
-								oss_ll4_deleteChain(&nodeDirection, _LL4_ALL);		// Proceed
-							}
-
-							// When we get here, everything up/down/left has been deleted.
-							// We proceed right (east)
-							nodeNext = node->east;
-							break;
-
-						default:
-							// Invalid direction, abort
-							return;
-					}
+							default:
+								// Invalid direction, abort
+								return;
+						}
 
 
-				//////////
-				// Disconnect if we are not deleting all
-				//////
-					if (tnDirection != _LL4_ALL)
-						oss_ll4_orphanize(node);
+					//////////
+					// Disconnect if we are not deleting all
+					//////
+						if (tnDirection != _LL4_ALL)
+							oss_ll4_orphanize(node);
 
 
-				//////////
-				// Delete this entry
-				/////
-					free(node);
+					//////////
+					// Delete this entry
+					/////
+						free(node);
 
 
-				//////////
-				// Move to the next node
-				/////
-					node = nodeNext;
+					//////////
+					// Move to the next node
+					/////
+						node = nodeNext;
+				}
 			}
 
 			// All done, update our root pointer
@@ -5656,99 +5630,70 @@ openAgain:
 	void CALLTYPE oss_ll4_deleteChainWithCallback(SLL4Callback* cb, u32 tnDirection)
 	{
 		SLL4* nodeNext;
-		SLL4* nodeDirection;
 
 
-		// Iterate through the master list until we find the associated entry
-		while (cb->node)
+		if (tnDirection == _LL4_ALL)
 		{
-			//////////
-			// Grab the next node
-			/////
-				switch (tnDirection)
-				{
-					case _LL4_NORTH:
-						nodeNext = cb->node->north;
-						break;
+			// Delete everything
+			ioss_ll4_deleteChainAllNodes(cb, cb->node);
 
-					case _LL4_SOUTH:
-						nodeNext = cb->node->south;
-						break;
+		} else {
+			// Iterate through the master list until we find the associated entry
+			while (cb->node)
+			{
+				//////////
+				// Grab the next node
+				/////
+					switch (tnDirection)
+					{
+						case _LL4_NORTH:
+							nodeNext = cb->node->north;
+							break;
 
-					case _LL4_WEST:
-						nodeNext = cb->node->west;
-						break;
+						case _LL4_SOUTH:
+							nodeNext = cb->node->south;
+							break;
 
-					case _LL4_EAST:
-						nodeNext = cb->node->east;
-						break;
+						case _LL4_WEST:
+							nodeNext = cb->node->west;
+							break;
 
-					case _LL4_ALL:
-						// For the all, we will naturally navigate east here, but we will spawn off in all directions other entries
+						case _LL4_EAST:
+							nodeNext = cb->node->east;
+							break;
 
-						// Delete everything down (all children)
-						if (cb->node->south)
-						{
-							cb->node->south->north	= NULL;						// Delete south's item's reference back north to us
-							nodeDirection			= cb->node->south;			// Create a "false root" from which too proceed
-							cb->node->south			= NULL;						// Disconnect us from them
-							oss_ll4_deleteChain(&nodeDirection, _LL4_ALL);		// Proceed
-						}
-
-						// Delete everything up (all parents)
-						if (cb->node->north)
-						{
-							cb->node->north->south	= NULL;						// Delete south's item's reference back north to us
-							nodeDirection			= cb->node->north;			// Create a "false root" from which too proceed
-							cb->node->north			= NULL;						// Disconnect us from them
-							oss_ll4_deleteChain(&nodeDirection, _LL4_ALL);		// Proceed
-						}
-
-						// Delete everything left (all previous entries)
-						if (cb->node->west)
-						{
-							cb->node->west->east	= NULL;						// Delete west's item's reference back east to us
-							nodeDirection			= cb->node->west;			// Create a "false root" from which too proceed
-							cb->node->west			= NULL;						// Disconnect us from them
-							oss_ll4_deleteChain(&nodeDirection, _LL4_ALL);		// Proceed
-						}
-
-						// When we get here, everything up/down/left has been deleted.
-						// We proceed right (east)
-						nodeNext = cb->node->east;
-						break;
-
-					default:
-						// Invalid direction, abort
-						return;
-				}
+						default:
+							// Invalid direction, abort
+							return;
+					}
 
 
-			//////////
-			// Disconnect if we are not deleting all
-			//////
-				if (tnDirection != _LL4_ALL)
-					oss_ll4_orphanize(cb->node);
+				//////////
+				// Disconnect if we are not deleting all
+				//////
+					if (tnDirection != _LL4_ALL)
+						oss_ll4_orphanize(cb->node);
 
 
-			//////////
-			// Perform the callback
-			//////
-				cb->funcBool(cb);
+				//////////
+				// Perform the callback
+				//////
+					cb->funcBool(cb);
 
 
-			//////////
-			// Delete this entry
-			/////
-				free(cb->node);
+				//////////
+				// Delete this entry
+				/////
+					free(cb->node);
 
 
-			//////////
-			// Move to the next node
-			/////
-				cb->node = nodeNext;
+				//////////
+				// Move to the next node
+				/////
+					cb->node = nodeNext;
+			}
+			// All done
 		}
-		// All done
 	}
 
 

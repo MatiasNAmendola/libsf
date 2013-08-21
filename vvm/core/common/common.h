@@ -133,6 +133,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	// Constant integers
 	cu32					_COMMON_START_END_BLOCK_SIZE			= 32;			// Allocate 32 entries/slots at a time (Start/end)
 	cu32					_COMMON_START_END_SMALL_BLOCK_SIZE		= 4;			// Allocate 4 entries/slots at a time (Start/end)
+	cu32					_COMMON_START_END_BIG_BLOCK_SIZE		= 256;			// Allocate 256 entries/slots at a time (Start/end)
 	cu32					_COMMON_BUFFER_BLOCK_SIZE				= 16384;		// Allocate 16KB at a time
 	// Constant strings
 	cs8						cgcSpace1[]								= " ";			// A single space

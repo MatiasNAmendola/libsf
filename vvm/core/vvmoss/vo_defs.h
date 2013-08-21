@@ -550,6 +550,9 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	void					ioss_setFindFileStatus							(csu8p tcPath, SFindFile* tsFileInfo, WIN32_FIND_DATAA* twfd);
 	void					ioss_convertFileTimeToSDateTime					(SFileTime* tsDateTime, FILETIME* tsFiletime);
 
+	void					ioss_ll4_deleteChainAllNodes					(SLL4Callback* cb, SLL4* root);
+	void					iioss_ll4_deleteChainAllNodes					(SStartEnd* nodeList, SLL4* root, u32 tnDirection);
+
 	bool					iioss_bxmlFindFirst								(SBxml* bxmlRoot, SBxml** bxmlNodeFound, SBxmla** bxmlaAttributeFound, SDatum* tsWildcard, bool tlTraverseChildren, bool tlSearchAttributes, void** x);
 	bool					iioss_bxmlFindContinue							(void* x);
 	bool					iioss_bxmlDataFindFirst							(SBxml* bxmlRoot, SBxmla** bxmlaAttributeFound, SDatum* tsWildcard, bool tlTraverseChildren, void** x);

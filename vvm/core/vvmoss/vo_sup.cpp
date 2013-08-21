@@ -4009,6 +4009,171 @@ _asm int 3;
 
 //////////
 //
+// Called to delete all nodes 
+//
+//////
+	void ioss_ll4_deleteChainAllNodes(SLL4Callback* cb, SLL4* node)
+	{
+		u32			lnI;
+		SStartEnd	nodeList;
+
+
+// TODO:  UNTESTED CODE
+		// Make sure our environment is sane
+		if (node)
+		{
+			//////////
+			// Initialize a buffer for all the of the nodes (we traverse to get a unique node list before deleting them all)
+			//////
+				memset(&nodeList, 0, sizeof(nodeList));
+				oss_allocateAdditionalStartEndMasterSlots(&nodeList, _COMMON_START_END_BIG_BLOCK_SIZE);
+
+
+			//////////
+			// Build the list from the node mesh
+			//////
+				iioss_ll4_deleteChainAllNodes(&nodeList, node,			_LL4_EAST);		// Conduct self plus everything east
+				iioss_ll4_deleteChainAllNodes(&nodeList, node->west,	_LL4_WEST);		// Conduct everything west
+				iioss_ll4_deleteChainAllNodes(&nodeList, node->north,	_LL4_NORTH);	// Conduct everything north
+				iioss_ll4_deleteChainAllNodes(&nodeList, node->south,	_LL4_SOUTH);	// Conduct everything south
+
+
+			//////////
+			// Now we have our list of items to delete
+			//////
+				for (lnI = 0; lnI < nodeList.masterCount; lnI++)
+				{
+					//////////
+					// When we're done, we're done
+					//////
+						if (!nodeList.master[lnI]->used)
+							break;	// We're done
+
+
+					//////////
+					// Callback if need be
+					//////
+						if (cb && cb->_func)
+						{
+							cb->node = node;
+							cb->funcVoid(cb);
+						}
+
+
+					//////////
+					// Free this node, which also orphanizes it if need be
+					//////
+						oss_ll4_delete((SLL4*)nodeList.master[lnI]->ptr);
+				}
+
+
+			//////////
+			// Delete the list of nodes, which is no longer required
+			//////
+				oss_SEChain_delete(&nodeList, 0, 0, false);
+		}
+	}
+
+
+
+
+//////////
+//
+// We scan each pointer to see if it exists in the already compiled list
+//
+//////
+	void iioss_ll4_deleteChainAllNodes(SStartEnd* nodeList, SLL4* node, u32 tnDirection)
+	{
+		u32		lnI;
+		bool	llFound;
+		SLL4*	nodeNext;
+
+
+// TODO:  UNTESTED CODE
+		// Iterate through every node in the indicated direction
+		while (node)
+		{
+			//////////
+			// See if this pointer is already known
+			//////
+				for (lnI = 0; lnI < nodeList->masterCount; lnI++)
+				{
+					// Are we out of slots to test?
+					if (!nodeList->master[lnI]->used)
+						break;	// Yes, we're done searching for slots (the new pointer can go here)
+
+					// See if this is a match
+					if (nodeList->master[lnI]->ptr == node)
+						return;	// Yes, we're done with this direction
+				}
+				// When we get here, we know it wasn't found and we need to add it
+
+
+			//////////
+			// Is there enough space?
+			//////
+				if (lnI == nodeList->masterCount)
+					oss_allocateAdditionalStartEndMasterSlots(nodeList, _COMMON_START_END_BIG_BLOCK_SIZE);		// No, allocate more space
+
+
+			//////////
+			// Append this data to this slot
+			//////
+				nodeList->master[lnI]->used	= true;
+				nodeList->master[lnI]->ptr	= node;
+
+
+			//////////
+			// Grab the next node
+			/////
+				switch (tnDirection)
+				{
+					case _LL4_NORTH:
+						nodeNext = node->north;
+						// Spawn off a search easterly, and westerly
+						iioss_ll4_deleteChainAllNodes(nodeList, node->east,		_LL4_EAST);
+						iioss_ll4_deleteChainAllNodes(nodeList, node->west,		_LL4_WEST);
+						break;
+
+					case _LL4_SOUTH:
+						nodeNext = node->south;
+						// Spawn off a search easterly, and westerly
+						iioss_ll4_deleteChainAllNodes(nodeList, node->east,		_LL4_EAST);
+						iioss_ll4_deleteChainAllNodes(nodeList, node->west,		_LL4_WEST);
+						break;
+
+					case _LL4_WEST:
+						nodeNext = node->west;
+						// Spawn off a search northerly, and southerly
+						iioss_ll4_deleteChainAllNodes(nodeList, node->north,	_LL4_NORTH);
+						iioss_ll4_deleteChainAllNodes(nodeList, node->south,	_LL4_SOUTH);
+						break;
+
+					case _LL4_EAST:
+						nodeNext = node->east;
+						// Spawn off a search northerly, and southerly
+						iioss_ll4_deleteChainAllNodes(nodeList, node->north,	_LL4_NORTH);
+						iioss_ll4_deleteChainAllNodes(nodeList, node->south,	_LL4_SOUTH);
+						break;
+
+					default:
+						// Invalid direction, abort
+						return;
+				}
+
+
+			//////////
+			// Move to the next node
+			/////
+				node = nodeNext;
+		}
+	}
+
+
+
+
+//////////
+//
 // Called to find the first match from the indicated location.
 //
 // Note:  *x must be NULL on the first call.  If x is populated, and *x is not NULL, it is assumed
