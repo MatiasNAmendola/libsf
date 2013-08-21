@@ -222,6 +222,7 @@
 
 	const s8		cgcOssSEChainCountValids[]								= "oss_SEChain_countValids";
 	const s8		cgcOssSEChainDelete[]									= "oss_SEChain_delete";
+	const s8		cgcOssSEChainDeleteAsPtrBlock[]							= "oss_SEChain_deleteAsPtrBlock";
 	const s8		cgcOssSEChainDeleteFrom[]								= "oss_SEChain_deleteFrom";
 	const s8		cgcOssSEChainDeleteFromAfterCallback[]					= "oss_SEChain_deleteFromAfterCallback";
 
@@ -517,7 +518,7 @@
 		u64				(CALLTYPE *oss_sharedAsciiCloseFile)				(u64 tnFileHandle);
 		u64				(CALLTYPE *oss_sharedAsciiFileSize)					(u64 tnFileHandle);
 		s8*				(CALLTYPE *oss_sharedAsciiGetTempFilename)			(void);
-		bool			(CALLBACK *oss_sharedAsciiDeleteFile)				(s8* tcFullPathname);
+		bool			(CALLTYPE *oss_sharedAsciiDeleteFile)				(s8* tcFullPathname);
 		bool			(CALLTYPE *oss_sharedAsciiWriteOutFile)				(s8* tcFullPathname, s8* tcData, u32 tnDataLength);
 
 
@@ -527,48 +528,48 @@
 //
 //////
 		// Prototype definitions
-		u8*				(CALLBACK *oss_duplicateString)						(u8* ptr, u64 length);
-		w16*			(CALLBACK *oss_duplicateUnicodeString)				(w16* tuText);
-		void			(CALLBACK *oss_duplicateStringIntoDatum)			(SDatum*  datum,  u8* ptr, u64 length,                  bool tlFreeExisting);
-		void			(CALLBACK *oss_duplicateStringIntoDatum2)			(SDatum2* datum2, u8* ptr, u64 length, u64 totalLength, bool tlFreeExisting);
-		void			(CALLBACK *oss_duplicateDatum)						(SDatum*  datumDst,  SDatum*  datumSrc);
-		void			(CALLBACK *oss_duplicateDatum2)						(SDatum2* datum2Dst, SDatum2* datum2Src);
-		void			(CALLBACK *oss_deleteDatum)							(SDatum*  datum);
-		void			(CALLBACK *oss_deleteDatum2)						(SDatum2* datum2);
-		void			(CALLBACK *oss_allocateNullStringIntoDatum2)		(SDatum2* datum2, u64 length, bool tlInitialize);
-		void			(CALLBACK *oss_copyUpToShortestString)				(u8* dst, u32 tnDstLength, u8* src, u32 tnSrcLength);
-		s32				(CALLBACK *oss_wildcardMatch)						(csu8p candidate, csu8p wildcardPattern, bool tlCaseSensitive);
-		w16*			(CALLBACK *oss_asciiToUnicode)						(u8* tcText, u32 tnTextLength);
-		s8*				(CALLBACK *oss_unicodeToAscii)						(w16* tuText, u32 tnTextLength);
-		w16				(CALLBACK *oss_asciiToUnicodeChar)					(u8 tcChar);
-		s8				(CALLBACK *oss_unicodeToAsciiCharacter)				(w16 tuChar);
-		u64				(CALLBACK *oss_scanForwardUntilCharacterChanges)	(csu8p tcData, u64 tnMaxLength);
-		u64				(CALLBACK *oss_scanForwardUntilCharacter)			(csu8p tcData, s8 c);
-		int				(CALLBACK *oss_unicodeMemcmp)						(w16* l, w16* r, u32 tnLength);
-		int				(CALLBACK *oss_unicodeMemicmp)						(w16* l, w16* r, u32 tnLength);
-		int				(CALLBACK *oss_unicodeMemset)						(w16* p, w16 c, u32 tnLength);
-		w16				(CALLBACK *oss_upperCaseW)							(w16 u);
-		w16				(CALLBACK *oss_lowerCaseW)							(w16 u);
-		void			(CALLBACK *oss_memset)								(s8* dst, s8 c, u64 tnCount);
-		void			(CALLBACK *oss_memset4)								(u32* dst, u32 val, u64 tnCount);
-		void			(CALLBACK *oss_memcpy)								(s8* dst, s8* src, u64 tnCount);
-		s32				(CALLBACK *oss_memcmp)								(csu8p l/*eft*/, csu8p r/*ight*/, u64 tnCount);
-		s32				(CALLBACK *oss_memicmp)								(csu8p l/*eft*/, csu8p r/*ight*/, u64 tnCount);
-		s32				(CALLBACK *oss_memicmpTwoLengths)					(csu8p l/*eft*/, u64 tnLeftLength, csu8p r/*ight*/, u64 tnRightLength);
-		s32				(CALLBACK *oss_memicmpDatum)						(SDatum*  datum,  csu8p r/*ight*/, u64 tnRightLength);
-		s32				(CALLBACK *oss_memicmpDatum2)						(SDatum2* datum2, csu8p r/*ight*/, u64 tnRightLength);
-		s32				(CALLBACK *oss_memicmpDatumDatum)					(SDatum*  datumL,  SDatum*  datumR);
-		s32				(CALLBACK *oss_memicmpDatum2Datum2)					(SDatum2* datum2L, SDatum2* datum2R);
-		void			(CALLBACK *oss_deriveRGBA)							(u32 tnColor, u8* tnRed, u8* tnGrn, u8* tnBlu, f32* tfAlp);
+		u8*				(CALLTYPE *oss_duplicateString)						(u8* ptr, u64 length);
+		w16*			(CALLTYPE *oss_duplicateUnicodeString)				(w16* tuText);
+		void			(CALLTYPE *oss_duplicateStringIntoDatum)			(SDatum*  datum,  u8* ptr, u64 length,                  bool tlFreeExisting);
+		void			(CALLTYPE *oss_duplicateStringIntoDatum2)			(SDatum2* datum2, u8* ptr, u64 length, u64 totalLength, bool tlFreeExisting);
+		void			(CALLTYPE *oss_duplicateDatum)						(SDatum*  datumDst,  SDatum*  datumSrc);
+		void			(CALLTYPE *oss_duplicateDatum2)						(SDatum2* datum2Dst, SDatum2* datum2Src);
+		void			(CALLTYPE *oss_deleteDatum)							(SDatum*  datum);
+		void			(CALLTYPE *oss_deleteDatum2)						(SDatum2* datum2);
+		void			(CALLTYPE *oss_allocateNullStringIntoDatum2)		(SDatum2* datum2, u64 length, bool tlInitialize);
+		void			(CALLTYPE *oss_copyUpToShortestString)				(u8* dst, u32 tnDstLength, u8* src, u32 tnSrcLength);
+		s32				(CALLTYPE *oss_wildcardMatch)						(csu8p candidate, csu8p wildcardPattern, bool tlCaseSensitive);
+		w16*			(CALLTYPE *oss_asciiToUnicode)						(u8* tcText, u32 tnTextLength);
+		s8*				(CALLTYPE *oss_unicodeToAscii)						(w16* tuText, u32 tnTextLength);
+		w16				(CALLTYPE *oss_asciiToUnicodeChar)					(u8 tcChar);
+		s8				(CALLTYPE *oss_unicodeToAsciiCharacter)				(w16 tuChar);
+		u64				(CALLTYPE *oss_scanForwardUntilCharacterChanges)	(csu8p tcData, u64 tnMaxLength);
+		u64				(CALLTYPE *oss_scanForwardUntilCharacter)			(csu8p tcData, s8 c);
+		int				(CALLTYPE *oss_unicodeMemcmp)						(w16* l, w16* r, u32 tnLength);
+		int				(CALLTYPE *oss_unicodeMemicmp)						(w16* l, w16* r, u32 tnLength);
+		int				(CALLTYPE *oss_unicodeMemset)						(w16* p, w16 c, u32 tnLength);
+		w16				(CALLTYPE *oss_upperCaseW)							(w16 u);
+		w16				(CALLTYPE *oss_lowerCaseW)							(w16 u);
+		void			(CALLTYPE *oss_memset)								(s8* dst, s8 c, u64 tnCount);
+		void			(CALLTYPE *oss_memset4)								(u32* dst, u32 val, u64 tnCount);
+		void			(CALLTYPE *oss_memcpy)								(s8* dst, s8* src, u64 tnCount);
+		s32				(CALLTYPE *oss_memcmp)								(csu8p l/*eft*/, csu8p r/*ight*/, u64 tnCount);
+		s32				(CALLTYPE *oss_memicmp)								(csu8p l/*eft*/, csu8p r/*ight*/, u64 tnCount);
+		s32				(CALLTYPE *oss_memicmpTwoLengths)					(csu8p l/*eft*/, u64 tnLeftLength, csu8p r/*ight*/, u64 tnRightLength);
+		s32				(CALLTYPE *oss_memicmpDatum)						(SDatum*  datum,  csu8p r/*ight*/, u64 tnRightLength);
+		s32				(CALLTYPE *oss_memicmpDatum2)						(SDatum2* datum2, csu8p r/*ight*/, u64 tnRightLength);
+		s32				(CALLTYPE *oss_memicmpDatumDatum)					(SDatum*  datumL,  SDatum*  datumR);
+		s32				(CALLTYPE *oss_memicmpDatum2Datum2)					(SDatum2* datum2L, SDatum2* datum2R);
+		void			(CALLTYPE *oss_deriveRGBA)							(u32 tnColor, u8* tnRed, u8* tnGrn, u8* tnBlu, f32* tfAlp);
 		u8				(CALLTYPE *oss_getPredictableSequentialPattern)		(u32 tnIterator, u32 tnValue);
 
-		SLL*			(CALLBACK *oss_ll_create)							(SLL* nodePrev, SLL* nodeNext, u64 tnUniqueId, u32  tnSize);
-		void			(CALLBACK *oss_ll_delete)							(SLL* node);
-		void			(CALLBACK *oss_ll_deleteWithCallback)				(SLLCallback* cb);
-		bool			(CALLBACK *oss_ll_insert)							(SLL* node, SLL* nodeRef, bool tlAfter);
-		void			(CALLBACK *oss_ll_orphanize)						(SLL* node);
-		void			(CALLBACK *oss_ll_deleteChain)						(SLL** root);
-		void			(CALLBACK *oss_ll_deleteChainWithCallback)			(SLLCallback* cb);
+		SLL*			(CALLTYPE *oss_ll_create)							(SLL* nodePrev, SLL* nodeNext, u64 tnUniqueId, u32  tnSize);
+		void			(CALLTYPE *oss_ll_delete)							(SLL* node);
+		void			(CALLTYPE *oss_ll_deleteWithCallback)				(SLLCallback* cb);
+		bool			(CALLTYPE *oss_ll_insert)							(SLL* node, SLL* nodeRef, bool tlAfter);
+		void			(CALLTYPE *oss_ll_orphanize)						(SLL* node);
+		void			(CALLTYPE *oss_ll_deleteChain)						(SLL** root);
+		void			(CALLTYPE *oss_ll_deleteChainWithCallback)			(SLLCallback* cb);
 		void			(CALLTYPE *oss_ll_iterateViaCallback)				(SLLCallback* cb);
 		void			(CALLTYPE *oss_ll_iterateBackwardViaCallback)		(SLLCallback* cb);
 		SLL*			(CALLTYPE *oss_ll_getFirstNode)						(SLL* node);
@@ -576,48 +577,49 @@
 
 		SLL4*			(CALLTYPE *oss_ll4_create)							(SLL4* nodeWest, SLL4* nodeEast, SLL4* nodeNorth, SLL4* nodeSouth, u64 tnUniqueId, u32 tnSize);
 		SLL4*			(CALLTYPE *oss_ll4_createChain)						(u32 tnSize, u32* tnCount, u32 tnDirection);
-		void			(CALLBACK *oss_ll4_delete)							(SLL4* node);
-		bool			(CALLBACK *oss_ll4_orphanize)						(SLL4* node);
-		bool			(CALLBACK *oss_ll4_insertNorthSouth)				(SLL4* node, SLL4* nodeRef,                   bool tlAfter);
-		bool			(CALLBACK *oss_ll4_insertWestEast)					(SLL4* node, SLL4* nodeRef,                   bool tlAfter);
+		void			(CALLTYPE *oss_ll4_delete)							(SLL4* node);
+		bool			(CALLTYPE *oss_ll4_orphanize)						(SLL4* node);
+		bool			(CALLTYPE *oss_ll4_insertNorthSouth)				(SLL4* node, SLL4* nodeRef,                   bool tlAfter);
+		bool			(CALLTYPE *oss_ll4_insertWestEast)					(SLL4* node, SLL4* nodeRef,                   bool tlAfter);
 		void			(CALLTYPE *oss_ll4_deleteChain)						(SLL4** root, u32 tnDirection);
 		void			(CALLTYPE *oss_ll4_deleteChainWithCallback)			(SLL4Callback* cb, u32 tnDirection);
 		void			(CALLTYPE *oss_ll4_iterateViaCallback)				(SLL4Callback* cb, u32 tnDirection);
 		SLL4*			(CALLTYPE *oss_ll4_getLastNode)						(SLL4* node, u32 tnDirection);
 
-		bool			(CALLBACK *oss_ll4bxml_orphanize)					(SLL4* bxml);
-		bool			(CALLBACK *oss_ll4bxml_insert)						(SLL4* bxmlSibling,	SLL4* bxmlRef,							bool tlAfter);
-		bool			(CALLBACK *oss_ll4bxml_insertAsChild)				(SLL4* bxmlChild,	SLL4* bxmlParent,						bool tlPrepend);
-		bool			(CALLBACK *oss_ll4bxml_insertAsChildRegarding)		(SLL4* bxmlChild,	SLL4* bxmlParent, SLL4* bxmlRegarding,	bool tlAfter);
+		bool			(CALLTYPE *oss_ll4bxml_orphanize)					(SLL4* bxml);
+		bool			(CALLTYPE *oss_ll4bxml_insert)						(SLL4* bxmlSibling,	SLL4* bxmlRef,							bool tlAfter);
+		bool			(CALLTYPE *oss_ll4bxml_insertAsChild)				(SLL4* bxmlChild,	SLL4* bxmlParent,						bool tlPrepend);
+		bool			(CALLTYPE *oss_ll4bxml_insertAsChildRegarding)		(SLL4* bxmlChild,	SLL4* bxmlParent, SLL4* bxmlRegarding,	bool tlAfter);
 
-		void*			(CALLBACK *oss_SEChain_prepend)						(SStartEnd* ptrSE, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool* tlResult);
-		void*			(CALLBACK *oss_SEChain_append)						(SStartEnd* ptrSE, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool* tlResult);
-		void*			(CALLBACK *oss_SEChain_appendRelativeToMember)		(SStartEnd* ptrSE, SLL* ptrRef, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize,     u32 tnBlockSizeIfNewBlockNeeded, bool tlAfter, bool* tlResult);
-		void*			(CALLBACK *oss_SEChain_appendExistingRelativeToMember)(SStartEnd* ptrSE, SLL* ptrRef,                 u64 tnUniqueIdExtra, SLL* ptrCaller, u32 tnBlockSizeIfNewBlockNeeded, bool tlAfter, bool* tlResult);
+		void*			(CALLTYPE *oss_SEChain_prepend)						(SStartEnd* ptrSE, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool* tlResult);
+		void*			(CALLTYPE *oss_SEChain_append)						(SStartEnd* ptrSE, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool* tlResult);
+		void*			(CALLTYPE *oss_SEChain_appendRelativeToMember)		(SStartEnd* ptrSE, SLL* ptrRef, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize,     u32 tnBlockSizeIfNewBlockNeeded, bool tlAfter, bool* tlResult);
+		void*			(CALLTYPE *oss_SEChain_appendExistingRelativeToMember)(SStartEnd* ptrSE, SLL* ptrRef,                 u64 tnUniqueIdExtra, SLL* ptrCaller, u32 tnBlockSizeIfNewBlockNeeded, bool tlAfter, bool* tlResult);
 
-		void*			(CALLBACK *oss_SEChain_migrateAll)					(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc);
-		SMasterList*	(CALLBACK *oss_SEChain_migrateByPtr)				(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, void* ptr,    u32 tnHint, u32 tnBlockSize);
-		SMasterList*	(CALLBACK *oss_SEChain_migrateByNum)				(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, u32 lnSrcNum, u32 tnHint, u32 tnBlockSize);
-		SLL*			(CALLBACK *oss_SEChain_completelyMigrateSLLByPtr)	(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, SLL* ptr,     u32 tnHint, u32 tnBlockSize);
-		SLL*			(CALLBACK *oss_SEChain_completelyMigrateSLLByNum)	(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, u32 lnSrcNum, u32 tnHint, u32 tnBlockSize);
+		void*			(CALLTYPE *oss_SEChain_migrateAll)					(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc);
+		SMasterList*	(CALLTYPE *oss_SEChain_migrateByPtr)				(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, void* ptr,    u32 tnHint, u32 tnBlockSize);
+		SMasterList*	(CALLTYPE *oss_SEChain_migrateByNum)				(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, u32 lnSrcNum, u32 tnHint, u32 tnBlockSize);
+		SLL*			(CALLTYPE *oss_SEChain_completelyMigrateSLLByPtr)	(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, SLL* ptr,     u32 tnHint, u32 tnBlockSize);
+		SLL*			(CALLTYPE *oss_SEChain_completelyMigrateSLLByNum)	(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, u32 lnSrcNum, u32 tnHint, u32 tnBlockSize);
 
-		u32				(CALLBACK *oss_SEChain_countValids)					(SStartEnd* ptrSE);
-		u32				(CALLBACK *oss_SEChain_delete)						(SStartEnd* ptrSE, u64 tnCallback, u64 tnParam, bool tlDeletePointers);
-		void			(CALLBACK *oss_SEChain_deleteFrom)					(SStartEnd* ptrSE, void* ptrDel, bool tlDeletePointers);
+		u32				(CALLTYPE *oss_SEChain_countValids)					(SStartEnd* ptrSE);
+		u32				(CALLTYPE *oss_SEChain_delete)						(SStartEnd* ptrSE, u64 tnCallback, u64 tnParam, bool tlDeletePointers);
+		void			(CALLTYPE *oss_SEChain_deleteAsPtrBlock)			(SStartEnd* ptrSE);
+		void			(CALLTYPE *oss_SEChain_deleteFrom)					(SStartEnd* ptrSE, void* ptrDel, bool tlDeletePointers);
 		bool			(CALLTYPE *oss_SEChain_deleteFromAfterCallback)		(SStartEnd* ptrSE, bool tlDeletePointers, SStartEndCallback* cb);
 
-		bool			(CALLBACK *oss_allocateAdditionalStartEndMasterSlots)(SStartEnd* ptrSE, u32 tnBlockSize);
-		void*			(CALLBACK *oss_searchSEChainByUniqueId)				(SStartEnd* ptrSE, u64 tnUniqueId);
+		bool			(CALLTYPE *oss_allocateAdditionalStartEndMasterSlots)(SStartEnd* ptrSE, u32 tnBlockSize);
+		void*			(CALLTYPE *oss_searchSEChainByUniqueId)				(SStartEnd* ptrSE, u64 tnUniqueId);
 		void*			(CALLTYPE *oss_searchSEChainByCallback)				(SStartEnd* ptrSE, SStartEndCallback* cb);
 		void			(CALLTYPE *oss_iterateThroughStartEndForCallback)	(SStartEnd* ptrSE, SStartEndCallback* cb);
 		void			(CALLTYPE *oss_validateStartEnd)					(SStartEnd* ptrSE, SStartEndCallback* cb);
-		u32				(CALLBACK *oss_swapEndian)							(u32 tnValue);
-		u32				(CALLBACK *oss_RGBA2BGRA)							(u32 tnColor);
-		void*			(CALLBACK *oss_allocateAndNull)						(u32 tnSize, bool tnInitToZeros);
-		bool			(CALLBACK *oss_isNeedleInHaystack)					(csu8p tcHaystack, s32 tnHaystackLength, csu8p tcNeedle, s32 tnNeedleLength, bool tlCaseSensitive, u32* tnFoundPosition);
-		bool			(CALLBACK *oss_isNeedleInHaystack_Unicode)			(w16* twHaystack, w16* twNeedle);
-		u32				(CALLBACK *oss_countConsecutiveAsciiNumericDigits)	(s8* buffer, u32 tnMaxLength);
-		u32				(CALLBACK *oss_convertTextToU32)					(s8* tcNumbers, u32 tnMaxLength);
+		u32				(CALLTYPE *oss_swapEndian)							(u32 tnValue);
+		u32				(CALLTYPE *oss_RGBA2BGRA)							(u32 tnColor);
+		void*			(CALLTYPE *oss_allocateAndNull)						(u32 tnSize, bool tnInitToZeros);
+		bool			(CALLTYPE *oss_isNeedleInHaystack)					(csu8p tcHaystack, s32 tnHaystackLength, csu8p tcNeedle, s32 tnNeedleLength, bool tlCaseSensitive, u32* tnFoundPosition);
+		bool			(CALLTYPE *oss_isNeedleInHaystack_Unicode)			(w16* twHaystack, w16* twNeedle);
+		u32				(CALLTYPE *oss_countConsecutiveAsciiNumericDigits)	(s8* buffer, u32 tnMaxLength);
+		u32				(CALLTYPE *oss_convertTextToU32)					(s8* tcNumbers, u32 tnMaxLength);
 
 
 //////////
@@ -625,9 +627,9 @@
 // Find files
 //
 //////////
-		u64				(CALLBACK *oss_fileFindFirst)						(csu8p tcPathname, csu8p tcFilenameTemplate, SFindFile* tsFileInfo);
-		bool			(CALLBACK *oss_fileFindNext)						(u64 tnHandle, SFindFile* tsFileInfo);
-		void			(CALLBACK *oss_fileFindClose)						(u64 tnHandle);
+		u64				(CALLTYPE *oss_fileFindFirst)						(csu8p tcPathname, csu8p tcFilenameTemplate, SFindFile* tsFileInfo);
+		bool			(CALLTYPE *oss_fileFindNext)						(u64 tnHandle, SFindFile* tsFileInfo);
+		void			(CALLTYPE *oss_fileFindClose)						(u64 tnHandle);
 
 
 //////////
@@ -958,6 +960,7 @@
 
 		(void*)&oss_SEChain_countValids,									(void*)cgcOssSEChainCountValids,
 		(void*)&oss_SEChain_delete,											(void*)cgcOssSEChainDelete,
+		(void*)&oss_SEChain_deleteAsPtrBlock,								(void*)cgcOssSEChainDeleteAsPtrBlock,
 		(void*)&oss_SEChain_deleteFrom,										(void*)cgcOssSEChainDeleteFrom,
 		(void*)&oss_SEChain_deleteFromAfterCallback,						(void*)cgcOssSEChainDeleteFromAfterCallback,
 

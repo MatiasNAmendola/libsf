@@ -73,7 +73,7 @@
 	{
 		union {
 			u64		_callback;
-			void	(CALLBACK *callback)				(f32* sampleBuffer, u32 tnSamples, bool* tlContinueAfterThisSampleSet);
+			void	(CALLTYPE *callback)	(f32* sampleBuffer, u32 tnSamples, bool* tlContinueAfterThisSampleSet);
 		};
 	};
 

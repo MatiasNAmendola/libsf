@@ -206,7 +206,7 @@
 		u64 CALLTYPE			oss_sharedAsciiCloseFile					(u64 tnFileHandle);
 		u64 CALLTYPE			oss_sharedAsciiFileSize						(u64 tnFileHandle);
 		s8* CALLTYPE			oss_sharedAsciiGetTempFilename				(void);
-		bool CALLBACK			oss_sharedAsciiDeleteFile					(s8* tcFullPathname);
+		bool CALLTYPE			oss_sharedAsciiDeleteFile					(s8* tcFullPathname);
 		bool CALLTYPE			oss_sharedAsciiWriteOutFile					(s8* tcFullPathname, s8* tcData, u32 tnDataLength);
 
 
@@ -252,11 +252,11 @@
 		u8 CALLTYPE				oss_getPredictableSequentialPattern			(u32 tnIterator, u32 tnValue);
 
 		SLL* CALLTYPE			oss_ll_create								(SLL* nodePrev, SLL* nodeNext, u64 tnUniqueId, u32  tnSize);
-		void CALLBACK			oss_ll_delete								(SLL* node);
-		void CALLBACK			oss_ll_deleteWithCallback					(SLLCallback* cb);
+		void CALLTYPE			oss_ll_delete								(SLL* node);
+		void CALLTYPE			oss_ll_deleteWithCallback					(SLLCallback* cb);
 		bool CALLTYPE			oss_ll_insert								(SLL* node, SLL* nodeRef, bool tlAfter);
 		void CALLTYPE			oss_ll_orphanize							(SLL* node);
-		void CALLBACK			oss_ll_deleteChain							(SLL** root);
+		void CALLTYPE			oss_ll_deleteChain							(SLL** root);
 		void CALLTYPE			oss_ll_deleteChainWithCallback				(SLLCallback* cb);
 		void CALLTYPE			oss_ll_iterateViaCallback					(SLLCallback* cb);
 		void CALLTYPE			oss_ll_iterateBackwardViaCallback			(SLLCallback* cb);
@@ -265,8 +265,8 @@
 
 		SLL4* CALLTYPE			oss_ll4_create								(SLL4* nodeWest, SLL4* nodeEast, SLL4* nodeNorth, SLL4* nodeSouth, u64 tnUniqueId, u32 tnSize);
 		SLL4* CALLTYPE			oss_ll4_createChain							(u32 tnSize, u32* tnCount, u32 tnDirection);
-		void CALLBACK			oss_ll4_delete								(SLL4* node);
-		void CALLBACK			oss_ll4_deleteWithCallback					(SLL4* node);
+		void CALLTYPE			oss_ll4_delete								(SLL4* node);
+		void CALLTYPE			oss_ll4_deleteWithCallback					(SLL4* node);
 		bool CALLTYPE			oss_ll4_orphanize							(SLL4* node);
 		bool CALLTYPE			oss_ll4_insertNorthSouth					(SLL4* node, SLL4* nodeRef, bool tlAfter);
 		bool CALLTYPE			oss_ll4_insertWestEast						(SLL4* node, SLL4* nodeRef, bool tlAfter);
@@ -293,6 +293,7 @@
 
 		u32 CALLTYPE			oss_SEChain_countValids						(SStartEnd* ptrSE);
 		u32 CALLTYPE			oss_SEChain_delete							(SStartEnd* ptrSE, u64 tnCallback, u64 tnParam, bool tlDeletePointers);
+		void CALLTYPE			oss_SEChain_deleteAsPtrBlock				(SStartEnd* ptrSE);
 		void CALLTYPE			oss_SEChain_deleteFrom						(SStartEnd* ptrSE, void* ptrDel, bool tlDeletePointers);
 		bool CALLTYPE			oss_SEChain_deleteFromAfterCallback			(SStartEnd* ptrSE, bool tlDeletePointers, SStartEndCallback* cb);
 
@@ -315,9 +316,9 @@
 // Find files
 //
 //////////
-		u64 CALLBACK			oss_fileFindFirst							(csu8p tcPathname, csu8p tcFilenameTemplate, SFindFile* tsFileInfo);
-		bool CALLBACK			oss_fileFindNext							(u64 tnHandle, SFindFile* tsFileInfo);
-		void CALLBACK			oss_fileFindClose							(u64 tnHandle);
+		u64 CALLTYPE			oss_fileFindFirst							(csu8p tcPathname, csu8p tcFilenameTemplate, SFindFile* tsFileInfo);
+		bool CALLTYPE			oss_fileFindNext							(u64 tnHandle, SFindFile* tsFileInfo);
+		void CALLTYPE			oss_fileFindClose							(u64 tnHandle);
 
 
 //////////
@@ -483,8 +484,8 @@
 	void					ioss_lockSemaphore								(u64 semaphore);
 	void					ioss_unlockSemaphore							(u64 semaphore);
 	void					ioss_deleteVisibleWindow						(_iswSOssWindowLL* w);
-	LRESULT CALLBACK		ioss_wndProc_Message							(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
-	LRESULT CALLBACK		ioss_wndProc_Visible							(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+	LRESULT CALLTYPE		ioss_wndProc_Message							(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
+	LRESULT CALLTYPE		ioss_wndProc_Visible							(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp);
 	void					ioss_checkWindowResize							(HWND hwnd, MINMAXINFO* tmmi);
 	void					ioss_createBitmap								(HWND hwnd);
 	u64						ioss_createDibWithBitBuffer						(HDC thDC, u32 tnWidth, u32 tnHeight, BITMAPINFO* tbi, s8** tbd, u32* tnActualWidth);
@@ -515,10 +516,10 @@
 	void					ioss_allocateSRGBAandCopy32Bit_BitmapBottomUp	(SRGBA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SRGBA* lrgbas,    u32* tnResult, u32 tnErrorValue);
 	void					ioss_allocateSRGBAandCopy24Bit_BitmapTopDown	(SRGBA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SRGB*  lrgbsRoot, u32* tnResult, u32 tnErrorValue);
 	void					ioss_allocateSRGBAandCopy24Bit_BitmapBottomUp	(SRGBA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SRGB*  lrgbsRoot, u32* tnResult, u32 tnErrorValue);
-	LRESULT CALLBACK		iioss_timerProc_10ms							(HWND hwnd, UINT msg, UINT_PTR idEvent, DWORD dwTime);
+	LRESULT CALLTYPE		iioss_timerProc_10ms							(HWND hwnd, UINT msg, UINT_PTR idEvent, DWORD dwTime);
 	bool					iioss_update10msTimersCallback					(SStartEndCallback* cb);
 	DWORD CALLTYPE			iioss_1MsTimerThread							(LPVOID lpParameter);
-	VOID CALLBACK			iiioss_1MsTimerThreadTimerAPCProc				(LPVOID lpArgToCompletionRoutine, DWORD dwTimerLowValue, DWORD dwTimerHighValue);
+	VOID CALLTYPE			iiioss_1MsTimerThreadTimerAPCProc				(LPVOID lpArgToCompletionRoutine, DWORD dwTimerLowValue, DWORD dwTimerHighValue);
 	void					iioss_sharedAsciiCloseFileLocksCallback			(void* ptr, u64 tnParam);
 	bool					iioss_reallocAndFreeCallback					(SStartEndCallback* cb);
 	u64						ioss_breakoutAsciiTextDataIntoLines_ScanLine	(s8* tcData, u64 tnMaxLength, u64* tnLength, u64* tnWhitespaces);

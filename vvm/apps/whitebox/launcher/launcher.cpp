@@ -74,7 +74,7 @@
 // to a running instance of a VVM.
 //
 //////
-	int CALLBACK WinMain(	HINSTANCE	hInstance,
+	int CALLTYPE WinMain(	HINSTANCE	hInstance,
 							HINSTANCE	hPrevInstance,
 							LPSTR		lpCmdLine,
 							int			nCmdShow)

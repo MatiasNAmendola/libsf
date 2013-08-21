@@ -59,7 +59,7 @@
 			//////
 				union {
 					u64		_sound_initialize;
-					u64		(CALLTYPE *sound_initialize)			(u64 tnDebuggerInterfaceAddress);
+					u64		(CALLTYPE *sound_initialize)		(u64 tnDebuggerInterfaceAddress);
 				};
 
 
@@ -68,7 +68,7 @@
 			//////
 				union {
 					u64		_sound_createTone;
-					u64		(CALLTYPE *sound_createTone)			(f32 tfHertz1, f32 tfHertz2, f32 tfHertz3, f32 tfHertz4, u32 tnDurationMilliseconds);
+					u64		(CALLTYPE *sound_createTone)		(f32 tfHertz1, f32 tfHertz2, f32 tfHertz3, f32 tfHertz4, u32 tnDurationMilliseconds);
 				};
 
 
@@ -77,7 +77,7 @@
 			//////
 				union {
 					u64		_sound_createStream;
-					u64		(CALLTYPE *sound_createStream)			(u32 tnSamplesPerSecond, u64 tnSoundFillerCallbackFunction);
+					u64		(CALLTYPE *sound_createStream)		(u32 tnSamplesPerSecond, u64 tnSoundFillerCallbackFunction);
 				};
 
 
@@ -86,7 +86,7 @@
 			//////
 				union {
 					u64		_sound_setVolume;
-					u64		(CALLTYPE *sound_setVolume)				(u64 tnHandle, f32 tfVolume);
+					u64		(CALLTYPE *sound_setVolume)			(u64 tnHandle, f32 tfVolume);
 				};
 
 
@@ -95,7 +95,7 @@
 			//////
 				union {
 					u64		_sound_playStart;
-					u64		(CALLTYPE *sound_playStart)				(u64 tnHandle, f32 tfVolume);
+					u64		(CALLTYPE *sound_playStart)			(u64 tnHandle, f32 tfVolume);
 				};
 
 
@@ -104,7 +104,7 @@
 			//////
 				union {
 					u64		_sound_playCancel;
-					u64		(CALLTYPE *sound_playCancel)			(u64 tnHandle);
+					u64		(CALLTYPE *sound_playCancel)		(u64 tnHandle);
 				};
 
 
@@ -113,7 +113,7 @@
 			//////
 				union {
 					u64		_sound_deleteHandle;
-					u64		(CALLBACK *sound_deleteHandle)			(u64 tnHandle);
+					u64		(CALLTYPE *sound_deleteHandle)		(u64 tnHandle);
 				};
 		};
 

@@ -671,7 +671,7 @@
 //
 //////
 #define _SECOND 10000000
-	LRESULT CALLBACK ioss_wndProc_Message(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+	LRESULT CALLTYPE ioss_wndProc_Message(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
 		u64 lnValue64;
 
@@ -745,7 +745,7 @@ _asm int 3;
 // The visible window callback from Windows, to parse all received messages
 //
 //////
-	LRESULT CALLBACK ioss_wndProc_Visible(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
+	LRESULT CALLTYPE ioss_wndProc_Visible(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp)
 	{
 		u32		lnX, lnY, lnButtons, lnKey, lnKeyFlags;
 		s8		lcChar;
@@ -2764,7 +2764,7 @@ _asm int 3;
 // of maintaining coherency and flow within, this function assumes it was exactly 10ms. :-)
 //
 //////
-	LRESULT CALLBACK iioss_timerProc_10ms(HWND hwnd, UINT msg, UINT_PTR idEvent, DWORD dwTime)
+	LRESULT CALLTYPE iioss_timerProc_10ms(HWND hwnd, UINT msg, UINT_PTR idEvent, DWORD dwTime)
 	{
 		SStartEndCallback cb;
 
@@ -2892,7 +2892,7 @@ _asm int 3;
 
 	// Only called by Windows through the iioss_1MsTimerThread SetWaitableTimer() function.
 	// Do not call directly.
-	void CALLBACK iiioss_1MsTimerThreadTimerAPCProc(LPVOID lpArgToCompletionRoutine, DWORD dwTimerLowValue, DWORD dwTimerHighValue)
+	void CALLTYPE iiioss_1MsTimerThreadTimerAPCProc(LPVOID lpArgToCompletionRoutine, DWORD dwTimerLowValue, DWORD dwTimerHighValue)
 	{
 		// Note:  No semaphore access.  This value is ONLY updated by this thread.
 		++gnTickCount;
@@ -4046,7 +4046,7 @@ _asm int 3;
 					//////////
 					// When we're done, we're done
 					//////
-						if (!nodeList.master[lnI]->used)
+						if (!nodeList.ptr[lnI])
 							break;	// We're done
 
 
@@ -4063,7 +4063,7 @@ _asm int 3;
 					//////////
 					// Free this node, which also orphanizes it if need be
 					//////
-						oss_ll4_delete((SLL4*)nodeList.master[lnI]->ptr);
+						oss_ll4_delete((SLL4*)nodeList.ptr[lnI]);
 				}
 
 
@@ -4085,7 +4085,6 @@ _asm int 3;
 	void iioss_ll4_deleteChainAllNodes(SStartEnd* nodeList, SLL4* node, u32 tnDirection)
 	{
 		u32		lnI;
-		bool	llFound;
 		SLL4*	nodeNext;
 
 
@@ -4099,11 +4098,11 @@ _asm int 3;
 				for (lnI = 0; lnI < nodeList->masterCount; lnI++)
 				{
 					// Are we out of slots to test?
-					if (!nodeList->master[lnI]->used)
+					if (!nodeList->ptr[lnI])
 						break;	// Yes, we're done searching for slots (the new pointer can go here)
 
 					// See if this is a match
-					if (nodeList->master[lnI]->ptr == node)
+					if (nodeList->ptr[lnI] == node)
 						return;	// Yes, we're done with this direction
 				}
 				// When we get here, we know it wasn't found and we need to add it
@@ -4119,8 +4118,7 @@ _asm int 3;
 			//////////
 			// Append this data to this slot
 			//////
-				nodeList->master[lnI]->used	= true;
-				nodeList->master[lnI]->ptr	= node;
+				nodeList->ptr[lnI] = node;
 
 
 			//////////

@@ -190,7 +190,7 @@
 // // Required first initialization after initial DLL load and first callback
 // //
 // //////
-// 	void CALLBACK iioss_soundCallback(f32* stream, u32 tnLength, bool* tlContinueAfterThisSampleSet)
+// 	void CALLTYPE iioss_soundCallback(f32* stream, u32 tnLength, bool* tlContinueAfterThisSampleSet)
 // 	{
 // 		u32 lnI;
 // 
@@ -3633,7 +3633,7 @@ openAgain:
 // Called to delete the indicated fully qualified pathname from the disk.
 //
 //////
-	bool CALLBACK oss_sharedAsciiDeleteFile(s8* tcFullPathname)
+	bool CALLTYPE oss_sharedAsciiDeleteFile(s8* tcFullPathname)
 	{
 		return(((DeleteFileA(tcFullPathname)) ? true : false));
 	}
@@ -4627,7 +4627,7 @@ openAgain:
 // Called to delete a link list node.  If need be it orphanizes the node first.
 //
 //////
-	void CALLBACK oss_ll_delete(SLL* node)
+	void CALLTYPE oss_ll_delete(SLL* node)
 	{
 		if (node)
 		{
@@ -4653,7 +4653,7 @@ openAgain:
 // Called to delete a link list node with a callback.  If need be it orphanizes the node first.
 //
 //////
-	void CALLBACK oss_ll_deleteWithCallback(SLLCallback* cb)
+	void CALLTYPE oss_ll_deleteWithCallback(SLLCallback* cb)
 	{
 		if (cb && cb->node)
 		{
@@ -4788,7 +4788,7 @@ openAgain:
 // Called to delete the entire chain (beginning from where it's at
 //
 //////
-	void CALLBACK oss_ll_deleteChain(SLL** root)
+	void CALLTYPE oss_ll_deleteChain(SLL** root)
 	{
 		SLL* node;
 		SLL* nodeNext;
@@ -5071,7 +5071,7 @@ openAgain:
 // Called to delete a single node from the four-way link list
 //
 //////
-	void CALLBACK oss_ll4_delete(SLL4* node)
+	void CALLTYPE oss_ll4_delete(SLL4* node)
 	{
 		if (node)
 		{
@@ -5092,7 +5092,7 @@ openAgain:
 // the node first.
 //
 //////
-	void CALLBACK oss_ll4_deleteWithCallback(SLL4Callback* cb)
+	void CALLTYPE oss_ll4_deleteWithCallback(SLL4Callback* cb)
 	{
 		if (cb && cb->node)
 		{
@@ -6253,7 +6253,7 @@ _asm int 3;
 				}
 
 			} else {
-				// Allocate the first 32 pointers
+				// Allocate the first N pointers
 				ptrSE->master = (SMasterList**)malloc(sizeof(SMasterList*) * tnBlockSize);
 				if (ptrSE->master)
 				{
@@ -6590,6 +6590,29 @@ _asm int 3;
 		}
 		// Indicate failure
 		return(-1);
+	}
+
+
+
+
+//////////
+//
+// Called to delete an entire Start/end chain
+//
+// Returns:
+//		-1 error in ptrSE, ptrSE->master or ptrSE->masterCount
+//		Number of records deleted
+//
+//////
+	void CALLTYPE oss_SEChain_deleteAsPtrBlock(SStartEnd* ptrSE)
+	{
+		// Make sure the environment's sane
+		if (ptrSE && ptrSE->master && ptrSE->masterCount != 0)
+		{
+			// When we get here, everything's deleted, now delete the container for everything. :-)
+			free(ptrSE->master);
+			ptrSE->master = NULL;
+		}
 	}
 
 
@@ -7138,7 +7161,7 @@ _asm int 3;
 // directory using the specified initial template
 //
 //////
-	u64 CALLTYPE CALLBACK oss_fileFindFirst(csu8p tcPathname, csu8p tcFilenameTemplate, SFindFile* tsFileInfo)
+	u64 CALLTYPE CALLTYPE oss_fileFindFirst(csu8p tcPathname, csu8p tcFilenameTemplate, SFindFile* tsFileInfo)
 	{
 		u32					lnLength;
 		HANDLE				lnHandle;
@@ -7196,7 +7219,7 @@ _asm int 3;
 //
 //////
 	// Called to find the next file
-	bool CALLBACK oss_fileFindNext(u64 tnHandle, SFindFile* tsFileInfo)
+	bool CALLTYPE oss_fileFindNext(u64 tnHandle, SFindFile* tsFileInfo)
 	{
 		bool				llResult;
 		WIN32_FIND_DATAA	lwfd;
@@ -7225,7 +7248,7 @@ _asm int 3;
 // Called as the last step to close a previously opened find.
 //
 //////
-	void CALLBACK oss_fileFindClose(u64 tnHandle)
+	void CALLTYPE oss_fileFindClose(u64 tnHandle)
 	{
 		FindClose((HANDLE)tnHandle);
 	}

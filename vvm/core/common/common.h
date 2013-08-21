@@ -419,7 +419,11 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		SMasterList*	root;					// Root item
 		SMasterList*	last;					// Last item
 
-		SMasterList**	master;					// Every item in the start/end chain is appended here when created (used primarily for suspension and resumption of the VVM)
+		// SStartEnd lists can have a master (which points to other items using the SMasterList protocol), or it can be used merely a pointer holder
+		union {
+			SMasterList**	master;					// Every item in the start/end chain is appended here when created (used primarily for suspension and resumption of the VVM)
+			void**			ptr;
+		};
 		u32				masterCount;			// Number of entries in the master array (used for resizing)
 
 		// Not used and reserved for future use
