@@ -5,8 +5,8 @@
 		<icon name="pursueEnter" tip="Enter another pursue level"/>
 		<icon name="pursueRejectAll" tip="Reject all levels of active pursues"/>
 		<icon name="pursueRejectOne" tip="Reject one level of the current pursues"/>
-		<icon name="breadcrumbPrevious" tip="Move to the previous breadcrumb"/>
-		<icon name="breadcrumbNext" tip="Move to the next breadcrumb"/>
+		<icon name="breadcrumbPreviousDocument" tip="Move to the previous breadcrumb in the previous document"/>
+		<icon name="breadcrumbNextDocument" tip="Move to the next breadcrumb in the next document"/>
 		<icon name="breadcrumbEnable" tip="Enable breadcrumbs"/>
 		<icon name="breadcrumbDisable" tip="Disable breadcrumbs"/>
 		<icon name="stepInto" tip="Steps into the current source code line"/>
@@ -72,5 +72,7 @@
 		<icon name="stop" tip="Stop execution of the current thread"/>
 		<icon name="restart" tip="Restart with normal execution"/>
 		<icon name="assembly" tip="Toggle display of virtual machine disassembly"/>
+		<icon name="breadcrumbPrevious" tip="Move to the previous breadcrumb"/>
+		<icon name="breadcrumbNext" tip="Move to the next breadcrumb"/>
 	<icons>
 </vdebug>
