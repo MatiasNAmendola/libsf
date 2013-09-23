@@ -1,0 +1,76 @@
+<vdebug>
+	<icons file="vdebug_icons.bmp" ulx="1" uly="1" width="36" height="36" stridex="37" stridey="37">
+		<icon name="pursueAcceptOne" tip="Accept one level of the current pursues"/>
+		<icon name="pursueAcceptAll" tip="Accept all levels of active pursues"/>
+		<icon name="pursueEnter" tip="Enter another pursue level"/>
+		<icon name="pursueRejectAll" tip="Reject all levels of active pursues"/>
+		<icon name="pursueRejectOne" tip="Reject one level of the current pursues"/>
+		<icon name="breadcrumbPrevious" tip="Move to the previous breadcrumb"/>
+		<icon name="breadcrumbNext" tip="Move to the next breadcrumb"/>
+		<icon name="breadcrumbEnable" tip="Enable breadcrumbs"/>
+		<icon name="breadcrumbDisable" tip="Disable breadcrumbs"/>
+		<icon name="stepInto" tip="Steps into the current source code line"/>
+		<icon name="stepOver" tip="Steps over the current source code line"/>
+		<icon name="stepOut" tip="Steps out of the current function"/>
+		<icon name="stepDownAll" tip="Steps forward to next return"/>
+		<icon name="stepToCursor" tip="Steps forward to the cursor location"/>
+		<icon name="stepHorizontalIn" tip="Steps horizontally into the current source code line"/>
+		<icon name="stepHorizontalOut" tip="Steps horizontally out of the current source code line"/>
+		<icon name="stepDownOne" tip="Steps out of the current block"/>
+		<icon name="stepToError" tip="Steps back to the line causing the error"/>
+		<icon name="breakpointSet" tip="Set an unconditional breakpoint on the current line"/>
+		<icon name="breakpointSetCondition" tip="Set a conditional breakpoint on the current line"/>
+		<icon name="breakpointHorizontalSet" tip="Set a horizontal breakpoint on the current line"/>
+		<icon name="breakpointToggleEnabled" tip="Toggle the breakpoint's enabled status"/>
+		<icon name="breakpointDelete" tip="Delete the current breakpoint"/>
+		<icon name="breakpointEnableAll" tip="Enable all breakpoints"/>
+		<icon name="breakpointDisableAll" tip="Disable all breakpoints"/>
+		<icon name="breakpointToggleEnabledAll" tip="Toggle all breakpoints' enabled status"/>
+		<icon name="breakpointDeleteAll" tip="Delete all breakpoints"/>
+		<icon name="findPrevCurrentDocument" tip="Find the previous matching entry in the current document"/>
+		<icon name="findNextCurrentDocument" tip="Find the next matching entry in the current document"/>
+		<icon name="findPrevAllDocuments" tip="Find the previous matching entry in all documents"/>
+		<icon name="findNextAllDocuments" tip="Find the next matching entry in all documents"/>
+		<icon name="replacePrevCurrentDocument" tip="Find and replace the previous matching entry in the current document"/>
+		<icon name="replaceNextCurrentDocument" tip="Find and replace the next matching entry in the current document"/>
+		<icon name="replacePrevAllDocuments" tip="Find and replace the previous matching entry in all documents"/>
+		<icon name="replaceNextAllDocuments" tip="Find and replace the next matching entry in all documents"/>
+		<icon name="scratch" tip="Display scratch memory"/>
+		<icon name="bookmarkAddHorizontal" tip="Adds a horizontal bookmark at the current line and column"/>
+		<icon name="bookmarkDeleteOne" tip="Delete current bookmark"/>
+		<icon name="bookmarkPrevAllDocuments" tip="Goto the previous bookmark in all documents"/>
+		<icon name="bookmakrNextAllDocuments" tip="Goto the next bookmark in all documents"/>
+		<icon name="bookmarkPrevCurrentDocument" tip="Goto the previous bookmark in the current document"/>
+		<icon name="bookmarkNextCurrentDocument" tip="Goto the next bookmark in the current document"/>
+		<icon name="bookmarkAdd" tip="Add bookmark at the current line"/>
+		<icon name="bookmarkShow" tip="Shows all bookmarks for rapid navigation"/>
+		<icon name="stack" tip="Display stack"/>
+		<icon name="anchor" tip="Anchors the current document to the next version"/>
+		<icon name="undo" tip="Undo last operation"/>
+		<icon name="redo" tip="Redo last operation"/>
+		<icon name="anchorPrev" tip="Navigate to previous anchor version"/>
+		<icon name="anchorNext" tip="Navigate to next anchor version"/>
+		<icon name="programRegisters" tip="Display the program registers"/>
+		<icon name="controlRegisters" tip="Display the control registers"/>
+		<icon name="integerRegisters" tip="Display the integer registers"/>
+		<icon name="floatingPointRegisters" tip="Display the floating point registers"/>
+		<icon name="sourceCode" tip="Display the source code window"/>
+		<icon name="callStack" tip="Display the call stack window"/>
+		<icon name="snippets" tip="Display the snippets window"/>
+		<icon name="threads" tip="Display the threads window"/>
+		<icon name="programs" tip="Display the programs window"/>
+		<icon name="memory" tip="Display the memory window"/>
+		<icon name="layout" tip="Display the layout window"/>
+		<icon name="application" tip="Display the application window"/>
+		<icon name="timers" tip="Display the timers window"/>
+		<icon name="autos" tip="Display the autos window"/>
+		<icon name="locals" tip="Display the locals window"/>
+		<icon name="watch" tip="Display the watch window"/>
+		<icon name="hover" tip="Display the hover window"/>
+		<icon name="go" tip="Resume normal execution"/>
+		<icon name="pause" tip="Pause execution of the current thread"/>
+		<icon name="stop" tip="Stop execution of the current thread"/>
+		<icon name="restart" tip="Restart with normal execution"/>
+		<icon name="assembly" tip="Toggle display of virtual machine disassembly"/>
+	<icons>
+</vdebug>
