@@ -81,5 +81,14 @@
 		<icon name="breadcrumbExtendedEnable" tip="Enable extended breadcrumbs"/>
 		<icon name="stack" tip="Display stack"/>
 		<icon name="scratch" tip="Display scratch memory"/>
+		<icon name="viewEdit" tip="Switch to source code edit view"/>
+		<icon name="viewTouch" tip="Switch to touch view"/>
+		<icon name="viewBounce" tip="View current line in bounce view"/>
+		<icon name="viewBool" tip="View current line in bool view"/>
+		<icon name="chainNew" tip="Create a new chain view window"/>
+		<icon name="chainAddLine" tip="Add a line to the active chain view window"/>
+		<icon name="chainAddBlock" tip="Add a block to the active chain view window"/>
+		<icon name="chainAddFunction" tip="Add a function to the active chain view window"/>
+		<icon name="chainAddFile" tip="Add the current document to the active chain view window"/>
 	<icons>
 </vdebug>

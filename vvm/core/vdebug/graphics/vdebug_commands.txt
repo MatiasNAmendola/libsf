@@ -1,0 +1,25 @@
+editView
+touchView
+bounceView
+boolViewLine
+
+chainNew, chainAddLine, chainAddBlock, chainAddFunction, chainAddFile
+
+comment, unComment
+lineComment, unLineComment
+lineSelect, columnSelect, anchorSelect
+clipCut, clipCopy, clipPaste, clipAppend, clipPrepend, clipPasteSelect, clipManage
+
+wordNextBegin, wordNextEnd, wordPrevBegin, wordPrevBegin, wordNextNBegin, wordNextNEnd, wordPrevNBegin, wordPrevNEnd
+errorNext, errorPrev
+warningNext, warningPrev
+noteNext, notePrev
+matchParenthesesBracketsBraces
+whitespaceNext, whitespacePrev, whitespaceNext5, whitespacePrev5
+lineBegin, lineEnd, lineMiddle
+cursorToTopScreen, cursorToBottomScreen, cursorToMiddleScreen
+centerCursorVertical, centerCursorHorizontal
+scrollLeft, scrollRight
+indentTab, unIndentTab
+indentSpaces, unIndentSpaces
+
