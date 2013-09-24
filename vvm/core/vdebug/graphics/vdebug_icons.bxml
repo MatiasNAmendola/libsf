@@ -1,12 +1,12 @@
 <vdebug>
 	<icons file="vdebug_icons.bmp" ulx="1" uly="1" width="36" height="36" stridex="37" stridey="37">
 		<icon name="pursueAcceptOne" tip="Accept one level of the current pursues"/>
-		<icon name="pursueAcceptAll" tip="Accept all levels of active pursues"/>
-		<icon name="pursueEnter" tip="Enter another pursue level"/>
-		<icon name="pursueRejectAll" tip="Reject all levels of active pursues"/>
+		<icon name="pursue" tip="Enter another pursue level"/>
 		<icon name="pursueRejectOne" tip="Reject one level of the current pursues"/>
-		<icon name="breadcrumbPreviousDocument" tip="Move to the previous breadcrumb in the previous document"/>
-		<icon name="breadcrumbNextDocument" tip="Move to the next breadcrumb in the next document"/>
+		<icon name="noStepIntoEnable" tip="Allow this function to be stepped into"
+		<icon name="noStepIntoDisable" tip="Disallow this function to be stepped into"
+		<icon name="breadcrumbPrevDocument" tip="Move to the previous breadcrumb"/>
+		<icon name="breadcrumbNextDocument" tip="Move to the next breadcrumb"/>
 		<icon name="breadcrumbEnable" tip="Enable breadcrumbs"/>
 		<icon name="breadcrumbDisable" tip="Disable breadcrumbs"/>
 		<icon name="stepInto" tip="Steps into the current source code line"/>
@@ -35,16 +35,16 @@
 		<icon name="replaceNextCurrentDocument" tip="Find and replace the next matching entry in the current document"/>
 		<icon name="replacePrevAllDocuments" tip="Find and replace the previous matching entry in all documents"/>
 		<icon name="replaceNextAllDocuments" tip="Find and replace the next matching entry in all documents"/>
-		<icon name="scratch" tip="Display scratch memory"/>
-		<icon name="bookmarkAddHorizontal" tip="Adds a horizontal bookmark at the current line and column"/>
-		<icon name="bookmarkDeleteOne" tip="Delete current bookmark"/>
+		<icon name="findShowAll" tip="Show all finds"/>
+		<icon name="bookmarkAddHorizontal" tip="Adds horizontal bookmark at the current line and column"/>
+		<icon name="bookmarkDeleteHorizontal" tip="Delete horizontal bookmark at the current line and column"/>
 		<icon name="bookmarkPrevAllDocuments" tip="Goto the previous bookmark in all documents"/>
 		<icon name="bookmakrNextAllDocuments" tip="Goto the next bookmark in all documents"/>
 		<icon name="bookmarkPrevCurrentDocument" tip="Goto the previous bookmark in the current document"/>
 		<icon name="bookmarkNextCurrentDocument" tip="Goto the next bookmark in the current document"/>
 		<icon name="bookmarkAdd" tip="Add bookmark at the current line"/>
+		<icon name="bookmarkDelete" tip="Delete bookmark at the current line"/>
 		<icon name="bookmarkShow" tip="Shows all bookmarks for rapid navigation"/>
-		<icon name="stack" tip="Display stack"/>
 		<icon name="anchor" tip="Anchors the current document to the next version"/>
 		<icon name="undo" tip="Undo last operation"/>
 		<icon name="redo" tip="Redo last operation"/>
@@ -72,7 +72,14 @@
 		<icon name="stop" tip="Stop execution of the current thread"/>
 		<icon name="restart" tip="Restart with normal execution"/>
 		<icon name="assembly" tip="Toggle display of virtual machine disassembly"/>
-		<icon name="breadcrumbPrevious" tip="Move to the previous breadcrumb"/>
-		<icon name="breadcrumbNext" tip="Move to the next breadcrumb"/>
+		<icon name="breadcrumbPrev" tip="Move to the previous breadcrumb only in the current function"/>
+		<icon name="breadcrumbNext" tip="Move to the next breadcrumb only in the current function"/>
+		<icon name="breadcrumbPrevFunction" tip="Move to the breadcrumb in previous function"
+		<icon name="breadcrumbNextFunction" tip="Move to the breadcrumb in next function"
+		<icon name="pursuePrev" tip="Examine previous pursue level"
+		<icon name="pursueNext" tip="Examine next pursue level"
+		<icon name="breadcrumbExtendedEnable" tip="Enable extended breadcrumbs"/>
+		<icon name="stack" tip="Display stack"/>
+		<icon name="scratch" tip="Display scratch memory"/>
 	<icons>
 </vdebug>
