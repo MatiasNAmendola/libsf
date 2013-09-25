@@ -1,5 +1,5 @@
 <vdebug>
-	<icons file="vdebug_icons.bmp" ulx="1" uly="1" width="36" height="36" stridex="37" stridey="37">
+	<icons file="vdebug_icons.bmp" ulx="2" uly="2" width="36" height="36" stridex="38" stridey="38">
 		<icon name="pursueAcceptOne" tip="Accept one level of the current pursues"/>
 		<icon name="pursue" tip="Enter another pursue level"/>
 		<icon name="pursueRejectOne" tip="Reject one level of the current pursues"/>
@@ -90,5 +90,32 @@
 		<icon name="chainAddBlock" tip="Add a block to the active chain view window"/>
 		<icon name="chainAddFunction" tip="Add a function to the active chain view window"/>
 		<icon name="chainAddFile" tip="Add the current document to the active chain view window"/>
+		<icon name="tabIn" tip="Shifts text right"/>
+		<icon name="tabOut" tip="Shifts text left"/>
+		<icon name="shiftDown" tip="Shifts text down"/>
+		<icon name="shiftUp" tip="Shifts text up"/>
+		<icon name="lineComment" tip="Prefix with line comments"/>
+		<icon name="blockComment" tip="Surround with a block comment"/>
+		<icon name="wordLeft" tip="Move word left"/>
+		<icon name="wordRight" tip="Move word right"/>
+		<icon name="lineStart" tip="Move to line start"/>
+		<icon name="lineEnd" tip="Move to line end"/>
+		<icon name="screenTop" tip="Move to top line on screen"/>
+		<icon name="screenBottom" tip="Move to bottom line on screen"/>
+		<icon name="fileTop" tip="Move to top line of file"/>
+		<icon name="fileEnd" tip="Move to bottom line of file"/>
+		<icon name="previousBlock" tip="Move up to bottom of previous block"/>
+		<icon name="nextBlockOut" tip="Move down to top of next outer block"/>
+		<icon name="previousFunction" tip="Move up to bottom of previous function"/>
+		<icon name="nextFunction" tip="Move top top of next function"/>
+		<icon name="nextBlockIn" tip="Move down to top of next inner block"/>
+		<icon name="unused" tip="u"/>
+		<icon name="unused" tip="u"/>
+		<icon name="unused" tip="u"/>
+		<icon name="unused" tip="u"/>
+		<icon name="unused" tip="u"/>
+		<icon name="unused" tip="u"/>
+		<icon name="unused" tip="u"/>
+		<icon name="unused" tip="u"/>
 	<icons>
 </vdebug>
