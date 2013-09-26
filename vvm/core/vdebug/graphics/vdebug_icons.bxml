@@ -71,7 +71,7 @@
 		<icon name="pause" tip="Pause execution of the current thread"/>
 		<icon name="stop" tip="Stop execution of the current thread"/>
 		<icon name="restart" tip="Restart with normal execution"/>
-		<icon name="assembly" tip="Toggle display of virtual machine disassembly"/>
+		<icon name="assemblyMix" tip="Toggle display of virtual machine disassembly"/>
 		<icon name="breadcrumbPrev" tip="Move to the previous breadcrumb only in the current function"/>
 		<icon name="breadcrumbNext" tip="Move to the next breadcrumb only in the current function"/>
 		<icon name="breadcrumbPrevFunction" tip="Move to the breadcrumb in previous function"
@@ -109,13 +109,17 @@
 		<icon name="previousFunction" tip="Move up to bottom of previous function"/>
 		<icon name="nextFunction" tip="Move top top of next function"/>
 		<icon name="nextBlockIn" tip="Move down to top of next inner block"/>
-		<icon name="unused" tip="u"/>
-		<icon name="unused" tip="u"/>
+		<icon name="clipListNew" tip="Create a new clip list"/>
+		<icon name="clipListDelete" tip="Delete the active clip list entry"/>
 		<icon name="clipListCopy" tip="Copy to clip list"/>
 		<icon name="clipListCut" tip="Cut to clip list"/>
 		<icon name="clipListPaste" tip="Paste from clip list"/>
 		<icon name="clipListPrepend" tip="Prepend to active clip list entry"/>
 		<icon name="clipListAppend" tip="Append to active clip list entry"/>
 		<icon name="clipListView" tip="View/edit clip list entries"/>
+		<icon name="assemblyOff" tip="Toggle display of virtual machine disassembly"/>
+		<icon name="pursueCount" tip="Shows current pursue view level, and total nested levels"/>
+		<icon name="assemblyOnly" tip="Toggle display of virtual machine disassembly"/>
+		<icon name="anchorCount" tip="Shows current anchor view level, and total anchor levels"/>
 	<icons>
 </vdebug>
