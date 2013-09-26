@@ -67,7 +67,7 @@
 		<icon name="locals" tip="Display the locals window"/>
 		<icon name="watch" tip="Display the watch window"/>
 		<icon name="hover" tip="Display the hover window"/>
-		<icon name="go" tip="Resume normal execution"/>
+		<icon name="play" tip="Resume normal execution"/>
 		<icon name="pause" tip="Pause execution of the current thread"/>
 		<icon name="stop" tip="Stop execution of the current thread"/>
 		<icon name="restart" tip="Restart with normal execution"/>
@@ -121,5 +121,7 @@
 		<icon name="pursueCount" tip="Shows current pursue view level, and total nested levels"/>
 		<icon name="assemblyOnly" tip="Toggle display of virtual machine disassembly"/>
 		<icon name="anchorCount" tip="Shows current anchor view level, and total anchor levels"/>
+		<icon name="suspend" tip="Suspend the virtual machine"/>
+		<icon name="resume" tip="Resume the virtual machine"/>
 	<icons>
 </vdebug>
