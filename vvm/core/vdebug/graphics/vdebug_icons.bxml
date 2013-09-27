@@ -18,10 +18,10 @@
 		<icon name="stepHorizontalOut" tip="Steps horizontally out of the current source code line"/>
 		<icon name="stepOutOne" tip="Steps out of the current block"/>
 		<icon name="stepToError" tip="Steps back to the line causing the error"/>
-		<icon name="breakpointSet" tip="Set an unconditional breakpoint on the current line"/>
+		<icon name="breakpointSetLine" tip="Set an unconditional breakpoint on the current line"/>
+		<icon name="breakpointView" tip="View all breakpoints"/>
+		<icon name="breakpointSetHorizontal" tip="Set a horizontal breakpoint on the current line"/>
 		<icon name="breakpointSetCondition" tip="Set a conditional breakpoint on the current line"/>
-		<icon name="breakpointHorizontalSet" tip="Set a horizontal breakpoint on the current line"/>
-		<icon name="breakpointToggleEnabled" tip="Toggle the breakpoint's enabled status"/>
 		<icon name="breakpointDelete" tip="Delete the current breakpoint"/>
 		<icon name="breakpointEnableAll" tip="Enable all breakpoints"/>
 		<icon name="breakpointDisableAll" tip="Disable all breakpoints"/>
@@ -153,5 +153,23 @@
 		<icon name="clipListCopyDocumentNew" tip="Copy entire document to a new clip list"/>
 		<icon name="clipListCutDocumentNew" tip="Cut entire document to a new clip list"/>
 		<icon name="clipListReplace" tip="Set clip list to replace added items"/>
+		<icon name="breakpointToggleEnabledEnable" tip="Toggle the breakpoint's enabled status"/>
+		<icon name="breakpointToggleEnabledDisable" tip="Toggle the breakpoint's enabled status"/>
+		<icon name="breakpointToggleHorizontalEnabledEnable" tip="Toggle the horizontal breakpoint's enabled status"/>
+		<icon name="breakpointToggleHorizontalEnabledDisable" tip="Toggle the horizontal breakpoint's enabled status"/>
+		<icon name="replaceAllPrevCurrentDocument" tip="Find and replace all using the previous matching entry in the current document"/>
+		<icon name="replaceAllNextCurrentDocument" tip="Find and replace all using the previous matching entry in the current document"/>
+		<icon name="replaceAllPrevAllDocuments" tip="Find and replace all using the previous matching entry in all documents"/>
+		<icon name="replaceAllNextAllDocuments" tip="Find and replace all using the previous matching entry in all documents"/>
+		<icon name="replaceAllView" tip="View all replace candidates in current document, or all documents"/>
+		<icon name="toUpper" tip="Convert to upper case"/>
+		<icon name="toLower" tip="Convert to lower case"/>
+		<icon name="toFlip" tip="Flip upper case to lower case, and lower case to upper case"/>
+		<icon name="toProper" tip="Convert to proper case"/>
+		<icon name="findWordUpCurrentDocument" tip="Find the word in the current document at the cursor up"/>
+		<icon name="findWordDownCurrentDocument" tip="Find the word in the current document at the cursor down"/>
+		<icon name="findWordView" tip="View all instances of the word at the cursor in current document, or all documents"/>
+		<icon name="findWordUpAllDocuments" tip="Find the word in all documents at the cursor up"/>
+		<icon name="findWordDownAllDocuments" tip="Find the word in all currents document at the cursor down"/>
 	<icons>
 </vdebug>
