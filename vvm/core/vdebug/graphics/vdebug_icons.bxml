@@ -48,8 +48,8 @@
 		<icon name="anchor" tip="Anchors the current document to the next version"/>
 		<icon name="undo" tip="Undo last operation"/>
 		<icon name="redo" tip="Redo last operation"/>
-		<icon name="anchorPrev" tip="Navigate to previous anchor version"/>
-		<icon name="anchorNext" tip="Navigate to next anchor version"/>
+		<icon name="anchorPrev" tip="Navigate to previous anchor version" var1="anchorCurrent-1"/>
+		<icon name="anchorNext" tip="Navigate to next anchor version" var1="anchorCurrent+1"/>
 		<icon name="programRegisters" tip="Display the program registers"/>
 		<icon name="controlRegisters" tip="Display the control registers"/>
 		<icon name="integerRegisters" tip="Display the integer registers"/>
@@ -74,10 +74,10 @@
 		<icon name="assemblyMix" tip="Toggle display of virtual machine disassembly"/>
 		<icon name="breadcrumbPrev" tip="Move to the previous breadcrumb only in the current function"/>
 		<icon name="breadcrumbNext" tip="Move to the next breadcrumb only in the current function"/>
-		<icon name="breadcrumbPrevFunction" tip="Move to the breadcrumb in previous function"
-		<icon name="breadcrumbNextFunction" tip="Move to the breadcrumb in next function"
-		<icon name="pursuePrev" tip="Examine previous pursue level"
-		<icon name="pursueNext" tip="Examine next pursue level"
+		<icon name="breadcrumbPrevFunction" tip="Move to the breadcrumb in previous function"/>
+		<icon name="breadcrumbNextFunction" tip="Move to the breadcrumb in next function"/>
+		<icon name="pursuePrev" tip="Examine previous pursue level" var1="pursueCurrent-1/>
+		<icon name="pursueNext" tip="Examine next pursue level" var1="pursueCurrent+1"/>
 		<icon name="breadcrumbExtendedEnable" tip="Enable extended breadcrumbs"/>
 		<icon name="stack" tip="Display stack"/>
 		<icon name="scratch" tip="Display scratch memory"/>
@@ -118,10 +118,12 @@
 		<icon name="clipListAppend" tip="Append to active clip list entry"/>
 		<icon name="clipListView" tip="View/edit clip list entries"/>
 		<icon name="assemblyOff" tip="Toggle display of virtual machine disassembly"/>
-		<icon name="pursueCount" tip="Shows current pursue view level, and total nested levels"/>
+		<icon name="pursueCount" tip="Shows current pursue view level, and total nested levels" var1="pursueCurrent" var2="pursueCount"/>
 		<icon name="assemblyOnly" tip="Toggle display of virtual machine disassembly"/>
-		<icon name="anchorCount" tip="Shows current anchor view level, and total anchor levels"/>
-		<icon name="suspend" tip="Suspend the virtual machine"/>
-		<icon name="resume" tip="Resume the virtual machine"/>
+		<icon name="anchorCount" tip="Shows current anchor view level, and total anchor levels" var1="anchorCurrent" var2="anchorCount"/>
+		<icon name="suspend" tip="Suspend the virtual machine" var1="suspend1" var2="suspend2" var3="suspend3" var4="suspend4" var5="suspend5" var6="suspend6"/>
+		<icon name="resume" tip="Resume the virtual machine" var1="resume1" var2="resume2" var3="resume3" var4="resume4" var5="resume5" var6="resume6"/>
+		<icon name="breadcrumbHistory" tip="Show the breadcrumb history" var1="breadcrumbCount"/>
+		<icon name="pursueEnabled" tip="Shown when pursue mode is enabled"/>
 	<icons>
 </vdebug>
