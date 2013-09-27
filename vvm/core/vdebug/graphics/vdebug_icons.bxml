@@ -3,8 +3,8 @@
 		<icon name="pursueAcceptOne" tip="Accept one level of the current pursues"/>
 		<icon name="pursue" tip="Enter another pursue level"/>
 		<icon name="pursueRejectOne" tip="Reject one level of the current pursues"/>
-		<icon name="noStepIntoEnable" tip="Allow this function to be stepped into"
-		<icon name="noStepIntoDisable" tip="Disallow this function to be stepped into"
+		<icon name="noStepIntoFunctionEnable" tip="Allow this function to be stepped into"
+		<icon name="noStepIntoFunctionDisable" tip="Disallow this function to be stepped into"
 		<icon name="breadcrumbPrevDocument" tip="Move to the previous breadcrumb"/>
 		<icon name="breadcrumbNextDocument" tip="Move to the next breadcrumb"/>
 		<icon name="breadcrumbEnable" tip="Enable breadcrumbs"/>
@@ -111,11 +111,11 @@
 		<icon name="nextBlockIn" tip="Move down to top of next inner block"/>
 		<icon name="clipListNew" tip="Create a new clip list"/>
 		<icon name="clipListDelete" tip="Delete the active clip list entry"/>
-		<icon name="clipListCopy" tip="Copy to clip list"/>
-		<icon name="clipListCut" tip="Cut to clip list"/>
+		<icon name="clipListCopyBlock" tip="Copy selected block to clip list"/>
+		<icon name="clipListCutBlock" tip="Cut selected block to clip list"/>
 		<icon name="clipListPaste" tip="Paste from clip list"/>
-		<icon name="clipListPrependCopy" tip="Prepend by copy to active clip list entry"/>
-		<icon name="clipListAppendCopy" tip="Append by copy to active clip list entry"/>
+		<icon name="clipListPrepend" tip="Set clip list to prepend added items"/>
+		<icon name="clipListAppend" tip="Set clip list to append added items"/>
 		<icon name="clipListView" tip="View/edit clip list entries"/>
 		<icon name="assemblyOff" tip="Toggle display of virtual machine disassembly"/>
 		<icon name="pursueCount" tip="Shows current pursue view level, and total nested levels" var1="pursueCurrent" var2="pursueCount"/>
@@ -130,10 +130,28 @@
 		<icon name="chainCount" tip="Shows how many chain views there are"/>
 		<icon name="chainView" tip="View/edit chain view entries"/>
 		<icon name="chainAddHorizontal" tip="Add a line to the active chain view window"/>
-		<icon name="clipListPrependCut" tip="Prepend by cut to active clip list entry"/>
-		<icon name="clipListAppendCut" tip="Append by cut to active clip list entry"/>
+		<icon name="noStepIntoFunctionInstanceEnable" tip="Allow the instance of this function to be stepped into"
+		<icon name="noStepIntoFunctionInstanceDisable" tip="Disallow the instance of this function to be stepped into"
 		<icon name="breadcrumbHistory" tip="Show the breadcrumb history" var1="breadcrumbCount"/>
 		<icon name="stepToCursorHorizontal" tip="Steps forward to the horizontal cursor position on the current line"/>
 		<icon name="stepInOne" tip="Steps in to the next deeper block"/>
+		<icon name="clipListTrailingCRLF_On" tip="Each appended item will automatically append a trailing CR/LF"/>
+		<icon name="clipListTrailingCRLF_Off" tip="Each appended item will not automatically append a trailing CR/LF"/>
+		<icon name="clipListCopyLine" tip="Copy current line to clip list"/>
+		<icon name="clipListCutLine" tip="Cut current line to clip list"/>
+		<icon name="clipListCopyHorizontal" tip="Copy horizontal portion to clip list"/>
+		<icon name="clipListCutHorizontal" tip="Cut horizontal portion to clip list"/>
+		<icon name="clipListCopyDocument" tip="Copy entire document to clip list"/>
+		<icon name="clipListCutDocument" tip="Cut entire document to clip list"/>
+		<icon name="clipListPasteDelete" tip="Paste from and delete clip list"/>
+		<icon name="clipListCopyBlockNew" tip="Copy selected block to a new clip list"/>
+		<icon name="clipListCutBlockNew" tip="Cut selected block to a new clip list"/>
+		<icon name="clipListCopyLineNew" tip="Copy current line to a new clip list"/>
+		<icon name="clipListCutLineNew" tip="Cut current line to a new clip list"/>
+		<icon name="clipListCopyHorizontalNew" tip="Copy horizontal portion to a new clip list"/>
+		<icon name="clipListCutHorizontalNew" tip="Cut horizontal portion to a new clip list"/>
+		<icon name="clipListCopyDocumentNew" tip="Copy entire document to a new clip list"/>
+		<icon name="clipListCutDocumentNew" tip="Cut entire document to a new clip list"/>
+		<icon name="clipListReplace" tip="Set clip list to replace added items"/>
 	<icons>
 </vdebug>
