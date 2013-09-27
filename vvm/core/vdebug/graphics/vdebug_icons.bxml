@@ -12,11 +12,11 @@
 		<icon name="stepInto" tip="Steps into the current source code line"/>
 		<icon name="stepOver" tip="Steps over the current source code line"/>
 		<icon name="stepOut" tip="Steps out of the current function"/>
-		<icon name="stepDownAll" tip="Steps forward to next return"/>
-		<icon name="stepToCursor" tip="Steps forward to the cursor location"/>
+		<icon name="stepOutAll" tip="Steps forward to next return"/>
+		<icon name="stepToCursorLine" tip="Steps forward to the cursor line"/>
 		<icon name="stepHorizontalIn" tip="Steps horizontally into the current source code line"/>
 		<icon name="stepHorizontalOut" tip="Steps horizontally out of the current source code line"/>
-		<icon name="stepDownOne" tip="Steps out of the current block"/>
+		<icon name="stepOutOne" tip="Steps out of the current block"/>
 		<icon name="stepToError" tip="Steps back to the line causing the error"/>
 		<icon name="breakpointSet" tip="Set an unconditional breakpoint on the current line"/>
 		<icon name="breakpointSetCondition" tip="Set a conditional breakpoint on the current line"/>
@@ -114,8 +114,8 @@
 		<icon name="clipListCopy" tip="Copy to clip list"/>
 		<icon name="clipListCut" tip="Cut to clip list"/>
 		<icon name="clipListPaste" tip="Paste from clip list"/>
-		<icon name="clipListPrepend" tip="Prepend to active clip list entry"/>
-		<icon name="clipListAppend" tip="Append to active clip list entry"/>
+		<icon name="clipListPrependCopy" tip="Prepend by copy to active clip list entry"/>
+		<icon name="clipListAppendCopy" tip="Append by copy to active clip list entry"/>
 		<icon name="clipListView" tip="View/edit clip list entries"/>
 		<icon name="assemblyOff" tip="Toggle display of virtual machine disassembly"/>
 		<icon name="pursueCount" tip="Shows current pursue view level, and total nested levels" var1="pursueCurrent" var2="pursueCount"/>
@@ -123,7 +123,17 @@
 		<icon name="anchorCount" tip="Shows current anchor view level, and total anchor levels" var1="anchorCurrent" var2="anchorCount"/>
 		<icon name="suspend" tip="Suspend the virtual machine" var1="suspend1" var2="suspend2" var3="suspend3" var4="suspend4" var5="suspend5" var6="suspend6"/>
 		<icon name="resume" tip="Resume the virtual machine" var1="resume1" var2="resume2" var3="resume3" var4="resume4" var5="resume5" var6="resume6"/>
-		<icon name="breadcrumbHistory" tip="Show the breadcrumb history" var1="breadcrumbCount"/>
+		<icon name="breadcrumbCount" tip="Shows the breadcrumb count" var1="breadcrumbCount"/>
 		<icon name="pursueEnabled" tip="Shown when pursue mode is enabled"/>
+		<icon name="clipListCount" tip="Shows how many items are in the clip list"/>
+		<icon name="chainDelete" tip="Deletes the current chain view"/>
+		<icon name="chainCount" tip="Shows how many chain views there are"/>
+		<icon name="chainView" tip="View/edit chain view entries"/>
+		<icon name="chainAddHorizontal" tip="Add a line to the active chain view window"/>
+		<icon name="clipListPrependCut" tip="Prepend by cut to active clip list entry"/>
+		<icon name="clipListAppendCut" tip="Append by cut to active clip list entry"/>
+		<icon name="breadcrumbHistory" tip="Show the breadcrumb history" var1="breadcrumbCount"/>
+		<icon name="stepToCursorHorizontal" tip="Steps forward to the horizontal cursor position on the current line"/>
+		<icon name="stepInOne" tip="Steps in to the next deeper block"/>
 	<icons>
 </vdebug>
