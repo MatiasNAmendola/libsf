@@ -83,8 +83,8 @@
 		<icon name="scratch" tip="Display scratch memory"/>
 		<icon name="viewEdit" tip="Switch to source code edit view"/>
 		<icon name="viewTouch" tip="Switch to touch view"/>
-		<icon name="viewBounce" tip="View current line in bounce view"/>
-		<icon name="viewBool" tip="View current line in bool view"/>
+		<icon name="viewBounceToggle_On" tip="Toggle viewing the current line in bounce view"/>
+		<icon name="viewBoolToggle_On" tip="Toggle viewing the current line in bool view"/>
 		<icon name="chainNew" tip="Create a new chain view window"/>
 		<icon name="chainAddLine" tip="Add a line to the active chain view window"/>
 		<icon name="chainAddBlock" tip="Add a block to the active chain view window"/>
@@ -203,6 +203,9 @@
 		<icon name="selectSubtractMode" tip="Trims out the new selected region from the current selection"/>
 		<icon name="selectUnionMode" tip="Trims the current selection down to the union with the new selected region"/>
 		<icon name="selectAllCurrentDocument" tip="Selects all in the current document"/>
+		<icon name="viewSpreadsheet" tip="Switch to spreadsheet edit view"/>
+		<icon name="viewBounceToggle_Off" tip="Toggle viewing the current line in bounce view"/>
+		<icon name="viewBoolToggle_Off" tip="Toggle viewing the current line in bool view"/>
+		<icon name="chainAddSpreadsheet" tip="Add visible data from the current spreadsheet view to the active chain view window"/>
 	<icons>
 </vdebug>
-
