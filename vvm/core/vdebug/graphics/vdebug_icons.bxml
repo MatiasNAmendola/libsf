@@ -14,8 +14,8 @@
 		<icon name="stepOut" tip="Steps out of the current function"/>
 		<icon name="stepOutAll" tip="Steps forward to next return"/>
 		<icon name="stepToCursorLine" tip="Steps forward to the cursor line"/>
-		<icon name="stepHorizontalIn" tip="Steps horizontally into the current source code line"/>
-		<icon name="stepHorizontalOut" tip="Steps horizontally out of the current source code line"/>
+		<icon name="stepInHorizontal" tip="Steps horizontally into the current source code line"/>
+		<icon name="stepOutHorizontal" tip="Steps horizontally out of the current source code line"/>
 		<icon name="stepOutOne" tip="Steps out of the current block"/>
 		<icon name="stepToError" tip="Steps back to the line causing the error"/>
 		<icon name="breakpointSetLine" tip="Set an unconditional breakpoint on the current line"/>
@@ -171,5 +171,38 @@
 		<icon name="findWordView" tip="View all instances of the word at the cursor in current document, or all documents"/>
 		<icon name="findWordUpAllDocuments" tip="Find the word in all documents at the cursor up"/>
 		<icon name="findWordDownAllDocuments" tip="Find the word in all currents document at the cursor down"/>
+		<icon name="breakpointOneAddLine" tip="Adds a breakpoint to stop at one time on the current line"/>
+		<icon name="breakpointOneAddHorizontal" tip="Adds a breakpoint to stop at one time horizontally"/>
+		<icon name="breakpointOneDelete" tip="Deletes a breakpoint to stop at one time"/>
+		<icon name="breakpointOneBlocksAdd" tip="Adds a breakpoint to stop at one time at the start of each block"/>
+		<icon name="breakpointOneBlocksDelete" tip="Deletes all breakpoints to stop at one time at the start of each block"/>
+		<icon name="functionUpCurrentDocument" tip="Move to the previous function in the current document"/>
+		<icon name="functionDownCurrentDocument" tip="Move to the previous function in the current document"/>
+		<icon name="functionUpAllDocuments" tip="Move to the previous function in all documents"/>
+		<icon name="functionDownAllDocuments" tip="Move to the previous function in all documents"/>
+		<icon name="functionView" tip="View all functions in the current document, or all documents"/>
+		<icon name="deleteToEndOfLine" tip="Deletes everything at end of line"/>
+		<icon name="deleteToStartOfLine" tip="Deletes everything to start of line"/>
+		<icon name="selectLine" tip="Begins selecting in entire line mode"/>
+		<icon name="selectCommand" tip="Begins selecting in entire line / command mode"/>
+		<icon name="selectColumn" tip="Begins selecting in column"/>
+		<icon name="selectStart" tip="Begins selecting at the cursor location"/>
+		<icon name="selectBlock" tip="Selects the current block"/>
+		<icon name="selectFunction" tip="Selects the current function"/>
+		<icon name="selectBlockOut" tip="Selects up to include the immediate outter block"/>
+		<icon name="selectBlockIn" tip="Selects down to the inner block"/>
+		<icon name="selectBlockUp" tip="Selects the immediate block up"/>
+		<icon name="selectBlockDown" tip="Selects the immediate block down"/>
+		<icon name="selectFunctionUpCurrentDocument" tip="Selects the immediate function above in the current document"/>
+		<icon name="selectFunctionDownCurrentDocument" tip="Selects the immediate function below in the current document"/>
+		<icon name="selectFunctionUpAllDocuments" tip="Selects the immediate function above in all documents"/>
+		<icon name="selectFunctionDownAllDocuments" tip="Selects the immediate function below in all documents"/>
+		<icon name="selectNone" tip="Removes all selections"/>
+		<icon name="selectMode" tip="Unselect anything selected, and select only the new region"/>
+		<icon name="selectAddMode" tip="Adds the new selected region to the current selection"/>
+		<icon name="selectSubtractMode" tip="Trims out the new selected region from the current selection"/>
+		<icon name="selectUnionMode" tip="Trims the current selection down to the union with the new selected region"/>
+		<icon name="selectAllCurrentDocument" tip="Selects all in the current document"/>
 	<icons>
 </vdebug>
+
