@@ -198,14 +198,23 @@
 		<icon name="selectFunctionUpAllDocuments" tip="Selects the immediate function above in all documents"/>
 		<icon name="selectFunctionDownAllDocuments" tip="Selects the immediate function below in all documents"/>
 		<icon name="selectNone" tip="Removes all selections"/>
-		<icon name="selectMode" tip="Unselect anything selected, and select only the new region"/>
-		<icon name="selectAddMode" tip="Adds the new selected region to the current selection"/>
-		<icon name="selectSubtractMode" tip="Trims out the new selected region from the current selection"/>
-		<icon name="selectUnionMode" tip="Trims the current selection down to the union with the new selected region"/>
+		<icon name="selectMode_Unselected" tip="Unselect anything selected, and select only the new region"/>
+		<icon name="selectAddMode_Unselected" tip="Adds the new selected region to the current selection"/>
+		<icon name="selectSubtractMode_Unselected" tip="Trims out the new selected region from the current selection"/>
+		<icon name="selectUnionMode_Unselected" tip="Trims the current selection down to the union with the new selected region"/>
 		<icon name="selectAllCurrentDocument" tip="Selects all in the current document"/>
 		<icon name="viewSpreadsheet" tip="Switch to spreadsheet edit view"/>
 		<icon name="viewBounceToggle_Off" tip="Toggle viewing the current line in bounce view"/>
 		<icon name="viewBoolToggle_Off" tip="Toggle viewing the current line in bool view"/>
 		<icon name="chainAddSpreadsheet" tip="Add visible data from the current spreadsheet view to the active chain view window"/>
+		<icon name="selectMode_Selected" tip="Unselect anything selected, and select only the new region"/>
+		<icon name="selectAddMode_Selected" tip="Adds the new selected region to the current selection"/>
+		<icon name="selectSubtractMode_Selected" tip="Trims out the new selected region from the current selection"/>
+		<icon name="selectUnionMode_Selected" tip="Trims the current selection down to the union with the new selected region"/>
+		<icon name="selectMode_Toggle" tip="Toggle unselecting anything selected, and select only the new region"/>
+		<icon name="selectAddMode_Toggle" tip="Toggle adding the new selected region to the current selection"/>
+		<icon name="selectSubtractMode_Toggle" tip="Toggle trimming out the new selected region from the current selection"/>
+		<icon name="selectUnionMode_Toggle" tip="Toggle trimming the current selection down to the union with the new selected region"/>
+		<icon name="programsThreads" tip="Choose the program and/or thread to debug"/>
 	<icons>
 </vdebug>
