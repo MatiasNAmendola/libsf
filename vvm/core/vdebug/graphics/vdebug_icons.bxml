@@ -5,10 +5,10 @@
 		<icon name="pursueRejectOne" tip="Reject one level of the current pursues"/>
 		<icon name="noStepIntoFunctionEnable" tip="Allow this function to be stepped into"
 		<icon name="noStepIntoFunctionDisable" tip="Disallow this function to be stepped into"
-		<icon name="breadcrumbPrevDocument" tip="Move to the previous breadcrumb"/>
-		<icon name="breadcrumbNextDocument" tip="Move to the next breadcrumb"/>
-		<icon name="breadcrumbEnable" tip="Enable breadcrumbs"/>
-		<icon name="breadcrumbDisable" tip="Disable breadcrumbs"/>
+		<icon name="breadcrumbsPrevDocument" tip="Move to the previous breadcrumb"/>
+		<icon name="breadcrumbsNextDocument" tip="Move to the next breadcrumb"/>
+		<icon name="breadcrumbsLineEnable" tip="Line breadcrumbs"/>
+		<icon name="breadcrumbsDisable" tip="Disable breadcrumbs"/>
 		<icon name="stepInto" tip="Steps into the current source code line"/>
 		<icon name="stepOver" tip="Steps over the current source code line"/>
 		<icon name="stepOut" tip="Steps out of the current function"/>
@@ -72,13 +72,13 @@
 		<icon name="stop" tip="Stop execution of the current thread"/>
 		<icon name="restart" tip="Restart with normal execution"/>
 		<icon name="assemblyMix" tip="Toggle display of virtual machine disassembly"/>
-		<icon name="breadcrumbPrev" tip="Move to the previous breadcrumb only in the current function"/>
-		<icon name="breadcrumbNext" tip="Move to the next breadcrumb only in the current function"/>
-		<icon name="breadcrumbPrevFunction" tip="Move to the breadcrumb in previous function"/>
-		<icon name="breadcrumbNextFunction" tip="Move to the breadcrumb in next function"/>
+		<icon name="breadcrumbsPrev" tip="Move to the previous breadcrumbs only in the current function"/>
+		<icon name="breadcrumbsNext" tip="Move to the next breadcrumbs only in the current function"/>
+		<icon name="breadcrumbsPrevFunction" tip="Move to the breadcrumbs in previous function"/>
+		<icon name="breadcrumbsNextFunction" tip="Move to the breadcrumbs in next function"/>
 		<icon name="pursuePrev" tip="Examine previous pursue level" var1="pursueCurrent-1/>
 		<icon name="pursueNext" tip="Examine next pursue level" var1="pursueCurrent+1"/>
-		<icon name="breadcrumbExtendedEnable" tip="Enable extended breadcrumbs"/>
+		<icon name="breadcrumbsDeltasEnable" tip="Breadcrumb deltas enabled"/>
 		<icon name="stack" tip="Display stack"/>
 		<icon name="scratch" tip="Display scratch memory"/>
 		<icon name="viewEdit" tip="Switch to source code edit view"/>
@@ -123,7 +123,7 @@
 		<icon name="anchorCount" tip="Shows current anchor view level, and total anchor levels" var1="anchorCurrent" var2="anchorCount"/>
 		<icon name="suspend" tip="Suspend the virtual machine" var1="suspend1" var2="suspend2" var3="suspend3" var4="suspend4" var5="suspend5" var6="suspend6"/>
 		<icon name="resume" tip="Resume the virtual machine" var1="resume1" var2="resume2" var3="resume3" var4="resume4" var5="resume5" var6="resume6"/>
-		<icon name="breadcrumbCount" tip="Shows the breadcrumb count" var1="breadcrumbCount"/>
+		<icon name="breadcrumbsCount" tip="Shows the breadcrumbs count" var1="breadcrumbsCount"/>
 		<icon name="pursueEnabled" tip="Shown when pursue mode is enabled"/>
 		<icon name="clipListCount" tip="Shows how many items are in the clip list"/>
 		<icon name="chainDelete" tip="Deletes the current chain view"/>
@@ -132,7 +132,7 @@
 		<icon name="chainAddHorizontal" tip="Add a line to the active chain view window"/>
 		<icon name="noStepIntoFunctionInstanceEnable" tip="Allow the instance of this function to be stepped into"
 		<icon name="noStepIntoFunctionInstanceDisable" tip="Disallow the instance of this function to be stepped into"
-		<icon name="breadcrumbHistory" tip="Show the breadcrumb history" var1="breadcrumbCount"/>
+		<icon name="breadcrumbsView" tip="View all breadcrumbs"/>
 		<icon name="stepToCursorHorizontal" tip="Steps forward to the horizontal cursor position on the current line"/>
 		<icon name="stepInOne" tip="Steps in to the next deeper block"/>
 		<icon name="clipListTrailingCRLF_On" tip="Each appended item will automatically append a trailing CR/LF"/>
@@ -215,6 +215,9 @@
 		<icon name="selectAddMode_Toggle" tip="Toggle adding the new selected region to the current selection"/>
 		<icon name="selectSubtractMode_Toggle" tip="Toggle trimming out the new selected region from the current selection"/>
 		<icon name="selectUnionMode_Toggle" tip="Toggle trimming the current selection down to the union with the new selected region"/>
-		<icon name="programsThreads" tip="Choose the program and/or thread to debug"/>
+		<icon name="vvmInterface" tip="View the VVM state, and running programs and threads"/>
+		<icon name="breadcrumbsHorizontalEnable" tip="Horizontal breadcrumbs"/>
+		<icon name="breadcrumbsDeltasDisable" tip="Breadcrumb deltas disabled"/>
+		<icon name="breadcrumbsClear" tip="Enable breadcrumbs deltas"/>
 	<icons>
 </vdebug>
