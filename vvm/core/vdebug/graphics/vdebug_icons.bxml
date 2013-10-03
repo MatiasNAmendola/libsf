@@ -215,9 +215,12 @@
 		<icon name="selectAddMode_Toggle" tip="Toggle adding the new selected region to the current selection"/>
 		<icon name="selectSubtractMode_Toggle" tip="Toggle trimming out the new selected region from the current selection"/>
 		<icon name="selectUnionMode_Toggle" tip="Toggle trimming the current selection down to the union with the new selected region"/>
-		<icon name="vvmInterface" tip="View the VVM state, and running programs and threads"/>
+		<icon name="vvmSettings" tip="View the VVM settings"/>
 		<icon name="breadcrumbsHorizontalEnable" tip="Horizontal breadcrumbs"/>
 		<icon name="breadcrumbsDeltasDisable" tip="Breadcrumb deltas disabled"/>
 		<icon name="breadcrumbsClear" tip="Enable breadcrumbs deltas"/>
+		<icon name="vvmDebuggers" tip="View the multiple VVM debugger instance running"/>
+		<icon name="vvmLink" tip="Link this debugger instance to another debugger instance"/>
+		<icon name="vvmLinkDelete" tip="Delete a link to another debugger instance"/>
 	<icons>
 </vdebug>
