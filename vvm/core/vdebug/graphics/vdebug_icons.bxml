@@ -81,8 +81,8 @@
 		<icon name="breadcrumbsDeltasEnable" tip="Breadcrumb deltas enabled"/>
 		<icon name="stack" tip="Display stack"/>
 		<icon name="scratch" tip="Display scratch memory"/>
-		<icon name="viewEdit" tip="Switch to source code edit view"/>
-		<icon name="viewTouch" tip="Switch to touch view"/>
+		<icon name="viewEditToggle" tip="Toggle source code edit view"/>
+		<icon name="viewTouchToggle" tip="Toggle touch view"/>
 		<icon name="viewBounceToggle_On" tip="Toggle viewing the current line in bounce view"/>
 		<icon name="viewBoolToggle_On" tip="Toggle viewing the current line in bool view"/>
 		<icon name="chainNew" tip="Create a new chain view window"/>
@@ -203,7 +203,7 @@
 		<icon name="selectSubtractMode_Unselected" tip="Trims out the new selected region from the current selection"/>
 		<icon name="selectUnionMode_Unselected" tip="Trims the current selection down to the union with the new selected region"/>
 		<icon name="selectAllCurrentDocument" tip="Selects all in the current document"/>
-		<icon name="viewSpreadsheet" tip="Switch to spreadsheet edit view"/>
+		<icon name="viewSpreadsheetToggle" tip="Toggle spreadsheet edit view"/>
 		<icon name="viewBounceToggle_Off" tip="Toggle viewing the current line in bounce view"/>
 		<icon name="viewBoolToggle_Off" tip="Toggle viewing the current line in bool view"/>
 		<icon name="chainAddSpreadsheet" tip="Add visible data from the current spreadsheet view to the active chain view window"/>
@@ -232,5 +232,9 @@
 		<icon name="stepSetCurrentHorizontal" tip="Set the next source code command to execute horizontally"/>
 		<icon name="chainAddBreadcrumbsAndDeltas" tip="Add breadcrumbs and deltas to the active chain view window"/>
 		<icon name="chainAddBreadcrumbsDeltasOnly" tip="Add breadcrumb deltas to the active chain view window"/>
+		<icon name="viewEdit" tip="Switch to source code edit view"/>
+		<icon name="viewTouch" tip="Switch to touch view"/>
+		<icon name="viewSpreadsheet" tip="Switch to spreadsheet edit view"/>
+		<icon name="resizer" tip="Resize the control"/>
 	<icons>
 </vdebug>
