@@ -222,8 +222,8 @@
 		<icon name="vvmDebuggers" tip="View the multiple VVM debugger instance running"/>
 		<icon name="vvmLink" tip="Link this debugger instance to another debugger instance"/>
 		<icon name="vvmLinkDelete" tip="Delete a link to another debugger instance"/>
-		<icon name="breadcrumbsDeltaPrev" tip="Move to previous breadcrumb which had a delta"/>
-		<icon name="breadcrumbsDeltaNext" tip="Move to next breadcrumb which had a delta"/>
+		<icon name="breadcrumbsDeltaPrev" tip="Move to previous breadcrumb in the current document which had a delta"/>
+		<icon name="breadcrumbsDeltaNext" tip="Move to next breadcrumb in the current document which had a delta"/>
 		<icon name="vvmNext" tip="Move to next debugger instance"/>
 		<icon name="vvmPrev" tip="Move to previous debugger instance"/>
 		<icon name="chainAddBreadcrumbs" tip="Add breadcrumbs to the active chain view window"/>
@@ -236,5 +236,7 @@
 		<icon name="viewTouch" tip="Switch to touch view"/>
 		<icon name="viewSpreadsheet" tip="Switch to spreadsheet edit view"/>
 		<icon name="resizer" tip="Resize the control"/>
+		<icon name="breadcrumbsDeltaPrevDocument" tip="Move to previous breadcrumb which had a delta"/>
+		<icon name="breadcrumbsDeltaNextDocument" tip="Move to next breadcrumb which had a delta"/>
 	<icons>
 </vdebug>
