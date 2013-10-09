@@ -206,7 +206,7 @@
 		<icon name="viewSpreadsheetToggle" tip="Toggle spreadsheet edit view"/>
 		<icon name="viewBounceToggle_Off" tip="Toggle viewing the current line in bounce view"/>
 		<icon name="viewBoolToggle_Off" tip="Toggle viewing the current line in bool view"/>
-		<icon name="chainAddSpreadsheet" tip="Add visible data from the current spreadsheet view to the active chain view window"/>
+		<icon name="chainAddSpreadsheet" tip="Add data from the current spreadsheet view to the active chain view window"/>
 		<icon name="selectMode_Selected" tip="Unselect anything selected, and select only the new region"/>
 		<icon name="selectAddMode_Selected" tip="Adds the new selected region to the current selection"/>
 		<icon name="selectSubtractMode_Selected" tip="Trims out the new selected region from the current selection"/>
@@ -221,7 +221,7 @@
 		<icon name="breadcrumbsClear" tip="Enable breadcrumbs deltas"/>
 		<icon name="vvmDebuggers" tip="View the multiple VVM debugger instance running"/>
 		<icon name="vvmLink" tip="Link this debugger instance to another debugger instance"/>
-		<icon name="vvmLinkDelete" tip="Delete a link to another debugger instance"/>
+		<icon name="chainPursue" tip="Add pursue line data to the active chain view window"/>
 		<icon name="breadcrumbsDeltaPrev" tip="Move to previous breadcrumb in the current document which had a delta"/>
 		<icon name="breadcrumbsDeltaNext" tip="Move to next breadcrumb in the current document which had a delta"/>
 		<icon name="vvmNext" tip="Move to next debugger instance"/>
@@ -238,5 +238,13 @@
 		<icon name="resizer" tip="Resize the control"/>
 		<icon name="breadcrumbsDeltaPrevDocument" tip="Move to previous breadcrumb which had a delta"/>
 		<icon name="breadcrumbsDeltaNextDocument" tip="Move to next breadcrumb which had a delta"/>
+		<icon name="pursueDeltaPrev" tip="Move to the previous delta in the current pursue"/>
+		<icon name="pursueDeltaNext" tip="Move to the next delta in the current pursue"/>
+		<icon name="deltaPrev" tip="Move to the previous delta"/>
+		<icon name="deltaNext" tip="Move to the next delta"/>
+		<icon name="chainPursueDeltas" tip="Add pursue deltas data to the active chain view window"/>
+		<icon name="roundRed"/>
+		<icon name="roundGrn"/>
+		<icon name="roundBlu"/>
 	<icons>
 </vdebug>
