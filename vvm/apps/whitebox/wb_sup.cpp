@@ -50,7 +50,7 @@
 									u32 tnWidthMax, u32 tnHeightMax,
 									u32 foreColor, u32 backColor,
 									bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder,
-									SCallbacks* callbacks	)
+									SCallbacksW* screenCallbacks	)
 	{
 		u64 lisw;
 
@@ -71,7 +71,7 @@
 											0, 0, tnWidth, 32, 4,
 											foreColor, backColor,
 											tlResizable, tlMovable, tlClosable, tlVisible, tlBorder,
-											callbacks);
+											screenCallbacks);
 
 // TODO:  Append the unique ID on here to the caption if there is more than one instance running
 		// All done
@@ -86,9 +86,10 @@
 // Set the callbacks to an empty/null state
 //
 //////
-	void iwb_initializeCallbacks(SCallbacks* tcb)
+	void iwb_initializeCallbacks(SCallbacksW* tcbw, SCallbacks* tcb)
 	{
-		memset(tcb, 0, sizeof(SCallbacks));
+		if (tcbw)		memset(tcbw, 0, sizeof(SCallbacksW));
+		if (tcb)		memset(tcb,  0, sizeof(SCallbacks));
 	}
 
 
@@ -104,7 +105,7 @@
 		//////////
 		// Physically build the screen
 		//////
-			if (!iiwb_createScreenCanvas(tnUniqueId, 848, 480, &tsWbScreen->screen, &tsWbScreen->canvas, &tsWbScreen->callbacks))
+			if (!iiwb_createScreenCanvas(tnUniqueId, 848, 480, &tsWbScreen->screen, &tsWbScreen->screenCallbacks, &tsWbScreen->canvas, &tsWbScreen->canvasCallbacks))
 				return(false);	// Failure allocating OS window, or screen or canvas
 
 
@@ -137,7 +138,7 @@
 		//////////
 		// Physically build the screen
 		//////
-			if (!iiwb_createScreenCanvas(tnUniqueId, 212, 480, &tsWbScreen->screen, &tsWbScreen->canvas, &tsWbScreen->callbacks))
+			if (!iiwb_createScreenCanvas(tnUniqueId, 212, 480, &tsWbScreen->screen, &tsWbScreen->screenCallbacks, &tsWbScreen->canvas, &tsWbScreen->canvasCallbacks))
 				return(false);	// Failure allocating OS window, or screen or canvas
 
 
@@ -170,7 +171,7 @@
 		//////////
 		// Physically build the screen
 		//////
-			if (!iiwb_createScreenCanvas(tnUniqueId, 848, 160, &tsWbScreen->screen, &tsWbScreen->canvas, &tsWbScreen->callbacks))
+			if (!iiwb_createScreenCanvas(tnUniqueId, 848, 160, &tsWbScreen->screen, &tsWbScreen->screenCallbacks, &tsWbScreen->canvas, &tsWbScreen->canvasCallbacks))
 				return(false);	// Failure allocating OS window, or screen or canvas
 
 
@@ -316,7 +317,7 @@
 // Build the physical OS-layer window, and VVM-layer screen and canvas
 //
 //////
-	bool iiwb_createScreenCanvas(u64 tnUniqueId, u32 tnWidth, u32 tnHeight, SScreen** tsScreen, SCanvas** tsCanvas, SCallbacks* callbacks)
+	bool iiwb_createScreenCanvas(u64 tnUniqueId, u32 tnWidth, u32 tnHeight, SScreen** tsScreen, SCallbacksW* screenCallbacks, SCanvas** tsCanvas, SCallbacks* canvasCallbacks)
 	{
 		u64			lisw, lnOssWindowId, lnScreen;
 		u32			foreColor, backColor;
@@ -336,8 +337,8 @@
 		//////////
 		// Callbacks for the screen
 		//////
-			iwb_initializeCallbacks(callbacks);
-			callbacks->_callback_keyDown = (u64)&iwb_callbackKeyDown;
+			iwb_initializeCallbacks(screenCallbacks, canvasCallbacks);
+			screenCallbacks->keyboard._callback_down = (u64)&iwb_callbackKeyDown;
 
 
 		//////////
@@ -351,7 +352,7 @@
 												-1, -1, 
 												foreColor, backColor,
 												false, true, false, true, true,
-												callbacks		);
+												screenCallbacks	);
 
 			// If we have a screen structure, create it
 			if (lisw)

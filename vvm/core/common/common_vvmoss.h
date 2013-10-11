@@ -326,6 +326,12 @@
 	const s8		cgcOssBxmlAttributeSha1[]								= "oss_bxmlaSha1";
 	const s8		cgcOssBxmlAttributeSha1Tag[]							= "oss_bxmlaSha1Tag";
 	const s8		cgcOssBxmlAttributeSha1Data[]							= "oss_bxmlaSha1Data";
+	const s8		cgcOssBxmlAttributeGetString[]							= "oss_bxmlaGetString";
+	const s8		cgcOssBxmlAttributeGetU32[]								= "oss_bxmlaGetU32";
+	const s8		cgcOssBxmlAttributeGetU64[]								= "oss_bxmlaGetU64";
+	const s8		cgcOssBxmlAttributeGetUBool[]							= "oss_bxmlaGetBool";
+	const s8		cgcOssBxmlAttributeGetF32[]								= "oss_bxmlaGetF32";
+	const s8		cgcOssBxmlAttributeGetF64[]								= "oss_bxmlaGetF64";
 
 	const s8		cgcOssBxmlAttributeGetNext[]							= "oss_bxmlaGetNext";
 	const s8		cgcOssBxmlAttributeGetPrev[]							= "oss_bxmlaGetPrev";
@@ -748,6 +754,13 @@
 		u64				(CALLTYPE *oss_bxmlaSha1)							(SBxml*  bxml,  u8 sha20Bytes[20]);
 		u64				(CALLTYPE *oss_bxmlaSha1Tag)						(SBxml*  bxml,  u8 sha20Bytes[20]);
 		u64				(CALLTYPE *oss_bxmlaSha1Data)						(SBxml*  bxml,  u8 sha20Bytes[20]);
+		u8*				(CALLTYPE *oss_bxmlaGetString)						(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength, u32* tnStringLength);
+		u32				(CALLTYPE *oss_bxmlaGetU32)							(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength);
+		u64				(CALLTYPE *oss_bxmlaGetU64)							(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength);
+		bool			(CALLTYPE *oss_bxmlaGetBool)						(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength);
+		f32				(CALLTYPE *oss_bxmlaGetF32)							(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength);
+		f64				(CALLTYPE *oss_bxmlaGetF64)							(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength);
+
 
 		// For 2-way navigation through the attributes (can be done manually, but these expressly do it
 		SBxmla*			(CALLTYPE *oss_bxmlaGetNext)						(SBxmla* bxmla);
@@ -1082,6 +1095,12 @@
 		(void *)&oss_bxmlaSha1,												(void *)cgcOssBxmlAttributeSha1,
 		(void *)&oss_bxmlaSha1Tag,											(void *)cgcOssBxmlAttributeSha1Tag,
 		(void *)&oss_bxmlaSha1Data,											(void *)cgcOssBxmlAttributeSha1Data,
+		(void *)&oss_bxmlaGetString,										(void *)cgcOssBxmlAttributeGetString,
+		(void *)&oss_bxmlaGetU32,											(void *)cgcOssBxmlAttributeGetU32,
+		(void *)&oss_bxmlaGetU64,											(void *)cgcOssBxmlAttributeGetU64,
+		(void *)&oss_bxmlaGetBool,											(void *)cgcOssBxmlAttributeGetUBool,
+		(void *)&oss_bxmlaGetF32,											(void *)cgcOssBxmlAttributeGetF32,
+		(void *)&oss_bxmlaGetF64,											(void *)cgcOssBxmlAttributeGetF64,
 
 		(void *)&oss_bxmlaGetNext,											(void *)cgcOssBxmlAttributeGetNext,
 		(void *)&oss_bxmlaGetPrev,											(void *)cgcOssBxmlAttributeGetPrev,

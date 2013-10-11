@@ -46,15 +46,15 @@
 
 
 	// wb_sup.h
-	u64					iwb_buildScreenTemplate							(u64 tnUniqueId, s8* tcCaption, u32 tnCaptionLength, u32 tnX, u32 tnY, u32 tnWidth, u32 tnHeight, u32 tnWidthMin, u32 tnHeightMin, u32 tnWidthMax, u32 tnHeightMax, u32 foreColor, u32 backColor, bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder, SCallbacks* tsCallbacks);
-	void				iwb_initializeCallbacks							(SCallbacks* tcb);
+	u64					iwb_buildScreenTemplate							(u64 tnUniqueId, s8* tcCaption, u32 tnCaptionLength, u32 tnX, u32 tnY, u32 tnWidth, u32 tnHeight, u32 tnWidthMin, u32 tnHeightMin, u32 tnWidthMax, u32 tnHeightMax, u32 foreColor, u32 backColor, bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder, SCallbacksW* tsScreenCallbacks);
+	void				iwb_initializeCallbacks							(SCallbacksW* tcbw, SCallbacks* tcb);
 	bool				iwb_buildNewMainScreen							(u64 tnUniqueId, SWBScreen* tsWbScreen);
 	bool				iwb_buildNewMediaScreen							(u64 tnUniqueId, SWBScreen* tsWbScreen);
 	bool				iwb_buildNewChannelScreen						(u64 tnUniqueId, SWBScreen* tsWbScreen);
 	bool				iiwb_createMainRegions							(SCanvas* canvas);
 	bool				iiwb_createMediaRegions							(SCanvas* canvas);
 	bool				iiwb_createChannelRegions						(SCanvas* canvas);
-	bool				iiwb_createScreenCanvas							(u64 tnUniqueId, u32 tnWidth, u32 tnHeight, SScreen** tsScreen, SCanvas** tsCanvas, SCallbacks* callbacks);
+	bool				iiwb_createScreenCanvas							(u64 tnUniqueId, u32 tnWidth, u32 tnHeight, SScreen** tsScreen, SCallbacksW* screenCallbacks, SCanvas** tsCanvas, SCallbacks* canvasCallbacks);
 
 
 	// wb_cb.cpp (cb=callbacks)

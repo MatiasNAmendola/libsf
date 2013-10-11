@@ -391,6 +391,12 @@
 		u64 CALLTYPE			oss_bxmlaSha1								(SBxml* bxml, u8 sha20Bytes[20]);
 		u64 CALLTYPE			oss_bxmlaSha1Tag							(SBxml* bxml, u8 sha20Bytes[20]);
 		u64 CALLTYPE			oss_bxmlaSha1Data							(SBxml* bxml, u8 sha20Bytes[20]);
+		u8* CALLTYPE			oss_bxmlaGetString							(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength, u32* tnStringLength);
+		u32 CALLTYPE			oss_bxmlaGetU32								(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength);
+		u64 CALLTYPE			oss_bxmlaGetU64								(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength);
+		bool CALLTYPE			oss_bxmlaGetBool							(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength);
+		f32 CALLTYPE			oss_bxmlaGetF32								(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength);
+		f64 CALLTYPE			oss_bxmlaGetF64								(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength);
 
 		// For 2-way navigation through the attributes (can be done manually, but these expressly do it
 		SBxmla* CALLTYPE		oss_bxmlaGetNext					(SBxmla* bxmla);

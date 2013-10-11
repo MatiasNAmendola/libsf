@@ -52,6 +52,13 @@
 
 		bool CALLTYPE			vvmt_executeTests										(u64 lnHandleLog);
 
+//////////
+// Temporarily hijacked to convey some conversion from the existing icon.bmp files and their
+// corresponding bxml files, to extract individual icons into a single BXML which is written
+// to disk.
+//////////
+void hijack_toLoadIcons(void);
+
 		void CALLTYPE			vvmt_enableBreakpoints									(void);
 		void CALLTYPE			vvmt_disableBreakpoints									(void);
 

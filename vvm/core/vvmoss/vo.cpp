@@ -8106,6 +8106,36 @@ _asm nop;
 		return(ioss_bxmlAttributeSha1Data(bxml, sha20Bytes));
 	}
 
+	u8* CALLTYPE oss_bxmlaGetString(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength, u32* tnStringLength)
+	{
+		return(NULL);
+	}
+
+	u32 CALLTYPE oss_bxmlaGetU32(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength)
+	{
+		return(NULL);
+	}
+
+	u64 CALLTYPE oss_bxmlaGetU64(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength)
+	{
+		return(NULL);
+	}
+
+	bool CALLTYPE oss_bxmlaGetBool(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength)
+	{
+		return(NULL);
+	}
+
+	f32 CALLTYPE oss_bxmlaGetF32(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength)
+	{
+		return(NULL);
+	}
+
+	f64 CALLTYPE oss_bxmlaGetF64(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength)
+	{
+		return(NULL);
+	}
+
 
 
 

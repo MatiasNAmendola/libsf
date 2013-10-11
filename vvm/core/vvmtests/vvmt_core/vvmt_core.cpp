@@ -184,6 +184,13 @@
 	{
 		bool llResult;
 
+//////////
+// Temporarily hijacked to convey some conversion from the existing icon.bmp files and their
+// corresponding bxml files, to extract individual icons into a single BXML which is written
+// to disk.
+//////////
+hijack_toLoadIcons();
+return(false);
 
 		//////////
 		// If any test fails, early out
@@ -198,6 +205,65 @@
 		// Indicate total success or not
 		//////
 			return(llResult);
+	}
+
+
+
+
+//////////
+// Temporarily hijacked to convey some conversion from the existing icon.bmp files and their
+// corresponding bxml files, to extract individual icons into a single BXML which is written
+// to disk.
+//////////
+	void hijack_toLoadIcons(void)
+	{
+		u32			lnUlX, lnUlY, lnWidth, lnHeight, lnStrideX, lnStrideY, lnFilenameLength;
+		u64			lnNumread, lnErrorOffset, lnErrorCode;
+		SBxml*		vdbi;
+		SBxml*		icons;
+		SBxml*		icon;
+		csu8p		file;
+		SCanvas*	canvasIcons;
+		s8			buffer[256];
+
+
+		// Load the VDEBUG_ICONS.BXML file
+		// file="vdebug_icons.bmp" ulx="2" uly="2" width="36" height="36" stridex="38" stridey="38"
+		vdbi = oss_bxmlLoad("\\libsf\\vvm\\core\\vdebug\\graphics\\vdebug_icons.bxml", -1, &lnNumread, &lnErrorOffset, &lnErrorCode);
+		if (!vdbi)
+			_asm int 3;
+
+		// Iterate through loading the icons
+		icons = oss_bxmlNodeGetFirstChild(vdbi);
+		if (!icons)
+			_asm int 3;
+
+		// Grab the name of the icon file, and the associated integers
+		file._u8	= oss_bxmlaGetString(icons,	"file",		-1, &lnFilenameLength);
+		lnUlX		= oss_bxmlaGetU32(icons,	"ulx",		-1);
+		lnUlY		= oss_bxmlaGetU32(icons,	"uly",		-1);
+		lnWidth		= oss_bxmlaGetU32(icons,	"width",	-1);
+		lnHeight	= oss_bxmlaGetU32(icons,	"height",	-1);
+		lnStrideX	= oss_bxmlaGetU32(icons,	"stridex",	-1);
+		lnStrideY	= oss_bxmlaGetU32(icons,	"stridey",	-1);
+		// Validate sanity
+		if (!file._u8 || lnFilenameLength > sizeof(buffer) || lnUlX == -1 || lnUlY == -1 || lnWidth == -1 || lnHeight == -1 || lnStrideX == -1 || lnStrideY == -1)
+			_asm int 3;
+
+		// Open the file
+		memset(&buffer, 0, sizeof(buffer));
+		memcpy(buffer, file._s8, lnFilenameLength);
+		oss_loadBitmapFromDisk(buffer, &canvasIcons, &lnWidth, &lnHeight, rgba(0,0,0,0));
+
+		// Iterate through each icon, loading its data
+		icon = oss_bxmlNodeGetFirstChild(icons);
+		while (icon)
+		{
+			// Extract this icon from the icon master file
+
+			// Move to next icon
+			icon = oss_bxmlNodeGetNext(icon);
+		}
 	}
 
 

@@ -40,6 +40,8 @@
 struct SWBScreen
 {
 	SScreen*		screen;
+	SCallbacksW		screenCallbacks;
+
 	SCanvas*		canvas;
-	SCallbacks		callbacks;
+	SCallbacks		canvasCallbacks;
 };
