@@ -713,7 +713,7 @@
 		{
 			// We create a canvas of the current size
 			lc = NULL;
-			ioss_createCanvas(tc->ll.uniqueId, &tc->state, tc->width, tc->height, tc->backColor, &lc);
+			ioss_createCanvas(tc->ll.uniqueId, &tc->state, tc->width, tc->height, tc->backColor.color, &lc);
 			if (lc)
 				oss_associateCanvasWithCanvas(tc, lc);		// Associate this canvas with this canvas
 		}
@@ -1189,6 +1189,111 @@
 
 //////////
 //
+// Creates a cask of the indicated size and type.
+// Refer to the _VVMOSS_CASK_* constants.
+//
+//////
+	SCask* CALLTYPE oss_caskDefineStandard(u32 tnHeight, u32 tnWidth, u32 tnLeftStyle, u32 tnLeftState, u32 tnLeftPipCount, u32 tnLeftColor, csu8p tcLeftText, u32 tnRightStyle, u32 tnRightState, u32 tnRightPipCount, u32 tnRightColor, csu8p tcRightText)
+	{
+		return(NULL);
+	}
+
+
+
+
+//////////
+//
+// Cask
+//
+//////
+	SCask* CALLTYPE oss_caskDefineEncompassingRectangle(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SRectXYXY* tsOuter)
+	{
+		return(NULL);
+	}
+
+
+
+
+//////////
+//
+// Cask
+//
+//////
+	SCask* CALLTYPE oss_caskDefineUpRectangle(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SCask* caskFrom, u32 tnFromPip, SRectXYXY* tsOuter)
+	{
+		return(NULL);
+	}
+
+
+
+
+//////////
+//
+// Cask
+//
+//////
+	SCask* CALLTYPE oss_caskDefineDownRectangle(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SCask* caskFrom, u32 tnFromPip, SRectXYXY* tsOuter)
+	{
+		return(NULL);
+	}
+
+
+
+
+//////////
+//
+// Cask
+//
+//////
+	SCaskPip* CALLTYPE oss_caskSetPipByValues(SCask* cask, bool tlLeft, u32 tnPip, SRGBA tnPipColorNeutral, SRGBA tnPipColorOver, SRGBA tnPipColorClick, u64 tnEnterCallback, u64 tnLeaveCallback, u64 tnHoverCallback, u64 tnClickCallback)
+	{
+		return(NULL);
+	}
+
+
+
+
+//////////
+//
+// Cask
+//
+//////
+	SCaskPip* CALLTYPE oss_caskSetPipByStruct(SCask* cask, bool tlLeft, u32 tnPip, SCaskPip* caskPip, bool tlCreateCopy)
+	{
+		return(NULL);
+	}
+
+
+
+
+//////////
+//
+// Cask
+//
+//////
+	SCask* CALLTYPE oss_caskCreate(SCask* cask, bool tlCreateCopy)
+	{
+		return(NULL);
+	}
+
+
+
+
+//////////
+//
+// Cask
+//
+//////
+	SCanvas* CALLTYPE oss_caskRefresh(SCask* cask)
+	{
+		return(NULL);
+	}
+
+
+
+
+//////////
+//
 // Indicate a mouse event callback.
 //
 //////
@@ -1618,8 +1723,8 @@
 			tisw->ncBorder					= ncBorder;
 
 			// Colors
-			tisw->foreColor					= tnForeColor;
-			tisw->backColor					= tnBackColor;
+			tisw->foreColor.color			= tnForeColor;
+			tisw->backColor.color			= tnBackColor;
 
 			// Flags
 			tisw->resizable					= tlResizable;

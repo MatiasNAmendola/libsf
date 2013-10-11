@@ -903,7 +903,7 @@ _asm int 3;
 				SelectObject((HDC)w->isw.osDC, (HGDIOBJ)w->isw.osBitmap);
 
 			// Initialize the background color
-			ioss_initializeBackground(w->isw.width, w->isw.height, w->isw.backColor, (s8*)w->isw.osBitData, lnActualWidth);
+			ioss_initializeBackground(w->isw.width, w->isw.height, w->isw.backColor.color, (s8*)w->isw.osBitData, lnActualWidth);
 		}
 	}
 
@@ -1600,7 +1600,7 @@ _asm int 3;
 				SelectObject((HDC)lnNewDC, (HGDIOBJ)lnNewBitmap);
 
 			// Initialize our new background to the default back color
-			ioss_initializeBackground(tnWidth, tnHeight, w->isw.backColor, lbd, lnActualWidth);
+			ioss_initializeBackground(tnWidth, tnHeight, w->isw.backColor.color, lbd, lnActualWidth);
 
 			// Use Windows' native BitBlt algorithm to copy
 			BitBlt(	(HDC)lnNewDC,		0, 0, min(tnWidth, w->isw.width), min(tnHeight, w->isw.height),
@@ -2863,6 +2863,14 @@ _asm int 3;
 // Designed to be self-contained.
 // Directed from WM_CREATE on message window startup, specifically for this timer.
 // Should not be called directly.
+//
+// For higher resolution timers:
+//		HANDLE CreateTimedEvent(BOOL bManualReset, LPCTSTR lpTimerName);
+//		long long Time(void);
+//		int SetTimedEvent(HANDLE hTimerEvent, long long TimerDueTime, long long TimerPeriod);
+//		int CancelTimedEvent(HANDLE hTimerEvent);
+//		HANDLE OpenTimedEvent(LPCTSTR lpTimerName);
+//		int DeleteTimedEvent(HANDLE hTimerEvent);
 //
 //////
 	DWORD CALLTYPE iioss_1MsTimerThread(LPVOID lpParameter)
@@ -4627,7 +4635,7 @@ continueToNextAttribute:
 			// Store the properties
 			lc->width			= tnWidth;													// width
 			lc->height			= tnHeight;													// height
-			lc->backColor		= tnBackColor;												// If transparency, we will use this default color
+			lc->backColor.color	= tnBackColor;												// If transparency, we will use this default color
 
 			// Create this canvas's refresh semaphore
 			lc->semRefresh		= oss_createSemaphore();
@@ -5505,8 +5513,8 @@ continueToNextAttribute:
 
 // TODO:  this algorithm needs to more properly consider transparency, of the source to destination, along with individual bits within
 		// Derive the colors from the back color
-		oss_deriveRGBA(tsDst->backColor, &redd, &grnd, &blud, &malp);
-		alp		= (f32)alp(tsSrc->backColor) / 255.0f;
+		oss_deriveRGBA(tsDst->backColor.color, &redd, &grnd, &blud, &malp);
+		alp		= (f32)tsSrc->backColor.alp / 255.0f;
 		malp	= 1.0f - alp;
 
 
@@ -5670,8 +5678,8 @@ continueToNextAttribute:
 
 // TODO:  this algorithm needs to more properly consider transparency, of the source to destination, along with individual bits within
 		// Derive the colors from the back color
-		oss_deriveRGBA(tsDst->backColor, &redd, &grnd, &blud, &malp);
-		alp		= (f32)alp(tsSrc->backColor) / 255.0f;
+		oss_deriveRGBA(tsDst->backColor.color, &redd, &grnd, &blud, &malp);
+		alp		= (f32)tsSrc->backColor.alp / 255.0f;
 		malp	= 1.0f - alp;
 
 		// Derive our size for the source rectangular region

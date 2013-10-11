@@ -108,6 +108,15 @@
 		void CALLTYPE			oss_canvasGetRegionsList					(SCanvas* tc, SRegion** regions, SEvent** events, u32* count);
 		u64 CALLTYPE			oss_canvasRemoveRegion						(SCanvas* tc, SRegion* region);
 
+		SCask* CALLTYPE			oss_caskDefineStandard						(u32 tnHeight, u32 tnWidth, u32 tnLeftStyle, u32 tnLeftState, u32 tnLeftPipCount, u32 tnLeftColor, csu8p tcLeftText, u32 tnRightStyle, u32 tnRightState, u32 tnRightPipCount, u32 tnRightColor, csu8p tcRightText);
+		SCask* CALLTYPE			oss_caskDefineEncompassingRectangle			(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SRectXYXY* tsOuter);
+		SCask* CALLTYPE			oss_caskDefineUpRectangle					(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SCask* caskFrom, u32 tnFromPip, SRectXYXY* tsOuter);
+		SCask* CALLTYPE			oss_caskDefineDownRectangle					(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SCask* caskFrom, u32 tnFromPip, SRectXYXY* tsOuter);
+		SCaskPip* CALLTYPE		oss_caskSetPipByValues						(SCask* cask, bool tlLeft, u32 tnPip, SRGBA tnPipColorNeutral, SRGBA tnPipColorOver, SRGBA tnPipColorClick, u64 tnEnterCallback, u64 tnLeaveCallback, u64 tnHoverCallback, u64 tnClickCallback);
+		SCaskPip* CALLTYPE		oss_caskSetPipByStruct						(SCask* cask, bool tlLeft, u32 tnPip, SCaskPip* caskPip, bool tlCreateCopy);
+		SCask* CALLTYPE			oss_caskCreate								(SCask* cask, bool tlCreateCopy);
+		SCanvas* CALLTYPE		oss_caskRefresh								(SCask* cask);
+
 		u64 CALLTYPE			oss_screenMouseSetEventCallback				(u64 id, SCanvas* tc, SEvent* event);
 		u64 CALLTYPE			oss_screenMouseRemoveEventCallback			(u64 id, SCanvas* tc, SEvent* event);
 		void CALLTYPE			oss_screenMouseGetEventCallbacksList		(u64 id, SCanvas* tc, SEvent** events, u32* count);

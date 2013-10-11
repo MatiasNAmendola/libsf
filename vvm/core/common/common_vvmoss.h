@@ -42,6 +42,43 @@
 
 
 
+//////////
+//
+// Constants used by the VVMOSS.
+//
+//////
+	const u32		_VVMOSS_CASK_PIPS0										= 0;		// No pips, no coloring
+	const u32		_VVMOSS_CASK_PIPS1										= 1;		// One vertical pip, uses pip1 coloring
+	const u32		_VVMOSS_CASK_PIPS2										= 2;		// Two vertical pips, uses pip1 and pip2 coloring
+	const u32		_VVMOSS_CASK_PIPS3										= 3;		// Three vertical pips, uses pip1, pip2 and pip3 coloring
+
+	const u32		_VVMOSS_CASK_COLOR_ORANGE								= 1;		// Orange coloring
+	const u32		_VVMOSS_CASK_COLOR_RED									= 2;		// Red coloring
+	const u32		_VVMOSS_CASK_COLOR_BLUE									= 3;		// Blue coloring
+	const u32		_VVMOSS_CASK_COLOR_PURPLE								= 4;		// Purple coloring
+	const u32		_VVMOSS_CASK_COLOR_CYAN									= 5;		// Cyan coloring
+	const u32		_VVMOSS_CASK_COLOR_GREEN								= 6;		// Green coloring
+	const u32		_VVMOSS_CASK_COLOR_YELLOW								= 7;		// Yellow coloring
+	const u32		_VVMOSS_CASK_COLOR_GRAY									= 8;		// Gray coloring
+	const u32		_VVMOSS_CASK_COLOR_WHITE								= 9;		// White coloring
+	const u32		_VVMOSS_CASK_COLOR_BLACK								= 10;		// Black coloring
+
+	const u32		_VVMOSS_CASK_STYLE_ROUND								= 0x10;		// (|cask|)
+	const u32		_VVMOSS_CASK_STYLE_SQUARE								= 0x20;		// [|cask|]
+	const u32		_VVMOSS_CASK_STYLE_DIAMOND								= 0x30;		// <|cask|>
+
+	const u32		_VVMOSS_CASK_STATE_CLOSED								= 0x100;	// ()
+	const u32		_VVMOSS_CASK_STATE_MINIMAL								= 0x200;	// (|)
+	const u32		_VVMOSS_CASK_STATE_TEXT									= 0x300;	// (|text|)
+	const u32		_VVMOSS_CASK_STATE_EXTENDED_TEXT						= 0x400;	// (|=|text|=|) with optional text on left and right sides
+
+	const u32		_VVMOSS_CASK_TYPE_STANDARD								= 0x1000;	// A cask indicated by the type on both sides
+	const u32		_VVMOSS_CASK_TYPE_ENCOMPASSING_RECTANGLE				= 0x2000;	// A semi-round cask which encompasses a rectangle which can be populated with text
+	const u32		_VVMOSS_CASK_TYPE_UP_RECTANGLE							= 0x3000;	// The part which extends up and right from a cask
+	const u32		_VVMOSS_CASK_TYPE_DOWN_RECTANGLE						= 0x4000;	// The part which extends down and left from a cask
+
+
+
 
 //////////
 //
@@ -98,6 +135,15 @@
 	const s8		cgcOssCanvasSetRegionAndEventCallback[]					= "oss_canvasSetRegionAndEventCallback";
 	const s8		cgcOssCanvasGetRegionsList[]							= "oss_canvasGetRegionsList";
 	const s8		cgcOssCanvasRemoveRegion[]								= "oss_canvasRemoveRegion";
+
+	const s8		cgcOssCaskDefineStandard[]								= "oss_caskDefineStandard";
+	const s8		cgcOssCaskDefineEncompassingRectangle[]					= "oss_caskDefineEncompassingRectangle";
+	const s8		cgcOssCaskDefineUpRectangle[]							= "oss_caskDefineUpRectangle";
+	const s8		cgcOssCaskDefineDownRectangle[]							= "oss_caskDefineDownRectangle";
+	const s8		cgcOssCaskSetPipByValues[]								= "oss_caskSetPipByValues";
+	const s8		cgcOssCaskSetPipByStruct[]								= "oss_caskSetPipByStruct";
+	const s8		cgcOssCaskCreate[]										= "oss_caskCreate";
+	const s8		cgcOssCaskRefresh[]										= "oss_caskRefresh";
 
 	const s8		cgcOssScreenMouseSetEventCallback[]						= "oss_screenMouseSetEventCallback";
 	const s8		cgcOssScreenMouseRemoveEventCallback[]					= "oss_screenMouseRemoveEventCallback";
@@ -415,6 +461,15 @@
 		u64				(CALLTYPE *oss_canvasSetRegionAndEventCallback)			(SCanvas* tc, SRegion*  region,  SEvent*  event);
 		void			(CALLTYPE *oss_canvasGetRegionsList)					(SCanvas* tc, SRegion** regions, SEvent** events, u32* count);
 		u64				(CALLTYPE *oss_canvasRemoveRegion)						(SCanvas* tc, SRegion* region);
+
+		SCask*			(CALLTYPE *oss_caskDefineStandard)						(u32 tnHeight, u32 tnWidth, u32 tnLeftStyle, u32 tnLeftState, u32 tnLeftPipCount, u32 tnLeftColor, csu8p tcLeftText, u32 tnRightStyle, u32 tnRightState, u32 tnRightPipCount, u32 tnRightColor, csu8p tcRightText);
+		SCask*			(CALLTYPE *oss_caskDefineEncompassingRectangle)			(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SRectXYXY* tsOuter);
+		SCask*			(CALLTYPE *oss_caskDefineUpRectangle)					(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SCask* caskFrom, u32 tnFromPip, SRectXYXY* tsOuter);
+		SCask*			(CALLTYPE *oss_caskDefineDownRectangle)					(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SCask* caskFrom, u32 tnFromPip, SRectXYXY* tsOuter);
+		SCaskPip*		(CALLTYPE *oss_caskSetPipByValues)						(SCask* cask, bool tlLeft, u32 tnPip, SRGBA tnPipColorNeutral, SRGBA tnPipColorOver, SRGBA tnPipColorClick, u64 tnEnterCallback, u64 tnLeaveCallback, u64 tnHoverCallback, u64 tnClickCallback);
+		SCaskPip*		(CALLTYPE *oss_caskSetPipByStruct)						(SCask* cask, bool tlLeft, u32 tnPip, SCaskPip* caskPip, bool tlCreateCopy);
+		SCask*			(CALLTYPE *oss_caskCreate)								(SCask* cask, bool tlCreateCopy);
+		SCanvas*		(CALLTYPE *oss_caskRefresh)								(SCask* cask);
 
 		u64				(CALLTYPE *oss_screenMouseSetEventCallback)				(u64 id, SCanvas* tc, SEvent* event);
 		u64				(CALLTYPE *oss_screenMouseRemoveEventCallback)			(u64 id, SCanvas* tc, SEvent* event);
@@ -827,6 +882,15 @@
 		(void *)&oss_canvasSetRegionAndEventCallback,						(void *)cgcOssCanvasSetRegionAndEventCallback,
 		(void *)&oss_canvasGetRegionsList,									(void *)cgcOssCanvasGetRegionsList,
 		(void *)&oss_canvasRemoveRegion,									(void *)cgcOssCanvasRemoveRegion,
+
+		(void *)&oss_caskDefineStandard,									(void *)cgcOssCaskDefineStandard,
+		(void *)&oss_caskDefineEncompassingRectangle,						(void *)cgcOssCaskDefineEncompassingRectangle,
+		(void *)&oss_caskDefineUpRectangle,									(void *)cgcOssCaskDefineUpRectangle,
+		(void *)&oss_caskDefineDownRectangle,								(void *)cgcOssCaskDefineDownRectangle,
+		(void *)&oss_caskSetPipByValues,									(void *)cgcOssCaskSetPipByValues,
+		(void *)&oss_caskSetPipByStruct,									(void *)cgcOssCaskSetPipByStruct,
+		(void *)&oss_caskCreate,											(void *)cgcOssCaskCreate,
+		(void *)&oss_caskRefresh,											(void *)cgcOssCaskRefresh,
 
 		(void *)&oss_screenMouseSetEventCallback,							(void *)cgcOssScreenMouseSetEventCallback,
 		(void *)&oss_screenMouseRemoveEventCallback,						(void *)cgcOssScreenMouseRemoveEventCallback,

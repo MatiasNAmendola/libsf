@@ -248,6 +248,9 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	struct SSysInfo;
 	struct SCanvas;
 	struct SScreen;
+	struct SRectXYWH;
+	struct SRectXYXY;
+	struct SRegion;
 
 
 
@@ -333,6 +336,31 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		};
 		u64				extra2;					// Data item 2
 	};
+
+	// Generic callback structure
+	struct SCallback
+	{
+		union
+		{
+			u64		_func;
+			bool	(*funcBool)	(SCallback* cb);
+			void	(*funcVoid)	(SCallback* cb);
+			//////
+			// Uses the following format for the callback:
+			//		void func(SCallback* cb)
+			//		bool func(SCallback* cb)
+			//////////
+		};
+
+		// Data items for this callback
+		void*		ptr;
+		union {
+			u64		extra;
+			u64		extra1;
+		};
+		u64			extra2;
+	};
+
 
 	// Generic callbacks
 	struct SCallbacks
@@ -632,7 +660,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 				u8		red;
 				u8		alp;					// Alpha
 			};
-			int			color;					// RGBA color in integer form
+			u32			color;					// RGBA color in integer form
 		};
 	};
 
@@ -643,6 +671,35 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		f32		red;
 		f32		alp;				// Alpha
 		f32		area;				// Holds area
+	};
+
+	struct SRectXYWH
+	{
+		u32		x;
+		u32		y;
+		u32		width;
+		u32		height;
+	};
+
+	struct SRectXYXY
+	{
+		u32		ulx;
+		u32		uly;
+		u32		lrx;
+		u32		lry;
+	};
+
+	struct SSize
+	{
+		union {
+			u32		width;
+			u32		w;
+		};
+
+		union {
+			u32		height;
+			u32		h;
+		};
 	};
 
 	struct SLLCallback
@@ -754,8 +811,8 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		u32				heightMax;							// Maximum height the window can have (including the border)
 
 		// Default colors
-		u32				foreColor;							// Default foreground color
-		u32				backColor;							// Default background color
+		SRGBA			foreColor;							// Default foreground color
+		SRGBA			backColor;							// Default background color
 
 		// Flags
 		bool			resizable;							// Is the window resizable?
@@ -921,7 +978,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		// All Canvas objects are always 32-bit RGBA format, even if they're ultimately rendered by the OS onto some lesser or greater color system
 		u32				width;					// width
 		u32				height;					// height
-		u32				backColor;				// A default back color to use for transparency operations
+		SRGBA			backColor;				// A default back color to use for transparency operations
 
 		// Bit buffers
 		SRGBA*			bd;						// buffer data
@@ -953,7 +1010,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		// Relative position to the associated parent
 		s32				x;						// Upper-left X coordinate
 		s32				y;						// Upper-left Y coordinate
-		u32				backColor;				// The instance's default back color to use for transparency operations (if state.useTransparency)
+		SRGBA			backColor;				// The instance's default back color to use for transparency operations (if state.useTransparency)
 
 		// Items related specifically for this one instance of the canvas (in addition to the ones related to the canvas)
 		SStartEnd		canvasList;				// Pointer to the first SCanvasList entry of this canvasList instance
@@ -1068,4 +1125,72 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 			u64		_event;
 			void	(CALLTYPE *event)(SEvent* te, u64 tnSignal, u64 tnValue, u64 tnExtra);
 		};
+	};
+
+
+
+
+//////////
+//
+// Cask structures
+//
+//////
+	// Refer to _VVMOSS_CASK_* constants
+	struct SCaskPip
+	{
+		bool		active;						// Is this pip active?
+
+		SRectXYXY	rect;						// The coordinate within the cask
+		SRegion		foo;
+
+		SRGBA		colorNeutral;				// What color is displayed when there is no mouse activity?
+		SRGBA		colorOver;					// What color is displayed when the mouse moves over it?
+		SRGBA		colorClick;					// What color is displayed when the user clicks down on it?
+
+		SCallback*	enter;						// Called when the pip is entered
+		SCallback*	leave;						// Called when the pip is left
+		SCallback*	hover;						// Called when the pip is hovered over
+		SCallback*	click;						// Called when the pip is clicked
+	};
+
+	struct SCaskSide
+	{
+		u32			style;						// Closed, minimal, text, or extended text
+		u32			pips;						// Supports 0 through 3
+
+		//////////
+		// Only used for extended text
+		//////
+			csu8p		extendedText;			// If there is any text on this side, include it here
+
+		//////////
+		// Only used if the number of pips is not 0
+		//////
+			SCaskPip*	pip1;					// What to do when pip1 is acted upon
+			SCaskPip*	pip2;					// What to do when pip2 is acted upon
+			SCaskPip*	pip3;					// What to do when pip3 is acted upon
+	};
+
+	struct SCask
+	{
+		u32			style;						// [Standard plus round, square, diamond coupled to information in left and right], or encompassing rectangle, up rectangle, or down rectangle (all of which use the fixed semi-rounded form)
+		SSize		size;						// If a standard cask, will be initially drawn in default resolution, and then scaled up or down to this level
+												// If height is -1, will be natural height of whatever is required.  If width is -1, then will use natural width as required for indicated type
+
+		//////////
+		// The canvas of the appropriately scaled item
+		//////
+			SCanvas*	canvas;
+
+		//////////
+		// Used only for standard types:
+		//////
+			csu8p		text;					// Cask middle text
+			SCaskSide*	left;					// Left-side cask information
+			SCaskSide*	right;					// Right-side cask information
+
+		//////////
+		// Only used internally
+		//////
+			SCanvas*	_canvasRaw;				// The canvas of the original un-scaled item.  This canvas is used to copy or scale into the canvas.
 	};
