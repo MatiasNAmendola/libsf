@@ -1,0 +1,65 @@
+<cask>
+	<icons file="cask_icons.bmp">
+		<icon x1="12" y1="2" x2="31" y2="38" name="caskRoundLeft"/>
+		<icon x1="33" y1="2" x2="52" y2="38" name="caskRoundRight"/>
+		<icon x1="12" y1="44" x2="31" y2="80" name="caskSquareLeft"/>
+		<icon x1="33" y1="44" x2="52" y2="80" name="caskSquareRight"/>
+		<icon x1="2" y1="86" x2="31" y2="122" name="caskDiamondLeft"/>
+		<icon x1="33" y1="86" x2="62" y2="122" name="caskDiamondRight"/>
+		<icon x1="93" y1="2" x2="128" y2="16" name="caskRoundExtendedLeft1"/>
+		<icon x1="93" y1="18" x2="128" y2="25" name="caskRoundExtendedLeft2"/>
+		<icon x1="93" y1="28" x2="128" y2="42" name="caskRoundExtendedLeft3Fixed"/>
+		<icon x1="93" y1="44" x2="128" y2="66" name="caskRoundExtendedLeft3Variable"/>
+		<icon x1="176" y1="2" x2="198" y2="16" name="caskRoundExtendedRight1"/>
+		<icon x1="176" y1="18" x2="198" y2="25" name="caskRoundExtendedRight2"/>
+		<icon x1="176" y1="28" x2="198" y2="42" name="caskRoundExtendedRight3Fixed"/>
+		<icon x1="176" y1="44" x2="198" y2="66" name="caskRoundExtendedRight3Variable"/>
+		<icon x1="130" y1="2" x2="160" y2="8" name="caskRoundExtendedLeftTopFixed"/>
+		<icon x1="163" y1="2" x2="175" y2="8" name="caskRoundExtendedRightTopFixed"/>
+		<icon x1="123" y1="68" x2="128" y2="76" name="caskRoundExtendedVerticalFiller"/>
+		<icon x1="130" y1="2" x2="160" y2="8" name="caskRoundExtendedLeft4"/>
+		<icon x1="163" y1="2" x2="175" y2="8" name="caskRoundExtendedRight4"/>
+		<icon x1="54" y1="7" x2="64" y2="16" name="pip3"/>
+		<icon x1="68" y1="7" x2="78" y2="20" name="pip2"/>
+		<icon x1="80" y1="7" x2="90" y2="33" name="pip1"/>
+		<icon x1="54" y1="44" x2="58" y2="79" name="textLeft"/>
+		<icon x1="60" y1="44" x2="64" y2="79" name="textMiddle"/>
+		<icon x1="66" y1="44" x2="70" y2="79" name="textRight"/>
+		<icon x1="72" y1="44" x2="76" y2="79" name="caskFiller"/>
+		<icon x1="64" y1="86" x2="68" y2="122" name="textExtendedLeft1"/>
+		<icon x1="70" y1="86" x2="74" y2="122" name="textExtendedFiller"/>
+		<icon x1="76" y1="86" x2="86" y2="122" name="textExtendedLeft2"/>
+		<icon x1="89" y1="86" x2="100" y2="122" name="textExtendedRight1"/>
+		<icon x1="102" y1="86" x2="106" y2="122" name="textExtendedRight2"/>
+		<color x="130" y="100" name="orange1"/>
+		<color x="130" y="106" name="orange2"/>
+		<color x="130" y="112" name="orange3"/>
+		<color x="135" y="100" name="red1"/>
+		<color x="135" y="106" name="red2"/>
+		<color x="135" y="112" name="red3"/>
+		<color x="140" y="100" name="blue1"/>
+		<color x="140" y="106" name="blue2"/>
+		<color x="140" y="112" name="blue3"/>
+		<color x="145" y="100" name="purple1"/>
+		<color x="145" y="106" name="purple2"/>
+		<color x="145" y="112" name="purple3"/>
+		<color x="150" y="100" name="cyan1"/>
+		<color x="150" y="106" name="cyan2"/>
+		<color x="150" y="112" name="cyan3"/>
+		<color x="155" y="100" name="green1"/>
+		<color x="155" y="106" name="green2"/>
+		<color x="155" y="112" name="green3"/>
+		<color x="160" y="100" name="yellow1"/>
+		<color x="160" y="106" name="yellow2"/>
+		<color x="160" y="112" name="yellow3"/>
+		<color x="165" y="100" name="gray1"/>
+		<color x="165" y="106" name="gray2"/>
+		<color x="165" y="112" name="gray3"/>
+		<color x="170" y="100" name="white1"/>
+		<color x="170" y="106" name="white2"/>
+		<color x="170" y="112" name="white3"/>
+		<color x="175" y="100" name="black1"/>
+		<color x="175" y="106" name="black2"/>
+		<color x="175" y="112" name="black3"/>
+	<icons>
+</cask>
