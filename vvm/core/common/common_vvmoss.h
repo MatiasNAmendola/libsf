@@ -436,9 +436,9 @@
 		SCanvas*		(CALLTYPE *oss_requestCanvasForScreen)					(SScreen* ts);
 		SCanvas*		(CALLTYPE *oss_requestCanvasForCanvas)					(SCanvas* tc);
 		SCanvas*		(CALLTYPE *oss_requestCanvas)							(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, u32 tnBackColor, bool tlIsActive, bool tlUseTransparency);
-		SRegion*		(CALLTYPE *oss_requestRegion)							(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, u32 tnWidth, u32 tnHeight, SCallbacks* callback, SStartEnd* events);
+		SRegion*		(CALLTYPE *oss_requestRegion)							(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, u32 tnWidth, u32 tnHeight, SCallbacksW* callback, SStartEnd* events);
 		SRegion*		(CALLTYPE *oss_requestDuplicateRegion)					(u64 tnAssociatedId, SRegion* templateRegion);
-		bool			(CALLTYPE *oss_requestCanvasAndRegion)					(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, u32 tnBackColor, bool tlIsActive, bool tlUseTransparency, SCanvas** tc, SRegion** tr, SCallbacks* callbacks, SStartEnd* events);
+		bool			(CALLTYPE *oss_requestCanvasAndRegion)					(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, u32 tnBackColor, bool tlIsActive, bool tlUseTransparency, SCanvas** tc, SRegion** tr, SCallbacksW* callbacks, SStartEnd* events);
 		SCanvasList* 	(CALLTYPE *oss_associateCanvasWithScreen)				(SScreen* ts, SCanvas* tc, bool tlMakeActive);
 		SCanvasList* 	(CALLTYPE *oss_associateCanvasWithCanvas)				(SCanvas* tcParent, SCanvas* tcChild);
 		SRegionList*	(CALLTYPE *oss_associateRegionWithCanvas)				(SCanvas* tc, SRegion* tr);
@@ -466,7 +466,7 @@
 		SCask*			(CALLTYPE *oss_caskDefineEncompassingRectangle)			(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SRectXYXY* tsOuter);
 		SCask*			(CALLTYPE *oss_caskDefineUpRectangle)					(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SCask* caskFrom, u32 tnFromPip, SRectXYXY* tsOuter);
 		SCask*			(CALLTYPE *oss_caskDefineDownRectangle)					(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SCask* caskFrom, u32 tnFromPip, SRectXYXY* tsOuter);
-		SCaskPip*		(CALLTYPE *oss_caskSetPipByValues)						(SCask* cask, bool tlLeft, u32 tnPip, SRGBA tnPipColorNeutral, SRGBA tnPipColorOver, SRGBA tnPipColorClick, u64 tnEnterCallback, u64 tnLeaveCallback, u64 tnHoverCallback, u64 tnClickCallback);
+		SCaskPip*		(CALLTYPE *oss_caskSetPipByValues)						(SCask* cask, bool tlLeft, u32 tnPip, SRGBA tnPipColorNeutral, SRGBA tnPipColorOver, SRGBA tnPipColorClick, u64 tnEnterCallback, u64 tnLeaveCallback, u64 tnHoverCallback, u64 tnClickCallback, bool tlCreateCopy);
 		SCaskPip*		(CALLTYPE *oss_caskSetPipByStruct)						(SCask* cask, bool tlLeft, u32 tnPip, SCaskPip* caskPip, bool tlCreateCopy);
 		SCask*			(CALLTYPE *oss_caskCreate)								(SCask* cask, bool tlCreateCopy);
 		SCanvas*		(CALLTYPE *oss_caskRefresh)								(SCask* cask);
@@ -494,7 +494,7 @@
 																					u32 ncUlx, u32 ncUly, u32 ncLrx, u32 ncLry, u32 ncBorder,
 																					u32 tnForeColor, u32 tnBackColor,
 																					bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder,
-																					SCallbacks* callbacks);
+																					SCallbacksW* callbacks);
 
 		bool			(CALLTYPE *oss_getScreenDimensions)						(u64 tnOssWindowId, u32* tnX, u32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin);
 		bool			(CALLTYPE *oss_setFocus)								(u64 tnScreenId);

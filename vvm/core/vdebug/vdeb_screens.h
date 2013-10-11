@@ -69,7 +69,7 @@
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
-		SCallbacks	lsCallbacks;
+		SCallbacksW	lsCallbacks;
 		u32			foreColor, backColor;
 
 
@@ -83,7 +83,7 @@
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
-		lsCallbacks._callback_mouseHover = (u64)&iScratchCallbackMouseHover;
+		lsCallbacks.mouse._callback_hover = (u64)&iScratchCallbackMouseHover;
 
 		// Request a screen
 		lisw = iBuildScreen(	tnUniqueId,
@@ -179,7 +179,7 @@
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
-		SCallbacks	lsCallbacks;
+		SCallbacksW	lsCallbacks;
 		u32			foreColor, backColor;
 
 
@@ -193,7 +193,7 @@
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
-		lsCallbacks._callback_mouseHover = (u64)&iProgramRegistersCallbackMouseHover;
+		lsCallbacks.mouse._callback_hover = (u64)&iProgramRegistersCallbackMouseHover;
 
 		// Request a screen
 		lisw = iBuildScreen(	tnUniqueId,
@@ -289,7 +289,7 @@
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
-		SCallbacks	lsCallbacks;
+		SCallbacksW	lsCallbacks;
 		u32			foreColor, backColor;
 
 
@@ -303,7 +303,7 @@
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
-		lsCallbacks._callback_mouseHover = (u64)&iControlRegistersCallbackMouseHover;
+		lsCallbacks.mouse._callback_hover = (u64)&iControlRegistersCallbackMouseHover;
 
 		// Request a screen
 		lisw = iBuildScreen(	tnUniqueId,
@@ -399,7 +399,7 @@
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
-		SCallbacks	lsCallbacks;
+		SCallbacksW	lsCallbacks;
 		u32			foreColor, backColor;
 
 
@@ -413,7 +413,7 @@
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
-		lsCallbacks._callback_mouseHover = (u64)&iIntegerRegistersCallbackMouseHover;
+		lsCallbacks.mouse._callback_hover = (u64)&iIntegerRegistersCallbackMouseHover;
 
 		// Request a screen
 		lisw = iBuildScreen(	tnUniqueId,
@@ -510,7 +510,7 @@
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
-		SCallbacks	lsCallbacks;
+		SCallbacksW	lsCallbacks;
 		u32			foreColor, backColor;
 
 
@@ -524,7 +524,7 @@
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
-		lsCallbacks._callback_mouseHover = (u64)&iIntegerRegistersCallbackMouseHover;
+		lsCallbacks.mouse._callback_hover = (u64)&iIntegerRegistersCallbackMouseHover;
 
 		// Request a screen
 		lisw = iBuildScreen(	tnUniqueId,
@@ -621,7 +621,7 @@
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
-		SCallbacks	lsCallbacks;
+		SCallbacksW	lsCallbacks;
 		u32			foreColor, backColor;
 
 
@@ -635,7 +635,7 @@
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
-		lsCallbacks._callback_mouseHover = (u64)&iStackCallbackMouseHover;
+		lsCallbacks.mouse._callback_hover = (u64)&iStackCallbackMouseHover;
 
 		// Request a screen
 		lisw = iBuildScreen(	tnUniqueId,
@@ -731,7 +731,7 @@
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
-		SCallbacks	lsCallbacks;
+		SCallbacksW	lsCallbacks;
 		u32			foreColor, backColor;
 
 
@@ -745,7 +745,7 @@
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
-		lsCallbacks._callback_mouseHover = (u64)&iWatchCallbackMouseHover;
+		lsCallbacks.mouse._callback_hover = (u64)&iWatchCallbackMouseHover;
 
 		// Request a screen
 		lisw = iBuildScreen(	tnUniqueId,
@@ -841,7 +841,7 @@
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
-		SCallbacks	lsCallbacks;
+		SCallbacksW	lsCallbacks;
 		u32			foreColor, backColor;
 
 
@@ -855,7 +855,7 @@
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
-		lsCallbacks._callback_mouseHover = (u64)&iHoverCallbackMouseHover;
+		lsCallbacks.mouse._callback_hover = (u64)&iHoverCallbackMouseHover;
 
 		// Request a screen
 		lisw = iBuildScreen(	tnUniqueId,
@@ -951,7 +951,7 @@
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
-		SCallbacks	lsCallbacks;
+		SCallbacksW	lsCallbacks;
 		u32			foreColor, backColor;
 
 
@@ -965,7 +965,7 @@
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
-		lsCallbacks._callback_mouseHover = (u64)&iLocalsCallbackMouseHover;
+		lsCallbacks.mouse._callback_hover = (u64)&iLocalsCallbackMouseHover;
 
 		// Request a screen
 		lisw = iBuildScreen(	tnUniqueId,
@@ -1061,7 +1061,7 @@
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
-		SCallbacks	lsCallbacks;
+		SCallbacksW	lsCallbacks;
 		u32			foreColor, backColor;
 
 
@@ -1075,7 +1075,7 @@
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
-		lsCallbacks._callback_mouseHover = (u64)&iAutosCallbackMouseHover;
+		lsCallbacks.mouse._callback_hover = (u64)&iAutosCallbackMouseHover;
 
 		// Request a screen
 		lisw = iBuildScreen(	tnUniqueId,
@@ -1171,7 +1171,7 @@
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
-		SCallbacks	lsCallbacks;
+		SCallbacksW	lsCallbacks;
 		u32			foreColor, backColor;
 
 
@@ -1185,7 +1185,7 @@
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
-		lsCallbacks._callback_mouseHover = (u64)&iTimersCallbackMouseHover;
+		lsCallbacks.mouse._callback_hover = (u64)&iTimersCallbackMouseHover;
 
 		// Request a screen
 		lisw = iBuildScreen(	tnUniqueId,
@@ -1281,7 +1281,7 @@
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
-		SCallbacks	lsCallbacks;
+		SCallbacksW	lsCallbacks;
 		u32			foreColor, backColor;
 
 
@@ -1295,7 +1295,7 @@
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
-		lsCallbacks._callback_mouseHover = (u64)&iMemoryCallbackMouseHover;
+		lsCallbacks.mouse._callback_hover = (u64)&iMemoryCallbackMouseHover;
 
 		// Request a screen
 		lisw = iBuildScreen(	tnUniqueId,
@@ -1391,7 +1391,7 @@
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
-		SCallbacks	lsCallbacks;
+		SCallbacksW	lsCallbacks;
 		u32			foreColor, backColor;
 
 
@@ -1405,7 +1405,7 @@
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
-		lsCallbacks._callback_mouseHover = (u64)&iProgramsCallbackMouseHover;
+		lsCallbacks.mouse._callback_hover = (u64)&iProgramsCallbackMouseHover;
 
 		// Request a screen
 		lisw = iBuildScreen(	tnUniqueId,
@@ -1501,7 +1501,7 @@
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
-		SCallbacks	lsCallbacks;
+		SCallbacksW	lsCallbacks;
 		u32			foreColor, backColor;
 
 
@@ -1515,7 +1515,7 @@
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
-		lsCallbacks._callback_mouseHover = (u64)&iThreadsCallbackMouseHover;
+		lsCallbacks.mouse._callback_hover = (u64)&iThreadsCallbackMouseHover;
 
 		// Request a screen
 		lisw = iBuildScreen(	tnUniqueId,
@@ -1620,7 +1620,7 @@
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
-		SCallbacks	lsCallbacks;
+		SCallbacksW	lsCallbacks;
 		u32			foreColor, backColor;
 
 
@@ -1634,7 +1634,7 @@
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
-		lsCallbacks._callback_mouseHover = (u64)&iAsciiCallbackMouseHover;
+		lsCallbacks.mouse._callback_hover = (u64)&iAsciiCallbackMouseHover;
 
 		// Request a screen
 		lisw		= iBuildScreen(	tnUniqueId,
@@ -1790,7 +1790,7 @@
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
-		SCallbacks	lsCallbacks;
+		SCallbacksW	lsCallbacks;
 		u32			foreColor, backColor;
 
 
@@ -1804,7 +1804,7 @@
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
-		lsCallbacks._callback_keyDown = (u64)&iVDebLauncherCallbackKeyDown;
+		lsCallbacks.keyboard._callback_down = (u64)&iVDebLauncherCallbackKeyDown;
 
 		// Request a screen
 		lisw		= iBuildScreen(	tnUniqueId,

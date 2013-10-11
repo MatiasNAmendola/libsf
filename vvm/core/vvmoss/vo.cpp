@@ -1189,11 +1189,24 @@
 
 //////////
 //
-// Creates a cask of the indicated size and type.
 // Refer to the _VVMOSS_CASK_* constants.
+// Creates a cask of the indicated size and style:
+//     Round:         (|name|)
+//     Square:        [|name|]
+//     Diamond:       <|name|>
+//
+// States allow various sizes (shown here as round, but is the same for all types):
+//     Closed:         ()
+//     Minimal:        (|)
+//     Text:           (|text|)
+//     Extended text:  (|=left=|text|=right=|)
+//
+// There may or may not be pips on each side.  Pip counts must be 0 through 3.
 //
 //////
-	SCask* CALLTYPE oss_caskDefineStandard(u32 tnHeight, u32 tnWidth, u32 tnLeftStyle, u32 tnLeftState, u32 tnLeftPipCount, u32 tnLeftColor, csu8p tcLeftText, u32 tnRightStyle, u32 tnRightState, u32 tnRightPipCount, u32 tnRightColor, csu8p tcRightText)
+	SCask* CALLTYPE oss_caskDefineStandard(u32 tnHeight, u32 tnWidth,
+		                                   u32 tnLeftStyle,  u32 tnLeftState,  u32 tnLeftPipCount,  u32 tnLeftColor,  csu8p tcLeftText,
+		                                   u32 tnRightStyle, u32 tnRightState, u32 tnRightPipCount, u32 tnRightColor, csu8p tcRightText)
 	{
 		return(NULL);
 	}
@@ -1203,7 +1216,15 @@
 
 //////////
 //
-// Cask
+// Create an encompassing rectangle cask, which has a form like:
+//
+//     (|+====--------------------==+|]
+//      \|                          |/
+//       |                          |
+//       |                          |
+//       |                          |
+//       |                          |
+//       +====--------------------==+
 //
 //////
 	SCask* CALLTYPE oss_caskDefineEncompassingRectangle(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SRectXYXY* tsOuter)
@@ -1216,7 +1237,15 @@
 
 //////////
 //
-// Cask
+// Create an up rectangle cask, which goes up from a cask, or from a particular pip on a cask.
+// It has the form like:
+//
+//     +===---------------------------------==+
+//     |                                      |
+//     |                                      |
+//     +===---------------------------------==|
+//     ||
+//  (|P||text|)
 //
 //////
 	SCask* CALLTYPE oss_caskDefineUpRectangle(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SCask* caskFrom, u32 tnFromPip, SRectXYXY* tsOuter)
@@ -1229,7 +1258,15 @@
 
 //////////
 //
-// Cask
+// Create an up rectangle cask, which goes up from a cask, or from a particular pip on a cask.
+// It has the form like:
+//
+//  (|text||P|)
+//        ||
+//        +===---------------------------------==+
+//        |                                      |
+//        |                                      |
+//        +===---------------------------------==|
 //
 //////
 	SCask* CALLTYPE oss_caskDefineDownRectangle(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SCask* caskFrom, u32 tnFromPip, SRectXYXY* tsOuter)
@@ -1242,10 +1279,12 @@
 
 //////////
 //
-// Cask
+// Cask Pips do not have to exist.  If they do not exist then the cask itself is made somewhat
+// less wide, and does not respond to mouse events in the pip area, apart from the normal
+// operation.
 //
 //////
-	SCaskPip* CALLTYPE oss_caskSetPipByValues(SCask* cask, bool tlLeft, u32 tnPip, SRGBA tnPipColorNeutral, SRGBA tnPipColorOver, SRGBA tnPipColorClick, u64 tnEnterCallback, u64 tnLeaveCallback, u64 tnHoverCallback, u64 tnClickCallback)
+	SCaskPip* CALLTYPE oss_caskSetPipByValues(SCask* cask, bool tlLeft, u32 tnPip, SRGBA tnPipColorNeutral, SRGBA tnPipColorOver, SRGBA tnPipColorClick, u64 tnEnterCallback, u64 tnLeaveCallback, u64 tnHoverCallback, u64 tnClickCallback, bool tlCreateCopy)
 	{
 		return(NULL);
 	}
@@ -1686,7 +1725,7 @@
 										 u32 ncUlx, u32 ncUly, u32 ncLrx, u32 ncLry, u32 ncBorder,
 										 u32 tnForeColor, u32 tnBackColor,
 										 bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder,
-										 SCallbacks* callbacks)
+										 SCallbacksW* callbacks)
 	{
 		SOssWindow*	tisw;
 
@@ -1734,24 +1773,24 @@
 			tisw->border					= tlBorder;
 
 			// Callbacks
-			tisw->callback._callback_windowCreated		= callbacks->_callback_windowCreated,
-			tisw->callback._callback_windowUnload		= callbacks->_callback_windowUnload,
-			tisw->callback._callback_windowClosed		= callbacks->_callback_windowClosed,
-			tisw->callback._callback_windowMoved		= callbacks->_callback_windowMoved;
-			tisw->callback._callback_windowResized		= callbacks->_callback_windowResized;
-			tisw->callback._callback_windowGotFocus		= callbacks->_callback_windowGotFocus;
-			tisw->callback._callback_windowLostFocus	= callbacks->_callback_windowLostFocus;
-			tisw->callback._callback_mouseDown			= callbacks->_callback_mouseDown;
-			tisw->callback._callback_mouseUp			= callbacks->_callback_mouseUp;
-			tisw->callback._callback_mouseMove			= callbacks->_callback_mouseMove;
-			tisw->callback._callback_mouseHover			= callbacks->_callback_mouseHover;
-			tisw->callback._callback_dragStart			= callbacks->_callback_dragStart;
-			tisw->callback._callback_dragging			= callbacks->_callback_dragging;
-			tisw->callback._callback_dragDrop			= callbacks->_callback_dragDrop;
-			tisw->callback._callback_keyDown			= callbacks->_callback_keyDown;
-			tisw->callback._callback_keyUp				= callbacks->_callback_keyUp;
-			tisw->callback._callback_keyPress			= callbacks->_callback_keyPress;
-			tisw->callback._callback_keyFlags			= callbacks->_callback_keyFlags;
+			tisw->callback.window._callback_created			= callbacks->window._callback_created,
+			tisw->callback.window._callback_unload			= callbacks->window._callback_unload,
+			tisw->callback.window._callback_closed			= callbacks->window._callback_closed,
+			tisw->callback.window._callback_moved			= callbacks->window._callback_moved;
+			tisw->callback.window._callback_resized			= callbacks->window._callback_resized;
+			tisw->callback.window._callback_gotFocus		= callbacks->window._callback_gotFocus;
+			tisw->callback.window._callback_lostFocus		= callbacks->window._callback_lostFocus;
+			tisw->callback.mouse._callback_down				= callbacks->mouse._callback_down;
+			tisw->callback.mouse._callback_up				= callbacks->mouse._callback_up;
+			tisw->callback.mouse._callback_move				= callbacks->mouse._callback_move;
+			tisw->callback.mouse._callback_hover			= callbacks->mouse._callback_hover;
+			tisw->callback.drag._callback_start				= callbacks->drag._callback_start;
+			tisw->callback.drag._callback_dragging			= callbacks->drag._callback_dragging;
+			tisw->callback.drag._callback_drop				= callbacks->drag._callback_drop;
+			tisw->callback.keyboard._callback_down			= callbacks->keyboard._callback_down;
+			tisw->callback.keyboard._callback_up			= callbacks->keyboard._callback_up;
+			tisw->callback.keyboard._callback_press			= callbacks->keyboard._callback_press;
+			tisw->callback.keyboard._callback_flags			= callbacks->keyboard._callback_flags;
 		}
 		// When we get here, we're done
 		return((u64)tisw);

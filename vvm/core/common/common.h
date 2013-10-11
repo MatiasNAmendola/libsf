@@ -244,7 +244,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	struct SOssWindow;
 	struct SOssLine;
 	struct SOssComp;
-	struct SCallbacks;
+	struct SCallbacksW;
 	struct SSysInfo;
 	struct SCanvas;
 	struct SScreen;
@@ -361,33 +361,84 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		u64			extra2;
 	};
 
+	// Window callbacks
+	struct SCallbackPartsWindow
+	{
+		defineCallback2( created,		u64 tnUniqueId, SOssWindow* tisw)																					// Called after window is created, before it is displayed
+		defineCallback2( unload,		u64 tnUniqueId, SOssWindow* tisw)																					// Called when a window will be closed, while everything related to it is still viable
+		defineCallback2( closed,		u64 tnUniqueId, SOssWindow* tisw)																					// Called after a window has been destroyed, before it is released by VVMOSS's internal lists of known windows
+		defineCallback4( moved,			u64 tnUniqueId, SOssWindow* tisw, u32 tnXNew, u32 tnYNew)															// After a window has been moved from one place to another (not while it is moving)
+		defineCallback4( resized,		u64 tnUniqueId, SOssWindow* tisw, u32 tnWidthNew, u32 tnHeightNew)													// After a window has been resized, and the buffers related to its screen have been allocated
+		defineCallback2( gotFocus,		u64 tnUniqueId, SOssWindow* tisw)																					// After a window has received focus, and after the window that lost focus (if any) has been signaled
+		defineCallback2( lostFocus,		u64 tnUniqueId, SOssWindow* tisw)																					// Before a new window receives focus
+	};
+	#define SCbPW SCallbackPartsWindow
+
+	struct SCallbackPartsObject
+	{
+		defineCallback6( enter,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)										// When the mouse moves into a control
+		defineCallback6( leave,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)										// When the mouse leaves a control
+	};
+	#define SCbPO SCallbackPartsObject
+
+	struct SCallbackPartsMouse
+	{
+		defineCallback6( down,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)										// When a mouse button is pressed down
+		defineCallback6( up,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)										// When a mouse button is released
+		defineCallback6( move,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)										// When a mouse is moved either with its buttons down or up
+		defineCallback8( hover,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing)	// When a mouse has positioned itself at a fixed location for a period of time after previously moving
+	};
+	#define SCbPM SCallbackPartsMouse
+
+	struct SCallbackPartsKeyboard
+	{
+		defineCallback6( down,			u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode)								// When a key is pressed down, or when the OS sends repeated keystrokes if it is a repeating key which is held down
+		defineCallback6( up,			u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode)								// When a key is released
+		defineCallback6( press,			u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode)								// When a key is pressed and interpreted to a known key
+		defineCallback4( flags,			u64 tnUniqueId, SOssWindow* tisw, u32 tnKeyFlagsOld, u32 tnKeyFlagsNew)												// When keyboard flags change (such as a non-printable key going up and down, like shift, caps lock, or control)
+	};
+	#define SCbPK SCallbackPartsKeyboard
+
+	struct SCallbackPartsDrag
+	{
+		defineCallback6( start,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)										// When any mouse button has been depressed and the mouse has moved more than a minimal number of pixels
+		defineCallback7( dragging,		u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds)					// Called as each MouseMove event while dragging
+		defineCallback7( drop,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds)					// Called when the mouse button initiating the drag is released
+	};
+	#define SCbPD SCallbackPartsDrag
+
+	struct SCallbackPartsCustom
+	{
+		defineCallback4( custom,			u64 tnUniqueId, SOssWindow* tisw, u64 tnCustomEventId, u64 tnOtherData)											// Called when to when a custom event is triggered programmatically
+	};
+	#define SCbPC SCallbackPartsCustom
 
 	// Generic callbacks
-	struct SCallbacks
+	struct SCallbacksW
 	{
+		// Used also in SCallbacks
 		// If a semaphore exists for any defined callback (it is non-NULL),
 		// it is locked immediately before,
 		// and unlocked immediately after, example:  u64 semaphore_x;
-		defineCallback2( windowCreated,		u64 tnUniqueId, SOssWindow* tisw)																					// Called after window is created, before it is displayed
-		defineCallback2( windowUnload,		u64 tnUniqueId, SOssWindow* tisw)																					// Called when a window will be closed, while everything related to it is still viable
-		defineCallback2( windowClosed,		u64 tnUniqueId, SOssWindow* tisw)																					// Called after a window has been destroyed, before it is released by VVMOSS's internal lists of known windows
-		defineCallback4( windowMoved,		u64 tnUniqueId, SOssWindow* tisw, u32 tnXNew, u32 tnYNew)															// After a window has been moved from one place to another (not while it is moving)
-		defineCallback4( windowResized,		u64 tnUniqueId, SOssWindow* tisw, u32 tnWidthNew, u32 tnHeightNew)													// After a window has been resized, and the buffers related to its screen have been allocated
-		defineCallback2( windowGotFocus,	u64 tnUniqueId, SOssWindow* tisw)																					// After a window has received focus, and after the window that lost focus (if any) has been signaled
-		defineCallback2( windowLostFocus,	u64 tnUniqueId, SOssWindow* tisw)																					// Before a new window receives focus
-		defineCallback6( mouseDown,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)										// When a mouse button is pressed down
-		defineCallback6( mouseUp,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)										// When a mouse button is released
-		defineCallback6( mouseMove,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)										// When a mouse is moved either with its buttons down or up
-		defineCallback8( mouseHover,		u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing)	// When a mouse has positioned itself at a fixed location for a period of time after previously moving
-		defineCallback6( keyDown,			u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode)								// When a key is pressed down, or when the OS sends repeated keystrokes if it is a repeating key which is held down
-		defineCallback6( keyUp,				u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode)								// When a key is released
-		defineCallback6( keyPress,			u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode)								// When a key is pressed and interpreted to a known key
-		defineCallback4( keyFlags,			u64 tnUniqueId, SOssWindow* tisw, u32 tnKeyFlagsOld, u32 tnKeyFlagsNew)												// When keyboard flags change (such as a non-printable key going up and down, like shift, caps lock, or control)
-		defineCallback6( dragStart,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)										// When any mouse button has been depressed and the mouse has moved more than a minimal number of pixels
-		defineCallback7( dragging,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds)					// Called as each MouseMove event while dragging
-		defineCallback7( dragDrop,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds)					// Called when the mouse button initiating the drag is released
-		defineCallback4( custom,			u64 tnUniqueId, SOssWindow* tisw, u64 tnCustomEventId, u64 tnOtherData)												// Called when to when a custom event is triggered programmatically
+		SCallbackPartsWindow		window;
+		SCallbackPartsObject		object;
+		SCallbackPartsMouse			mouse;
+		SCallbackPartsKeyboard		keyboard;
+		SCallbackPartsDrag			drag;
+		SCallbackPartsCustom		custom;
 	};
+	#define SCbW SCallbacksW
+
+	// Callbacks for everything except window controls
+	struct SCallbacks
+	{
+		SCallbackPartsObject		object;
+		SCallbackPartsMouse			mouse;
+		SCallbackPartsKeyboard		keyboard;
+		SCallbackPartsDrag			drag;
+		SCallbackPartsCustom		custom;
+	};
+	#define SCb SCallbacks
 
 	struct SLL
 	{
@@ -860,7 +911,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		SOssKbdEvent	osKeyUp;
 
 		// Callbacks
-		SCallbacks		callback;							// Callback definitions (common.h)
+		SCallbacksW		callback;							// Callback definitions (common.h)
 	};
 
 
@@ -1080,7 +1131,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		// Note:  The x,y coordinates are assigned when they are applied to a canvas or other region as part of the SRegionList entry
 
 		// Default region callbacks and sub-regions
-		SCallbacks		callback;				// Callbacks for activities when this region has focus
+		SCallbacksW		callback;				// Callbacks for activities when this region has focus
 		SStartEnd		events;					// A list of events this region responds to		(SEvent*)
 		SStartEnd		regionList;				// A list of sub-regions relative to this one	(SRegion*)
 	};
@@ -1101,7 +1152,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		s32				y;						// Upper-left Y coordinate
 
 		// Region instance callbacks and sub-regions
-		SCallbacks		callback;				// Callbacks for activities when this instance of the region has focus
+		SCallbacksW		callback;				// Callbacks for activities when this instance of the region has focus
 		SStartEnd		regionList;				// A list of sub-regions relative to this one
 	};
 
@@ -1139,29 +1190,29 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	struct SCaskPip
 	{
 		bool		active;						// Is this pip active?
+		SRectXYXY	rect;						// The coordinate range of this pip within the cask ((0,0) is upper-left)
+		SCb			o;							// Callbacks for this pip
 
-		SRectXYXY	rect;						// The coordinate within the cask
-		SRegion		foo;
-
+		// Pip colors can be anything
 		SRGBA		colorNeutral;				// What color is displayed when there is no mouse activity?
 		SRGBA		colorOver;					// What color is displayed when the mouse moves over it?
 		SRGBA		colorClick;					// What color is displayed when the user clicks down on it?
-
-		SCallback*	enter;						// Called when the pip is entered
-		SCallback*	leave;						// Called when the pip is left
-		SCallback*	hover;						// Called when the pip is hovered over
-		SCallback*	click;						// Called when the pip is clicked
 	};
 
 	struct SCaskSide
 	{
+		bool		active;						// Is this side active?
+		SRectXYXY	rect;						// The coordinate range of this side within the cask ((0,0) is upper-left)
 		u32			style;						// Closed, minimal, text, or extended text
 		u32			pips;						// Supports 0 through 3
+		SCb			o;							// Callbacks for this side
+
 
 		//////////
 		// Only used for extended text
 		//////
 			csu8p		extendedText;			// If there is any text on this side, include it here
+
 
 		//////////
 		// Only used if the number of pips is not 0
@@ -1171,23 +1222,37 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 			SCaskPip*	pip3;					// What to do when pip3 is acted upon
 	};
 
+	struct SCaskText
+	{
+		bool		active;						// Is the text active?
+		SRectXYXY	rect;						// The coordinate range of this text within the cask ((0,0) is upper-left)
+		SCb			o;							// Callbacks for this text
+
+		SRGBA		backColor;					// The back color
+		SRGBA		foreColor;					// The fore color
+		csu8p		text;						// Cask middle text
+	};
+
 	struct SCask
 	{
 		u32			style;						// [Standard plus round, square, diamond coupled to information in left and right], or encompassing rectangle, up rectangle, or down rectangle (all of which use the fixed semi-rounded form)
-		SSize		size;						// If a standard cask, will be initially drawn in default resolution, and then scaled up or down to this level
-												// If height is -1, will be natural height of whatever is required.  If width is -1, then will use natural width as required for indicated type
+		SCb			o;							// Callbacks for this cask
 
 		//////////
 		// The canvas of the appropriately scaled item
 		//////
 			SCanvas*	canvas;
+			SSize		size;					// If a standard cask, will be initially drawn in default resolution, and then scaled up or down to this level
+												// If height is -1, will be natural height of whatever is required.  If width is -1, then will use natural width as required for indicated type
+
 
 		//////////
 		// Used only for standard types:
 		//////
-			csu8p		text;					// Cask middle text
 			SCaskSide*	left;					// Left-side cask information
+			SCaskText*	text;					// Text information
 			SCaskSide*	right;					// Right-side cask information
+
 
 		//////////
 		// Only used internally

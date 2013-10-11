@@ -551,14 +551,14 @@
 		low->isw.osHoverCallbackFired	= true;
 
 		// If need be, call the window created callback
-		if (low->isw.callback._callback_windowCreated)
+		if (low->isw.callback.window._callback_created)
 		{
 			// Yes, it's needed
 			// Create a copy of our isw in case the callee is a lunatic
 			memcpy(&lisw, &low->isw, sizeof(SOssWindow));
-			ioss_lockSemaphore(low->isw.callback.semaphore_windowCreated);
-			low->isw.callback.callback_windowCreated(low->isw.uniqueId, &lisw);
-			ioss_unlockSemaphore(low->isw.callback.semaphore_windowCreated);
+			ioss_lockSemaphore(low->isw.callback.window.semaphore_created);
+			low->isw.callback.window.callback_created(low->isw.uniqueId, &lisw);
+			ioss_unlockSemaphore(low->isw.callback.window.semaphore_created);
 		}
 
 		// Indicate through events this window has focus
@@ -598,15 +598,15 @@
 			// Indicate it has focus
 			lfc.forFocus->isw.hasFocus = true;
 
-			if (lfc.forFocus->isw.callback._callback_windowGotFocus)
+			if (lfc.forFocus->isw.callback.window._callback_gotFocus)
 			{
 				// Create a copy in case the user is a lunatic! :-)
 				memcpy(&lisw, &lfc.forFocus->isw, sizeof(SOssWindow));
 
 				// Signal
-				ioss_lockSemaphore(lfc.forFocus->isw.callback.semaphore_windowGotFocus);
-				lfc.forFocus->isw.callback.callback_windowGotFocus(lfc.forFocus->isw.uniqueId, &lisw);
-				ioss_unlockSemaphore(lfc.forFocus->isw.callback.semaphore_windowGotFocus);
+				ioss_lockSemaphore(lfc.forFocus->isw.callback.window.semaphore_gotFocus);
+				lfc.forFocus->isw.callback.window.callback_gotFocus(lfc.forFocus->isw.uniqueId, &lisw);
+				ioss_unlockSemaphore(lfc.forFocus->isw.callback.window.semaphore_gotFocus);
 			}
 		}
 	}
@@ -1246,20 +1246,20 @@ _asm int 3;
 					if (lisw.osIsDragging)
 					{
 						// Dragging something, signal that callback if necessary
-						if (lisw.callback._callback_dragging)
+						if (lisw.callback.drag._callback_dragging)
 						{
-							ioss_lockSemaphore(w->isw.callback.semaphore_dragging);
-							lisw.callback.callback_dragging(w->isw.uniqueId, &lisw, tnX, tnY, tnButtons, tnKeys, w->isw.timer - w->isw.osDragStartTimer);
-							ioss_unlockSemaphore(w->isw.callback.semaphore_dragging);
+							ioss_lockSemaphore(w->isw.callback.drag.semaphore_dragging);
+							lisw.callback.drag.callback_dragging(w->isw.uniqueId, &lisw, tnX, tnY, tnButtons, tnKeys, w->isw.timer - w->isw.osDragStartTimer);
+							ioss_unlockSemaphore(w->isw.callback.drag.semaphore_dragging);
 						}
 
 					} else {
 						// Regular mouse move
-						if (lisw.callback._callback_mouseMove)
+						if (lisw.callback.mouse._callback_move)
 						{
-							ioss_lockSemaphore(lisw.callback.semaphore_mouseMove);
-							lisw.callback.callback_mouseMove(w->isw.uniqueId, &lisw, tnX, tnY, tnButtons, tnKeys);
-							ioss_unlockSemaphore(lisw.callback.semaphore_mouseMove);
+							ioss_lockSemaphore(lisw.callback.mouse.semaphore_move);
+							lisw.callback.mouse.callback_move(w->isw.uniqueId, &lisw, tnX, tnY, tnButtons, tnKeys);
+							ioss_unlockSemaphore(lisw.callback.mouse.semaphore_move);
 						}
 					}
 
@@ -1271,11 +1271,11 @@ _asm int 3;
 				case VVMOSS_MOUSE_BUTTON_DOWN_RIGHT:
 				case VVMOSS_MOUSE_BUTTON_DOWN:
 					// Do the callback for the down buttons
-					if (lisw.callback._callback_mouseDown)
+					if (lisw.callback.mouse._callback_down)
 					{
-						ioss_lockSemaphore(lisw.callback.semaphore_mouseDown);
-						lisw.callback.callback_mouseDown(w->isw.uniqueId, &lisw, tnX, tnY, tnButtons, tnKeys);
-						ioss_unlockSemaphore(lisw.callback.semaphore_mouseDown);
+						ioss_lockSemaphore(lisw.callback.mouse.semaphore_down);
+						lisw.callback.mouse.callback_down(w->isw.uniqueId, &lisw, tnX, tnY, tnButtons, tnKeys);
+						ioss_unlockSemaphore(lisw.callback.mouse.semaphore_down);
 					}
 
 					// Note:  The determination for dragging is triggered on the timer event.
@@ -1292,11 +1292,11 @@ _asm int 3;
 					if (!lisw.osIsDragging)
 					{
 						// Regular mouse release
-						if (lisw.callback._callback_mouseUp)
+						if (lisw.callback.mouse._callback_up)
 						{
-							ioss_lockSemaphore(lisw.callback.semaphore_mouseUp);
-							lisw.callback.callback_mouseUp(w->isw.uniqueId, &lisw, tnX, tnY, tnButtons, tnKeys);
-							ioss_unlockSemaphore(lisw.callback.semaphore_mouseUp);
+							ioss_lockSemaphore(lisw.callback.mouse.semaphore_up);
+							lisw.callback.mouse.callback_up(w->isw.uniqueId, &lisw, tnX, tnY, tnButtons, tnKeys);
+							ioss_unlockSemaphore(lisw.callback.mouse.semaphore_up);
 						}
 					}
 
@@ -1344,25 +1344,25 @@ _asm int 3;
 			}
 
 			// See if we're done dragging
-			if (w->isw.osIsDragging && !w->isw.osIsMouseButtonDown && w->isw.callback._callback_dragDrop)
+			if (w->isw.osIsDragging && !w->isw.osIsMouseButtonDown && w->isw.callback.drag._callback_drop)
 			{
 				// They're dropped the item
 				// Note:  This is signaled here because the user can drag with any button, and insert and
 				//        remove other buttons while dragging, for some potentially awesome abilities.
 				w->isw.osIsDragging = false;
-				ioss_lockSemaphore(w->isw.callback.semaphore_dragDrop);
-				w->isw.callback.callback_dragDrop(w->isw.uniqueId, &lisw, w->isw.osMouseMove.x, w->isw.osMouseMove.y, w->isw.osMouseMove.buttons, w->isw.osMouseMove.keys, w->isw.timer - w->isw.osDragStartTimer);
-				ioss_unlockSemaphore(w->isw.callback.semaphore_dragDrop);
+				ioss_lockSemaphore(w->isw.callback.drag.semaphore_drop);
+				w->isw.callback.drag.callback_drop(w->isw.uniqueId, &lisw, w->isw.osMouseMove.x, w->isw.osMouseMove.y, w->isw.osMouseMove.buttons, w->isw.osMouseMove.keys, w->isw.timer - w->isw.osDragStartTimer);
+				ioss_unlockSemaphore(w->isw.callback.drag.semaphore_drop);
 			}
 
 			// If need be, cancel the hover callback, and lower the hover flag
-			if (w->isw.osHoverCallbackFired && w->isw.callback._callback_mouseHover)
+			if (w->isw.osHoverCallbackFired && w->isw.callback.mouse._callback_hover)
 			{
 				// Yes, it's needed
 				// Cancel the hover operation
-				ioss_lockSemaphore(w->isw.callback.semaphore_mouseHover);
-				w->isw.callback.callback_mouseHover(w->isw.uniqueId, &lisw, w->isw.osMouseMove.x, w->isw.osMouseMove.y, w->isw.osMouseMove.buttons, w->isw.osMouseMove.keys, w->isw.timer - w->isw.osMouseMove.timer, true);
-				ioss_unlockSemaphore(w->isw.callback.semaphore_mouseHover);
+				ioss_lockSemaphore(w->isw.callback.mouse.semaphore_hover);
+				w->isw.callback.mouse.callback_hover(w->isw.uniqueId, &lisw, w->isw.osMouseMove.x, w->isw.osMouseMove.y, w->isw.osMouseMove.buttons, w->isw.osMouseMove.keys, w->isw.timer - w->isw.osMouseMove.timer, true);
+				ioss_unlockSemaphore(w->isw.callback.mouse.semaphore_hover);
 				w->isw.osHoverCallbackFired = false;
 			}
 		}
@@ -1475,12 +1475,12 @@ _asm int 3;
 
 
 			// If shift/control/alt/caps/num/scroll have changed
-			if (w->isw.osKeyDownLast.keyFlags != tnKeyFlags && w->isw.callback._callback_keyFlags)
+			if (w->isw.osKeyDownLast.keyFlags != tnKeyFlags && w->isw.callback.keyboard._callback_flags)
 			{
 				// Keys have changed, signal the change
-				ioss_lockSemaphore(w->isw.callback.semaphore_keyFlags);
-				w->isw.callback.callback_keyFlags(w->isw.uniqueId, &lisw, w->isw.osKeyDownLast.keyFlags, tnKeyFlags);
-				ioss_unlockSemaphore(w->isw.callback.semaphore_keyFlags);
+				ioss_lockSemaphore(w->isw.callback.keyboard.semaphore_flags);
+				w->isw.callback.keyboard.callback_flags(w->isw.uniqueId, &lisw, w->isw.osKeyDownLast.keyFlags, tnKeyFlags);
+				ioss_unlockSemaphore(w->isw.callback.keyboard.semaphore_flags);
 			}
 
 
@@ -1488,19 +1488,19 @@ _asm int 3;
 			switch (tnEVent)
 			{
 				case VVMOSS_KEYBOARD_DOWN:
-					if (tsXKeyInfo->repeatCount == 1 && w->isw.callback._callback_keyDown)
+					if (tsXKeyInfo->repeatCount == 1 && w->isw.callback.keyboard._callback_down)
 					{
 						// We fire the key down event only on the first press
-						ioss_lockSemaphore(w->isw.callback.semaphore_keyDown);
-						w->isw.callback.callback_keyDown(w->isw.uniqueId, &lisw, tnKey, tnKeyFlags, tcChar, tuUnicode);
-						ioss_unlockSemaphore(w->isw.callback.semaphore_keyDown);
+						ioss_lockSemaphore(w->isw.callback.keyboard.semaphore_down);
+						w->isw.callback.keyboard.callback_down(w->isw.uniqueId, &lisw, tnKey, tnKeyFlags, tcChar, tuUnicode);
+						ioss_unlockSemaphore(w->isw.callback.keyboard.semaphore_down);
 					}
-					if (w->isw.callback._callback_keyPress)
+					if (w->isw.callback.keyboard._callback_press)
 					{
 						// We fire every key repeated character under KeyPress
-						ioss_lockSemaphore(w->isw.callback.semaphore_keyPress);
-						w->isw.callback.callback_keyPress(w->isw.uniqueId, &lisw, tnKey, tnKeyFlags, tcChar, tuUnicode);
-						ioss_unlockSemaphore(w->isw.callback.semaphore_keyPress);
+						ioss_lockSemaphore(w->isw.callback.keyboard.semaphore_press);
+						w->isw.callback.keyboard.callback_press(w->isw.uniqueId, &lisw, tnKey, tnKeyFlags, tcChar, tuUnicode);
+						ioss_unlockSemaphore(w->isw.callback.keyboard.semaphore_press);
 					}
 
 					// Update the key down
@@ -1508,12 +1508,12 @@ _asm int 3;
 					break;
 
 				case VVMOSS_KEYBOARD_UP:
-					if (w->isw.callback._callback_keyUp)
+					if (w->isw.callback.keyboard._callback_up)
 					{
 						// We fire the key down event only on the first press
-						ioss_lockSemaphore(w->isw.callback.semaphore_keyUp);
-						w->isw.callback.callback_keyUp(w->isw.uniqueId, &lisw, tnKey, tnKeyFlags, tcChar, tuUnicode);
-						ioss_unlockSemaphore(w->isw.callback.semaphore_keyUp);
+						ioss_lockSemaphore(w->isw.callback.keyboard.semaphore_up);
+						w->isw.callback.keyboard.callback_up(w->isw.uniqueId, &lisw, tnKey, tnKeyFlags, tcChar, tuUnicode);
+						ioss_unlockSemaphore(w->isw.callback.keyboard.semaphore_up);
 					}
 
 					// Update the key down
@@ -1545,11 +1545,11 @@ _asm int 3;
 			memcpy(&lisw, &w->isw, sizeof(SOssWindow));
 
 			// Signal the move if we are supposed to
-			if (w->isw.callback._callback_windowMoved)
+			if (w->isw.callback.window._callback_moved)
 			{
-				ioss_lockSemaphore(w->isw.callback.semaphore_windowMoved);
-				w->isw.callback.callback_windowMoved(w->isw.uniqueId, &lisw, tnX, tnY);
-				ioss_unlockSemaphore(w->isw.callback.semaphore_windowMoved);
+				ioss_lockSemaphore(w->isw.callback.window.semaphore_moved);
+				w->isw.callback.window.callback_moved(w->isw.uniqueId, &lisw, tnX, tnY);
+				ioss_unlockSemaphore(w->isw.callback.window.semaphore_moved);
 			}
 
 			// Position the window logically to match where it is
@@ -1585,12 +1585,12 @@ _asm int 3;
 			memcpy(&lisw, &w->isw, sizeof(SOssWindow));
 
 			// Signal the resize (if we are supposed to)
-			if (w->isw.callback._callback_windowResized)
+			if (w->isw.callback.window._callback_resized)
 			{
 				// Callback
-				ioss_lockSemaphore(w->isw.callback.semaphore_windowResized);
-				w->isw.callback.callback_windowResized(w->isw.uniqueId, &lisw, tnWidth, tnHeight);
-				ioss_unlockSemaphore(w->isw.callback.semaphore_windowResized);
+				ioss_lockSemaphore(w->isw.callback.window.semaphore_resized);
+				w->isw.callback.window.callback_resized(w->isw.uniqueId, &lisw, tnWidth, tnHeight);
+				ioss_unlockSemaphore(w->isw.callback.window.semaphore_resized);
 			}
 
 			// Create our new DC and bitmap
@@ -2239,12 +2239,12 @@ _asm int 3;
 					memcpy(&lisw, &low->isw, sizeof(SOssWindow));
 
 					// This window is losing focus
-					if (low->isw.callback._callback_windowLostFocus)
+					if (low->isw.callback.window._callback_lostFocus)
 					{
 						// Signal this window that it's losing focus
-						ioss_lockSemaphore(low->isw.callback.semaphore_windowLostFocus);
-						low->isw.callback.callback_windowLostFocus(low->isw.uniqueId, &lisw);
-						ioss_unlockSemaphore(low->isw.callback.semaphore_windowLostFocus);
+						ioss_lockSemaphore(low->isw.callback.window.semaphore_lostFocus);
+						low->isw.callback.window.callback_lostFocus(low->isw.uniqueId, &lisw);
+						ioss_unlockSemaphore(low->isw.callback.window.semaphore_lostFocus);
 					}
 					// And make it so
 					low->isw.hasFocus = false;
@@ -2281,15 +2281,15 @@ _asm int 3;
 			memcpy(&lisw, &w->isw, sizeof(SOssWindow));
 
 			// Signal the move if we are supposed to
-			if (w->isw.callback._callback_windowUnload)
+			if (w->isw.callback.window._callback_unload)
 			{
-				ioss_lockSemaphore(w->isw.callback.semaphore_windowUnload);
-				w->isw.callback.callback_windowUnload(w->isw.uniqueId, &lisw);
-				ioss_unlockSemaphore(w->isw.callback.semaphore_windowUnload);
+				ioss_lockSemaphore(w->isw.callback.window.semaphore_unload);
+				w->isw.callback.window.callback_unload(w->isw.uniqueId, &lisw);
+				ioss_unlockSemaphore(w->isw.callback.window.semaphore_unload);
 			}
 
 			// Signal the closed callback if necessary, if not, then just delete the window
-			if (w->isw.callback._callback_windowClosed)
+			if (w->isw.callback.window._callback_closed)
 			{
 				// Send a message to the message queue so that after the window is destroyed, its callback will happen when it's no longer viable
 				PostMessage(ghWndMsg/*message window*/, VVMOSS_VISIBLE_WINDOW_CLOSED, (WPARAM)w, NULL);
@@ -2321,11 +2321,11 @@ _asm int 3;
 			memcpy(&lisw, &w->isw, sizeof(SOssWindow));
 
 			// Do the callback
-			if (w->isw.callback._callback_windowClosed)
+			if (w->isw.callback.window._callback_closed)
 			{
-				ioss_lockSemaphore(w->isw.callback.semaphore_windowClosed);
-				w->isw.callback.callback_windowClosed(w->isw.uniqueId, &lisw);
-				ioss_unlockSemaphore(w->isw.callback.semaphore_windowClosed);
+				ioss_lockSemaphore(w->isw.callback.window.semaphore_closed);
+				w->isw.callback.window.callback_closed(w->isw.uniqueId, &lisw);
+				ioss_unlockSemaphore(w->isw.callback.window.semaphore_closed);
 			}
 
 			// Release the window
@@ -2804,7 +2804,7 @@ _asm int 3;
 			{
 				if (!low->isw.osIsDragging)
 				{
-					if (low->isw.callback._callback_dragStart)
+					if (low->isw.callback.drag._callback_start)
 					{
 						if (ioss_distanceBetween(	low->isw.osMouseMove.x,		low->isw.osMouseMove.y,
 												low->isw.osMouseDownFirst.x,	low->isw.osMouseDownFirst.y) > gfMouseDragThreshold)
@@ -2812,9 +2812,9 @@ _asm int 3;
 							// A drag has now started
 							// It is time.  Make a copy of the structure in case the user goes bananas! :-)
 							memcpy(&lisw, &low->isw, sizeof(SOssWindow));
-							ioss_lockSemaphore(low->isw.callback.semaphore_dragStart);
-							low->isw.callback.callback_dragStart(low->isw.uniqueId, &lisw, low->isw.osMouseDownFirst.x, low->isw.osMouseDownFirst.y, low->isw.osMouseMove.buttons, low->isw.osMouseMove.keys);
-							ioss_unlockSemaphore(low->isw.callback.semaphore_dragStart);
+							ioss_lockSemaphore(low->isw.callback.drag.semaphore_start);
+							low->isw.callback.drag.callback_start(low->isw.uniqueId, &lisw, low->isw.osMouseDownFirst.x, low->isw.osMouseDownFirst.y, low->isw.osMouseMove.buttons, low->isw.osMouseMove.keys);
+							ioss_unlockSemaphore(low->isw.callback.drag.semaphore_start);
 							low->isw.osIsDragging = true;
 						}
 					}
@@ -2822,7 +2822,7 @@ _asm int 3;
 			}
 
 			// See if a hover event has been triggered
-			if (low->isw.callback._callback_mouseHover && !low->isw.osHoverCallbackFired && !low->isw.osIsDragging)
+			if (low->isw.callback.mouse._callback_hover && !low->isw.osHoverCallbackFired && !low->isw.osIsDragging)
 			{
 				// The hover function is defined, see if the timing is right
 				lnTimerDiff = low->isw.timer - low->isw.osMouseMove.timer;
@@ -2841,9 +2841,9 @@ _asm int 3;
 				//        This thread should only be used for notification to kick off
 				//        worker threads.
 				//////
-					ioss_lockSemaphore(low->isw.callback.semaphore_mouseHover);
-					low->isw.callback.callback_mouseHover(low->isw.uniqueId, &lisw, low->isw.osMouseMove.x, low->isw.osMouseMove.y, low->isw.osMouseMove.buttons, low->isw.osMouseMove.keys, lnTimerDiff, false);
-					ioss_unlockSemaphore(low->isw.callback.semaphore_mouseHover);
+					ioss_lockSemaphore(low->isw.callback.mouse.semaphore_hover);
+					low->isw.callback.mouse.callback_hover(low->isw.uniqueId, &lisw, low->isw.osMouseMove.x, low->isw.osMouseMove.y, low->isw.osMouseMove.buttons, low->isw.osMouseMove.keys, lnTimerDiff, false);
+					ioss_unlockSemaphore(low->isw.callback.mouse.semaphore_hover);
 				}
 			}
 		}

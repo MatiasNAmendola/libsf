@@ -55,7 +55,7 @@
 						u32 tnWidthMax, u32 tnHeightMax,
 						u32 foreColor, u32 backColor,
 						bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder,
-						SCallbacks* callbacks)
+						SCallbacksW* callbacks)
 	{
 		u64 lisw;
 
@@ -91,9 +91,9 @@
 // Set the callbacks to an empty/null state
 //
 //////
-	void iInitializeCallbacksToNull(SCallbacks* tcb)
+	void iInitializeCallbacksToNull(SCallbacksW* tcb)
 	{
-		memset(tcb, 0, sizeof(SCallbacks));
+		memset(tcb, 0, sizeof(SCallbacksW));
 	}
 
 

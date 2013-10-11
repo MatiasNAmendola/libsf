@@ -86,8 +86,8 @@
 
 
 	// vdeb_sup.h
-	u64					iBuildScreen									(u64 tnUniqueId, s8* tcCaption, u32 tnCaptionLength, u32 tnX, u32 tnY, u32 tnWidth, u32 tnHeight, u32 tnWidthMin, u32 tnHeightMin, u32 tnWidthMax, u32 tnHeightMax, u32 foreColor, u32 backColor, bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder, SCallbacks* tsCallbacks);
-	void				iInitializeCallbacksToNull						(SCallbacks* tcb);
+	u64					iBuildScreen									(u64 tnUniqueId, s8* tcCaption, u32 tnCaptionLength, u32 tnX, u32 tnY, u32 tnWidth, u32 tnHeight, u32 tnWidthMin, u32 tnHeightMin, u32 tnWidthMax, u32 tnHeightMax, u32 foreColor, u32 backColor, bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder, SCallbacksW* tsCallbacks);
+	void				iInitializeCallbacksToNull						(SCallbacksW* tcb);
 
 	void CALLTYPE		iCallbackWindowMoved							(u64 tnUniqueId, SOssWindow* tisw, u32 tnXNew, u32 tnYNew);
 	void CALLTYPE		iCallbackWindowResized							(u64 tnUniqueId, SOssWindow* tisw, u32 tnWidthNew, u32 tnHeightNew);
