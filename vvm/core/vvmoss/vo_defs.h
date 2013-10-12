@@ -227,13 +227,13 @@
 		// Prototype definitions
 		u8* CALLTYPE			oss_duplicateString							(u8* ptr, u64 length);
 		w16* CALLTYPE			oss_duplicateUnicodeString					(w16* tuText);
-		void CALLTYPE			oss_duplicateStringIntoDatum				(SDatum*  datum,  u8* ptr, u64 length,                  bool tlFreeExisting);
-		void CALLTYPE			oss_duplicateStringIntoDatum2				(SDatum2* datum2, u8* ptr, u64 length, u64 totalLength, bool tlFreeExisting);
-		void CALLTYPE			oss_duplicateDatum							(SDatum*  datumDst,  SDatum*  datumSrc);
-		void CALLTYPE			oss_duplicateDatum2							(SDatum2* datum2Dst, SDatum2* datum2Src);
-		void CALLTYPE			oss_deleteDatum								(SDatum*  datum);
-		void CALLTYPE			oss_deleteDatum2							(SDatum2* datum2);
-		void CALLTYPE			oss_allocateNullStringIntoDatum2			(SDatum2* datum2, u64 length, bool tlInitialize);
+		SDatum* CALLTYPE		oss_datumSet								(SDatum*  datum,  u8* ptr, u64 length,                  bool tlFreeExisting);
+		SDatum2* CALLTYPE		oss_datum2Set								(SDatum2* datum2, u8* ptr, u64 length, u64 totalLength, bool tlFreeExisting);
+		SDatum* CALLTYPE		oss_datumDuplicate							(SDatum*  datumDst,  SDatum*  datumSrc);
+		SDatum2* CALLTYPE		oss_datum2Duplicate							(SDatum2* datum2Dst, SDatum2* datum2Src);
+		void CALLTYPE			oss_datumDelete								(SDatum*  datum);
+		void CALLTYPE			oss_datum2Delete							(SDatum2* datum2);
+		void CALLTYPE			oss_datum2SetNullString						(SDatum2* datum2, u64 length, bool tlInitialize);
 		void CALLTYPE			oss_copyUpToShortestString					(u8* dst, u32 tnDstLength, u8* src, u32 tnSrcLength);
 		s32 CALLTYPE			oss_wildcardMatch							(csu8p candidate, csu8p wildcardPattern, bool tlCaseSensitive);
 		w16* CALLTYPE			oss_asciiToUnicode							(u8* tcText, u32 tnTextLength);
@@ -391,12 +391,20 @@
 		u64 CALLTYPE			oss_bxmlaSha1								(SBxml* bxml, u8 sha20Bytes[20]);
 		u64 CALLTYPE			oss_bxmlaSha1Tag							(SBxml* bxml, u8 sha20Bytes[20]);
 		u64 CALLTYPE			oss_bxmlaSha1Data							(SBxml* bxml, u8 sha20Bytes[20]);
-		u8* CALLTYPE			oss_bxmlaGetString							(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength, u32* tnStringLength);
-		u32 CALLTYPE			oss_bxmlaGetU32								(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength);
-		u64 CALLTYPE			oss_bxmlaGetU64								(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength);
-		bool CALLTYPE			oss_bxmlaGetBool							(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength);
-		f32 CALLTYPE			oss_bxmlaGetF32								(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength);
-		f64 CALLTYPE			oss_bxmlaGetF64								(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength);
+
+		u32 CALLTYPE			oss_bxmlaFindAndGetString					(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance, SDatum* tsResult);
+		u32 CALLTYPE			oss_bxmlaFindAndGetU32						(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance);
+		u64 CALLTYPE			oss_bxmlaFindAndGetU64						(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance);
+		bool CALLTYPE			oss_bxmlaFindAndGetBool						(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance);
+		f32 CALLTYPE			oss_bxmlaFindAndGetF32						(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance);
+		f64 CALLTYPE			oss_bxmlaFindAndGetF64						(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance);
+
+		u32 CALLTYPE			oss_bxmlaGetString							(SBxmla* bxmla, SDatum* tsResult);
+		u32 CALLTYPE			oss_bxmlaGetU32								(SBxmla* bxmla);
+		u64 CALLTYPE			oss_bxmlaGetU64								(SBxmla* bxmla);
+		bool CALLTYPE			oss_bxmlaGetBool							(SBxmla* bxmla);
+		f32 CALLTYPE			oss_bxmlaGetF32								(SBxmla* bxmla);
+		f64 CALLTYPE			oss_bxmlaGetF64								(SBxmla* bxmla);
 
 		// For 2-way navigation through the attributes (can be done manually, but these expressly do it
 		SBxmla* CALLTYPE		oss_bxmlaGetNext					(SBxmla* bxmla);
@@ -422,6 +430,7 @@
 		SBxmla* CALLTYPE		oss_bxmlNodeGetFirstAttribute				(SBxml* bxml);
 
 		// Searches node or attribute names for the indicated wildcard search string
+		SBxmla* CALLTYPE		oss_bxmlFindAttribute						(SBxml* bxml, SDatum* tsWildcardSearch, u32 tnInstance);
 		bool CALLTYPE			oss_bxmlFindFirst							(SBxml* bxmlRoot, SBxml* bxmlNodeFound, SBxmla* bxmlaAttributeFound, SDatum* tsWildcardSearch, bool tlTraverseChildren, bool tlSearchAttributes, void** x);
 		bool CALLTYPE			oss_bxmlFindContinue						(void* x);
 		u32 CALLTYPE			oss_bxmlFindAllAsStartEndLists				(SBxml* bxmlRoot, SStartEnd** bxmlFinds, SStartEnd** bxmlaFinds, SDatum* tsWildcardSearch, u32* tnMaxFindsToInclude, bool tlTraverseChildren, bool tlSearchAttributes);

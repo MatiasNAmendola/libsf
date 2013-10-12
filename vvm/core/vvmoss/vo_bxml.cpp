@@ -185,8 +185,8 @@
 					bxmlaNew->_parent = bxml;
 
 					// Store the tag name and allocate space for the data, set it to NULLs
-					oss_duplicateStringIntoDatum (&bxmlaNew->_name,	(u8*)cgcAutoComment,		sizeof(cgcAutoComment) - 1,					false);
-					oss_duplicateStringIntoDatum2(&bxmlaNew->_data,	(u8*)buffer + lnOffset,		lnLength + 3,				lnLength + 3,	false);
+					oss_datumSet (&bxmlaNew->_name,	(u8*)cgcAutoComment,		sizeof(cgcAutoComment) - 1,					false);
+					oss_datum2Set(&bxmlaNew->_data,	(u8*)buffer + lnOffset,		lnLength + 3,				lnLength + 3,	false);
 
 					// If we're at the end of the input, syntax error
 					if (!ioss_verifyLength(lnOffset + 2, tnMaxLength))
@@ -275,7 +275,7 @@
 						return((SBxml*)-1);		// Memory error??
 
 					// Store the tag name
-					oss_duplicateStringIntoDatum(&bxml->_name, (u8*)buffer + lnOffset, lnLength, false);
+					oss_datumSet(&bxml->_name, (u8*)buffer + lnOffset, lnLength, false);
 
 					// Skip past the name
 					lnOffset += lnLength;
@@ -354,8 +354,8 @@ _asm nop;
 											bxmlaNew->_parent = bxml;
 
 											// Store the tag name and data
-											oss_duplicateStringIntoDatum (&bxmlaNew->_name, (u8*)buffer + lnOffset,								lnAttrTagLength,						false);
-											oss_duplicateStringIntoDatum2(&bxmlaNew->_data, (u8*)buffer + lnOffset + lnAttrTagLength + 1 + 1,	lnAttrDataLength, lnAttrDataLength,		false);
+											oss_datumSet (&bxmlaNew->_name, (u8*)buffer + lnOffset,								lnAttrTagLength,						false);
+											oss_datum2Set(&bxmlaNew->_data, (u8*)buffer + lnOffset + lnAttrTagLength + 1 + 1,	lnAttrDataLength, lnAttrDataLength,		false);
 
 											// Move past this attribute
 											lnOffset += lnAttrTagLength + 1 + 1 + lnAttrDataLength + 1;
@@ -393,8 +393,8 @@ _asm nop;
 												bxmlaNew->_parent = bxml;
 
 												// Store the tag name and allocate space for the data, set it to NULLs
-												oss_duplicateStringIntoDatum    (&bxmlaNew->_name,	(u8*)buffer + lnOffset,		lnAttrTagLength,	false);
-												oss_allocateNullStringIntoDatum2(&bxmlaNew->_data,								 lnValue,			true);
+												oss_datumSet		  (&bxmlaNew->_name,	(u8*)buffer + lnOffset,		lnAttrTagLength,	false);
+												oss_datum2SetNullString(&bxmlaNew->_data,								 lnValue,			true);
 
 												// Move past this attribute size allocator
 												lnOffset += lnAttrTagLength + 2 + lnNumberLength;
@@ -449,8 +449,8 @@ _asm nop;
 														bxmlaNew->_parent = bxml;
 
 														// Store the tag name and allocate space for the data, set it to NULLs
-														oss_duplicateStringIntoDatum (&bxmlaNew->_name,	(u8*)buffer + lnOffset,																		lnAttrTagLength,				false);
-														oss_duplicateStringIntoDatum2(&bxmlaNew->_data,	(u8*)buffer + lnOffset + lnAttrTagLength + 1 + lnNumberLength1 + 1 + lnNumberLength2 + 1,	lnValue2,			lnValue1,	false);
+														oss_datumSet (&bxmlaNew->_name,	(u8*)buffer + lnOffset,																		lnAttrTagLength,				false);
+														oss_datum2Set(&bxmlaNew->_data,	(u8*)buffer + lnOffset + lnAttrTagLength + 1 + lnNumberLength1 + 1 + lnNumberLength2 + 1,	lnValue2,			lnValue1,	false);
 
 														// Move past this attribute size allocator
 														lnOffset += lnAttrTagLength + 1 + lnNumberLength1 + 1 + lnNumberLength2 + 1 + lnValue2;
@@ -473,8 +473,8 @@ _asm nop;
 														bxmlaNew->_parent = bxml;
 
 														// Store the tag name and allocate space for the data, set it to NULLs
-														oss_duplicateStringIntoDatum (&bxmlaNew->_name,	(u8*)buffer + lnOffset,												lnAttrTagLength,			false);
-														oss_duplicateStringIntoDatum2(&bxmlaNew->_data,	(u8*)buffer + lnOffset + lnAttrTagLength + 1 + lnNumberLength1 + 1,	lnValue,		lnValue,	false);
+														oss_datumSet (&bxmlaNew->_name,	(u8*)buffer + lnOffset,												lnAttrTagLength,			false);
+														oss_datum2Set(&bxmlaNew->_data,	(u8*)buffer + lnOffset + lnAttrTagLength + 1 + lnNumberLength1 + 1,	lnValue,		lnValue,	false);
 
 														// Move past this attribute size allocator
 														lnOffset += lnAttrTagLength + 1 + lnNumberLength1 + 1 + lnValue;
@@ -939,10 +939,10 @@ _asm nop;
 				}
 
 				// Delete the name
-				oss_deleteDatum(&bxmla->_name);
+				oss_datumDelete(&bxmla->_name);
 
 				// Delete the data
-				oss_deleteDatum2(&bxmla->_data);
+				oss_datum2Delete(&bxmla->_data);
 
 				// Now that we've deleted the subordinate structure components, we are free to release the structure itself, both happily, and obediently. :-)
 				// Indicate we found our man
@@ -1032,7 +1032,7 @@ _asm nop;
 
 			// If we're valid, duplicate the source entry's data component
 			if (bxmlaNew)
-				oss_duplicateDatum2(&bxmlaNew->_data, &bxmlaOriginal->_data);
+				oss_datum2Duplicate(&bxmlaNew->_data, &bxmlaOriginal->_data);
 		}
 		// Indicate our status
 		return(bxmlaNew);
@@ -1069,7 +1069,7 @@ _asm nop;
 				bxmlaNew->ll.uniqueId = oss_getNextUniqueId();
 
 				// Duplicate the source entry's components
-				oss_duplicateStringIntoDatum(&bxmlaNew->_name, (u8*)tcNewName, tnNewNameLength, false);
+				oss_datumSet(&bxmlaNew->_name, (u8*)tcNewName, tnNewNameLength, false);
 			}
 		}
 		// Indicate our status
@@ -1094,7 +1094,7 @@ _asm nop;
 		if (bxmlaNew)
 		{
 			// Append the data
-			oss_duplicateStringIntoDatum2(&bxmlaNew->_data, (u8*)tcData, tnDataLength, tnTotalDataLength, false);
+			oss_datum2Set(&bxmlaNew->_data, (u8*)tcData, tnDataLength, tnTotalDataLength, false);
 
 		}
 		// Indicate our status
@@ -1132,7 +1132,7 @@ _asm nop;
 				bxmlNew->ll4.uniqueId = oss_getNextUniqueId();
 
 				// Duplicate the source entry's components
-				oss_duplicateStringIntoDatum(&bxmlNew->_name, (u8*)tcNewName, tnNewNameLength, false);
+				oss_datumSet(&bxmlNew->_name, (u8*)tcNewName, tnNewNameLength, false);
 			}
 		}
 		// Indicate our status
@@ -1169,7 +1169,7 @@ _asm nop;
 			if (bxmlNew)
 			{
 				// Duplicate the name
-				oss_duplicateStringIntoDatum(&bxmlNew->_name, (u8*)tcNewName, tnNewNameLength, false);
+				oss_datumSet(&bxmlNew->_name, (u8*)tcNewName, tnNewNameLength, false);
 
 				// If we are to copy attributes, do so
 				if (tlCopyAttributes && bxmlSrc->_attributes.masterCount != 0)
@@ -1315,7 +1315,7 @@ _asm nop;
 					//////////
 					// Append the duplicated tag name
 					//////
-						oss_duplicateDatum(&bxmlNew->_name, &bxmlSrcChild->_name);
+						oss_datumDuplicate(&bxmlNew->_name, &bxmlSrcChild->_name);
 
 
 					//////////
@@ -1381,7 +1381,7 @@ _asm nop;
 		gsLastErrorInfo.lastErrorCode	= tnErrorNumber;
 
 		// Update the last error structure
-		oss_duplicateStringIntoDatum(&gsLastErrorInfo.description, (u8*)tcDescriptionZ, oss_strlen(_csu8p(tcDescriptionZ)), true);
+		oss_datumSet(&gsLastErrorInfo.description, (u8*)tcDescriptionZ, oss_strlen(_csu8p(tcDescriptionZ)), true);
 		// When we get here, the last error has been updated
 	}
 
@@ -1444,8 +1444,8 @@ _asm nop;
 			bxml	= (SBxml*)cb->extra;
 
 			// Delete this attribute's datum and datum2 items
-			oss_deleteDatum(&bxmla->_name);
-			oss_deleteDatum2(&bxmla->_data);
+			oss_datumDelete(&bxmla->_name);
+			oss_datum2Delete(&bxmla->_data);
 		}
 	}
 

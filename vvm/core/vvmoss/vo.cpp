@@ -3883,7 +3883,7 @@ openAgain:
 // Duplicate and store to a datum structure
 //
 //////
-	void CALLTYPE oss_duplicateStringIntoDatum(SDatum* datum, u8* ptr, u64 length, bool tlFreeExisting)
+	SDatum* CALLTYPE oss_datumSet(SDatum* datum, u8* ptr, u64 length, bool tlFreeExisting)
 	{
 		u8* lptr;
 
@@ -3929,6 +3929,7 @@ openAgain:
 				datum->length		= 0;
 			}
 		}
+		return(datum);
 	}
 
 
@@ -3939,7 +3940,7 @@ openAgain:
 // Duplicate and store to a datum2 structure
 //
 //////
-	void CALLTYPE oss_duplicateStringIntoDatum2(SDatum2* datum2, u8* ptr, u64 length, u64 lengthTotal, bool tlFreeExisting)
+	SDatum2* CALLTYPE oss_datum2Set(SDatum2* datum2, u8* ptr, u64 length, u64 lengthTotal, bool tlFreeExisting)
 	{
 		// Make sure our environment is sane
 		if (datum2)
@@ -3947,7 +3948,7 @@ openAgain:
 			if (length != 0)
 			{
 				// Duplicate the datum string
-				oss_duplicateStringIntoDatum(&datum2->datum, ptr, length, tlFreeExisting);
+				oss_datumSet(&datum2->datum, ptr, length, tlFreeExisting);
 
 				// Update our totals if the string was allocated appropriately
 				if (datum2->datum.data._u8)
@@ -3962,12 +3963,13 @@ openAgain:
 
 			} else {
 				// They are clearing out whatever is already there
-				oss_deleteDatum(&datum2->datum);
+				oss_datumDelete(&datum2->datum);
 
 				// Initialize it to NULL
 				datum2->lengthTotal	= lengthTotal;
 			}
 		}
+		return(datum2);
 	}
 
 
@@ -3978,7 +3980,7 @@ openAgain:
 // Duplicates a datum into another datum
 //
 //////
-	void CALLTYPE oss_duplicateDatum(SDatum* datumDst, SDatum* datumSrc)
+	SDatum* CALLTYPE oss_datumDuplicate(SDatum* datumDst, SDatum* datumSrc)
 	{
 		// Make sure our environment is sane
 		if (datumDst && datumSrc && datumSrc->data._u8 && datumSrc->length != 0)
@@ -3994,6 +3996,7 @@ openAgain:
 			if (datumDst->data._u8)		datumDst->length	= datumSrc->length;
 			else						datumDst->length	= 0;
 		}
+		return(datumDst);
 	}
 
 
@@ -4004,7 +4007,7 @@ openAgain:
 // Duplicates a datum2 into another datum2
 //
 //////
-	void CALLTYPE oss_duplicateDatum2(SDatum2* datum2Dst, SDatum2* datum2Src)
+	SDatum2* CALLTYPE oss_datum2Duplicate(SDatum2* datum2Dst, SDatum2* datum2Src)
 	{
 		// Make sure our environment is sane
 		if (datum2Dst && datum2Src && datum2Src->datum.data._u8 && datum2Src->datum.length != 0)
@@ -4029,6 +4032,7 @@ openAgain:
 				datum2Dst->lengthTotal		= 0;
 			}
 		}
+		return(datum2Dst);
 	}
 
 
@@ -4039,7 +4043,7 @@ openAgain:
 // Deletes the indicated datum
 //
 //////
-	void CALLTYPE oss_deleteDatum(SDatum* datum)
+	void CALLTYPE oss_datumDelete(SDatum* datum)
 	{
 		if (datum)
 		{
@@ -4065,12 +4069,12 @@ openAgain:
 // Delete the indicated datum2
 //
 //////
-	void CALLTYPE oss_deleteDatum2(SDatum2* datum2)
+	void CALLTYPE oss_datum2Delete(SDatum2* datum2)
 	{
 		if (datum2 && datum2->datum.data._u8)
 		{
 			// Free the memory
-			oss_deleteDatum(&datum2->datum);
+			oss_datumDelete(&datum2->datum);
 
 			// Reset the datum2 total size
 			datum2->lengthTotal	= 0;
@@ -4085,7 +4089,7 @@ openAgain:
 // Allocate an empty string into datum2
 //
 //////
-	void CALLTYPE oss_allocateNullStringIntoDatum2(SDatum2* datum2, u64 length, bool tlInitialize)
+	void CALLTYPE oss_datum2SetNullString(SDatum2* datum2, u64 length, bool tlInitialize)
 	{
 		// Make sure our environment is sane
 		if (datum2)
@@ -7785,7 +7789,7 @@ _asm int 3;
 		if (bxmla && tcNewName && tnNewNameLength != 0)
 		{
 			// Create the new data block based on what is requested
-			oss_duplicateStringIntoDatum(&bxmla->_name, (u8*)tcNewName, tnNewNameLength, true);
+			oss_datumSet(&bxmla->_name, (u8*)tcNewName, tnNewNameLength, true);
 			llResult = (bxmla->_name.data._s8 != NULL);
 		}
 		// Indicate our success or failure
@@ -7812,7 +7816,7 @@ _asm int 3;
 		if (bxmla && tcData)
 		{
 			// Create the new data block based on what is requested
-			oss_duplicateStringIntoDatum2(&bxmla->_data, (u8*)tcData, tnDataLength, bxmla->_data.lengthTotal, true);
+			oss_datum2Set(&bxmla->_data, (u8*)tcData, tnDataLength, bxmla->_data.lengthTotal, true);
 
 			// Update our new total length (if need be)
 			bxmla->_data.lengthTotal = max(tnDataLength, bxmla->_data.lengthTotal);
@@ -7919,7 +7923,7 @@ _asm int 3;
 					// We are creating the first data that will go here
 // TODO:  untested code, breakpoint and examine
 _asm nop;
-					oss_duplicateStringIntoDatum2(&bxmla->_data, NULL, tnDataLengthTotal, tnDataLengthTotal, false);
+					oss_datum2Set(&bxmla->_data, NULL, tnDataLengthTotal, tnDataLengthTotal, false);
 				}
 				// When we get here, we're done
 				break;
@@ -8105,33 +8109,72 @@ _asm nop;
 	{
 		return(ioss_bxmlAttributeSha1Data(bxml, sha20Bytes));
 	}
+;
 
-	u8* CALLTYPE oss_bxmlaGetString(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength, u32* tnStringLength)
+
+
+
+//////////
+//
+// Called to return the values directly without having to obtain 
+//
+//////
+	u32 CALLTYPE oss_bxmlaFindAndGetString(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance, SDatum* tsResult)
 	{
 		return(NULL);
 	}
 
-	u32 CALLTYPE oss_bxmlaGetU32(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength)
+	u32 CALLTYPE oss_bxmlaFindAndGetU32(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance)
 	{
 		return(NULL);
 	}
 
-	u64 CALLTYPE oss_bxmlaGetU64(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength)
+	u64 CALLTYPE oss_bxmlaFindAndGetU64(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance)
 	{
 		return(NULL);
 	}
 
-	bool CALLTYPE oss_bxmlaGetBool(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength)
+	bool CALLTYPE oss_bxmlaFindAndGetBool(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance)
 	{
 		return(NULL);
 	}
 
-	f32 CALLTYPE oss_bxmlaGetF32(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength)
+	f32 CALLTYPE oss_bxmlaFindAndGetF32(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance)
 	{
 		return(NULL);
 	}
 
-	f64 CALLTYPE oss_bxmlaGetF64(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength)
+	f64 CALLTYPE oss_bxmlaFindAndGetF64(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance)
+	{
+		return(NULL);
+	}
+
+	u32 CALLTYPE oss_bxmlaGetString(SBxmla* bxmla, SDatum* tsResult)
+	{
+		return(NULL);
+	}
+
+	u32 CALLTYPE oss_bxmlaGetU32(SBxmla* bxmla)
+	{
+		return(NULL);
+	}
+
+	u64 CALLTYPE oss_bxmlaGetU64(SBxmla* bxmla)
+	{
+		return(NULL);
+	}
+
+	bool CALLTYPE oss_bxmlaGetBool(SBxmla* bxmla)
+	{
+		return(NULL);
+	}
+
+	f32 CALLTYPE oss_bxmlaGetF32(SBxmla* bxmla)
+	{
+		return(NULL);
+	}
+
+	f64 CALLTYPE oss_bxmlaGetF64(SBxmla* bxmla)
 	{
 		return(NULL);
 	}
@@ -8206,7 +8249,7 @@ _asm nop;
 		if (bxml && tcNewName && tnNewNameLength != 0)
 		{
 			// Create the new data block based on what is requested
-			oss_duplicateStringIntoDatum(&bxml->_name, (u8*)tcNewName, tnNewNameLength, true);
+			oss_datumSet(&bxml->_name, (u8*)tcNewName, tnNewNameLength, true);
 			llResult = (bxml->_name.data._s8 != NULL);
 		}
 		// Indicate our success or failure
@@ -8447,6 +8490,19 @@ _asm nop;
 
 		// Return our target
 		return(bxmlaTarget);
+	}
+
+
+
+
+//////////
+//
+// Called to find the indicated attribute directly for the indicated node
+//
+//////
+	SBxmla* CALLTYPE oss_bxmlFindAttribute(SBxml* bxml, SDatum* tsWildcardSearch, u32 tnInstance)
+	{
+		return(iioss_bxmlFindAttribute(bxml, tsWildcardSearch));
 	}
 
 

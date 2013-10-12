@@ -194,13 +194,13 @@
 
 	const s8		cgcOssDuplicateString[]									= "oss_duplicateString";
 	const s8		cgcOssDuplicateUnicodeString[]							= "oss_duplicateUnicodeString";
-	const s8		cgcOssDuplicateStringIntoDatum[]						= "oss_duplicateStringIntoDatum";
-	const s8		cgcOssDuplicateStringIntoDatum2[]						= "oss_duplicateStringIntoDatum2";
-	const s8		cgcOssDuplicateDatum[]									= "oss_duplicateDatum";
-	const s8		cgcOssDuplicateDatum2[]									= "oss_duplicateDatum2";
-	const s8		cgcOssDeleteDatum[]										= "oss_deleteDatum";
-	const s8		cgcOssDeleteDatum2[]									= "oss_deleteDatum2";
-	const s8		cgcOssAllocateNullStringIntoDatum2[]					= "oss_allocateNullStringIntoDatum2";
+	const s8		cgcOssDatumSet[]										= "oss_datumSet";
+	const s8		cgcOssDatum2Set[]										= "oss_datumSet2";
+	const s8		cgcOssDatumDuplicate[]									= "oss_datumDuplicate";
+	const s8		cgcOssDatum2Duplicate[]									= "oss_datum2Duplicate";
+	const s8		cgcOssDatumDelete[]										= "oss_datumDelete";
+	const s8		cgcOssDatum2Delete[]									= "oss_datum2Delete";
+	const s8		cgcOssDatum2SetNullString[]								= "oss_datum2SetNullString";
 	const s8		cgcOssCopyUpToShortestString[]							= "oss_copyUpToShortestString";
 	const s8		cgcOssWildcardMatch[]									= "oss_wildcardMatch";
 	const s8		cgcOssAsciiToUnicode[]									= "oss_asciiToUnicode";
@@ -326,6 +326,14 @@
 	const s8		cgcOssBxmlAttributeSha1[]								= "oss_bxmlaSha1";
 	const s8		cgcOssBxmlAttributeSha1Tag[]							= "oss_bxmlaSha1Tag";
 	const s8		cgcOssBxmlAttributeSha1Data[]							= "oss_bxmlaSha1Data";
+
+	const s8		cgcOssBxmlAttributeFindAndGetString[]					= "oss_bxmlaFindAndGetString";
+	const s8		cgcOssBxmlAttributeFindAndGetU32[]						= "oss_bxmlaFindAndGetU32";
+	const s8		cgcOssBxmlAttributeFindAndGetU64[]						= "oss_bxmlaFindAndGetU64";
+	const s8		cgcOssBxmlAttributeFindAndGetUBool[]					= "oss_bxmlaFindAndGetBool";
+	const s8		cgcOssBxmlAttributeFindAndGetF32[]						= "oss_bxmlaFindAndGetF32";
+	const s8		cgcOssBxmlAttributeFindAndGetF64[]						= "oss_bxmlaFindAndGetF64";
+
 	const s8		cgcOssBxmlAttributeGetString[]							= "oss_bxmlaGetString";
 	const s8		cgcOssBxmlAttributeGetU32[]								= "oss_bxmlaGetU32";
 	const s8		cgcOssBxmlAttributeGetU64[]								= "oss_bxmlaGetU64";
@@ -355,6 +363,7 @@
 	const s8		cgcOssBxmlGetFirstChild[]								= "oss_bxmlNodeGetFirstChild";
 	const s8		cgcOssBxmlGetFirstAttribute[]							= "oss_bxmlNodeGetFirstAttribute";
 
+	const s8		cgcOssBxmlFindAttribute[]								= "oss_bxmlFindAttribute";
 	const s8		cgcOssBxmlFindFirst[]									= "oss_bxmlFindFirst";
 	const s8		cgcOssBxmlFindContinue[]								= "oss_bxmlFindContinue";
 	const s8		cgcOssBxmlFindAllAsStartEndLists[]						= "oss_bxmlFindAllAsStartEndLists";
@@ -591,13 +600,13 @@
 		// Prototype definitions
 		u8*				(CALLTYPE *oss_duplicateString)						(u8* ptr, u64 length);
 		w16*			(CALLTYPE *oss_duplicateUnicodeString)				(w16* tuText);
-		void			(CALLTYPE *oss_duplicateStringIntoDatum)			(SDatum*  datum,  u8* ptr, u64 length,                  bool tlFreeExisting);
-		void			(CALLTYPE *oss_duplicateStringIntoDatum2)			(SDatum2* datum2, u8* ptr, u64 length, u64 totalLength, bool tlFreeExisting);
-		void			(CALLTYPE *oss_duplicateDatum)						(SDatum*  datumDst,  SDatum*  datumSrc);
-		void			(CALLTYPE *oss_duplicateDatum2)						(SDatum2* datum2Dst, SDatum2* datum2Src);
-		void			(CALLTYPE *oss_deleteDatum)							(SDatum*  datum);
-		void			(CALLTYPE *oss_deleteDatum2)						(SDatum2* datum2);
-		void			(CALLTYPE *oss_allocateNullStringIntoDatum2)		(SDatum2* datum2, u64 length, bool tlInitialize);
+		SDatum*			(CALLTYPE *oss_datumSet)							(SDatum*  datum,  u8* ptr, u64 length,                  bool tlFreeExisting);
+		SDatum2*		(CALLTYPE *oss_datumSet2)							(SDatum2* datum2, u8* ptr, u64 length, u64 totalLength, bool tlFreeExisting);
+		SDatum*			(CALLTYPE *oss_datumDuplicate)						(SDatum*  datumDst,  SDatum*  datumSrc);
+		SDatum2*		(CALLTYPE *oss_datum2Duplicate)						(SDatum2* datum2Dst, SDatum2* datum2Src);
+		void			(CALLTYPE *oss_datumDelete)							(SDatum*  datum);
+		void			(CALLTYPE *oss_datum2Delete)						(SDatum2* datum2);
+		void			(CALLTYPE *oss_datum2SetNullString)					(SDatum2* datum2, u64 length, bool tlInitialize);
 		void			(CALLTYPE *oss_copyUpToShortestString)				(u8* dst, u32 tnDstLength, u8* src, u32 tnSrcLength);
 		s32				(CALLTYPE *oss_wildcardMatch)						(csu8p candidate, csu8p wildcardPattern, bool tlCaseSensitive);
 		w16*			(CALLTYPE *oss_asciiToUnicode)						(u8* tcText, u32 tnTextLength);
@@ -754,13 +763,20 @@
 		u64				(CALLTYPE *oss_bxmlaSha1)							(SBxml*  bxml,  u8 sha20Bytes[20]);
 		u64				(CALLTYPE *oss_bxmlaSha1Tag)						(SBxml*  bxml,  u8 sha20Bytes[20]);
 		u64				(CALLTYPE *oss_bxmlaSha1Data)						(SBxml*  bxml,  u8 sha20Bytes[20]);
-		u8*				(CALLTYPE *oss_bxmlaGetString)						(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength, u32* tnStringLength);
-		u32				(CALLTYPE *oss_bxmlaGetU32)							(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength);
-		u64				(CALLTYPE *oss_bxmlaGetU64)							(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength);
-		bool			(CALLTYPE *oss_bxmlaGetBool)						(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength);
-		f32				(CALLTYPE *oss_bxmlaGetF32)							(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength);
-		f64				(CALLTYPE *oss_bxmlaGetF64)							(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength);
 
+		u32				(CALLTYPE *oss_bxmlaFindAndGetString)				(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance, SDatum* tsResult);
+		u32				(CALLTYPE *oss_bxmlaFindAndGetU32)					(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance);
+		u64				(CALLTYPE *oss_bxmlaFindAndGetU64)					(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance);
+		bool			(CALLTYPE *oss_bxmlaFindAndGetBool)					(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance);
+		f32				(CALLTYPE *oss_bxmlaFindAndGetF32)					(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance);
+		f64				(CALLTYPE *oss_bxmlaFindAndGetF64)					(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance);
+
+		u32				(CALLTYPE *oss_bxmlaGetString)						(SBxmla* bxmla, SDatum* tsResult);
+		u32				(CALLTYPE *oss_bxmlaGetU32)							(SBxmla* bxmla);
+		u64				(CALLTYPE *oss_bxmlaGetU64)							(SBxmla* bxmla);
+		bool			(CALLTYPE *oss_bxmlaGetBool)						(SBxmla* bxmla);
+		f32				(CALLTYPE *oss_bxmlaGetF32)							(SBxmla* bxmla);
+		f64				(CALLTYPE *oss_bxmlaGetF64)							(SBxmla* bxmla);
 
 		// For 2-way navigation through the attributes (can be done manually, but these expressly do it
 		SBxmla*			(CALLTYPE *oss_bxmlaGetNext)						(SBxmla* bxmla);
@@ -785,6 +801,7 @@
 		SBxml*			(CALLTYPE *oss_bxmlNodeGetFirstChild)				(SBxml* bxml);
 		SBxmla*			(CALLTYPE *oss_bxmlNodeGetFirstAttribute)			(SBxml* bxml);
 
+		SBxmla*			(CALLTYPE *oss_bxmlFindAttribute)					(SBxml* bxml, s8* tcAttributeName, u32 tnAttributeNameLength, u32 tnInstance);
 		bool			(CALLTYPE *oss_bxmlFindFirst)						(SBxml* bxmlRoot, SBxml** bxmlNodeFound, SBxmla** bxmlaAttributeFound, SDatum* tsWildcardSearch, bool tlTraverseChildren, bool tlSearchAttributes, void** x);
 		bool			(CALLTYPE *oss_bxmlFindContinue)					(void* x);
 		u32				(CALLTYPE *oss_bxmlFindAllAsStartEndLists)			(SBxml* bxmlRoot, SStartEnd* bxmlFinds, SStartEnd* bxmlaFinds, SDatum* tsWildcardSearch, u32* tnMaxFindsToInclude, bool tlTraverseChildren, bool tlSearchAttributes);
@@ -963,13 +980,13 @@
 
 		(void*)&oss_duplicateString,										(void*)cgcOssDuplicateString,
 		(void*)&oss_duplicateUnicodeString,									(void*)cgcOssDuplicateUnicodeString,
-		(void*)&oss_duplicateStringIntoDatum,								(void*)cgcOssDuplicateStringIntoDatum,
-		(void*)&oss_duplicateStringIntoDatum2,								(void*)cgcOssDuplicateStringIntoDatum2,
-		(void*)&oss_duplicateDatum,											(void*)cgcOssDuplicateDatum,
-		(void*)&oss_duplicateDatum2,										(void*)cgcOssDuplicateDatum2,
-		(void*)&oss_deleteDatum,											(void*)cgcOssDeleteDatum,
-		(void*)&oss_deleteDatum2,											(void*)cgcOssDeleteDatum2,
-		(void*)&oss_allocateNullStringIntoDatum2,							(void*)cgcOssAllocateNullStringIntoDatum2,
+		(void*)&oss_datumSet,												(void*)cgcOssDatumSet,
+		(void*)&oss_datumSet2,												(void*)cgcOssDatum2Set,
+		(void*)&oss_datumDuplicate,											(void*)cgcOssDatumDuplicate,
+		(void*)&oss_datum2Duplicate,										(void*)cgcOssDatum2Duplicate,
+		(void*)&oss_datumDelete,											(void*)cgcOssDatumDelete,
+		(void*)&oss_datum2Delete,											(void*)cgcOssDatum2Delete,
+		(void*)&oss_datum2SetNullString,									(void*)cgcOssDatum2SetNullString,
 		(void*)&oss_copyUpToShortestString,									(void*)cgcOssCopyUpToShortestString,
 		(void*)&oss_wildcardMatch,											(void*)cgcOssWildcardMatch,
 		(void*)&oss_asciiToUnicode,											(void*)cgcOssAsciiToUnicode,
@@ -1095,6 +1112,14 @@
 		(void *)&oss_bxmlaSha1,												(void *)cgcOssBxmlAttributeSha1,
 		(void *)&oss_bxmlaSha1Tag,											(void *)cgcOssBxmlAttributeSha1Tag,
 		(void *)&oss_bxmlaSha1Data,											(void *)cgcOssBxmlAttributeSha1Data,
+
+		(void *)&oss_bxmlaFindAndGetString,									(void *)cgcOssBxmlAttributeFindAndGetString,
+		(void *)&oss_bxmlaFindAndGetU32,									(void *)cgcOssBxmlAttributeFindAndGetU32,
+		(void *)&oss_bxmlaFindAndGetU64,									(void *)cgcOssBxmlAttributeFindAndGetU64,
+		(void *)&oss_bxmlaFindAndGetBool,									(void *)cgcOssBxmlAttributeFindAndGetUBool,
+		(void *)&oss_bxmlaFindAndGetF32,									(void *)cgcOssBxmlAttributeFindAndGetF32,
+		(void *)&oss_bxmlaFindAndGetF64,									(void *)cgcOssBxmlAttributeFindAndGetF64,
+
 		(void *)&oss_bxmlaGetString,										(void *)cgcOssBxmlAttributeGetString,
 		(void *)&oss_bxmlaGetU32,											(void *)cgcOssBxmlAttributeGetU32,
 		(void *)&oss_bxmlaGetU64,											(void *)cgcOssBxmlAttributeGetU64,
@@ -1123,6 +1148,7 @@
 		(void *)&oss_bxmlNodeGetFirstChild,									(void *)cgcOssBxmlGetFirstChild,
 		(void *)&oss_bxmlNodeGetFirstAttribute,								(void *)cgcOssBxmlGetFirstAttribute,
 
+		(void *)&oss_bxmlFindAttribute,										(void *)cgcOssBxmlFindAttribute,
 		(void *)&oss_bxmlFindFirst,											(void *)cgcOssBxmlFindFirst,
 		(void *)&oss_bxmlFindContinue,										(void *)cgcOssBxmlFindContinue,
 		(void *)&oss_bxmlFindAllAsStartEndLists,							(void *)cgcOssBxmlFindAllAsStartEndLists,
@@ -1199,6 +1225,7 @@
 			if (!lnAddress)
 			{
 				// The specified functionality is not available
+				// Note:  By design, this should never happen.  It is the result of a programming error.
 				sprintf_s(buffer, sizeof(buffer), "Error accessing: %s\000", lcFuncName);
 				MessageBoxA(NULL, buffer, "VVMOSS Initialization Error", MB_OK);
 				// We need all the functions we request, not just some of them
@@ -1256,6 +1283,7 @@
 			if (!lcAddress)
 			{
 				// The specified functionality is not available
+				// Note:  By design, this should never happen.  It is the result of a programming error.
 				sprintf_s(buffer, sizeof(buffer), "Error accessing: %s\000", lcFuncName);
 				MessageBoxA(NULL, buffer, "VVMOSS Initialization Error", MB_OK);
 				// The specified functionality is not available

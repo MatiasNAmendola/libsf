@@ -3958,13 +3958,13 @@ _asm int 3;
 				memset(buffer, 0, sizeof(buffer));
 				if (tcPath._u8) oss_memcpy(buffer, tcPath._s8, oss_strlen(tcPath));
 				oss_memcpy(buffer + oss_strlen(_csu8p(buffer)), twfd->cFileName, oss_strlen(_csu8p(twfd->cFileName)));
-				oss_duplicateStringIntoDatum(&tsFileInfo->file, (u8*)buffer, oss_strlen(_csu8p(buffer)), true);
+				oss_datumSet(&tsFileInfo->file, (u8*)buffer, oss_strlen(_csu8p(buffer)), true);
 
 				// Alternate filename
 				memset(buffer, 0, sizeof(buffer));
 				if (tcPath._s8) oss_memcpy(buffer, tcPath._s8, oss_strlen(tcPath));
 				memcpy(buffer + strlen(buffer), twfd->cAlternateFileName, strlen(twfd->cAlternateFileName));
-				oss_duplicateStringIntoDatum(&tsFileInfo->file2, (u8*)buffer, oss_strlen(_csu8p(buffer)), true);
+				oss_datumSet(&tsFileInfo->file2, (u8*)buffer, oss_strlen(_csu8p(buffer)), true);
 
 			// Store the file size
 			tsFileInfo->size		= ((u64)twfd->nFileSizeHigh < 32) | ((u64)twfd->nFileSizeLow);

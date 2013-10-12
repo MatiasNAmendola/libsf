@@ -185,6 +185,7 @@
 			if (!lnAddress)
 			{
 				// The specified functionality is not available
+				// Note:  By design, this should never happen.  It is the result of a programming error.
 				sprintf_s(buffer, sizeof(buffer), "Error accessing: %s\000", lcFuncName);
 				MessageBoxA(NULL, buffer, "VVMMC (Machine Code) Initialization Error", MB_OK);
 				// We need all the functions we request, not just some of them
@@ -242,6 +243,7 @@
 			if (!lcAddress)
 			{
 				// The specified functionality is not available
+				// Note:  By design, this should never happen.  It is the result of a programming error.
 				sprintf_s(buffer, sizeof(buffer), "Error accessing: %s\000", lcFuncName);
 				MessageBoxA(NULL, buffer, "VVMMC (Machine Code) Initialization Error", MB_OK);
 				// The specified functionality is not available

@@ -157,6 +157,7 @@
 			if (!lcAddress)
 			{
 				// The specified functionality is not available
+				// Note:  By design, this should never happen.  It is the result of a programming error.
 				sprintf_s(buffer, sizeof(buffer), "Error accessing: %s\000", lcFuncName);
 				MessageBoxA(NULL, buffer, "VVMTESTS Initialization Error", MB_OK);
 				// The specified functionality is not available

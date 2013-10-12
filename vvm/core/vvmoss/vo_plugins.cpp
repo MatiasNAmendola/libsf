@@ -88,8 +88,8 @@
 				oss_fileFindClose(lnHandle);
 
 				// Release any allocated memory blocks
-				oss_deleteDatum(&lff.file);
-				oss_deleteDatum(&lff.file2);
+				oss_datumDelete(&lff.file);
+				oss_datumDelete(&lff.file2);
 			}
 	}
 

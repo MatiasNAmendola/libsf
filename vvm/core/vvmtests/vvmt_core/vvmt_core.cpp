@@ -217,13 +217,15 @@ return(false);
 //////////
 	void hijack_toLoadIcons(void)
 	{
-		u32			lnUlX, lnUlY, lnWidth, lnHeight, lnStrideX, lnStrideY, lnFilenameLength;
+		u32			lnResult, lnUlX, lnUlY, lnWidth, lnHeight, lnStrideX, lnStrideY, lnFilenameLength;
 		u64			lnNumread, lnErrorOffset, lnErrorCode;
 		SBxml*		vdbi;
 		SBxml*		icons;
 		SBxml*		icon;
 		csu8p		file;
 		SCanvas*	canvasIcons;
+		SDatum		searchString;
+		SDatum		resultString;
 		s8			buffer[256];
 
 
@@ -239,13 +241,14 @@ return(false);
 			_asm int 3;
 
 		// Grab the name of the icon file, and the associated integers
-		file._u8	= oss_bxmlaGetString(icons,	"file",		-1, &lnFilenameLength);
-		lnUlX		= oss_bxmlaGetU32(icons,	"ulx",		-1);
-		lnUlY		= oss_bxmlaGetU32(icons,	"uly",		-1);
-		lnWidth		= oss_bxmlaGetU32(icons,	"width",	-1);
-		lnHeight	= oss_bxmlaGetU32(icons,	"height",	-1);
-		lnStrideX	= oss_bxmlaGetU32(icons,	"stridex",	-1);
-		lnStrideY	= oss_bxmlaGetU32(icons,	"stridey",	-1);
+		lnResult	= oss_bxmlaFindAndGetString	(icons,	NULL,	oss_datumSet(&searchString, (u8*)"file",	-1, true), 1, &resultString);
+		lnUlX		= oss_bxmlaFindAndGetU32	(icons,	NULL,	oss_datumSet(&searchString, (u8*)"ulx",		-1, true), 1);
+		lnUlY		= oss_bxmlaFindAndGetU32	(icons,	NULL,	oss_datumSet(&searchString, (u8*)"uly",		-1, true), 1);
+		lnWidth		= oss_bxmlaFindAndGetU32	(icons,	NULL,	oss_datumSet(&searchString, (u8*)"width",	-1, true), 1);
+		lnHeight	= oss_bxmlaFindAndGetU32	(icons,	NULL,	oss_datumSet(&searchString, (u8*)"height",	-1, true), 1);
+		lnStrideX	= oss_bxmlaFindAndGetU32	(icons,	NULL,	oss_datumSet(&searchString, (u8*)"stridex",	-1, true), 1);
+		lnStrideY	= oss_bxmlaFindAndGetU32	(icons,	NULL,	oss_datumSet(&searchString, (u8*)"stridey",	-1, true), 1);
+		oss_datumDelete(&searchString);
 		// Validate sanity
 		if (!file._u8 || lnFilenameLength > sizeof(buffer) || lnUlX == -1 || lnUlY == -1 || lnWidth == -1 || lnHeight == -1 || lnStrideX == -1 || lnStrideY == -1)
 			_asm int 3;

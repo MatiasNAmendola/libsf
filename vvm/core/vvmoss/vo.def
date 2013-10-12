@@ -116,13 +116,13 @@ EXPORTS
 	
 	oss_duplicateString
 	oss_duplicateUnicodeString
-	oss_duplicateStringIntoDatum
-	oss_duplicateStringIntoDatum2
-	oss_duplicateDatum
-	oss_duplicateDatum2
-	oss_deleteDatum
-	oss_deleteDatum2
-	oss_allocateNullStringIntoDatum2
+	oss_datumSet
+	oss_datumSet2
+	oss_datumDuplicate
+	oss_datum2Duplicate
+	oss_datumDelete
+	oss_datum2Delete
+	oss_datum2SetNullString
 	oss_copyUpToShortestString
 	oss_wildcardMatch
 	oss_asciiToUnicode
@@ -249,6 +249,20 @@ EXPORTS
 	oss_bxmlaSha1
 	oss_bxmlaSha1Tag
 	oss_bxmlaSha1Data
+	
+	oss_bxmlaFindAndGetString
+	oss_bxmlaFindAndGetU32
+	oss_bxmlaFindAndGetU64
+	oss_bxmlaFindAndGetBool
+	oss_bxmlaFindAndGetF32
+	oss_bxmlaFindAndGetF64
+
+	oss_bxmlaGetString
+	oss_bxmlaGetU32
+	oss_bxmlaGetU64
+	oss_bxmlaGetBool
+	oss_bxmlaGetF32
+	oss_bxmlaGetF64
 
 	oss_bxmlNodeCreate
 	oss_bxmlNodeSetName
@@ -267,7 +281,8 @@ EXPORTS
 	oss_bxmlNodeGetParent
 	oss_bxmlNodeGetFirstChild
 	oss_bxmlNodeGetFirstAttribute
-
+	
+	oss_bxmlFindAttribute
 	oss_bxmlFindFirst
 	oss_bxmlFindContinue
 	oss_bxmlFindAllAsStartEndLists
