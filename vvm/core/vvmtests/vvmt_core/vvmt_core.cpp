@@ -217,6 +217,7 @@ return(false);
 //////////
 	void hijack_toLoadIcons(void)
 	{
+		bool		llErrorFile, llErrorUlx, llErrorUly, llErrorWidth, llErrorHeight, llErrorStridex, llErrorStridey;
 		u32			lnResult, lnUlX, lnUlY, lnWidth, lnHeight, lnStrideX, lnStrideY, lnFilenameLength;
 		u64			lnNumread, lnErrorOffset, lnErrorCode;
 		SBxml*		vdbi;
@@ -241,16 +242,16 @@ return(false);
 			_asm int 3;
 
 		// Grab the name of the icon file, and the associated integers
-		lnResult	= oss_bxmlaFindAndGetString	(icons,	NULL,	oss_datumSet(&searchString, (u8*)"file",	-1, true), 1, &resultString);
-		lnUlX		= oss_bxmlaFindAndGetU32	(icons,	NULL,	oss_datumSet(&searchString, (u8*)"ulx",		-1, true), 1);
-		lnUlY		= oss_bxmlaFindAndGetU32	(icons,	NULL,	oss_datumSet(&searchString, (u8*)"uly",		-1, true), 1);
-		lnWidth		= oss_bxmlaFindAndGetU32	(icons,	NULL,	oss_datumSet(&searchString, (u8*)"width",	-1, true), 1);
-		lnHeight	= oss_bxmlaFindAndGetU32	(icons,	NULL,	oss_datumSet(&searchString, (u8*)"height",	-1, true), 1);
-		lnStrideX	= oss_bxmlaFindAndGetU32	(icons,	NULL,	oss_datumSet(&searchString, (u8*)"stridex",	-1, true), 1);
-		lnStrideY	= oss_bxmlaFindAndGetU32	(icons,	NULL,	oss_datumSet(&searchString, (u8*)"stridey",	-1, true), 1);
+		lnResult	= oss_bxmlaFindAndGetString	(icons,	NULL,	oss_datumSet(&searchString, (u8*)"file",	-1, true), 1, &resultString, &llErrorFile);
+		lnUlX		= oss_bxmlaFindAndGetU32	(icons,	NULL,	oss_datumSet(&searchString, (u8*)"ulx",		-1, true), 1, &llErrorUlx);
+		lnUlY		= oss_bxmlaFindAndGetU32	(icons,	NULL,	oss_datumSet(&searchString, (u8*)"uly",		-1, true), 1, &llErrorUly);
+		lnWidth		= oss_bxmlaFindAndGetU32	(icons,	NULL,	oss_datumSet(&searchString, (u8*)"width",	-1, true), 1, &llErrorWidth);
+		lnHeight	= oss_bxmlaFindAndGetU32	(icons,	NULL,	oss_datumSet(&searchString, (u8*)"height",	-1, true), 1, &llErrorHeight);
+		lnStrideX	= oss_bxmlaFindAndGetU32	(icons,	NULL,	oss_datumSet(&searchString, (u8*)"stridex",	-1, true), 1, &llErrorStridex);
+		lnStrideY	= oss_bxmlaFindAndGetU32	(icons,	NULL,	oss_datumSet(&searchString, (u8*)"stridey",	-1, true), 1, &llErrorStridey);
 		oss_datumDelete(&searchString);
 		// Validate sanity
-		if (!file._u8 || lnFilenameLength > sizeof(buffer) || lnUlX == -1 || lnUlY == -1 || lnWidth == -1 || lnHeight == -1 || lnStrideX == -1 || lnStrideY == -1)
+		if (!llErrorFile || !llErrorUlx || !llErrorUly || !llErrorWidth || !llErrorHeight || !llErrorStridex || !llErrorStridey)
 			_asm int 3;
 
 		// Open the file

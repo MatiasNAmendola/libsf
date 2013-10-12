@@ -4570,6 +4570,28 @@ continueToNextAttribute:
 
 //////////
 //
+// Called to search for the attribute and store it optionally if indicated
+//
+//////
+	SBxmla* iioss_bxmlFindAttribute(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance)
+	{
+		SBxmla* lbxmla;
+
+
+		// Find and store the attribute
+		lbxmla = oss_bxmlFindAttribute(bxml, tsWildcardSearch, tnInstance);
+		if (bxmla)
+			*bxmla = lbxmla;
+
+		// Indicate our success or failure
+		return(lbxmla);
+	}
+
+
+
+
+//////////
+//
 // Create a new screen in the master list
 //
 //////

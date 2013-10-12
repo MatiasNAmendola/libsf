@@ -2221,6 +2221,11 @@
 //		1		-- candidate is greater than wildcardPattern
 //
 ///////
+	s32 CALLTYPE oss_wildcardMatchDatum(SDatum* tsCandidate, SDatum* tsWildcardPattern, bool tlCaseSensitive)
+	{
+		return(oss_wildcardMatch(_csu8p(tsCandidate->data._u8), _csu8p(tsWildcardPattern->data._u8), tlCaseSensitive));
+	}
+
 	s32 CALLTYPE oss_wildcardMatch(csu8p candidate, csu8p wildcardPattern, bool tlCaseSensitive)
 	{
 		u8		c, w;
@@ -8109,7 +8114,6 @@ _asm nop;
 	{
 		return(ioss_bxmlAttributeSha1Data(bxml, sha20Bytes));
 	}
-;
 
 
 
@@ -8119,64 +8123,169 @@ _asm nop;
 // Called to return the values directly without having to obtain 
 //
 //////
-	u32 CALLTYPE oss_bxmlaFindAndGetString(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance, SDatum* tsResult)
+	u32 CALLTYPE oss_bxmlaFindAndGetString(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance, SDatum* tsResult, bool* tlError)
 	{
-		return(NULL);
+		return(oss_bxmlaGetString(iioss_bxmlFindAttribute(bxml, bxmla, tsWildcardSearch, tnInstance), tsResult, tlError));
 	}
 
-	u32 CALLTYPE oss_bxmlaFindAndGetU32(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance)
+	u32 CALLTYPE oss_bxmlaFindAndGetU32(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance, bool* tlError)
 	{
-		return(NULL);
+		return(oss_bxmlaGetU32(iioss_bxmlFindAttribute(bxml, bxmla, tsWildcardSearch, tnInstance), tlError));
 	}
 
-	u64 CALLTYPE oss_bxmlaFindAndGetU64(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance)
+	u64 CALLTYPE oss_bxmlaFindAndGetU64(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance, bool* tlError)
 	{
-		return(NULL);
+		return(oss_bxmlaGetU64(iioss_bxmlFindAttribute(bxml, bxmla, tsWildcardSearch, tnInstance), tlError));
 	}
 
-	bool CALLTYPE oss_bxmlaFindAndGetBool(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance)
+	bool CALLTYPE oss_bxmlaFindAndGetBool(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance, bool* tlError)
 	{
-		return(NULL);
+		return(oss_bxmlaGetBool(iioss_bxmlFindAttribute(bxml, bxmla, tsWildcardSearch, tnInstance), tlError));
 	}
 
-	f32 CALLTYPE oss_bxmlaFindAndGetF32(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance)
+	f32 CALLTYPE oss_bxmlaFindAndGetF32(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance, bool* tlError)
 	{
-		return(NULL);
+		return(oss_bxmlaGetF32(iioss_bxmlFindAttribute(bxml, bxmla, tsWildcardSearch, tnInstance), tlError));
 	}
 
-	f64 CALLTYPE oss_bxmlaFindAndGetF64(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance)
+	f64 CALLTYPE oss_bxmlaFindAndGetF64(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance, bool* tlError)
 	{
-		return(NULL);
+		return(oss_bxmlaGetF64(iioss_bxmlFindAttribute(bxml, bxmla, tsWildcardSearch, tnInstance), tlError));
 	}
 
-	u32 CALLTYPE oss_bxmlaGetString(SBxmla* bxmla, SDatum* tsResult)
+	u32 CALLTYPE oss_bxmlaGetString(SBxmla* bxmla, SDatum* tsResult, bool* tlError)
 	{
-		return(NULL);
+		if (bxmla && bxmla->_data.datum.data._u8 && bxmla->_data.datum.length != 0)
+		{
+			// Indicate success
+			if (*tlError)
+				*tlError = false;
+
+			// Copy our datum
+			if (tsResult)
+				memcpy(&tsResult->data, &bxmla->_data.datum, sizeof(SDatum));
+
+			// Indicate the length of the value
+			return((u32)bxmla->_data.datum.length);
+
+		} else {
+			// Indicate failure (unable to find the attribute)
+			if (tlError)
+				*tlError = true;
+
+			// Return anything
+			return(0);
+		}
 	}
 
-	u32 CALLTYPE oss_bxmlaGetU32(SBxmla* bxmla)
+	u32 CALLTYPE oss_bxmlaGetU32(SBxmla* bxmla, bool* tlError)
 	{
-		return(NULL);
+		if (bxmla && bxmla->_data.datum.data._u8 && bxmla->_data.datum.length != 0)
+		{
+			// Indicate success
+			if (*tlError)
+				*tlError = false;
+
+			// Indicate our value
+			return(atoi(bxmla->_data.datum.data._s8));
+
+		} else {
+			// Indicate failure (unable to find the attribute)
+			if (tlError)
+				*tlError = true;
+
+			// Return anything
+			return(0);
+		}
 	}
 
-	u64 CALLTYPE oss_bxmlaGetU64(SBxmla* bxmla)
+	u64 CALLTYPE oss_bxmlaGetU64(SBxmla* bxmla, bool* tlError)
 	{
-		return(NULL);
+		if (bxmla && bxmla->_data.datum.data._u8 && bxmla->_data.datum.length != 0)
+		{
+			// Indicate success
+			if (*tlError)
+				*tlError = false;
+
+			// Indicate our value
+			return(atol(bxmla->_data.datum.data._s8));
+
+		} else {
+			// Indicate failure (unable to find the attribute)
+			if (tlError)
+				*tlError = true;
+
+			// Return anything
+			return(0);
+		}
 	}
 
-	bool CALLTYPE oss_bxmlaGetBool(SBxmla* bxmla)
+	// Valid "true" conditions are 1,Y,y,T,t
+	bool CALLTYPE oss_bxmlaGetBool(SBxmla* bxmla, bool* tlError)
 	{
-		return(NULL);
+		s8 lc;
+
+
+		if (bxmla && bxmla->_data.datum.data._u8 && bxmla->_data.datum.length != 0)
+		{
+			// Indicate success
+			if (*tlError)
+				*tlError = false;
+
+			// Indicate our value
+			lc = bxmla->_data.datum.data._s8[0];
+			return((lc == '1' || lc == 'Y' || lc == 'y' || lc == 'T' || lc == 't'));
+
+		} else {
+			// Indicate failure (unable to find the attribute)
+			if (tlError)
+				*tlError = true;
+
+			// Return anything
+			return(0);
+		}
 	}
 
-	f32 CALLTYPE oss_bxmlaGetF32(SBxmla* bxmla)
+	f32 CALLTYPE oss_bxmlaGetF32(SBxmla* bxmla, bool* tlError)
 	{
-		return(NULL);
+		if (bxmla && bxmla->_data.datum.data._u8 && bxmla->_data.datum.length != 0)
+		{
+			// Indicate success
+			if (*tlError)
+				*tlError = false;
+
+			// Indicate our value
+			return((f32)atof(bxmla->_data.datum.data._s8));
+
+		} else {
+			// Indicate failure (unable to find the attribute)
+			if (tlError)
+				*tlError = true;
+
+			// Return anything
+			return(0);
+		}
 	}
 
-	f64 CALLTYPE oss_bxmlaGetF64(SBxmla* bxmla)
+	f64 CALLTYPE oss_bxmlaGetF64(SBxmla* bxmla, bool* tlError)
 	{
-		return(NULL);
+		if (bxmla && bxmla->_data.datum.data._u8 && bxmla->_data.datum.length != 0)
+		{
+			// Indicate success
+			if (*tlError)
+				*tlError = false;
+
+			// Indicate our value
+			return(atof(bxmla->_data.datum.data._s8));
+
+		} else {
+			// Indicate failure (unable to find the attribute)
+			if (tlError)
+				*tlError = true;
+
+			// Return anything
+			return(0);
+		}
 	}
 
 
@@ -8502,7 +8611,27 @@ _asm nop;
 //////
 	SBxmla* CALLTYPE oss_bxmlFindAttribute(SBxml* bxml, SDatum* tsWildcardSearch, u32 tnInstance)
 	{
-		return(iioss_bxmlFindAttribute(bxml, tsWildcardSearch));
+		u32		lnInstance;
+		SBxmla*	bxmla;
+
+
+		lnInstance = 0;
+		bxmla		= oss_bxmlNodeGetFirstAttribute(bxml);
+		while (bxmla)
+		{
+			// Is this a match?
+			if (oss_wildcardMatch(_csu8p(bxmla->_name.data._u8), _csu8p(tsWildcardSearch->data._u8), false) == 0)
+			{
+				++lnInstance;
+				if (lnInstance >= tnInstance)
+					break;	// This is our match
+			}
+
+			// Move to next attribute
+			bxmla = oss_bxmlaGetNext(bxmla);
+		}
+		// Indicate our failure
+		return(bxmla);
 	}
 
 

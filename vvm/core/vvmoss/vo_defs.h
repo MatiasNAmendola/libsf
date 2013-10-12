@@ -235,6 +235,7 @@
 		void CALLTYPE			oss_datum2Delete							(SDatum2* datum2);
 		void CALLTYPE			oss_datum2SetNullString						(SDatum2* datum2, u64 length, bool tlInitialize);
 		void CALLTYPE			oss_copyUpToShortestString					(u8* dst, u32 tnDstLength, u8* src, u32 tnSrcLength);
+		s32 CALLTYPE			oss_wildcardMatchDatum						(SDatum* tsCandidate, SDatum* tsWildcardPattern, bool tlCaseSensitive);
 		s32 CALLTYPE			oss_wildcardMatch							(csu8p candidate, csu8p wildcardPattern, bool tlCaseSensitive);
 		w16* CALLTYPE			oss_asciiToUnicode							(u8* tcText, u32 tnTextLength);
 		s8* CALLTYPE			oss_unicodeToAscii							(w16* tuText, u32 tnTextLength);
@@ -392,19 +393,19 @@
 		u64 CALLTYPE			oss_bxmlaSha1Tag							(SBxml* bxml, u8 sha20Bytes[20]);
 		u64 CALLTYPE			oss_bxmlaSha1Data							(SBxml* bxml, u8 sha20Bytes[20]);
 
-		u32 CALLTYPE			oss_bxmlaFindAndGetString					(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance, SDatum* tsResult);
-		u32 CALLTYPE			oss_bxmlaFindAndGetU32						(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance);
-		u64 CALLTYPE			oss_bxmlaFindAndGetU64						(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance);
-		bool CALLTYPE			oss_bxmlaFindAndGetBool						(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance);
-		f32 CALLTYPE			oss_bxmlaFindAndGetF32						(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance);
-		f64 CALLTYPE			oss_bxmlaFindAndGetF64						(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance);
+		u32 CALLTYPE			oss_bxmlaFindAndGetString					(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance, SDatum* tsResult, bool* tlError);
+		u32 CALLTYPE			oss_bxmlaFindAndGetU32						(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance, bool* tlError);
+		u64 CALLTYPE			oss_bxmlaFindAndGetU64						(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance, bool* tlError);
+		bool CALLTYPE			oss_bxmlaFindAndGetBool						(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance, bool* tlError);
+		f32 CALLTYPE			oss_bxmlaFindAndGetF32						(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance, bool* tlError);
+		f64 CALLTYPE			oss_bxmlaFindAndGetF64						(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance, bool* tlError);
 
-		u32 CALLTYPE			oss_bxmlaGetString							(SBxmla* bxmla, SDatum* tsResult);
-		u32 CALLTYPE			oss_bxmlaGetU32								(SBxmla* bxmla);
-		u64 CALLTYPE			oss_bxmlaGetU64								(SBxmla* bxmla);
-		bool CALLTYPE			oss_bxmlaGetBool							(SBxmla* bxmla);
-		f32 CALLTYPE			oss_bxmlaGetF32								(SBxmla* bxmla);
-		f64 CALLTYPE			oss_bxmlaGetF64								(SBxmla* bxmla);
+		u32 CALLTYPE			oss_bxmlaGetString							(SBxmla* bxmla, SDatum* tsResult, bool* tlError);
+		u32 CALLTYPE			oss_bxmlaGetU32								(SBxmla* bxmla, bool* tlError);
+		u64 CALLTYPE			oss_bxmlaGetU64								(SBxmla* bxmla, bool* tlError);
+		bool CALLTYPE			oss_bxmlaGetBool							(SBxmla* bxmla, bool* tlError);
+		f32 CALLTYPE			oss_bxmlaGetF32								(SBxmla* bxmla, bool* tlError);
+		f64 CALLTYPE			oss_bxmlaGetF64								(SBxmla* bxmla, bool* tlError);
 
 		// For 2-way navigation through the attributes (can be done manually, but these expressly do it
 		SBxmla* CALLTYPE		oss_bxmlaGetNext					(SBxmla* bxmla);
@@ -582,7 +583,7 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	bool					iioss_bxmlFindContinue							(void* x);
 	bool					iioss_bxmlDataFindFirst							(SBxml* bxmlRoot, SBxmla** bxmlaAttributeFound, SDatum* tsWildcard, bool tlTraverseChildren, void** x);
 	bool					iioss_bxmlDataFindContinue						(void* x);
-
+	SBxmla*					iioss_bxmlFindAttribute							(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance);
 
 	SScreen*				ioss_createScreen								(u64 tnAssociatedId, SScreen** ts);
 	SCanvas*				ioss_createCanvas								(u64 tnAssociatedId, SCanvasState* tsState, u32 tnWidth, u32 tnHeight, u32 tnBackColor, SCanvas** tsCanvas);
