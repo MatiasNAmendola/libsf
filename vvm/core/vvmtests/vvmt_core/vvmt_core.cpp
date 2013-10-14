@@ -225,8 +225,8 @@ return(false);
 		SBxml*		icon;
 		csu8p		file;
 		SCanvas*	canvasIcons;
-		SDatum		searchString;
-		SDatum		resultString;
+		SDatum		searchString = { NULL, 0 };
+		SDatum		resultString = { NULL, 0 };
 		s8			buffer[256];
 
 
@@ -251,13 +251,15 @@ return(false);
 		lnStrideY	= oss_bxmlaFindAndGetU32	(icons,	NULL,	oss_datumSet(&searchString, (u8*)"stridey",	-1, true), 1, &llErrorStridey);
 		oss_datumDelete(&searchString);
 		// Validate sanity
-		if (!llErrorFile || !llErrorUlx || !llErrorUly || !llErrorWidth || !llErrorHeight || !llErrorStridex || !llErrorStridey)
+		if (llErrorFile || llErrorUlx || llErrorUly || llErrorWidth || llErrorHeight || llErrorStridex || llErrorStridey)
 			_asm int 3;
 
 		// Open the file
 		memset(&buffer, 0, sizeof(buffer));
-		memcpy(buffer, file._s8, lnFilenameLength);
+		memcpy(buffer, "\\libsf\\vvm\\core\\vdebug\\graphics\\", 32);
+		memcpy(buffer + strlen(buffer), resultString.data._s8, resultString.length);
 		oss_loadBitmapFromDisk(buffer, &canvasIcons, &lnWidth, &lnHeight, rgba(0,0,0,0));
+		oss_saveBitmapToDisk(canvasIcons, canvasIcons->bd, "\\temp\\test.bmp");
 
 		// Iterate through each icon, loading its data
 		icon = oss_bxmlNodeGetFirstChild(icons);

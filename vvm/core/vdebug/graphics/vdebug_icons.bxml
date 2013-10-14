@@ -3,8 +3,8 @@
 		<icon name="pursueAcceptOne" tip="Accept one level of the current pursues"/>
 		<icon name="pursue" tip="Enter another pursue level"/>
 		<icon name="pursueRejectOne" tip="Reject one level of the current pursues"/>
-		<icon name="noStepIntoFunctionEnable" tip="Allow this function to be stepped into"
-		<icon name="noStepIntoFunctionDisable" tip="Disallow this function to be stepped into"
+		<icon name="noStepIntoFunctionEnable" tip="Allow this function to be stepped into"/>
+		<icon name="noStepIntoFunctionDisable" tip="Disallow this function to be stepped into"/>
 		<icon name="breadcrumbsPrevDocument" tip="Move to the previous breadcrumb"/>
 		<icon name="breadcrumbsNextDocument" tip="Move to the next breadcrumb"/>
 		<icon name="breadcrumbsLineEnable" tip="Line breadcrumbs"/>
@@ -76,7 +76,7 @@
 		<icon name="breadcrumbsNext" tip="Move to the next breadcrumbs only in the current function"/>
 		<icon name="breadcrumbsPrevFunction" tip="Move to the breadcrumbs in previous function"/>
 		<icon name="breadcrumbsNextFunction" tip="Move to the breadcrumbs in next function"/>
-		<icon name="pursuePrev" tip="Examine previous pursue level" var1="pursueCurrent-1/>
+		<icon name="pursuePrev" tip="Examine previous pursue level" var1="pursueCurrent-1"/>
 		<icon name="pursueNext" tip="Examine next pursue level" var1="pursueCurrent+1"/>
 		<icon name="breadcrumbsDeltasEnable" tip="Breadcrumb deltas enabled"/>
 		<icon name="stack" tip="Display stack"/>
@@ -130,8 +130,8 @@
 		<icon name="chainCount" tip="Shows how many chain views there are"/>
 		<icon name="chainView" tip="View/edit chain view entries"/>
 		<icon name="chainAddHorizontal" tip="Add a line to the active chain view window"/>
-		<icon name="noStepIntoFunctionInstanceEnable" tip="Allow the instance of this function to be stepped into"
-		<icon name="noStepIntoFunctionInstanceDisable" tip="Disallow the instance of this function to be stepped into"
+		<icon name="noStepIntoFunctionInstanceEnable" tip="Allow the instance of this function to be stepped into"/>
+		<icon name="noStepIntoFunctionInstanceDisable" tip="Disallow the instance of this function to be stepped into"/>
 		<icon name="breadcrumbsView" tip="View all breadcrumbs"/>
 		<icon name="stepToCursorHorizontal" tip="Steps forward to the horizontal cursor position on the current line"/>
 		<icon name="stepInOne" tip="Steps in to the next deeper block"/>
@@ -184,12 +184,12 @@
 		<icon name="deleteToEndOfLine" tip="Deletes everything at end of line"/>
 		<icon name="deleteToStartOfLine" tip="Deletes everything to start of line"/>
 		<icon name="selectLine" tip="Begins selecting in entire line mode"/>
-		<icon name="selectCommand" tip="Begins selecting in entire line / command mode"/>
+		<icon name="selectCommand" tip="Begins selecting in entire command mode"/>
 		<icon name="selectColumn" tip="Begins selecting in column"/>
 		<icon name="selectStart" tip="Begins selecting at the cursor location"/>
 		<icon name="selectBlock" tip="Selects the current block"/>
 		<icon name="selectFunction" tip="Selects the current function"/>
-		<icon name="selectBlockOut" tip="Selects up to include the immediate outter block"/>
+		<icon name="selectBlockOut" tip="Selects up to include the immediate outer block"/>
 		<icon name="selectBlockIn" tip="Selects down to the inner block"/>
 		<icon name="selectBlockUp" tip="Selects the immediate block up"/>
 		<icon name="selectBlockDown" tip="Selects the immediate block down"/>
@@ -246,5 +246,5 @@
 		<icon name="roundRed"/>
 		<icon name="roundGrn"/>
 		<icon name="roundBlu"/>
-	<icons>
+	</icons>
 </vdebug>

@@ -3896,6 +3896,11 @@ openAgain:
 		// Make sure our environment is sane
 		if (datum)
 		{
+			// Do they want us to set the length?
+			if (length == -1)
+				length = oss_strlen(_csu8p(ptr));
+
+			// Is there anything to do?
 			if (length != 0)
 			{
 				// If there is already a value here, free it up
@@ -3950,6 +3955,11 @@ openAgain:
 		// Make sure our environment is sane
 		if (datum2)
 		{
+			// Do they want us to set the length?
+			if (length == -1)
+				length = oss_strlen(_csu8p(ptr));
+
+			// Is there anything to do?
 			if (length != 0)
 			{
 				// Duplicate the datum string
@@ -8300,30 +8310,75 @@ _asm nop;
 //////
 	SBxmla* CALLTYPE oss_bxmlaGetNext(SBxmla* bxmla)
 	{
-		SBxmla* bxmlaTarget;
+		u32		lnI;
+		bool	llFound;
+		SBxml*	bxml;
 
 
 		// Make sure the environment is sane
-		bxmlaTarget = NULL;
-		if (bxmla)
-			bxmlaTarget = (SBxmla*)bxmla->ll.next;
+		if (bxmla && bxmla->_parent)
+		{
+			// Iterate through all the attributes to find the next one
+			bxml	= (SBxml*)bxmla->_parent;
+			llFound	= false;
+			for (lnI = 0; lnI < bxml->_attributes.masterCount; lnI++)
+			{
+				if (bxml->_attributes.master[lnI]->used)
+				{
+					if (llFound)
+					{
+						// This is our return item
+						return((SBxmla*)bxml->_attributes.master[lnI]->ptr);
 
-		// Return our target
-		return(bxmlaTarget);
+					} else if (bxml->_attributes.master[lnI]->ptr == bxmla) {
+						// We found the item, so the next item is the next one
+						llFound = true;
+					}
+				}
+			}
+		}
+		// If we get here, not found
+		return(NULL);
 	}
 
 	SBxmla* CALLTYPE oss_bxmlaGetPrev(SBxmla* bxmla)
 	{
-		SBxmla* bxmlaTarget;
+		u32		lnI, lnILast;
+		SBxml*	bxml;
 
 
 		// Make sure the environment is sane
-		bxmlaTarget = NULL;
-		if (bxmla)
-			bxmlaTarget = (SBxmla*)bxmla->ll.prev;
+		if (bxmla && bxmla->_parent)
+		{
+			// Iterate through all the attributes to find the next one
+			bxml	= (SBxml*)bxmla->_parent;
+			lnILast	= -1;
+			for (lnI = 0; lnI < bxml->_attributes.masterCount; lnI++)
+			{
+				if (bxml->_attributes.master[lnI]->used)
+				{
+					// Is this a match?
+					if (bxml->_attributes.master[lnI]->ptr == bxmla)
+					{
+						// We found the item, so the previous item is the one
+						if (lnILast == -1)
+						{
+							// Nothing previous
+							return(NULL);
 
-		// Return our target
-		return(bxmlaTarget);
+						} else {
+							// We have one previous to return
+							return((SBxmla*)bxml->_attributes.master[lnILast]->ptr);
+						}
+					}
+
+					// This is a previous attribute candidate, so update it
+					lnILast = lnI;
+				}
+			}
+		}
+		// If we get here, not found
+		return(NULL);
 	}
 
 
@@ -8589,16 +8644,20 @@ _asm nop;
 
 	SBxmla* CALLTYPE oss_bxmlNodeGetFirstAttribute(SBxml* bxml)
 	{
-		SBxmla* bxmlaTarget;
+		u32 lnI;
 
 
 		// Make sure the environment is sane
-		bxmlaTarget = NULL;
 		if (bxml)
-			bxmlaTarget = (SBxmla*)bxml->_attributes.root;
-
-		// Return our target
-		return(bxmlaTarget);
+		{
+			for (lnI = 0; lnI < bxml->_attributes.masterCount; lnI++)
+			{
+				if (bxml->_attributes.master[lnI]->used && bxml->_attributes.master[lnI]->ptr)
+					return((SBxmla*)bxml->_attributes.master[lnI]->ptr);
+			}
+		}
+		// If we get here, no attribute
+		return(NULL);
 	}
 
 
@@ -8615,7 +8674,7 @@ _asm nop;
 		SBxmla*	bxmla;
 
 
-		lnInstance = 0;
+		lnInstance	= 0;
 		bxmla		= oss_bxmlNodeGetFirstAttribute(bxml);
 		while (bxmla)
 		{

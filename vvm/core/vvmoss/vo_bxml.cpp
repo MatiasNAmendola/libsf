@@ -109,12 +109,12 @@
 
 
 		// Load it as XML
+//		oss_sharedAsciiWriteOutFile("c:\\temp\\test_raw.bxml", tptr, lnFileSize);
 		lbxml = ibxml_asciiLoadBuffer(tptr, lnFileSize, tnErrorOffset, tnErrorCode);
-
+		oss_bxmlSave(lbxml, "\\temp\\test.bxml", 15, true, true, &lnNumread);
 
 		// Note:  ibxml_asciiLoadBuffer() makes copies of every string as needed
 		oss_free(tptr);
-
 
 		// All done!
 		return(lbxml);
@@ -147,6 +147,7 @@
 
 
 // TODO:  This algorithm currently leaks memory if there is an error. This will need to be fixed.
+// TODO:  A bug is known, that if there is no closing "/>" on a line, as it should be <tag attribute="value"/>, it goes into an infinite loop
 		// We must now be at the root node
 		if (tnMaxLength == 0)
 			tnMaxLength = strlen(buffer);
@@ -179,7 +180,10 @@
 					// Append an attribute which contains the comment data
 					bxmlaNew = (SBxmla*)oss_SEChain_append(&bxml->_attributes, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 					if (!bxmlaNew)
+					{
+_asm nop;
 						return((SBxml*)-1);
+					}
 
 					// Update the parent
 					bxmlaNew->_parent = bxml;
@@ -190,7 +194,10 @@
 
 					// If we're at the end of the input, syntax error
 					if (!ioss_verifyLength(lnOffset + 2, tnMaxLength))
+					{
+_asm nop;
 						return((SBxml*)-1);		// We reached end-of-file before finding the closing comment tag
+					}
 
 					// If we get here, we went past our comment
 					lnOffset += lnLength + 3;
@@ -199,30 +206,50 @@
 					// We've reached the </ which should be </something> where "something" matches the parent bxml entry
 					lnOffset += 2;
 					if (lnOffset >= tnMaxLength)
+					{
+_asm nop;
 						return((SBxml*)-1);		// We've reached the end unexpectedly
+					}
 
 					// Is it alpha?
 					if (!ioss_isAlpha(buffer[lnOffset + 1]))
+					{
+_asm nop;
 						return((SBxml*)-1);
+					}
 
 					// Scan forward until we reach a non-contiguous group of alphanumeric characters
 					lnLength = iibxml_scanForwardToNonAlphanumeric(buffer + lnOffset, tnMaxLength - lnOffset);
 					if (lnLength + lnOffset >= tnMaxLength)
+					{
+_asm nop;
 						return((SBxml*)-1);		// We've reached the end unexpectedly
+					}
+
 					// Verify we have proper syntax
 					if (buffer[lnOffset + lnLength] != '>')
+					{
+_asm nop;
 						return((SBxml*)-1);		// Syntax error
+					}
 
 					// Verify our environment is sane
 					if (!bxml)
+					{
+_asm nop;
 						return((SBxml*)-1);		// Syntax error
+					}
 
 					// See what they're closing
 					if (!bxml->closed)
 					{
 						// They have to be closing this tag
 						if (lnLength != bxml->_name.length || _memicmp(buffer + lnOffset, bxml->_name.data._s8, (u32)lnLength) != 0)
+						{
+_asm nop;
 							return((SBxml*)-1);		// Syntax error
+						}
+
 						// If we get here, they properly closed it
 						bxml->closed = true;
 						// Still staying at same level for siblings being added
@@ -230,7 +257,10 @@
 					} else {
 						// They have to be closing the parent tag
 						if (!bxml->ll4.parent || lnLength != ((SBxml*)bxml->ll4.parent)->_name.length || _memicmp(buffer + lnOffset, ((SBxml*)bxml->ll4.parent)->_name.data._s8, (u32)lnLength) != 0)
+						{
+_asm nop;
 							return((SBxml*)-1);		// Syntax error
+						}
 
 						// If we get here, they properly closed it
 						bxml = (SBxml*)bxml->ll4.parent;
@@ -248,16 +278,25 @@
 					// Get the offset to the tag name
 					++lnOffset;
 					if (lnOffset >= tnMaxLength)
+					{
+_asm nop;
 						return((SBxml*)-1);		// We've reached the end unexpectedly
+					}
 
 					// Is it alpha?
 					if (!ioss_isAlpha(buffer[lnOffset + 1]))
+					{
+_asm nop;
 						return((SBxml*)-1);
+					}
 
 					// Scan forward until we reach a non-contiguous group of alphanumeric characters
 					lnLength = iibxml_scanForwardToNonAlphanumeric(buffer + lnOffset, tnMaxLength - lnOffset);
 					if (lnLength + lnOffset >= tnMaxLength)
+					{
+_asm nop;
 						return((SBxml*)-1);		// We've reached the end unexpectedly
+					}
 
 					// Store the entry
 					if (!bxml || lnLevel == bxml->level)
@@ -272,7 +311,10 @@
 
 					// Verify we added the tag successfully
 					if (!bxml)
+					{
+_asm nop;
 						return((SBxml*)-1);		// Memory error??
+					}
 
 					// Store the tag name
 					oss_datumSet(&bxml->_name, (u8*)buffer + lnOffset, lnLength, false);
@@ -287,7 +329,10 @@
 						// Next non-whitespace character must be a letter (attribute), "/" closing single tag, or ">" closing first tag
 						lnOffset += ioss_skipWhitespaces(buffer + lnOffset, tnMaxLength - lnOffset);
 						if (lnOffset >= tnMaxLength)
+						{
+_asm nop;
 							return((SBxml*)-1);		// We've reached the end unexpectedly
+						}
 
 						// See what character is there
 						switch (buffer[lnOffset])
@@ -304,6 +349,7 @@
 
 								} else {
 									// Syntax error
+_asm nop;
 									return((SBxml*)-1);
 								}
 								break;
@@ -323,12 +369,16 @@
 _asm nop;
 								while (ioss_isAlpha(buffer[lnOffset]))
 								{
+_asm nop;
 									// It could be an attribute
 									lnAttrTagLength = iibxml_scanForwardToNonAlphanumeric(buffer + lnOffset, tnMaxLength - lnOffset);
 
 									// Verify our length is still on track
 									if (lnOffset + lnAttrTagLength >= tnMaxLength)
+									{
+_asm nop;
 										return((SBxml*)-1);		// We've reached the end unexpectedly
+									}
 
 									// We have the attribute name, but what's after it?
 									switch (buffer[lnOffset + lnAttrTagLength])
@@ -337,18 +387,27 @@ _asm nop;
 											// Access the quote character
 											lcQuoteChar	= buffer[lnOffset + lnAttrTagLength + 1];
 											if (lcQuoteChar != 34 && lcQuoteChar != 39)
+											{
+_asm nop;
 												return((SBxml*)-1);		// It wasn't a quote character, syntax error
+											}
 											
 											// Find out how long the quoted portion is
 											lnAttrDataLength = iibxml_scanForwardToCharacter(buffer + lnOffset + lnAttrTagLength + 1 + 1, tnMaxLength - lnOffset - lnAttrTagLength - 1 - 1, lcQuoteChar);
 											if (lnLength + lnOffset + lnAttrTagLength + lnAttrDataLength + 1 + 1 >= tnMaxLength)
+											{
+_asm nop;
 												return((SBxml*)-1);		// We've reached the end unexpectedly
+											}
 
 											// We're sitting no the closing quote character
 											// Append this attribute
 											bxmlaNew = (SBxmla*)oss_SEChain_append(&bxml->_attributes, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 											if (!bxmlaNew)
+											{
+_asm nop;
 												return((SBxml*)-1);
+											}
 
 											// Update the parent
 											bxmlaNew->_parent = bxml;
@@ -360,13 +419,19 @@ _asm nop;
 											// Move past this attribute
 											lnOffset += lnAttrTagLength + 1 + 1 + lnAttrDataLength + 1;
 											if (lnOffset >= tnMaxLength)
+											{
+_asm nop;
 												return((SBxml*)-1);		// We've reached the end unexpectedly
+											}
 											break;
 
 										case ':':
 											// Verify our length is still on track
 											if (lnOffset + lnAttrTagLength + 1 >= tnMaxLength)
+											{
+_asm nop;
 												return((SBxml*)-1);		// We've reached the end unexpectedly
+											}
 
 											// See if the next character is also a colon
 											if (buffer[lnOffset + lnAttrTagLength + 1] == ':')
@@ -377,9 +442,16 @@ _asm nop;
 
 												// Verify our file position is okay, that there was a number
 												if (lnOffset + lnAttrTagLength + 2 + lnNumberLength >= tnMaxLength)
+												{
+_asm nop;
 													return((SBxml*)-1);		// We've reached the end unexpectedly
+												}
+
 												if (lnNumberLength == 0)
+												{
+_asm nop;
 													return((SBxml*)-1);		// There was no number, a syntax error
+												}
 
 												// Get the value of the number
 												lnValue = ioss_convertValidatedNumericStringToU32(buffer + lnOffset + lnAttrTagLength + 2, (u32)lnNumberLength);
@@ -387,7 +459,10 @@ _asm nop;
 												// Append this attribute
 												bxmlaNew = (SBxmla*)oss_SEChain_append(&bxml->_attributes, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 												if (!bxmlaNew)
+												{
+_asm nop;
 													return((SBxml*)-1);
+												}
 
 												// Update the parent
 												bxmlaNew->_parent = bxml;
@@ -399,7 +474,10 @@ _asm nop;
 												// Move past this attribute size allocator
 												lnOffset += lnAttrTagLength + 2 + lnNumberLength;
 												if (lnOffset >= tnMaxLength)
+												{
+_asm nop;
 													return((SBxml*)-1);		// We've reached the end unexpectedly
+												}
 												// When we get here, we're ready for the next attribute or end of the tag
 
 											} else {
@@ -408,9 +486,16 @@ _asm nop;
 
 												// Verify our file position is okay, that there was a number
 												if (lnOffset + lnAttrTagLength + 1 + lnNumberLength1 >= tnMaxLength)
+												{
+_asm nop;
 													return((SBxml*)-1);		// We've reached the end unexpectedly
+												}
+
 												if (lnNumberLength1 == 0)
+												{
+_asm nop;
 													return((SBxml*)-1);		// There was no number, a syntax error
+												}
 
 												// Get the value of the first number
 												lnValue = ioss_convertValidatedNumericStringToU32(buffer + lnOffset + lnAttrTagLength + 1, (u32)lnNumberLength1);
@@ -424,9 +509,16 @@ _asm nop;
 
 														// Verify our file position is okay, that there was a number
 														if (lnOffset + lnAttrTagLength + 1 + lnNumberLength1 + 1 + lnNumberLength2 >= tnMaxLength)
+														{
+_asm nop;
 															return((SBxml*)-1);		// We've reached the end unexpectedly
+														}
+
 														if (lnNumberLength2 == 0)
+														{
+_asm nop;
 															return((SBxml*)-1);		// There was no number, a syntax error
+														}
 
 														// Get the value of the second number
 														lnValue2 = ioss_convertValidatedNumericStringToU32(buffer + lnOffset + lnAttrTagLength + 1 + lnNumberLength1 + 1, (u32)lnNumberLength2);
@@ -443,7 +535,10 @@ _asm nop;
 														// Append this attribute
 														bxmlaNew = (SBxmla*)oss_SEChain_append(&bxml->_attributes, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 														if (!bxmlaNew)
+														{
+_asm nop;
 															return((SBxml*)-1);
+														}
 
 														// Update the parent
 														bxmlaNew->_parent = bxml;
@@ -455,7 +550,10 @@ _asm nop;
 														// Move past this attribute size allocator
 														lnOffset += lnAttrTagLength + 1 + lnNumberLength1 + 1 + lnNumberLength2 + 1 + lnValue2;
 														if (lnOffset >= tnMaxLength)
+														{
+_asm nop;
 															return((SBxml*)-1);		// We've reached the end unexpectedly
+														}
 														// When we get here, we're ready for the next attribute or end of the tag
 														break;
 
@@ -467,7 +565,10 @@ _asm nop;
 														// Append this attribute
 														bxmlaNew = (SBxmla*)oss_SEChain_append(&bxml->_attributes, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 														if (!bxmlaNew)
+														{
+_asm nop;
 															return((SBxml*)-1);
+														}
 
 														// Update the parent
 														bxmlaNew->_parent = bxml;
@@ -479,12 +580,16 @@ _asm nop;
 														// Move past this attribute size allocator
 														lnOffset += lnAttrTagLength + 1 + lnNumberLength1 + 1 + lnValue;
 														if (lnOffset >= tnMaxLength)
+														{
+_asm nop;
 															return((SBxml*)-1);		// We've reached the end unexpectedly
+														}
 														// When we get here, we're ready for the next attribute or end of the tag
 														break;
 
 													default:
 														// It's a syntax error
+_asm nop;
 														return((SBxml*)-1);
 												}
 											}
@@ -492,6 +597,7 @@ _asm nop;
 
 										default:
 											// Syntax error
+_asm nop;
 											return((SBxml*)-1);
 											break;
 									}
@@ -500,7 +606,10 @@ _asm nop;
 									// Skip past any whitespaces between attributes
 									lnOffset += ioss_skipWhitespaces(buffer + lnOffset, tnMaxLength - lnOffset);
 									if (lnOffset >= tnMaxLength)
+									{
+_asm nop;
 										return((SBxml*)-1);
+									}
 								}
 								// When we get here, we must be at end of file, sitting on / or >.
 								// Anything else is a syntax error.
@@ -515,23 +624,33 @@ _asm nop;
 
 			} else {
 				// Syntax error
+_asm nop;
 				return((SBxml*)-1);
 			}
 		}
 		// When we get here, we need to have the root node closed to be successful
 		if (lnLevel != 0)
+		{
+_asm nop;
 			return((SBxml*)-1);
+		}
 
 		// If we parsed anything, verify that which we parsed is, in fact, up to specs. :-)
 		if (bxml)
 		{
 			// If we're not closed
 			if (!bxml->closed)
+			{
+_asm nop;
 				return((SBxml*)-1);		// Syntax error
+			}
 
 			// If we're not back at our root
 			if (bxml->level != lnLevel)
+			{
+_asm nop;
 				return((SBxml*)-1);		// Syntax error
+			}
 		}
 
 		// Make sure we return the sibling back up to the top-most level
