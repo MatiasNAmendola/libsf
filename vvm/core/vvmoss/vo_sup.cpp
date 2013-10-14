@@ -3335,20 +3335,20 @@ _asm int 3;
 		if (buffRoot && tnDataLength != 0)
 		{
 			// Repeatedly allocate our allocation size until we get big enough
-			while (buffRoot->data && buffRoot->populatedLength + tnDataLength < buffRoot->allocatedLength)
+			while (buffRoot->data)
 			{
 				// Are we there yet?
 				if (buffRoot->populatedLength + tnDataLength < buffRoot->allocatedLength)
 				{
-					// We're good
-					// Update our size
+					// We're good, update our populated size
 					buffRoot->populatedLength += tnDataLength;
 					return;
 				}
 				// If we get here, we need to allocate more space
 
 				// Reallocate and continue
-				buffRoot->data = (s8*)oss_realloc(buffRoot->data, buffRoot->allocatedLength + buffRoot->allocateBlockSize);
+				buffRoot->data				= (s8*)oss_realloc(buffRoot->data, buffRoot->allocatedLength + buffRoot->allocateBlockSize);
+				buffRoot->allocatedLength	+= buffRoot->allocateBlockSize;
 			}
 		}
 		// If we get here, there's been an error
@@ -4633,7 +4633,7 @@ continueToNextAttribute:
 // Create a new canvas in the master list
 //
 //////
-	SCanvas* ioss_createCanvas(u64 tnAssociatedId, SCanvasState* tsState, u32 tnWidth, u32 tnHeight, u32 tnBackColor, SCanvas** tsCanvas)
+	SCanvas* ioss_createCanvas(u64 tnAssociatedId, SCanvasState* tsState, u32 tnWidth, u32 tnHeight, SRGBA tnBackColor, SCanvas** tsCanvas)
 	{
 		SCanvas*	lc;
 
@@ -4657,7 +4657,7 @@ continueToNextAttribute:
 			// Store the properties
 			lc->width			= tnWidth;													// width
 			lc->height			= tnHeight;													// height
-			lc->backColor.color	= tnBackColor;												// If transparency, we will use this default color
+			lc->backColor		= tnBackColor;												// If transparency, we will use this default color
 
 			// Create this canvas's refresh semaphore
 			lc->semRefresh		= oss_createSemaphore();
@@ -4668,16 +4668,15 @@ continueToNextAttribute:
 			lc->bd_vvmoss		= oss_requestSystemBitmap(tnWidth, tnHeight);				// Used primarily for rendering system fonts
 
 			// Initialize it with the default background color
-			if (lc->bd)			oss_memset4((u32*)lc->bd,  oss_swapEndian(oss_RGBA2BGRA(tnBackColor)), tnHeight * tnWidth);	// Initialize bd to the indicated color
-			if (lc->bda)		oss_memset4((u32*)lc->bda, oss_swapEndian(oss_RGBA2BGRA(tnBackColor)), tnHeight * tnWidth);	// Initialize bda to the indicated color
+			if (lc->bd)			oss_memset4((u32*)lc->bd,  oss_swapEndian(oss_RGBA2BGRA(tnBackColor.color)), tnHeight * tnWidth);	// Initialize bd to the indicated color
+			if (lc->bda)		oss_memset4((u32*)lc->bda, oss_swapEndian(oss_RGBA2BGRA(tnBackColor.color)), tnHeight * tnWidth);	// Initialize bda to the indicated color
 
 			// Store the state
 			memcpy(&lc->state, tsState, sizeof(SCanvasState));								// Use provided information
 
 			// Update the state based on the condition of the alpha channel of the rgba color
-			if (alp(tnBackColor) != 255)
+			if (tnBackColor.alp != 255)
 				lc->state.useTransparency = true;
-
 		}
 
 		// Unlock the canvas access semaphore
@@ -5110,7 +5109,7 @@ continueToNextAttribute:
 //		-3		= ts, tcParent, or tcChild is null
 //
 //////
-	SRegionList* ioss_appendRegionToRegion(SRegion* trParent, SRegion* trChild, u64 tnAssociatedId, SRegionState* tsState, u32 tnX, u32 tnY, SCallbacks* callback)
+	SRegionList* ioss_appendRegionToRegion(SRegion* trParent, SRegion* trChild, u64 tnAssociatedId, SRegionState* tsState, s32 tnX, s32 tnY, SCallbacks* callback)
 	{
 		SRegionList* lrl;
 
@@ -5168,7 +5167,7 @@ continueToNextAttribute:
 // could be used by the ioss_drawText() function.
 //
 //////
-	u64 ioss_drawFixedPoint(SCanvas* tc, u32 fontWidth, u32 fontHeight, u32 ulx, u32 uly, s8* tcText, u32 tnTextLength, u32 foreground, u32 background)
+	u64 ioss_drawFixedPoint(SCanvas* tc, u32 fontWidth, u32 fontHeight, s32 ulx, s32 uly, s8* tcText, u32 tnTextLength, u32 foreground, u32 background)
 	{
 		u64		lnPixels;
         u32		lnX, lnY, lnFontWidth, lnFontHeight, lnSV, lnSH, lnScalerV, lnScalerH;
@@ -5633,7 +5632,7 @@ continueToNextAttribute:
 //
 //////
 	// It is probbaly best NOT to call this function directory, but rather call ioss_bitBltSection()
-	u64 ioss_bitBltSection(SCanvas* tsDst, bool tlDstIsAccumulatorBuffer, s32 dulx, s32 duly, SCanvas* tsSrc, bool tlSrcIsAccumulatorBuffer, u32 sulx, u32 suly, u32 slrx, u32 slry)
+	u64 ioss_bitBltSection(SCanvas* tsDst, bool tlDstIsAccumulatorBuffer, s32 dulx, s32 duly, SCanvas* tsSrc, bool tlSrcIsAccumulatorBuffer, s32 sulx, s32 suly, s32 slrx, s32 slry)
 	{
 		u64			lnRowCount;
 		SRGBA*		lrgbaDstRoot;
@@ -5668,7 +5667,7 @@ continueToNextAttribute:
 				// Make sure the pointers are valid
 				if (lrgbaDstRoot || lrgbaSrcRoot)
 				{
-					if (tsSrc->state.useTransparency)	iioss_bitBltSection_Alpha( lrgbaDstRoot, tsDst, dulx, duly, lrgbaSrcRoot, tsSrc, sulx, suly, slrx, slry);		// Use the slower algorithm to blend the the two 
+					if (tsDst->state.useTransparency)	iioss_bitBltSection_Alpha( lrgbaDstRoot, tsDst, dulx, duly, lrgbaSrcRoot, tsSrc, sulx, suly, slrx, slry);		// Use the slower algorithm to blend the the two 
 					else								iioss_bitBltSection_Opaque(lrgbaDstRoot, tsDst, dulx, duly, lrgbaSrcRoot, tsSrc, sulx, suly, slrx, slry);		// Iterate through every row for all pixels to copy
 					
 					// We always indicate we processed this many rows, even if something wasn't updated
@@ -5689,7 +5688,7 @@ continueToNextAttribute:
 // src alpha settings, for the section indicated.
 //
 //////
-	void iioss_bitBltSection_Opaque(SRGBA* trgbaDstRoot, SCanvas* tsDst, s32 dulx, s32 duly, SRGBA* trgbaSrcRoot, SCanvas* tsSrc, u32 sulx, u32 suly, u32 slrx, u32 slry)
+	void iioss_bitBltSection_Opaque(SRGBA* trgbaDstRoot, SCanvas* tsDst, s32 dulx, s32 duly, SRGBA* trgbaSrcRoot, SCanvas* tsSrc, s32 sulx, s32 suly, s32 slrx, s32 slry)
 	{
 		s32			lnY, lnX, lnThisX, lnThisY, lnWidth, lnHeight;
 		u8			redd, grnd, blud;
@@ -5720,8 +5719,8 @@ continueToNextAttribute:
 				if (lnY >= 0 && lnY < (s32)tsDst->height && lnThisY < lnHeight)
 				{
 					// Yes we can, recompute the positions for this line
-					lrgbad = trgbaDstRoot + (lnY * tsDst->width);
-					lrgbas = trgbaSrcRoot + (lnY * tsSrc->width);
+					lrgbad = trgbaDstRoot + (lnY              * tsDst->width);
+					lrgbas = trgbaSrcRoot + ((lnThisY + suly) * tsSrc->width) + sulx;
 
 					//////////
 					// Iterate for as many pixels as will fit
@@ -5757,7 +5756,7 @@ continueToNextAttribute:
 // src alpha settings, for the section indicated.
 //
 //////
-	void iioss_bitBltSection_Alpha(SRGBA* trgbaDstRoot, SCanvas* tsDst, s32 dulx, s32 duly, SRGBA* trgbaSrcRoot, SCanvas* tsSrc, u32 sulx, u32 suly, u32 slrx, u32 slry)
+	void iioss_bitBltSection_Alpha(SRGBA* trgbaDstRoot, SCanvas* tsDst, s32 dulx, s32 duly, SRGBA* trgbaSrcRoot, SCanvas* tsSrc, s32 sulx, s32 suly, s32 slrx, s32 slry)
 	{
 		s32			lnY, lnX, lnThisX, lnThisY, lnWidth, lnHeight;
 		SRGBA*		lrgbad;
@@ -5780,8 +5779,8 @@ continueToNextAttribute:
 				if (lnY >= 0 && lnY < (s32)tsDst->height && lnThisY < lnHeight)
 				{
 					// Yes we can, recompute the positions for this line
-					lrgbad = trgbaDstRoot + (lnY * tsDst->width);
-					lrgbas = trgbaSrcRoot + (lnY * tsSrc->width);
+					lrgbad = trgbaDstRoot + (lnY              * tsDst->width);
+					lrgbas = trgbaSrcRoot + ((lnThisY + suly) * tsSrc->width) + sulx;
 
 
 					//////////
@@ -5804,9 +5803,9 @@ continueToNextAttribute:
 							// Move to the next pixel
 							++lrgbad;
 							++lrgbas;
-						}	// end for lnX...
-				}	// end if lnY...
-			}	// end for lnY...
+						}
+				}
+			}
 	}
 
 

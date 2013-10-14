@@ -218,16 +218,20 @@ return(false);
 	void hijack_toLoadIcons(void)
 	{
 		bool		llErrorFile, llErrorUlx, llErrorUly, llErrorWidth, llErrorHeight, llErrorStridex, llErrorStridey;
-		u32			lnResult, lnUlX, lnUlY, lnWidth, lnHeight, lnStrideX, lnStrideY, lnFilenameLength;
+		u32			lnX, lnY, lnResult, lnUlX, lnUlY, lnWidth, lnHeight, lnStrideX, lnStrideY, lnThisWidth;
 		u64			lnNumread, lnErrorOffset, lnErrorCode;
+		SRGBA		lrgba;
 		SBxml*		vdbi;
 		SBxml*		icons;
 		SBxml*		icon;
-		csu8p		file;
 		SCanvas*	canvasIcons;
+		SCanvas*	canvasNew;
 		SDatum		searchString = { NULL, 0 };
 		SDatum		resultString = { NULL, 0 };
 		s8			buffer[256];
+		s8			bufferWidth[8];
+		s8			bufferHeight[8];
+		s8			bufferCanvasLength[8];
 
 
 		// Load the VDEBUG_ICONS.BXML file
@@ -257,19 +261,53 @@ return(false);
 		// Open the file
 		memset(&buffer, 0, sizeof(buffer));
 		memcpy(buffer, "\\libsf\\vvm\\core\\vdebug\\graphics\\", 32);
-		memcpy(buffer + strlen(buffer), resultString.data._s8, resultString.length);
-		oss_loadBitmapFromDisk(buffer, &canvasIcons, &lnWidth, &lnHeight, rgba(0,0,0,0));
+		memcpy(buffer + strlen(buffer), resultString.data._s8, (u32)resultString.length);
+		lrgba.color = rgba(0,0,0,0);
+		oss_loadBitmapFromDisk(buffer, &canvasIcons, &lnWidth, &lnHeight, lrgba);
 		oss_saveBitmapToDisk(canvasIcons, canvasIcons->bd, "\\temp\\test.bmp");
 
+		// Store width information
+		sprintf_s(bufferWidth,	sizeof(bufferWidth),	"%u\0", lnStrideX - lnUlX);
+		sprintf_s(bufferHeight,	sizeof(bufferHeight),	"%u\0", lnStrideY - lnUlY);
+
 		// Iterate through each icon, loading its data
-		icon = oss_bxmlNodeGetFirstChild(icons);
+		icon	= oss_bxmlNodeGetFirstChild(icons);
+		lnX		= lnUlX;
+		lnY		= lnUlY;
 		while (icon)
 		{
 			// Extract this icon from the icon master file
+			canvasNew = oss_canvasExtract(canvasIcons, canvasIcons->bd, lnX, lnY, lnX+lnStrideX-lnUlX, lnY+lnStrideY-lnUlY);
+			if (!canvasNew)
+				_asm int 3;
+
+//			s8 bufferFile[256];
+//			sprintf_s(bufferFile, sizeof(bufferFile), "\\temp\\extract_%03u_%04u.bmp", lnX, lnY);
+//			oss_saveBitmapToDisk(canvasNew, canvasNew->bd, bufferFile);
+
+			// Store the size for this bitmap data
+			lnThisWidth = canvasNew->width * canvasNew->height * sizeof(SRGBA);
+			sprintf_s(bufferCanvasLength, sizeof(bufferCanvasLength), "%u\0", lnThisWidth);
+
+			// Append this extracted bitmap data to the bxml
+			oss_bxmlaInsert(icon, NULL, "rgbaw", 5, bufferWidth,		strlen(bufferWidth),	strlen(bufferWidth),	true);
+			oss_bxmlaInsert(icon, NULL, "rgbah", 5, bufferHeight,		strlen(bufferHeight),	strlen(bufferHeight),	true);
+			oss_bxmlaInsert(icon, NULL, "rgba",  4, (s8*)canvasNew->bd,	lnThisWidth,			lnThisWidth,			true);
 
 			// Move to next icon
+			lnX += lnStrideX;
+			if (lnX >= lnWidth)
+			{
+				lnY += lnStrideY;
+				lnX = lnUlX;
+			}
+
+			// Grab the next icon bxml node
 			icon = oss_bxmlNodeGetNext(icon);
 		}
+
+		// Save the converted bitmap in its stand-alone form
+		oss_bxmlSave(vdbi, "\\temp\\icons.bxml", -1, true, true, &lnNumread);
 	}
 
 

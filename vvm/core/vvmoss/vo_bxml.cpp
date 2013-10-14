@@ -109,9 +109,9 @@
 
 
 		// Load it as XML
-//		oss_sharedAsciiWriteOutFile("c:\\temp\\test_raw.bxml", tptr, lnFileSize);
+//		oss_sharedAsciiWriteOutFile("\\temp\\test_raw.bxml", tptr, lnFileSize);
 		lbxml = ibxml_asciiLoadBuffer(tptr, lnFileSize, tnErrorOffset, tnErrorCode);
-		oss_bxmlSave(lbxml, "\\temp\\test.bxml", 15, true, true, &lnNumread);
+//		oss_bxmlSave(lbxml, "\\temp\\test.bxml", 15, true, true, &lnNumread);
 
 		// Note:  ibxml_asciiLoadBuffer() makes copies of every string as needed
 		oss_free(tptr);

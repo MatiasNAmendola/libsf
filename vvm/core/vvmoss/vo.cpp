@@ -671,6 +671,7 @@
 		SCanvas*		lc;
 		u32				lnWidth, lnHeight;
 		SCanvasState	state;
+		SRGBA			lrgba;
 
 
 		// Get the screen dimensions
@@ -682,8 +683,9 @@
 			state.useTransparency	= true;
 
 			// We create a canvas of the current size
-			lc = NULL;
-			ioss_createCanvas(ts->ll.uniqueId, &state, lnWidth, lnHeight, rgba(255,255,255,255), &lc);
+			lc			= NULL;
+			lrgba.color = rgba(255,255,255,255);
+			ioss_createCanvas(ts->ll.uniqueId, &state, lnWidth, lnHeight, lrgba, &lc);
 			if (lc)
 				oss_associateCanvasWithScreen(ts, lc, false);		// Associate this canvas with this screen
 		}
@@ -713,7 +715,7 @@
 		{
 			// We create a canvas of the current size
 			lc = NULL;
-			ioss_createCanvas(tc->ll.uniqueId, &tc->state, tc->width, tc->height, tc->backColor.color, &lc);
+			ioss_createCanvas(tc->ll.uniqueId, &tc->state, tc->width, tc->height, tc->backColor, &lc);
 			if (lc)
 				oss_associateCanvasWithCanvas(tc, lc);		// Associate this canvas with this canvas
 		}
@@ -731,7 +733,7 @@
 // Returns a new canvas of the specified dimension.
 //
 //////
-	SCanvas* CALLTYPE oss_requestCanvas(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, u32 tnBackColor, bool tlIsActive, bool tlUseTransparency)
+	SCanvas* CALLTYPE oss_requestCanvas(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SRGBA tnBackColor, bool tlIsActive, bool tlUseTransparency)
     {
 		SCanvas*		lc;
 		SCanvasState	state;
@@ -785,7 +787,7 @@
 // area.  As such, a combined function is created to allow this creation in one shot.
 //
 //////
-	bool CALLTYPE oss_requestCanvasAndRegion(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, u32 tnBackColor, bool tlIsActive, bool tlUseTransparency, u32 ulx, u32 uly, u32 lrx, u32 lry, SCanvas** tc, SRegion** tr, SCallbacks* callbacks, SStartEnd* events)
+	bool CALLTYPE oss_requestCanvasAndRegion(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SRGBA tnBackColor, bool tlIsActive, bool tlUseTransparency, s32 ulx, s32 uly, s32 lrx, s32 lry, SCanvas** tc, SRegion** tr, SCallbacks* callbacks, SStartEnd* events)
 	{
 		SRegion*	lr;
 		SCanvas*	lc;
@@ -909,7 +911,7 @@
 //		Number of pixels drawn, 0 if none, -1 if error, >0 if something new was actually rendered onto the canvas
 //
 //////
-	u64 CALLTYPE oss_canvasDrawFixedPointText(SCanvas* tc, SRGBA* bd, u32 fontWidth, u32 fontHeight, u32 ulx, u32 uly, s8* text, u32 characterCount, u32 foreground, u32 background)
+	u64 CALLTYPE oss_canvasDrawFixedPointText(SCanvas* tc, SRGBA* bd, u32 fontWidth, u32 fontHeight, s32 ulx, s32 uly, s8* text, u32 characterCount, u32 foreground, u32 background)
     {
 		u64 lnResult;
 
@@ -981,7 +983,7 @@
 // Draws a rectangle frame onto a canvas (no fill).
 //
 //////
-	u64 CALLTYPE oss_canvasFrameRect(SCanvas* tc, SRGBA* bd, u32 ulx, u32 uly, u32 lrx, u32 lry, u32 borderThickness, u32 border)
+	u64 CALLTYPE oss_canvasFrameRect(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, u32 borderThickness, u32 border)
     {
 		return(0);
     }
@@ -994,7 +996,7 @@
 // Draws a filled rectangle onto a canvas.
 //
 //////
-	u64 CALLTYPE oss_canvasFillRect(SCanvas* tc, SRGBA* bd, u32 ulx, u32 uly, u32 lrx, u32 lry, u32 borderThickness, u32 border, u32 background)
+	u64 CALLTYPE oss_canvasFillRect(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, u32 borderThickness, u32 border, u32 background)
     {
 		return(0);
     }
@@ -1007,7 +1009,7 @@
 // Draws a line on the canvas.
 //
 //////
-	u64 CALLTYPE oss_canvasLine(SCanvas* tc, SRGBA* bd, u32 ulx, u32 uly, u32 lrx, u32 lry, u32 lineThickness, u32 line)
+	u64 CALLTYPE oss_canvasLine(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, u32 lineThickness, u32 line)
     {
 		return(0);
     }
@@ -1020,7 +1022,7 @@
 // Draws an arc on the canvas.
 //
 //////
-	u64 CALLTYPE oss_canvasArc(SCanvas* tc, SRGBA* bd, u32 ox, u32 oy, f32 start, f32 end, u32 lineThickness, u32 line)
+	u64 CALLTYPE oss_canvasArc(SCanvas* tc, SRGBA* bd, s32 ox, s32 oy, f32 start, f32 end, u32 lineThickness, u32 line)
     {
 		return(0);
     }
@@ -1033,9 +1035,29 @@
 // Extracts a portion of a canvas, creating a new canvas.
 //
 //////
-	SCanvas* CALLTYPE oss_canvasExtract(SCanvas* tc, SRGBA* bd, u32 ulx, u32 uly, u32 lrx, u32 lry)
+	SCanvas* CALLTYPE oss_canvasExtract(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry)
     {
-		return(0);
+		s32			lnWidth, lnHeight;
+		SCanvas*	canvas;
+
+
+		// Make sure the environment is sane
+		if (tc && bd && ulx < lrx && uly < lry)
+		{
+			// Create the canvas
+			lnWidth		= lrx - ulx;
+			lnHeight	= lry - uly;
+// TODO: Possible bug observed here, with the tc->state.useTransparency setting not being honored
+			canvas		= oss_requestCanvas(tc->ll.uniqueId, (u32)lnWidth, (u32)lnHeight, tc->backColor, true, tc->state.useTransparency);
+
+			// Copy the bitmap data
+			if (canvas)
+				oss_canvasBitBlt(canvas, false, 0, 0, tc, false, ulx, uly, lrx, lry);
+			
+			// Indicate our success or failure
+			return(canvas);
+		}
+		return(NULL);
     }
 
 
@@ -1047,7 +1069,7 @@
 // to the entire area.
 //
 //////
-	u64 CALLTYPE oss_canvasColorize(SCanvas* tc, SRGBA* bd, u32 ulx, u32 uly, u32 lrx, u32 lry, u32 color)
+	u64 CALLTYPE oss_canvasColorize(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, u32 color)
     {
 		return(0);
     }
@@ -1060,7 +1082,7 @@
 // Converts the canvas rectangle to grayscale.
 //
 //////
-	u64 CALLTYPE oss_canvasGrayscale(SCanvas* tc, SRGBA* bd, u32 ulx, u32 uly, u32 lrx, u32 lry)
+	u64 CALLTYPE oss_canvasGrayscale(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry)
     {
 		return(0);
     }
@@ -1092,7 +1114,7 @@
 // Overlay or alpha blend the specified canvas onto the destination canvas.
 //
 //////
-	u64 CALLTYPE oss_canvasBitBlt(SCanvas* tc, SCanvas* tsDst, bool tlDstAccumulator, u32 dulx, u32 duly, u32 dlrx, u32 dlry, SCanvas* tsSrc, bool tlSrcAccumulator, u32 sulx, u32 suly, u32 slrx, u32 slry)
+	u64 CALLTYPE oss_canvasBitBlt(SCanvas* tsDst, bool tlDstAccumulator, s32 dulx, s32 duly, SCanvas* tsSrc, bool tlSrcAccumulator, s32 sulx, s32 suly, s32 slrx, s32 slry)
     {
 		return(ioss_bitBltSection(tsDst, tlDstAccumulator, dulx, duly, tsSrc, tlSrcAccumulator, sulx, suly, slrx, slry));
     }
@@ -1426,7 +1448,7 @@
 //		-50				- Invalid parameters
 //
 //////
-	u64 CALLTYPE oss_loadBitmapFromDisk(s8* tcPathname, SCanvas** tc, u32* tnWidth, u32* tnHeight, u32 tnBackColor)
+	u64 CALLTYPE oss_loadBitmapFromDisk(s8* tcPathname, SCanvas** tc, u32* tnWidth, u32* tnHeight, SRGBA tnBackColor)
 	{
 		bool			llLoadResult;
 		u32				lnResult;
@@ -1472,11 +1494,11 @@
 						{
 							// It's stored in top-down order
 							lbi.height = (u32)((s32)lbi.height * -1);
-							ioss_allocateSRGBAandCopy24Bit_BitmapBottomUp(&lrgbad, &lbh, &lbi, (SRGB*)lbd, &lnResult, -7);
+							ioss_allocateSRGBAandCopy24Bit_BitmapTopDown(&lrgbad, &lbh, &lbi, (SRGB*)lbd, &lnResult, -7);
 
 						} else {
 							// It's stored in bottom-up order
-							ioss_allocateSRGBAandCopy24Bit_BitmapTopDown(&lrgbad, &lbh, &lbi, (SRGB*)lbd, &lnResult, -7);
+							ioss_allocateSRGBAandCopy24Bit_BitmapBottomUp(&lrgbad, &lbh, &lbi, (SRGB*)lbd, &lnResult, -7);
 						}
 
 					} else {
@@ -1485,11 +1507,11 @@
 						{
 							// It's stored in top-down order
 							lbi.height = (u32)((s32)lbi.height * -1);
-							ioss_allocateSRGBAandCopy32Bit_BitmapBottomUp(&lrgbad, &lbh, &lbi, (SRGBA*)lbd, &lnResult, -7);
+							ioss_allocateSRGBAandCopy32Bit_BitmapTopDown(&lrgbad, &lbh, &lbi, (SRGBA*)lbd, &lnResult, -7);
 
 						} else {
 							// It's stored in bottom-up order
-							ioss_allocateSRGBAandCopy32Bit_BitmapTopDown(&lrgbad, &lbh, &lbi, (SRGBA*)lbd, &lnResult, -7);
+							ioss_allocateSRGBAandCopy32Bit_BitmapBottomUp(&lrgbad, &lbh, &lbi, (SRGBA*)lbd, &lnResult, -7);
 						}
 					}
 					// When we get here, we will have loaded the bitmap and copied it from its native format to the indicated SRGBA structure
@@ -1548,7 +1570,7 @@
 				lbi.sizeOfInfoBlock		= sizeof(lbi);
 				lbi.bitCount			= 32;
 				lbi.planes				= 1;
-				lbi.height				= tc->height;
+				lbi.height				= -(s32)tc->height;
 				lbi.width				= tc->width;
 				lbi.ppmX				= 3270;
 				lbi.ppmY				= 3270;
@@ -6194,29 +6216,36 @@ openAgain:
 			if (!ptrSE->root)
 				return(NULL);		// There are no entries, so we can't be adding relative to the reference pointer
 
-			// Locate the indicated reference in this list
-			llFound = false;
-			for (lnI = 0; lnI < ptrSE->masterCount; lnI++)
+			// If there's a reference, add it relative to the reference
+			if (ptrRef)
 			{
-				if (ptrSE->master[lnI]->used && ptrSE->master[lnI]->ptr == ptrRef)
+				// Locate the indicated reference in this list
+				llFound = false;
+				for (lnI = 0; lnI < ptrSE->masterCount; lnI++)
 				{
-					// We found our match
-					if (tlAfter)		lnHint = lnI + 1;		// Should go after
-					else				lnHint = lnI;			// Should go before, which means where the current entry was found
+					if (ptrSE->master[lnI]->used && ptrSE->master[lnI]->ptr == ptrRef)
+					{
+						// We found our match
+						if (tlAfter)		lnHint = lnI + 1;		// Should go after
+						else				lnHint = lnI;			// Should go before, which means where the current entry was found
 
-					// Make sure there's room
-					ioss_SEChain_freeUpSlot(ptrSE, lnHint, tnBlockSizeIfNewBlockNeeded);
+						// Make sure there's room
+						ioss_SEChain_freeUpSlot(ptrSE, lnHint, tnBlockSizeIfNewBlockNeeded);
 
-					// Continue to insert this item
-					llFound = true;
-					break;
+						// Continue to insert this item
+						llFound = true;
+						break;
+					}
 				}
+
+				// See if we found our entry
+				if (!llFound)
+					return(NULL);		// The indicated ptrRef was not found as a member of this Start/End list
+
+			} else {
+				// Add at the first available slot
+				lnHint = 0;
 			}
-
-			// See if we found our entry
-			if (!llFound)
-				return(NULL);		// The indicated ptrRef was not found as a member of this Start/End list
-
 			// When we get here, we have the relative of where the new entry will go
 
 			// Allocate for our SMasterList pointer
@@ -6237,26 +6266,29 @@ openAgain:
 				///////////
 				// Adjust this item relative to its ptrRef
 				//////
-					if (tlAfter)
+					if (ptrRef)
 					{
-						// ptrNew goes after ptrRef
-						ptrCaller->prev		= ptrRef;			// New one points backward to reference
-						ptrCaller->next		= ptrRef->next;		// New one points forward to what reference used to point to
-						ptrRef->next		= ptrCaller;		// Reference points forward to thew new one
+						if (tlAfter)
+						{
+							// ptrNew goes after ptrRef
+							ptrCaller->prev		= ptrRef;			// New one points backward to reference
+							ptrCaller->next		= ptrRef->next;		// New one points forward to what reference used to point to
+							ptrRef->next		= ptrCaller;		// Reference points forward to thew new one
 
-						// Update the one after where reference used to be
-						if (ptrCaller->next)
-							ptrCaller->next->prev = ptrCaller;	// One originally after reference points backward to new one
+							// Update the one after where reference used to be
+							if (ptrCaller->next)
+								ptrCaller->next->prev = ptrCaller;	// One originally after reference points backward to new one
 
-					} else {
-						// ptrNew goes before ptrRef
-						ptrCaller->next		= ptrRef;			// New one points forward to what reference
-						ptrCaller->prev		= ptrRef->prev;		// New one points backward to what reference used to point backward to
-						ptrRef->prev		= ptrCaller;		// Reference points backward to the new one
+						} else {
+							// ptrNew goes before ptrRef
+							ptrCaller->next		= ptrRef;			// New one points forward to what reference
+							ptrCaller->prev		= ptrRef->prev;		// New one points backward to what reference used to point backward to
+							ptrRef->prev		= ptrCaller;		// Reference points backward to the new one
 
-						// Update the one before where reference used to be
-						if (ptrCaller->prev)
-							ptrCaller->prev->next = ptrCaller;	// One originally before reference points forward to new one
+							// Update the one before where reference used to be
+							if (ptrCaller->prev)
+								ptrCaller->prev->next = ptrCaller;	// One originally before reference points forward to new one
+						}
 					}
 
 
@@ -7502,9 +7534,15 @@ _asm int 3;
 	void CALLTYPE oss_buildBufferSetSize(SBuffer** buffRoot, u32 tnBufferLength)
 	{
 // TODO:  untested code, breakpoint and examine
+// Note:  This code should not be being executed.  The code in ioss_bufferVerifySizeForNewBytes() should be used
+_asm int 3;
 		// Make sure our environment is sane
 		if (buffRoot && *buffRoot && tnBufferLength != 0)
+		{
 			*buffRoot = (SBuffer*)oss_realloc(*buffRoot, tnBufferLength);
+			if (*buffRoot)
+				(*buffRoot)->allocatedLength = tnBufferLength;
+		}
 	}
 
 
@@ -8000,18 +8038,8 @@ _asm nop;
 
 		// Make sure our environment is sane
 		// We only need to have a true bxml and tcName (for the attribute tag), the rest can be null / non-existent
-		if (bxmlaRef && bxmlaRef->_parent && tcName)
+		if (bxml && tcName && tnNameLength >= 1)
 		{
-			// Get the parent bxml if need be
-			if (!bxml)
-			{
-				bxml = bxmlaRef->_parent;
-				// make sure we're still good
-				if (!bxml)
-					return(false);
-			}
-			// When we get here, we know where we're adding it
-
 			// Create the attribute
 			bxmlaNew = oss_bxmlaCreate(tcName, tnNameLength, tcData, tnDataLength, tnTotalDataLength);
 			if (bxmlaNew)
@@ -8045,18 +8073,8 @@ _asm nop;
 
 		// Make sure our environment is sane
 		// We only need to have a true bxml and tcName (for the attribute tag), the rest can be null / non-existent
-		if (bxmlaRef && bxmlaRef->_parent && bxmlaNew)
+		if (bxml && bxmlaNew)
 		{
-			// Get the parent bxml if need be
-			if (!bxml)
-			{
-				bxml = bxmlaRef->_parent;
-				// make sure we're still good
-				if (!bxml)
-					return(false);
-			}
-			// When we get here, we know where we're adding it
-
 			// Append it to the chain after the entry
 			oss_SEChain_appendExistingRelativeToMember(&bxml->_attributes, (SLL*)bxmlaRef, oss_getNextUniqueId(), (SLL*)bxmlaNew, _COMMON_START_END_BLOCK_SIZE, tlAfter, &llResult);
 

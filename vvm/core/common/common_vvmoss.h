@@ -454,24 +454,24 @@
 		SCanvas*		(CALLTYPE *oss_requestCanvas)							(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, u32 tnBackColor, bool tlIsActive, bool tlUseTransparency);
 		SRegion*		(CALLTYPE *oss_requestRegion)							(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, u32 tnWidth, u32 tnHeight, SCallbacksW* callback, SStartEnd* events);
 		SRegion*		(CALLTYPE *oss_requestDuplicateRegion)					(u64 tnAssociatedId, SRegion* templateRegion);
-		bool			(CALLTYPE *oss_requestCanvasAndRegion)					(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, u32 tnBackColor, bool tlIsActive, bool tlUseTransparency, SCanvas** tc, SRegion** tr, SCallbacksW* callbacks, SStartEnd* events);
+		bool			(CALLTYPE *oss_requestCanvasAndRegion)					(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SRGBA tnBackColor, bool tlIsActive, bool tlUseTransparency, SCanvas** tc, SRegion** tr, SCallbacksW* callbacks, SStartEnd* events);
 		SCanvasList* 	(CALLTYPE *oss_associateCanvasWithScreen)				(SScreen* ts, SCanvas* tc, bool tlMakeActive);
 		SCanvasList* 	(CALLTYPE *oss_associateCanvasWithCanvas)				(SCanvas* tcParent, SCanvas* tcChild);
 		SRegionList*	(CALLTYPE *oss_associateRegionWithCanvas)				(SCanvas* tc, SRegion* tr);
 		SRegionList*	(CALLTYPE *oss_associateRegionWithRegion)				(SRegion* tcParent, SRegion* trChild);
 		u64				(CALLTYPE *oss_requestFontHandle)						(s8* fontName, u32 fontWidth, bool bold, bool italics, bool underline, bool strikethrough);
-		u64				(CALLTYPE *oss_canvasDrawFixedPointText)				(SCanvas* tc, SRGBA* bd, u32 fontWidth, u32 fontHeight, u32 ulx, u32 uly,    s8*  text, u32 characterCount, u32 foreground, u32 background);
+		u64				(CALLTYPE *oss_canvasDrawFixedPointText)				(SCanvas* tc, SRGBA* bd, u32 fontWidth, u32 fontHeight, s32 ulx, s32 uly,    s8*  text, u32 characterCount, u32 foreground, u32 background);
 		u64				(CALLTYPE *oss_canvasDrawText)							(SCanvas* tc, SRGBA* bd, u64 fontHandle, s32 ulx, s32 uly, s32 lrx, s32 lry, s8*  tcText, u32 tnTextLength, u32 foreground, u32 background, SDrawState* tsDrawState);
 		u64				(CALLTYPE *oss_canvasDrawTextUnicode)					(SCanvas* tc, SRGBA* bd, u64 fontHandle, s32 ulx, s32 uly, s32 lrx, s32 lry, w16* tuText, u32 tnTextLength, u32 foreground, u32 background, SDrawState* tsDrawState);
-		u64				(CALLTYPE *oss_canvasFrameRect)							(SCanvas* tc, SRGBA* bd, u32 ulx, u32 uly, u32 lrx, u32 lry, u32 borderThickness, u32 border);
-		u64				(CALLTYPE *oss_canvasFillRect)							(SCanvas* tc, SRGBA* bd, u32 ulx, u32 uly, u32 lrx, u32 lry, u32 borderThickness, u32 border, u32 background);
-		u64				(CALLTYPE *oss_canvasLine)								(SCanvas* tc, SRGBA* bd, u32 ulx, u32 uly, u32 lrx, u32 lry, u32 lineThickness, u32 line);
-		u64				(CALLTYPE *oss_canvasArc)								(SCanvas* tc, SRGBA* bd, u32 ox, u32 oy, f32 start, f32 end, u32 lineThickness, u32 line);
-		SCanvas*		(CALLTYPE *oss_canvasExtract)							(SCanvas* tc, SRGBA* bd, u32 ulx, u32 uly, u32 lrx, u32 lry);
-		u64				(CALLTYPE *oss_canvasColorize)							(SCanvas* tc, SRGBA* bd, u32 ulx, u32 uly, u32 lrx, u32 lry, u32 color);
-		u64				(CALLTYPE *oss_canvasGrayscale)							(SCanvas* tc, SRGBA* bd, u32 ulx, u32 uly, u32 lrx, u32 lry);
+		u64				(CALLTYPE *oss_canvasFrameRect)							(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, u32 borderThickness, u32 border);
+		u64				(CALLTYPE *oss_canvasFillRect)							(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, u32 borderThickness, u32 border, u32 background);
+		u64				(CALLTYPE *oss_canvasLine)								(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, u32 lineThickness, u32 line);
+		u64				(CALLTYPE *oss_canvasArc)								(SCanvas* tc, SRGBA* bd, s32 ox, s32 oy, f32 start, f32 end, u32 lineThickness, u32 line);
+		SCanvas*		(CALLTYPE *oss_canvasExtract)							(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry);
+		u64				(CALLTYPE *oss_canvasColorize)							(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, u32 color);
+		u64				(CALLTYPE *oss_canvasGrayscale)							(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry);
 		u64				(CALLTYPE *oss_canvasGradient)							(SCanvas* tc, SRGBA* bd, SRGBA ul, SRGBA ur, SRGBA lr, SRGBA ll);
-		u64				(CALLTYPE *oss_canvasBitBlt)							(SCanvas* tc, SCanvas* tcDst, bool tlDstAccumulator, u32 dulx, u32 duly, u32 dlrx, u32 dlry, SCanvas* tsSrc, bool tlSrcAccumulator, u32 sulx, u32 suly, u32 slrx, u32 slry);
+		u64				(CALLTYPE *oss_canvasBitBlt)							(SCanvas* tcDst, bool tlDstAccumulator, s32 dulx, s32 duly, SCanvas* tsSrc, bool tlSrcAccumulator, s32 sulx, s32 suly, s32 slrx, s32 slry);
 		u64				(CALLTYPE *oss_canvasScale)								(SCanvas* tcDst, SCanvas* tcSrc);
 		u64				(CALLTYPE *oss_canvasRefresh)							(SCanvas* tc);
 		u64				(CALLTYPE *oss_canvasSetRegionAndEventCallback)			(SCanvas* tc, SRegion*  region,  SEvent*  event);
@@ -495,7 +495,7 @@
 		void			(CALLTYPE *oss_screenKeyboardGetEventCallbacksList)		(u64 id, SCanvas* tc, SEvent** events, u32* count);
 
 		// Only 24-bit or 32-bit bitmaps can be loaded from disk at present.
-		u64				(CALLTYPE *oss_loadBitmapFromDisk)						(s8* tcPathname, SCanvas** tc, u32* tnWidth, u32* tnHeight, u32 tnBackColor);
+		u64				(CALLTYPE *oss_loadBitmapFromDisk)						(s8* tcPathname, SCanvas** tc, u32* tnWidth, u32* tnHeight, SRGBA tnBackColor);
 		u64				(CALLTYPE *oss_saveBitmapToDisk)						(SCanvas* tc, SRGBA* bd, s8* tcPathname);
 		u64				(CALLTYPE *oss_requestSystemFont)						(s8* fontName, u32 fontPointSize, bool bold, bool italics, bool underline, bool strikethrough);
 		u64				(CALLTYPE *oss_requestSystemBitmap)						(u32 tnWidth, u32 tnHeight);
@@ -757,7 +757,7 @@
 		bool			(CALLTYPE *oss_bxmlaSetData)						(SBxmla* bxmla, s8* tcData, u32 tnDataLength);
 		bool			(CALLTYPE *oss_bxmlaSetTotalLength)					(SBxmla* bxmla, u32 tnDataLengthTotal);
 		SBxmla*			(CALLTYPE *oss_bxmlaDelete)							(SBxmla* bxmla, bool tlFreeMemory);
-		bool			(CALLTYPE *oss_bxmlaInsert)							(SBxml* bxml, SBxmla* bxmla, s8* tcName, u32 tnNameLength, s8* tcData, u32 tnDataLength, bool tlAfter);
+		bool			(CALLTYPE *oss_bxmlaInsert)							(SBxml* bxml, SBxmla* bxmlaRef, s8* tcName, u32 tnNameLength, s8* tcData, u32 tnDataLength, u32 tnTotalDataLength, bool tlAfter);
 		bool			(CALLTYPE *oss_bxmlaInsertExisting)					(SBxml* bxml, SBxmla* bxmlaRef, SBxmla* bxmlaNew, bool tlAfter);
 		SBxmla*			(CALLTYPE *oss_bxmlaCopy)							(SBxmla* bxmla);
 		SBxmla*			(CALLTYPE *oss_bxmlaCopyAs)							(SBxmla* bxmla, s8* tcNewName, u32 tnNewNameLength);
