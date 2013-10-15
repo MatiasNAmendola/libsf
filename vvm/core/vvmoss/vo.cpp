@@ -2252,6 +2252,7 @@
 	{
 		u8		c, w;
 		u32		lnC, lnW, lnNeedleLength, lnFoundPosition;
+		bool	llWildcardFound;
 		csu8p	needle, haystack;
 
 
@@ -2261,6 +2262,7 @@ _asm nop;
 		if (candidate._u8 && wildcardPattern._u8)
 		{
 			// Repeat for every character in the wildcardPattern
+			llWildcardFound = false;
 			for (lnC = 0, lnW = 0;	wildcardPattern._u8[lnW] != 0;	)
 			{
 				//////////
@@ -2276,12 +2278,14 @@ _asm nop;
 					if (w == '?')
 					{
 						// c can be anything, we accept it as is
-						++lnC;	// Increment in candidate
-						++lnW;	// Increment in wildcardPattern
+						llWildcardFound = true;
+						++lnC;					// Increment in candidate
+						++lnW;					// Increment in wildcardPattern
 
 
 					} else if (w == '*') {
 						// The rest of c can be anything, unless there is something more in w after the asterisk
+						llWildcardFound = true;
 						if (wildcardPattern._u8[lnW + 1] == 0)
 						{
 							// We're done, the rest of candidate can be anything
@@ -2324,7 +2328,7 @@ _asm nop;
 							//////
 								if (lnNeedleLength == 0)
 								{
-									// We reached the end of the wildcardPattern, which means whatever remains after this is a match
+									// We reached the end of the wildcardPattern, which means this is a match
 									return(0);		// The candidate was a match
 
 								} else {
@@ -2370,8 +2374,24 @@ _asm nop;
 			// When we get here, the wildcardPattern is done being searched
 
 			// Are we done scanning the candidate yet?
-			if (candidate._u8[lnC] == 0)	return(0);			// Yes, everything matched
-			else							return(1);			// Nope, it didn't match, the candidate is greater than the wildcardPattern
+			if (candidate._u8[lnC] == 0)
+			{
+				// Yes, everything matched
+				// It may still not be a match though if the strings are not the same length
+				if (llWildcardFound)
+				{
+					// The lengths must match to be a match
+					return(oss_strlen(candidate) == oss_strlen(wildcardPattern));
+
+				} else {
+					// It was a match
+					return(0);
+				}
+
+			} else {
+				// Nope, it didn't match, the candidate is greater than the wildcardPattern
+				return(1);
+			}
 
 		} else {
 			// Something's awry

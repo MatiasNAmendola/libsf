@@ -57,7 +57,8 @@
 // corresponding bxml files, to extract individual icons into a single BXML which is written
 // to disk.
 //////////
-void hijack_toLoadIcons(void);
+void hijack_loadIcons(void);
+void hijack_verifyIcons(void);
 
 		void CALLTYPE			vvmt_enableBreakpoints									(void);
 		void CALLTYPE			vvmt_disableBreakpoints									(void);

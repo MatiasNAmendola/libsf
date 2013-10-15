@@ -4211,8 +4211,13 @@ _asm int 3;
 					}
 					// Store the pointer for the user's use
 					*x = bxmlFind;
+
+				} else {
+					// Grab the existing pointer
+					bxmlFind = (_isSBxmlFind*)*x;
 				}
-				//else it's already been created, but will be re-populated below
+				// Initialize the memory block to empty
+				memset(bxmlFind, 0, sizeof(_isSBxmlFind));
 
 			} else {
 				// We will create a fake x for the purpose of a one-shot find
@@ -4226,8 +4231,6 @@ _asm int 3;
 		//////
 			bxmlFind->bxmlRoot				= bxmlRoot;
 			bxmlFind->bxmlRootParent		= (SBxml*)bxmlRoot->ll4.parent;
-			bxmlFind->bxml					= NULL;
-			bxmlFind->bxmla					= NULL;
 
 			bxmlFind->traverseChildren		= tlTraverseChildren;
 			bxmlFind->searchAttributes		= tlSearchAttributes;
@@ -4261,7 +4264,7 @@ _asm int 3;
 //////
 	bool iioss_bxmlFindContinue(void* x)
 	{
-		_isSBxmlFind* bxmlFind;
+		_isSBxmlFind*	bxmlFind;
 
 
 		// Grab our pointer
@@ -4307,11 +4310,20 @@ continueToAttributes:
 					if (bxmlFind->bxmlaAttributeFound)
 					{
 						// Iterate through any attributes
-						bxmlFind->_ml = bxmlFind->bxml->_attributes.root;
-						while (bxmlFind->_ml)
+						if (!bxmlFind->bxml && bxmlFind->bxmla)
+							bxmlFind->bxml = bxmlFind->bxmla->_parent;		// Update the bxml by the current attribute's parent
+
+						// Make sure this attribute still has a parent
+						if (!bxmlFind->bxml)
+							break;		// Nope, we're done with this search
+
+						for ( ; bxmlFind->_mlIterator < bxmlFind->bxml->_attributes.masterCount; )
 						{
+							// Grab this attribute
+							bxmlFind->_ml = bxmlFind->bxml->_attributes.master[bxmlFind->_mlIterator];
+
 							// Is this master slot used?
-							if (bxmlFind->_ml->used)
+							if (bxmlFind->_ml && bxmlFind->_ml->used)
 							{
 								// Grab the master list's associated pointer, which is the attribute
 								bxmlFind->bxmla = (SBxmla*)bxmlFind->_ml->ptr;
@@ -4332,10 +4344,9 @@ continueToAttributes:
 									return(true);
 								}
 							}
-
 continueToNextAttribute:
-							// Move to next record
-							bxmlFind->_ml = (SMasterList*)bxmlFind->_ml->ll.next;
+							// Move to next entry
+							++bxmlFind->_mlIterator;
 						}
 					}
 
@@ -4346,7 +4357,8 @@ continueToNextAttribute:
 					if (bxmlFind->traverseChildren && bxmlFind->bxml->ll4.firstChild)
 					{
 						// Search child nodes
-						bxmlFind->bxml = (SBxml*)bxmlFind->bxml->ll4.firstChild;
+						bxmlFind->bxml			= (SBxml*)bxmlFind->bxml->ll4.firstChild;
+						bxmlFind->_mlIterator	= 0;
 
 					} else {
 						// Iterate until we find a sibling or reach the end of the parentage
@@ -4355,7 +4367,8 @@ continueToNextAttribute:
 							if (bxmlFind->bxml->ll4.next)
 							{
 								// Continue on to the next sibling
-								bxmlFind->bxml = (SBxml*)bxmlFind->bxml->ll4.next;
+								bxmlFind->bxml			= (SBxml*)bxmlFind->bxml->ll4.next;
+								bxmlFind->_mlIterator	= 0;
 								break;
 
 							} else {

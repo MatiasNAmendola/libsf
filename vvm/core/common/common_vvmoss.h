@@ -201,6 +201,7 @@
 	const s8		cgcOssDatumDelete[]										= "oss_datumDelete";
 	const s8		cgcOssDatum2Delete[]									= "oss_datum2Delete";
 	const s8		cgcOssDatum2SetNullString[]								= "oss_datum2SetNullString";
+	
 	const s8		cgcOssCopyUpToShortestString[]							= "oss_copyUpToShortestString";
 	const s8		cgcOssWildcardMatchDatum[]								= "oss_wildcardMatchDatum";
 	const s8		cgcOssWildcardMatch[]									= "oss_wildcardMatch";
@@ -608,6 +609,7 @@
 		void			(CALLTYPE *oss_datumDelete)							(SDatum*  datum);
 		void			(CALLTYPE *oss_datum2Delete)						(SDatum2* datum2);
 		void			(CALLTYPE *oss_datum2SetNullString)					(SDatum2* datum2, u64 length, bool tlInitialize);
+
 		void			(CALLTYPE *oss_copyUpToShortestString)				(u8* dst, u32 tnDstLength, u8* src, u32 tnSrcLength);
 		s32				(CALLTYPE *oss_wildcardMatchDatum)					(SDatum* tsCandidate, SDatum* tsWildcardPattern, bool tlCaseSensitive);
 		s32				(CALLTYPE *oss_wildcardMatch)						(csu8p candidate, csu8p wildcardPattern, bool tlCaseSensitive);
@@ -989,6 +991,7 @@
 		(void*)&oss_datumDelete,											(void*)cgcOssDatumDelete,
 		(void*)&oss_datum2Delete,											(void*)cgcOssDatum2Delete,
 		(void*)&oss_datum2SetNullString,									(void*)cgcOssDatum2SetNullString,
+
 		(void*)&oss_copyUpToShortestString,									(void*)cgcOssCopyUpToShortestString,
 		(void*)&oss_wildcardMatchDatum,										(void*)cgcOssWildcardMatchDatum,
 		(void*)&oss_wildcardMatch,											(void*)cgcOssWildcardMatch,

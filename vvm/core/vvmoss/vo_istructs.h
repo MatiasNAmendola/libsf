@@ -231,6 +231,7 @@
 		// Each subsequent find, the find data is stored here for future changes
 		SBxml*				bxml;				// If populated, the last item found was this node
 		SBxmla*				bxmla;				// If populated, the last item found was this attribute
+		u32					_mlIterator;		// For entries related to attributes, holds the last entry through _attributes.master[]
 		SMasterList*		_ml;				// For entries related to attributes
 		bool				lastFindOnNode;		// Was the last find found on a node?
 		bool				lastFindOnAttribute;// Was the last find found on an attribute?
