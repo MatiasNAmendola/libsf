@@ -491,6 +491,7 @@ return(false);
 				// Grab the next icon bxml node
 				icon = oss_bxmlNodeGetNext(icon);
 		}
+		// When we get here, we know everything has been tested successfully
 	}
 
 
