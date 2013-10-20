@@ -122,7 +122,7 @@
 			lnStart = ptrSEVar->masterCount;
 
 			// Increase our buffer by the block size
-			llResult = oss_allocateAdditionalStartEndMasterSlots(ptrSEVar, tnAllocationSize);
+			llResult = oss_SEChain_allocateAdditionalMasterSlots(ptrSEVar, tnAllocationSize);
 			if (llResult)
 			{
 				// From our initial value to the end, allocate space for each variable
@@ -198,7 +198,7 @@
 			// If we get here, we need to increase the allocation
 
 			// Allocate our new entry
-			if (oss_allocateAdditionalStartEndMasterSlots(ptrSEVar, 1))
+			if (oss_SEChain_allocateAdditionalMasterSlots(ptrSEVar, 1))
 			{
 				// We know we have our slot now
 				// Allocate our new entry
@@ -247,7 +247,7 @@
 			lnStart = ptrSESnip->masterCount;
 
 			// Increase our buffer by the block size
-			llResult = oss_allocateAdditionalStartEndMasterSlots(ptrSESnip, gsVvm.gnSnippetAllocationBlockSize);
+			llResult = oss_SEChain_allocateAdditionalMasterSlots(ptrSESnip, gsVvm.gnSnippetAllocationBlockSize);
 			if (llResult)
 			{
 				// From our initial value to the end, allocate space for each snippet
@@ -325,7 +325,7 @@
 			lnStart = ptrSEVar->masterCount;
 
 			// Increase our buffer by the block size
-			llResult = oss_allocateAdditionalStartEndMasterSlots(ptrSEVar, tnAllocationSize);
+			llResult = oss_SEChain_allocateAdditionalMasterSlots(ptrSEVar, tnAllocationSize);
 			if (llResult)
 			{
 				// From our initial value to the end, allocate space for each snippet

@@ -59,6 +59,7 @@
 #include "\libsf\vvm\core\common\common.h"
 #include "\libsf\vvm\core\common\common_vvm.h"
 #include "\libsf\vvm\core\common\common_vvmoss_plugins.h"
+#include "\libsf\vvm\core\common\common_vvmoss_const.h"
 #include "\libsf\vvm\core\common\common_vvmmc.h"
 #include "\libsf\vvm\core\localization\vvmenu\resource.h"					// Resource constants
 #include "vo_const.h"
@@ -167,19 +168,10 @@
 		// See:
 		//		vo_plugins.h
 		//		vo_plugins.cpp
+		//		(as well as the source files in the \libsf\vvm\core\plugins\ directories)
 		//
 		//////
-			ioss_loadPlugins();
-
-
-		/////////
-		//
-		// The VVMOSS contains placeholder functions (in vo_plugins.cpp) which do nothing if the
-		// plugin wasn't loaded, but are used to allow any existing application to call those
-		// functions so their code does not need changed.
-		//
-		//////
-			oss_soundInitialize(tnDebuggerInterfaceAddress);
+			ioss_loadPlugins(tnDebuggerInterfaceAddress);
 	}
 	
 
@@ -364,6 +356,60 @@
 			// Indicate failure
 			return(0);
 		}
+	}
+
+
+
+
+//////////
+//
+// Called to register a function that a plugin possesses, or to unregister a function.
+//
+//////
+	u64 CALLTYPE oss_plugin_registerFunction(u64 tnInstanceId, u64 tnFunction, f32 tfVersion, u32 tnBuild, const u8* tcMetaName, u64 tnFunc)
+	{
+		_isSInterfacePlugin*	plugin;
+		SStartEndCallback		cb;
+
+
+		// Prepare for search
+		cb._func	= (u64)&ioss_plugin_registerCallback;
+		cb.extra	= tnInstanceId;
+
+		// Search for the plugin
+		plugin = (_isSInterfacePlugin*)oss_SEChain_searchByCallback(&gsRootFunctionPlugins, &cb);
+		if (plugin)
+		{
+			switch (tnFunction)
+			{
+				case _VVMOSS_PLUGIN_EDITOR:
+					// They are registering an editor
+					plugin->editor.available	= true;
+					plugin->editor.version		= tfVersion;
+					plugin->editor.build		= tnBuild;
+					plugin->editor._func		= tnFunc;
+					oss_datumSet(&plugin->editor.identifier, (u8*)tcMetaName, -1, true);
+					return(0);
+					break;
+
+				default:
+					// Requested function is not known
+					return(-2);
+					break;
+			}
+
+		} else {
+			// Plugin was not found
+			return(-1);
+		}
+	}
+
+
+
+
+	u64 CALLTYPE oss_plugin_unregisterFunction(u64 tnInstanceId, u64 tnFunction)
+	{
+		return(0);
 	}
 
 
@@ -1723,7 +1769,7 @@
 		// Find the indicated font by its uniqueId, which the systems uses as its handle between VVM and VVMOSS
 		cb._func	= (u64)&iioss_findSystemFontByHandleCallback;
 		cb.extra	= tnFontHandle;
-		lsf = (_iswSSystemFont*)oss_searchSEChainByCallback(&gseRootFonts, &cb);
+		lsf = (_iswSSystemFont*)oss_SEChain_searchByCallback(&gseRootFonts, &cb);
 
 		// Based on return result, indicate our handle or failure
 		if (lsf)	return((u64)lsf->handle);		// Return the HFONT for immediate use by caller
@@ -2163,7 +2209,7 @@
 		// Locate the existing master list pointer
 		cb._func	= (u64)iioss_reallocAndFreeCallback;
 		cb.extra	= (u64)ptrOld;
-		ldll = (SDatumLL*)oss_searchSEChainByCallback(&gseRootMemoryBlocks, &cb);
+		ldll = (SDatumLL*)oss_SEChain_searchByCallback(&gseRootMemoryBlocks, &cb);
 		if (!ldll)
 			return(NULL);		// It's not one of our pointers, tisk, tisk!
 
@@ -2207,7 +2253,7 @@
 		// Locate the existing master list pointer
 		cb._func	= (u64)iioss_reallocAndFreeCallback;
 		cb.extra	= (u64)ptr;
-		ldll = (SDatumLL*)oss_searchSEChainByCallback(&gseRootMemoryBlocks, &cb);
+		ldll = (SDatumLL*)oss_SEChain_searchByCallback(&gseRootMemoryBlocks, &cb);
 		if (!ldll)
 			return(NULL);		// It's not one of our pointers, tisk, tisk!
 
@@ -2649,7 +2695,7 @@ storeFirstOne:
 
 		cb._func	= (u64)iioss_translateSOssCompsToOthersCallback;
 		cb.extra	= (u64)tsComps;
-		oss_searchSEChainByCallback(&line->comps, &cb);
+		oss_SEChain_searchByCallback(&line->comps, &cb);
 	}
 
 
@@ -3449,7 +3495,7 @@ openAgain:
 
 
 		// Make sure the indicated file exists
-		lsf = (_iswSSharedFile*)oss_searchSEChainByUniqueId(&gseRootForeignFiles, tnFileHandle);
+		lsf = (_iswSSharedFile*)oss_SEChain_searchByUniqueId(&gseRootForeignFiles, tnFileHandle);
 		if (!lsf)	return(-1);		// Invalid file handle
 
 
@@ -3499,7 +3545,7 @@ openAgain:
 			return(-4);
 
 		// Make sure the indicated file exists
-		lsf = (_iswSSharedFile*)oss_searchSEChainByUniqueId(&gseRootForeignFiles, tnFileHandle);
+		lsf = (_iswSSharedFile*)oss_SEChain_searchByUniqueId(&gseRootForeignFiles, tnFileHandle);
 		if (!lsf)	return(-1);			// Invalid file handle
 
 
@@ -3552,7 +3598,7 @@ openAgain:
 
 
 		// Make sure the indicated file exists
-		lsf = (_iswSSharedFile*)oss_searchSEChainByUniqueId(&gseRootForeignFiles, tnFileHandle);
+		lsf = (_iswSSharedFile*)oss_SEChain_searchByUniqueId(&gseRootForeignFiles, tnFileHandle);
 		if (!lsf)	return(-1);			// Invalid file handle
 
 
@@ -3597,7 +3643,7 @@ openAgain:
 
 
 		// Make sure the indicated file exists
-		lsf = (_iswSSharedFile*)oss_searchSEChainByUniqueId(&gseRootForeignFiles, tnFileHandle);
+		lsf = (_iswSSharedFile*)oss_SEChain_searchByUniqueId(&gseRootForeignFiles, tnFileHandle);
 		if (!lsf)	return(-1);			// Invalid file handle
 
 
@@ -3664,10 +3710,10 @@ openAgain:
 
 
 		// Make sure the indicated file exists
-		lsf = (_iswSSharedFile*)oss_searchSEChainByUniqueId(&gseRootForeignFiles, tnFileHandle);
+		lsf = (_iswSSharedFile*)oss_SEChain_searchByUniqueId(&gseRootForeignFiles, tnFileHandle);
 		if (!lsf)	return(-1);			// Invalid file handle
 
-		lsfl = (_iswSSharedFileLocks*)oss_searchSEChainByUniqueId(&lsf->locks, tnLockHandle);
+		lsfl = (_iswSSharedFileLocks*)oss_SEChain_searchByUniqueId(&lsf->locks, tnLockHandle);
 		if (!lsfl)	return(-2);			// Invalid lock handle
 
 
@@ -3717,7 +3763,7 @@ openAgain:
 
 
 		// Make sure the indicated file exists
-		lsf = (_iswSSharedFile*)oss_searchSEChainByUniqueId(&gseRootForeignFiles, tnFileHandle);
+		lsf = (_iswSSharedFile*)oss_SEChain_searchByUniqueId(&gseRootForeignFiles, tnFileHandle);
 		if (!lsf)	return(-1);			// Invalid file handle
 
 		// Close the handle
@@ -3752,7 +3798,7 @@ openAgain:
 
 
 		// Make sure the indicated file exists
-		lsf = (_iswSSharedFile*)oss_searchSEChainByUniqueId(&gseRootForeignFiles, tnFileHandle);
+		lsf = (_iswSSharedFile*)oss_SEChain_searchByUniqueId(&gseRootForeignFiles, tnFileHandle);
 		if (!lsf)	return(-1);			// Invalid file handle
 
 
@@ -3972,8 +4018,15 @@ openAgain:
 				}
 
 				// Verify our string was allocated properly
-				if (datum->data._u8)	datum->length = length;
-				else					datum->length = 0;
+				if (datum->data._u8)
+				{
+					// Set the length
+					datum->length = length;
+
+				} else {
+					// Indicate it failed
+					datum->length = 0;
+				}
 
 			} else {
 				// Initialize it to NULL
@@ -4050,8 +4103,15 @@ openAgain:
 			datumDst->data._u8 = oss_duplicateString(datumSrc->data._u8, datumSrc->length);
 
 			// If it was copied, update the length
-			if (datumDst->data._u8)		datumDst->length	= datumSrc->length;
-			else						datumDst->length	= 0;
+			if (datumDst->data._u8)
+			{
+				// Store the length
+				datumDst->length = datumSrc->length;
+
+			} else {
+				// Indicate it failed
+				datumDst->length = 0;
+			}
 		}
 		return(datumDst);
 	}
@@ -6359,7 +6419,7 @@ openAgain:
 			// If we get here, no slots are available, add some more
 
 			// Allocate some pointer space
-			oss_allocateAdditionalStartEndMasterSlots(ptrSE, tnBlockSizeIfNewBlockNeeded);
+			oss_SEChain_allocateAdditionalMasterSlots(ptrSE, tnBlockSizeIfNewBlockNeeded);
 			// We never break out of this loop because we will always return above from it
 		}
 	}
@@ -6410,7 +6470,7 @@ openAgain:
 				// We did not find room
 				// Allocate some pointer space
 				//////
-					oss_allocateAdditionalStartEndMasterSlots(ptrSE, tnBlockSizeIfNewBlockNeeded);
+					oss_SEChain_allocateAdditionalMasterSlots(ptrSE, tnBlockSizeIfNewBlockNeeded);
 					// We never break out of this loop because we will always return above from it
 
 			} while (1);
@@ -6432,7 +6492,7 @@ openAgain:
 			ptrSE->master[tnSlot] = NULL;
 	}
 
-	bool CALLTYPE oss_allocateAdditionalStartEndMasterSlots(SStartEnd* ptrSE, u32 tnBlockSize)
+	bool CALLTYPE oss_SEChain_allocateAdditionalMasterSlots(SStartEnd* ptrSE, u32 tnBlockSize)
 	{
 		bool			llResult;
 		SMasterList**	lml;
@@ -6625,7 +6685,7 @@ _asm int 3;
 					}
 				}
 				// If we get here, no empty slots. Allocate some, rinse, and repeat. :-)
-				oss_allocateAdditionalStartEndMasterSlots(ptrSEDst, tnBlockSize);
+				oss_SEChain_allocateAdditionalMasterSlots(ptrSEDst, tnBlockSize);
 
 				// Process through again beginning at the newly added portion
 				tnHint = lnI;
@@ -6993,7 +7053,7 @@ _asm int 3;
 		// Internal information used to make it happen for the target OS
 		u64				ossWindowId;			// information necessary to render this screen on the OSS (pointer to _iSWindow struct, for example)
 	};
-	void* CALLTYPE oss_searchSEChainByUniqueId(SStartEnd* ptrSE, u64 tnUniqueId)
+	void* CALLTYPE oss_SEChain_searchByUniqueId(SStartEnd* ptrSE, u64 tnUniqueId)
 	{
 		u32 lnI;
 
@@ -7028,7 +7088,7 @@ _asm int 3;
 //		The associated pointer if found
 //
 //////
-	void* CALLTYPE oss_searchSEChainByCallback(SStartEnd* ptrSE, SStartEndCallback* cb)
+	void* CALLTYPE oss_SEChain_searchByCallback(SStartEnd* ptrSE, SStartEndCallback* cb)
 	{
 		u32 lnI;
 
@@ -7063,7 +7123,7 @@ _asm int 3;
 // Iterates through the indicated Start/End list, calling back the callback function for every item.
 //
 //////
-	void CALLTYPE oss_iterateThroughStartEndForCallback(SStartEnd* ptrSE, SStartEndCallback* cb)
+	void CALLTYPE oss_SEChain_iterateThroughForCallback(SStartEnd* ptrSE, SStartEndCallback* cb)
 	{
 		u32 lnI;
 
@@ -7108,7 +7168,7 @@ _asm int 3;
 // If there is an error, it will trap to the debugger so the machine state can be examined.
 //
 //////
-	void CALLTYPE oss_validateStartEnd(SStartEnd* ptrSE, SStartEndCallback* cb)
+	void CALLTYPE oss_SEChain_validate(SStartEnd* ptrSE, SStartEndCallback* cb)
 	{
 		u32				lnI;
 		SMasterList*	lml;
@@ -7376,7 +7436,7 @@ _asm int 3;
 // directory using the specified initial template
 //
 //////
-	u64 CALLTYPE CALLTYPE oss_fileFindFirst(csu8p tcPathname, csu8p tcFilenameTemplate, SFindFile* tsFileInfo)
+	u64 CALLTYPE CALLTYPE oss_fileFindFirst(SFindFile* tsFileInfo)
 	{
 		u32					lnLength;
 		HANDLE				lnHandle;
@@ -7385,21 +7445,21 @@ _asm int 3;
 
 
 		// Make sure there's a pathname
-		if (!tcPathname._u8)
-			tcPathname._u8 = (u8*)".\\";
+		if (!tsFileInfo->pathnameOfSearch.data._u8)
+			oss_datumSet(&tsFileInfo->pathnameOfSearch, (u8*)".\\", -1, true);
 
 		// Make sure the environment has sane
 		lnHandle = (HANDLE)-1;
-		if (tsFileInfo && tcFilenameTemplate._u8)
+		if (tsFileInfo && tsFileInfo->filenameSearched.data._u8 && tsFileInfo->filenameSearched.length != 0)
 		{
 			//////////
 			// Create the filename
 			//////
 				memset(buffer, 0, sizeof(buffer));
-				lnLength = (u32)oss_strlen(tcPathname);
+				lnLength = (u32)tsFileInfo->pathnameOfSearch.length;
 
 				// Copy the pathname part (if any)
-				oss_memcpy(buffer, tcPathname._s8, lnLength);
+				oss_memcpy(buffer, tsFileInfo->pathnameOfSearch.data._s8, lnLength);
 
 				// Make sure it is terminated with a backslash
 				if (buffer[lnLength - 1] != '\\')
@@ -7409,14 +7469,14 @@ _asm int 3;
 					++lnLength;
 				}
 				// Append on the file spec
-				oss_memcpy(buffer + lnLength, tcFilenameTemplate._s8, oss_strlen(tcFilenameTemplate));
+				oss_memcpy(buffer + lnLength, tsFileInfo->filenameSearched.data._s8, tsFileInfo->filenameSearched.length);
 				// Right now, the buffer is something like ".\plugins\sound.dll"
 			
 
 			// Attempt to get a file list
 			lnHandle = FindFirstFileA(buffer, &lwfd);
 			if (lnHandle != INVALID_HANDLE_VALUE)
-				ioss_setFindFileStatus(tcPathname, tsFileInfo, &lwfd);	// Copy the file info
+				ioss_setFindFileStatus(tsFileInfo, &lwfd);	// Copy the file info
 
 		}
 
@@ -7447,7 +7507,7 @@ _asm int 3;
 			// Locate
 			llResult = ((FindNextFileA((HANDLE)tnHandle, &lwfd)) ? true : false);
 			if (llResult)
-				ioss_setFindFileStatus(_csu8p((u8*)NULL), tsFileInfo, &lwfd);	// Copy the file info
+				ioss_setFindFileStatus(tsFileInfo, &lwfd);	// Copy the file info
 
 		}
 		// Indicate the success
@@ -7463,9 +7523,26 @@ _asm int 3;
 // Called as the last step to close a previously opened find.
 //
 //////
-	void CALLTYPE oss_fileFindClose(u64 tnHandle)
+	void CALLTYPE oss_fileFindClose(u64 tnHandle, SFindFile* tsFileInfo)
 	{
 		FindClose((HANDLE)tnHandle);
+
+		// Release any allocated datums
+		// Filename
+		if (tsFileInfo->filenameSearched.data._u8 && tsFileInfo->filenameSearched.length != 0)
+			oss_datumDelete(&tsFileInfo->filenameSearched);
+
+		// Pathname
+		if (tsFileInfo->pathnameOfSearch.data._u8 && tsFileInfo->pathnameOfSearch.length != 0)
+			oss_datumDelete(&tsFileInfo->pathnameOfSearch);
+
+		// File
+		if (tsFileInfo->file.data._u8 && tsFileInfo->file.length != 0)
+			oss_datumDelete(&tsFileInfo->file);
+
+		// File2
+		if (tsFileInfo->file2.data._u8 && tsFileInfo->file2.length != 0)
+			oss_datumDelete(&tsFileInfo->file2);
 	}
 
 
@@ -9098,7 +9175,7 @@ _asm nop;
 		lnResult = 0;
 
 		// Locate the indicated thread
-		lt = (_iswSThreads*)oss_searchSEChainByUniqueId(&gseRootForeignThreads, ossData);
+		lt = (_iswSThreads*)oss_SEChain_searchByUniqueId(&gseRootForeignThreads, ossData);
 		while (lt && lt->isViable && !lt->isSuspended)
 		{
 			// Suspend the thread
@@ -9142,7 +9219,7 @@ _asm nop;
 		lnResult = 0;
 
 		// Locate the indicated thread
-		lt = (_iswSThreads*)oss_searchSEChainByUniqueId(&gseRootForeignThreads, ossData);
+		lt = (_iswSThreads*)oss_SEChain_searchByUniqueId(&gseRootForeignThreads, ossData);
 		while (lt && lt->isViable && lt->isSuspended)
 		{
 			// Resume the thread
@@ -9186,7 +9263,7 @@ _asm nop;
 		lnResult = 0;
 
 		// Locate the indicated thread
-		lt = (_iswSThreads*)oss_searchSEChainByUniqueId(&gseRootForeignThreads, ossData);
+		lt = (_iswSThreads*)oss_SEChain_searchByUniqueId(&gseRootForeignThreads, ossData);
 		while (lt && lt->isViable)
 		{
 			// Resume the thread

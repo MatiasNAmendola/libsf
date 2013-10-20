@@ -47,7 +47,14 @@
 // are found matching the plugins known to the vvmoss.
 //
 //////
-	void ioss_loadPlugins(void)
+/////////
+//
+// The VVMOSS contains placeholder functions (in vo_plugins.cpp) which do nothing if the
+// plugin wasn't loaded, but are used to allow any existing application to call those
+// functions so their code does not need changed.
+//
+//////
+	void ioss_loadPlugins(u64 tnDebuggerInterfaceAddress)
 	{
 		u64			lnHandle;
 		bool		llMore;
@@ -58,26 +65,45 @@
 		// Initialize
 		//////
 			memset(&lff, 0, sizeof(lff));
+			oss_datumSet(&lff.pathnameOfSearch, (u8*)".\\plugins\\",	-1, false);
+			oss_datumSet(&lff.filenameSearched, (u8*)"*.dll",			-1, false);
 
 
 		//////////
 		// Get the filenames
 		//////
-			lnHandle = oss_fileFindFirst(_csu8p((cs8*)".\\plugins\\"), _csu8p((cs8*)"*.dll"), &lff);
+			lnHandle = oss_fileFindFirst(&lff);
 			if (lnHandle != -1)
 			{
 				llMore = true;
-				while (llMore && (!gsSoundPlugin.DllInstance))
+				while (llMore)
 				{
-					// Do we still need a plugin
-					if (!gsSoundPlugin.DllInstance)
-						ioss_loadPlugin_sound(&lff);	// See if this is a sound-file plugin
+					do {
+
+						//////////
+						// Sound plugins
+						//////
+							// Do we still need to load the sound plugin?
+							if (!gsSoundPlugin.DllInstance)
+								if (ioss_loadPlugin_sound(&lff, tnDebuggerInterfaceAddress))
+									break;
+	
+
+						//////////
+						// Function plugins
+						//////
+							// See if there are any function plugins that need loaded
+							if (ioss_loadPlugin_function(&lff, tnDebuggerInterfaceAddress))
+								break;
+
 
 //////////
 //
 // TODO: Other plugins will be tested for here
 //
 //////
+							break;
+					} while (1);
 
 					// Get the next file
 					llMore = oss_fileFindNext(lnHandle, &lff);
@@ -85,11 +111,7 @@
 				// When we get here, we're done.
 
 				// Close the handle
-				oss_fileFindClose(lnHandle);
-
-				// Release any allocated memory blocks
-				oss_datumDelete(&lff.file);
-				oss_datumDelete(&lff.file2);
+				oss_fileFindClose(lnHandle, &lff);
 			}
 	}
 
@@ -98,10 +120,12 @@
 
 //////////
 //
-// Called to load the sound plugin if possible
+// Called to load the sound plugin if possible.
+// Note:  Sound plugins are singletons.
+//        Only the first sound plugin found is loaded, and any further sound plugins are ignored.
 //
 //////
-	void ioss_loadPlugin_sound(SFindFile* tff)
+	bool ioss_loadPlugin_sound(SFindFile* tff, u64 tnDebuggerInterfaceAddress)
 	{
 		u64		lnInitialize, lnCreateTone, lnCreateStream, lnSetVolume, lnPlayStart, lnPlayCancel, lnDelete;
 		HMODULE	lnHmod;
@@ -127,10 +151,12 @@
 				lnPlayStart		= (u64)GetProcAddress(lnHmod, cgcOssSoundPlayStart);
 				lnPlayCancel	= (u64)GetProcAddress(lnHmod, cgcOssSoundPlayCancel);
 				lnDelete		= (u64)GetProcAddress(lnHmod, cgcOssSoundDelete);
+
+				// Did we get them all?
 				if (lnInitialize != 0 && lnCreateTone != 0 && lnCreateStream != 0 && lnSetVolume != 0 && lnPlayStart != 0 && lnPlayCancel != 0 && lnDelete != 0)
 				{
 					// We found our plugin
-					gsSoundPlugin.DllInstance		= (u64)lnHmod;
+					gsSoundPlugin.DllInstance				= (u64)lnHmod;
 
 					// Store the interfaces
 					gsSoundPlugin._sound_initialize			= lnInitialize;
@@ -141,13 +167,75 @@
 					gsSoundPlugin._sound_playStart			= lnPlayStart;
 					gsSoundPlugin._sound_deleteHandle		= lnDelete;
 
+					// Ask it to initialize itself
+					oss_soundInitialize(tnDebuggerInterfaceAddress);
+
 					// All done!
-					return;
+					return true;
 				}
 				// If we get her, not found
 				FreeLibrary(lnHmod);
 			}
 		}
+		// If we get here, failure
+		return false;
+	}
+
+
+
+
+//////////
+//
+// Called to load the function plugin if possible
+// Note:  Multiple function plugins can be added.
+//        Each one will be called where it sets itself up and self-registers its published abilities.
+//
+//////
+	bool ioss_loadPlugin_function(SFindFile* tff, u64 tnDebuggerInterfaceAddress)
+	{
+		u64						lnRequestor;
+		HMODULE					lnHmod;
+		_isSInterfacePlugin*	plugin;
+		s8						filename[_MAX_PATH];
+
+
+		// Make sure our environment is sane
+		if (tff)
+		{
+			// Initialize our filename
+			memset(&filename, 0, sizeof(filename));
+			memcpy(&filename, tff->file.data._s8, (u32)tff->file.length);
+
+			// Attempt to open the DLL
+			lnHmod = LoadLibraryA(filename);
+			if (lnHmod)
+			{
+				// Try to locate the functions
+				lnRequestor = (u64)GetProcAddress(lnHmod, cgcOssPluginRequestor);
+
+				// Did we get it?
+				if (lnRequestor != 0)
+				{
+					// We found our plugin
+					plugin = ioss_plugin_register((u64)lnHmod);
+					if (plugin)
+					{
+						// Store the interfaces
+						plugin->_requestor = lnRequestor;
+
+						// Ask this plugin to expost its abilities to the VVMOSS
+						plugin->requestor(tnDebuggerInterfaceAddress, plugin->DllInstance);
+
+						// All done!
+						return true;
+					}
+				}
+				// If we get her, not found
+				FreeLibrary(lnHmod);
+			}
+		}
+		// If we get here, failure
+		return false;
 	}
 
 

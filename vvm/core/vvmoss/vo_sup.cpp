@@ -590,7 +590,7 @@
 		lfc.osHandle	= tnOsHandle;
 		cb._func		= (u64)iioss_signalWindowFocusCallbacksCallback;
 		cb.extra		= (u64)&lfc;
-		oss_searchSEChainByCallback(&gseRootWindows, &cb);
+		oss_SEChain_searchByCallback(&gseRootWindows, &cb);
 
 		// Signal the new window that it has focus (if it was found, and doesn't already have focus)
 		if (lfc.forFocus && !lfc.forFocus->isw.hasFocus)
@@ -1093,7 +1093,7 @@ _asm int 3;
 
 		cb._func	= (u64)iioss_findSOssWindowLLByHwndCallback;
 		cb.extra	= (u64)hwnd;
-		return((_iswSOssWindowLL*)oss_searchSEChainByCallback(&gseRootWindows, &cb));
+		return((_iswSOssWindowLL*)oss_SEChain_searchByCallback(&gseRootWindows, &cb));
 	}
 
 	bool iioss_findSOssWindowLLByHwndCallback(SStartEndCallback* cb)
@@ -1128,7 +1128,7 @@ _asm int 3;
 
 		cb._func	= (u64)iioss_findSOssWindowLLByScreenId;
 		cb.extra	= (u64)tnScreenId;
-		return((_iswSOssWindowLL*)oss_searchSEChainByCallback(&gseRootWindows, &cb));
+		return((_iswSOssWindowLL*)oss_SEChain_searchByCallback(&gseRootWindows, &cb));
 	}
 
 	bool iioss_findSOssWindowLLByScreenId(SStartEndCallback* cb)
@@ -1164,7 +1164,7 @@ _asm int 3;
 		// Try to find it using the callback
 		cb._func	= (u64)&iioss_findSOssWindowByOssWindowIdCallback;
 		cb.extra	= tnOssWindowId;
-		return((_iswSOssWindowLL*)oss_searchSEChainByCallback(&gseRootWindows, &cb));
+		return((_iswSOssWindowLL*)oss_SEChain_searchByCallback(&gseRootWindows, &cb));
 	}
 
 	bool iioss_findSOssWindowByOssWindowIdCallback(SStartEndCallback* cb)
@@ -2255,7 +2255,7 @@ _asm int 3;
 				}
 			}
 		}
-		// Indicate a false set of failure state so we will continue receiving all entries
+		// Not found
 		return(false);
 	}
 
@@ -2771,7 +2771,7 @@ _asm int 3;
 
 		// The timer has fired, updating timers and trigger any hover events
 		cb._func = (u64)iioss_update10msTimersCallback;
-		oss_searchSEChainByCallback(&gseRootWindows, &cb);
+		oss_SEChain_searchByCallback(&gseRootWindows, &cb);
 
 		// All done
 		return 0;
@@ -3924,7 +3924,7 @@ _asm int 3;
 // Called to set the status of the SFindFile
 //
 //////
-	void ioss_setFindFileStatus(csu8p tcPath, SFindFile* tsFileInfo, WIN32_FIND_DATAA* twfd)
+	void ioss_setFindFileStatus(SFindFile* tsFileInfo, WIN32_FIND_DATAA* twfd)
 	{
 		s8 buffer[_MAX_PATH];
 
@@ -3956,13 +3956,17 @@ _asm int 3;
 			//////
 				// Primary filename
 				memset(buffer, 0, sizeof(buffer));
-				if (tcPath._u8) oss_memcpy(buffer, tcPath._s8, oss_strlen(tcPath));
+				if (tsFileInfo->pathnameOfSearch.data._u8)
+					oss_memcpy(buffer, tsFileInfo->pathnameOfSearch.data._s8, tsFileInfo->pathnameOfSearch.length);
+
 				oss_memcpy(buffer + oss_strlen(_csu8p(buffer)), twfd->cFileName, oss_strlen(_csu8p(twfd->cFileName)));
 				oss_datumSet(&tsFileInfo->file, (u8*)buffer, oss_strlen(_csu8p(buffer)), true);
 
 				// Alternate filename
 				memset(buffer, 0, sizeof(buffer));
-				if (tcPath._s8) oss_memcpy(buffer, tcPath._s8, oss_strlen(tcPath));
+				if (tsFileInfo->pathnameOfSearch.data._s8)
+					oss_memcpy(buffer, tsFileInfo->pathnameOfSearch.data._s8, tsFileInfo->pathnameOfSearch.length);
+
 				memcpy(buffer + strlen(buffer), twfd->cAlternateFileName, strlen(twfd->cAlternateFileName));
 				oss_datumSet(&tsFileInfo->file2, (u8*)buffer, oss_strlen(_csu8p(buffer)), true);
 
@@ -4034,7 +4038,7 @@ _asm int 3;
 			// Initialize a buffer for all the of the nodes (we traverse to get a unique node list before deleting them all)
 			//////
 				memset(&nodeList, 0, sizeof(nodeList));
-				oss_allocateAdditionalStartEndMasterSlots(&nodeList, _COMMON_START_END_BIG_BLOCK_SIZE);
+				oss_SEChain_allocateAdditionalMasterSlots(&nodeList, _COMMON_START_END_BIG_BLOCK_SIZE);
 
 
 			//////////
@@ -4120,7 +4124,7 @@ _asm int 3;
 			// Is there enough space?
 			//////
 				if (lnI == nodeList->masterCount)
-					oss_allocateAdditionalStartEndMasterSlots(nodeList, _COMMON_START_END_BIG_BLOCK_SIZE);		// No, allocate more space
+					oss_SEChain_allocateAdditionalMasterSlots(nodeList, _COMMON_START_END_BIG_BLOCK_SIZE);		// No, allocate more space
 
 
 			//////////
@@ -4742,7 +4746,7 @@ continueToNextAttribute:
 			{
 				cb._func	= (u64)iioss_createRegionCallback;
 				cb.extra	= (u64)lr;
-				oss_iterateThroughStartEndForCallback(events, &cb);
+				oss_SEChain_iterateThroughForCallback(events, &cb);
 			}
 		}
 
@@ -4769,7 +4773,7 @@ continueToNextAttribute:
 		// Locate the screen by the indicated canvas ID
 		cb._func	= (u64)iioss_findScreenByActiveCanvasCallback;
 		cb.extra	= canvasId;
-		return((SScreen*)oss_searchSEChainByCallback(&gseRootScreen, &cb));
+		return((SScreen*)oss_SEChain_searchByCallback(&gseRootScreen, &cb));
 	}
 
 	bool iioss_findScreenByActiveCanvasCallback(SStartEndCallback* cb)
@@ -4806,7 +4810,7 @@ continueToNextAttribute:
 		{
 			cb._func	= (u64)iioss_findCanvasCallback;
 			cb.extra	= (u64)tc;
-			return((SCanvasList*)oss_searchSEChainByCallback(&ts->canvasList, &cb));
+			return((SCanvasList*)oss_SEChain_searchByCallback(&ts->canvasList, &cb));
 		}
 
 		// Failure
@@ -4831,7 +4835,7 @@ continueToNextAttribute:
 		{
 			cb._func	= (u64)iioss_findCanvasCallback;
 			cb.extra	= (u64)tcNeedle;
-			return((SCanvasList*)oss_searchSEChainByCallback(&tcHaystack->canvasList, &cb));
+			return((SCanvasList*)oss_SEChain_searchByCallback(&tcHaystack->canvasList, &cb));
 		}
 
 		// Failure
@@ -5935,4 +5939,55 @@ continueToNextAttribute:
 				leNew->_event		= le->_event;
 			}
 		}
+	}
+
+
+
+
+//////////
+//
+// Called to register plugins, or their functions, or to unregister entirely, or their functions
+//
+//////
+	_isSInterfacePlugin* ioss_plugin_register(u64 DllInstance)
+	{
+		_isSInterfacePlugin* plugin;
+
+
+		// Allocate the plugin
+		plugin = (_isSInterfacePlugin*)oss_SEChain_append(&gsRootFunctionPlugins, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(_isSInterfacePlugin), _COMMON_START_END_BLOCK_SIZE, NULL);
+
+		// IF it was allocated, set the dll instance
+		if (plugin)
+			plugin->DllInstance = DllInstance;
+
+		// Indicate our success or failure
+		return(plugin);
+	}
+
+	u64 ioss_plugin_unregister(u64 DllInstance)
+	{
+		// Not currently supported
+		return(-1);
+	}
+
+
+
+
+//////////
+//
+// Callback for searching a plugin by DllInstance id
+//
+//////
+	bool ioss_plugin_registerCallback(SStartEndCallback* cb)
+	{
+		// Make sure the environment is sane
+		if (cb->ptr && cb->extra)
+		{
+			// Is this a match?
+			if (((_isSInterfacePlugin*)cb->ptr)->DllInstance == cb->extra)
+				return(true);	// Yes
+		}
+		// Not found
+		return(false);
 	}

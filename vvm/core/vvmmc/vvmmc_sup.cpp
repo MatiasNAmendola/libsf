@@ -245,7 +245,7 @@
 		{
 			cb._func	= (u64)iivvmmc_searchVariablesByNameCallback;
 			cb.extra	= (u64)tsDatum;
-			return((SVariable*)oss_searchSEChainByCallback(tseVariables, &cb));
+			return((SVariable*)oss_SEChain_searchByCallback(tseVariables, &cb));
 
 		} else {
 			return(NULL);		// None are yet defined
@@ -294,8 +294,8 @@
 			line = (SOssLine*)cb->ptr;
 
 			// Validate any of the line's components or combined components
-			oss_validateStartEnd(&line->comps, 0);
-			oss_validateStartEnd(&line->compsCombined, 0);
+			oss_SEChain_validate(&line->comps, 0);
+			oss_SEChain_validate(&line->compsCombined, 0);
 
 			// If we get here, we're good, had there been an error there would've been _asm int 3 on one of those iValidateStartEnd entries
 			return(true);
@@ -583,7 +583,7 @@
 #pragma message("vvmmc_sup.cpp::ivvmmc_loadSourceFile() contains several validation functions that can be removed in the future.")
 SStartEndCallback cb;
 cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
-oss_validateStartEnd(&lsf->lines, &cb);
+oss_SEChain_validate(&lsf->lines, &cb);
 
 //if (iIsNeedleInHaystack(line->base + line->start + line->whitespace, line->length, "_", 1))
 //	oss_writeSOssLineSequenceCompsToDisk("\\libsf\\vvm\\vasm\\test\\testoutcomps.txt", &lsf->lines);
@@ -595,27 +595,27 @@ oss_validateStartEnd(&lsf->lines, &cb);
 // TODO:  (future enhancement) will need to continually combine items which are related, such as a variable _like_this_14_abc into a single alphanumeric
 					oss_combine2SOssComps			(line, _VVMMC_ICODE_UNDERSCORE,		_VVMMC_ICODE_NUMERIC,		_VVMMC_ICODE_ALPHANUMERIC);
 cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
-oss_validateStartEnd(&lsf->lines, &cb);
+oss_SEChain_validate(&lsf->lines, &cb);
 
 					oss_combine2SOssComps			(line, _VVMMC_ICODE_ALPHA,			_VVMMC_ICODE_UNDERSCORE,	_VVMMC_ICODE_ALPHA);
 cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
-oss_validateStartEnd(&lsf->lines, &cb);
+oss_SEChain_validate(&lsf->lines, &cb);
 
 					oss_combine2SOssComps			(line, _VVMMC_ICODE_UNDERSCORE,		_VVMMC_ICODE_ALPHA,			_VVMMC_ICODE_ALPHA);
 cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
-oss_validateStartEnd(&lsf->lines, &cb);
+oss_SEChain_validate(&lsf->lines, &cb);
 
 					oss_combine2SOssComps			(line, _VVMMC_ICODE_ALPHA,			_VVMMC_ICODE_NUMERIC,		_VVMMC_ICODE_ALPHANUMERIC);
 cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
-oss_validateStartEnd(&lsf->lines, &cb);
+oss_SEChain_validate(&lsf->lines, &cb);
 
 					oss_combine2SOssComps			(line, _VVMMC_ICODE_ALPHANUMERIC,	_VVMMC_ICODE_UNDERSCORE,	_VVMMC_ICODE_ALPHANUMERIC);
 cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
-oss_validateStartEnd(&lsf->lines, &cb);
+oss_SEChain_validate(&lsf->lines, &cb);
 
 					oss_combine3SOssComps			(line, _VVMMC_ICODE_NUMERIC,		_VVMMC_ICODE_PERIOD,		_VVMMC_ICODE_NUMERIC,		_VVMMC_ICODE_NUMERIC);
 cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
-oss_validateStartEnd(&lsf->lines, &cb);
+oss_SEChain_validate(&lsf->lines, &cb);
 
 //if (iIsNeedleInHaystack(line->base + line->start + line->whitespace, line->length, "_", 1))
 //	oss_writeSOssLineSequenceCompsToDisk("\\libsf\\vvm\\vasm\\test\\testoutcomps.txt", &lsf->lines);
@@ -626,15 +626,15 @@ oss_validateStartEnd(&lsf->lines, &cb);
 				//////
 					oss_combineAllBetweenSOssComps	(line, _VVMMC_ICODE_SINGLE_QUOTE,		_VVMMC_ICODE_SINGLE_QUOTED_TEXT);
 cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
-oss_validateStartEnd(&lsf->lines, &cb);
+oss_SEChain_validate(&lsf->lines, &cb);
 
 					oss_combineAllBetweenSOssComps	(line, _VVMMC_ICODE_DOUBLE_QUOTE,		_VVMMC_ICODE_DOUBLE_QUOTED_TEXT);
 cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
-oss_validateStartEnd(&lsf->lines, &cb);
+oss_SEChain_validate(&lsf->lines, &cb);
 
 					oss_combineAllAfterSOssComp		(line, _VVMMC_ICODE_COMMENT);
 cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
-oss_validateStartEnd(&lsf->lines, &cb);
+oss_SEChain_validate(&lsf->lines, &cb);
 
 				//////////
 				// Move to next line

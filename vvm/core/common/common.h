@@ -614,8 +614,12 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 
 	struct SFindFile
 	{
-		SDatum		file;												// The found filename
-		SDatum		file2;												// An alternate name for the file
+		SDatum		filenameSearched;									// The filename being searched for
+		SDatum		pathnameOfSearch;									// The parent path where we looked, such as the ".\plugin\" portion in the name ".\plugin\plugin.dll"
+
+		SDatum		file;												// The found filename (as in "pluginSomething.dll")
+		SDatum		file2;												// An alternate name for the file (as in "PLUGIN~1.DLL")
+
 		u64			size;												// How big is the file?
 		SFileTime	created;											// FileTime of file's creation date
 		SFileTime	accessed;											// FileTime of file's last access date
@@ -804,7 +808,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		union
 		{
 			u64		_func;
-			bool	(*funcBool)	(SStartEndCallback* cb);
+			bool	(*funcBool)	(SStartEndCallback* cb);	// This callback should return false to continue searching, or true when the item is found
 			void	(*funcVoid)	(SStartEndCallback* cb);
 			//////
 			// Uses the following format for the callback:
@@ -814,7 +818,11 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 
 		// Data items for this callback
 		void*	ptr;
-		u64		extra;
+		union {
+			u64		extra;
+			u64		extra1;
+		};
+		u64		extra2;
 	};
 
 	// The values here have been changed into VVMOSS_* values, which are common throughout the system externally.

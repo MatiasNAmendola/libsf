@@ -198,6 +198,10 @@
 				RelativePath=".\wideedit.h"
 				>
 			</File>
+			<File
+				RelativePath=".\wideedit_const.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

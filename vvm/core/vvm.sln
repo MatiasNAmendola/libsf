@@ -21,7 +21,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "whiteboxenu", "..\apps\whit
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vvmt_core", "vvmtests\vvmt_core\vvmt_core.vcproj", "{2A9A8478-654D-49A6-9940-24FF5DE94BE0}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "wideedit", "plugins\wideedit\wideedit\wideedit.vcproj", "{672982BC-73C8-4EF1-B9B5-B6FDDE566293}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vvm_plugin_wideedit", "plugins\wideedit\wideedit.vcproj", "{672982BC-73C8-4EF1-B9B5-B6FDDE566293}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

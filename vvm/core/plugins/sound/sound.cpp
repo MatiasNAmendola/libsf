@@ -161,7 +161,7 @@
 			lnLength = length / sizeof(Sint16);
 			cb._func	= (u64)&isound_requestStreams;
 			cb.extra	= lnLength;
-			oss_iterateThroughStartEndForCallback(&gseRootSounds, &cb);
+			oss_SEChain_iterateThroughForCallback(&gseRootSounds, &cb);
 			// Once we get here, all streams have been populated
 
 			// Iterate through each channel merging them together
@@ -567,7 +567,7 @@
 
 
 		// Search for the indicated handle
-		lss = (_isSSound*)oss_searchSEChainByUniqueId(&gseRootSounds, tnHandle);
+		lss = (_isSSound*)oss_SEChain_searchByUniqueId(&gseRootSounds, tnHandle);
 		if (lss && lss->samples)
 		{
 			// They are just updating the volume
@@ -597,7 +597,7 @@
 
 
 		// Search for the indicated handle
-		lss = (_isSSound*)oss_searchSEChainByUniqueId(&gseRootSounds, tnHandle);
+		lss = (_isSSound*)oss_SEChain_searchByUniqueId(&gseRootSounds, tnHandle);
 		if (lss && lss->samples)
 		{
 			// Turn it on (even if it's already on)
@@ -642,7 +642,7 @@
 
 
 		// Search for the indicated handle
-		lss = (_isSSound*)oss_searchSEChainByUniqueId(&gseRootSounds, tnHandle);
+		lss = (_isSSound*)oss_SEChain_searchByUniqueId(&gseRootSounds, tnHandle);
 		if (lss && lss->samples)
 		{
 			// Turn it on (even if it's already on)
@@ -671,7 +671,7 @@
 
 
 		// Search for the indicated handle
-		lss = (_isSSound*)oss_searchSEChainByUniqueId(&gseRootSounds, tnHandle);
+		lss = (_isSSound*)oss_SEChain_searchByUniqueId(&gseRootSounds, tnHandle);
 		if (lss)
 		{
 			// Turn it off, and add it to the delete queue
@@ -680,7 +680,7 @@
 
 			// We need to see if this is the last item playing, and if so, then turn off SDL
 			cb._func	= (u64)&isound_DeleteValidate;
-			lssPlaying	= (_isSSound*)oss_searchSEChainByCallback(&gseRootSounds, &cb);
+			lssPlaying	= (_isSSound*)oss_SEChain_searchByCallback(&gseRootSounds, &cb);
 
 			// Is anything else still playing?
 			if (!lssPlaying)

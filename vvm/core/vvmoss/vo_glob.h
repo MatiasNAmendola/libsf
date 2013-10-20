@@ -66,9 +66,9 @@
 	u64					gsemRegionAccess		= 0;					// Master region inventory
 
 	// The root objects
-	SStartEnd	gseRootScreen					= { NULL, NULL };		// Master screen list
-	SStartEnd	gseRootCanvas					= { NULL, NULL };		// Master canvas list
-	SStartEnd	gseRootRegion					= { NULL, NULL };		// Master region list
+	SStartEnd	gseRootScreen					= { NULL, NULL, NULL, 0 };		// Master screen list
+	SStartEnd	gseRootCanvas					= { NULL, NULL, NULL, 0 };		// Master canvas list
+	SStartEnd	gseRootRegion					= { NULL, NULL, NULL, 0 };		// Master region list
 
 	// BXML last error
 	u64					gnLastErrorOffset		= -1;					// Initially indicate no prior error offset
@@ -82,11 +82,11 @@
 											};
 
 	// Start/end structs
-	SStartEnd			gseRootWindows			= { NULL, NULL };		// Initially, no windows are defined
-	SStartEnd			gseRootFonts			= { NULL, NULL };		// Initially, no fonts are defined
-	SStartEnd			gseRootForeignThreads	= { NULL, NULL };		// Initially, no foreign threads are defined
-	SStartEnd			gseRootForeignFiles		= { NULL, NULL };		// Files that have been requested open with oss_sharedAsciiOpenFile() or oss_sharedUnicodeOpenFile()
-	SStartEnd			gseRootMemoryBlocks		= { NULL, NULL };		// Any memory blocks that need to persist beyond termination of the VMM
+	SStartEnd			gseRootWindows			= { NULL, NULL, NULL, 0 };		// Initially, no windows are defined
+	SStartEnd			gseRootFonts			= { NULL, NULL, NULL, 0 };		// Initially, no fonts are defined
+	SStartEnd			gseRootForeignThreads	= { NULL, NULL, NULL, 0 };		// Initially, no foreign threads are defined
+	SStartEnd			gseRootForeignFiles		= { NULL, NULL, NULL, 0 };		// Files that have been requested open with oss_sharedAsciiOpenFile() or oss_sharedUnicodeOpenFile()
+	SStartEnd			gseRootMemoryBlocks		= { NULL, NULL, NULL, 0 };		// Any memory blocks that need to persist beyond termination of the VMM
 
 	// Separate debugger instances can request unique color schemes if they want to visually identify themselves
 	u32					gnDebuggerNumber		= 0;					// Current color index for loaded debugger
@@ -112,3 +112,9 @@
 // Data specifically relative to the sound plugin
 //////
 	_isSSoundPlugin		gsSoundPlugin;
+
+
+//////////
+// Data specifically related to the function plugins
+//////
+	SStartEnd			gsRootFunctionPlugins	= { NULL, NULL, NULL, 0 };		// All plugins are here

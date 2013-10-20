@@ -414,12 +414,12 @@
 				SStartEndCallback cb;
 				cb._func = (u64)&iivvmt_testBxml_computeSha1CallbackBxml;
 				cb.extra = (u64)&context[0];
-				oss_iterateThroughStartEndForCallback(&bxmlFinds, &cb);
+				oss_SEChain_iterateThroughForCallback(&bxmlFinds, &cb);
 				oss_SEChain_delete(&bxmlFinds, 0, 0, false);
 
 				// And continue by computing SHA-1 of bxmla attribute name finds on top of the just computed SHA-1 from bxml node finds
 				cb._func = (u64)&iivvmt_testBxml_computeSha1CallbackBxmla;
-				oss_iterateThroughStartEndForCallback(&bxmlaFinds, &cb);
+				oss_SEChain_iterateThroughForCallback(&bxmlaFinds, &cb);
 				oss_SEChain_delete(&bxmlaFinds, 0, 0, false);
 
 				// Determine the SHA-1 based on the finds
@@ -443,7 +443,7 @@
 
 				// Compute SHA-1 of bxmla attribute data finds
 				cb._func = (u64)&iivvmt_testBxml_computeSha1CallbackBxmlaData;
-				oss_iterateThroughStartEndForCallback(&bxmlDataFinds, &cb);
+				oss_SEChain_iterateThroughForCallback(&bxmlDataFinds, &cb);
 				oss_SEChain_delete(&bxmlDataFinds,	0, 0, false);
 
 				// Determine the SHA-1 based on the finds

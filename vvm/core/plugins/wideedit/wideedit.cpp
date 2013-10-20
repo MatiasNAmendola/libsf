@@ -51,6 +51,7 @@
 #include <windows.h>
 #include "\libsf\vvm\core\common\common.h"
 #include "\libsf\vvm\core\common\common_vvmoss.h"
+#include "wideedit_const.h"
 #include "wideedit.h"
 
 
@@ -60,13 +61,14 @@
 // Global variables and constants
 //////
 	u32				gnNextUniqueId				= 0;				// Unique IDs assigned
+	u64				gnEditorFunctionId			= 0;				// The returned unique id for this editor function
 
 
 
 //////////
 // Forward declarations
 //////
-	void			iwe_sample					(void);
+	u64 CALLTYPE	iwe_editorCallback			(u64 tnSubfunction, u64 extra, u64 extra2);
 
 
 
@@ -76,10 +78,9 @@
 // Dll entry point
 //
 //////
-	BOOL APIENTRY DllMain( HMODULE hModule,
-						   DWORD  ul_reason_for_call,
-						   LPVOID lpReserved
-						 )
+	BOOL APIENTRY DllMain( HMODULE	hModule,
+						   DWORD	ul_reason_for_call,
+						   LPVOID	lpReserved	)
 	{
 		switch (ul_reason_for_call)
 		{
@@ -106,7 +107,7 @@
 // Called one time at startup to initialize the SDL library to handle the sound requests.
 //
 //////
-	void CALLTYPE oss_pluginRequestor(u64 tnDebuggerInterfaceAddress)
+	void CALLTYPE vvmoss_plugin_requestor(u64 tnDebuggerInterfaceAddress, u64 tnInstanceId)
 	{
 		//////////
 		// Retrieve the necessary callbacks into the VVMOSS itself
@@ -115,6 +116,14 @@
 
 
 		//////////
-		// Broadcast to the VVM exactly what it is we offer
+		// Tell the VVM exactly what it is we offer
 		//////
+			oss_plugin_registerFunction(tnInstanceId, _VVMOSS_PLUGIN_EDITOR, cgfVersion, cgnBuild, (u8*)cgcWideEditVersion, (u64)iwe_editorCallback);
+	}
+
+
+	// Callback for this function
+	u64 CALLTYPE iwe_editorCallback(u64 tnSubfunction, u64 extra, u64 extra2)
+	{
+		return(-1);
 	}

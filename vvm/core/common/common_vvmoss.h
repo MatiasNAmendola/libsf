@@ -42,41 +42,7 @@
 
 
 
-//////////
-//
-// Constants used by the VVMOSS.
-//
-//////
-	const u32		_VVMOSS_CASK_PIPS0										= 0;		// No pips, no coloring
-	const u32		_VVMOSS_CASK_PIPS1										= 1;		// One vertical pip, uses pip1 coloring
-	const u32		_VVMOSS_CASK_PIPS2										= 2;		// Two vertical pips, uses pip1 and pip2 coloring
-	const u32		_VVMOSS_CASK_PIPS3										= 3;		// Three vertical pips, uses pip1, pip2 and pip3 coloring
-
-	const u32		_VVMOSS_CASK_COLOR_ORANGE								= 1;		// Orange coloring
-	const u32		_VVMOSS_CASK_COLOR_RED									= 2;		// Red coloring
-	const u32		_VVMOSS_CASK_COLOR_BLUE									= 3;		// Blue coloring
-	const u32		_VVMOSS_CASK_COLOR_PURPLE								= 4;		// Purple coloring
-	const u32		_VVMOSS_CASK_COLOR_CYAN									= 5;		// Cyan coloring
-	const u32		_VVMOSS_CASK_COLOR_GREEN								= 6;		// Green coloring
-	const u32		_VVMOSS_CASK_COLOR_YELLOW								= 7;		// Yellow coloring
-	const u32		_VVMOSS_CASK_COLOR_GRAY									= 8;		// Gray coloring
-	const u32		_VVMOSS_CASK_COLOR_WHITE								= 9;		// White coloring
-	const u32		_VVMOSS_CASK_COLOR_BLACK								= 10;		// Black coloring
-
-	const u32		_VVMOSS_CASK_STYLE_ROUND								= 0x10;		// (|cask|)
-	const u32		_VVMOSS_CASK_STYLE_SQUARE								= 0x20;		// [|cask|]
-	const u32		_VVMOSS_CASK_STYLE_DIAMOND								= 0x30;		// <|cask|>
-
-	const u32		_VVMOSS_CASK_STATE_CLOSED								= 0x100;	// ()
-	const u32		_VVMOSS_CASK_STATE_MINIMAL								= 0x200;	// (|)
-	const u32		_VVMOSS_CASK_STATE_TEXT									= 0x300;	// (|text|)
-	const u32		_VVMOSS_CASK_STATE_EXTENDED_TEXT						= 0x400;	// (|=|text|=|) with optional text on left and right sides
-
-	const u32		_VVMOSS_CASK_TYPE_STANDARD								= 0x1000;	// A cask indicated by the type on both sides
-	const u32		_VVMOSS_CASK_TYPE_ENCOMPASSING_RECTANGLE				= 0x2000;	// A semi-round cask which encompasses a rectangle which can be populated with text
-	const u32		_VVMOSS_CASK_TYPE_UP_RECTANGLE							= 0x3000;	// The part which extends up and right from a cask
-	const u32		_VVMOSS_CASK_TYPE_DOWN_RECTANGLE						= 0x4000;	// The part which extends down and left from a cask
-
+#include "common_vvmoss_const.h"
 
 
 
@@ -95,6 +61,9 @@
 	const s8		cgcOssGetVersion[]										= "oss_getVersion";
 	const s8		cgcOssCreateMessageWindow[]								= "oss_createMessageWindow";
 	const s8		cgcOssCreateVisibleWindow[]								= "oss_createVisibleWindow";
+
+	const s8		cgcOssPluginRegisterFunction[]							= "oss_plugin_registerFunction";
+	const s8		cgcOssPluginUnregisterFunction[]						= "oss_plugin_unregisterFunction";
 
 	const s8		cgcOssGetSystemInfo[]									= "oss_getSystemInfo";
 	const s8		cgcOssSleep[]											= "oss_sleep";
@@ -274,11 +243,12 @@
 	const s8		cgcOssSEChainDeleteFrom[]								= "oss_SEChain_deleteFrom";
 	const s8		cgcOssSEChainDeleteFromAfterCallback[]					= "oss_SEChain_deleteFromAfterCallback";
 
-	const s8		cgcOssAllocateAdditionalStartEndMasterSlots[]			= "oss_allocateAdditionalStartEndMasterSlots";
-	const s8		cgcOssSearchSEChainByUniqueId[]							= "oss_searchSEChainByUniqueId";
-	const s8		cgcOssSearchSEChainByCallback[]							= "oss_searchSEChainByCallback";
-	const s8		cgcOssIterateThroughStartEndForCallback[]				= "oss_iterateThroughStartEndForCallback";
-	const s8		cgcOssValidateStartEnd[]								= "oss_validateStartEnd";
+	const s8		cgcOssSEChainAllocateAdditionalMasterSlots[]			= "oss_SEChain_allocateAdditionalMasterSlots";
+	const s8		cgcOssSEChainSearchByUniqueId[]							= "oss_SEChain_searchByUniqueId";
+	const s8		cgcOssSEChainSearchByCallback[]							= "oss_SEChain_searchByCallback";
+	const s8		cgcOssSEChainIterateThroughForCallback[]				= "oss_SEChain_iterateThroughForCallback";
+	const s8		cgcOssSEChainValidate[]									= "oss_SEChain_validate";
+	
 	const s8		cgcOssSwapEndian[]										= "oss_swapEndian";
 	const s8		cgcOssRGA2BGRA[]										= "oss_RGBA2BGRA";
 	const s8		cgcOssAllocateAndNull[]									= "oss_allocateAndNull";
@@ -421,6 +391,15 @@
 	const s8*		(CALLTYPE *oss_getVersion)								(void);
 	bool			(CALLTYPE *oss_createMessageWindow)						(void);
 	u64				(CALLTYPE *oss_createVisibleWindow)						(u64 tisw, u64 tnScreenId);
+
+
+//////////
+//
+// Support for plugins
+//
+//////
+	u64				(CALLTYPE *oss_plugin_registerFunction)					(u64 tnInstanceId, u64 tnFunction, f32 tfVersion, u32 tnBuild, const u8* tcMetaName, u64 tnFunc);
+	u64				(CALLTYPE *oss_plugin_unregisterFunction)				(u64 tnInstanceId, u64 tnFunction);
 
 
 //////////
@@ -682,11 +661,12 @@
 		void			(CALLTYPE *oss_SEChain_deleteFrom)					(SStartEnd* ptrSE, void* ptrDel, bool tlDeletePointers);
 		bool			(CALLTYPE *oss_SEChain_deleteFromAfterCallback)		(SStartEnd* ptrSE, bool tlDeletePointers, SStartEndCallback* cb);
 
-		bool			(CALLTYPE *oss_allocateAdditionalStartEndMasterSlots)(SStartEnd* ptrSE, u32 tnBlockSize);
-		void*			(CALLTYPE *oss_searchSEChainByUniqueId)				(SStartEnd* ptrSE, u64 tnUniqueId);
-		void*			(CALLTYPE *oss_searchSEChainByCallback)				(SStartEnd* ptrSE, SStartEndCallback* cb);
-		void			(CALLTYPE *oss_iterateThroughStartEndForCallback)	(SStartEnd* ptrSE, SStartEndCallback* cb);
-		void			(CALLTYPE *oss_validateStartEnd)					(SStartEnd* ptrSE, SStartEndCallback* cb);
+		bool			(CALLTYPE *oss_SEChain_allocateAdditionalMasterSlots)(SStartEnd* ptrSE, u32 tnBlockSize);
+		void*			(CALLTYPE *oss_SEChain_searchByUniqueId)			(SStartEnd* ptrSE, u64 tnUniqueId);
+		void*			(CALLTYPE *oss_SEChain_searchByCallback)			(SStartEnd* ptrSE, SStartEndCallback* cb);
+		void			(CALLTYPE *oss_SEChain_iterateThroughForCallback)	(SStartEnd* ptrSE, SStartEndCallback* cb);
+		void			(CALLTYPE *oss_SEChain_validate)					(SStartEnd* ptrSE, SStartEndCallback* cb);
+
 		u32				(CALLTYPE *oss_swapEndian)							(u32 tnValue);
 		u32				(CALLTYPE *oss_RGBA2BGRA)							(u32 tnColor);
 		void*			(CALLTYPE *oss_allocateAndNull)						(u32 tnSize, bool tnInitToZeros);
@@ -701,9 +681,9 @@
 // Find files
 //
 //////////
-		u64				(CALLTYPE *oss_fileFindFirst)						(csu8p tcPathname, csu8p tcFilenameTemplate, SFindFile* tsFileInfo);
+		u64				(CALLTYPE *oss_fileFindFirst)						(SFindFile* tsFileInfo);
 		bool			(CALLTYPE *oss_fileFindNext)						(u64 tnHandle, SFindFile* tsFileInfo);
-		void			(CALLTYPE *oss_fileFindClose)						(u64 tnHandle);
+		void			(CALLTYPE *oss_fileFindClose)						(u64 tnHandle, SFindFile* tsFileInfo);
 
 
 //////////
@@ -876,6 +856,9 @@
 		(void *)&oss_getVersion,											(void *)cgcOssGetVersion,
 		(void *)&oss_createMessageWindow,									(void *)cgcOssCreateMessageWindow,
 		(void *)&oss_createVisibleWindow,									(void *)cgcOssCreateVisibleWindow,
+
+		(void *)&oss_plugin_registerFunction,								(void *)cgcOssPluginRegisterFunction,
+		(void *)&oss_plugin_unregisterFunction,								(void *)cgcOssPluginUnregisterFunction,
 
 		(void *)&oss_getSystemInfo,											(void *)cgcOssGetSystemInfo,
 		(void *)&oss_sleep,													(void *)cgcOssSleep,
@@ -1064,11 +1047,12 @@
 		(void*)&oss_SEChain_deleteFrom,										(void*)cgcOssSEChainDeleteFrom,
 		(void*)&oss_SEChain_deleteFromAfterCallback,						(void*)cgcOssSEChainDeleteFromAfterCallback,
 
-		(void*)&oss_allocateAdditionalStartEndMasterSlots,					(void*)cgcOssAllocateAdditionalStartEndMasterSlots,
-		(void*)&oss_searchSEChainByUniqueId,								(void*)cgcOssSearchSEChainByUniqueId,
-		(void*)&oss_searchSEChainByCallback,								(void*)cgcOssSearchSEChainByCallback,
-		(void*)&oss_iterateThroughStartEndForCallback,						(void*)cgcOssIterateThroughStartEndForCallback,
-		(void*)&oss_validateStartEnd,										(void*)cgcOssValidateStartEnd,
+		(void*)&oss_SEChain_allocateAdditionalMasterSlots,					(void*)cgcOssSEChainAllocateAdditionalMasterSlots,
+		(void*)&oss_SEChain_searchByUniqueId,								(void*)cgcOssSEChainSearchByUniqueId,
+		(void*)&oss_SEChain_searchByCallback,								(void*)cgcOssSEChainSearchByCallback,
+		(void*)&oss_SEChain_iterateThroughForCallback,						(void*)cgcOssSEChainIterateThroughForCallback,
+		(void*)&oss_SEChain_validate,										(void*)cgcOssSEChainValidate,
+
 		(void*)&oss_swapEndian,												(void*)cgcOssSwapEndian,
 		(void*)&oss_RGBA2BGRA,												(void*)cgcOssRGA2BGRA,
 		(void*)&oss_allocateAndNull,										(void*)cgcOssAllocateAndNull,

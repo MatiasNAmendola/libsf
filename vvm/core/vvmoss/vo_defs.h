@@ -55,6 +55,13 @@
 
 
 //////////
+// Plugin callbacks
+//////
+	u64 CALLTYPE			oss_plugin_registerFunction						(u64 tnInstanceId, u64 tnFunction, f32 tfVersion, u32 tnBuild, const u8* tcMetaName, u64 tnFunc);
+	u64 CALLTYPE			oss_plugin_unregisterFunction					(u64 tnInstanceId, u64 tnFunction);
+
+
+//////////
 //
 // Basic system functions
 //
@@ -307,11 +314,12 @@
 		void CALLTYPE			oss_SEChain_deleteFrom						(SStartEnd* ptrSE, void* ptrDel, bool tlDeletePointers);
 		bool CALLTYPE			oss_SEChain_deleteFromAfterCallback			(SStartEnd* ptrSE, bool tlDeletePointers, SStartEndCallback* cb);
 
-		bool CALLTYPE			oss_allocateAdditionalStartEndMasterSlots	(SStartEnd* ptrSE, u32 tnBlockSize);
-		void* CALLTYPE			oss_searchSEChainByUniqueId					(SStartEnd* ptrSE, u64 tnUniqueId);
-		void* CALLTYPE			oss_searchSEChainByCallback					(SStartEnd* ptrSE, SStartEndCallback* cb);
-		void CALLTYPE			oss_iterateThroughStartEndForCallback		(SStartEnd* ptrSE, SStartEndCallback* cb);
-		void CALLTYPE			oss_validateStartEnd						(SStartEnd* ptrSE, SStartEndCallback* cb);
+		bool CALLTYPE			oss_SEChain_allocateAdditionalMasterSlots	(SStartEnd* ptrSE, u32 tnBlockSize);
+		void* CALLTYPE			oss_SEChain_searchByUniqueId				(SStartEnd* ptrSE, u64 tnUniqueId);
+		void* CALLTYPE			oss_SEChain_searchByCallback				(SStartEnd* ptrSE, SStartEndCallback* cb);
+		void CALLTYPE			oss_SEChain_iterateThroughForCallback		(SStartEnd* ptrSE, SStartEndCallback* cb);
+		void CALLTYPE			oss_SEChain_validate						(SStartEnd* ptrSE, SStartEndCallback* cb);
+
 		u32 CALLTYPE			oss_swapEndian								(u32 tnValue);
 		u32 CALLTYPE			oss_RGBA2BGRA								(u32 tnColor);
 		void* CALLTYPE			oss_allocateAndNull							(u32 tnSize, bool tnInitToZeros);
@@ -326,9 +334,9 @@
 // Find files
 //
 //////////
-		u64 CALLTYPE			oss_fileFindFirst							(csu8p tcPathname, csu8p tcFilenameTemplate, SFindFile* tsFileInfo);
+		u64 CALLTYPE			oss_fileFindFirst							(SFindFile* tsFileInfo);
 		bool CALLTYPE			oss_fileFindNext							(u64 tnHandle, SFindFile* tsFileInfo);
-		void CALLTYPE			oss_fileFindClose							(u64 tnHandle);
+		void CALLTYPE			oss_fileFindClose							(u64 tnHandle, SFindFile* tsFileInfo);
 
 
 //////////
@@ -573,7 +581,7 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	void					iioss_getSpannedPixelColors8					(_isSBitmapProcess* bp);
 	void					iioss_getSpannedPixelColors9					(_isSBitmapProcess* bp);
 	u32						ioss_getIntegersBetween							(f32 p1, f32 p2);
-	void					ioss_setFindFileStatus							(csu8p tcPath, SFindFile* tsFileInfo, WIN32_FIND_DATAA* twfd);
+	void					ioss_setFindFileStatus							(SFindFile* tsFileInfo, WIN32_FIND_DATAA* twfd);
 	void					ioss_convertFileTimeToSDateTime					(SFileTime* tsDateTime, FILETIME* tsFiletime);
 
 	void					ioss_ll4_deleteChainAllNodes					(SLL4Callback* cb, SLL4* root);
@@ -618,4 +626,14 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	void*					ioss_SEChain_appendOrPrependExisting			(SStartEnd* ptrSE, SLL* ptrExisting, u32 tnBlockSizeIfNewBlockNeeded, bool tlPrepend, bool* tlResult);
 	void					ioss_SEChain_appendMasterList					(SStartEnd* ptrSE, SMasterList* ptrNew, u32 tnHint, u32 tnBlockSizeIfNewBlockNeeded);
 	void					ioss_SEChain_freeUpSlot							(SStartEnd* ptrSE, u32 tnSlot, u32 tnBlockSizeIfNewBlockNeeded);
-	void					ioss_deleteFromSEChainMasterList			(SStartEnd* ptrSE, void* ptrDel);
+	void					ioss_deleteFromSEChainMasterList				(SStartEnd* ptrSE, void* ptrDel);
+
+
+//////////
+//
+// Support for plugins
+//
+//////
+	_isSInterfacePlugin*	ioss_plugin_register							(u64 DllInstance);
+	u64						ioss_plugin_unregister							(u64 DllInstance);
+	bool					ioss_plugin_registerCallback					(SStartEndCallback* cb);

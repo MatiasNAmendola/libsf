@@ -9,6 +9,9 @@ EXPORTS
 	oss_createMessageWindow
 	oss_createVisibleWindow
 	
+	oss_plugin_registerFunction
+	oss_plugin_unregisterFunction
+	
 	oss_getSystemInfo
 	oss_sleep
 	oss_storeDateTime
@@ -72,7 +75,7 @@ EXPORTS
 	oss_requestSystemFont
 	oss_requestSystemBitmap
 	oss_findSystemFontByHandle
-
+	
 	oss_createScreenTemplate
 	oss_getScreenDimensions
 	oss_setFocus
@@ -204,11 +207,11 @@ EXPORTS
 	oss_SEChain_deleteFrom
 	oss_SEChain_deleteFromAfterCallback
 
-	oss_allocateAdditionalStartEndMasterSlots
-	oss_searchSEChainByUniqueId
-	oss_searchSEChainByCallback
-	oss_iterateThroughStartEndForCallback
-	oss_validateStartEnd
+	oss_SEChain_allocateAdditionalMasterSlots
+	oss_SEChain_searchByUniqueId
+	oss_SEChain_searchByCallback
+	oss_SEChain_iterateThroughForCallback
+	oss_SEChain_validate
 	oss_swapEndian
 	oss_RGBA2BGRA
 	oss_allocateAndNull

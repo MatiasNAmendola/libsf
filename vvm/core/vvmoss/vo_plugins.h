@@ -49,77 +49,88 @@
 	//////////
 	// Structures
 	//////
+		// For sound plugins
 		struct _isSSoundPlugin
 		{
-			u64 DllInstance;
+			u64			DllInstance;
+
+			union {
+				u64		_sound_initialize;
+				u64		(CALLTYPE *sound_initialize)		(u64 tnDebuggerInterfaceAddress);
+			};
+
+			union {
+				u64		_sound_createTone;
+				u64		(CALLTYPE *sound_createTone)		(f32 tfHertz1, f32 tfHertz2, f32 tfHertz3, f32 tfHertz4, u32 tnDurationMilliseconds);
+			};
+
+			union {
+				u64		_sound_createStream;
+				u64		(CALLTYPE *sound_createStream)		(u32 tnSamplesPerSecond, u64 tnSoundFillerCallbackFunction);
+			};
+
+			union {
+				u64		_sound_setVolume;
+				u64		(CALLTYPE *sound_setVolume)			(u64 tnHandle, f32 tfVolume);
+			};
+
+			union {
+				u64		_sound_playStart;
+				u64		(CALLTYPE *sound_playStart)			(u64 tnHandle, f32 tfVolume);
+			};
+
+			union {
+				u64		_sound_playCancel;
+				u64		(CALLTYPE *sound_playCancel)		(u64 tnHandle);
+			};
+
+			union {
+				u64		_sound_deleteHandle;
+				u64		(CALLTYPE *sound_deleteHandle)		(u64 tnHandle);
+			};
+		};
+
+
+		// For user interface plugins
+		struct _isSInterfaceFunction
+		{
+			bool		available;						// Has this function been specified by this plugin?
+
+			// Callback for this function
+			union {
+				u64		_func;
+				u64		(CALLTYPE *func)				(u64 tnSubfunction, u64 extra, u64 extra2);
+			};
+
+			f32			version;						// What is the version, as in "999.999" maximum (3.3).
+			u32			build;							// Build number within a specified version
+			SDatum		identifier;						// Visual name for display purposes
+		};
+
+		struct _isSInterfacePlugin
+		{
+			u64			DllInstance;
 
 
 			//////////
-			// initialize
+			// Primary interface callbacks
 			//////
 				union {
-					u64		_sound_initialize;
-					u64		(CALLTYPE *sound_initialize)		(u64 tnDebuggerInterfaceAddress);
+					u64		_requestor;
+					u64		(CALLTYPE *requestor)				(u64 tnDebuggerInterfaceAddress, u64 tnInstanceId);
 				};
 
 
 			//////////
-			// createTone
+			// Each function that is exposed by this plugin is available here
 			//////
-				union {
-					u64		_sound_createTone;
-					u64		(CALLTYPE *sound_createTone)		(f32 tfHertz1, f32 tfHertz2, f32 tfHertz3, f32 tfHertz4, u32 tnDurationMilliseconds);
-				};
-
-
-			//////////
-			// createStream
-			//////
-				union {
-					u64		_sound_createStream;
-					u64		(CALLTYPE *sound_createStream)		(u32 tnSamplesPerSecond, u64 tnSoundFillerCallbackFunction);
-				};
-
-
-			//////////
-			// setVolume
-			//////
-				union {
-					u64		_sound_setVolume;
-					u64		(CALLTYPE *sound_setVolume)			(u64 tnHandle, f32 tfVolume);
-				};
-
-
-			//////////
-			// playStart
-			//////
-				union {
-					u64		_sound_playStart;
-					u64		(CALLTYPE *sound_playStart)			(u64 tnHandle, f32 tfVolume);
-				};
-
-
-			//////////
-			// playCancel
-			//////
-				union {
-					u64		_sound_playCancel;
-					u64		(CALLTYPE *sound_playCancel)		(u64 tnHandle);
-				};
-
-
-			//////////
-			// delete
-			//////
-				union {
-					u64		_sound_deleteHandle;
-					u64		(CALLTYPE *sound_deleteHandle)		(u64 tnHandle);
-				};
+				_isSInterfaceFunction		editor;			// See _VVMOSS_PLUGIN_EDITOR
 		};
 
 
 	//////////
 	// vo_plugins.cpp
 	//////
-		void					ioss_loadPlugins								(void);
-		void					ioss_loadPlugin_sound							(SFindFile* tff);
+		void					ioss_loadPlugins								(u64 tnDebuggerInterfaceAddress);
+		bool					ioss_loadPlugin_sound							(SFindFile* tff, u64 tnDebuggerInterfaceAddress);
+		bool					ioss_loadPlugin_function						(SFindFile* tff, u64 tnDebuggerInterfaceAddress);

@@ -92,6 +92,8 @@
 		// Initialize
 		//////
 			memset(&lff, 0, sizeof(lff));
+			oss_datumSet(&lff.pathnameOfSearch, tcDirectory._u8,	-1, false);
+			oss_datumSet(&lff.filenameSearched, tcFilePattern._u8,	-1, false);
 			lnExclusionListLength	= (u32)oss_strlen(tcExclusionList);
 			llCumulativeResult		= true;
 
@@ -99,7 +101,7 @@
 		//////////
 		// Attempt to load the pattern
 		//////
-			lnHandleFind = oss_fileFindFirst(tcDirectory, tcFilePattern, &lff);
+			lnHandleFind = oss_fileFindFirst(&lff);
 			if (lnHandleFind != -1)
 			{
 				llMore = true;
@@ -120,11 +122,7 @@
 				// When we get here, we're done.
 
 				// Close the handle
-				oss_fileFindClose(lnHandleFind);
-
-				// Release any allocated memory blocks
-				oss_datumDelete(&lff.file);
-				oss_datumDelete(&lff.file2);
+				oss_fileFindClose(lnHandleFind, &lff);
 			}
 
 

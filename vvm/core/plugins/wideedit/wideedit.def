@@ -1,0 +1,5 @@
+LIBRARY	"wideedit"
+
+EXPORTS
+
+	vvmoss_plugin_requestor

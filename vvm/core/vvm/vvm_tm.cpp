@@ -69,7 +69,7 @@
 		//////////
 		// For each core, create a thread control structure slot
 		//////
-			llResult = oss_allocateAdditionalStartEndMasterSlots(&gsVvm.gseRootThreadMizer, gsVvmSysInfo.cores);
+			llResult = oss_SEChain_allocateAdditionalMasterSlots(&gsVvm.gseRootThreadMizer, gsVvmSysInfo.cores);
 
 
 		// Enter a loop (for breaking out of)

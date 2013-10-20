@@ -871,7 +871,7 @@ _asm nop;
 					// Iterate through each attribute, appending them as we go
 					cb._func	= (u64)&iibxml_saveNodeCallback;
 					cb.extra	= (u64)(void*)build;
-					oss_iterateThroughStartEndForCallback(&bxml->_attributes, &cb);
+					oss_SEChain_iterateThroughForCallback(&bxml->_attributes, &cb);
 				}
 
 				// Add the closer for this tag
@@ -1334,7 +1334,7 @@ _asm nop;
 			// Iterate through each attribute copying them out
 			cb._func	= (u64)&iibxml_nodeCopyAttributesCallback;
 			cb.extra	= (u64)(void*)&params;
-			oss_iterateThroughStartEndForCallback(&bxmlSrc->_attributes, &cb);
+			oss_SEChain_iterateThroughForCallback(&bxmlSrc->_attributes, &cb);
 
 			// Update the result if we failed
 			if (tlResult && !*params.tlResult)
@@ -1776,7 +1776,7 @@ _asm nop;
 			{
 				cb._func	= (u64)&iioss_bxmlComputeSha1OnNodeAttributeCallback;
 				cb.extra	= (u64)(void*)&cbParams;
-				oss_iterateThroughStartEndForCallback(&bxml->_attributes, &cb);
+				oss_SEChain_iterateThroughForCallback(&bxml->_attributes, &cb);
 			}
 
 			// If we are to process children, process them next

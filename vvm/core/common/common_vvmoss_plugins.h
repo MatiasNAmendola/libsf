@@ -44,6 +44,7 @@
 //////////
 // The following are function names referenced by plugins
 //////
+	// For sound plugins
 	const s8		cgcOssSoundInitialize[]								= "oss_soundInitialize";
 	const s8		cgcOssSoundCreateTone[]								= "oss_soundCreateTone";
 	const s8		cgcOssSoundCreateStream[]							= "oss_soundCreateStream";
@@ -52,38 +53,47 @@
 	const s8		cgcOssSoundPlayCancel[]								= "oss_soundPlayCancel";
 	const s8		cgcOssSoundDelete[]									= "oss_soundDelete";
 
+	// For function plugins (these are not called directly by the VVMOSS, but rather by currently active function as there can be several plugins which provide the same functionality, able to be context-switched by selecting one or the other at random)
+	const s8		cgcOssPluginRequestor[]								= "vvmoss_plugin_requestor";
+	const s8		cgcOssPluginInterface[]								= "vvmoss_plugin_interface";
+
 
 //////////
 // vo.cpp, sound.cpp
 //////
 #ifdef _NATIVE_CALLS
-	void CALLTYPE			oss_soundInitialize							(u64 tnDebuggerInterfaceAddress);
-	u64 CALLTYPE			oss_soundCreateTone							(f32 tnHertz1, f32 tnHertz2, f32 tnHertz3, f32 tnHertz4, u32 tnDurationMilliseconds);
-	u64 CALLTYPE			oss_soundCreateStream						(u32 tnSamplesPerSecond, u64 tnSoundFillerCallbackFunction);
-	u64 CALLTYPE			oss_soundSetVolume							(u64 tnHandle, f32 tfVolume);
-	u64 CALLTYPE			oss_soundPlayStart							(u64 tnHandle, f32 tfVolume);
-	u64 CALLTYPE			oss_soundPlayCancel							(u64 tnHandle);
-	u64 CALLTYPE			oss_soundDelete								(u64 tnHandle);
+	//////////
+	// For sound plugins
+	//////
+		void CALLTYPE			oss_soundInitialize							(u64 tnDebuggerInterfaceAddress);
+		u64 CALLTYPE			oss_soundCreateTone							(f32 tnHertz1, f32 tnHertz2, f32 tnHertz3, f32 tnHertz4, u32 tnDurationMilliseconds);
+		u64 CALLTYPE			oss_soundCreateStream						(u32 tnSamplesPerSecond, u64 tnSoundFillerCallbackFunction);
+		u64 CALLTYPE			oss_soundSetVolume							(u64 tnHandle, f32 tfVolume);
+		u64 CALLTYPE			oss_soundPlayStart							(u64 tnHandle, f32 tfVolume);
+		u64 CALLTYPE			oss_soundPlayCancel							(u64 tnHandle);
+		u64 CALLTYPE			oss_soundDelete								(u64 tnHandle);
 
-//////////
-// For oss_soundCreateStream()'s callback to populate each stream.
-// Samples should be -1.0 to 1.0, and are auto-adjusted to the target.
-//////
-	struct _isSSoundPluginCallback
-	{
-		union {
-			u64		_callback;
-			void	(CALLTYPE *callback)	(f32* sampleBuffer, u32 tnSamples, bool* tlContinueAfterThisSampleSet);
+	//////////
+	// For oss_soundCreateStream()'s callback to populate each stream.
+	// Samples should be -1.0 to 1.0, and are auto-adjusted to the target.
+	//////
+		struct _isSSoundPluginCallback
+		{
+			union {
+				u64		_callback;
+				void	(CALLTYPE *callback)	(f32* sampleBuffer, u32 tnSamples, bool* tlContinueAfterThisSampleSet);
+			};
 		};
-	};
-
 
 #else
-	void (CALLTYPE			*oss_soundInitialize)						(u64 tnDebuggerInterfaceAddress);
-	u64	(CALLTYPE			*oss_soundCreateTone)						(f32 tnHertz1, f32 tnHertz2, f32 tnHertz3, f32 tnHertz4, u32 tnDurationMilliseconds);
-	u64	(CALLTYPE			*oss_soundCreateStream)						(u32 tnSamplesPerSecond, u64 tnSoundFillerCallbackFunction);
-	u64 (CALLTYPE			*oss_soundSetVolume)						(u64 tnHandle, f32 tfVolume);
-	u64	(CALLTYPE			*oss_soundPlayStart)						(u64 tnHandle, f32 tfVolume);
-	u64	(CALLTYPE			*oss_soundPlayCancel)						(u64 tnHandle);
-	u64	(CALLTYPE			*oss_soundDelete)							(u64 tnHandle);
+	//////////
+	// For sound plugins
+	//////
+		void (CALLTYPE			*oss_soundInitialize)						(u64 tnDebuggerInterfaceAddress);
+		u64	(CALLTYPE			*oss_soundCreateTone)						(f32 tnHertz1, f32 tnHertz2, f32 tnHertz3, f32 tnHertz4, u32 tnDurationMilliseconds);
+		u64	(CALLTYPE			*oss_soundCreateStream)						(u32 tnSamplesPerSecond, u64 tnSoundFillerCallbackFunction);
+		u64 (CALLTYPE			*oss_soundSetVolume)						(u64 tnHandle, f32 tfVolume);
+		u64	(CALLTYPE			*oss_soundPlayStart)						(u64 tnHandle, f32 tfVolume);
+		u64	(CALLTYPE			*oss_soundPlayCancel)						(u64 tnHandle);
+		u64	(CALLTYPE			*oss_soundDelete)							(u64 tnHandle);
 #endif
