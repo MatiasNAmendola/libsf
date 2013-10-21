@@ -78,3 +78,5 @@
 
 	// For plugins
 	cu32			_VVMOSS_PLUGIN_EDITOR									= 1;		// This plugin is an editor plugin, for taking the standard line-by-line format and displaying it
+	cu32			_VVMOSS_PLUGIN_EDITOR_CREATE_CONTEXT					= 1000;		// Editor, creates a context and associates it with the indicated bxml
+	cu32			_VVMOSS_PLUGIN_EDITOR_ASSOCIATE_WITH_SCREEN				= 1001;		// Editor, associates the current context with the indicated screen

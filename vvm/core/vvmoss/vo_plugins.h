@@ -43,9 +43,25 @@
 
 //////////
 //
-// Sound
+// Forward declarations
 //
 //////
+	//////////
+	// vo_plugins.cpp
+	//////
+		void					ioss_loadPlugins								(u64 tnDebuggerInterfaceAddress);
+		bool					ioss_loadPlugin_sound							(SFindFile* tff, u64 tnDebuggerInterfaceAddress);
+		bool					ioss_loadPlugin_function						(SFindFile* tff, u64 tnDebuggerInterfaceAddress);
+
+
+
+
+//////////
+//
+// Sound plugins
+//
+//////
+
 	//////////
 	// Structures
 	//////
@@ -91,22 +107,34 @@
 		};
 
 
-		// For user interface plugins
+
+
+
+//////////
+//
+// Function plugins
+//
+//////
+
+	//////////
+	// Structures
+	//////
+		// Each function plugin has a direct callback for every registered function
 		struct _isSInterfaceFunction
 		{
 			bool		available;						// Has this function been specified by this plugin?
+			f32			version;						// What is the version, as in "999.999" maximum (3.3).
+			u32			build;							// Build number within a specified version
+			SDatum		identifier;						// Visual name for display purposes
 
 			// Callback for this function
 			union {
 				u64		_func;
 				u64		(CALLTYPE *func)				(u64 tnSubfunction, u64 extra, u64 extra2);
 			};
-
-			f32			version;						// What is the version, as in "999.999" maximum (3.3).
-			u32			build;							// Build number within a specified version
-			SDatum		identifier;						// Visual name for display purposes
 		};
 
+		// Each function plugin has an entry
 		struct _isSInterfacePlugin
 		{
 			u64			DllInstance;
@@ -126,11 +154,3 @@
 			//////
 				_isSInterfaceFunction		editor;			// See _VVMOSS_PLUGIN_EDITOR
 		};
-
-
-	//////////
-	// vo_plugins.cpp
-	//////
-		void					ioss_loadPlugins								(u64 tnDebuggerInterfaceAddress);
-		bool					ioss_loadPlugin_sound							(SFindFile* tff, u64 tnDebuggerInterfaceAddress);
-		bool					ioss_loadPlugin_function						(SFindFile* tff, u64 tnDebuggerInterfaceAddress);

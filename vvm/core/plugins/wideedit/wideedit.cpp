@@ -122,8 +122,21 @@
 	}
 
 
-	// Callback for this function
+
+
+//////////
+//
+// Callback for this function
+//
+//////
 	u64 CALLTYPE iwe_editorCallback(u64 tnSubfunction, u64 extra, u64 extra2)
 	{
-		return(-1);
+		switch (tnSubfunction)
+		{
+			case _VVMOSS_PLUGIN_EDITOR_CREATE_CONTEXT:
+				break;
+
+			case _VVMOSS_PLUGIN_EDITOR_ASSOCIATE_WITH_SCREEN:
+				break;
+		}
 	}
