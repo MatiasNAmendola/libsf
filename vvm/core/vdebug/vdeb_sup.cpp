@@ -53,7 +53,7 @@
 								u32 tnWidth, u32 tnHeight,
 								u32 tnWidthMin, u32 tnHeightMin,
 								u32 tnWidthMax, u32 tnHeightMax,
-								u32 foreColor, u32 backColor,
+								SBGRA foreColor, SBGRA backColor,
 								bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder,
 								SCallbacksW* callbacks	)
 	{

@@ -71,7 +71,7 @@
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
 		SCallbacksW	lsCallbacks;
-		u32			foreColor, backColor;
+		SBGRA		foreColor, backColor;
 
 
 		// Initialize memory variables
@@ -79,8 +79,8 @@
 		lnFontHeight	= gnFontSize;
 		lnFontSkip		= gnFontSize;
 		lnTop			= -gnFontSize;
-		foreColor		= rgba(0,255,0,255);
-		backColor		= rgba(0,0,0,255);
+		foreColor.color	= rgba(0,255,0,255);
+		backColor.color	= rgba(0,0,0,255);
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
@@ -182,7 +182,7 @@
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
 		SCallbacksW	lsCallbacks;
-		u32			foreColor, backColor;
+		SBGRA		foreColor, backColor;
 
 
 		// Initialize memory variables
@@ -190,8 +190,8 @@
 		lnFontHeight	= gnFontSize;
 		lnFontSkip		= gnFontSize;
 		lnTop			= -gnFontSize;
-		foreColor		= rgba(0,255,0,255);
-		backColor		= rgba(0,0,0,255);
+		foreColor.color	= rgba(0,255,0,255);
+		backColor.color	= rgba(0,0,0,255);
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
@@ -293,7 +293,7 @@
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
 		SCallbacksW	lsCallbacks;
-		u32			foreColor, backColor;
+		SBGRA		foreColor, backColor;
 
 
 		// Initialize memory variables
@@ -301,8 +301,8 @@
 		lnFontHeight	= gnFontSize;
 		lnFontSkip		= gnFontSize;
 		lnTop			= -gnFontSize;
-		foreColor		= rgba(0,255,0,255);
-		backColor		= rgba(0,0,0,255);
+		foreColor.color	= rgba(0,255,0,255);
+		backColor.color	= rgba(0,0,0,255);
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
@@ -404,7 +404,7 @@
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
 		SCallbacksW	lsCallbacks;
-		u32			foreColor, backColor;
+		SBGRA		foreColor, backColor;
 
 
 		// Initialize memory variables
@@ -412,8 +412,8 @@
 		lnFontHeight	= gnFontSize;
 		lnFontSkip		= gnFontSize;
 		lnTop			= -gnFontSize;
-		foreColor		= rgba(0,255,0,255);
-		backColor		= rgba(0,0,0,255);
+		foreColor.color	= rgba(0,255,0,255);
+		backColor.color	= rgba(0,0,0,255);
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
@@ -516,7 +516,7 @@
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
 		SCallbacksW	lsCallbacks;
-		u32			foreColor, backColor;
+		SBGRA		foreColor, backColor;
 
 
 		// Initialize memory variables
@@ -524,8 +524,8 @@
 		lnFontHeight	= gnFontSize;
 		lnFontSkip		= gnFontSize;
 		lnTop			= -gnFontSize;
-		foreColor		= rgba(0,255,0,255);
-		backColor		= rgba(0,0,0,255);
+		foreColor.color	= rgba(0,255,0,255);
+		backColor.color	= rgba(0,0,0,255);
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
@@ -628,7 +628,7 @@
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
 		SCallbacksW	lsCallbacks;
-		u32			foreColor, backColor;
+		SBGRA		foreColor, backColor;
 
 
 		// Initialize memory variables
@@ -636,8 +636,8 @@
 		lnFontHeight	= gnFontSize;
 		lnFontSkip		= gnFontSize;
 		lnTop			= -gnFontSize;
-		foreColor		= rgba(0,255,0,255);
-		backColor		= rgba(0,0,0,255);
+		foreColor.color	= rgba(0,255,0,255);
+		backColor.color	= rgba(0,0,0,255);
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
@@ -739,7 +739,7 @@
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
 		SCallbacksW	lsCallbacks;
-		u32			foreColor, backColor;
+		SBGRA		foreColor, backColor;
 
 
 		// Initialize memory variables
@@ -747,8 +747,8 @@
 		lnFontHeight	= gnFontSize;
 		lnFontSkip		= gnFontSize;
 		lnTop			= -gnFontSize;
-		foreColor		= rgba(0,255,0,255);
-		backColor		= rgba(0,0,0,255);
+		foreColor.color	= rgba(0,255,0,255);
+		backColor.color	= rgba(0,0,0,255);
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
@@ -850,7 +850,7 @@
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
 		SCallbacksW	lsCallbacks;
-		u32			foreColor, backColor;
+		SBGRA		foreColor, backColor;
 
 
 		// Initialize memory variables
@@ -858,8 +858,8 @@
 		lnFontHeight	= gnFontSize;
 		lnFontSkip		= gnFontSize;
 		lnTop			= -gnFontSize;
-		foreColor		= rgba(0,255,0,255);
-		backColor		= rgba(0,0,0,255);
+		foreColor.color	= rgba(0,255,0,255);
+		backColor.color	= rgba(0,0,0,255);
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
@@ -961,7 +961,7 @@
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
 		SCallbacksW	lsCallbacks;
-		u32			foreColor, backColor;
+		SBGRA		foreColor, backColor;
 
 
 		// Initialize memory variables
@@ -969,8 +969,8 @@
 		lnFontHeight	= gnFontSize;
 		lnFontSkip		= gnFontSize;
 		lnTop			= -gnFontSize;
-		foreColor		= rgba(0,255,0,255);
-		backColor		= rgba(0,0,0,255);
+		foreColor.color	= rgba(0,255,0,255);
+		backColor.color	= rgba(0,0,0,255);
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
@@ -1072,7 +1072,7 @@
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
 		SCallbacksW	lsCallbacks;
-		u32			foreColor, backColor;
+		SBGRA		foreColor, backColor;
 
 
 		// Initialize memory variables
@@ -1080,8 +1080,8 @@
 		lnFontHeight	= gnFontSize;
 		lnFontSkip		= gnFontSize;
 		lnTop			= -gnFontSize;
-		foreColor		= rgba(0,255,0,255);
-		backColor		= rgba(0,0,0,255);
+		foreColor.color	= rgba(0,255,0,255);
+		backColor.color	= rgba(0,0,0,255);
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
@@ -1183,7 +1183,7 @@
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
 		SCallbacksW	lsCallbacks;
-		u32			foreColor, backColor;
+		SBGRA		foreColor, backColor;
 
 
 		// Initialize memory variables
@@ -1191,8 +1191,8 @@
 		lnFontHeight	= gnFontSize;
 		lnFontSkip		= gnFontSize;
 		lnTop			= -gnFontSize;
-		foreColor		= rgba(0,255,0,255);
-		backColor		= rgba(0,0,0,255);
+		foreColor.color	= rgba(0,255,0,255);
+		backColor.color	= rgba(0,0,0,255);
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
@@ -1294,7 +1294,7 @@
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
 		SCallbacksW	lsCallbacks;
-		u32			foreColor, backColor;
+		SBGRA		foreColor, backColor;
 
 
 		// Initialize memory variables
@@ -1302,8 +1302,8 @@
 		lnFontHeight	= gnFontSize;
 		lnFontSkip		= gnFontSize;
 		lnTop			= -gnFontSize;
-		foreColor		= rgba(0,255,0,255);
-		backColor		= rgba(0,0,0,255);
+		foreColor.color	= rgba(0,255,0,255);
+		backColor.color	= rgba(0,0,0,255);
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
@@ -1405,7 +1405,7 @@
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
 		SCallbacksW	lsCallbacks;
-		u32			foreColor, backColor;
+		SBGRA		foreColor, backColor;
 
 
 		// Initialize memory variables
@@ -1413,8 +1413,8 @@
 		lnFontHeight	= gnFontSize;
 		lnFontSkip		= gnFontSize;
 		lnTop			= -gnFontSize;
-		foreColor		= rgba(0,255,0,255);
-		backColor		= rgba(0,0,0,255);
+		foreColor.color	= rgba(0,255,0,255);
+		backColor.color	= rgba(0,0,0,255);
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
@@ -1516,7 +1516,7 @@
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
 		SCallbacksW	lsCallbacks;
-		u32			foreColor, backColor;
+		SBGRA		foreColor, backColor;
 
 
 		// Initialize memory variables
@@ -1524,8 +1524,8 @@
 		lnFontHeight	= gnFontSize;
 		lnFontSkip		= gnFontSize;
 		lnTop			= -gnFontSize;
-		foreColor		= rgba(0,255,0,255);
-		backColor		= rgba(0,0,0,255);
+		foreColor.color	= rgba(0,255,0,255);
+		backColor.color	= rgba(0,0,0,255);
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
@@ -1636,7 +1636,7 @@
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
 		SCallbacksW	lsCallbacks;
-		u32			foreColor, backColor;
+		SBGRA		foreColor, backColor;
 
 
 		// Initialize memory variables
@@ -1644,8 +1644,8 @@
 		lnFontHeight	= -16;
 		lnFontSkip		= 16;
 		lnTop			= -16;
-		foreColor		= rgba(0,255,0,255);
-		backColor		= rgba(0,0,0,255);
+		foreColor.color	= rgba(0,255,0,255);
+		backColor.color	= rgba(0,0,0,255);
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);
@@ -1807,7 +1807,7 @@
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
 		SCallbacksW	lsCallbacks;
-		u32			foreColor, backColor;
+		SBGRA		foreColor, backColor;
 
 
 		// Initialize memory variables
@@ -1815,8 +1815,8 @@
 		lnFontHeight	= -16;
 		lnFontSkip		= 16;
 		lnTop			= -16;
-		foreColor		= rgba(0,255,0,255);
-		backColor		= rgba(0,0,0,255);
+		foreColor.color	= rgba(0,255,0,255);
+		backColor.color	= rgba(0,0,0,255);
 
 		// Callbacks for the ASCII screen
 		iInitializeCallbacksToNull(&lsCallbacks);

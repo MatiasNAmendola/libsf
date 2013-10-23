@@ -717,7 +717,7 @@
 		SCanvas*		lc;
 		u32				lnWidth, lnHeight;
 		SCanvasState	state;
-		SRGBA			lrgba;
+		SBGRA			lrgba;
 
 
 		// Get the screen dimensions
@@ -732,8 +732,17 @@
 			lc			= NULL;
 			lrgba.color = rgba(255,255,255,255);
 			ioss_createCanvas(ts->ll.uniqueId, &state, lnWidth, lnHeight, lrgba, &lc);
+
+			// Did we create it okay?
 			if (lc)
-				oss_associateCanvasWithScreen(ts, lc, false);		// Associate this canvas with this screen
+			{
+				// Associate this canvas with this screen
+				oss_associateCanvasWithScreen(ts, lc, false);
+
+				// Does this screen have an active canvas yet?
+				if (!ts->activeCanvas)
+					ts->activeCanvas = lc;		// Make it active
+			}
 		}
 
 		// Since this is a VVM structure, we will return the SCanvas*
@@ -779,7 +788,7 @@
 // Returns a new canvas of the specified dimension.
 //
 //////
-	SCanvas* CALLTYPE oss_requestCanvas(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SRGBA tnBackColor, bool tlIsActive, bool tlUseTransparency)
+	SCanvas* CALLTYPE oss_requestCanvas(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, bool tlIsActive, bool tlUseTransparency)
     {
 		SCanvas*		lc;
 		SCanvasState	state;
@@ -833,7 +842,7 @@
 // area.  As such, a combined function is created to allow this creation in one shot.
 //
 //////
-	bool CALLTYPE oss_requestCanvasAndRegion(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SRGBA tnBackColor, bool tlIsActive, bool tlUseTransparency, s32 ulx, s32 uly, s32 lrx, s32 lry, SCanvas** tc, SRegion** tr, SCallbacks* callbacks, SStartEnd* events)
+	bool CALLTYPE oss_requestCanvasAndRegion(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, bool tlIsActive, bool tlUseTransparency, s32 ulx, s32 uly, s32 lrx, s32 lry, SCanvas** tc, SRegion** tr, SCallbacks* callbacks, SStartEnd* events)
 	{
 		SRegion*	lr;
 		SCanvas*	lc;
@@ -957,7 +966,7 @@
 //		Number of pixels drawn, 0 if none, -1 if error, >0 if something new was actually rendered onto the canvas
 //
 //////
-	u64 CALLTYPE oss_canvasDrawFixedPointText(SCanvas* tc, SRGBA* bd, u32 fontWidth, u32 fontHeight, s32 ulx, s32 uly, s8* text, u32 characterCount, u32 foreground, u32 background)
+	u64 CALLTYPE oss_canvasDrawFixedPointText(SCanvas* tc, SBGRA* bd, u32 fontWidth, u32 fontHeight, s32 ulx, s32 uly, s8* text, u32 characterCount, SBGRA foreground, SBGRA background)
     {
 		u64 lnResult;
 
@@ -986,7 +995,7 @@
 //		characterCount	- success
 //
 //////
-	u64 CALLTYPE oss_canvasDrawText(SCanvas* tc, SRGBA* bd, u64 fontHandle, s32 ulx, s32 uly, s32 lrx, s32 lry, s8* tcText, u32 tnTextLength, u32 foreground, u32 background, SDrawState* tsDrawState)
+	u64 CALLTYPE oss_canvasDrawText(SCanvas* tc, SBGRA* bd, u64 fontHandle, s32 ulx, s32 uly, s32 lrx, s32 lry, s8* tcText, u32 tnTextLength, SBGRA foreground, SBGRA background, SDrawState* tsDrawState)
     {
 		u64 lnResult;
 
@@ -1000,7 +1009,7 @@
 			if (lnResult > 0)
 			{
 				// Copy the text drawn onto the system bitmap onto the canvas
-				lnResult = oss_bitBltSystemBitmapToSRGBA(tc->bd_vvmoss, ulx, uly, lrx-ulx, lry-uly, tc, bd);
+				lnResult = oss_bitBltSystemBitmapToSBGRA(tc->bd_vvmoss, ulx, uly, lrx-ulx, lry-uly, tc, bd);
 			}
 
 		}
@@ -1016,7 +1025,7 @@
 // Draws OSS-specific fonts onto the canvas using the unicode character set.
 //
 //////
-	u64 CALLTYPE oss_canvasDrawTextUnicode(SCanvas* tc, SRGBA* bd, u64 fontHandle, s32 ulx, s32 uly, s32 lrx, s32 lry, w16* tuText, u32 tnTextLength, u32 foreground, u32 background, SDrawState* tsDrawState)
+	u64 CALLTYPE oss_canvasDrawTextUnicode(SCanvas* tc, SBGRA* bd, u64 fontHandle, s32 ulx, s32 uly, s32 lrx, s32 lry, w16* tuText, u32 tnTextLength, SBGRA foreground, SBGRA background, SDrawState* tsDrawState)
     {
 		return(0);
     }
@@ -1029,9 +1038,86 @@
 // Draws a rectangle frame onto a canvas (no fill).
 //
 //////
-	u64 CALLTYPE oss_canvasFrameRect(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, u32 borderThickness, u32 border)
+	u64 CALLTYPE oss_canvasFrameRect(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 borderThickness, SBGRA border)
     {
-		return(0);
+		u8		lnFrameRed, lnFrameGrn, lnFrameBlu;
+		s32		lnY, lnX, lnX0, lnY0, lnPixelsDrawn;
+		SBGRA*	lrgba;
+
+
+		// Frame colors
+		lnFrameRed	= border.red;
+		lnFrameGrn	= border.grn;
+		lnFrameBlu	= border.blu;
+
+		// Draw the rectangle for all pixels that should be drawn vertically
+		lnPixelsDrawn = 0;
+		for (lnY0 = 0, lnY = uly; lnY < lry; lnY0++, lnY++)
+		{
+			if (lnY >= 0 && lnY < tc->height)
+			{
+				// Find out on what row this pixel data will go
+				lrgba = bd + (lnY * tc->width) + ulx;
+
+				if (lnY0 < borderThickness || lnY0 >= tc->height - borderThickness)
+				{
+					// We are drawing an entire border across
+					for (lnX = ulx; lnX < lrx; lnX++)
+					{
+						if (lnX >= 0 && lnX < tc->width)
+						{
+							// Frame color
+							lrgba->red = lnFrameRed;
+							lrgba->grn = lnFrameGrn;
+							lrgba->blu = lnFrameBlu;
+							++lnPixelsDrawn;
+						}
+						// Move to next pixel
+						++lrgba;
+					}
+
+				} else {
+					// We are drawing left-border, fill, right-border
+
+					// Draw left-border
+					for (lnX0 = 0, lnX = ulx; lnX < lrx && lnX0 < borderThickness; lnX0++, lnX++)
+					{
+						if (lnX >= 0 && lnX < tc->width)
+						{
+							// Frame color
+							lrgba->red = lnFrameRed;
+							lrgba->grn = lnFrameGrn;
+							lrgba->blu = lnFrameBlu;
+							++lnPixelsDrawn;
+						}
+						// Move to next pixel
+						++lrgba;
+					}
+
+					// Skip filler
+// TODO:  Both of these algorithms, frame and fill rect, need to be rewritten to use line segments
+					for ( ; lnX < lrx - borderThickness; lnX++)
+						++lrgba;
+
+					// Draw right-border
+					for ( ; lnX < lrx; lnX++)
+					{
+						if (lnX >= 0 && lnX < tc->width)
+						{
+							// Frame color
+							lrgba->red = lnFrameRed;
+							lrgba->grn = lnFrameGrn;
+							lrgba->blu = lnFrameBlu;
+							++lnPixelsDrawn;
+						}
+						// Move to next pixel
+						++lrgba;
+					}
+				}
+			}
+		}
+		// Indicate how many pixels we drew
+		return(lnPixelsDrawn);
     }
 
 
@@ -1042,9 +1128,101 @@
 // Draws a filled rectangle onto a canvas.
 //
 //////
-	u64 CALLTYPE oss_canvasFillRect(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, u32 borderThickness, u32 border, u32 background)
+	u64 CALLTYPE oss_canvasFillRect(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 borderThickness, SBGRA border, SBGRA background)
     {
-		return(0);
+		u8		lnFrameRed, lnFrameGrn, lnFrameBlu, lnFillRed, lnFillGrn, lnFillBlu;
+		s32		lnY, lnX, lnX0, lnY0, lnPixelsDrawn;
+		SBGRA*	lrgba;
+
+
+		// Fill colors
+		lnFillRed	= background.red;
+		lnFillGrn	= background.grn;
+		lnFillBlu	= background.blu;
+
+		// Frame colors
+		lnFrameRed	= border.red;
+		lnFrameGrn	= border.grn;
+		lnFrameBlu	= border.blu;
+
+		// Draw the rectangle for all pixels that should be drawn vertically
+		lnPixelsDrawn = 0;
+		for (lnY0 = 0, lnY = uly; lnY < lry; lnY0++, lnY++)
+		{
+			if (lnY >= 0 && lnY < tc->height)
+			{
+				// Find out on what row this pixel data will go
+				lrgba = bd + (lnY * tc->width) + ulx;
+
+				if (lnY0 < borderThickness || lnY0 >= tc->height - borderThickness)
+				{
+					// We are drawing an entire border across
+					for (lnX = ulx; lnX < lrx; lnX++)
+					{
+						if (lnX >= 0 && lnX < tc->width)
+						{
+							// Frame color
+							lrgba->red = lnFrameRed;
+							lrgba->grn = lnFrameGrn;
+							lrgba->blu = lnFrameBlu;
+							++lnPixelsDrawn;
+						}
+						// Move to next pixel
+						++lrgba;
+					}
+
+				} else {
+					// We are drawing left-border, fill, right-border
+
+					// Draw left-border
+					for (lnX0 = 0, lnX = ulx; lnX < lrx && lnX0 < borderThickness; lnX0++, lnX++)
+					{
+						if (lnX >= 0 && lnX < tc->width)
+						{
+							// Frame color
+							lrgba->red = lnFrameRed;
+							lrgba->grn = lnFrameGrn;
+							lrgba->blu = lnFrameBlu;
+							++lnPixelsDrawn;
+						}
+						// Move to next pixel
+						++lrgba;
+					}
+
+					// Draw filler
+					for ( ; lnX < lrx - borderThickness; lnX++)
+					{
+						if (lnX >= 0 && lnX < tc->width)
+						{
+							// Fill color
+							lrgba->red = lnFillRed;
+							lrgba->grn = lnFillGrn;
+							lrgba->blu = lnFillBlu;
+							++lnPixelsDrawn;
+						}
+						// Move to next pixel
+						++lrgba;
+					}
+
+					// Draw right-border
+					for ( ; lnX < lrx; lnX++)
+					{
+						if (lnX >= 0 && lnX < tc->width)
+						{
+							// Frame color
+							lrgba->red = lnFrameRed;
+							lrgba->grn = lnFrameGrn;
+							lrgba->blu = lnFrameBlu;
+							++lnPixelsDrawn;
+						}
+						// Move to next pixel
+						++lrgba;
+					}
+				}
+			}
+		}
+		// Indicate how many pixels we drew
+		return(lnPixelsDrawn);
     }
 
 
@@ -1055,7 +1233,7 @@
 // Draws a line on the canvas.
 //
 //////
-	u64 CALLTYPE oss_canvasLine(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, u32 lineThickness, u32 line)
+	u64 CALLTYPE oss_canvasLine(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 lineThickness, SBGRA line)
     {
 		return(0);
     }
@@ -1068,7 +1246,7 @@
 // Draws an arc on the canvas.
 //
 //////
-	u64 CALLTYPE oss_canvasArc(SCanvas* tc, SRGBA* bd, s32 ox, s32 oy, f32 start, f32 end, u32 lineThickness, u32 line)
+	u64 CALLTYPE oss_canvasArc(SCanvas* tc, SBGRA* bd, s32 ox, s32 oy, f32 start, f32 end, s32 lineThickness, SBGRA line)
     {
 		return(0);
     }
@@ -1081,7 +1259,7 @@
 // Extracts a portion of a canvas, creating a new canvas.
 //
 //////
-	SCanvas* CALLTYPE oss_canvasExtract(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry)
+	SCanvas* CALLTYPE oss_canvasExtract(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry)
     {
 		s32			lnWidth, lnHeight;
 		SCanvas*	canvas;
@@ -1115,7 +1293,7 @@
 // to the entire area.
 //
 //////
-	u64 CALLTYPE oss_canvasColorize(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, u32 color)
+	u64 CALLTYPE oss_canvasColorize(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, SBGRA color)
     {
 		return(0);
     }
@@ -1128,7 +1306,7 @@
 // Converts the canvas rectangle to grayscale.
 //
 //////
-	u64 CALLTYPE oss_canvasGrayscale(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry)
+	u64 CALLTYPE oss_canvasGrayscale(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry)
     {
 		return(0);
     }
@@ -1142,7 +1320,7 @@
 // Note:  Goes from bd to bd, does not use accumulator.
 //
 //////
-	u64 CALLTYPE oss_canvasGradient(SCanvas* tc, SRGBA* bd, SRGBA ul, SRGBA ur, SRGBA lr, SRGBA ll)
+	u64 CALLTYPE oss_canvasGradient(SCanvas* tc, SBGRA* bd, SBGRA ul, SBGRA ur, SBGRA lr, SBGRA ll)
 	{
 		// Make sure the environment is sane
 		if (tc && bd && (bd == tc->bd || bd == tc->bda))
@@ -1352,7 +1530,7 @@
 // operation.
 //
 //////
-	SCaskPip* CALLTYPE oss_caskSetPipByValues(SCask* cask, bool tlLeft, u32 tnPip, SRGBA tnPipColorNeutral, SRGBA tnPipColorOver, SRGBA tnPipColorClick, u64 tnEnterCallback, u64 tnLeaveCallback, u64 tnHoverCallback, u64 tnClickCallback, bool tlCreateCopy)
+	SCaskPip* CALLTYPE oss_caskSetPipByValues(SCask* cask, bool tlLeft, u32 tnPip, SBGRA tnPipColorNeutral, SBGRA tnPipColorOver, SBGRA tnPipColorClick, u64 tnEnterCallback, u64 tnLeaveCallback, u64 tnHoverCallback, u64 tnClickCallback, bool tlCreateCopy)
 	{
 		return(NULL);
 	}
@@ -1488,13 +1666,13 @@
 //		-4				- Unable to allocate memory for bits
 //		-5				- Unable to read file
 //		-6				- Offset to bits in header not correct
-//		-7				- Unable to allocate memory for internal SRGBA bits
+//		-7				- Unable to allocate memory for internal SBGRA bits
 //		-8				- Unable to open pathname
 //		Our return values:
 //		-50				- Invalid parameters
 //
 //////
-	u64 CALLTYPE oss_loadBitmapFromDisk(s8* tcPathname, SCanvas** tc, u32* tnWidth, u32* tnHeight, SRGBA tnBackColor)
+	u64 CALLTYPE oss_loadBitmapFromDisk(s8* tcPathname, SCanvas** tc, u32* tnWidth, u32* tnHeight, SBGRA tnBackColor)
 	{
 		bool			llLoadResult;
 		u32				lnResult;
@@ -1502,11 +1680,11 @@
 		SBitmapInfo		lbi;		// Info
 		s8*				lbd;		// Data
 		SCanvas*		lc;			// Newly created canvas
-		SRGBA*			lrgbad;		// Destination is always 32-bit
+		SBGRA*			lrgbad;		// Destination is always 32-bit
 
 
 // TODO:  Someone needs to test this with different bitmap formats from different sources, 24-bit and 32-bit
-// TODO:  verify that this function is working properly by loading and bitBlting the converted SRGBA buffer onto a canvas
+// TODO:  verify that this function is working properly by loading and bitBlting the converted SBGRA buffer onto a canvas
 		// Make sure the environment is sane
 		lnResult = 0;
 		if (tcPathname && tc)
@@ -1540,11 +1718,11 @@
 						{
 							// It's stored in top-down order
 							lbi.height = (u32)((s32)lbi.height * -1);
-							ioss_allocateSRGBAandCopy24Bit_BitmapTopDown(&lrgbad, &lbh, &lbi, (SRGB*)lbd, &lnResult, -7);
+							ioss_allocateSBGRAandCopy24Bit_BitmapTopDown(&lrgbad, &lbh, &lbi, (SRGB*)lbd, &lnResult, -7);
 
 						} else {
 							// It's stored in bottom-up order
-							ioss_allocateSRGBAandCopy24Bit_BitmapBottomUp(&lrgbad, &lbh, &lbi, (SRGB*)lbd, &lnResult, -7);
+							ioss_allocateSBGRAandCopy24Bit_BitmapBottomUp(&lrgbad, &lbh, &lbi, (SRGB*)lbd, &lnResult, -7);
 						}
 
 					} else {
@@ -1553,19 +1731,19 @@
 						{
 							// It's stored in top-down order
 							lbi.height = (u32)((s32)lbi.height * -1);
-							ioss_allocateSRGBAandCopy32Bit_BitmapTopDown(&lrgbad, &lbh, &lbi, (SRGBA*)lbd, &lnResult, -7);
+							ioss_allocateSBGRAandCopy32Bit_BitmapTopDown(&lrgbad, &lbh, &lbi, (SBGRA*)lbd, &lnResult, -7);
 
 						} else {
 							// It's stored in bottom-up order
-							ioss_allocateSRGBAandCopy32Bit_BitmapBottomUp(&lrgbad, &lbh, &lbi, (SRGBA*)lbd, &lnResult, -7);
+							ioss_allocateSBGRAandCopy32Bit_BitmapBottomUp(&lrgbad, &lbh, &lbi, (SBGRA*)lbd, &lnResult, -7);
 						}
 					}
-					// When we get here, we will have loaded the bitmap and copied it from its native format to the indicated SRGBA structure
-					// Copy the temporary SRGBA of the loaded image to the new canvas we've created
-					memcpy(lc->bd,  lrgbad, lbi.height * lbi.width * sizeof(SRGBA));
-					memcpy(lc->bda, lrgbad, lbi.height * lbi.width * sizeof(SRGBA));
+					// When we get here, we will have loaded the bitmap and copied it from its native format to the indicated SBGRA structure
+					// Copy the temporary SBGRA of the loaded image to the new canvas we've created
+					memcpy(lc->bd,  lrgbad, lbi.height * lbi.width * sizeof(SBGRA));
+					memcpy(lc->bda, lrgbad, lbi.height * lbi.width * sizeof(SBGRA));
 
-					// Release our temporary SRGBA buffer
+					// Release our temporary SBGRA buffer
 					free(lrgbad);
 				}
 				// Once we get here we have everything we need
@@ -1593,7 +1771,7 @@
 // Saves the indicated canvas to disk
 //
 //////
-	u64 CALLTYPE oss_saveBitmapToDisk(SCanvas* tc, SRGBA* bd, s8* tcPathname)
+	u64 CALLTYPE oss_saveBitmapToDisk(SCanvas* tc, SBGRA* bd, s8* tcPathname)
 	{
 		u64				lnResult, lnHandle, lnNumread;
 		SBitmapHeader	lbh;		// Header
@@ -1620,7 +1798,7 @@
 				lbi.width				= tc->width;
 				lbi.ppmX				= 3270;
 				lbi.ppmY				= 3270;
-				lbi.sizeOfImage			= tc->height * tc->width * sizeof(SRGBA);
+				lbi.sizeOfImage			= tc->height * tc->width * sizeof(SBGRA);
 
 				// Update the disk header
 				lbh.type				= 'MB';
@@ -1714,7 +1892,7 @@
 //////////
 //
 // Request a system bitmap based on the width and height.  This will be a DIB that can be used
-// primarily for drawing text onto, and then copying back out to SRGBA buffers.
+// primarily for drawing text onto, and then copying back out to SBGRA buffers.
 //
 // Returns:
 //		pointer to _isWSystemBitmap (the Start/end structure)
@@ -1791,7 +1969,7 @@
 													 u32 tnWidthMin, u32 tnHeightMin,
 													 u32 tnWidthMax, u32 tnHeightMax,
 													 u32 ncUlx, u32 ncUly, u32 ncLrx, u32 ncLry, u32 ncBorder,
-													 u32 tnForeColor, u32 tnBackColor,
+													 SBGRA tnForeColor, SBGRA tnBackColor,
 													 bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder,
 													 SCallbacksW* callbacks)
 	{
@@ -1813,36 +1991,36 @@
 				tnCaptionLength = (u32)oss_strlen(_csu8p(tcCaption));
 
 			// Visible identifier
-			tisw->caption					= (s8*)oss_duplicateString((u8*)tcCaption, tnCaptionLength + 1);
-			tisw->captionLength				= tnCaptionLength;
+			tisw->caption			= (s8*)oss_duplicateString((u8*)tcCaption, tnCaptionLength + 1);
+			tisw->captionLength		= tnCaptionLength;
 
 			// Position
-			tisw->osX						= tnX;
-			tisw->osY						= tnY;
-			tisw->width						= tnWidth;
-			tisw->height					= tnHeight;
-			tisw->widthMin					= tnWidthMin;
-			tisw->heightMin					= tnHeightMin;
-			tisw->widthMax					= tnWidthMax;
-			tisw->heightMax					= tnHeightMax;
+			tisw->osX				= tnX;
+			tisw->osY				= tnY;
+			tisw->width				= tnWidth;
+			tisw->height			= tnHeight;
+			tisw->widthMin			= tnWidthMin;
+			tisw->heightMin			= tnHeightMin;
+			tisw->widthMax			= tnWidthMax;
+			tisw->heightMax			= tnHeightMax;
 
 			// Non-client portions
-			tisw->ncUlX						= ncUlx;
-			tisw->ncUlY						= ncUly;
-			tisw->ncLrX						= ncLrx;
-			tisw->ncLrY						= ncLry;
-			tisw->ncBorder					= ncBorder;
+			tisw->ncUlX				= ncUlx;
+			tisw->ncUlY				= ncUly;
+			tisw->ncLrX				= ncLrx;
+			tisw->ncLrY				= ncLry;
+			tisw->ncBorder			= ncBorder;
 
 			// Colors
-			tisw->foreColor.color			= tnForeColor;
-			tisw->backColor.color			= tnBackColor;
+			tisw->foreColor			= tnForeColor;
+			tisw->backColor			= tnBackColor;
 
 			// Flags
-			tisw->resizable					= tlResizable;
-			tisw->movable					= tlMovable;
-			tisw->closable					= tlClosable;
-			tisw->visible					= tlVisible;
-			tisw->border					= tlBorder;
+			tisw->resizable			= tlResizable;
+			tisw->movable			= tlMovable;
+			tisw->closable			= tlClosable;
+			tisw->visible			= tlVisible;
+			tisw->border			= tlBorder;
 
 			// Callbacks
 			tisw->callback.window._callback_created			= callbacks->window._callback_created,
@@ -2082,18 +2260,18 @@
 // Blt the specified buffer onto the indicated screen id
 //
 //////
-	u64 CALLTYPE oss_bitBlt(u64 tnOssWindowId, SRGBA* buffer, u32 width, u32 height)
+	u64 CALLTYPE oss_bitBlt(u64 tnOssWindowId, SBGRA* buffer, u32 width, u32 height)
 	{
 		u64			lnResult;
-		_iswSOssWindowLL* low;
+		_iswSOssWindowLL* w;
 
 
 		// Make sure the screen they indicated is valid
-		low = ioss_findSOssWindowLLByOssWindowId(tnOssWindowId);
-		if (low)
+		w = ioss_findSOssWindowLLByOssWindowId(tnOssWindowId);
+		if (w)
 		{
 			// Copy over the buffer contents, as much as will fit (should be all of it)
-			lnResult = ivvm_bitBltAll(low, buffer, width, height);
+			lnResult = ivvm_bitBltAll(w, buffer, width, height);
 
 		} else {
 			// Indicate failure
@@ -2108,21 +2286,21 @@
 
 //////////
 //
-// Blt the specified system buffer onto the indicated SRGBA using the tnX,tnY coordinates for the
+// Blt the specified system buffer onto the indicated SBGRA using the tnX,tnY coordinates for the
 // upper-left, for the width and the height.
 //
 //////
-	u64 CALLTYPE oss_bitBltSystemBitmapToSRGBA(u64 bdoss, s32 tnX, s32 tnY, u32 tnWidth, u32 tnHeight, SCanvas* tc, SRGBA* bdRoot)
+	u64 CALLTYPE oss_bitBltSystemBitmapToSBGRA(u64 bdoss, s32 tnX, s32 tnY, u32 tnWidth, u32 tnHeight, SCanvas* tc, SBGRA* bdRoot)
 	{
 		u64					lnPixels;
 		s32					lnY, lnX, lnThisY, lnThisX;
 		_iswSSystemBitmap*	lsb;
 		SRGB*				lrgbs;
-		SRGBA*				lrgbad;
+		SBGRA*				lrgbad;
 
 
 // TODO:  (an optimization) could make the code below look for blocks which exist in the destination, and only iterate across those ranges
-// Working here, copy out the DIB section bitmap rectangle to the SRGBA buffer
+// Working here, copy out the DIB section bitmap rectangle to the SBGRA buffer
 		lnPixels	= 0;
 		lsb			= (_iswSSystemBitmap*)bdoss;
 		for (	lnY = 0, lnThisY = tnY;
@@ -2134,7 +2312,7 @@
 			{
 				// Set our source and destination pointers
 				lrgbs	= (SRGB*)( (s8*)lsb->bdRoot + ((lsb->height - (lnY + tnY) - 1) * lsb->actualWidth)          + (tnX * sizeof(SRGB)));
-				lrgbad	= (SRGBA*)((s8*)bdRoot      + ((lnY + tnY)                     * tc->width * sizeof(SRGBA)) + (tnX * sizeof(SRGBA)));
+				lrgbad	= (SBGRA*)((s8*)bdRoot      + ((lnY + tnY)                     * tc->width * sizeof(SBGRA)) + (tnX * sizeof(SBGRA)));
 
 				// Repeat for every valid pixel
 				for (	lnX = 0, lnThisX = tnX;
@@ -2173,7 +2351,7 @@
 // Note:  tnSystemFont and tnSystemBitmap are _isWSystem* structures
 //
 //////
-	u64 CALLTYPE oss_drawText(s8* tcText, u32 tnTextLength, s32 ulx, s32 uly, s32 lrx, s32 lry, u32 foreground, u32 background, SDrawState* tsDrawState, u64 tnSystemFont, u64 tnSystemBitmap)
+	u64 CALLTYPE oss_drawText(s8* tcText, u32 tnTextLength, s32 ulx, s32 uly, s32 lrx, s32 lry, SBGRA foreground, SBGRA background, SDrawState* tsDrawState, u64 tnSystemFont, u64 tnSystemBitmap)
 	{
 		u32					lnCount, lnFormat, lnForeColor, lnBackColor;
 		RECT				lrc;
@@ -2194,8 +2372,8 @@
 			SelectObject(lsb->hdc, (HGDIOBJ)lsf->handle);
 
 			// Prepare our text info
-			lnForeColor = RGB(red(foreground), grn(foreground), blu(foreground));
-			lnBackColor = RGB(red(background), grn(background), blu(background));
+			lnForeColor = foreground.color;
+			lnBackColor = background.color;
 			SetTextColor(lsb->hdc, lnForeColor);
 			SetBkColor	(lsb->hdc, lnBackColor);
 			SetBkMode	(lsb->hdc, OPAQUE);

@@ -223,7 +223,7 @@ return(false);
 		bool		llErrorFile, llErrorUlx, llErrorUly, llErrorWidth, llErrorHeight, llErrorStridex, llErrorStridey;
 		u32			lnX, lnY, lnResult, lnUlX, lnUlY, lnWidth, lnHeight, lnStrideX, lnStrideY, lnThisWidth;
 		u64			lnNumread, lnErrorOffset, lnErrorCode;
-		SRGBA		lrgba;
+		SBGRA		lrgba;
 		SBxml*		vdbi;
 		SBxml*		icons;
 		SBxml*		icon;
@@ -289,7 +289,7 @@ return(false);
 //			oss_saveBitmapToDisk(canvasNew, canvasNew->bd, bufferFile);
 
 			// Store the size for this bitmap data
-			lnThisWidth = canvasNew->width * canvasNew->height * sizeof(SRGBA);
+			lnThisWidth = canvasNew->width * canvasNew->height * sizeof(SBGRA);
 			sprintf_s(bufferCanvasLength, sizeof(bufferCanvasLength), "%u\0", lnThisWidth);
 
 			// Append this extracted bitmap data to the bxml
@@ -319,7 +319,7 @@ return(false);
 		u32			lnX, lnY, lnResult, lnUlX, lnUlY, lnWidth, lnHeight, lnStrideX, lnStrideY, lnThisWidth;
 		u64			lnNumread, lnErrorOffset, lnErrorCode;
 		void*		searchPtr = NULL;
-		SRGBA		lrgba;
+		SBGRA		lrgba;
 		SBxml*		vdbi;
 		SBxml*		icons;
 		SBxml*		icon;
@@ -399,7 +399,7 @@ return(false);
 
 
 			// Store the size for this bitmap data
-			lnThisWidth = canvasNew->width * canvasNew->height * sizeof(SRGBA);
+			lnThisWidth = canvasNew->width * canvasNew->height * sizeof(SBGRA);
 			sprintf_s(bufferCanvasLength, sizeof(bufferCanvasLength), "%u\0", lnThisWidth);
 
 			// Append this extracted bitmap data to the bxml
@@ -504,11 +504,13 @@ return(false);
 // Temporary function for hijacking control of the VVM during development
 //
 /////
+	SScreen* screen;
+	SCanvas* canvas;
+
 	void hijack_createWindow(void)
 	{
 		s32				lnX, lnY;
 		u32				lnWidth, lnHeight, lnMinWidth, lnMinHeight, lnMaxWidth, lnMaxHeight;
-		SScreen*		screen;
 		SOssWindow*		low;
 		SCallbacksW		cb;
 		SStartEnd		lse;
@@ -556,15 +558,31 @@ return(false);
 		//////////
 		// Create our screen template
 		//////
+			SBGRA foreground, background;
+			foreground.color = rgba(0,0,0,0);
+			background.color = rgba(255,255,255,255);
 			low = oss_createScreenTemplate(	oss_getNextUniqueId(),
 											oss_getNextUniqueId(),
 											"Hijack", -1, 
 											lnX, lnY, lnWidth, lnHeight, lnMaxWidth, lnMaxHeight, lnMinWidth, lnMinHeight,
-											0, 0, lnWidth, 40, 4, rgba(0,0,0,0), rgba(255,255,255,255),
+											0, 0, lnWidth, 40, 4, foreground, background,
 											true, true, true, true, true,
 											&cb);
 
 			screen = oss_requestScreen(0, low);
+			if (screen)
+			{
+				canvas = oss_requestCanvasForScreen(screen);
+				if (canvas)
+				{
+					SBGRA green = { 0, 255, 0, 255 };
+					SBGRA blue = { 255, 0, 0, 255 };
+					SBGRA white = { 255, 255, 255, 255 };
+					oss_canvasFillRect(canvas, canvas->bd, 0, 0, canvas->width, canvas->height, 5, blue, green);
+					oss_canvasFrameRect(canvas, canvas->bd, 0, 0, canvas->width, canvas->height, 3, white);
+					oss_canvasRefresh(canvas);
+				}
+			}
 	}
 
 // Called after window is created, before it is displayed

@@ -88,26 +88,26 @@
 		SScreen* CALLTYPE		oss_requestScreen							(u64 tnAssociatedId, SOssWindow*  tisw/*tisw was created by oss_createScreenTemplate()*/);
 		SCanvas* CALLTYPE		oss_requestCanvasForScreen					(SScreen* ts);
 		SCanvas* CALLTYPE		oss_requestCanvasForCanvas					(SCanvas* tc);
-		SCanvas* CALLTYPE	 	oss_requestCanvas							(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SRGBA tnBackColor, bool tlIsActive, bool tlUseTransparency);
+		SCanvas* CALLTYPE	 	oss_requestCanvas							(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, bool tlIsActive, bool tlUseTransparency);
 		SRegion* CALLTYPE		oss_requestRegion							(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, s32 ulx, s32 uly, s32 lrx, s32 lry, SCallbacks* callback, SStartEnd* events);
 		SRegion* CALLTYPE		oss_requestDuplicateRegion					(u64 tnAssociatedId, SRegion* templateRegion);
-		bool CALLTYPE			oss_requestCanvasAndRegion					(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SRGBA tnBackColor, bool tlIsActive, bool tlUseTransparency, s32 ulx, s32 uly, s32 lrx, s32 lry, SCanvas** tc, SRegion** tr, SCallbacks* callbacks, SStartEnd* events);
+		bool CALLTYPE			oss_requestCanvasAndRegion					(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, bool tlIsActive, bool tlUseTransparency, s32 ulx, s32 uly, s32 lrx, s32 lry, SCanvas** tc, SRegion** tr, SCallbacks* callbacks, SStartEnd* events);
 		SCanvasList* CALLTYPE	oss_associateCanvasWithScreen				(SScreen* ts, SCanvas* tc, bool tlMakeActive);
 		SCanvasList* CALLTYPE	oss_associateCanvasWithCanvas				(SCanvas* tcParent, SCanvas* tcChild);
 		SRegionList* CALLTYPE	oss_associateRegionWithCanvas				(SCanvas* tc, SRegion* tr);
 		SRegionList* CALLTYPE	oss_associateRegionWithRegion				(SRegion* tcParent, SRegion* trChild);
 		u64 CALLTYPE		 	oss_requestFontHandle						(s8* fontName, u32 fontWidth, bool bold, bool italics, bool underline, bool strikethrough);
-		u64 CALLTYPE		 	oss_canvasDrawFixedPointText				(SCanvas* tc, SRGBA* bd, u32 fontWidth, u32 fontHeight, s32 ulx, s32 uly,    s8*  text, u32 characterCount, u32 foreground, u32 background);
-		u64 CALLTYPE		 	oss_canvasDrawText							(SCanvas* tc, SRGBA* bd, u64 fontHandle, s32 ulx, s32 uly, s32 lrx, s32 lry, s8*  tcText, u32 tnTextLength, u32 foreground, u32 background, SDrawState* tsDrawState);
-		u64 CALLTYPE		 	oss_canvasDrawTextUnicode					(SCanvas* tc, SRGBA* bd, u64 fontHandle, s32 ulx, s32 uly, s32 lrx, s32 lry, w16* tuText, u32 tnTextLength, u32 foreground, u32 background, SDrawState* tsDrawState);
-		u64 CALLTYPE		 	oss_canvasFrameRect							(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, u32 borderThickness, u32 border);
-		u64 CALLTYPE		 	oss_canvasFillRect							(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, u32 borderThickness, u32 border, u32 background);
-		u64 CALLTYPE		 	oss_canvasLine								(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, u32 lineThickness, u32 line);
-		u64 CALLTYPE		 	oss_canvasArc								(SCanvas* tc, SRGBA* bd, s32 ox, s32 oy, f32 start, f32 end, u32 lineThickness, u32 line);
-		SCanvas* CALLTYPE	 	oss_canvasExtract							(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry);
-		u64 CALLTYPE		 	oss_canvasColorize							(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, u32 color);
-		u64 CALLTYPE		 	oss_canvasGrayscale							(SCanvas* tc, SRGBA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry);
-		u64 CALLTYPE		 	oss_canvasGradient							(SCanvas* tc, SRGBA* bd, SRGBA ul, SRGBA ur, SRGBA lr, SRGBA ll);
+		u64 CALLTYPE		 	oss_canvasDrawFixedPointText				(SCanvas* tc, SBGRA* bd, u32 fontWidth, u32 fontHeight, s32 ulx, s32 uly,    s8*  text, u32 characterCount, SBGRA foreground, SBGRA background);
+		u64 CALLTYPE		 	oss_canvasDrawText							(SCanvas* tc, SBGRA* bd, u64 fontHandle, s32 ulx, s32 uly, s32 lrx, s32 lry, s8*  tcText, u32 tnTextLength, SBGRA foreground, SBGRA background, SDrawState* tsDrawState);
+		u64 CALLTYPE		 	oss_canvasDrawTextUnicode					(SCanvas* tc, SBGRA* bd, u64 fontHandle, s32 ulx, s32 uly, s32 lrx, s32 lry, w16* tuText, u32 tnTextLength, SBGRA foreground, SBGRA background, SDrawState* tsDrawState);
+		u64 CALLTYPE		 	oss_canvasFrameRect							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 borderThickness, SBGRA border);
+		u64 CALLTYPE		 	oss_canvasFillRect							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 borderThickness, SBGRA border, SBGRA background);
+		u64 CALLTYPE		 	oss_canvasLine								(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 lineThickness, SBGRA line);
+		u64 CALLTYPE		 	oss_canvasArc								(SCanvas* tc, SBGRA* bd, s32 ox, s32 oy, f32 start, f32 end, s32 lineThickness, SBGRA line);
+		SCanvas* CALLTYPE	 	oss_canvasExtract							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry);
+		u64 CALLTYPE		 	oss_canvasColorize							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, SBGRA color);
+		u64 CALLTYPE		 	oss_canvasGrayscale							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry);
+		u64 CALLTYPE		 	oss_canvasGradient							(SCanvas* tc, SBGRA* bd, SBGRA ul, SBGRA ur, SBGRA lr, SBGRA ll);
 		u64 CALLTYPE		 	oss_canvasBitBlt							(SCanvas* tcDst, bool tlDstAccumulator, s32 dulx, s32 duly, SCanvas* tsSrc, bool tlSrcAccumulator, s32 sulx, s32 suly, s32 slrx, s32 slry);
 		u64 CALLTYPE			oss_canvasScale								(SCanvas* tcDst, SCanvas* tcSrc);
 		u64 CALLTYPE			oss_canvasRefresh							(SCanvas* tc);
@@ -119,7 +119,7 @@
 		SCask* CALLTYPE			oss_caskDefineEncompassingRectangle			(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SRectXYXY* tsOuter);
 		SCask* CALLTYPE			oss_caskDefineUpRectangle					(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SCask* caskFrom, u32 tnFromPip, SRectXYXY* tsOuter);
 		SCask* CALLTYPE			oss_caskDefineDownRectangle					(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SCask* caskFrom, u32 tnFromPip, SRectXYXY* tsOuter);
-		SCaskPip* CALLTYPE		oss_caskSetPipByValues						(SCask* cask, bool tlLeft, u32 tnPip, SRGBA tnPipColorNeutral, SRGBA tnPipColorOver, SRGBA tnPipColorClick, u64 tnEnterCallback, u64 tnLeaveCallback, u64 tnHoverCallback, u64 tnClickCallback, bool tlCreateCopy);
+		SCaskPip* CALLTYPE		oss_caskSetPipByValues						(SCask* cask, bool tlLeft, u32 tnPip, SBGRA tnPipColorNeutral, SBGRA tnPipColorOver, SBGRA tnPipColorClick, u64 tnEnterCallback, u64 tnLeaveCallback, u64 tnHoverCallback, u64 tnClickCallback, bool tlCreateCopy);
 		SCaskPip* CALLTYPE		oss_caskSetPipByStruct						(SCask* cask, bool tlLeft, u32 tnPip, SCaskPip* caskPip, bool tlCreateCopy);
 		SCask* CALLTYPE			oss_caskCreate								(SCask* cask, bool tlCreateCopy);
 		SCanvas* CALLTYPE		oss_caskRefresh								(SCask* cask);
@@ -132,8 +132,8 @@
 		void CALLTYPE			oss_screenKeyboardGetEventCallbacksList		(u64 id, SCanvas* tc, SEvent** events, u32* count);
 
 		// Only 24-bit or 32-bit bitmaps can be loaded from disk at present.
-		u64 CALLTYPE			oss_loadBitmapFromDisk						(s8* tcPathname, SCanvas** tc, u32* tnWidth, u32* tnHeight, SRGBA tnBackColor);
-		u64 CALLTYPE			oss_saveBitmapToDisk						(SCanvas* tc, SRGBA* bd, s8* tcPathname);
+		u64 CALLTYPE			oss_loadBitmapFromDisk						(s8* tcPathname, SCanvas** tc, u32* tnWidth, u32* tnHeight, SBGRA tnBackColor);
+		u64 CALLTYPE			oss_saveBitmapToDisk						(SCanvas* tc, SBGRA* bd, s8* tcPathname);
 		u64 CALLTYPE			oss_requestSystemFont						(s8* fontName, u32 fontWidth, bool bold, bool italics, bool underline, bool strikethrough);
 		u64 CALLTYPE			oss_requestSystemBitmap						(u32 tnWidth, u32 tnHeight);
 		u64 CALLTYPE			oss_findSystemFontByHandle					(u64 tnFontHandle);
@@ -146,7 +146,7 @@
 																				u32 tnWidthMin, u32 tnHeightMin,
 																				u32 tnWidthMax, u32 tnHeightMax,
 																				u32 ncUlx, u32 ncUly, u32 ncLrx, u32 ncLry, u32 ncBorder,
-																				u32 tnForeColor, u32 tnBackColor,
+																				SBGRA tnForeColor, SBGRA tnBackColor,
 																				bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder,
 																				SCallbacksW* callbacks);
 
@@ -154,9 +154,9 @@
 		SOssWindow* CALLTYPE	oss_enumerateMonitors						(SStartEnd* tsMonitors/*Returns SOssWindow* structures*/);
 		bool CALLTYPE			oss_getScreenDimensions						(u64 tnOssWindowId, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin);
 		bool CALLTYPE			oss_setFocus								(u64 tnScreenId);
-		u64 CALLTYPE			oss_bitBlt									(u64 tnOssWindowId, SRGBA* buffer, u32 width, u32 height);
-		u64 CALLTYPE			oss_bitBltSystemBitmapToSRGBA				(u64 bdoss, s32 tnX, s32 tnY, u32 tnWidth, u32 tnHeight, SCanvas* tc, SRGBA* bdRoot);
-		u64 CALLTYPE			oss_drawText								(s8* tcText, u32 tnTextLength, s32 ulx, s32 uly, s32 lrx, s32 lry, u32 foreground, u32 background, SDrawState* tsDrawState, u64 tnSystemFont, u64 tnSystemBitmap);
+		u64 CALLTYPE			oss_bitBlt									(u64 tnOssWindowId, SBGRA* buffer, u32 width, u32 height);
+		u64 CALLTYPE			oss_bitBltSystemBitmapToSBGRA				(u64 bdoss, s32 tnX, s32 tnY, u32 tnWidth, u32 tnHeight, SCanvas* tc, SBGRA* bdRoot);
+		u64 CALLTYPE			oss_drawText								(s8* tcText, u32 tnTextLength, s32 ulx, s32 uly, s32 lrx, s32 lry, SBGRA foreground, SBGRA background, SDrawState* tsDrawState, u64 tnSystemFont, u64 tnSystemBitmap);
 		u64 CALLTYPE			oss_getNextMessage							(u32* message, void* extra);
 		u64 CALLTYPE			oss_messageBox								(u64 id, s8*  tcText, s8*  tcCaption, bool tlYes, bool tlNo, bool tlOk, bool tlRetry, bool tlCancel);
 		u64 CALLTYPE			oss_messageBoxUnicode						(u64 id, w16* tuText, w16* tuCaption, bool tlYes, bool tlNo, bool tlOk, bool tlRetry, bool tlCancel);
@@ -545,12 +545,12 @@
 	bool					iioss_signalWindowFocusCallbacksCallback		(SStartEndCallback* cb);
 	void					ioss_signalWindowUnloadCallback					(HWND hwnd);
 	void					ioss_signalWindowClosedCallback					(_iswSOssWindowLL* w);
-	u64						ivvm_bitBltAll										(_iswSOssWindowLL* tow, SRGBA* bd, u32 width, u32 height);
+	u64						ivvm_bitBltAll										(_iswSOssWindowLL* tow, SBGRA* bd, u32 width, u32 height);
 	bool					ioss_openAndReadBitmapFile						(s8* tcPathname, SBitmapHeader* tbh, SBitmapInfo* tbi, s8** tbd, u32* tnResult);
-	void					ioss_allocateSRGBAandCopy32Bit_BitmapTopDown	(SRGBA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SRGBA* lrgbas,    u32* tnResult, u32 tnErrorValue);
-	void					ioss_allocateSRGBAandCopy32Bit_BitmapBottomUp	(SRGBA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SRGBA* lrgbas,    u32* tnResult, u32 tnErrorValue);
-	void					ioss_allocateSRGBAandCopy24Bit_BitmapTopDown	(SRGBA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SRGB*  lrgbsRoot, u32* tnResult, u32 tnErrorValue);
-	void					ioss_allocateSRGBAandCopy24Bit_BitmapBottomUp	(SRGBA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SRGB*  lrgbsRoot, u32* tnResult, u32 tnErrorValue);
+	void					ioss_allocateSBGRAandCopy32Bit_BitmapTopDown	(SBGRA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SBGRA* lrgbas,    u32* tnResult, u32 tnErrorValue);
+	void					ioss_allocateSBGRAandCopy32Bit_BitmapBottomUp	(SBGRA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SBGRA* lrgbas,    u32* tnResult, u32 tnErrorValue);
+	void					ioss_allocateSBGRAandCopy24Bit_BitmapTopDown	(SBGRA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SRGB*  lrgbsRoot, u32* tnResult, u32 tnErrorValue);
+	void					ioss_allocateSBGRAandCopy24Bit_BitmapBottomUp	(SBGRA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SRGB*  lrgbsRoot, u32* tnResult, u32 tnErrorValue);
 	LRESULT CALLTYPE		iioss_timerProc_10ms							(HWND hwnd, UINT msg, UINT_PTR idEvent, DWORD dwTime);
 	bool					iioss_update10msTimersCallback					(SStartEndCallback* cb);
 	DWORD CALLTYPE			iioss_1MsTimerThread							(LPVOID lpParameter);
@@ -596,7 +596,7 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	SBxmla*					iioss_bxmlFindAttribute							(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance);
 
 	SScreen*				ioss_createScreen								(u64 tnAssociatedId, SScreen** ts);
-	SCanvas*				ioss_createCanvas								(u64 tnAssociatedId, SCanvasState* tsState, u32 tnWidth, u32 tnHeight, SRGBA tnBackColor, SCanvas** tsCanvas);
+	SCanvas*				ioss_createCanvas								(u64 tnAssociatedId, SCanvasState* tsState, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, SCanvas** tsCanvas);
 	SRegion*				ioss_createRegion								(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, u32 tnWidth, u32 tnHeight, SCallbacks* callback, SStartEnd* events);
 
 	// TODO:  to be added later: regions need to be able to trigger custom region events (see common.h's Custom event)
@@ -612,16 +612,16 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	SCanvasList*			ioss_appendCanvasToCanvas						(SCanvas* tcParent, SCanvas* tcChild, SCanvasState* tsState, u64 tnAssociatedId, s32 tnX, s32 tnY);
 	SRegionList*			ioss_appendRegionToCanvas						(SCanvas* tc,       SRegion* tr,      u64 tnAssociatedId, SRegionState* tsState, s32 tnX, s32 tnY, SCallbacks* callback);
 	SRegionList*			ioss_appendRegionToRegion						(SRegion* trParent, SRegion* trChild, u64 tnAssociatedId, SRegionState* tsState, u32 tnX, u32 tnY, SCallbacks* callback);
-	u64						ioss_drawFixedPoint								(SCanvas* tc, u32 fontWidth, u32 fontHeight, s32 ulx, s32 uly, s8* text, u32 characterCount, u32 foreground, u32 background);
+	u64						ioss_drawFixedPoint								(SCanvas* tc, u32 fontWidth, u32 fontHeight, s32 ulx, s32 uly, s8* text, u32 characterCount, SBGRA foreground, SBGRA background);
 	u64						ioss_refreshScreen								(SScreen* ts);
 	u64						ioss_refreshCanvas								(SCanvas* tc);
 	u64						ioss_bitBltAll									(SCanvas* tsDst, bool tlDstIsAccumulatorBuffer, s32 tnX, s32 tnY, SCanvas* tsSrc, bool tlSrcIsAccumulatorBuffer);
-	void					iioss_bitBltAll_Opaque							(SRGBA* trgbaDstRoot, SCanvas* tsDst, s32 tnX, s32 tnY, SRGBA* trgbaSrcRoot, SCanvas* tsSrc);
-	void					iioss_bitBltAll_Alpha							(SRGBA* trgbaDstRoot, SCanvas* tsDst, s32 tnX, s32 tnY, SRGBA* trgbaSrcRoot, SCanvas* tsSrc);
+	void					iioss_bitBltAll_Opaque							(SBGRA* trgbaDstRoot, SCanvas* tsDst, s32 tnX, s32 tnY, SBGRA* trgbaSrcRoot, SCanvas* tsSrc);
+	void					iioss_bitBltAll_Alpha							(SBGRA* trgbaDstRoot, SCanvas* tsDst, s32 tnX, s32 tnY, SBGRA* trgbaSrcRoot, SCanvas* tsSrc);
 	u64						ioss_bitBltSection								(SCanvas* tsDst, bool tlDstIsAccumulatorBuffer, s32 dulx, s32 duly, SCanvas* tsSrc, bool tlSrcIsAccumulatorBuffer, s32 sulx, s32 suly, s32 slrx, s32 slry);
-	void					iioss_bitBltSection_Opaque						(SRGBA* trgbaDstRoot, SCanvas* tsDst, s32 dulx, s32 duly, SRGBA* trgbaSrcRoot, SCanvas* tsSrc, s32 sulx, s32 suly, s32 slrx, s32 slry);
-	void					iioss_bitBltSection_Alpha						(SRGBA* trgbaDstRoot, SCanvas* tsDst, s32 dulx, s32 duly, SRGBA* trgbaSrcRoot, SCanvas* tsSrc, s32 sulx, s32 suly, s32 slrx, s32 slry);
-	u32						iioss_gradient									(SCanvas* tc, SRGBA* bd, SRGBA ul, SRGBA ur, SRGBA lr, SRGBA ll);
+	void					iioss_bitBltSection_Opaque						(SBGRA* trgbaDstRoot, SCanvas* tsDst, s32 dulx, s32 duly, SBGRA* trgbaSrcRoot, SCanvas* tsSrc, s32 sulx, s32 suly, s32 slrx, s32 slry);
+	void					iioss_bitBltSection_Alpha						(SBGRA* trgbaDstRoot, SCanvas* tsDst, s32 dulx, s32 duly, SBGRA* trgbaSrcRoot, SCanvas* tsSrc, s32 sulx, s32 suly, s32 slrx, s32 slry);
+	u32						iioss_gradient									(SCanvas* tc, SBGRA* bd, SBGRA ul, SBGRA ur, SBGRA lr, SBGRA ll);
 	void					iioss_createRegionCallback						(SStartEndCallback* cb);
 
 	void*					ioss_SEChain_appendOrPrepend					(SStartEnd* ptrSE, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool tlPrepend, bool* tlResult);

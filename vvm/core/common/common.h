@@ -234,8 +234,8 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	struct SBitmapHeader;
 	struct SBitmapInfo;
 	struct SRGB;
-	struct SRGBA;
-	struct SRGBAF;
+	struct SBGRA;
+	struct SBGRAF;
 	struct SLLCallback;
 	struct SLL4Callback;
 	struct SStartEndCallback;
@@ -733,7 +733,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		u8		red;
 	};
 
-	struct SRGBA
+	struct SBGRA
 	{
 		union {
 			struct {
@@ -746,7 +746,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		};
 	};
 
-	struct SRGBAF
+	struct SBGRAF
 	{
 		f32		blu;				// 24-bit RGB values in bitmap files are physically stored as BGR
 		f32		grn;
@@ -897,8 +897,8 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		u32				heightMax;							// Maximum height the window can have (including the border)
 
 		// Default colors
-		SRGBA			foreColor;							// Default foreground color
-		SRGBA			backColor;							// Default background color
+		SBGRA			foreColor;							// Default foreground color
+		SBGRA			backColor;							// Default background color
 
 		// Flags
 		bool			resizable;							// Is the window resizable?
@@ -1062,13 +1062,13 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		bool			isRefreshing;			// Is this canvas currently refreshing?  If yes, this means its children are also potentially busy.
 
 		// All Canvas objects are always 32-bit RGBA format, even if they're ultimately rendered by the OS onto some lesser or greater color system
-		u32				width;					// width
-		u32				height;					// height
-		SRGBA			backColor;				// A default back color to use for transparency operations
+		s32				width;					// width (stored as s32 for easy comparison during drawing operations, will always be positive)
+		s32				height;					// height (stored as s32 for easy comparison during drawing operations, will always be positive)
+		SBGRA			backColor;				// A default back color to use for transparency operations
 
 		// Bit buffers
-		SRGBA*			bd;						// buffer data
-		SRGBA*			bda;					// buffer data accumulator (for building child items onto this item)
+		SBGRA*			bd;						// buffer data
+		SBGRA*			bda;					// buffer data accumulator (for building child items onto this item)
 		u64				bd_vvmoss;				// OS-specific information used for drawing OSS-fonts (used only by vvmoss code)
 
 		// Items related specifically to this canvas
@@ -1096,7 +1096,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		// Relative position to the associated parent
 		s32				x;						// Upper-left X coordinate
 		s32				y;						// Upper-left Y coordinate
-		SRGBA			backColor;				// The instance's default back color to use for transparency operations (if state.useTransparency)
+		SBGRA			backColor;				// The instance's default back color to use for transparency operations (if state.useTransparency)
 
 		// Items related specifically for this one instance of the canvas (in addition to the ones related to the canvas)
 		SStartEnd		canvasList;				// Pointer to the first SCanvasList entry of this canvasList instance
@@ -1229,9 +1229,9 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		SCb			o;							// Callbacks for this pip
 
 		// Pip colors can be anything
-		SRGBA		colorNeutral;				// What color is displayed when there is no mouse activity?
-		SRGBA		colorOver;					// What color is displayed when the mouse moves over it?
-		SRGBA		colorClick;					// What color is displayed when the user clicks down on it?
+		SBGRA		colorNeutral;				// What color is displayed when there is no mouse activity?
+		SBGRA		colorOver;					// What color is displayed when the mouse moves over it?
+		SBGRA		colorClick;					// What color is displayed when the user clicks down on it?
 	};
 
 	struct SCaskSide
@@ -1263,8 +1263,8 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		SRectXYXY	rect;						// The coordinate range of this text within the cask ((0,0) is upper-left)
 		SCb			o;							// Callbacks for this text
 
-		SRGBA		backColor;					// The back color
-		SRGBA		foreColor;					// The fore color
+		SBGRA		backColor;					// The back color
+		SBGRA		foreColor;					// The fore color
 		csu8p		text;						// Cask middle text
 	};
 

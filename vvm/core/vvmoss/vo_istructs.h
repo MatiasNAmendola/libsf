@@ -186,18 +186,18 @@
 
 		// tpoints is a buffer created to store the conversion pixel data during accumulation
 		// Use formula:
-		//		tpoints	= (SRGBAF*)malloc(		((u32)(1.0/ratioV) + 3)   *
+		//		tpoints	= (SBGRAF*)malloc(		((u32)(1.0/ratioV) + 3)   *
 		//										((u32)(1.0/ratioH) + 3))
 		//
 		f32					ratioV;				// (f32)bio->biHeight	/ (f32)bii->biHeight;
 		f32					ratioH;				// (f32)bio->biWidth	/ (f32)bii->biWidth;
 		u32					count;				// Number of valid points in tpoints
-		SRGBAF*				pixels;				// Accumulation buffer for point data needed to feed into destination
+		SBGRAF*				pixels;				// Accumulation buffer for point data needed to feed into destination
 
 		// Temporary variables used for processing
-		SRGBA*				optr;				// Output pointer to the upper-left pixel for this x,y
-		SRGBA*				iptra;				// Input pointer to the left-most pixel of the first row (the anchor)
-		SRGBA*				iptr;				// Input pointer to the left-most pixel for this y row
+		SBGRA*				optr;				// Output pointer to the upper-left pixel for this x,y
+		SBGRA*				iptra;				// Input pointer to the left-most pixel of the first row (the anchor)
+		SBGRA*				iptr;				// Input pointer to the left-most pixel for this y row
 		u32					x;					// X-coordinate
 		u32					y;					// Y-coordinate
 		f32					ulx;				// Upper-left X

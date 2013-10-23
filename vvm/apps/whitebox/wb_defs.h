@@ -46,7 +46,7 @@
 
 
 	// wb_sup.h
-	SOssWindow*			iwb_buildScreenTemplate							(u64 tnUniqueId, s8* tcCaption, u32 tnCaptionLength, u32 tnX, u32 tnY, u32 tnWidth, u32 tnHeight, u32 tnWidthMin, u32 tnHeightMin, u32 tnWidthMax, u32 tnHeightMax, u32 foreColor, u32 backColor, bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder, SCallbacksW* tsScreenCallbacks);
+	SOssWindow*			iwb_buildScreenTemplate							(u64 tnUniqueId, s8* tcCaption, u32 tnCaptionLength, u32 tnX, u32 tnY, u32 tnWidth, u32 tnHeight, u32 tnWidthMin, u32 tnHeightMin, u32 tnWidthMax, u32 tnHeightMax, SBGRA foreColor, SBGRA backColor, bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder, SCallbacksW* tsScreenCallbacks);
 	void				iwb_initializeCallbacks							(SCallbacksW* tcbw, SCallbacks* tcb);
 	bool				iwb_buildNewMainScreen							(u64 tnUniqueId, SWBScreen* tsWbScreen);
 	bool				iwb_buildNewMediaScreen							(u64 tnUniqueId, SWBScreen* tsWbScreen);

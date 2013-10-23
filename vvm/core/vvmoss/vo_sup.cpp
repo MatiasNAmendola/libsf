@@ -2339,35 +2339,35 @@ _asm int 3;
 
 //////////
 //
-// BitBlt the indicated SRGBA buffer to the specified screen
+// BitBlt the indicated SBGRA buffer to the specified screen
 //
 //////
-	u64 ivvm_bitBltAll(_iswSOssWindowLL* tow, SRGBA* bd, u32 width, u32 height)
+	u64 ivvm_bitBltAll(_iswSOssWindowLL* tw, SBGRA* bd, u32 width, u32 height)
 	{
 		u64		lnResult;
 		u32		lnX, lnY, lnActualWidth;
 		SRGB*	lrgb;
-		SRGBA*	lrgba;
+		SBGRA*	lrgba;
 
 
 		// Make sure there's something to do
-		if (tow)
+		if (tw)
 		{
 			// Draw for every pixel indicated
 			lnResult		= 0;
-			lnActualWidth	= ioss_computeActualWidth(tow->isw.width);
-			for (lnY = 0; lnY < tow->isw.height; lnY++)
+			lnActualWidth	= ioss_computeActualWidth(tw->isw.width);
+			for (lnY = 0; lnY < tw->isw.height; lnY++)
 			{
 				if (lnY < height)
 				{
 					// Grab our offset for the source
-					lrgba = bd + (lnY * tow->isw.width);
+					lrgba = bd + (lnY * tw->isw.width);
 
 					// Grab our offset for the destination
-					lrgb = (SRGB*)((s8*)tow->isw.osBitData + ((tow->isw.height - lnY - 1) * lnActualWidth));
+					lrgb = (SRGB*)((s8*)tw->isw.osBitData + ((tw->isw.height - lnY - 1) * lnActualWidth));
 
 					// Draw this row of pixels
-					for (lnX = 0; lnX < tow->isw.width; lnX++)
+					for (lnX = 0; lnX < tw->isw.width; lnX++)
 					{
 						if (lnX < width)
 						{
@@ -2387,7 +2387,7 @@ _asm int 3;
 			}
 
 			// Tell Windows to redraw it
-			InvalidateRect((HWND)tow->isw.osHandle, NULL, false);
+			InvalidateRect((HWND)tw->isw.osHandle, NULL, false);
 
 		} else {
 			// Indicate failure
@@ -2418,7 +2418,7 @@ _asm int 3;
 //		-4				- Unable to allocate memory for bits
 //		-5				- Unable to read file
 //		-6				- Offset to bits in header not correct
-//		-7				- Unable to allocate memory for internal SRGBA bits
+//		-7				- Unable to allocate memory for internal SBGRA bits
 //		-8				- Unable to open pathname
 //
 //////
@@ -2535,22 +2535,22 @@ _asm int 3;
 
 //////////
 //
-// Called to allocate the SRGBA bitmap data, and copy the indicated 32-bit disk-based bitmap
-// to the SRGBA buffer, when the disk bitmap data is in top-down format.
+// Called to allocate the SBGRA bitmap data, and copy the indicated 32-bit disk-based bitmap
+// to the SBGRA buffer, when the disk bitmap data is in top-down format.
 //
 // Returns:
 //		0			- success
 //		errorValue	- Error allocating memory
 //
 //////
-	void ioss_allocateSRGBAandCopy32Bit_BitmapTopDown(SRGBA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SRGBA* lrgbas, u32* tnResult, u32 tnErrorValue)
+	void ioss_allocateSBGRAandCopy32Bit_BitmapTopDown(SBGRA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SBGRA* lrgbas, u32* tnResult, u32 tnErrorValue)
 	{
 		u32		lnX, lnY;
-		SRGBA*	lrgbad;
+		SBGRA*	lrgbad;
 
 
 		// Allocate our block
-		lrgbad = (SRGBA*)malloc(tbi->height * tbi->width * sizeof(SRGBA));
+		lrgbad = (SBGRA*)malloc(tbi->height * tbi->width * sizeof(SBGRA));
 		if (!lrgbad)
 		{
 			// Failure allocating memory
@@ -2586,23 +2586,23 @@ _asm int 3;
 
 //////////
 //
-// Called to allocate the SRGBA bitmap data, and copy the indicated 32-bit disk-based bitmap
-// to the SRGBA buffer, when the disk bitmap data is in bottom-up format.
+// Called to allocate the SBGRA bitmap data, and copy the indicated 32-bit disk-based bitmap
+// to the SBGRA buffer, when the disk bitmap data is in bottom-up format.
 //
 // Returns:
 //		0			- success
 //		errorValue	- Error allocating memory
 //
 //////
-	void ioss_allocateSRGBAandCopy32Bit_BitmapBottomUp(SRGBA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SRGBA* lrgbasRoot, u32* tnResult, u32 tnErrorValue)
+	void ioss_allocateSBGRAandCopy32Bit_BitmapBottomUp(SBGRA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SBGRA* lrgbasRoot, u32* tnResult, u32 tnErrorValue)
 	{
 		u32		lnX, lnY, lnPixels;
-		SRGBA*	lrgbad;
-		SRGBA*	lrgbas;
+		SBGRA*	lrgbad;
+		SBGRA*	lrgbas;
 
 
 		// Allocate our block
-		lrgbad = (SRGBA*)malloc(tbi->height * tbi->width * sizeof(SRGBA));
+		lrgbad = (SBGRA*)malloc(tbi->height * tbi->width * sizeof(SBGRA));
 		if (!lrgbad)
 		{
 			// Failure allocating memory
@@ -2617,7 +2617,7 @@ _asm int 3;
 		for (lnY = 0; lnY < tbi->height; lnY++)
 		{
 			// Calculate the offset for this line
-			lrgbas = (SRGBA*)((s8*)lrgbasRoot + ((tbi->height - lnY - 1) * tbi->width * sizeof(SRGBA)));
+			lrgbas = (SBGRA*)((s8*)lrgbasRoot + ((tbi->height - lnY - 1) * tbi->width * sizeof(SBGRA)));
 
 			// Iterate for every pixel column on this row
 			for (lnX = 0; lnX < tbi->width; lnX++)
@@ -2646,23 +2646,23 @@ _asm int 3;
 
 //////////
 //
-// Called to allocate the SRGBA bitmap data, and copy the indicated 24-bit disk-based bitmap
-// to the SRGBA buffer, when the disk bitmap data is in top-down format.
+// Called to allocate the SBGRA bitmap data, and copy the indicated 24-bit disk-based bitmap
+// to the SBGRA buffer, when the disk bitmap data is in top-down format.
 //
 // Returns:
 //		0			- success
 //		errorValue	- Error allocating memory
 //
 //////
-	void ioss_allocateSRGBAandCopy24Bit_BitmapTopDown(SRGBA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SRGB* lrgbsRoot, u32* tnResult, u32 tnErrorValue)
+	void ioss_allocateSBGRAandCopy24Bit_BitmapTopDown(SBGRA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SRGB* lrgbsRoot, u32* tnResult, u32 tnErrorValue)
 	{
 		u32		lnX, lnY;
-		SRGBA*	lrgbad;
+		SBGRA*	lrgbad;
 		SRGB*	lrgbs;
 
 
 		// Allocate our block
-		lrgbad = (SRGBA*)malloc(tbi->height * tbi->width * sizeof(SRGBA));
+		lrgbad = (SBGRA*)malloc(tbi->height * tbi->width * sizeof(SBGRA));
 		if (!lrgbad)
 		{
 			// Failure allocating memory
@@ -2701,23 +2701,23 @@ _asm int 3;
 
 //////////
 //
-// Called to allocate the SRGBA bitmap data, and copy the indicated 24-bit disk-based bitmap
-// to the SRGBA buffer, when the disk bitmap data is in bottom-up format.
+// Called to allocate the SBGRA bitmap data, and copy the indicated 24-bit disk-based bitmap
+// to the SBGRA buffer, when the disk bitmap data is in bottom-up format.
 //
 // Returns:
 //		0			- success
 //		errorValue	- Error allocating memory
 //
 //////
-	void ioss_allocateSRGBAandCopy24Bit_BitmapBottomUp(SRGBA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SRGB* lrgbsRoot, u32* tnResult, u32 tnErrorValue)
+	void ioss_allocateSBGRAandCopy24Bit_BitmapBottomUp(SBGRA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SRGB* lrgbsRoot, u32* tnResult, u32 tnErrorValue)
 	{
 		u32		lnX, lnY;
-		SRGBA*	lrgbad;
+		SBGRA*	lrgbad;
 		SRGB*	lrgbs;
 
 
 		// Allocate our block
-		lrgbad = (SRGBA*)malloc(tbi->height * tbi->width * sizeof(SRGBA));
+		lrgbad = (SBGRA*)malloc(tbi->height * tbi->width * sizeof(SBGRA));
 		if (!lrgbad)
 		{
 			// Failure allocating memory
@@ -3372,7 +3372,7 @@ _asm int 3;
 		if (tcSrc->width == tcDst->width && tcSrc->height == tcDst->height)
 		{
 			// They're the same size, just copy them
-			memcpy(tcDst->bd, tcSrc->bd, tcSrc->width * tcSrc->height * sizeof(SRGBA));
+			memcpy(tcDst->bd, tcSrc->bd, tcSrc->width * tcSrc->height * sizeof(SBGRA));
 			lnResult = 1;
 
 		} else {
@@ -3405,7 +3405,7 @@ _asm int 3;
 //////
 	u64 iioss_canvasScaleProcess(SCanvas* tcDst, SCanvas* tcSrc, f32 tfVerticalScaler, f32 tfHorizontalScaler)
 	{
-		u32					lnY, lnX;
+		s32					lnY, lnX;
 		_isSBitmapProcess	bp;
 
 
@@ -3414,7 +3414,7 @@ _asm int 3;
 		bp.src		= tcSrc;
 		bp.ratioV	= (f32)tcSrc->height	/ (f32)tcDst->height;
 		bp.ratioH	= (f32)tcSrc->width		/ (f32)tcDst->width;
-		bp.pixels	= (SRGBAF*)malloc(((u32)bp.ratioV + 16) * ((u32)bp.ratioH + 16) * sizeof(SRGBAF));
+		bp.pixels	= (SBGRAF*)malloc(((u32)bp.ratioV + 16) * ((u32)bp.ratioH + 16) * sizeof(SBGRAF));
 
 		// Iterate through every pixel
 		for (lnY = 0; lnY < tcDst->height; lnY++)
@@ -3450,7 +3450,7 @@ _asm int 3;
 		// When we get here, we've computed everything
 
 		// Finished, indicate the pixel count
-		return(tcDst->height * tcDst->width * sizeof(SRGBA));
+		return(tcDst->height * tcDst->width * sizeof(SBGRA));
 	}
 
 
@@ -4648,7 +4648,7 @@ continueToNextAttribute:
 // Create a new canvas in the master list
 //
 //////
-	SCanvas* ioss_createCanvas(u64 tnAssociatedId, SCanvasState* tsState, u32 tnWidth, u32 tnHeight, SRGBA tnBackColor, SCanvas** tsCanvas)
+	SCanvas* ioss_createCanvas(u64 tnAssociatedId, SCanvasState* tsState, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, SCanvas** tsCanvas)
 	{
 		SCanvas*	lc;
 
@@ -4678,8 +4678,8 @@ continueToNextAttribute:
 			lc->semRefresh		= oss_createSemaphore();
 
 			// Initialize the canvas buffers
-			lc->bd				= (SRGBA*)malloc(tnHeight * tnWidth * 4);					// buffer data
-			lc->bda				= (SRGBA*)malloc(tnHeight * tnWidth * 4);					// buffer accumulator data (for building child items onto a canvas before copying and using this canvas above)
+			lc->bd				= (SBGRA*)malloc(tnHeight * tnWidth * 4);					// buffer data
+			lc->bda				= (SBGRA*)malloc(tnHeight * tnWidth * 4);					// buffer accumulator data (for building child items onto a canvas before copying and using this canvas above)
 			lc->bd_vvmoss		= oss_requestSystemBitmap(tnWidth, tnHeight);				// Used primarily for rendering system fonts
 
 			// Initialize it with the default background color
@@ -5182,14 +5182,14 @@ continueToNextAttribute:
 // could be used by the ioss_drawText() function.
 //
 //////
-	u64 ioss_drawFixedPoint(SCanvas* tc, u32 fontWidth, u32 fontHeight, s32 ulx, s32 uly, s8* tcText, u32 tnTextLength, u32 foreground, u32 background)
+	u64 ioss_drawFixedPoint(SCanvas* tc, u32 fontWidth, u32 fontHeight, s32 ulx, s32 uly, s8* tcText, u32 tnTextLength, SBGRA foreground, SBGRA background)
 	{
 		u64		lnPixels;
-        u32		lnX, lnY, lnFontWidth, lnFontHeight, lnSV, lnSH, lnScalerV, lnScalerH;
+        s32		lnX, lnY, lnFontWidth, lnFontHeight, lnSV, lnSH, lnScalerV, lnScalerH;
 		u8		lcThisCharacter, lcRowBits, lcMask, fred, fgrn, fblu, bred, bgrn, bblu;
         u8*		lcFontBase;
         u32		lnCharacterOffset;
-		SRGBA*	lrgba;
+		SBGRA*	lrgba;
 
 
         // See what font they're using
@@ -5302,12 +5302,13 @@ continueToNextAttribute:
         }
 
 		// Extract the colors
-		fred	= red(foreground);
-		fgrn	= grn(foreground);
-		fblu	= blu(foreground);
-		bred	= red(background);
-		bgrn	= grn(background);
-		bblu	= blu(background);
+		fred	= foreground.red;
+		fgrn	= foreground.grn;
+		fblu	= foreground.blu;
+
+		bred	= background.red;
+		bgrn	= background.grn;
+		bblu	= background.blu;
 
         // Begin drawing the text
 		lnPixels = 0;
@@ -5485,8 +5486,8 @@ continueToNextAttribute:
 	u64 ioss_bitBltAll(SCanvas* tsDst, bool tlDstIsAccumulatorBuffer, s32 tnX, s32 tnY, SCanvas* tsSrc, bool tlSrcIsAccumulatorBuffer)
 	{
 		u64			lnRowCount;
-		SRGBA*		lrgbaDstRoot;
-		SRGBA*		lrgbaSrcRoot;
+		SBGRA*		lrgbaDstRoot;
+		SBGRA*		lrgbaSrcRoot;
 
 
 // OPTIMIZATION:  We can go through here and determine line portions to process to speed this up.
@@ -5503,7 +5504,7 @@ continueToNextAttribute:
 				if (tsDst->bd && tsDst->bda)
 				{
 					// We are doing a copy from accumulation to non-accumulation
-					memcpy(tsDst->bd, tsDst->bda, tsDst->height * tsDst->width * sizeof(SRGBA));		// Copy the entire buffer
+					memcpy(tsDst->bd, tsDst->bda, tsDst->height * tsDst->width * sizeof(SBGRA));		// Copy the entire buffer
 
 					// Indicate we copied all of them
 					lnRowCount = tsDst->height;
@@ -5538,13 +5539,13 @@ continueToNextAttribute:
 // src alpha settings.
 //
 //////
-	void iioss_bitBltAll_Alpha(SRGBA* trgbaDstRoot, SCanvas* tsDst, s32 tnX, s32 tnY, SRGBA* trgbaSrcRoot, SCanvas* tsSrc)
+	void iioss_bitBltAll_Alpha(SBGRA* trgbaDstRoot, SCanvas* tsDst, s32 tnX, s32 tnY, SBGRA* trgbaSrcRoot, SCanvas* tsSrc)
 	{
 		s32			lnY, lnX;
 		u8			redd, grnd, blud;
 		f32			alp, malp;
-		SRGBA*		lrgbad;
-		SRGBA*		lrgbas;
+		SBGRA*		lrgbad;
+		SBGRA*		lrgbas;
 
 
 // TODO:  this algorithm needs to more properly consider transparency, of the source to destination, along with individual bits within
@@ -5595,11 +5596,11 @@ continueToNextAttribute:
 //
 //////
 	// It is probbaly best NOT to call this function directory, but rather call ioss_bitBltAll()
-	void iioss_bitBltAll_Opaque(SRGBA* trgbaDstRoot, SCanvas* tsDst, s32 tnX, s32 tnY, SRGBA* trgbaSrcRoot, SCanvas* tsSrc)
+	void iioss_bitBltAll_Opaque(SBGRA* trgbaDstRoot, SCanvas* tsDst, s32 tnX, s32 tnY, SBGRA* trgbaSrcRoot, SCanvas* tsSrc)
 	{
 		s32			lnY, lnX;
-		SRGBA*		lrgbad;
-		SRGBA*		lrgbas;
+		SBGRA*		lrgbad;
+		SBGRA*		lrgbas;
 
 
 		// Repeat for every row
@@ -5650,8 +5651,8 @@ continueToNextAttribute:
 	u64 ioss_bitBltSection(SCanvas* tsDst, bool tlDstIsAccumulatorBuffer, s32 dulx, s32 duly, SCanvas* tsSrc, bool tlSrcIsAccumulatorBuffer, s32 sulx, s32 suly, s32 slrx, s32 slry)
 	{
 		u64			lnRowCount;
-		SRGBA*		lrgbaDstRoot;
-		SRGBA*		lrgbaSrcRoot;
+		SBGRA*		lrgbaDstRoot;
+		SBGRA*		lrgbaSrcRoot;
 
 
 // OPTIMIZATION:  We can go through here and determine line portions to process to speed this up.
@@ -5668,7 +5669,7 @@ continueToNextAttribute:
 				if (tsDst->bd && tsDst->bda)
 				{
 					// We are doing a copy from accumulation to non-accumulation
-					memcpy(tsDst->bd, tsDst->bda, tsDst->height * tsDst->width * sizeof(SRGBA));		// Copy the entire buffer
+					memcpy(tsDst->bd, tsDst->bda, tsDst->height * tsDst->width * sizeof(SBGRA));		// Copy the entire buffer
 
 					// Indicate we copied all of them
 					lnRowCount = tsDst->height;
@@ -5703,13 +5704,13 @@ continueToNextAttribute:
 // src alpha settings, for the section indicated.
 //
 //////
-	void iioss_bitBltSection_Opaque(SRGBA* trgbaDstRoot, SCanvas* tsDst, s32 dulx, s32 duly, SRGBA* trgbaSrcRoot, SCanvas* tsSrc, s32 sulx, s32 suly, s32 slrx, s32 slry)
+	void iioss_bitBltSection_Opaque(SBGRA* trgbaDstRoot, SCanvas* tsDst, s32 dulx, s32 duly, SBGRA* trgbaSrcRoot, SCanvas* tsSrc, s32 sulx, s32 suly, s32 slrx, s32 slry)
 	{
 		s32			lnY, lnX, lnThisX, lnThisY, lnWidth, lnHeight;
 		u8			redd, grnd, blud;
 		f32			alp, malp;
-		SRGBA*		lrgbad;
-		SRGBA*		lrgbas;
+		SBGRA*		lrgbad;
+		SBGRA*		lrgbas;
 
 
 // TODO:  this algorithm needs to more properly consider transparency, of the source to destination, along with individual bits within
@@ -5771,11 +5772,11 @@ continueToNextAttribute:
 // src alpha settings, for the section indicated.
 //
 //////
-	void iioss_bitBltSection_Alpha(SRGBA* trgbaDstRoot, SCanvas* tsDst, s32 dulx, s32 duly, SRGBA* trgbaSrcRoot, SCanvas* tsSrc, s32 sulx, s32 suly, s32 slrx, s32 slry)
+	void iioss_bitBltSection_Alpha(SBGRA* trgbaDstRoot, SCanvas* tsDst, s32 dulx, s32 duly, SBGRA* trgbaSrcRoot, SCanvas* tsSrc, s32 sulx, s32 suly, s32 slrx, s32 slry)
 	{
 		s32			lnY, lnX, lnThisX, lnThisY, lnWidth, lnHeight;
-		SRGBA*		lrgbad;
-		SRGBA*		lrgbas;
+		SBGRA*		lrgbad;
+		SBGRA*		lrgbas;
 
 
 		// Derive our size for the source rectangular region
@@ -5831,15 +5832,15 @@ continueToNextAttribute:
 // Draws a gradient on the indicated canvas.
 //
 //////
-	u32 iioss_gradient(SCanvas* tc, SRGBA* bd, SRGBA ul, SRGBA ur, SRGBA lr, SRGBA ll)
+	u32 iioss_gradient(SCanvas* tc, SBGRA* bd, SBGRA ul, SBGRA ur, SBGRA lr, SBGRA ll)
 	{
-		u32		lnY, lnX;
+		s32		lnY, lnX;
 		f32		red, grn, blu, redColumnStep, grnColumnStep, bluColumnStep;
 		f32		redLeft,  grnLeft,  bluLeft;
 		f32		redRight, grnRight, bluRight;
 		f32		redRowLeftStep,  grnRowLeftStep,  bluRowLeftStep;
 		f32		redRowRightStep, grnRowRightStep, bluRowRightStep;
-		SRGBA*	lrgba;
+		SBGRA*	lrgba;
 
 
 		// Grab our colors

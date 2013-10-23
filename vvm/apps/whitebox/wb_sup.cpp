@@ -48,7 +48,7 @@
 										u32 tnWidth, u32 tnHeight,
 										u32 tnWidthMin, u32 tnHeightMin,
 										u32 tnWidthMax, u32 tnHeightMax,
-										u32 foreColor, u32 backColor,
+										SBGRA foreColor, SBGRA backColor,
 										bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder,
 										SCallbacksW* screenCallbacks	)
 	{
@@ -321,7 +321,7 @@
 	{
 		SOssWindow*	lisw;
 		u64			lnOssWindowId, lnScreen;
-		u32			foreColor, backColor;
+		SBGRA 		foreColor, backColor;
 		SScreen*	ls;
 		SCanvas*	lc;
 
@@ -329,10 +329,10 @@
 		//////////
 		// Initialize memory variables
 		//////
-			foreColor	= rgba(0,0,0,255);
-			backColor	= rgba(255,255,255,255);
-			*tsScreen	= NULL;
-			*tsCanvas	= NULL;
+			foreColor.color	= rgba(0,0,0,255);
+			backColor.color	= rgba(255,255,255,255);
+			*tsScreen		= NULL;
+			*tsCanvas		= NULL;
 
 
 		//////////

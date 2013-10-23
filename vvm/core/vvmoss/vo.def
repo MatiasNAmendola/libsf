@@ -82,7 +82,7 @@ EXPORTS
 	oss_getScreenDimensions
 	oss_setFocus
 	oss_bitBlt
-	oss_bitBltSystemBitmapToSRGBA
+	oss_bitBltSystemBitmapToSBGRA
 	oss_drawText
 	oss_getNextMessage
 	oss_messageBox
