@@ -219,7 +219,8 @@
 					}
 
 				// When we get here, this test is completed
-				FreeLibrary(lnHmod);
+// TODO:  We should undo this following line comment.  It was added for the hijack() functions added to vvmt_core.cpp for initial testing.
+//				FreeLibrary(lnHmod);
 			}
 		}
 		// When we get here, indicate our status

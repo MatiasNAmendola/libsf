@@ -466,20 +466,20 @@
 //////
 	void ioss_createVisibleWindow(SOssWindow* tisw, _iswSOssWindowLL** tow)
 	{
-		u32				lnError, lnWindowStyle, lnWidthDelta, lnHeightDelta;
-		SOssWindow		lisw;
-		w16*			luCaption;
+		u32					lnError, lnWindowStyle, lnWidthDelta, lnHeightDelta;
+		SOssWindow			lisw;
+		w16*				luCaption;
 		_iswSOssWindowLL*	low;
-		RECT			lrc, lrco;
+		RECT				lrc, lrco;
 
 
 		// See if we should position / center the window on vertical or horizontal
 		GetWindowRect(GetDesktopWindow(), &lrc);
-		if (tisw->x == -1)
-			tisw->x = ((lrc.right - lrc.left) - tisw->width) / 2;		// Position horizontal
+		if (tisw->osX == -1)
+			tisw->osX = ((lrc.right - lrc.left) - tisw->width) / 2;		// Position horizontal
 
-		if (tisw->y == -1)
-			tisw->y = ((lrc.bottom - lrc.top) - tisw->height) / 2;		// Position vertical
+		if (tisw->osY == -1)
+			tisw->osY = ((lrc.bottom - lrc.top) - tisw->height) / 2;		// Position vertical
 
 
 		// Determine the geometry for this type of window
@@ -489,8 +489,6 @@
 		AdjustWindowRect(&lrc, lnWindowStyle, FALSE);
 		tisw->osWidth	= lrc.right - lrc.left;
 		tisw->osHeight	= lrc.bottom - lrc.top;
-		tisw->osX		= tisw->x;
-		tisw->osY		= tisw->y;
 
 		// Adjust the minimum width by any requirements of the border
 		lnWidthDelta	= (lrc.right  - lrc.left) - (lrco.right  - lrco.left);
@@ -521,7 +519,7 @@
 		low->isw.osHandle = (u64)CreateWindowW(	guVvmOssVisibleClass,
 												luCaption,
 												lnWindowStyle,
-												tisw->x, tisw->y,
+												tisw->osX, tisw->osY,
 												tisw->osWidth, tisw->osHeight,
 												NULL, NULL, ghInstance, NULL);
 
@@ -766,6 +764,10 @@ _asm int 3;
 				return DefWindowProc(hwnd, msg, wp, lp);
 				break;
 
+		//////////
+		// Window movement / resize events
+		//////
+			//
 			case WM_MOVE:
 			// The window has moved, signal the callback
 				ioss_signalMove(hwnd,
@@ -779,6 +781,10 @@ _asm int 3;
 								/*width */(u32)(lp & 0xffff),
 								/*height*/(u32)(lp >> 16));
 				break;
+				//
+		//////////
+		// END
+		//////
 
 
 		//////////
@@ -1224,9 +1230,9 @@ _asm int 3;
 //////
 	void ioss_recordMouseEvent(HWND hwnd, u32 tnEVent, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)
 	{
-		_iswSOssWindowLL*		w;
+		_iswSOssWindowLL*	w;
 		SOssWindow			lisw;
-		SOssMouseEvent*	lisme;
+		SOssMouseEvent*		lisme;
 
 
 		// Iterate through known windows to find our man
@@ -1235,31 +1241,30 @@ _asm int 3;
 		{
 // TODO:  In all places where the lisw structure is referenced, we need to blank out or create a duplicate of the structure at the start of every call
 //        This way the user can mess with the structure, and nothing will be affected
-			// Make a copy of the record in case the user goes nutty coo-coo! :-)
-			memcpy(&lisw, &w->isw, sizeof(SOssWindow));
-
 			// See what event we're processing
 			switch (tnEVent)
 			{
 				case VVMOSS_MOUSE_MOVE:
 					// Do the callback
-					if (lisw.osIsDragging)
+					if (w->isw.osIsDragging)
 					{
 						// Dragging something, signal that callback if necessary
-						if (lisw.callback.drag._callback_dragging)
+						if (w->isw.callback.drag._callback_dragging)
 						{
 							ioss_lockSemaphore(w->isw.callback.drag.semaphore_dragging);
-							lisw.callback.drag.callback_dragging(w->isw.uniqueId, &lisw, tnX, tnY, tnButtons, tnKeys, w->isw.timer - w->isw.osDragStartTimer);
+							memcpy(&lisw, &w->isw, sizeof(SOssWindow));		// Make a copy of the record in case the user goes nutty coo-coo! :-)
+							w->isw.callback.drag.callback_dragging(w->isw.uniqueId, &lisw, tnX, tnY, tnButtons, tnKeys, w->isw.timer - w->isw.osDragStartTimer);
 							ioss_unlockSemaphore(w->isw.callback.drag.semaphore_dragging);
 						}
 
 					} else {
 						// Regular mouse move
-						if (lisw.callback.mouse._callback_move)
+						if (w->isw.callback.mouse._callback_move)
 						{
-							ioss_lockSemaphore(lisw.callback.mouse.semaphore_move);
-							lisw.callback.mouse.callback_move(w->isw.uniqueId, &lisw, tnX, tnY, tnButtons, tnKeys);
-							ioss_unlockSemaphore(lisw.callback.mouse.semaphore_move);
+							ioss_lockSemaphore(w->isw.callback.mouse.semaphore_move);
+							memcpy(&lisw, &w->isw, sizeof(SOssWindow));		// Make a copy of the record in case the user goes nutty coo-coo! :-)
+							w->isw.callback.mouse.callback_move(w->isw.uniqueId, &lisw, tnX, tnY, tnButtons, tnKeys);
+							ioss_unlockSemaphore(w->isw.callback.mouse.semaphore_move);
 						}
 					}
 
@@ -1271,11 +1276,12 @@ _asm int 3;
 				case VVMOSS_MOUSE_BUTTON_DOWN_RIGHT:
 				case VVMOSS_MOUSE_BUTTON_DOWN:
 					// Do the callback for the down buttons
-					if (lisw.callback.mouse._callback_down)
+					if (w->isw.callback.mouse._callback_down)
 					{
-						ioss_lockSemaphore(lisw.callback.mouse.semaphore_down);
-						lisw.callback.mouse.callback_down(w->isw.uniqueId, &lisw, tnX, tnY, tnButtons, tnKeys);
-						ioss_unlockSemaphore(lisw.callback.mouse.semaphore_down);
+						ioss_lockSemaphore(w->isw.callback.mouse.semaphore_down);
+						memcpy(&lisw, &w->isw, sizeof(SOssWindow));		// Make a copy of the record in case the user goes nutty coo-coo! :-)
+						w->isw.callback.mouse.callback_down(w->isw.uniqueId, &lisw, tnX, tnY, tnButtons, tnKeys);
+						ioss_unlockSemaphore(w->isw.callback.mouse.semaphore_down);
 					}
 
 					// Note:  The determination for dragging is triggered on the timer event.
@@ -1289,14 +1295,15 @@ _asm int 3;
 				case VVMOSS_MOUSE_BUTTON_UP_LEFT:
 				case VVMOSS_MOUSE_BUTTON_UP:
 					// Do the callback for the up buttons
-					if (!lisw.osIsDragging)
+					if (!w->isw.osIsDragging)
 					{
 						// Regular mouse release
-						if (lisw.callback.mouse._callback_up)
+						if (w->isw.callback.mouse._callback_up)
 						{
-							ioss_lockSemaphore(lisw.callback.mouse.semaphore_up);
-							lisw.callback.mouse.callback_up(w->isw.uniqueId, &lisw, tnX, tnY, tnButtons, tnKeys);
-							ioss_unlockSemaphore(lisw.callback.mouse.semaphore_up);
+							ioss_lockSemaphore(w->isw.callback.mouse.semaphore_up);
+							memcpy(&lisw, &w->isw, sizeof(SOssWindow));		// Make a copy of the record in case the user goes nutty coo-coo! :-)
+							w->isw.callback.mouse.callback_up(w->isw.uniqueId, &lisw, tnX, tnY, tnButtons, tnKeys);
+							ioss_unlockSemaphore(w->isw.callback.mouse.semaphore_up);
 						}
 					}
 
@@ -1351,6 +1358,7 @@ _asm int 3;
 				//        remove other buttons while dragging, for some potentially awesome abilities.
 				w->isw.osIsDragging = false;
 				ioss_lockSemaphore(w->isw.callback.drag.semaphore_drop);
+				memcpy(&lisw, &w->isw, sizeof(SOssWindow));		// Make a copy of the record in case the user goes nutty coo-coo! :-)
 				w->isw.callback.drag.callback_drop(w->isw.uniqueId, &lisw, w->isw.osMouseMove.x, w->isw.osMouseMove.y, w->isw.osMouseMove.buttons, w->isw.osMouseMove.keys, w->isw.timer - w->isw.osDragStartTimer);
 				ioss_unlockSemaphore(w->isw.callback.drag.semaphore_drop);
 			}
@@ -1361,6 +1369,7 @@ _asm int 3;
 				// Yes, it's needed
 				// Cancel the hover operation
 				ioss_lockSemaphore(w->isw.callback.mouse.semaphore_hover);
+				memcpy(&lisw, &w->isw, sizeof(SOssWindow));		// Make a copy of the record in case the user goes nutty coo-coo! :-)
 				w->isw.callback.mouse.callback_hover(w->isw.uniqueId, &lisw, w->isw.osMouseMove.x, w->isw.osMouseMove.y, w->isw.osMouseMove.buttons, w->isw.osMouseMove.keys, w->isw.timer - w->isw.osMouseMove.timer, true);
 				ioss_unlockSemaphore(w->isw.callback.mouse.semaphore_hover);
 				w->isw.osHoverCallbackFired = false;
@@ -1581,14 +1590,12 @@ _asm int 3;
 		w = ioss_findSOssWindowLLByHwnd(hwnd);
 		if (w && (w->isw.width != tnWidth || w->isw.height != tnHeight))
 		{
-			// Create a copy in case the user is a lunatic! :-)
-			memcpy(&lisw, &w->isw, sizeof(SOssWindow));
-
 			// Signal the resize (if we are supposed to)
 			if (w->isw.callback.window._callback_resized)
 			{
 				// Callback
 				ioss_lockSemaphore(w->isw.callback.window.semaphore_resized);
+				memcpy(&lisw, &w->isw, sizeof(SOssWindow));		// Make a copy of the record in case the user goes nutty coo-coo! :-)
 				w->isw.callback.window.callback_resized(w->isw.uniqueId, &lisw, tnWidth, tnHeight);
 				ioss_unlockSemaphore(w->isw.callback.window.semaphore_resized);
 			}
@@ -2214,7 +2221,7 @@ _asm int 3;
 //////
 	bool iioss_signalWindowFocusCallbacksCallback(SStartEndCallback* cb)
 	{
-		_iswSOssWindowLL*		low;
+		_iswSOssWindowLL*	w;
 		SOssWindow			lisw;
 		_iswSFocusCallback*	lfc;
 
@@ -2222,32 +2229,30 @@ _asm int 3;
 		// Make sure our environment is sane
 		if (cb && cb->ptr)
 		{
-			low = (_iswSOssWindowLL*)cb->ptr;
+			w = (_iswSOssWindowLL*)cb->ptr;
 			lfc = (_iswSFocusCallback*)cb->extra;
 
 			// See if this is the window that should receive focus
-			if (low->isw.osHandle == lfc->osHandle)
-				lfc->forFocus = low;		// It is
+			if (w->isw.osHandle == lfc->osHandle)
+				lfc->forFocus = w;		// It is
 
 			// See if this window currently has focus
-			if (low->isw.hasFocus)
+			if (w->isw.hasFocus)
 			{
 				// Is this window losing focus?
-				if (low->isw.osHandle != lfc->osHandle)
+				if (w->isw.osHandle != lfc->osHandle)
 				{
-					// Create a copy in case the user is a lunatic! :-)
-					memcpy(&lisw, &low->isw, sizeof(SOssWindow));
-
 					// This window is losing focus
-					if (low->isw.callback.window._callback_lostFocus)
+					if (w->isw.callback.window._callback_lostFocus)
 					{
 						// Signal this window that it's losing focus
-						ioss_lockSemaphore(low->isw.callback.window.semaphore_lostFocus);
-						low->isw.callback.window.callback_lostFocus(low->isw.uniqueId, &lisw);
-						ioss_unlockSemaphore(low->isw.callback.window.semaphore_lostFocus);
+						ioss_lockSemaphore(w->isw.callback.window.semaphore_lostFocus);
+						memcpy(&lisw, &w->isw, sizeof(SOssWindow));		// Make a copy of the record in case the user goes nutty coo-coo! :-)
+						w->isw.callback.window.callback_lostFocus(w->isw.uniqueId, &lisw);
+						ioss_unlockSemaphore(w->isw.callback.window.semaphore_lostFocus);
 					}
 					// And make it so
-					low->isw.hasFocus = false;
+					w->isw.hasFocus = false;
 
 				} else {
 					// This window already had focus
@@ -2277,13 +2282,11 @@ _asm int 3;
 		w = ioss_findSOssWindowLLByHwnd(hwnd);
 		if (w)
 		{
-			// Create a copy in case the user is a lunatic! :-)
-			memcpy(&lisw, &w->isw, sizeof(SOssWindow));
-
 			// Signal the move if we are supposed to
 			if (w->isw.callback.window._callback_unload)
 			{
 				ioss_lockSemaphore(w->isw.callback.window.semaphore_unload);
+				memcpy(&lisw, &w->isw, sizeof(SOssWindow));		// Make a copy of the record in case the user goes nutty coo-coo! :-)
 				w->isw.callback.window.callback_unload(w->isw.uniqueId, &lisw);
 				ioss_unlockSemaphore(w->isw.callback.window.semaphore_unload);
 			}
@@ -2317,13 +2320,11 @@ _asm int 3;
 		// Make sure there's something to do! :-)
 		if (w)
 		{
-			// Create a copy in case the user is a lunatic! :-)
-			memcpy(&lisw, &w->isw, sizeof(SOssWindow));
-
 			// Do the callback
 			if (w->isw.callback.window._callback_closed)
 			{
 				ioss_lockSemaphore(w->isw.callback.window.semaphore_closed);
+				memcpy(&lisw, &w->isw, sizeof(SOssWindow));		// Make a copy of the record in case the user goes nutty coo-coo! :-)
 				w->isw.callback.window.callback_closed(w->isw.uniqueId, &lisw);
 				ioss_unlockSemaphore(w->isw.callback.window.semaphore_closed);
 			}
@@ -2779,60 +2780,56 @@ _asm int 3;
 
 	bool iioss_update10msTimersCallback(SStartEndCallback* cb)
 	{
-		u64				lnTimerDiff;
-		_iswSOssWindowLL*	low;
-		SOssWindow		lisw;
+		u64					lnTimerDiff;
+		_iswSOssWindowLL*	w;
+		SOssWindow			lisw;
 
 
 		// Make sure our environment's sane
 		if (cb && cb->ptr)
 		{
-			low = (_iswSOssWindowLL*)cb->ptr;
+			w = (_iswSOssWindowLL*)cb->ptr;
 			// Increase the timer
-			low->isw.timer += 10;
+			w->isw.timer += 10;
 
 			// Increase the accumulation timers
-			if (low->isw.osIsMouseButtonDown)
-				low->isw.osMouseDownAccumulationCounter += 10;	// Increments that this item has been pressed down for this long
+			if (w->isw.osIsMouseButtonDown)
+				w->isw.osMouseDownAccumulationCounter += 10;	// Increments that this item has been pressed down for this long
 
 			// See if we're beginning a drag:
 			//		(1) At least one mouse button is down
 			//		(2) Not already dragging
 			//		(3) They want dragDrop callbacks
 			//		(4) They've dragged at least 7 pixels as the crow flies
-			if (low->isw.osIsMouseButtonDown)
+			if (w->isw.osIsMouseButtonDown)
 			{
-				if (!low->isw.osIsDragging)
+				if (!w->isw.osIsDragging)
 				{
-					if (low->isw.callback.drag._callback_start)
+					if (w->isw.callback.drag._callback_start)
 					{
-						if (ioss_distanceBetween(	low->isw.osMouseMove.x,		low->isw.osMouseMove.y,
-												low->isw.osMouseDownFirst.x,	low->isw.osMouseDownFirst.y) > gfMouseDragThreshold)
+						if (ioss_distanceBetween(	w->isw.osMouseMove.x,		w->isw.osMouseMove.y,
+												w->isw.osMouseDownFirst.x,	w->isw.osMouseDownFirst.y) > gfMouseDragThreshold)
 						{
 							// A drag has now started
-							// It is time.  Make a copy of the structure in case the user goes bananas! :-)
-							memcpy(&lisw, &low->isw, sizeof(SOssWindow));
-							ioss_lockSemaphore(low->isw.callback.drag.semaphore_start);
-							low->isw.callback.drag.callback_start(low->isw.uniqueId, &lisw, low->isw.osMouseDownFirst.x, low->isw.osMouseDownFirst.y, low->isw.osMouseMove.buttons, low->isw.osMouseMove.keys);
-							ioss_unlockSemaphore(low->isw.callback.drag.semaphore_start);
-							low->isw.osIsDragging = true;
+							ioss_lockSemaphore(w->isw.callback.drag.semaphore_start);
+							memcpy(&lisw, &w->isw, sizeof(SOssWindow));		// Make a copy of the record in case the user goes nutty coo-coo! :-)
+							w->isw.callback.drag.callback_start(w->isw.uniqueId, &lisw, w->isw.osMouseDownFirst.x, w->isw.osMouseDownFirst.y, w->isw.osMouseMove.buttons, w->isw.osMouseMove.keys);
+							ioss_unlockSemaphore(w->isw.callback.drag.semaphore_start);
+							w->isw.osIsDragging = true;
 						}
 					}
 				}
 			}
 
 			// See if a hover event has been triggered
-			if (low->isw.callback.mouse._callback_hover && !low->isw.osHoverCallbackFired && !low->isw.osIsDragging)
+			if (w->isw.callback.mouse._callback_hover && !w->isw.osHoverCallbackFired && !w->isw.osIsDragging)
 			{
 				// The hover function is defined, see if the timing is right
-				lnTimerDiff = low->isw.timer - low->isw.osMouseMove.timer;
+				lnTimerDiff = w->isw.timer - w->isw.osMouseMove.timer;
 				if (lnTimerDiff > gnHoverTimeout)
 				{
-					// It is time.  Make a copy of the structure in case the user goes bananas! :-)
-					memcpy(&lisw, &low->isw, sizeof(SOssWindow));
-
 					// Raise the flag
-					low->isw.osHoverCallbackFired = true;
+					w->isw.osHoverCallbackFired = true;
 
 				//////////
 				// Do the callback
@@ -2841,9 +2838,10 @@ _asm int 3;
 				//        This thread should only be used for notification to kick off
 				//        worker threads.
 				//////
-					ioss_lockSemaphore(low->isw.callback.mouse.semaphore_hover);
-					low->isw.callback.mouse.callback_hover(low->isw.uniqueId, &lisw, low->isw.osMouseMove.x, low->isw.osMouseMove.y, low->isw.osMouseMove.buttons, low->isw.osMouseMove.keys, lnTimerDiff, false);
-					ioss_unlockSemaphore(low->isw.callback.mouse.semaphore_hover);
+					ioss_lockSemaphore(w->isw.callback.mouse.semaphore_hover);
+					memcpy(&lisw, &w->isw, sizeof(SOssWindow));		// Make a copy of the record in case the user goes nutty coo-coo! :-)
+					w->isw.callback.mouse.callback_hover(w->isw.uniqueId, &lisw, w->isw.osMouseMove.x, w->isw.osMouseMove.y, w->isw.osMouseMove.buttons, w->isw.osMouseMove.keys, lnTimerDiff, false);
+					ioss_unlockSemaphore(w->isw.callback.mouse.semaphore_hover);
 				}
 			}
 		}
@@ -5990,4 +5988,78 @@ continueToNextAttribute:
 		}
 		// Not found
 		return(false);
+	}
+
+
+
+
+//////////
+//
+// Callback for the enumerate monitors function
+//
+//////
+	BOOL CALLBACK iioss_enumerateMonitors(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData)
+	{
+		bool			llResult;
+		MONITORINFO		lmi;
+		SOssWindow*		low;
+		SStartEnd*		lse;
+
+
+		// Grab the monitor info
+		lmi.cbSize = sizeof(MONITORINFO);
+		if (GetMonitorInfo(hMonitor, &lmi))
+		{
+			lse = (SStartEnd*)dwData;
+			low = (SOssWindow*)oss_SEChain_append(lse, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SOssWindow), 2, &llResult);
+			if (low)
+			{
+				// Initialize the structure
+				memset(low, 0, sizeof(SOssWindow));
+
+				// Store the data
+				low->osX			= lmi.rcMonitor.left;
+				low->osY			= lmi.rcMonitor.top;
+				low->width			= lmi.rcMonitor.right	- lmi.rcMonitor.left;
+				low->height			= lmi.rcMonitor.bottom	- lmi.rcMonitor.top;
+			}
+		}
+		// Indicate we want more
+		return TRUE;
+	}
+
+	void iioss_enumerateMonitorsIterateCallback(SStartEndCallback* cb)
+	{
+		SOssWindow*			lowOld;
+		SOssWindow*			lowNew;
+		SOssWindow**		lowp;
+		f32					lfHypOld, lfHypNew;
+
+
+		// Make sure the environment is sane
+		if (cb && cb->ptr && cb->extra != 0)
+		{
+			// Grab the existing pointer
+			lowNew	= (SOssWindow*)cb->ptr;
+			lowp	= (SOssWindow**)cb->extra;
+
+			// Has a monitor already been selected to compare against?
+			if (*lowp)
+			{
+				// Grab the previous monitor pointer
+				lowOld	= *lowp;
+
+				// If the line from upper-left to lower-right is longer, then this is our new man
+				lfHypOld	= (f32)sqrt((f32)(lowOld->width * lowOld->width)	+ (f32)(lowOld->height * lowOld->height));
+				lfHypNew	= (f32)sqrt((f32)(lowNew->width * lowNew->width)	+ (f32)(lowNew->height * lowNew->height));
+
+				// See which one is longer
+				if (lfHypNew > lfHypOld)
+					*lowp = lowNew;		// We've found our new biggest monitor
+
+			} else {
+				// This is the first monitor, so by default we store it
+				*lowp = lowNew;
+			}
+		}
 	}

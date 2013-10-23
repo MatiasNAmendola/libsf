@@ -45,6 +45,7 @@
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
+				StructMemberAlignment="1"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				DebugInformationFormat="4"
@@ -62,7 +63,7 @@
 				Name="VCLinkerTool"
 				OutputFile="\libsf\vvm\dev\plugins\wideedit.dll"
 				LinkIncremental="2"
-				ModuleDefinitionFile="wideedit.def"
+				ModuleDefinitionFile="we.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)pdbs\$(TargetName).pdb"
 				SubSystem="2"
@@ -121,6 +122,7 @@
 				EnableIntrinsicFunctions="true"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;WIDEEDIT_EXPORTS"
 				RuntimeLibrary="2"
+				StructMemberAlignment="1"
 				EnableFunctionLevelLinking="true"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -139,7 +141,7 @@
 				Name="VCLinkerTool"
 				OutputFile="\libsf\vvm\dev\plugins\wideedit.dll"
 				LinkIncremental="1"
-				ModuleDefinitionFile="wideedit.def"
+				ModuleDefinitionFile="we.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)pdbs\$(TargetName).pdb"
 				SubSystem="2"
@@ -181,11 +183,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\wideedit.cpp"
+				RelativePath=".\we.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\wideedit.def"
+				RelativePath=".\we.def"
 				>
 			</File>
 		</Filter>
@@ -195,11 +197,15 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\wideedit.h"
+				RelativePath=".\we.h"
 				>
 			</File>
 			<File
-				RelativePath=".\wideedit_const.h"
+				RelativePath=".\we_const.h"
+				>
+			</File>
+			<File
+				RelativePath=".\we_glob.h"
 				>
 			</File>
 		</Filter>

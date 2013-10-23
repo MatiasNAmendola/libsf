@@ -76,6 +76,13 @@
 	cu32			_VVMOSS_CASK_TYPE_UP_RECTANGLE							= 0x3000;	// The part which extends up and right from a cask
 	cu32			_VVMOSS_CASK_TYPE_DOWN_RECTANGLE						= 0x4000;	// The part which extends down and left from a cask
 
+	// For the SCREEN coordinate positioning functions
+	cu32			_VVMOSS_SCREEN_UPPER_LEFT								= 1;		// Positions toward the upper-left of the active monitor in desktop coordinates
+	cu32			_VVMOSS_SCREEN_UPPER_RIGHT								= 2;		// Positions toward the upper-right of the active monitor in desktop coordinates
+	cu32			_VVMOSS_SCREEN_LOWER_LEFT								= 3;		// Positions toward the lower-left of the active monitor in desktop coordinates
+	cu32			_VVMOSS_SCREEN_LOWER_RIGHT								= 4;		// Positions toward the lower-right of the active monitor in desktop coordinates
+	cu32			_VVMOSS_SCREEN_CENTER									= 5;		// Positions toward the center of the active monitor in desktop coordinates
+
 	// For plugins
 	cu32			_VVMOSS_PLUGIN_EDITOR									= 1;		// This plugin is an editor plugin, for taking the standard line-by-line format and displaying it
 	cu32			_VVMOSS_PLUGIN_EDITOR_CREATE_CONTEXT					= 1000;		// Editor, creates a context and associates it with the indicated bxml

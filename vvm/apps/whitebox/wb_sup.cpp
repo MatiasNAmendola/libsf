@@ -42,17 +42,17 @@
 // Test code, builds various screen forms to try out features
 //
 /////
-	u64 iwb_buildScreenTemplate(	u64 tnUniqueId,
-									s8* tcCaption, u32 tnCaptionLength,
-									u32 tnX, u32 tnY,
-									u32 tnWidth, u32 tnHeight,
-									u32 tnWidthMin, u32 tnHeightMin,
-									u32 tnWidthMax, u32 tnHeightMax,
-									u32 foreColor, u32 backColor,
-									bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder,
-									SCallbacksW* screenCallbacks	)
+	SOssWindow* iwb_buildScreenTemplate(u64 tnUniqueId,
+										s8* tcCaption, u32 tnCaptionLength,
+										u32 tnX, u32 tnY,
+										u32 tnWidth, u32 tnHeight,
+										u32 tnWidthMin, u32 tnHeightMin,
+										u32 tnWidthMax, u32 tnHeightMax,
+										u32 foreColor, u32 backColor,
+										bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder,
+										SCallbacksW* screenCallbacks	)
 	{
-		u64 lisw;
+		SOssWindow* lisw;
 
 
 		// Validate parameters
@@ -319,7 +319,8 @@
 //////
 	bool iiwb_createScreenCanvas(u64 tnUniqueId, u32 tnWidth, u32 tnHeight, SScreen** tsScreen, SCallbacksW* screenCallbacks, SCanvas** tsCanvas, SCallbacks* canvasCallbacks)
 	{
-		u64			lisw, lnOssWindowId, lnScreen;
+		SOssWindow*	lisw;
+		u64			lnOssWindowId, lnScreen;
 		u32			foreColor, backColor;
 		SScreen*	ls;
 		SCanvas*	lc;
@@ -345,14 +346,14 @@
 		// Request a screen
 		//////
 			// Allocate a screen
-			lisw = iwb_buildScreenTemplate(		oss_getNextUniqueId(), 
-												gcWhiteBoxLauncherCaption, sizeof(gcWhiteBoxLauncherCaption),
-												0, 0, tnWidth, tnHeight, 
-												-1, -1, 
-												-1, -1, 
-												foreColor, backColor,
-												false, true, false, true, true,
-												screenCallbacks	);
+			lisw = iwb_buildScreenTemplate(	oss_getNextUniqueId(), 
+											gcWhiteBoxLauncherCaption, sizeof(gcWhiteBoxLauncherCaption),
+											0, 0, tnWidth, tnHeight, 
+											-1, -1, 
+											-1, -1, 
+											foreColor, backColor,
+											false, true, false, true, true,
+											screenCallbacks	);
 
 			// If we have a screen structure, create it
 			if (lisw)

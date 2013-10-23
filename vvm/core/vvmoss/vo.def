@@ -77,6 +77,8 @@ EXPORTS
 	oss_findSystemFontByHandle
 	
 	oss_createScreenTemplate
+	oss_computeMonitorCoordinates
+	oss_enumerateMonitors
 	oss_getScreenDimensions
 	oss_setFocus
 	oss_bitBlt

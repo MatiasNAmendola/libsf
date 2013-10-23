@@ -155,31 +155,31 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 											u64 semaphore_ ## x; \
 												union { \
 													u64		_callback_ ## x; \
-													void	(CALLTYPE *callback_ ## x )( arg1, arg2 ); \
+													void	(CALLBACK *callback_ ## x )( arg1, arg2 ); \
 												};
 	#define defineCallback4(x, arg1, arg2, arg3, arg4) \
 											u64 semaphore_ ## x; \
 												union { \
 													u64		_callback_ ## x; \
-													void	(CALLTYPE *callback_ ## x )( arg1, arg2, arg3, arg4 ); \
+													void	(CALLBACK *callback_ ## x )( arg1, arg2, arg3, arg4 ); \
 												};
 	#define defineCallback6(x, arg1, arg2, arg3, arg4, arg5, arg6) \
 											u64 semaphore_ ## x; \
 												union { \
 													u64		_callback_ ## x; \
-													void	(CALLTYPE *callback_ ## x )( arg1, arg2, arg3, arg4, arg5, arg6 ); \
+													void	(CALLBACK *callback_ ## x )( arg1, arg2, arg3, arg4, arg5, arg6 ); \
 												};
 	#define defineCallback7(x, arg1, arg2, arg3, arg4, arg5, arg6, arg7) \
 											u64 semaphore_ ## x; \
 												union { \
 													u64		_callback_ ## x; \
-													void	(CALLTYPE *callback_ ## x )( arg1, arg2, arg3, arg4, arg5, arg6, arg7 ); \
+													void	(CALLBACK *callback_ ## x )( arg1, arg2, arg3, arg4, arg5, arg6, arg7 ); \
 												};
 	#define defineCallback8(x, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) \
 											u64 semaphore_ ## x; \
 												union { \
 													u64		_callback_ ## x; \
-													void	(CALLTYPE *callback_ ## x )( arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 ); \
+													void	(CALLBACK *callback_ ## x )( arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 ); \
 												};
 
 
@@ -371,6 +371,14 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		defineCallback4( resized,		u64 tnUniqueId, SOssWindow* tisw, u32 tnWidthNew, u32 tnHeightNew)													// After a window has been resized, and the buffers related to its screen have been allocated
 		defineCallback2( gotFocus,		u64 tnUniqueId, SOssWindow* tisw)																					// After a window has received focus, and after the window that lost focus (if any) has been signaled
 		defineCallback2( lostFocus,		u64 tnUniqueId, SOssWindow* tisw)																					// Before a new window receives focus
+		// Simple templates to build from:
+		//u64 CALLTYPE _window_created(u64 tnUniqueId, SOssWindow* tisw);
+		//u64 CALLTYPE _window_unload(u64 tnUniqueId, SOssWindow* tisw);
+		//u64 CALLTYPE _window_closed(u64 tnUniqueId, SOssWindow* tisw);
+		//u64 CALLTYPE _window_moved(u64 tnUniqueId, SOssWindow* tisw, u32 tnXNew, u32 tnYNew);
+		//u64 CALLTYPE _window_resized(u64 tnUniqueId, SOssWindow* tisw, u32 tnWidthNew, u32 tnHeightNew);
+		//u64 CALLTYPE _window_gotFocus(u64 tnUniqueId, SOssWindow* tisw);
+		//u64 CALLTYPE _window_lostFocus(u64 tnUniqueId, SOssWindow* tisw);
 	};
 	#define SCbPW SCallbackPartsWindow
 
@@ -378,6 +386,9 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	{
 		defineCallback6( enter,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)										// When the mouse moves into a control
 		defineCallback6( leave,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)										// When the mouse leaves a control
+		// Simple templates to build from:
+		//u64 CALLTYPE _object_enter(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
+		//u64 CALLTYPE _object_leave(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
 	};
 	#define SCbPO SCallbackPartsObject
 
@@ -387,6 +398,11 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		defineCallback6( up,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)										// When a mouse button is released
 		defineCallback6( move,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)										// When a mouse is moved either with its buttons down or up
 		defineCallback8( hover,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing)	// When a mouse has positioned itself at a fixed location for a period of time after previously moving
+		// Simple templates to build from:
+		//u64 CALLTYPE _mouse_down(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
+		//u64 CALLTYPE _mouse_up(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
+		//u64 CALLTYPE _mouse_move(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
+		//u64 CALLTYPE _mouse_hover(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing);
 	};
 	#define SCbPM SCallbackPartsMouse
 
@@ -396,6 +412,11 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		defineCallback6( up,			u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode)								// When a key is released
 		defineCallback6( press,			u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode)								// When a key is pressed and interpreted to a known key
 		defineCallback4( flags,			u64 tnUniqueId, SOssWindow* tisw, u32 tnKeyFlagsOld, u32 tnKeyFlagsNew)												// When keyboard flags change (such as a non-printable key going up and down, like shift, caps lock, or control)
+		// Simple templates to build from:
+		//u64 CALLTYPE _keyboard_down(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode);
+		//u64 CALLTYPE _keyboard_up(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode);
+		//u64 CALLTYPE _keyboard_press(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode);
+		//u64 CALLTYPE _keyboard_flags(u64 tnUniqueId, SOssWindow* tisw, u32 tnKeyFlagsOld, u32 tnKeyFlagsNew);
 	};
 	#define SCbPK SCallbackPartsKeyboard
 
@@ -404,12 +425,18 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		defineCallback6( start,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)										// When any mouse button has been depressed and the mouse has moved more than a minimal number of pixels
 		defineCallback7( dragging,		u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds)					// Called as each MouseMove event while dragging
 		defineCallback7( drop,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds)					// Called when the mouse button initiating the drag is released
+		// Simple templates to build from:
+		//u64 CALLTYPE _drag_start(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
+		//u64 CALLTYPE _drag_dragging(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds);
+		//u64 CALLTYPE _drag_drop(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds);
 	};
 	#define SCbPD SCallbackPartsDrag
 
 	struct SCallbackPartsCustom
 	{
 		defineCallback4( custom,			u64 tnUniqueId, SOssWindow* tisw, u64 tnCustomEventId, u64 tnOtherData)											// Called when to when a custom event is triggered programmatically
+		// Simple templates to build from:
+		//u64 CALLTYPE _custom_custom(u64 tnUniqueId, SOssWindow* tisw, u64 tnCustomEventId, u64 tnOtherData);
 	};
 	#define SCbPC SCallbackPartsCustom
 
@@ -860,8 +887,8 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		s8*				caption;							// (copy or original) Window title (only supports ASCII characters for now)
 		u32				captionLength;						// Length of the title
 
-		s32				x;									// Window x position
-		s32				y;									// Window y position
+		// Note:  This window is displayed at the (osX,osY) coordinates for the upper-left corner
+		// Note:  The width and height here are pixels, not physical window dimensions
 		u32				width;								// Width of the client portion of the window
 		u32				height;								// Height of the client portion of the window
 		u32				widthMin;							// Minimum width the window can have (including the border)

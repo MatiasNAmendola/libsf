@@ -352,7 +352,8 @@
 	const s8		cgcOssThreadTerminate[]									= "oss_threadTerminate";
 
 	const s8		cgcOssCreateScreenTemplate[]							= "oss_createScreenTemplate";
-
+	const s8		cgcOssComputeMonitorCoordinates[]						= "oss_computeMonitorCoordinates";
+	const s8		cgcOssEnumerateMonitors[]								= "oss_enumerateMonitors";
 	const s8		cgcOssGetScreenDimensions[]								= "oss_getScreenDimensions";
 	const s8		cgcOssSetFocus[]										= "oss_setFocus";
 
@@ -390,7 +391,7 @@
 	void			(CALLTYPE *oss_initialization)							(u64 tnDebuggerInterfaceAddress);
 	const s8*		(CALLTYPE *oss_getVersion)								(void);
 	bool			(CALLTYPE *oss_createMessageWindow)						(void);
-	u64				(CALLTYPE *oss_createVisibleWindow)						(u64 tisw, u64 tnScreenId);
+	u64				(CALLTYPE *oss_createVisibleWindow)						(SOssWindow* tisw, u64 tnScreenId);
 
 
 //////////
@@ -428,7 +429,7 @@
 		u64				(CALLTYPE *oss_deleteCanvas)							(u64 id, SCanvas* tc);
 
 		// Visible window information
-		SScreen*		(CALLTYPE *oss_requestScreen)							(u64 tnAssociatedId, u64 tisw);
+		SScreen*		(CALLTYPE *oss_requestScreen)							(u64 tnAssociatedId, SOssWindow* tisw);
 		SCanvas*		(CALLTYPE *oss_requestCanvasForScreen)					(SScreen* ts);
 		SCanvas*		(CALLTYPE *oss_requestCanvasForCanvas)					(SCanvas* tc);
 		SCanvas*		(CALLTYPE *oss_requestCanvas)							(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, u32 tnBackColor, bool tlIsActive, bool tlUseTransparency);
@@ -481,9 +482,9 @@
 		u64				(CALLTYPE *oss_requestSystemBitmap)						(u32 tnWidth, u32 tnHeight);
 		u64				(CALLTYPE *oss_findSystemFontByHandle)					(u64 tnFontHandle);
 
-		u64				(CALLTYPE *oss_createScreenTemplate)					(u64 id, u64 uniqueScreenId,
+		SOssWindow*		(CALLTYPE *oss_createScreenTemplate)					(u64 id, u64 uniqueScreenId,
 																					s8* tcCaption, u32 tnCaptionLength,
-																					u32 tnX, u32 tnY,
+																					s32 tnX, s32 tnY,
 																					u32 tnWidth, u32 tnHeight,
 																					u32 tnWidthMin, u32 tnHeightMin,
 																					u32 tnWidthMax, u32 tnHeightMax,
@@ -491,8 +492,10 @@
 																					u32 tnForeColor, u32 tnBackColor,
 																					bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder,
 																					SCallbacksW* callbacks);
+		SOssWindow*		(CALLTYPE *oss_enumerateMonitors)						(SStartEnd* tsMonitors/*Returns SOssWindow* structures*/);
+		void			(CALLTYPE *oss_computeMonitorCoordinates)				(SOssWindow* tow, f32 tfPercent, u32 tnPosition, f32 tfMargin, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin);
+		bool			(CALLTYPE *oss_getScreenDimensions)						(u64 tnOssWindowId, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin);
 
-		bool			(CALLTYPE *oss_getScreenDimensions)						(u64 tnOssWindowId, u32* tnX, u32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin);
 		bool			(CALLTYPE *oss_setFocus)								(u64 tnScreenId);
 		u64				(CALLTYPE *oss_bitBlt)									(u64 tnOssWindowId, SRGBA* buffer, u32 width, u32 height);
 		u64				(CALLTYPE *oss_bitBltSystemBitmapToSRGBA)				(u64 bdoss, s32 tnX, s32 tnY, u32 tnWidth, u32 tnHeight, SCanvas* tc, SRGBA* bdRoot);
@@ -1155,7 +1158,8 @@
 		(void *)&oss_threadTerminate,										(void *)cgcOssThreadTerminate,
 
 		(void *)&oss_createScreenTemplate,									(void *)cgcOssCreateScreenTemplate,
-
+		(void *)&oss_computeMonitorCoordinates,								(void *)cgcOssComputeMonitorCoordinates,
+		(void *)&oss_enumerateMonitors,										(void *)cgcOssEnumerateMonitors,
 		(void *)&oss_getScreenDimensions,									(void *)cgcOssGetScreenDimensions,
 		(void *)&oss_setFocus,												(void *)cgcOssSetFocus,
 

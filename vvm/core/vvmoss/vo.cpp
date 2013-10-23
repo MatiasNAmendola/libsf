@@ -329,7 +329,7 @@
 // OSS thread
 //
 //////
-	u64 CALLTYPE oss_createVisibleWindow(u64 tisw, u64 tnScreenId)
+	u64 CALLTYPE oss_createVisibleWindow(SOssWindow* tisw, u64 tnScreenId)
 	{
 		_iswSOssWindowLL* low;
 
@@ -685,7 +685,7 @@
 //			member ossWindowId	= oss id
 //
 //////
-	SScreen* CALLTYPE oss_requestScreen(u64 tnAssociatedId, u64 tisw)
+	SScreen* CALLTYPE oss_requestScreen(u64 tnAssociatedId, SOssWindow* tisw)
     {
 		SScreen* ls;
 
@@ -1784,16 +1784,16 @@
 // Create the specified screen structure
 //
 //////
-	u64 CALLTYPE oss_createScreenTemplate(u64 id, u64 uniqueScreenId,
-										 s8* tcCaption, u32 tnCaptionLength,
-										 u32 tnX, u32 tnY,
-										 u32 tnWidth, u32 tnHeight,
-										 u32 tnWidthMin, u32 tnHeightMin,
-										 u32 tnWidthMax, u32 tnHeightMax,
-										 u32 ncUlx, u32 ncUly, u32 ncLrx, u32 ncLry, u32 ncBorder,
-										 u32 tnForeColor, u32 tnBackColor,
-										 bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder,
-										 SCallbacksW* callbacks)
+	SOssWindow* CALLTYPE oss_createScreenTemplate(u64 id, u64 uniqueScreenId,
+													 s8* tcCaption, u32 tnCaptionLength,
+													 s32 tnX, s32 tnY,
+													 u32 tnWidth, u32 tnHeight,
+													 u32 tnWidthMin, u32 tnHeightMin,
+													 u32 tnWidthMax, u32 tnHeightMax,
+													 u32 ncUlx, u32 ncUly, u32 ncLrx, u32 ncLry, u32 ncBorder,
+													 u32 tnForeColor, u32 tnBackColor,
+													 bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder,
+													 SCallbacksW* callbacks)
 	{
 		SOssWindow*	tisw;
 
@@ -1808,13 +1808,17 @@
 			// Populate it
 			tisw->uniqueId					= uniqueScreenId;
 
+			// Set the length if necessary
+			if (tnCaptionLength == -1)
+				tnCaptionLength = (u32)oss_strlen(_csu8p(tcCaption));
+
 			// Visible identifier
 			tisw->caption					= (s8*)oss_duplicateString((u8*)tcCaption, tnCaptionLength + 1);
 			tisw->captionLength				= tnCaptionLength;
 
 			// Position
-			tisw->x							= tnX;
-			tisw->y							= tnY;
+			tisw->osX						= tnX;
+			tisw->osY						= tnY;
 			tisw->width						= tnWidth;
 			tisw->height					= tnHeight;
 			tisw->widthMin					= tnWidthMin;
@@ -1861,7 +1865,156 @@
 			tisw->callback.keyboard._callback_flags			= callbacks->keyboard._callback_flags;
 		}
 		// When we get here, we're done
-		return((u64)tisw);
+		return(tisw);
+	}
+
+
+
+
+//////////
+//
+// Called to determine how big a screen should be to fit on the indicated monitor
+//
+//////
+	void CALLTYPE oss_computeMonitorCoordinates(SOssWindow* tow, f32 tfPercent, u32 tnPosition, f32 tfMargin, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin)
+	{
+		bool		llDelete;
+		f32			lfX, lfY, lfWidth, lfHeight, lfMarginX, lfMarginY;
+		SStartEnd	lse;
+
+
+		////////////
+		// Do we have a monitor to use?
+		//////
+			if (!tow)
+			{
+				// Nope, we have to get our own
+				memset(&lse, 0, sizeof(lse));
+				llDelete	= true;
+				tow			= oss_enumerateMonitors(&lse);
+
+			} else {
+				// We do not need to delete the SStartEnd chain
+				llDelete	= false;
+			}
+
+
+		//////////
+		// Adjust percentages into the 0..1 range
+		//////
+			if (tfPercent > 1.0f)	tfPercent = tfPercent / 100.0f;
+			if (tfMargin > 1.0f)	tfMargin  = tfMargin / 100.0f;
+
+			// Verify they're in the 0..1 range
+			if (tfPercent < 0.0f)	tfPercent = 0.0f;
+			if (tfPercent > 1.0f)	tfPercent = 1.0f;
+			if (tfMargin < 0.0f)	tfMargin  = 0.0f;
+			if (tfMargin > 1.0f)	tfMargin  = 1.0f;
+
+
+		//////////
+		// Determine the size
+		//////
+			lfWidth		= (f32)tow->width	* tfPercent;
+			lfHeight	= (f32)tow->height	* tfPercent;
+			lfMarginX	= (f32)tow->width	* tfMargin;
+			lfMarginY	= (f32)tow->height	* tfMargin;
+
+
+		//////////
+		// Determine its position
+		//////
+			switch (tnPosition)
+			{
+				default:
+				case _VVMOSS_SCREEN_UPPER_LEFT:
+					lfX = lfMarginX;
+					lfY = lfMarginY;
+					break;
+
+				case _VVMOSS_SCREEN_UPPER_RIGHT:
+					lfX = (f32)tow->width - lfMarginX - lfWidth;
+					lfY = tfMargin;
+					break;
+
+				case _VVMOSS_SCREEN_LOWER_LEFT:
+					lfX = tfMargin;
+					lfY = (f32)tow->height - lfMarginY - lfHeight;
+					break;
+
+				case _VVMOSS_SCREEN_LOWER_RIGHT:
+					lfX = (f32)tow->width - lfMarginX - lfWidth;
+					lfY = (f32)tow->height - lfMarginY - lfHeight;
+					break;
+
+				case _VVMOSS_SCREEN_CENTER:
+					lfX = ((f32)tow->width  - lfWidth)  / 2.0f;
+					lfY = ((f32)tow->height - lfHeight) / 2.0f;
+					break;
+			}
+
+
+		//////////
+		// Convert to the components they want
+		//////
+			if (tnX)				*tnX			= (s32)lfX;
+			if (tnY)				*tnY			= (s32)lfY;
+			if (tnWidth)			*tnWidth		= (u32)lfWidth;
+			if (tnHeight)			*tnHeight		= (u32)lfHeight;
+			if (tnWidthMax)			*tnWidthMax		= (u32)lfWidth;
+			if (tnHeightMax)		*tnHeightMax	= (u32)lfHeight;
+			if (tnWidthMin)			*tnWidthMin		= (u32)lfWidth;
+			if (tnHeightMin)		*tnHeightMin	= (u32)lfHeight;
+
+
+		//////////
+		// Clean up
+		//////
+			if (llDelete)
+			{
+				// We need to delete our list of monitors
+				oss_SEChain_delete(&lse, NULL, 0, true);
+			}
+	}
+
+
+
+
+//////////
+//
+// Called to enumerate the monitors available to the VVMOSS.  The left-most monitor is conveyed
+// as the coordinate 0,0, and every other monitor is relative to that location.  By computing the
+// deltas based upon width and height of each monitor, a map can be created.
+//
+// Note:  Returns the SOssWindow* structure, one for each monitor, in the SStartEnd.
+//
+//////
+	SOssWindow* CALLTYPE oss_enumerateMonitors(SStartEnd* tsMonitors)
+	{
+		SOssWindow*			low;
+		SStartEndCallback	cb;
+
+
+		// Make sure our environment is sane
+		if (tsMonitors)
+		{
+			// Ask Windows to please send us a response for each monitor
+			EnumDisplayMonitors(NULL, NULL, iioss_enumerateMonitors, (LPARAM)tsMonitors);
+
+			low			= NULL;
+			cb._func	= (u64)&iioss_enumerateMonitorsIterateCallback;
+			cb.extra	= (u64)&low;
+
+			// Iterate through each and find the largest 
+			oss_SEChain_iterateThroughForCallback(tsMonitors, &cb);
+
+			// Return the largest monitor
+			return(low);
+
+		} else {
+			// Indicate failure
+			return(NULL);
+		}
 	}
 
 
@@ -1872,7 +2025,7 @@
 // Return dimensions for the indicated screen (if found)
 //
 //////
-	bool CALLTYPE oss_getScreenDimensions(u64 tnOssWindowId, u32* tnX, u32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin)
+	bool CALLTYPE oss_getScreenDimensions(u64 tnOssWindowId, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin)
 	{
 		_iswSOssWindowLL* low;
 
@@ -1882,8 +2035,8 @@
 		if (low)
 		{
 			// Update the dimensions
-			if (tnX)			*tnX			= low->isw.x;
-			if (tnY)			*tnY			= low->isw.y;
+			if (tnX)			*tnX			= low->isw.osX;
+			if (tnY)			*tnY			= low->isw.osY;
 			if (tnWidth)		*tnWidth		= low->isw.width;
 			if (tnHeight)		*tnHeight		= low->isw.height;
 			if (tnWidthMax)		*tnWidthMax		= low->isw.widthMax;

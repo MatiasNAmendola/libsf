@@ -51,17 +51,9 @@
 #include <windows.h>
 #include "\libsf\vvm\core\common\common.h"
 #include "\libsf\vvm\core\common\common_vvmoss.h"
-#include "wideedit_const.h"
-#include "wideedit.h"
+#include "we_const.h"
+#include "we.h"
 
-
-
-
-//////////
-// Global variables and constants
-//////
-	u32				gnNextUniqueId				= 0;				// Unique IDs assigned
-	u64				gnEditorFunctionId			= 0;				// The returned unique id for this editor function
 
 
 
@@ -139,4 +131,5 @@
 			case _VVMOSS_PLUGIN_EDITOR_ASSOCIATE_WITH_SCREEN:
 				break;
 		}
+		return(-1);
 	}

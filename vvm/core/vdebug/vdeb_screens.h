@@ -65,7 +65,8 @@
 
 	u64 iBuildNewScreen_Scratch(u64 tnUniqueId)
 	{
-		u64			lisw, lnOssWindowId, lnScreen;
+		SOssWindow*	lisw;
+		u64			lnOssWindowId, lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -175,7 +176,8 @@
 
 	u64 iBuildNewScreen_ProgramRegisters(u64 tnUniqueId)
 	{
-		u64			lisw, lnOssWindowId, lnScreen;
+		SOssWindow*	lisw;
+		u64			lnOssWindowId, lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -285,7 +287,8 @@
 
 	u64 iBuildNewScreen_ControlRegisters(u64 tnUniqueId)
 	{
-		u64			lisw, lnOssWindowId, lnScreen;
+		SOssWindow*	lisw;
+		u64			lnOssWindowId, lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -306,16 +309,16 @@
 		lsCallbacks.mouse._callback_hover = (u64)&iControlRegistersCallbackMouseHover;
 
 		// Request a screen
-		lisw = iBuildScreen(	tnUniqueId,
-			gcProgramRegistersCaption, sizeof(gcProgramRegistersCaption), 
-			0, 0, 
-			(sizeof(gcControlRegisters01) - 1) * lnFontWidth, 
-			18 * lnFontSkip, 
-			-1, -1, 
-			-1, -1, 
-			foreColor, backColor, 
-			false, true, false, true, true,
-			&lsCallbacks);
+		lisw = iBuildScreen(tnUniqueId,
+							gcProgramRegistersCaption, sizeof(gcProgramRegistersCaption), 
+							0, 0, 
+							(sizeof(gcControlRegisters01) - 1) * lnFontWidth, 
+							18 * lnFontSkip, 
+							-1, -1, 
+							-1, -1, 
+							foreColor, backColor, 
+							false, true, false, true, true,
+							&lsCallbacks);
 
 		ls = (SScreen*)oss_requestScreen(tnUniqueId, lisw);
 		if (!ls)
@@ -395,7 +398,8 @@
 
 	u64 iBuildNewScreen_IntegerRegisters(u64 tnUniqueId)
 	{
-		u64			lisw, lnOssWindowId, lnScreen;
+		SOssWindow*	lisw;
+		u64			lnOssWindowId, lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -506,7 +510,8 @@
 
 	u64 iBuildNewScreen_FloatingPointRegisters(u64 tnUniqueId)
 	{
-		u64			lisw, lnOssWindowId, lnScreen;
+		SOssWindow*	lisw;
+		u64			lnOssWindowId, lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -617,7 +622,8 @@
 
 	u64 iBuildNewScreen_Stack(u64 tnUniqueId)
 	{
-		u64			lisw, lnOssWindowId, lnScreen;
+		SOssWindow*	lisw;
+		u64			lnOssWindowId, lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -727,7 +733,8 @@
 
 	u64 iBuildNewScreen_Watch(u64 tnUniqueId)
 	{
-		u64			lisw, lnOssWindowId, lnScreen;
+		SOssWindow*	lisw;
+		u64			lnOssWindowId, lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -837,7 +844,8 @@
 
 	u64 iBuildNewScreen_Hover(u64 tnUniqueId)
 	{
-		u64			lisw, lnOssWindowId, lnScreen;
+		SOssWindow*	lisw;
+		u64			lnOssWindowId, lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -947,7 +955,8 @@
 
 	u64 iBuildNewScreen_Locals(u64 tnUniqueId)
 	{
-		u64			lisw, lnOssWindowId, lnScreen;
+		SOssWindow*	lisw;
+		u64			lnOssWindowId, lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -1057,7 +1066,8 @@
 
 	u64 iBuildNewScreen_Autos(u64 tnUniqueId)
 	{
-		u64			lisw, lnOssWindowId, lnScreen;
+		SOssWindow*	lisw;
+		u64			lnOssWindowId, lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -1167,7 +1177,8 @@
 
 	u64 iBuildNewScreen_Timers(u64 tnUniqueId)
 	{
-		u64			lisw, lnOssWindowId, lnScreen;
+		SOssWindow*	lisw;
+		u64			lnOssWindowId, lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -1277,7 +1288,8 @@
 
 	u64 iBuildNewScreen_Memory(u64 tnUniqueId)
 	{
-		u64			lisw, lnOssWindowId, lnScreen;
+		SOssWindow*	lisw;
+		u64			lnOssWindowId, lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -1387,7 +1399,8 @@
 
 	u64 iBuildNewScreen_Programs(u64 tnUniqueId)
 	{
-		u64			lisw, lnOssWindowId, lnScreen;
+		SOssWindow*	lisw;
+		u64			lnOssWindowId, lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -1497,7 +1510,8 @@
 
 	u64 iBuildNewScreen_Threads(u64 tnUniqueId)
 	{
-		u64			lisw, lnOssWindowId, lnScreen;
+		SOssWindow*	lisw;
+		u64			lnOssWindowId, lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -1616,7 +1630,8 @@
 
 	u64 iBuildNewScreen_AsciiChart(u64 tnUniqueId)
 	{
-		u64			lisw, lnOssWindowId, lnScreen;
+		SOssWindow*	lisw;
+		u64			lnOssWindowId, lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -1786,7 +1801,8 @@
 
 	u64 iBuildNewScreen_VDebLauncher(u64 tnUniqueId)
 	{
-		u64			lisw, lnOssWindowId, lnScreen;
+		SOssWindow*	lisw;
+		u64			lnOssWindowId, lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;

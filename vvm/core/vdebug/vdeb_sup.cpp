@@ -47,17 +47,17 @@
 // Test code, builds various screen forms to try out features
 //
 /////
-	u64 iBuildScreen(	u64 tnUniqueId,
-						s8* tcCaption, u32 tnCaptionLength,
-						u32 tnX, u32 tnY,
-						u32 tnWidth, u32 tnHeight,
-						u32 tnWidthMin, u32 tnHeightMin,
-						u32 tnWidthMax, u32 tnHeightMax,
-						u32 foreColor, u32 backColor,
-						bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder,
-						SCallbacksW* callbacks)
+	SOssWindow* iBuildScreen(	u64 tnUniqueId,
+								s8* tcCaption, u32 tnCaptionLength,
+								u32 tnX, u32 tnY,
+								u32 tnWidth, u32 tnHeight,
+								u32 tnWidthMin, u32 tnHeightMin,
+								u32 tnWidthMax, u32 tnHeightMax,
+								u32 foreColor, u32 backColor,
+								bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder,
+								SCallbacksW* callbacks	)
 	{
-		u64 lisw;
+		SOssWindow* lisw;
 
 
 		// Validate parameters

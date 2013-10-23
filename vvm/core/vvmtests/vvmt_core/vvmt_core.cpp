@@ -191,6 +191,8 @@
 //////////
 hijack_loadIcons();
 hijack_verifyIcons();
+
+hijack_createWindow();
 return(false);
 
 		//////////
@@ -493,6 +495,189 @@ return(false);
 		}
 		// When we get here, we know everything has been tested successfully
 	}
+
+
+
+
+//////////
+//
+// Temporary function for hijacking control of the VVM during development
+//
+/////
+	void hijack_createWindow(void)
+	{
+		s32				lnX, lnY;
+		u32				lnWidth, lnHeight, lnMinWidth, lnMinHeight, lnMaxWidth, lnMaxHeight;
+		SScreen*		screen;
+		SOssWindow*		low;
+		SCallbacksW		cb;
+		SStartEnd		lse;
+
+
+		//////////
+		// Indicate our handlers
+		//////
+			cb.window._callback_created		= (u64)&hj_window_created;
+			cb.window._callback_unload		= (u64)&hj_window_unload;
+			cb.window._callback_closed		= (u64)&hj_window_closed;
+			cb.window._callback_moved		= (u64)&hj_window_moved;
+			cb.window._callback_resized		= (u64)&hj_window_resized;
+			cb.window._callback_gotFocus	= (u64)&hj_window_gotFocus;
+			cb.window._callback_lostFocus	= (u64)&hj_window_lostFocus;
+
+			cb.object._callback_enter		= (u64)&hj_object_enter;
+			cb.object._callback_leave		= (u64)&hj_object_leave;
+
+			cb.mouse._callback_down			= (u64)&hj_mouse_down;
+			cb.mouse._callback_up			= (u64)&hj_mouse_up;
+			cb.mouse._callback_move			= (u64)&hj_mouse_move;
+			cb.mouse._callback_hover		= (u64)&hj_mouse_hover;
+
+			cb.keyboard._callback_down		= (u64)&hj_keyboard_down;
+			cb.keyboard._callback_up		= (u64)&hj_keyboard_up;
+			cb.keyboard._callback_press		= (u64)&hj_keyboard_press;
+			cb.keyboard._callback_flags		= (u64)&hj_keyboard_flags;
+
+			cb.drag._callback_start			= (u64)&hj_drag_start;
+			cb.drag._callback_dragging		= (u64)&hj_drag_dragging;
+			cb.drag._callback_drop			= (u64)&hj_drag_drop;
+
+			cb.custom._callback_custom		= (u64)&hj_custom_custom;
+
+
+		//////////
+		// Create our window position
+		//////
+			memset(&lse, 0, sizeof(SStartEnd));
+			low = oss_enumerateMonitors(&lse);
+			oss_computeMonitorCoordinates(low, 80.0f, _VVMOSS_SCREEN_UPPER_LEFT, 5.0f, &lnX, &lnY, &lnWidth, &lnHeight, &lnMaxWidth, &lnMaxHeight, &lnMinWidth, &lnMinHeight);
+
+
+		//////////
+		// Create our screen template
+		//////
+			low = oss_createScreenTemplate(	oss_getNextUniqueId(),
+											oss_getNextUniqueId(),
+											"Hijack", -1, 
+											lnX, lnY, lnWidth, lnHeight, lnMaxWidth, lnMaxHeight, lnMinWidth, lnMinHeight,
+											0, 0, lnWidth, 40, 4, rgba(0,0,0,0), rgba(255,255,255,255),
+											true, true, true, true, true,
+											&cb);
+
+			screen = oss_requestScreen(0, low);
+	}
+
+// Called after window is created, before it is displayed
+u64 CALLTYPE hj_window_created(u64 tnUniqueId, SOssWindow* tisw)
+{
+	return(0);
+}
+
+// Called when a window will be closed, while everything related to it is still viable
+u64 CALLTYPE hj_window_unload(u64 tnUniqueId, SOssWindow* tisw)
+{
+	return(0);
+}
+
+// Called after a window has been destroyed, before it is released by VVMOSS's internal lists of known windows
+u64 CALLTYPE hj_window_closed(u64 tnUniqueId, SOssWindow* tisw)
+{
+	return(0);
+}
+
+// After a window has been moved from one place to another (not while it is moving)
+u64 CALLTYPE hj_window_moved(u64 tnUniqueId, SOssWindow* tisw, u32 tnXNew, u32 tnYNew)
+{
+	return(0);
+}
+
+// After a window has been resized, and the buffers related to its screen have been allocated
+u64 CALLTYPE hj_window_resized(u64 tnUniqueId, SOssWindow* tisw, u32 tnWidthNew, u32 tnHeightNew)
+{
+	return(0);
+}
+
+// After a window has received focus, and after the window that lost focus (if any) has been signaled
+u64 CALLTYPE hj_window_gotFocus(u64 tnUniqueId, SOssWindow* tisw)
+{
+	return(0);
+}
+
+// Before a new window receives focus
+u64 CALLTYPE hj_window_lostFocus(u64 tnUniqueId, SOssWindow* tisw)
+{
+	return(0);
+}
+
+u64 CALLTYPE hj_object_enter(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)
+{
+	return(0);
+}
+
+u64 CALLTYPE hj_object_leave(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)
+{
+	return(0);
+}
+
+u64 CALLTYPE hj_mouse_down(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)
+{
+	return(0);
+}
+
+u64 CALLTYPE hj_mouse_up(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)
+{
+	return(0);
+}
+
+u64 CALLTYPE hj_mouse_move(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)
+{
+	return(0);
+}
+
+u64 CALLTYPE hj_mouse_hover(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing)
+{
+	return(0);
+}
+
+u64 CALLTYPE hj_keyboard_down(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode)
+{
+	return(0);
+}
+
+u64 CALLTYPE hj_keyboard_up(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode)
+{
+	return(0);
+}
+
+u64 CALLTYPE hj_keyboard_press(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode)
+{
+	return(0);
+}
+
+u64 CALLTYPE hj_keyboard_flags(u64 tnUniqueId, SOssWindow* tisw, u32 tnKeyFlagsOld, u32 tnKeyFlagsNew)
+{
+	return(0);
+}
+
+u64 CALLTYPE hj_drag_start(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)
+{
+	return(0);
+}
+
+u64 CALLTYPE hj_drag_dragging(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds)
+{
+	return(0);
+}
+
+u64 CALLTYPE hj_drag_drop(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds)
+{
+	return(0);
+}
+
+u64 CALLTYPE hj_custom_custom(u64 tnUniqueId, SOssWindow* tisw, u64 tnCustomEventId, u64 tnOtherData)
+{
+	return(0);
+}
 
 
 
