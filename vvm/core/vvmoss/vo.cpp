@@ -973,10 +973,14 @@
 
 		// Make sure the environment is sane
 		lnResult = -1;
-		if (tc)
+		if (tc && text)
 		{
+			// Make sure our count is valid
+			if (characterCount == -1)
+				characterCount = (u32)oss_strlen(_csu8p(text));
+
 			// Draw the text
-			lnResult = ioss_drawFixedPoint(tc, fontWidth, fontHeight, ulx, uly, text, characterCount, foreground, background);
+			lnResult = ioss_drawFixedPoint(tc, bd, fontWidth, fontHeight, ulx, uly, text, characterCount, foreground, background);
 		}
 		// Indicate success or failure
 		return lnResult;
@@ -1044,6 +1048,10 @@
 		s32		lnY, lnX, lnX0, lnY0, lnPixelsDrawn;
 		SBGRA*	lrgba;
 
+
+		// Make sure the environment is sane
+		if (!tc || !bd)
+			return(-1);
 
 		// Frame colors
 		lnFrameRed	= border.red;
@@ -1134,6 +1142,10 @@
 		s32		lnY, lnX, lnX0, lnY0, lnPixelsDrawn;
 		SBGRA*	lrgba;
 
+
+		// Make sure the environment is sane
+		if (!tc || !bd)
+			return(-1);
 
 		// Fill colors
 		lnFillRed	= background.red;
@@ -1235,6 +1247,64 @@
 //////
 	u64 CALLTYPE oss_canvasLine(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 lineThickness, SBGRA line)
     {
+		f32		lfI, lfX, lfY, lfDeltaX, lfDeltaY, lfStepI, lfStepX, lfStepY, lfHyp, lfXLine, lfHalfLine;
+		u8		lnRed, lnGrn, lnBlu;
+		SBGRA*	lrgba;
+
+
+		// Make sure the environment is sane
+		if (!tc || !bd)
+			return(-1);
+
+		// See what type of line it is
+		lfHalfLine = (f32)lineThickness / 2.0f;
+		if (ulx == lrx)
+		{
+			// Vertical line
+			oss_canvasFillRect(tc, bd, (s32)((f32)ulx - lfHalfLine), uly, (s32)((f32)ulx + lfHalfLine), lry, 0, line, line);
+
+		} else if (uly == lry) {
+			// Horizontal line
+			oss_canvasFillRect(tc, bd, ulx, (s32)((f32)uly - lfHalfLine), lrx, (s32)((f32)uly + lfHalfLine), 0, line, line);
+
+		} else {
+			// Arbitrary line
+			lfX			= (f32)ulx;
+			lfY			= (f32)uly;
+			lfDeltaX	= (f32)lrx - (f32)ulx;
+			lfDeltaY	= (f32)lry - (f32)uly;
+			lfHyp		= sqrt(lfDeltaX*lfDeltaX + lfDeltaY*lfDeltaY);
+			lfStepX		= lfDeltaX / lfHyp;
+			lfStepY		= lfDeltaY / lfHyp;
+			lfStepI		= 1.0f / lfHyp;
+
+			// Grab the colors
+			lnRed		= line.red;
+			lnGrn		= line.grn;
+			lnBlu		= line.blu;
+
+			// Iterate for every pixel along the hypotenuse
+			for (	lfI = 0;
+					lfI < 1.0f;
+					lfI += lfStepI, lfX += lfStepX, lfY += lfStepY	)
+			{
+				for (	lfXLine = lfX - lfHalfLine;
+						lfXLine < lfX + lfHalfLine;
+						lfXLine++)
+				{
+					if (lfY >= 0.0f && (s32)lfY < tc->height && lfXLine >= 0.0f && (s32)lfXLine < tc->width)
+					{
+						// Find out on what row this pixel data will go
+						lrgba = bd + ((s32)lfY * tc->width) + (s32)lfXLine;
+
+						// Store the color
+						lrgba->red	= lnRed;
+						lrgba->grn	= lnGrn;
+						lrgba->blu	= lnBlu;
+					}
+				}
+			}
+		}
 		return(0);
     }
 
@@ -1246,8 +1316,17 @@
 // Draws an arc on the canvas.
 //
 //////
-	u64 CALLTYPE oss_canvasArc(SCanvas* tc, SBGRA* bd, s32 ox, s32 oy, f32 start, f32 end, s32 lineThickness, SBGRA line)
+	u64 CALLTYPE oss_canvasArc(SCanvas* tc, SBGRA* bd, s32 ox, s32 oy, f32 radius, f32 start, f32 end, s32 lineThickness, SBGRA line)
     {
+		// Make sure the environment is sane
+		if (!tc || !bd)
+			return(-1);
+
+		// Make sure our start and end are within 0..2pi
+//		start	= fmod(start,	_2PI);
+//		end		= fmod(end,		_2PI);
+
+
 		return(0);
     }
 
@@ -1295,7 +1374,53 @@
 //////
 	u64 CALLTYPE oss_canvasColorize(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, SBGRA color)
     {
-		return(0);
+		u32		lnPixelsDrawn;
+		s32		lnY, lnX;
+		f32		lfGray, lfRed, lfGrn, lfBlu;
+		SBGRA*	lrgba;
+
+
+		// Make sure the environment is sane
+		if (!tc || !bd)
+			return(-1);
+
+		// Get the colors
+		lfRed = (f32)color.red;
+		lfGrn = (f32)color.grn;
+		lfBlu = (f32)color.blu;
+
+		// Iterate through every pixel in the rectangle
+		lnPixelsDrawn = 0;
+		for (lnY = uly; lnY < lry; lnY++)
+		{
+			if (lnY >= 0 && lnY < tc->height)
+			{
+				// Find out on what row this pixel data will go
+				lrgba = bd + (lnY * tc->width) + ulx;
+
+				// We are drawing an entire border across
+				for (lnX = ulx; lnX < lrx; lnX++)
+				{
+					if (lnX >= 0 && lnX < tc->width)
+					{
+						// Compute the grayscale percentage
+						lfGray	= (((f32)lrgba->red * 0.35f) + ((f32)lrgba->grn * 0.54f) + ((f32)lrgba->blu * 0.11f)) / 255.0f;
+
+						// Convert to that color
+						lrgba->red = (u8)(lfGray * lfRed);
+						lrgba->grn = (u8)(lfGray * lfGrn);
+						lrgba->blu = (u8)(lfGray * lfBlu);
+
+						// Increase our pixel modified count
+						++lnPixelsDrawn;
+					}
+					// Move to next pixel
+					++lrgba;
+				}
+			}
+		}
+		// Return the number of pixels colorized
+		return(lnPixelsDrawn);
     }
 
 
@@ -1308,7 +1433,48 @@
 //////
 	u64 CALLTYPE oss_canvasGrayscale(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry)
     {
-		return(0);
+		u8		lnGray;
+		u32		lnPixelsDrawn;
+		s32		lnY, lnX;
+		SBGRA*	lrgba;
+
+
+		// Make sure the environment is sane
+		if (!tc || !bd)
+			return(-1);
+
+		// Iterate through every pixel in the rectangle
+		lnPixelsDrawn = 0;
+		for (lnY = uly; lnY < lry; lnY++)
+		{
+			if (lnY >= 0 && lnY < tc->height)
+			{
+				// Find out on what row this pixel data will go
+				lrgba = bd + (lnY * tc->width) + ulx;
+
+				// We are drawing an entire border across
+				for (lnX = ulx; lnX < lrx; lnX++)
+				{
+					if (lnX >= 0 && lnX < tc->width)
+					{
+						// Compute the grayscale percentage
+						lnGray = (u8)(((f32)lrgba->red * 0.35f) + ((f32)lrgba->grn * 0.54f) + ((f32)lrgba->blu * 0.11f));
+
+						// Convert to that color
+						lrgba->red = lnGray;
+						lrgba->grn = lnGray;
+						lrgba->blu = lnGray;
+
+						// Increase our pixel modified count
+						++lnPixelsDrawn;
+					}
+					// Move to next pixel
+					++lrgba;
+				}
+			}
+		}
+		// Return the number of pixels colorized
+		return(lnPixelsDrawn);
     }
 
 
@@ -1340,7 +1506,11 @@
 //////
 	u64 CALLTYPE oss_canvasBitBlt(SCanvas* tsDst, bool tlDstAccumulator, s32 dulx, s32 duly, SCanvas* tsSrc, bool tlSrcAccumulator, s32 sulx, s32 suly, s32 slrx, s32 slry)
     {
-		return(ioss_bitBltSection(tsDst, tlDstAccumulator, dulx, duly, tsSrc, tlSrcAccumulator, sulx, suly, slrx, slry));
+		if (tsDst && tsSrc)
+			return(ioss_bitBltSection(tsDst, tlDstAccumulator, dulx, duly, tsSrc, tlSrcAccumulator, sulx, suly, slrx, slry));
+
+		// If we get here, invalid data
+		return(-1);
     }
 
 

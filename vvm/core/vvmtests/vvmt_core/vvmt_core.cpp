@@ -563,7 +563,7 @@ return(false);
 			background.color = rgba(255,255,255,255);
 			low = oss_createScreenTemplate(	oss_getNextUniqueId(),
 											oss_getNextUniqueId(),
-											"Hijack", -1, 
+											"Test Window", -1, 
 											lnX, lnY, lnWidth, lnHeight, lnMaxWidth, lnMaxHeight, lnMinWidth, lnMinHeight,
 											0, 0, lnWidth, 40, 4, foreground, background,
 											true, true, true, true, true,
@@ -575,11 +575,19 @@ return(false);
 				canvas = oss_requestCanvasForScreen(screen);
 				if (canvas)
 				{
-					SBGRA green = { 0, 255, 0, 255 };
-					SBGRA blue = { 255, 0, 0, 255 };
-					SBGRA white = { 255, 255, 255, 255 };
-					oss_canvasFillRect(canvas, canvas->bd, 0, 0, canvas->width, canvas->height, 5, blue, green);
-					oss_canvasFrameRect(canvas, canvas->bd, 0, 0, canvas->width, canvas->height, 3, white);
+					SBGRA white1 = { 255, 255, 255, 255 };
+					SBGRA white2 = { 255, 215, 215, 255 };
+					SBGRA white3 = { 215, 255, 215, 255 };
+					SBGRA white4 = { 215, 215, 255, 255 };
+					SBGRA black = { 0, 0, 0, 255 };
+					SBGRA blue = { 255, 235, 235, 255 };
+					oss_canvasFillRect(canvas, canvas->bd, 0, 0, canvas->width, canvas->height, 0, white1, white1);
+					oss_canvasGradient(canvas, canvas->bd, white1, white2, white3, white4);
+					oss_canvasDrawFixedPointText(canvas, canvas->bd, 8, 16, 50, 50, "8x16 font -- ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789", -1, black, white1);
+					oss_canvasDrawFixedPointText(canvas, canvas->bd, 8, 14, 50, 70, "8x14 font -- ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789", -1, black, white1);
+					oss_canvasDrawFixedPointText(canvas, canvas->bd, 8, 8, 50, 90, "8x8  font -- ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789", -1, black, white1);
+					oss_canvasDrawFixedPointText(canvas, canvas->bd, 8, 6, 50, 110, "8x6  font -- ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789", -1, black, white1);
+					oss_canvasArc(canvas, canvas->bd, 2 0 0, 200, 40.0f, 0.0f, 3.14f, 2, black);
 					oss_canvasRefresh(canvas);
 				}
 			}

@@ -5182,7 +5182,7 @@ continueToNextAttribute:
 // could be used by the ioss_drawText() function.
 //
 //////
-	u64 ioss_drawFixedPoint(SCanvas* tc, u32 fontWidth, u32 fontHeight, s32 ulx, s32 uly, s8* tcText, u32 tnTextLength, SBGRA foreground, SBGRA background)
+	u64 ioss_drawFixedPoint(SCanvas* tc, SBGRA* bd, u32 fontWidth, u32 fontHeight, s32 ulx, s32 uly, s8* tcText, u32 tnTextLength, SBGRA foreground, SBGRA background)
 	{
 		u64		lnPixels;
         s32		lnX, lnY, lnFontWidth, lnFontHeight, lnSV, lnSH, lnScalerV, lnScalerH;
@@ -5324,7 +5324,7 @@ continueToNextAttribute:
 				for (lnSV = 0; lnSV < lnScalerV; lnSV++)
 				{
 					// Position the pointer for this part of the font's
-					lrgba = tc->bda + ((uly + (lnY * lnScalerV) + lnSV) * tc->width) + (ulx * lnScalerH);
+					lrgba = bd + ((uly + (lnY * lnScalerV) + lnSV) * tc->width) + (ulx * lnScalerH);
 
 					// Grab the bits
 					lcRowBits = lcFontBase[lnCharacterOffset];
@@ -5873,7 +5873,7 @@ continueToNextAttribute:
 			bluColumnStep = (bluRight - bluLeft) / (f32)tc->width;
 
 			// Compute this row's offset
-			lrgba = bd + ((tc->height - lnY - 1) * tc->width);
+			lrgba = bd + (lnY * tc->width);
 
 			// Repeat for every pixel across
 			for (lnX = 0; lnX < tc->width; lnX++)
