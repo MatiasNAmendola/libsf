@@ -1045,7 +1045,7 @@
 	u64 CALLTYPE oss_canvasFrameRect(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 borderThickness, SBGRA border)
     {
 		u8		lnFrameRed, lnFrameGrn, lnFrameBlu;
-		s32		lnY, lnX, lnX0, lnY0, lnPixelsDrawn;
+		s32		lnY, lnX, lnX0, lnY0, lnPixelsDrawn, lnHeight;
 		SBGRA*	lrgba;
 
 
@@ -1058,6 +1058,9 @@
 		lnFrameGrn	= border.grn;
 		lnFrameBlu	= border.blu;
 
+		// Box height
+		lnHeight = lry - uly;
+
 		// Draw the rectangle for all pixels that should be drawn vertically
 		lnPixelsDrawn = 0;
 		for (lnY0 = 0, lnY = uly; lnY < lry; lnY0++, lnY++)
@@ -1067,9 +1070,10 @@
 				// Find out on what row this pixel data will go
 				lrgba = bd + (lnY * tc->width) + ulx;
 
-				if (lnY0 < borderThickness || lnY0 >= tc->height - borderThickness)
+				// Are we drawing the top and bottom part?
+				if (lnY0 < borderThickness || lnY0 >= lnHeight - borderThickness)
 				{
-					// We are drawing an entire border across
+					// Yes.  This is drawing an entire border across
 					for (lnX = ulx; lnX < lrx; lnX++)
 					{
 						if (lnX >= 0 && lnX < tc->width)
@@ -1085,7 +1089,7 @@
 					}
 
 				} else {
-					// We are drawing left-border, fill, right-border
+					// Nope.  We are drawing three parts:  (1) left-border, (2) fill area, (3) right-border
 
 					// Draw left-border
 					for (lnX0 = 0, lnX = ulx; lnX < lrx && lnX0 < borderThickness; lnX0++, lnX++)
@@ -1139,7 +1143,7 @@
 	u64 CALLTYPE oss_canvasFillRect(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 borderThickness, SBGRA border, SBGRA background)
     {
 		u8		lnFrameRed, lnFrameGrn, lnFrameBlu, lnFillRed, lnFillGrn, lnFillBlu;
-		s32		lnY, lnX, lnX0, lnY0, lnPixelsDrawn;
+		s32		lnY, lnX, lnX0, lnY0, lnPixelsDrawn, lnHeight;
 		SBGRA*	lrgba;
 
 
@@ -1157,6 +1161,9 @@
 		lnFrameGrn	= border.grn;
 		lnFrameBlu	= border.blu;
 
+		// Box height
+		lnHeight = lry - uly;
+
 		// Draw the rectangle for all pixels that should be drawn vertically
 		lnPixelsDrawn = 0;
 		for (lnY0 = 0, lnY = uly; lnY < lry; lnY0++, lnY++)
@@ -1166,9 +1173,10 @@
 				// Find out on what row this pixel data will go
 				lrgba = bd + (lnY * tc->width) + ulx;
 
-				if (lnY0 < borderThickness || lnY0 >= tc->height - borderThickness)
+				// Are we drawing the top and bottom part?
+				if (lnY0 < borderThickness || lnY0 >= lnHeight - borderThickness)
 				{
-					// We are drawing an entire border across
+					// Yes.  This is drawing an entire border across
 					for (lnX = ulx; lnX < lrx; lnX++)
 					{
 						if (lnX >= 0 && lnX < tc->width)
@@ -1184,7 +1192,7 @@
 					}
 
 				} else {
-					// We are drawing left-border, fill, right-border
+					// Nope.  We are drawing three parts:  (1) left-border, (2) fill area, (3) right-border
 
 					// Draw left-border
 					for (lnX0 = 0, lnX = ulx; lnX < lrx && lnX0 < borderThickness; lnX0++, lnX++)
@@ -1245,38 +1253,50 @@
 // Draws a line on the canvas.
 //
 //////
-	u64 CALLTYPE oss_canvasLine(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 lineThickness, SBGRA line)
+	u64 CALLTYPE oss_canvasLine(SCanvas* tc, SBGRA* bd, s32 p1x, s32 p1y, s32 p2x, s32 p2y, s32 lineThickness, SBGRA line)
     {
-		f32		lfI, lfX, lfY, lfDeltaX, lfDeltaY, lfStepI, lfStepX, lfStepY, lfHyp, lfXLine, lfHalfLine;
+		f32		lfI, lfX, lfY, lfDeltaX, lfDeltaY, lfStepI, lfStepX, lfStepY, lfHyp, lfHalfLine;
+		f32		lfXP, lfYP, lfStepXP, lfStepYP, lfThetaP;
+		s32		lnX0;
 		u8		lnRed, lnGrn, lnBlu;
 		SBGRA*	lrgba;
 
 
 		// Make sure the environment is sane
-		if (!tc || !bd)
+		if (!tc || !bd || lineThickness < 1)
 			return(-1);
 
 		// See what type of line it is
 		lfHalfLine = (f32)lineThickness / 2.0f;
-		if (ulx == lrx)
+		if (p1x == p2x)
 		{
 			// Vertical line
-			oss_canvasFillRect(tc, bd, (s32)((f32)ulx - lfHalfLine), uly, (s32)((f32)ulx + lfHalfLine), lry, 0, line, line);
+			oss_canvasFillRect(tc, bd, (s32)((f32)p1x - lfHalfLine), min(p1y, p2y), (s32)((f32)p1x + lfHalfLine), max(p1y, p2y), 0, line, line);
 
-		} else if (uly == lry) {
+		} else if (p1y == p2y) {
 			// Horizontal line
-			oss_canvasFillRect(tc, bd, ulx, (s32)((f32)uly - lfHalfLine), lrx, (s32)((f32)uly + lfHalfLine), 0, line, line);
+			oss_canvasFillRect(tc, bd, min(p1x, p2x), (s32)((f32)p1y - lfHalfLine), max(p1x, p2x), (s32)((f32)p1y + lfHalfLine), 0, line, line);
 
 		} else {
 			// Arbitrary line
-			lfX			= (f32)ulx;
-			lfY			= (f32)uly;
-			lfDeltaX	= (f32)lrx - (f32)ulx;
-			lfDeltaY	= (f32)lry - (f32)uly;
-			lfHyp		= sqrt(lfDeltaX*lfDeltaX + lfDeltaY*lfDeltaY);
-			lfStepX		= lfDeltaX / lfHyp;
-			lfStepY		= lfDeltaY / lfHyp;
-			lfStepI		= 1.0f / lfHyp;
+			lfX				= (f32)p1x;
+			lfY				= (f32)p1y;
+			lfDeltaX		= (f32)p2x - (f32)p1x;
+			lfDeltaY		= (f32)p2y - (f32)p1y;
+			lfHyp			= sqrt(lfDeltaX*lfDeltaX + lfDeltaY*lfDeltaY);
+			lfStepX			= lfDeltaX / lfHyp;
+			lfStepY			= lfDeltaY / lfHyp;
+			lfStepI			= 1.0f / lfHyp;
+
+			// Compute slope
+			if (lineThickness != 1)
+			{
+				lfThetaP		= atan2(-lfDeltaX, lfDeltaY);		// Get theta for X
+				lfStepXP		= cos(lfThetaP) / 3.0f;
+				lfStepYP		= sin(lfThetaP) / 3.0f;
+				lfHalfLine		= lfHalfLine * 3.0f;
+				lineThickness	= lineThickness * 3;
+			}
 
 			// Grab the colors
 			lnRed		= line.red;
@@ -1288,19 +1308,38 @@
 					lfI < 1.0f;
 					lfI += lfStepI, lfX += lfStepX, lfY += lfStepY	)
 			{
-				for (	lfXLine = lfX - lfHalfLine;
-						lfXLine < lfX + lfHalfLine;
-						lfXLine++)
+				// Are we on the canvas vertically?
+				if (lfY >= 0.0f && (s32)lfY < tc->height)
 				{
-					if (lfY >= 0.0f && (s32)lfY < tc->height && lfXLine >= 0.0f && (s32)lfXLine < tc->width)
+					// Based on our line thickness, we use one of two formulas
+					if (lineThickness != 1)
 					{
-						// Find out on what row this pixel data will go
-						lrgba = bd + ((s32)lfY * tc->width) + (s32)lfXLine;
+						// Do the perpendicular slope for the line, one point at a time
+						lfXP = lfX - (lfHalfLine * lfStepXP);
+						lfYP = lfY - (lfHalfLine * lfStepYP);
+						for (lnX0 = 0; lnX0 < lineThickness; lnX0++, lfXP += lfStepXP, lfYP += lfStepYP)
+						{
+							// Find out on what row this pixel data will go
+							lrgba = bd + ((s32)lfYP * tc->width) + (s32)lfXP;
 
-						// Store the color
-						lrgba->red	= lnRed;
-						lrgba->grn	= lnGrn;
-						lrgba->blu	= lnBlu;
+							// Store the color
+							lrgba->red	= lnRed;
+							lrgba->grn	= lnGrn;
+							lrgba->blu	= lnBlu;
+						}
+
+					} else {
+						// Are we on the canvas horizontally?
+						if (lfX >= 0.0f && (s32)lfX < tc->width)
+						{
+							// Find out on what row this pixel data will go
+							lrgba = bd + ((s32)lfY * tc->width) + (s32)lfX;
+
+							// Store the color
+							lrgba->red	= lnRed;
+							lrgba->grn	= lnGrn;
+							lrgba->blu	= lnBlu;
+						}
 					}
 				}
 			}

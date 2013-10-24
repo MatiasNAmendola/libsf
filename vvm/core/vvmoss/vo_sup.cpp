@@ -5185,7 +5185,7 @@ continueToNextAttribute:
 	u64 ioss_drawFixedPoint(SCanvas* tc, SBGRA* bd, u32 fontWidth, u32 fontHeight, s32 ulx, s32 uly, s8* tcText, u32 tnTextLength, SBGRA foreground, SBGRA background)
 	{
 		u64		lnPixels;
-        s32		lnX, lnY, lnFontWidth, lnFontHeight, lnSV, lnSH, lnScalerV, lnScalerH;
+        s32		lnX, lnY, lnFontWidth, lnFontHeight, lnPixelY, lnSX, lnScalerY, lnScalerX;
 		u8		lcThisCharacter, lcRowBits, lcMask, fred, fgrn, fblu, bred, bgrn, bblu;
         u8*		lcFontBase;
         u32		lnCharacterOffset;
@@ -5193,8 +5193,8 @@ continueToNextAttribute:
 
 
         // See what font they're using
-		lnScalerV	= 1;
-		lnScalerH	= 1;
+		lnScalerY	= 1;
+		lnScalerX	= 1;
 		switch (fontWidth)
 		{
 			case 8:
@@ -5203,17 +5203,17 @@ continueToNextAttribute:
 
 			case -16:
 				lnFontWidth	= 8;
-				lnScalerH	= 2;
+				lnScalerX	= 2;
 				break;
 
 			case -24:
 				lnFontWidth	= 8;
-				lnScalerH	= 3;
+				lnScalerX	= 3;
 				break;
 
 			case -32:
 				lnFontWidth	= 8;
-				lnScalerH	= 4;
+				lnScalerX	= 4;
 				break;
 
 			default:
@@ -5225,13 +5225,13 @@ continueToNextAttribute:
 			case -12:
 				lcFontBase		= (u8*)gxFontBase_8x6;
 				lnFontHeight	= 6;
-				lnScalerV		= 2;
+				lnScalerY		= 2;
 				break;
 
 			case -18:
 				lcFontBase		= (u8*)gxFontBase_8x6;
 				lnFontHeight	= 6;
-				lnScalerV		= 3;
+				lnScalerY		= 3;
 				break;
 
             case 6:
@@ -5247,7 +5247,7 @@ continueToNextAttribute:
 			case -16:
 				lcFontBase		= (u8*)gxFontBase_8x8;
 				lnFontHeight	= 8;
-				lnScalerV		= 2;
+				lnScalerY		= 2;
 				break;
 
             case 14:
@@ -5258,19 +5258,19 @@ continueToNextAttribute:
 			case -28:
 				lcFontBase		= (u8*)gxFontBase_8x14;
 				lnFontHeight	= 14;
-				lnScalerV		= 2;
+				lnScalerY		= 2;
 				break;
 
 			case -42:
 				lcFontBase		= (u8*)gxFontBase_8x14;
 				lnFontHeight	= 14;
-				lnScalerV		= 3;
+				lnScalerY		= 3;
 				break;
 
 			case -56:
 				lcFontBase		= (u8*)gxFontBase_8x14;
 				lnFontHeight	= 14;
-				lnScalerV		= 4;
+				lnScalerY		= 4;
 				break;
 
             case 16:
@@ -5281,19 +5281,19 @@ continueToNextAttribute:
 			case -32:
 				lcFontBase		= (u8*)gxFontBase_8x16;
 				lnFontHeight	= 16;
-				lnScalerV		= 2;
+				lnScalerY		= 2;
 				break;
 
 			case -48:
 				lcFontBase		= (u8*)gxFontBase_8x16;
 				lnFontHeight	= 16;
-				lnScalerV		= 3;
+				lnScalerY		= 3;
 				break;
 
 			case -64:
 				lcFontBase		= (u8*)gxFontBase_8x16;
 				lnFontHeight	= 16;
-				lnScalerV		= 4;
+				lnScalerY		= 4;
 				break;
 
             default:
@@ -5321,44 +5321,47 @@ continueToNextAttribute:
             // Put it into the tbDst
             for (lnY = 0; lnY < lnFontHeight; lnY++)
             {
-				for (lnSV = 0; lnSV < lnScalerV; lnSV++)
+				for (lnPixelY = 0; lnPixelY < lnScalerY; lnPixelY++)
 				{
-					// Position the pointer for this part of the font's
-					lrgba = bd + ((uly + (lnY * lnScalerV) + lnSV) * tc->width) + (ulx * lnScalerH);
-
-					// Grab the bits
-					lcRowBits = lcFontBase[lnCharacterOffset];
-					lcMask = 0x80;
-
-					// Iterate through all of the bits
-					for (lnX = 0; lnX < lnFontWidth; lnX++)
+					if ((uly + (lnY * lnScalerY) + lnPixelY) < tc->height)
 					{
-						for (lnSH = 0; lnSH < lnScalerH; lnSH++)
+						// Position the pointer for this part of the font's
+						lrgba = bd + ((uly + (lnY * lnScalerY) + lnPixelY) * tc->width) + (ulx * lnScalerX);
+
+						// Grab the bits
+						lcRowBits = lcFontBase[lnCharacterOffset];
+						lcMask = 0x80;
+
+						// Iterate through all of the bits
+						for (lnX = 0; lnX < lnFontWidth; lnX++)
 						{
-							if ((uly + (lnY * lnScalerV) + lnSV) < tc->height && (ulx + (lnX * lnScalerH) + lnSH) < tc->width)
+							for (lnSX = 0; lnSX < lnScalerX; lnSX++)
 							{
-								// This character is within the bitmap
-								++lnPixels;
-								if ((lcRowBits & lcMask) != 0)
+								if ((ulx + (lnX * lnScalerX) + lnSX) < tc->width)
 								{
-									// Foreground bit
-									lrgba->red = fred;
-									lrgba->grn = fgrn;
-									lrgba->blu = fblu;
+									// This character is within the bitmap
+									++lnPixels;
+									if ((lcRowBits & lcMask) != 0)
+									{
+										// Foreground bit
+										lrgba->red = fred;
+										lrgba->grn = fgrn;
+										lrgba->blu = fblu;
 
-								} else {
-									// Background bit
-									lrgba->red = bred;
-									lrgba->grn = bgrn;
-									lrgba->blu = bblu;
+									} else {
+										// Background bit
+										lrgba->red = bred;
+										lrgba->grn = bgrn;
+										lrgba->blu = bblu;
+									}
 								}
+								// Move to the next pixel
+								++lrgba;
 							}
-							// Move to the next pixel
-							++lrgba;
-						}
 
-						// Shift the mask over 1 bit to get to the next pixel
-						lcMask >>= 1;
+							// Shift the mask over 1 bit to get to the next pixel
+							lcMask >>= 1;
+						}
 					}
 				}
 

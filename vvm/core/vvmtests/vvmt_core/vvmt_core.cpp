@@ -552,7 +552,7 @@ return(false);
 		//////
 			memset(&lse, 0, sizeof(SStartEnd));
 			low = oss_enumerateMonitors(&lse);
-			oss_computeMonitorCoordinates(low, 80.0f, _VVMOSS_SCREEN_UPPER_LEFT, 5.0f, &lnX, &lnY, &lnWidth, &lnHeight, &lnMaxWidth, &lnMaxHeight, &lnMinWidth, &lnMinHeight);
+			oss_computeMonitorCoordinates(low, 90.0f, _VVMOSS_SCREEN_UPPER_LEFT, 5.0f, &lnX, &lnY, &lnWidth, &lnHeight, &lnMaxWidth, &lnMaxHeight, &lnMinWidth, &lnMinHeight);
 
 
 		//////////
@@ -575,20 +575,46 @@ return(false);
 				canvas = oss_requestCanvasForScreen(screen);
 				if (canvas)
 				{
-					SBGRA white1 = { 255, 255, 255, 255 };
-					SBGRA white2 = { 255, 215, 215, 255 };
-					SBGRA white3 = { 215, 255, 215, 255 };
-					SBGRA white4 = { 215, 215, 255, 255 };
-					SBGRA black = { 0, 0, 0, 255 };
-					SBGRA blue = { 255, 235, 235, 255 };
-					oss_canvasFillRect(canvas, canvas->bd, 0, 0, canvas->width, canvas->height, 0, white1, white1);
-					oss_canvasGradient(canvas, canvas->bd, white1, white2, white3, white4);
-					oss_canvasDrawFixedPointText(canvas, canvas->bd, 8, 16, 50, 50, "8x16 font -- ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789", -1, black, white1);
-					oss_canvasDrawFixedPointText(canvas, canvas->bd, 8, 14, 50, 70, "8x14 font -- ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789", -1, black, white1);
-					oss_canvasDrawFixedPointText(canvas, canvas->bd, 8, 8, 50, 90, "8x8  font -- ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789", -1, black, white1);
-					oss_canvasDrawFixedPointText(canvas, canvas->bd, 8, 6, 50, 110, "8x6  font -- ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789", -1, black, white1);
-					oss_canvasArc(canvas, canvas->bd, 2 0 0, 200, 40.0f, 0.0f, 3.14f, 2, black);
-					oss_canvasRefresh(canvas);
+// 					SBGRA white1 = { 255, 255, 255, 255 };
+// 					SBGRA white2 = { 255, 215, 215, 255 };
+// 					SBGRA white3 = { 215, 255, 215, 255 };
+// 					SBGRA white4 = { 215, 215, 255, 255 };
+// 					SBGRA black = { 0, 0, 0, 255 };
+// 					SBGRA blue = { 255, 0, 0, 255 };
+// 					oss_canvasFillRect(canvas, canvas->bd, 0, 0, canvas->width, canvas->height, 0, white1, white1);
+// 					oss_canvasGradient(canvas, canvas->bd, white1, white2, white3, white4);
+// 
+// 					int lnI, lnJ, lnLength;
+// 					char* foo;
+// 					lnLength = (canvas->width / 8) + 2;
+// 					foo = (char*)malloc(lnLength);
+// 
+// 					for (lnI = 0; lnI < canvas->height; lnI += 14)
+// 					{
+// 						memset(foo, 0, lnLength);
+// 						for (lnJ = 0; lnJ < canvas->width / 8; lnJ++)
+// 							foo[lnJ] = (lnI + lnJ) % 256;
+// 
+// 						oss_canvasDrawFixedPointText(canvas, canvas->bd, 8, 14, 0, lnI, foo, canvas->width / 8, black, white1);
+// 					}
+// 
+// 					int lnI;
+// 					for (lnI = 1; lnI < 10; lnI++)
+// 						oss_canvasLine(canvas, canvas->bd, 300 + (lnI * 30), 300, 400 + (lnI * 30), 380, lnI, blue);
+// 
+// 					f32 lfTheta;
+// 					for (lnI = 0, lfTheta = 0; lfTheta < 6.28f * 3.0f; lnI += 4, lfTheta += 6.28f / 90.0f)
+// 						oss_canvasLine(canvas, canvas->bd, 100 + lnI, 700, 100 + lnI + (s32)(cos(lfTheta) * 200), 700 + (s32)(sin(lfTheta) * 200), lnI % 5, blue);
+
+// 					oss_canvasLine(canvas, canvas->bd, 40, 40, 800, 40, 2, black);
+// 					oss_canvasLine(canvas, canvas->bd, 800, 40, 800, 800, 2, black);
+// 					oss_canvasLine(canvas, canvas->bd, 40, 800, 800, 800, 2, black);
+
+//					oss_canvasFillRect(canvas, canvas->bd, 200, 200, 600, 600, 6, black, white1);
+
+//					oss_canvasArc(canvas, canvas->bd, 200, 200, 40.0f, 0.0f, 3.14f, 2, black);
+
+//					oss_canvasRefresh(canvas);
 				}
 			}
 	}
