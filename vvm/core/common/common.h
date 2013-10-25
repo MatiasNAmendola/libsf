@@ -384,11 +384,13 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 
 	struct SCallbackPartsObject
 	{
-		defineCallback6( enter,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)										// When the mouse moves into a control
-		defineCallback6( leave,			u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)										// When the mouse leaves a control
+		defineCallback7( enter,			u64 tnUniqueId, SOssWindow* tisw, SRegion* tr, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)							// When the mouse moves into a control
+		defineCallback7( leave,			u64 tnUniqueId, SOssWindow* tisw, SRegion* tr, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)							// When the mouse leaves a control
+		defineCallback7( paint,			u64 tnUniqueId, SOssWindow* tisw, SRegion* tr, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)							// When the mouse leaves a control
 		// Simple templates to build from:
-		//u64 CALLTYPE _object_enter(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
-		//u64 CALLTYPE _object_leave(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
+		//u64 CALLTYPE _object_enter(u64 tnUniqueId, SOssWindow* tisw, SRegion* tr, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
+		//u64 CALLTYPE _object_leave(u64 tnUniqueId, SOssWindow* tisw, SRegion* tr, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
+		//u64 CALLTYPE _object_paint(u64 tnUniqueId, SOssWindow* tisw, SRegion* tr, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
 	};
 	#define SCbPO SCallbackPartsObject
 
@@ -1001,16 +1003,19 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		u64				associatedId;			// A user-defined id of something associated with this screen
 
 		// Limited access is granted during a refresh operation
-		u64				semRefresh;				// Limited access to 
+		u64				semRefresh;				// Limit access to this screen
 		bool			isRefreshing;			// Is this screen refreshing?
 
-		// Associated canvas for this screen
-		SCanvas*		activeCanvas;			// Pointer to this screen's active canvas (must be a member of the canvastList
-		SStartEnd		canvasList;				// Pointer to this screen's first SCanvasList entry
+		// Associated region for this screen
+		SRegion*		activeRegion;			// Pointer to this screen's first region
 
 		// Internal information used to make it happen for the target OS
-		u64				ossWindowId;			// information necessary to render this screen on the OSS (pointer to _iSWindow struct, for example)
+		u64				_iOssWindowId;			// OSS specific information for this instance (pointer to SOssWindow struct, for example)
 	};
+
+
+
+
 //////////
 //
 // Used for text, indicates the drawing state for the text item
@@ -1046,9 +1051,10 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	struct SCanvasState
 	{
 		// The state of a canvas or a canvas instance
-		bool			isEnabled		: 1;				// Is this instance enabled?  (does it respond to updates if/when it has focus? It still can even if it's not visible)
-		bool			isVisible		: 1;				// Is this instance visible?  (which also controls the visibility of all children)
-		bool			useTransparency	: 1;				// Does this canvas use transparency?
+		bool			isEnabled;				// Is this instance enabled?  (does it respond to updates if/when it has focus? It still can even if it's not visible)
+		bool			isVisible;				// Is this instance visible?  (which also controls the visibility of all children)
+		bool			useTransparency;		// Does this canvas use transparency?
+		bool			isDirty;				// Has this canvas been drawn to?  Reset after each oss_canvasRefresh()
 	};
 
 	struct SCanvas
@@ -1070,37 +1076,6 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		SBGRA*			bd;						// buffer data
 		SBGRA*			bda;					// buffer data accumulator (for building child items onto this item)
 		u64				bd_vvmoss;				// OS-specific information used for drawing OSS-fonts (used only by vvmoss code)
-
-		// Items related specifically to this canvas
-		SStartEnd		canvasList;				// Pointer to this canvas's first child SCanvasList entry
-		SStartEnd		regionList;				// Pointer to this canvas's first SRegionList entry
-	};
-
-
-	// Canvases exist in one place. To be used by the VVM, they must be associated with a canvas list,
-	// which allows the single instance objects to be employed where required.  In most cases this is
-	// likely to be a 1:1 ratio.  However, the VVM allows single instance objects to appear multiple
-	// places on multiple parents.  This allows a control to be on several different items without its
-	// related data requiring mirroring to other controls.
-	struct SCanvasList
-	{
-		SLL				ll;						// 2-way link list
-		u64				associatedId;			// The associated id, provided at creation for creator's private use and reference
-
-		// Conditions for this particular instance
-		SCanvasState	state;					// Settings like active, focus, tab order, etc.
-
-		// The canvas associated here
-		SCanvas*		canvas;					// Pointer to the canvas associated with this entry
-
-		// Relative position to the associated parent
-		s32				x;						// Upper-left X coordinate
-		s32				y;						// Upper-left Y coordinate
-		SBGRA			backColor;				// The instance's default back color to use for transparency operations (if state.useTransparency)
-
-		// Items related specifically for this one instance of the canvas (in addition to the ones related to the canvas)
-		SStartEnd		canvasList;				// Pointer to the first SCanvasList entry of this canvasList instance
-		SStartEnd		regionList;				// Pointer to the first SRegionList entry of this canvasList instance
 	};
 
 
@@ -1126,15 +1101,12 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	struct SRegionState
 	{
 		// The state of a region or a region instance
-		bool			isActive		: 1;				// Is this instance active? (does it respond to updates if/when it has focus? It still can even if it's not visible)
-		bool			isVisible		: 1;				// Is this instance visible?
-		bool			hasFocus		: 1;				// Does this instance have focus?
-		bool			useCallbacks	: 1;				// Should callbacks be used for this instance?
-		u32				tabOrder		: 16;				// -1=not a tab stop, 0 or greater, tab order
+		bool			isActive;				// Is this instance active? (does it respond to updates if/when it has focus? It still can even if it's not visible)
+		bool			isVisible;				// Is this instance visible?
+		bool			hasFocus;				// Does this instance have focus?
+		bool			useCallbacks;			// Should callbacks be used for this instance?
+		u32				tabOrder;				// -1=not a tab stop, 0 or greater, tab order
 	};
-
-
-
 
 //////////
 //
@@ -1158,37 +1130,81 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 
 		// Conditions for this particular instance
 		SRegionState	state;					// Settings like active, focus, tab order, etc.
+		SCanvas*		canvas;					// Canvas for this region (if any, not all regions have a canvas)
 
 		// Region information
-		u32				type;					// Type of input, see _REGION_* constants
+		u32				type;					// Type of input, see _VVM_REGION_* constants
+		void*			data;					// Based on the type of input, data may or may not be populated
+		u32				x;						// Upper-left X coordinate
+		u32				y;						// Upper-left Y coordinate
 		u32				width;					// Width of the region
 		u32				height;					// Height of the region
 		// Note:  The x,y coordinates are assigned when they are applied to a canvas or other region as part of the SRegionList entry
 
 		// Default region callbacks and sub-regions
-		SCallbacksW		callback;				// Callbacks for activities when this region has focus
-		SStartEnd		events;					// A list of events this region responds to		(SEvent*)
-		SStartEnd		regionList;				// A list of sub-regions relative to this one	(SRegion*)
+		SCallbacks		callback;				// Callbacks for activities for this region
+		SStartEnd		events;					// A list of user-defined events this region responds to	(SEvent*)
+		SStartEnd		subRegions;				// A list of sub-regions within this one					(SRegion*)
 	};
 
-
-	// Instances of a rectangular definition
-	struct SRegionList
+	struct SRegionEditboxData
 	{
-		SLL				ll;						// 2-way link list
-		u64				associatedId;			// The associated id, provided at creation for creator's private use and reference
+		SDatum2			data;					// Whatever is being input
+		u32				maxLength;				// Maximum length of input
 
-		// The region associated here at this location, and its instance state
-		SRegion*		region;					// The region instance related to this entry
-		SRegionState	state;					// Settings like active, focus, tab order, etc.
+		u32				fontWidth;				// Always 8
+		u32				fontHeight;				// Can be 6, 8, -12, 14, 16, -16, etc.
 
-		// Relative position to the associated parent
-		s32				x;						// Upper-left X coordinate for this instance
-		s32				y;						// Upper-left Y coordinate
+		SBGRA			foreColor;				// Typically black
+		SBGRA			backColor;				// Typically white
+	};
 
-		// Region instance callbacks and sub-regions
-		SCallbacksW		callback;				// Callbacks for activities when this instance of the region has focus
-		SStartEnd		regionList;				// A list of sub-regions relative to this one
+	struct SRegionButtonData
+	{
+		SDatum			caption;
+
+		u32				fontWidth;				// Always 8
+		u32				fontHeight;				// Can be 6, 8, -12, 14, 16, -16, etc.
+
+		SBGRA			foreColor;
+		SBGRA			backColor;
+	};
+
+	struct SRegionImageData
+	{
+		SCanvas*		canvas;					// Canvas of the image
+	};
+
+	struct SRegionLabelData
+	{
+		SDatum			caption;
+
+		u32				fontWidth;				// Always 8
+		u32				fontHeight;				// Can be 6, 8, -12, 14, 16, -16, etc.
+
+		SBGRA			foreColor;
+		SBGRA			backColor;
+	};
+
+	struct SRegionCheckboxData
+	{
+		SDatum			caption;
+		bool			checked;				// Is this control checked?
+
+		u32				fontWidth;				// Always 8
+		u32				fontHeight;				// Can be 6, 8, -12, 14, 16, -16, etc.
+
+		SBGRA			foreColor;
+		SBGRA			backColor;
+	};
+
+	struct SRegionRectangleData
+	{
+		bool			framed;					// Is this a framed-only rectangle?
+		u32				borderWidth;
+
+		SBGRA			borderColor;
+		SBGRA			fillColor;
 	};
 
 

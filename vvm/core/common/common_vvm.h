@@ -48,10 +48,22 @@
 // Constants used by the VVM
 //
 //////
-	const u32		_VVM_REGION_TAB_STOP							= 1;
-	const u32		_VVM_REGION_KEYBOARD_INPUT						= 2;
-	const u32		_VVM_REGION_MOUSE_INPUT							= 4;
-	const u32		_VVM_REGION_STANDARD_INPUT						= _VVM_REGION_TAB_STOP + _VVM_REGION_KEYBOARD_INPUT + _VVM_REGION_MOUSE_INPUT;
+	// Events it responds to
+	const u32		_VVM_REGION_TAB_STOP							= 0x00000001;
+	const u32		_VVM_REGION_KEYBOARD_INPUT						= 0x00000002;
+	const u32		_VVM_REGION_MOUSE_INPUT							= 0x00000004;
+	const u32		_VVM_REGION_STANDARD_INPUT						= _VVM_REGION_TAB_STOP | _VVM_REGION_KEYBOARD_INPUT | _VVM_REGION_MOUSE_INPUT;
+	// Types of default input
+	const u32		_VVM_REGION_EDITBOX								= 0x00000100;
+	const u32		_VVM_REGION_BUTTON								= 0x00000200;
+	const u32		_VVM_REGION_IMAGE								= 0x00000400;
+	const u32		_VVM_REGION_LABEL								= 0x00000800;
+	const u32		_VVM_REGION_CHECKBOX							= 0x00001000;
+	const u32		_VVM_REGION_RECTANGLE							= 0x00002000;
+	const u32		_VVM_REGION_CUSTOM_CANVAS						= 0x40000000;
+	const u32		_VVM_REGION_CUSTOM_NO_CANVAS					= 0x80000000;
+	// Only used internally:
+	const u32		_VVM_REGION_I_CANVAS_MASK						= 0x7fffff00;		// Masks off any region inputs that have an associated canvas
 
 	// These correlate to Visual FreePro definitions for text alignment
 	const u32		_VVM_ALIGN_LEFT									= 1;

@@ -23,18 +23,15 @@ EXPORTS
 	oss_deleteScreen
 	oss_deleteCanvas
 
-	oss_requestScreen
-	oss_requestCanvasForScreen
-	oss_requestCanvasForCanvas
-	oss_requestCanvas
-	oss_requestCanvasAndRegion
-	oss_requestRegion
-	oss_requestDuplicateRegion
-	oss_associateCanvasWithScreen
-	oss_associateCanvasWithCanvas
-	oss_associateRegionWithCanvas
-	oss_associateRegionWithRegion
-	oss_requestFontHandle
+	oss_createScreenAndVisibleWindow
+	oss_createRegionForScreen
+	oss_createCanvas
+	oss_createCanvasAndRegion
+	oss_createRegion
+	oss_regionDuplicate
+	oss_regionDefaultPaint
+	oss_regionRefresh
+	oss_createFontHandle
 	oss_canvasDrawFixedPointText
 	oss_canvasDrawText
 	oss_canvasDrawTextUnicode
@@ -47,6 +44,7 @@ EXPORTS
 	oss_canvasGrayscale
 	oss_canvasGradient
 	oss_canvasBitBlt
+	oss_screenRefresh
 	oss_canvasRefresh
 	oss_canvasSetRegionAndEventCallback
 	oss_canvasGetRegionsList
@@ -72,8 +70,8 @@ EXPORTS
 	oss_loadBitmapFromDisk
 	oss_saveBitmapToDisk
 	
-	oss_requestSystemFont
-	oss_requestSystemBitmap
+	oss_createSystemFont
+	oss_createSystemBitmap
 	oss_findSystemFontByHandle
 	
 	oss_createScreenTemplate

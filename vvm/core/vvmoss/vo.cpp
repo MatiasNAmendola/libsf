@@ -331,26 +331,26 @@
 //////
 	u64 CALLTYPE oss_createVisibleWindow(SOssWindow* tisw, u64 tnScreenId)
 	{
-		_iswSOssWindowLL* low;
+		_iswSOssWindowLL* w;
 
 
 		// Lock the semaphore for synchronous access
 		oss_lockSemaphore(gsemBuildScreen);
 
 		// Physically create the window in the message thread (so it will receive messages from windows in the message thread)
-		SendMessage(ghWndMsg, VVMOSS_CREATE_VISIBLE_WINDOW, (WPARAM)tisw, (LPARAM)&low);
+		SendMessage(ghWndMsg, VVMOSS_CREATE_VISIBLE_WINDOW, (WPARAM)tisw, (LPARAM)&w);
 
 		// Unlock the semaphore
 		oss_unlockSemaphore(gsemBuildScreen);
 
 		// Return our screen identifier
-		if (low)
+		if (w)
 		{
 			// Store the screen id
-			low->isw.screenId = tnScreenId;
+			w->isw.screenId = tnScreenId;
 
 			// Return the status
-			return(low->ll.uniqueId);
+			return(w->ll.uniqueId);
 
 		} else {
 			// Indicate failure
@@ -685,17 +685,17 @@
 //			member ossWindowId	= oss id
 //
 //////
-	SScreen* CALLTYPE oss_requestScreen(u64 tnAssociatedId, SOssWindow* tisw)
+	SScreen* CALLTYPE oss_createScreenAndVisibleWindow(u64 tnAssociatedId, SOssWindow* tisw)
     {
 		SScreen* ls;
 
 
 		// Create the vvm screen
-		ioss_createScreen(tnAssociatedId, &ls);
+		ls = ioss_createScreen(tnAssociatedId);
 		if (ls)
 		{
 			// Physically create the window
-			ls->ossWindowId = oss_createVisibleWindow(tisw, ls->ll.uniqueId);
+			ls->_iOssWindowId = oss_createVisibleWindow(tisw, ls->ll.uniqueId);
 		}
 		// Indicate success or failure
 		return(ls);
@@ -712,73 +712,53 @@
 // Returns:
 //
 //////
-	SCanvas* CALLTYPE oss_requestCanvasForScreen(SScreen* ts)
+	SRegion* CALLTYPE oss_createRegionForScreen(SScreen* ts)
     {
+		SRegion*		lr;
 		SCanvas*		lc;
 		u32				lnWidth, lnHeight;
-		SCanvasState	state;
+		SRegionState	regionState;
+		SCanvasState	canvasState;
 		SBGRA			lrgba;
 
 
 		// Get the screen dimensions
-		lc = NULL;
-		if (oss_getScreenDimensions(ts->ossWindowId, NULL, NULL, &lnWidth, &lnHeight, NULL, NULL, NULL, NULL))
+		lr = NULL;
+		if (oss_getScreenDimensions(ts->_iOssWindowId, NULL, NULL, &lnWidth, &lnHeight, NULL, NULL, NULL, NULL))
 		{
+			// Populate the region state
+			regionState.isActive		= true;
+			regionState.isVisible		= true;
+			regionState.hasFocus		= false;
+			regionState.tabOrder		= 0;
+			regionState.useCallbacks	= false;
+
 			// Populate the canvas state
-			state.isEnabled			= true;
-			state.useTransparency	= true;
+			canvasState.isEnabled		= true;
+			canvasState.useTransparency	= true;
+			canvasState.isDirty			= false;
+			canvasState.isVisible		= true;
 
-			// We create a canvas of the current size
-			lc			= NULL;
-			lrgba.color = rgba(255,255,255,255);
-			ioss_createCanvas(ts->ll.uniqueId, &state, lnWidth, lnHeight, lrgba, &lc);
-
-			// Did we create it okay?
-			if (lc)
+			// Create a region
+			lr = ioss_createRegion(ts->ll.uniqueId, &regionState, 0, lnWidth, lnHeight, NULL, NULL);
+			if (lr)
 			{
-				// Associate this canvas with this screen
-				oss_associateCanvasWithScreen(ts, lc, false);
+				// We create a canvas of the current size
+				lrgba.color = rgba(255,255,255,255);
+				lc			= ioss_createCanvas(ts->ll.uniqueId, &canvasState, lnWidth, lnHeight, lrgba);
 
-				// Does this screen have an active canvas yet?
-				if (!ts->activeCanvas)
-					ts->activeCanvas = lc;		// Make it active
+				// Did we create it okay?
+				if (lc)
+				{
+					// Does this screen have an active region yet?
+					if (!ts->activeRegion)
+						ts->activeRegion = lr;		// Make it active
+				}
 			}
 		}
-
-		// Since this is a VVM structure, we will return the SCanvas*
-		return(lc);
-		// See SCanvas->ll.uniqueId for id number
+		// Indicate our success or failure
+		return(lr);
     }
-
-
-
-
-//////////
-//
-// Requests a new canvas for the specified canvas (auto-sizes the canvas to the canvas's
-// current dimensions).
-//
-//////
-	SCanvas* CALLTYPE oss_requestCanvasForCanvas(SCanvas* tc)
-	{
-		SCanvas* lc;
-
-
-		// Get the screen dimensions
-		lc = NULL;
-		if (tc)
-		{
-			// We create a canvas of the current size
-			lc = NULL;
-			ioss_createCanvas(tc->ll.uniqueId, &tc->state, tc->width, tc->height, tc->backColor, &lc);
-			if (lc)
-				oss_associateCanvasWithCanvas(tc, lc);		// Associate this canvas with this canvas
-		}
-
-		// Since this is a VVM structure, we will return the SCanvas*
-		return(lc);
-		// See SCanvas->ll.uniqueId for id number
-	}
 
 
 
@@ -788,7 +768,7 @@
 // Returns a new canvas of the specified dimension.
 //
 //////
-	SCanvas* CALLTYPE oss_requestCanvas(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, bool tlIsActive, bool tlUseTransparency)
+	SCanvas* CALLTYPE oss_createCanvas(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, bool tlIsActive, bool tlUseTransparency)
     {
 		SCanvas*		lc;
 		SCanvasState	state;
@@ -799,7 +779,7 @@
 		state.useTransparency	= tlUseTransparency;
 
 		// We create a canvas of the indicated size
-		ioss_createCanvas(tnAssociatedId, &state, tnWidth, tnHeight, tnBackColor, &lc);
+		lc = ioss_createCanvas(tnAssociatedId, &state, tnWidth, tnHeight, tnBackColor);
 
 		// Since this is a VVM structure, we will return the SCanvas*
 		return(lc);
@@ -814,7 +794,7 @@
 // Returns a new region of the specified settings
 //
 //////
-	SRegion* CALLTYPE oss_requestRegion(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, u32 ulx, u32 uly, u32 lrx, u32 lry, SCallbacks* callback, SStartEnd* events)
+	SRegion* CALLTYPE oss_createRegion(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, u32 ulx, u32 uly, u32 lrx, u32 lry, SCallbacks* callback, SStartEnd* events)
 	{
 		return(NULL);
 	}
@@ -827,9 +807,74 @@
 // Returns a copy/duplicate or the template region
 //
 ///////
-	SRegion* CALLTYPE oss_requestDuplicateRegion(u64 tnAssociatedId, SRegion* templateRegion)
+	SRegion* CALLTYPE oss_regionDuplicate(u64 tnAssociatedId, SRegion* templateRegion)
 	{
 		return(NULL);
+	}
+
+
+
+
+//////////
+//
+// Called to paint a region using the default algorithms
+//
+//////
+	u64 CALLTYPE oss_regionDefaultPaint(SRegion* tr)
+	{
+		u64 lnPixelsDrawn;
+		u32 lnType;
+
+
+		// Make sure our environment is sane
+		lnPixelsDrawn = 0;
+		if (tr && tr->canvas && tr->data)
+		{
+			// Make sure there's a canvas we have to display something
+			lnType = tr->type & _VVM_REGION_I_CANVAS_MASK;
+			switch (lnType)
+			{
+				case _VVM_REGION_EDITBOX:
+					lnPixelsDrawn = ioss_regionDefaultPaintEditbox(tr, tr->canvas, tr->canvas->bda, (SRegionEditboxData*)tr->data);
+					break;
+
+				case _VVM_REGION_BUTTON:
+					lnPixelsDrawn = ioss_regionDefaultPaintButton(tr, tr->canvas, tr->canvas->bda, (SRegionButtonData*)tr->data);
+					break;
+
+				case _VVM_REGION_IMAGE:
+					lnPixelsDrawn = ioss_regionDefaultPaintImage(tr, tr->canvas, tr->canvas->bda, (SRegionImageData*)tr->data);
+					break;
+
+				case _VVM_REGION_LABEL:
+					lnPixelsDrawn = ioss_regionDefaultPaintLabel(tr, tr->canvas, tr->canvas->bda, (SRegionLabelData*)tr->data);
+					break;
+
+				case _VVM_REGION_CHECKBOX:
+					lnPixelsDrawn = ioss_regionDefaultPaintCheckbox(tr, tr->canvas, tr->canvas->bda, (SRegionCheckboxData*)tr->data);
+					break;
+
+				case _VVM_REGION_RECTANGLE:
+					lnPixelsDrawn = ioss_regionDefaultPaintRectangle(tr, tr->canvas, tr->canvas->bda, (SRegionRectangleData*)tr->data);
+					break;
+			}
+		}
+		// Indicate how many pixels were drawn
+		return(lnPixelsDrawn);
+	}
+
+
+
+
+//////////
+//
+// Called to refresh this region by drawing all sub-regions within
+//
+//////
+	u64 CALLTYPE oss_regionRefresh(SRegion* tr)
+	{
+// TODO:  Uncoded algorithm
+		return(0);
 	}
 
 
@@ -842,7 +887,7 @@
 // area.  As such, a combined function is created to allow this creation in one shot.
 //
 //////
-	bool CALLTYPE oss_requestCanvasAndRegion(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, bool tlIsActive, bool tlUseTransparency, s32 ulx, s32 uly, s32 lrx, s32 lry, SCanvas** tc, SRegion** tr, SCallbacks* callbacks, SStartEnd* events)
+	bool CALLTYPE oss_createCanvasAndRegion(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, bool tlIsActive, bool tlUseTransparency, s32 ulx, s32 uly, s32 lrx, s32 lry, SCanvas** tc, SRegion** tr, SCallbacks* callbacks, SStartEnd* events)
 	{
 		SRegion*	lr;
 		SCanvas*	lc;
@@ -852,7 +897,7 @@
 		if (tc && tr)
 		{
 			// Create our canvas
-			lc	= oss_requestCanvas(tnAssociatedId, tnWidth, tnHeight, tnBackColor, tlIsActive, tlUseTransparency);
+			lc	= oss_createCanvas(tnAssociatedId, tnWidth, tnHeight, tnBackColor, tlIsActive, tlUseTransparency);
 
 			// Apply our region to it
 			lr	= ioss_createRegion(tnAssociatedId, NULL, 0, tnWidth, tnHeight, callbacks, events);
@@ -869,90 +914,14 @@
 
 //////////
 //
-// Specifies the indicated canvas is to be the primary canvas for the screen.
-//
-//////
-	SCanvasList* CALLTYPE oss_associateCanvasWithScreen(SScreen* ts, SCanvas* tc, bool tlMakeActive)
-	{
-		SCanvasList* lcl;
-
-
-		// Locate the screen and canvas by id
-		lcl = NULL;
-		if (ts && tc)
-		{
-			// We're good
-			if (tlMakeActive)
-				ts->activeCanvas = tc;
-
-			// Associate this canvas with the screen
-			lcl = ioss_appendCanvasToScreen(ts, tc, NULL, 0, 0, 0);
-		}
-		// Indicate the result
-		return lcl;
-	}
-
-
-
-
-//////////
-//
-// Specifies the indicated canvas is to be the primary canvas for the canvas.
-//
-//////
-	SCanvasList* CALLTYPE oss_associateCanvasWithCanvas(SCanvas* tcParent, SCanvas* tcChild)
-	{
-		SCanvasList* lcl;
-
-
-		// Locate the screen and canvas by id
-		lcl = NULL;
-		if (tcParent && tcChild)
-			lcl = ioss_appendCanvasToCanvas(tcParent, tcChild, &tcParent->state, tcChild->ll.uniqueId, 0, 0);
-		
-		// Indicate the result
-		return lcl;
-	}
-
-
-
-
-//////////
-//
-// Specifies that a particular region should be associated with a canvas
-//
-//////
-	SRegionList* CALLTYPE oss_associateRegionWithCanvas(SCanvas* tc, SRegion* tr)
-	{
-		return(NULL);
-	}
-
-
-
-
-//////////
-//
-// Specifies that the child region should be added to the parent
-//
-//////
-	SRegionList* CALLTYPE oss_associateRegionWithRegion(SRegion* tcParent, SRegion* trChild)
-	{
-		return(NULL);
-	}
-
-
-
-
-//////////
-//
 // Returns an OSS-specific font handle that can be used for the CanvasWriteText() and
 // CanvasWriteUnicode() functions, which use OSS-specific drawing algorithms to draw non-
 // fixed point text onto the screen.
 //
 //////
-	u64 CALLTYPE oss_requestFontHandle(s8* fontName, u32 fontPointSize, bool bold, bool italics, bool underline, bool strikethrough)
+	u64 CALLTYPE oss_createFontHandle(s8* fontName, u32 fontPointSize, bool bold, bool italics, bool underline, bool strikethrough)
     {
-		return(oss_requestSystemFont(fontName, fontPointSize, bold, italics, underline, strikethrough));
+		return(oss_createSystemFont(fontName, fontPointSize, bold, italics, underline, strikethrough));
     }
 
 
@@ -981,6 +950,10 @@
 
 			// Draw the text
 			lnResult = ioss_drawFixedPoint(tc, bd, fontWidth, fontHeight, ulx, uly, text, characterCount, foreground, background);
+
+			// Mark the item dirty
+			if (lnResult != 0)
+				tc->state.isDirty = true;
 		}
 		// Indicate success or failure
 		return lnResult;
@@ -1014,6 +987,10 @@
 			{
 				// Copy the text drawn onto the system bitmap onto the canvas
 				lnResult = oss_bitBltSystemBitmapToSBGRA(tc->bd_vvmoss, ulx, uly, lrx-ulx, lry-uly, tc, bd);
+
+				// Mark the item dirty
+				if (lnResult != 0)
+					tc->state.isDirty = true;
 			}
 
 		}
@@ -1031,7 +1008,7 @@
 //////
 	u64 CALLTYPE oss_canvasDrawTextUnicode(SCanvas* tc, SBGRA* bd, u64 fontHandle, s32 ulx, s32 uly, s32 lrx, s32 lry, w16* tuText, u32 tnTextLength, SBGRA foreground, SBGRA background, SDrawState* tsDrawState)
     {
-		return(0);
+		return(-1);
     }
 
 
@@ -1128,6 +1105,11 @@
 				}
 			}
 		}
+
+		// Mark the item dirty
+		if (lnPixelsDrawn != 0)
+			tc->state.isDirty = true;
+
 		// Indicate how many pixels we drew
 		return(lnPixelsDrawn);
     }
@@ -1241,6 +1223,11 @@
 				}
 			}
 		}
+
+		// Mark the item dirty
+		if (lnPixelsDrawn != 0)
+			tc->state.isDirty = true;
+
 		// Indicate how many pixels we drew
 		return(lnPixelsDrawn);
     }
@@ -1258,6 +1245,7 @@
 		f32		lfI, lfX, lfY, lfDeltaX, lfDeltaY, lfStepI, lfStepX, lfStepY, lfHyp, lfHalfLine;
 		f32		lfXP, lfYP, lfStepXP, lfStepYP, lfThetaP;
 		s32		lnX0;
+		u64		lnPixelsDrawn;
 		u8		lnRed, lnGrn, lnBlu;
 		SBGRA*	lrgba;
 
@@ -1267,15 +1255,16 @@
 			return(-1);
 
 		// See what type of line it is
-		lfHalfLine = (f32)lineThickness / 2.0f;
+		lnPixelsDrawn	= 0;
+		lfHalfLine		= (f32)lineThickness / 2.0f;
 		if (p1x == p2x)
 		{
 			// Vertical line
-			oss_canvasFillRect(tc, bd, (s32)((f32)p1x - lfHalfLine), min(p1y, p2y), (s32)((f32)p1x + lfHalfLine), max(p1y, p2y), 0, line, line);
+			lnPixelsDrawn = oss_canvasFillRect(tc, bd, (s32)((f32)p1x - lfHalfLine), min(p1y, p2y), (s32)((f32)p1x + lfHalfLine), max(p1y, p2y), 0, line, line);
 
 		} else if (p1y == p2y) {
 			// Horizontal line
-			oss_canvasFillRect(tc, bd, min(p1x, p2x), (s32)((f32)p1y - lfHalfLine), max(p1x, p2x), (s32)((f32)p1y + lfHalfLine), 0, line, line);
+			lnPixelsDrawn = oss_canvasFillRect(tc, bd, min(p1x, p2x), (s32)((f32)p1y - lfHalfLine), max(p1x, p2x), (s32)((f32)p1y + lfHalfLine), 0, line, line);
 
 		} else {
 			// Arbitrary line
@@ -1326,6 +1315,9 @@
 							lrgba->red	= lnRed;
 							lrgba->grn	= lnGrn;
 							lrgba->blu	= lnBlu;
+
+							// Increase our pixel drawn count
+							++lnPixelsDrawn;
 						}
 
 					} else {
@@ -1339,12 +1331,21 @@
 							lrgba->red	= lnRed;
 							lrgba->grn	= lnGrn;
 							lrgba->blu	= lnBlu;
+
+							// Increase our pixel drawn count
+							++lnPixelsDrawn;
 						}
 					}
 				}
 			}
 		}
-		return(0);
+
+		// Mark the item dirty
+		if (lnPixelsDrawn != 0)
+			tc->state.isDirty = true;
+
+		// Indicate how many pixels were updated
+		return(lnPixelsDrawn);
     }
 
 
@@ -1366,7 +1367,7 @@
 //		end		= fmod(end,		_2PI);
 
 
-		return(0);
+		return(-1);
     }
 
 
@@ -1380,7 +1381,7 @@
 	SCanvas* CALLTYPE oss_canvasExtract(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry)
     {
 		s32			lnWidth, lnHeight;
-		SCanvas*	canvas;
+		SCanvas*	lc;
 
 
 		// Make sure the environment is sane
@@ -1389,15 +1390,15 @@
 			// Create the canvas
 			lnWidth		= lrx - ulx;
 			lnHeight	= lry - uly;
-// TODO: Possible bug observed here, with the tc->state.useTransparency setting not being honored
-			canvas		= oss_requestCanvas(tc->ll.uniqueId, (u32)lnWidth, (u32)lnHeight, tc->backColor, true, tc->state.useTransparency);
+// TODO: Possible bug observed here, with the tc->state.useTransparency setting possibly not being honored
+			lc			= oss_createCanvas(tc->ll.uniqueId, (u32)lnWidth, (u32)lnHeight, tc->backColor, true, tc->state.useTransparency);
 
 			// Copy the bitmap data
-			if (canvas)
-				oss_canvasBitBlt(canvas, false, 0, 0, tc, false, ulx, uly, lrx, lry);
+			if (lc)
+				oss_canvasBitBlt(lc, false, 0, 0, tc, false, ulx, uly, lrx, lry);
 			
 			// Indicate our success or failure
-			return(canvas);
+			return(lc);
 		}
 		return(NULL);
     }
@@ -1413,7 +1414,7 @@
 //////
 	u64 CALLTYPE oss_canvasColorize(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, SBGRA color)
     {
-		u32		lnPixelsDrawn;
+		u64		lnPixelsDrawn;
 		s32		lnY, lnX;
 		f32		lfGray, lfRed, lfGrn, lfBlu;
 		SBGRA*	lrgba;
@@ -1458,6 +1459,11 @@
 				}
 			}
 		}
+
+		// Mark the item dirty
+		if (lnPixelsDrawn != 0)
+			tc->state.isDirty = true;
+
 		// Return the number of pixels colorized
 		return(lnPixelsDrawn);
     }
@@ -1473,7 +1479,7 @@
 	u64 CALLTYPE oss_canvasGrayscale(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry)
     {
 		u8		lnGray;
-		u32		lnPixelsDrawn;
+		u64		lnPixelsDrawn;
 		s32		lnY, lnX;
 		SBGRA*	lrgba;
 
@@ -1512,6 +1518,11 @@
 				}
 			}
 		}
+
+		// Mark the item dirty
+		if (lnPixelsDrawn != 0)
+			tc->state.isDirty = true;
+
 		// Return the number of pixels colorized
 		return(lnPixelsDrawn);
     }
@@ -1527,9 +1538,19 @@
 //////
 	u64 CALLTYPE oss_canvasGradient(SCanvas* tc, SBGRA* bd, SBGRA ul, SBGRA ur, SBGRA lr, SBGRA ll)
 	{
+		u64 lnPixelsDrawn;
+
+
 		// Make sure the environment is sane
 		if (tc && bd && (bd == tc->bd || bd == tc->bda))
-			return(iioss_gradient(tc, bd, ul, ur, lr, ll));
+		{
+			// Perform the gradient
+			lnPixelsDrawn = iioss_gradient(tc, bd, ul, ur, lr, ll);
+
+			// Mark the item dirty
+			if (lnPixelsDrawn != 0)
+				tc->state.isDirty = true;
+		}
 
 		// Indicate failure
 		return(-1);
@@ -1545,8 +1566,19 @@
 //////
 	u64 CALLTYPE oss_canvasBitBlt(SCanvas* tsDst, bool tlDstAccumulator, s32 dulx, s32 duly, SCanvas* tsSrc, bool tlSrcAccumulator, s32 sulx, s32 suly, s32 slrx, s32 slry)
     {
+		u64 lnPixelsDrawn;
+
+
+		// Make sure the environment is sane
 		if (tsDst && tsSrc)
-			return(ioss_bitBltSection(tsDst, tlDstAccumulator, dulx, duly, tsSrc, tlSrcAccumulator, sulx, suly, slrx, slry));
+		{
+			// perform the copy
+			lnPixelsDrawn = ioss_bitBltSection(tsDst, tlDstAccumulator, dulx, duly, tsSrc, tlSrcAccumulator, sulx, suly, slrx, slry);
+
+			// Mark the item dirty
+			if (lnPixelsDrawn != 0)
+				tsDst->state.isDirty = true;
+		}
 
 		// If we get here, invalid data
 		return(-1);
@@ -1562,8 +1594,19 @@
 //////
 	u64 CALLTYPE oss_canvasScale(SCanvas* tcDst, SCanvas* tcSrc)
 	{
+		u64 lnPixelsDrawn;
+
+
+		// Make sure the environment is sane
 		if (tcDst && tcSrc && tcDst->bd && tcSrc->bd)
-			return(iioss_canvasScale(tcDst, tcSrc));
+		{
+			// Perform the scale
+			lnPixelsDrawn = iioss_canvasScale(tcDst, tcSrc);
+
+			// Mark the item dirty
+			if (lnPixelsDrawn != 0)
+				tcDst->state.isDirty = true;
+		}
 
 		// If we get here, failure
 		return(-1);
@@ -1574,32 +1617,40 @@
 
 //////////
 //
-// Refreshes the canvas (draws it on the screen to which it belongs).
+// Refreshes the screen (draws all regions within)
+//
+//////
+	u64 CALLTYPE oss_screenRefresh(SScreen* ts)
+    {
+		// Make sure our environment is sane
+		if (ts && ts->activeRegion)
+		{
+			// Refresh this region
+			oss_regionRefresh(ts->activeRegion);
+
+// TODO:  Incomplete code, needs written
+			// Refresh this screen
+			//lnPixelsDrawn = oss_bitBlt(ls->_iOssWindowId, lc->bd, lc->width, lc->height);
+			return(0);
+
+		} else {
+			return(0);
+		}
+    }
+
+
+
+
+//////////
+//
+// Refreshes the canvas
 //
 //////
 	u64 CALLTYPE oss_canvasRefresh(SCanvas* tc)
-    {
-		u64			lnResult;
-		SScreen*	ls;
-		SCanvas*	lc;
-
-
-// TODO:  consider refactoring this to have oss_bitBlt directly receive the screen id and SCanvas structure
-		// Locate the screen with this active canvas
-		ls = ioss_findScreenByActiveCanvas(tc->ll.uniqueId);
-		if (ls)
-		{
-			// Refresh this screen
-			lc = ls->activeCanvas;
-			lnResult = oss_bitBlt(ls->ossWindowId, lc->bd, lc->width, lc->height);
-
-		} else {
-			// Indicate failure
-			lnResult = -1;
-		}
-		// Return the number of bits updated
-		return lnResult;
-    }
+	{
+// TODO:  Incomplete code, needs written
+		return(0);
+	}
 
 
 
@@ -1906,7 +1957,7 @@
 				if (tnHeight)	*tnHeight	= lbi.height;
 
 				// Allocate our canvas
-				lc = oss_requestCanvas(0, lbi.width, lbi.height, tnBackColor, true, (lbi.bitCount == 32));
+				lc = oss_createCanvas(0, lbi.width, lbi.height, tnBackColor, true, (lbi.bitCount == 32));
 
 				// Update their pointer if they want
 				if (tc)
@@ -2053,7 +2104,7 @@
 //		Note:  use _isWSSystemFont->handle for HFONT
 //
 //////
-	u64 CALLTYPE oss_requestSystemFont(s8* fontName, u32 fontPointSize, bool bold, bool italics, bool underline, bool strikethrough)
+	u64 CALLTYPE oss_createSystemFont(s8* fontName, u32 fontPointSize, bool bold, bool italics, bool underline, bool strikethrough)
 	{
 		u64					lnUniqueId;
 		s32					lnHeight;
@@ -2111,7 +2162,7 @@
 //		           _isWSystemBitmap->height
 //
 //////
-	u64 CALLTYPE oss_requestSystemBitmap(u32 tnWidth, u32 tnHeight)
+	u64 CALLTYPE oss_createSystemBitmap(u32 tnWidth, u32 tnHeight)
 	{
 		_iswSSystemBitmap*	lsb;
 
@@ -2418,7 +2469,7 @@
 
 
 		// Make sure the screen they indicated is valid
-		low = ioss_findSOssWindowLLByOssWindowId(tnOssWindowId);
+		low = ioss_find_iswSOssWindowLL_By_iOssWindowId(tnOssWindowId);
 		if (low)
 		{
 			// Update the dimensions
@@ -2466,7 +2517,7 @@
 
 //////////
 //
-// Blt the specified buffer onto the indicated screen id
+// Blt the specified buffer onto the indicated operating-system specific screen id
 //
 //////
 	u64 CALLTYPE oss_bitBlt(u64 tnOssWindowId, SBGRA* buffer, u32 width, u32 height)
@@ -2476,11 +2527,11 @@
 
 
 		// Make sure the screen they indicated is valid
-		w = ioss_findSOssWindowLLByOssWindowId(tnOssWindowId);
+		w = ioss_find_iswSOssWindowLL_By_iOssWindowId(tnOssWindowId);
 		if (w)
 		{
 			// Copy over the buffer contents, as much as will fit (should be all of it)
-			lnResult = ivvm_bitBltAll(w, buffer, width, height);
+			lnResult = ioss_bitBlt_SbgraBuffer_onto_ossWindow(w, buffer, width, height);
 
 		} else {
 			// Indicate failure

@@ -66,7 +66,7 @@
 	u64 iBuildNewScreen_Scratch(u64 tnUniqueId)
 	{
 		SOssWindow*	lisw;
-		u64			lnOssWindowId, lnScreen;
+		u64			lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -98,7 +98,7 @@
 								false, true, false, true, true,
 								&lsCallbacks);
 
-		ls = (SScreen*)oss_requestScreen(tnUniqueId, lisw);
+		ls = oss_createScreenAndVisibleWindow(tnUniqueId, lisw);
 		if (!ls)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -107,9 +107,8 @@
 		}
 
 		// We're good
-		lnOssWindowId	= ls->ossWindowId;
-		lnScreen		= ls->ll.uniqueId;
-		lc					= (SCanvas*)oss_requestCanvasForScreen(ls);
+		lnScreen	= ls->ll.uniqueId;
+		lc			= oss_createCanvasForScreen(ls);
 		if (!lc)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate canvas for debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -177,7 +176,7 @@
 	u64 iBuildNewScreen_ProgramRegisters(u64 tnUniqueId)
 	{
 		SOssWindow*	lisw;
-		u64			lnOssWindowId, lnScreen;
+		u64			lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -209,7 +208,7 @@
 								false, true, false, true, true,
 								&lsCallbacks);
 
-		ls = (SScreen*)oss_requestScreen(tnUniqueId, lisw);
+		ls = oss_createScreenAndVisibleWindow(tnUniqueId, lisw);
 		if (!ls)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -218,9 +217,8 @@
 		}
 
 		// We're good
-		lnOssWindowId	= ls->ossWindowId;
-		lnScreen		= ls->ll.uniqueId;
-		lc					= (SCanvas*)oss_requestCanvasForScreen(ls);
+		lnScreen	= ls->ll.uniqueId;
+		lc			= oss_createCanvasForScreen(ls);
 		if (!lc)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate canvas for debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -288,7 +286,7 @@
 	u64 iBuildNewScreen_ControlRegisters(u64 tnUniqueId)
 	{
 		SOssWindow*	lisw;
-		u64			lnOssWindowId, lnScreen;
+		u64			lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -320,7 +318,7 @@
 							false, true, false, true, true,
 							&lsCallbacks);
 
-		ls = (SScreen*)oss_requestScreen(tnUniqueId, lisw);
+		ls = oss_createScreenAndVisibleWindow(tnUniqueId, lisw);
 		if (!ls)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -329,9 +327,8 @@
 		}
 
 		// We're good
-		lnOssWindowId	= ls->ossWindowId;
-		lnScreen		= ls->ll.uniqueId;
-		lc					= (SCanvas*)oss_requestCanvasForScreen(ls);
+		lnScreen	= ls->ll.uniqueId;
+		lc			= oss_createCanvasForScreen(ls);
 		if (!lc)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate canvas for debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -399,7 +396,7 @@
 	u64 iBuildNewScreen_IntegerRegisters(u64 tnUniqueId)
 	{
 		SOssWindow*	lisw;
-		u64			lnOssWindowId, lnScreen;
+		u64			lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -431,7 +428,7 @@
 								false, true, false, true, true,
 								&lsCallbacks);
 
-		ls = (SScreen*)oss_requestScreen(tnUniqueId, lisw);
+		ls = oss_createScreenAndVisibleWindow(tnUniqueId, lisw);
 		if (!ls)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -440,9 +437,8 @@
 		}
 
 		// We're good
-		lnOssWindowId	= ls->ossWindowId;
-		lnScreen		= ls->ll.uniqueId;
-		lc					= (SCanvas*)oss_requestCanvasForScreen(ls);
+		lnScreen	= ls->ll.uniqueId;
+		lc			= oss_createCanvasForScreen(ls);
 		if (!lc)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate canvas for debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -511,7 +507,7 @@
 	u64 iBuildNewScreen_FloatingPointRegisters(u64 tnUniqueId)
 	{
 		SOssWindow*	lisw;
-		u64			lnOssWindowId, lnScreen;
+		u64			lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -543,7 +539,7 @@
 								false, true, false, true, true,
 								&lsCallbacks);
 
-		ls = (SScreen*)oss_requestScreen(tnUniqueId, lisw);
+		ls = oss_createScreenAndVisibleWindow(tnUniqueId, lisw);
 		if (!ls)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -552,9 +548,8 @@
 		}
 
 		// We're good
-		lnOssWindowId	= ls->ossWindowId;
-		lnScreen		= ls->ll.uniqueId;
-		lc					= (SCanvas*)oss_requestCanvasForScreen(ls);
+		lnScreen	= ls->ll.uniqueId;
+		lc			= oss_createCanvasForScreen(ls);
 		if (!lc)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate canvas for debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -623,7 +618,7 @@
 	u64 iBuildNewScreen_Stack(u64 tnUniqueId)
 	{
 		SOssWindow*	lisw;
-		u64			lnOssWindowId, lnScreen;
+		u64			lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -655,7 +650,7 @@
 								false, true, false, true, true,
 								&lsCallbacks);
 
-		ls = (SScreen*)oss_requestScreen(tnUniqueId, lisw);
+		ls = oss_createScreenAndVisibleWindow(tnUniqueId, lisw);
 		if (!ls)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -664,9 +659,8 @@
 		}
 
 		// We're good
-		lnOssWindowId	= ls->ossWindowId;
-		lnScreen		= ls->ll.uniqueId;
-		lc					= (SCanvas*)oss_requestCanvasForScreen(ls);
+		lnScreen	= ls->ll.uniqueId;
+		lc			= oss_createCanvasForScreen(ls);
 		if (!lc)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate canvas for debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -734,7 +728,7 @@
 	u64 iBuildNewScreen_Watch(u64 tnUniqueId)
 	{
 		SOssWindow*	lisw;
-		u64			lnOssWindowId, lnScreen;
+		u64			lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -766,7 +760,7 @@
 								false, true, false, true, true,
 								&lsCallbacks);
 
-		ls = (SScreen*)oss_requestScreen(tnUniqueId, lisw);
+		ls = oss_createScreenAndVisibleWindow(tnUniqueId, lisw);
 		if (!ls)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -775,9 +769,8 @@
 		}
 
 		// We're good
-		lnOssWindowId	= ls->ossWindowId;
-		lnScreen		= ls->ll.uniqueId;
-		lc					= (SCanvas*)oss_requestCanvasForScreen(ls);
+		lnScreen	= ls->ll.uniqueId;
+		lc			= oss_createCanvasForScreen(ls);
 		if (!lc)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate canvas for debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -845,7 +838,7 @@
 	u64 iBuildNewScreen_Hover(u64 tnUniqueId)
 	{
 		SOssWindow*	lisw;
-		u64			lnOssWindowId, lnScreen;
+		u64			lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -877,7 +870,7 @@
 								false, true, false, true, true,
 								&lsCallbacks);
 
-		ls = (SScreen*)oss_requestScreen(tnUniqueId, lisw);
+		ls = oss_createScreenAndVisibleWindow(tnUniqueId, lisw);
 		if (!ls)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -886,9 +879,8 @@
 		}
 
 		// We're good
-		lnOssWindowId	= ls->ossWindowId;
-		lnScreen		= ls->ll.uniqueId;
-		lc					= (SCanvas*)oss_requestCanvasForScreen(ls);
+		lnScreen	= ls->ll.uniqueId;
+		lc			= oss_createCanvasForScreen(ls);
 		if (!lc)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate canvas for debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -956,7 +948,7 @@
 	u64 iBuildNewScreen_Locals(u64 tnUniqueId)
 	{
 		SOssWindow*	lisw;
-		u64			lnOssWindowId, lnScreen;
+		u64			lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -988,7 +980,7 @@
 								false, true, false, true, true,
 								&lsCallbacks);
 
-		ls = (SScreen*)oss_requestScreen(tnUniqueId, lisw);
+		ls = oss_createScreenAndVisibleWindow(tnUniqueId, lisw);
 		if (!ls)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -997,9 +989,8 @@
 		}
 
 		// We're good
-		lnOssWindowId	= ls->ossWindowId;
-		lnScreen		= ls->ll.uniqueId;
-		lc					= (SCanvas*)oss_requestCanvasForScreen(ls);
+		lnScreen	= ls->ll.uniqueId;
+		lc			= oss_createCanvasForScreen(ls);
 		if (!lc)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate canvas for debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -1067,7 +1058,7 @@
 	u64 iBuildNewScreen_Autos(u64 tnUniqueId)
 	{
 		SOssWindow*	lisw;
-		u64			lnOssWindowId, lnScreen;
+		u64			lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -1099,7 +1090,7 @@
 								false, true, false, true, true,
 								&lsCallbacks);
 
-		ls = (SScreen*)oss_requestScreen(tnUniqueId, lisw);
+		ls = oss_createScreenAndVisibleWindow(tnUniqueId, lisw);
 		if (!ls)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -1108,9 +1099,8 @@
 		}
 
 		// We're good
-		lnOssWindowId	= ls->ossWindowId;
-		lnScreen		= ls->ll.uniqueId;
-		lc					= (SCanvas*)oss_requestCanvasForScreen(ls);
+		lnScreen	= ls->ll.uniqueId;
+		lc			= oss_createCanvasForScreen(ls);
 		if (!lc)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate canvas for debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -1178,7 +1168,7 @@
 	u64 iBuildNewScreen_Timers(u64 tnUniqueId)
 	{
 		SOssWindow*	lisw;
-		u64			lnOssWindowId, lnScreen;
+		u64			lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -1210,7 +1200,7 @@
 								false, true, false, true, true,
 								&lsCallbacks);
 
-		ls = (SScreen*)oss_requestScreen(tnUniqueId, lisw);
+		ls = oss_createScreenAndVisibleWindow(tnUniqueId, lisw);
 		if (!ls)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -1219,9 +1209,8 @@
 		}
 
 		// We're good
-		lnOssWindowId	= ls->ossWindowId;
-		lnScreen		= ls->ll.uniqueId;
-		lc				= (SCanvas*)oss_requestCanvasForScreen(ls);
+		lnScreen	= ls->ll.uniqueId;
+		lc			= oss_createCanvasForScreen(ls);
 		if (!lc)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate canvas for debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -1289,7 +1278,7 @@
 	u64 iBuildNewScreen_Memory(u64 tnUniqueId)
 	{
 		SOssWindow*	lisw;
-		u64			lnOssWindowId, lnScreen;
+		u64			lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -1321,7 +1310,7 @@
 								false, true, false, true, true,
 								&lsCallbacks);
 
-		ls = (SScreen*)oss_requestScreen(tnUniqueId, lisw);
+		ls = oss_createScreenAndVisibleWindow(tnUniqueId, lisw);
 		if (!ls)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -1330,9 +1319,8 @@
 		}
 
 		// We're good
-		lnOssWindowId	= ls->ossWindowId;
-		lnScreen		= ls->ll.uniqueId;
-		lc				= (SCanvas*)oss_requestCanvasForScreen(ls);
+		lnScreen	= ls->ll.uniqueId;
+		lc			= oss_createCanvasForScreen(ls);
 		if (!lc)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate canvas for debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -1400,7 +1388,7 @@
 	u64 iBuildNewScreen_Programs(u64 tnUniqueId)
 	{
 		SOssWindow*	lisw;
-		u64			lnOssWindowId, lnScreen;
+		u64			lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -1432,7 +1420,7 @@
 								false, true, false, true, true,
 								&lsCallbacks);
 
-		ls = (SScreen*)oss_requestScreen(tnUniqueId, lisw);
+		ls = oss_createScreenAndVisibleWindow(tnUniqueId, lisw);
 		if (!ls)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -1441,9 +1429,8 @@
 		}
 
 		// We're good
-		lnOssWindowId	= ls->ossWindowId;
-		lnScreen		= ls->ll.uniqueId;
-		lc				= (SCanvas*)oss_requestCanvasForScreen(ls);
+		lnScreen	= ls->ll.uniqueId;
+		lc			= oss_createCanvasForScreen(ls);
 		if (!lc)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate canvas for debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -1511,7 +1498,7 @@
 	u64 iBuildNewScreen_Threads(u64 tnUniqueId)
 	{
 		SOssWindow*	lisw;
-		u64			lnOssWindowId, lnScreen;
+		u64			lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -1543,7 +1530,7 @@
 								false, true, false, true, true,
 								&lsCallbacks);
 
-		ls = (SScreen*)oss_requestScreen(tnUniqueId, lisw);
+		ls = oss_createScreenAndVisibleWindow(tnUniqueId, lisw);
 		if (!ls)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -1552,9 +1539,8 @@
 		}
 
 		// We're good
-		lnOssWindowId	= ls->ossWindowId;
-		lnScreen		= ls->ll.uniqueId;
-		lc				= (SCanvas*)oss_requestCanvasForScreen(ls);
+		lnScreen	= ls->ll.uniqueId;
+		lc			= oss_createCanvasForScreen(ls);
 		if (!lc)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate canvas for debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -1631,7 +1617,7 @@
 	u64 iBuildNewScreen_AsciiChart(u64 tnUniqueId)
 	{
 		SOssWindow*	lisw;
-		u64			lnOssWindowId, lnScreen;
+		u64			lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -1663,7 +1649,7 @@
 									false, true, false, true, true,
 									&lsCallbacks);
 
-		ls			= (SScreen*)oss_requestScreen(tnUniqueId, lisw);
+		ls			= oss_createScreenAndVisibleWindow(tnUniqueId, lisw);
 		if (!ls)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -1672,9 +1658,8 @@
 		}
 
 		// We're good
-		lnOssWindowId	= ls->ossWindowId;
-		lnScreen		= ls->ll.uniqueId;
-		lc				= (SCanvas*)oss_requestCanvasForScreen(ls);
+		lnScreen	= ls->ll.uniqueId;
+		lc			= oss_createCanvasForScreen(ls);
 		if (!lc)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate canvas for debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -1802,7 +1787,7 @@
 	u64 iBuildNewScreen_VDebLauncher(u64 tnUniqueId)
 	{
 		SOssWindow*	lisw;
-		u64			lnOssWindowId, lnScreen;
+		u64			lnScreen;
 		SScreen*	ls;
 		SCanvas*	lc;
 		s32			lnFontWidth, lnFontHeight, lnFontSkip, lnTop;
@@ -1834,7 +1819,7 @@
 									false, true, false, true, true,
 									&lsCallbacks);
 
-		ls			= (SScreen*)oss_requestScreen(tnUniqueId, lisw);
+		ls			= oss_createScreenAndVisibleWindow(tnUniqueId, lisw);
 		if (!ls)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);
@@ -1843,9 +1828,8 @@
 		}
 
 		// We're good
-		lnOssWindowId	= ls->ossWindowId;
-		lnScreen		= ls->ll.uniqueId;
-		lc				= (SCanvas*)oss_requestCanvasForScreen(ls);
+		lnScreen	= ls->ll.uniqueId;
+		lc			= oss_createCanvasForScreen(ls);
 		if (!lc)
 		{
 			vvm_messageBox(tnUniqueId, "Failed to allocate canvas for debugger screen.\nTerminating.", "VDebug Error", false, false, false, false, true);

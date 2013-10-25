@@ -1162,7 +1162,7 @@ _asm int 3;
 // ID, and not the actual SOssWindowLL->isw->ll.uniqueId for the actual internal screen structure
 //
 //////
-	_iswSOssWindowLL* ioss_findSOssWindowLLByOssWindowId(u64 tnOssWindowId)
+	_iswSOssWindowLL* ioss_find_iswSOssWindowLL_By_iOssWindowId(u64 tnOssWindowId)
 	{
 		SStartEndCallback cb;
 
@@ -2342,7 +2342,7 @@ _asm int 3;
 // BitBlt the indicated SBGRA buffer to the specified screen
 //
 //////
-	u64 ivvm_bitBltAll(_iswSOssWindowLL* tw, SBGRA* bd, u32 width, u32 height)
+	u64 ioss_bitBlt_SbgraBuffer_onto_ossWindow(_iswSOssWindowLL* tw, SBGRA* bd, u32 width, u32 height)
 	{
 		u64		lnResult;
 		u32		lnX, lnY, lnActualWidth;
@@ -3362,27 +3362,32 @@ _asm int 3;
 //////
 	u64 iioss_canvasScale(SCanvas* tcDst, SCanvas* tcSrc)
 	{
-		u64		lnResult;
+		u64		lnPixelsDrawn;
 		f32		lfVertical, lfHorizontal;
 
 
 		// Make sure our environment is sane
-		lnResult = -1;
+		lnPixelsDrawn = 0;
 		// We have valid source and destination canvases
 		if (tcSrc->width == tcDst->width && tcSrc->height == tcDst->height)
 		{
 			// They're the same size, just copy them
 			memcpy(tcDst->bd, tcSrc->bd, tcSrc->width * tcSrc->height * sizeof(SBGRA));
-			lnResult = 1;
+			lnPixelsDrawn = tcSrc->width * tcSrc->height;
 
 		} else {
 			// We need to scale
 			lfVertical		= (f32)tcSrc->height / (f32)tcDst->height;
 			lfHorizontal	= (f32)tcSrc->width  / (f32)tcDst->width;
-			lnResult		= iioss_canvasScaleProcess(tcDst, tcSrc, lfVertical, lfHorizontal);
+			lnPixelsDrawn	= iioss_canvasScaleProcess(tcDst, tcSrc, lfVertical, lfHorizontal);
 		}
+
+		// Mark the item dirty
+		if (lnPixelsDrawn != 0)
+			tcDst->state.isDirty = true;
+
 		// Indicate our failure or success
-		return(lnResult);
+		return(lnPixelsDrawn);
 	}
 
 
@@ -3405,6 +3410,7 @@ _asm int 3;
 //////
 	u64 iioss_canvasScaleProcess(SCanvas* tcDst, SCanvas* tcSrc, f32 tfVerticalScaler, f32 tfHorizontalScaler)
 	{
+		u64					lnPixelsDrawn;
 		s32					lnY, lnX;
 		_isSBitmapProcess	bp;
 
@@ -3417,6 +3423,7 @@ _asm int 3;
 		bp.pixels	= (SBGRAF*)malloc(((u32)bp.ratioV + 16) * ((u32)bp.ratioH + 16) * sizeof(SBGRAF));
 
 		// Iterate through every pixel
+		lnPixelsDrawn = 0;
 		for (lnY = 0; lnY < tcDst->height; lnY++)
 		{
 			// Grab the offset for this line
@@ -3442,6 +3449,9 @@ _asm int 3;
 				bp.optr->grn = (u8)bp.grn;
 				bp.optr->blu = (u8)bp.blu;
 				bp.optr->alp = (u8)bp.alp;
+
+				// Increase the pixel count
+				++lnPixelsDrawn;
 
 				// Move to the next pixel
 				++bp.optr;
@@ -4610,12 +4620,12 @@ continueToNextAttribute:
 // Create a new screen in the master list
 //
 //////
-	SScreen* ioss_createScreen(u64 tnAssociatedId, SScreen** ts)
+	SScreen* ioss_createScreen(u64 tnAssociatedId)
 	{
-		SScreen*	ls;
+		SScreen* ls;
 
 
-		// Lock the canvas access semaphore
+		// Lock the screen access semaphore
 		oss_lockSemaphore(gsemScreenAccess);
 
 		// Create the canvas
@@ -4627,13 +4637,9 @@ continueToNextAttribute:
 
 			// Create this screen's refresh semaphore
 			ls->semRefresh		= oss_createSemaphore();
-
-			// Update the caller's data
-			if (ts)
-				*ts = ls;
 		}
 
-		// Unlock the canvas access semaphore
+		// Unlock the screen access semaphore
 		oss_unlockSemaphore(gsemScreenAccess);
 
 		// Indicate our status
@@ -4648,7 +4654,7 @@ continueToNextAttribute:
 // Create a new canvas in the master list
 //
 //////
-	SCanvas* ioss_createCanvas(u64 tnAssociatedId, SCanvasState* tsState, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, SCanvas** tsCanvas)
+	SCanvas* ioss_createCanvas(u64 tnAssociatedId, SCanvasState* tsState, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor)
 	{
 		SCanvas*	lc;
 
@@ -4658,10 +4664,6 @@ continueToNextAttribute:
 
 		// Create the canvas
 		lc = (SCanvas*)oss_SEChain_append(&gseRootCanvas, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SCanvas), _COMMON_START_END_BLOCK_SIZE, NULL);
-
-		// If the user wants a copy, give it to them
-		if (tsCanvas)
-			*tsCanvas = lc;
 
 		// If it's valid, update it
 		if (lc)
@@ -4680,7 +4682,7 @@ continueToNextAttribute:
 			// Initialize the canvas buffers
 			lc->bd				= (SBGRA*)malloc(tnHeight * tnWidth * 4);					// buffer data
 			lc->bda				= (SBGRA*)malloc(tnHeight * tnWidth * 4);					// buffer accumulator data (for building child items onto a canvas before copying and using this canvas above)
-			lc->bd_vvmoss		= oss_requestSystemBitmap(tnWidth, tnHeight);				// Used primarily for rendering system fonts
+			lc->bd_vvmoss		= oss_createSystemBitmap(tnWidth, tnHeight);				// Used primarily for rendering system fonts
 
 			// Initialize it with the default background color
 			if (lc->bd)			oss_memset4((u32*)lc->bd,  oss_swapEndian(oss_RGBA2BGRA(tnBackColor.color)), tnHeight * tnWidth);	// Initialize bd to the indicated color
@@ -4706,7 +4708,8 @@ continueToNextAttribute:
 
 //////////
 //
-// Create a region object
+// Create a region object.  Regions are areas which can respond to keyboard and mouse
+// events, and can be an optional tab stop.
 //
 //////
 	SRegion* ioss_createRegion(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, u32 tnWidth, u32 tnHeight, SCallbacks* callback, SStartEnd* events)
@@ -4731,7 +4734,7 @@ continueToNextAttribute:
 			// Copy properties
 			lr->width			= tnWidth;							// Width of this region
 			lr->height			= tnHeight;							// Height of this region
-			lr->type			= tnType;							// type of region (see _REGION_* constants in common_vvmoss.h)
+			lr->type			= tnType;							// type of region (see _VVM_REGION_* constants in common_vvm.h)
 
 			// Copy state information
 			if (tsState)		memcpy(&lr->state, tsState, sizeof(SRegionState));
@@ -4760,363 +4763,6 @@ continueToNextAttribute:
 
 //////////
 //
-// Search by the screen's active canvas
-//
-//////
-	SScreen* ioss_findScreenByActiveCanvas(u64 canvasId)
-	{
-		SStartEndCallback cb;
-
-
-		// Locate the screen by the indicated canvas ID
-		cb._func	= (u64)iioss_findScreenByActiveCanvasCallback;
-		cb.extra	= canvasId;
-		return((SScreen*)oss_SEChain_searchByCallback(&gseRootScreen, &cb));
-	}
-
-	bool iioss_findScreenByActiveCanvasCallback(SStartEndCallback* cb)
-	{
-		SScreen* ls;
-
-
-		// Make sure the environment is sane
-		if (cb && cb->ptr)
-		{
-			ls = (SScreen*)cb->ptr;
-			if (ls->activeCanvas && ls->activeCanvas->ll.uniqueId == cb->extra)
-				return(true);		// Found it
-		}
-		// If we get here, not this one
-		return(false);
-	}
-
-
-
-
-//////////
-//
-// Search the screen's canvas list for the indicated canvas
-//
-//////
-	SCanvasList* ioss_findCanvasListOfScreen(SScreen* ts, SCanvas* tc)
-	{
-		SStartEndCallback cb;
-
-
-		// Make sure there's something to do
-		if (ts && tc && ts->canvasList.root)
-		{
-			cb._func	= (u64)iioss_findCanvasCallback;
-			cb.extra	= (u64)tc;
-			return((SCanvasList*)oss_SEChain_searchByCallback(&ts->canvasList, &cb));
-		}
-
-		// Failure
-		return(NULL);
-	}
-
-
-
-
-//////////
-//
-// Search the canvas's list for the indicated canvas
-//
-//////
-	SCanvasList* ioss_findCanvasListOfCanvas(SCanvas* tcHaystack, SCanvas* tcNeedle)
-	{
-		SStartEndCallback cb;
-
-
-		// Make sure there's something to do
-		if (tcHaystack && tcNeedle && tcHaystack->canvasList.root)
-		{
-			cb._func	= (u64)iioss_findCanvasCallback;
-			cb.extra	= (u64)tcNeedle;
-			return((SCanvasList*)oss_SEChain_searchByCallback(&tcHaystack->canvasList, &cb));
-		}
-
-		// Failure
-		return(NULL);
-	}
-
-	bool iioss_findCanvasCallback(SStartEndCallback* cb)
-	{
-		SCanvasList* lcl;
-
-
-		// Make sure our environment is sane
-		if (cb && cb->ptr && cb->extra != 0)
-		{
-			lcl	= (SCanvasList*)cb->ptr;
-
-			// Is this the canvas?
-			if (lcl->canvas == (SCanvas*)cb->extra)
-				return(true);	// Yes
-			// If we get here, no
-		}
-		// Return false, indicating we have not yet found our record, and we want to examine more
-		return(false);
-	}
-
-
-
-
-//////////
-//
-// Do a deep, recursive search of the canvas's list items, and all of its list items, for
-// either of the indicated canvases, and if any are found at any point, return that entry.
-//
-//////
-	SCanvasList* ioss_deepFindCanvasListOfCanvas(SCanvas* tcHaystack, SCanvas* tcNeedle)
-	{
-//		SCanvasList*	lcl;
-
-
-// TODO:  working here on canvas progeny
-		return(0);
-	}
-
-
-
-
-//////////
-//
-// Search this canvas's list for the indicated region
-//
-//////
-	SRegionList* ioss_findRegionListOfCanvas(SCanvas* tc, SRegion* tr)
-	{
-		SRegionList* lrl;
-
-
-		// Make sure there's something to do
-		if (tc && tr && tc->regionList.root)
-		{
-			// Iterate through the master list
-// UNTESTED CODE: breakpoint and examine
-			lrl = (SRegionList*)tc->regionList.root;
-			while (lrl)
-			{
-				if (lrl->region == tr)
-					return(lrl);
-
-				// Move to next entry
-				lrl = (SRegionList*)lrl->ll.next;
-			}
-			// If we get here, not found
-		}
-		return(NULL);
-	}
-
-
-
-
-//////////
-//
-// Search this region's list for the indicated region
-//
-//////
-	SRegionList* ioss_findRegionListOfRegion(SRegion* trHaystack, SRegion* trNeedle)
-	{
-		SRegionList* lrl;
-
-
-		// Make sure there's something to do
-		if (trHaystack && trNeedle && trHaystack->regionList.root)
-		{
-			// Iterate through the master list
-// UNTESTED CODE: breakpoint and examine
-			lrl = (SRegionList*)trHaystack->regionList.root;
-			while (lrl)
-			{
-				if (lrl->region == trNeedle)
-					return(lrl);
-
-				// Move to next entry
-				lrl = (SRegionList*)lrl->ll.next;
-			}
-			// If we get here, not found
-		}
-		return(NULL);
-	}
-
-
-
-
-//////////
-//
-// Append this canvas to this screen's chain of canvases
-//
-//////
-	SCanvasList* ioss_appendCanvasToScreen(SScreen* ts, SCanvas* tc, SCanvasState* tsState, u64 tnAssociatedId, s32 tnX, s32 tnY)
-	{
-		SCanvasList* lcl;
-
-
-		// Make sure there's something to do
-		lcl = NULL;
-		if (ts && tc)
-		{
-			// Search through this screen's list to see if this canvas already resides here
-			while (1)
-			{
-				lcl = ioss_findCanvasListOfScreen(ts, tc);
-				if (lcl)
-					break;	// It already exists, so let's update the parameters (in case they've changed)
-				// If we get here, it doesn't already exist
-
-				// Create the new SCanvasList entry
-				lcl = (SCanvasList*)oss_SEChain_append(&ts->canvasList, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SCanvasList), _COMMON_START_END_BLOCK_SIZE, NULL);
-				break;
-			}
-
-			// If it's a valid structure, we can update it
-			if (lcl)
-			{
-				// Associate this instance with the screen, and at this location
-				lcl->associatedId	= tnAssociatedId;
-				lcl->canvas			= tc;
-
-				// Store the instance parameters
-				lcl->x				= tnX;
-				lcl->y				= tnY;
-
-				// Store the state
-				if (tsState)	memcpy(&lcl->state, tsState,	sizeof(SCanvasState));	// Use provided information
-				else			memcpy(&lcl->state, &tc->state,	sizeof(SCanvasState));	// Use root object information
-
-				// Note:  This may not be the active canvas.  To make it the active canvas is a separate function call.
-			}
-			// Indicate our success or failure
-		}
-		// Indicate our success or failure
-		return lcl;
-	}
-
-
-
-
-//////////
-//
-// Append this canvas to the canvas
-//
-// Returns:
-//		-1		= tcParent and tcChild are indirectly related through a distant reference
-//		-2		= tcParent and tcChild are exactly the same
-//		-3		= ts, tcParent, or tcChild is null
-//
-//////
-	SCanvasList* ioss_appendCanvasToCanvas(SCanvas* tcParent, SCanvas* tcChild, SCanvasState* tsState, u64 tnAssociatedId, s32 tnX, s32 tnY)
-	{
-		SCanvasList* lcl;
-
-
-		// Verify parameters are sane
-		if (!tcParent || !tcChild)
-			return (SCanvasList*)-3;		// Something's awry
-
-		// Verify no circular reference
-		if (tcParent == tcChild)
-			return (SCanvasList*)-2;		// This is a circular reference
-
-		// Make sure the child canvas is not related this parent in any way through any relationship already
-		lcl = ioss_deepFindCanvasListOfCanvas(tcParent, tcChild);
-		if (lcl)
-			return (SCanvasList*)-1;		// Circular reference through a distant reference
-
-		// Search through this canvas's list to see if it already exists
-		while (1)
-		{
-			lcl = ioss_findCanvasListOfCanvas(tcParent, tcChild);
-			if (lcl)
-				break;	// We found a match, let's use it and go ahead and update its parameters
-			// If we get here, we need to create a new CanvasList entry
-
-			// Create the new SCanvasList entry
-			lcl = (SCanvasList*)oss_SEChain_append(&tcParent->canvasList, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SCanvasList), _COMMON_START_END_BLOCK_SIZE, NULL);
-			break;
-		}
-
-		// Update entry if it is valid
-		if (lcl)
-		{
-			// Associate this instance with the canvas, and at this location
-			lcl->associatedId	= tnAssociatedId;
-			lcl->canvas			= tcChild;
-
-			// Store the instance parameters
-			lcl->x				= tnX;
-			lcl->y				= tnY;
-
-			// Store the state
-			if (tsState)	memcpy(&lcl->state, tsState,			sizeof(SCanvasState));	// Use provided information
-			else			memcpy(&lcl->state, &tcChild->state,	sizeof(SCanvasState));	// Use root object information
-		}
-
-		// Indicate our success or failure
-		return lcl;
-	}
-
-
-
-
-//////////
-//
-// Append this region to this canvas
-//
-//////
-	SRegionList* ioss_appendRegionToCanvas(SCanvas* tc, SRegion* tr, SRegionState* tsState, u64 tnAssociatedId, s32 tnX, s32 tnY, SCallbacks* callback)
-	{
-		SRegionList* lrl;
-
-
-		// Make sure there's something to do
-		lrl = NULL;
-		if (tc && tr)
-		{
-			// Search through this canvas's list to see if this region is already present
-			lrl = ioss_findRegionListOfCanvas(tc, tr);
-			while (1)
-			{
-				if (lrl)
-					break;	// We found a match, let's use it and go ahead and update its parameters
-				// If we get here, we need to create a new RegionList entry
-
-				// Create the new SRegionList entry
-				lrl = (SRegionList*)oss_SEChain_append(&tc->canvasList, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SRegionList), _COMMON_START_END_BLOCK_SIZE, NULL);
-				break;
-			}
-
-			// Update the entry if it's valid
-			if (lrl)
-			{
-				// Associate this instance with the region, and at this location
-				lrl->associatedId	= tnAssociatedId;
-				lrl->region			= tr;
-
-				// Store the instance parameters
-				lrl->x				= tnX;
-				lrl->y				= tnY;
-
-				// Store the state
-				if (tsState)	memcpy(&lrl->state, tsState,	sizeof(SRegionState));	// Use provided information
-				else			memcpy(&lrl->state, &tr->state,	sizeof(SRegionState));	// Use root object information
-
-				// Store the callback functions if any (if not, then it will default to the root object's callbacks without first copying them)
-				if (callback)	memcpy(&lrl->callback, callback, sizeof(SCallbacks));
-			}
-			// Indicate our success or failure
-		}
-		// Indicate our success or failure
-		return lrl;
-	}
-
-
-
-
-//////////
-//
 // Append this region to this region
 //
 // Returns:
@@ -5124,52 +4770,9 @@ continueToNextAttribute:
 //		-3		= ts, tcParent, or tcChild is null
 //
 //////
-	SRegionList* ioss_appendRegionToRegion(SRegion* trParent, SRegion* trChild, u64 tnAssociatedId, SRegionState* tsState, s32 tnX, s32 tnY, SCallbacks* callback)
+	SRegion* ioss_appendRegionToRegion(SRegion* trParent, SRegion* trChild, u64 tnAssociatedId, SRegionState* tsState, s32 tnX, s32 tnY, SCallbacks* callback)
 	{
-		SRegionList* lrl;
-
-
-		// Verify parameters are sane
-		if (!trParent || !trChild)
-			return (SRegionList*)-3;		// Something's awry
-
-		// Verify no circular reference
-		if (trParent == trChild)
-			return (SRegionList*)-2;		// This is a circular reference
-
-		// Search through this canvas's list to see if this region is already present
-		lrl = ioss_findRegionListOfRegion(trParent, trChild);
-		while (1)
-		{
-			if (lrl)
-				break;	// We found a match, let's use it and go ahead and update its parameters
-			// If we get here, we need to create a new RegionList entry
-
-			// Create the new SRegionList entry
-			lrl = (SRegionList*)oss_SEChain_append(&trParent->regionList, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SRegionList), _COMMON_START_END_BLOCK_SIZE, NULL);
-			break;
-		}
-
-		// Update the entry if it's valid
-		if (lrl)
-		{
-			// Associate this instance with the region, and at this location
-			lrl->associatedId	= tnAssociatedId;
-			lrl->region			= trChild;
-
-			// Store the instance parameters
-			lrl->x				= tnX;
-			lrl->y				= tnY;
-
-			// Store the state
-			if (tsState)	memcpy(&lrl->state, tsState,			sizeof(SRegionState));	// Use provided information
-			else			memcpy(&lrl->state, &trChild->state,	sizeof(SRegionState));	// Use root object information
-
-			// Store the callback functions if any (if not, then it will default to the root object's callbacks without first copying them)
-			if (callback)	memcpy(&lrl->callback, callback, sizeof(SCallbacks));
-		}
-		// Indicate our success or failure
-		return lrl;
+		return NULL;
 	}
 
 
@@ -5378,100 +4981,6 @@ continueToNextAttribute:
         }
 		// Return the number of pixels updated
 		return(lnPixels);
-	}
-
-
-
-
-//////////
-//
-// Called to refresh the specified screen and all items on the active canvas
-//
-//////
-	u64 ioss_refreshScreen(SScreen* ts)
-	{
-		u32		lnI;
-		u64		lnCount;
-
-
-		// Lock the semaphores for exclusive access to this operation and screen
-		oss_lockSemaphore(ts->semRefresh);
-
-// UNTESTED CODE:  Breakpoint and examine!
-		// If there is a canvas list, update each of those
-		lnCount = 0;
-		if (ts->canvasList.root)
-		{
-			// Iterate the canvases in the canvas list prior to processing the activeCanvas
-			for (lnI = 0; lnI < ts->canvasList.masterCount; lnI++)
-			{
-				if (ts->canvasList.master[lnI]->used && ts->canvasList.master[lnI]->ptr)
-				{
-					// Process this canvas
-					++lnCount;
-					ioss_refreshCanvas((SCanvas*)ts->canvasList.master[lnI]->ptr);
-				}
-			}
-		}
-
-		// Process the activeCanvas
-		++lnCount;
-		ioss_refreshCanvas(ts->activeCanvas);
-
-		// Once we get here, every canvas is updated
-		lnCount += (ioss_bitBltAll(ts->activeCanvas, false, 0, 0, ts->activeCanvas, true) != 0);
-
-		// Unlock the semaphores
-		oss_unlockSemaphore(ts->semRefresh);
-
-		// Indicate our success our failure
-		return(lnCount);
-	}
-
-
-
-
-//////////
-//
-// Called to refresh the specified canvas, and all sub-canvases in this instance
-//
-//////
-	u64 ioss_refreshCanvas(SCanvas* tc)
-	{
-		// Process child entries in the canvasList first
-		u32		lnI;
-		u64		lnCount;
-
-
-		// Lock the semaphore for exclusive access to this canvas
-		oss_lockSemaphore(tc->semRefresh);
-
-// UNTESTED CODE:  Breakpoint and examine!
-		// If there is a canvas list, update each of those
-		lnCount = 0;
-		if (tc->canvasList.root)
-		{
-			// Iterate the canvases in the canvas list prior to processing the activeCanvas
-			for (lnI = 0; lnI < tc->canvasList.masterCount; lnI++)
-			{
-				if (tc->canvasList.master[lnI]->used && tc->canvasList.master[lnI]->ptr)
-				{
-					// Process this canvas
-					++lnCount;
-					ioss_refreshCanvas((SCanvas*)tc->canvasList.master[lnI]->ptr);
-				}
-			}
-		}
-
-		// Once we get here, every canvas is updated
-		// Update self
-		lnCount += (ioss_bitBltAll(tc, false, 0, 0, tc, true) != 0);
-
-		// Unlock the semaphore
-		oss_unlockSemaphore(tc->semRefresh);
-
-		// Indicate our success our failure
-		return(lnCount);
 	}
 
 
@@ -5941,6 +5450,137 @@ continueToNextAttribute:
 				leNew->_event		= le->_event;
 			}
 		}
+	}
+
+
+
+
+//////////
+//
+// Refresh this canvas and all of its children
+//
+//////
+	void iioss_screenRefreshCallback(SStartEndCallback* cb)
+	{
+		SRegion*			lr;
+		SCanvas*			lc;
+
+
+// TODO:  Incomplete code, not yet developed
+		// Get our canvas pointer
+		lr = (SRegion*)cb->ptr;
+		if (lr && lr->state.isVisible)
+		{
+			// Initialize the background onto the accumulator
+			if (lr->canvas)
+			{
+				// Draw the canvas
+				lc = lr->canvas;
+				oss_canvasFillRect(lc, lc->bda, 0, 0, lc->width, lc->height, 0, lc->backColor, lc->backColor);
+
+				// See how it should be painted
+				if (lr->callback.object._callback_paint != 0)
+				{
+					// There is a custom paint algorithm
+
+				} else {
+					// Paint it manually
+					oss_regionDefaultPaint(lr);
+				}
+			}
+		}
+	}
+
+
+
+
+//////////
+//
+// Painting algorithms for standard controls
+//
+//////
+	u64 ioss_regionDefaultPaintEditbox(SRegion* tr, SCanvas* tc, SBGRA* bd, SRegionEditboxData* editbox)
+	{
+		u64 lnPixelsDrawn;
+
+
+		// Make sure our environment is sane
+		lnPixelsDrawn = 0;
+		if (tr && tc && bd && editbox)
+		{
+		}
+		// Indicate if we did anything
+		return(lnPixelsDrawn);
+	}
+
+	u64 ioss_regionDefaultPaintButton(SRegion* tr, SCanvas* tc, SBGRA* bd, SRegionButtonData* button)
+	{
+		u64 lnPixelsDrawn;
+
+
+		// Make sure our environment is sane
+		lnPixelsDrawn = 0;
+		if (tr && tc && bd && button)
+		{
+		}
+		// Indicate if we did anything
+		return(lnPixelsDrawn);
+	}
+
+	u64 ioss_regionDefaultPaintImage(SRegion* tr, SCanvas* tc, SBGRA* bd, SRegionImageData* image)
+	{
+		u64 lnPixelsDrawn;
+
+
+		// Make sure our environment is sane
+		lnPixelsDrawn = 0;
+		if (tr && tc && bd && image)
+		{
+		}
+		// Indicate if we did anything
+		return(lnPixelsDrawn);
+	}
+
+	u64 ioss_regionDefaultPaintLabel(SRegion* tr, SCanvas* tc, SBGRA* bd, SRegionLabelData* label)
+	{
+		u64 lnPixelsDrawn;
+
+
+		// Make sure our environment is sane
+		lnPixelsDrawn = 0;
+		if (tr && tc && bd && label)
+		{
+		}
+		// Indicate if we did anything
+		return(lnPixelsDrawn);
+	}
+
+	u64 ioss_regionDefaultPaintCheckbox(SRegion* tr, SCanvas* tc, SBGRA* bd, SRegionCheckboxData* checkbox)
+	{
+		u64 lnPixelsDrawn;
+
+
+		// Make sure our environment is sane
+		lnPixelsDrawn = 0;
+		if (tr && tc && bd && checkbox)
+		{
+		}
+		// Indicate if we did anything
+		return(lnPixelsDrawn);
+	}
+
+	u64 ioss_regionDefaultPaintRectangle(SRegion* tr, SCanvas* tc, SBGRA* bd, SRegionRectangleData* rectangle)
+	{
+		u64 lnPixelsDrawn;
+
+
+		// Make sure our environment is sane
+		lnPixelsDrawn = 0;
+		if (tr && tc && bd && rectangle)
+		{
+		}
+		// Indicate if we did anything
+		return(lnPixelsDrawn);
 	}
 
 

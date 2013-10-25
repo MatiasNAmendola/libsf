@@ -511,7 +511,7 @@ return(false);
 	{
 		s32				lnX, lnY;
 		u32				lnWidth, lnHeight, lnMinWidth, lnMinHeight, lnMaxWidth, lnMaxHeight;
-		SOssWindow*		low;
+		SOssWindow*		w;
 		SCallbacksW		cb;
 		SStartEnd		lse;
 
@@ -551,8 +551,8 @@ return(false);
 		// Create our window position
 		//////
 			memset(&lse, 0, sizeof(SStartEnd));
-			low = oss_enumerateMonitors(&lse);
-			oss_computeMonitorCoordinates(low, 90.0f, _VVMOSS_SCREEN_UPPER_LEFT, 5.0f, &lnX, &lnY, &lnWidth, &lnHeight, &lnMaxWidth, &lnMaxHeight, &lnMinWidth, &lnMinHeight);
+			w = oss_enumerateMonitors(&lse);
+			oss_computeMonitorCoordinates(w, 90.0f, _VVMOSS_SCREEN_UPPER_LEFT, 5.0f, &lnX, &lnY, &lnWidth, &lnHeight, &lnMaxWidth, &lnMaxHeight, &lnMinWidth, &lnMinHeight);
 
 
 		//////////
@@ -561,7 +561,7 @@ return(false);
 			SBGRA foreground, background;
 			foreground.color = rgba(0,0,0,0);
 			background.color = rgba(255,255,255,255);
-			low = oss_createScreenTemplate(	oss_getNextUniqueId(),
+			w = oss_createScreenTemplate(	oss_getNextUniqueId(),
 											oss_getNextUniqueId(),
 											"Test Window", -1, 
 											lnX, lnY, lnWidth, lnHeight, lnMaxWidth, lnMaxHeight, lnMinWidth, lnMinHeight,
@@ -569,10 +569,10 @@ return(false);
 											true, true, true, true, true,
 											&cb);
 
-			screen = oss_requestScreen(0, low);
+			screen = oss_createScreenAndVisibleWindow(0, w);
 			if (screen)
 			{
-				canvas = oss_requestCanvasForScreen(screen);
+				canvas = oss_createCanvasForScreen(screen);
 				if (canvas)
 				{
 // 					SBGRA white1 = { 255, 255, 255, 255 };
@@ -580,7 +580,7 @@ return(false);
 // 					SBGRA white3 = { 215, 255, 215, 255 };
 // 					SBGRA white4 = { 215, 215, 255, 255 };
 // 					SBGRA black = { 0, 0, 0, 255 };
-// 					SBGRA blue = { 255, 0, 0, 255 };
+ 					SBGRA blue = { 255, 0, 0, 255 };
 // 					oss_canvasFillRect(canvas, canvas->bd, 0, 0, canvas->width, canvas->height, 0, white1, white1);
 // 					oss_canvasGradient(canvas, canvas->bd, white1, white2, white3, white4);
 // 
@@ -598,10 +598,10 @@ return(false);
 // 						oss_canvasDrawFixedPointText(canvas, canvas->bd, 8, 14, 0, lnI, foo, canvas->width / 8, black, white1);
 // 					}
 // 
-// 					int lnI;
-// 					for (lnI = 1; lnI < 10; lnI++)
-// 						oss_canvasLine(canvas, canvas->bd, 300 + (lnI * 30), 300, 400 + (lnI * 30), 380, lnI, blue);
-// 
+ 					int lnI;
+ 					for (lnI = 1; lnI < 10; lnI++)
+ 						oss_canvasLine(canvas, canvas->bd, 300 + (lnI * 30), 300, 400 + (lnI * 30), 680, lnI, blue);
+ 
 // 					f32 lfTheta;
 // 					for (lnI = 0, lfTheta = 0; lfTheta < 6.28f * 3.0f; lnI += 4, lfTheta += 6.28f / 90.0f)
 // 						oss_canvasLine(canvas, canvas->bd, 100 + lnI, 700, 100 + lnI + (s32)(cos(lfTheta) * 200), 700 + (s32)(sin(lfTheta) * 200), lnI % 5, blue);
@@ -614,7 +614,7 @@ return(false);
 
 //					oss_canvasArc(canvas, canvas->bd, 200, 200, 40.0f, 0.0f, 3.14f, 2, black);
 
-//					oss_canvasRefresh(canvas);
+					oss_canvasRefresh(canvas);
 				}
 			}
 	}
@@ -661,12 +661,17 @@ u64 CALLTYPE hj_window_lostFocus(u64 tnUniqueId, SOssWindow* tisw)
 	return(0);
 }
 
-u64 CALLTYPE hj_object_enter(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)
+u64 CALLTYPE hj_object_enter(u64 tnUniqueId, SOssWindow* tisw, SRegion* tr, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)
 {
 	return(0);
 }
 
-u64 CALLTYPE hj_object_leave(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)
+u64 CALLTYPE hj_object_leave(u64 tnUniqueId, SOssWindow* tisw, SRegion* tr, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)
+{
+	return(0);
+}
+
+u64 CALLTYPE hj_object_paint(u64 tnUniqueId, SOssWindow* tisw, SRegion* tr, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)
 {
 	return(0);
 }

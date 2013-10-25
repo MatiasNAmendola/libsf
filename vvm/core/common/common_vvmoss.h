@@ -76,18 +76,15 @@
 	const s8		cgcOssDeleteScreen[]									= "oss_deleteScreen";
 	const s8		cgcOssDeleteCanvas[]									= "oss_deleteCanvas";
 
-	const s8		cgcOssRequestScreen[]									= "oss_requestScreen";
-	const s8		cgcOssRequestCanvasForScreen[]							= "oss_requestCanvasForScreen";
-	const s8		cgcOssRequestCanvasForCanvas[]							= "oss_requestCanvasForCanvas";
-	const s8		cgcOssRequestCanvas[]									= "oss_requestCanvas";
-	const s8		cgcOssRequestCanvasAndRegion[]							= "oss_requestCanvasAndRegion";
-	const s8		cgcOssRequestRegion[]									= "oss_requestRegion";
-	const s8		cgcOssRequestDuplicateRegion[]							= "oss_requestDuplicateRegion";
-	const s8		cgcOssAssociateCanvasWithScreen[]						= "oss_associateCanvasWithScreen";
-	const s8		cgcOssAssociateCanvasWithCanvas[]						= "oss_associateCanvasWithCanvas";
-	const s8		cgcOssAssociateRegionWithCanvas[]						= "oss_associateRegionWithCanvas";
-	const s8		cgcOssAssociateRegionWithRegion[]						= "oss_associateRegionWithRegion";
-	const s8		cgcOssRequestFontHandle[]								= "oss_requestFontHandle";
+	const s8		cgcOssCreateScreenAndVisibleWindow[]					= "oss_createScreenAndVisibleWindow";
+	const s8		cgcOssCreateRegionForScreen[]							= "oss_createRegionForScreen";
+	const s8		cgcOssCreateCanvas[]									= "oss_createCanvas";
+	const s8		cgcOssCreateRegion[]									= "oss_createRegion";
+	const s8		cgcOssRegionDuplicate[]									= "oss_regionDuplicate";
+	const s8		cgcOssRegionDefaultPaint[]								= "oss_regionDefaultPaint";
+	const s8		cgcOssRegionRefresh[]									= "oss_regionRefresh";
+	const s8		cgcOssCreateCanvasAndRegion[]							= "oss_createCanvasAndRegion";
+	const s8		cgcOssCreateFontHandle[]								= "oss_createFontHandle";
 	const s8		cgcOssCanvasWriteFixedPointText[]						= "oss_canvasDrawFixedPointText";
 	const s8		cgcOssCanvasDrawText[]									= "oss_canvasDrawText";
 	const s8		cgcOssCanvasDrawTextUnicode[]							= "oss_canvasDrawTextUnicode";
@@ -100,6 +97,7 @@
 	const s8		cgcOssCanvasGrayscale[]									= "oss_canvasGrayscale";
 	const s8		cgcOssCanvasGradient[]									= "oss_canvasGradient";
 	const s8		cgcOssCanvasBitBlt[]									= "oss_canvasBitBlt";
+	const s8		cgcOssScreenRefresh[]									= "oss_screenRefresh";
 	const s8		cgcOssCanvasRefresh[]									= "oss_canvasRefresh";
 	const s8		cgcOssCanvasSetRegionAndEventCallback[]					= "oss_canvasSetRegionAndEventCallback";
 	const s8		cgcOssCanvasGetRegionsList[]							= "oss_canvasGetRegionsList";
@@ -124,8 +122,8 @@
 	const s8		cgcOssCanvasScale[]										= "oss_canvasScale";
 	const s8		cgcOssLoadBitmapFromDisk[]								= "oss_loadBitmapFromDisk";
 	const s8		cgcOssSaveBitmapToDisk[]								= "oss_saveBitmapToDisk";
-	const s8		cgcOssRequestSystemFont[]								= "oss_requestSystemFont";
-	const s8		cgcOssRequestSystemBitmap[]								= "oss_requestSystemBitmap";
+	const s8		cgcOssCreateSystemFont[]								= "oss_createSystemFont";
+	const s8		cgcOssCreateSystemBitmap[]								= "oss_createSystemBitmap";
 	const s8		cgcOssFindSystemFontByHandle[]							= "oss_findSystemFontByHandle";
 
 	const s8		cgcOssAlloc[]											= "oss_alloc";
@@ -429,18 +427,15 @@
 		u64				(CALLTYPE *oss_deleteCanvas)							(u64 id, SCanvas* tc);
 
 		// Visible window information
-		SScreen*		(CALLTYPE *oss_requestScreen)							(u64 tnAssociatedId, SOssWindow* tisw);
-		SCanvas*		(CALLTYPE *oss_requestCanvasForScreen)					(SScreen* ts);
-		SCanvas*		(CALLTYPE *oss_requestCanvasForCanvas)					(SCanvas* tc);
-		SCanvas*		(CALLTYPE *oss_requestCanvas)							(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, u32 tnBackColor, bool tlIsActive, bool tlUseTransparency);
-		SRegion*		(CALLTYPE *oss_requestRegion)							(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, u32 tnWidth, u32 tnHeight, SCallbacksW* callback, SStartEnd* events);
-		SRegion*		(CALLTYPE *oss_requestDuplicateRegion)					(u64 tnAssociatedId, SRegion* templateRegion);
-		bool			(CALLTYPE *oss_requestCanvasAndRegion)					(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, bool tlIsActive, bool tlUseTransparency, SCanvas** tc, SRegion** tr, SCallbacksW* callbacks, SStartEnd* events);
-		SCanvasList* 	(CALLTYPE *oss_associateCanvasWithScreen)				(SScreen* ts, SCanvas* tc, bool tlMakeActive);
-		SCanvasList* 	(CALLTYPE *oss_associateCanvasWithCanvas)				(SCanvas* tcParent, SCanvas* tcChild);
-		SRegionList*	(CALLTYPE *oss_associateRegionWithCanvas)				(SCanvas* tc, SRegion* tr);
-		SRegionList*	(CALLTYPE *oss_associateRegionWithRegion)				(SRegion* tcParent, SRegion* trChild);
-		u64				(CALLTYPE *oss_requestFontHandle)						(s8* fontName, u32 fontWidth, bool bold, bool italics, bool underline, bool strikethrough);
+		SScreen*		(CALLTYPE *oss_createScreenAndVisibleWindow)			(u64 tnAssociatedId, SOssWindow* tisw/*tisw was created by oss_createScreenTemplate()*/);
+		SCanvas*		(CALLTYPE *oss_createCanvasForScreen)					(SScreen* ts);
+		SCanvas*		(CALLTYPE *oss_createCanvas)							(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, u32 tnBackColor, bool tlIsActive, bool tlUseTransparency);
+		SRegion*		(CALLTYPE *oss_createRegion)							(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, u32 tnWidth, u32 tnHeight, SCallbacksW* callback, SStartEnd* events);
+		SRegion*		(CALLTYPE *oss_regionDuplicate)							(u64 tnAssociatedId, SRegion* templateRegion);
+		u64				(CALLTYPE *oss_regionDefaultPaint)						(SRegion* tr);
+		u64				(CALLTYPE *oss_regionRefresh)							(SRegion* tr);
+		bool			(CALLTYPE *oss_createCanvasAndRegion)					(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, bool tlIsActive, bool tlUseTransparency, SCanvas** tc, SRegion** tr, SCallbacksW* callbacks, SStartEnd* events);
+		u64				(CALLTYPE *oss_createFontHandle)						(s8* fontName, u32 fontWidth, bool bold, bool italics, bool underline, bool strikethrough);
 		u64				(CALLTYPE *oss_canvasDrawFixedPointText)				(SCanvas* tc, SBGRA* bd, u32 fontWidth, u32 fontHeight, s32 ulx, s32 uly,    s8*  text, u32 characterCount, SBGRA foreground, SBGRA background);
 		u64				(CALLTYPE *oss_canvasDrawText)							(SCanvas* tc, SBGRA* bd, u64 fontHandle, s32 ulx, s32 uly, s32 lrx, s32 lry, s8*  tcText, u32 tnTextLength, SBGRA foreground, SBGRA background, SDrawState* tsDrawState);
 		u64				(CALLTYPE *oss_canvasDrawTextUnicode)					(SCanvas* tc, SBGRA* bd, u64 fontHandle, s32 ulx, s32 uly, s32 lrx, s32 lry, w16* tuText, u32 tnTextLength, SBGRA foreground, SBGRA background, SDrawState* tsDrawState);
@@ -454,6 +449,7 @@
 		u64				(CALLTYPE *oss_canvasGradient)							(SCanvas* tc, SBGRA* bd, SBGRA ul, SBGRA ur, SBGRA lr, SBGRA ll);
 		u64				(CALLTYPE *oss_canvasBitBlt)							(SCanvas* tcDst, bool tlDstAccumulator, s32 dulx, s32 duly, SCanvas* tsSrc, bool tlSrcAccumulator, s32 sulx, s32 suly, s32 slrx, s32 slry);
 		u64				(CALLTYPE *oss_canvasScale)								(SCanvas* tcDst, SCanvas* tcSrc);
+		u64				(CALLTYPE *oss_screenRefresh)							(SScreen* ts);
 		u64				(CALLTYPE *oss_canvasRefresh)							(SCanvas* tc);
 		u64				(CALLTYPE *oss_canvasSetRegionAndEventCallback)			(SCanvas* tc, SRegion*  region,  SEvent*  event);
 		void			(CALLTYPE *oss_canvasGetRegionsList)					(SCanvas* tc, SRegion** regions, SEvent** events, u32* count);
@@ -478,8 +474,8 @@
 		// Only 24-bit or 32-bit bitmaps can be loaded from disk at present.
 		u64				(CALLTYPE *oss_loadBitmapFromDisk)						(s8* tcPathname, SCanvas** tc, u32* tnWidth, u32* tnHeight, SBGRA tnBackColor);
 		u64				(CALLTYPE *oss_saveBitmapToDisk)						(SCanvas* tc, SBGRA* bd, s8* tcPathname);
-		u64				(CALLTYPE *oss_requestSystemFont)						(s8* fontName, u32 fontPointSize, bool bold, bool italics, bool underline, bool strikethrough);
-		u64				(CALLTYPE *oss_requestSystemBitmap)						(u32 tnWidth, u32 tnHeight);
+		u64				(CALLTYPE *oss_createSystemFont)						(s8* fontName, u32 fontPointSize, bool bold, bool italics, bool underline, bool strikethrough);
+		u64				(CALLTYPE *oss_createSystemBitmap)						(u32 tnWidth, u32 tnHeight);
 		u64				(CALLTYPE *oss_findSystemFontByHandle)					(u64 tnFontHandle);
 
 		SOssWindow*		(CALLTYPE *oss_createScreenTemplate)					(u64 id, u64 uniqueScreenId,
@@ -874,18 +870,13 @@
 		(void *)&oss_deleteScreen,											(void *)cgcOssDeleteScreen,
 		(void *)&oss_deleteCanvas,											(void *)cgcOssDeleteCanvas,
 
-		(void *)&oss_requestScreen,											(void *)cgcOssRequestScreen,
-		(void *)&oss_requestCanvasForScreen,								(void *)cgcOssRequestCanvasForScreen,
-		(void *)&oss_requestCanvasForCanvas,								(void *)cgcOssRequestCanvasForCanvas,
-		(void *)&oss_requestCanvas,											(void *)cgcOssRequestCanvas,
-		(void *)&oss_requestCanvasAndRegion,								(void *)cgcOssRequestCanvasAndRegion,
-		(void *)&oss_requestRegion,											(void *)cgcOssRequestRegion,
-		(void *)&oss_requestDuplicateRegion,								(void *)cgcOssRequestDuplicateRegion,
-		(void *)&oss_associateCanvasWithScreen,								(void *)cgcOssAssociateCanvasWithScreen,
-		(void *)&oss_associateCanvasWithCanvas,								(void *)cgcOssAssociateCanvasWithCanvas,
-		(void *)&oss_associateRegionWithCanvas,								(void *)cgcOssAssociateRegionWithCanvas,
-		(void *)&oss_associateRegionWithRegion,								(void *)cgcOssAssociateRegionWithRegion,
-		(void *)&oss_requestFontHandle,										(void *)cgcOssRequestFontHandle,
+		(void *)&oss_createScreenAndVisibleWindow,							(void *)cgcOssCreateScreenAndVisibleWindow,
+		(void *)&oss_createCanvasForScreen,									(void *)cgcOssCreateRegionForScreen,
+		(void *)&oss_createCanvas,											(void *)cgcOssCreateCanvas,
+		(void *)&oss_createRegion,											(void *)cgcOssCreateRegion,
+		(void *)&oss_regionDuplicate,										(void *)cgcOssRegionDuplicate,
+		(void *)&oss_regionDefaultPaint,									(void *)cgcOssRegionDefaultPaint,
+		(void *)&oss_createFontHandle,										(void *)cgcOssCreateFontHandle,
 		(void *)&oss_canvasDrawFixedPointText,								(void *)cgcOssCanvasWriteFixedPointText,
 		(void *)&oss_canvasDrawText,										(void *)cgcOssCanvasDrawText,
 		(void *)&oss_canvasDrawTextUnicode,									(void *)cgcOssCanvasDrawTextUnicode,
@@ -898,6 +889,7 @@
 		(void *)&oss_canvasGrayscale,										(void *)cgcOssCanvasGrayscale,
 		(void *)&oss_canvasGradient,										(void *)cgcOssCanvasGradient,
 		(void *)&oss_canvasBitBlt,											(void *)cgcOssCanvasBitBlt,
+		(void *)&oss_screenRefresh,											(void *)cgcOssScreenRefresh,
 		(void *)&oss_canvasRefresh,											(void *)cgcOssCanvasRefresh,
 		(void *)&oss_canvasSetRegionAndEventCallback,						(void *)cgcOssCanvasSetRegionAndEventCallback,
 		(void *)&oss_canvasGetRegionsList,									(void *)cgcOssCanvasGetRegionsList,
@@ -923,8 +915,8 @@
 		(void *)&oss_loadBitmapFromDisk,									(void *)cgcOssLoadBitmapFromDisk,
 		(void *)&oss_saveBitmapToDisk,										(void *)cgcOssSaveBitmapToDisk,
 
-		(void *)&oss_requestSystemFont,										(void *)cgcOssRequestSystemFont,
-		(void *)&oss_requestSystemBitmap,									(void *)cgcOssRequestSystemBitmap,
+		(void *)&oss_createSystemFont,										(void *)cgcOssCreateSystemFont,
+		(void *)&oss_createSystemBitmap,									(void *)cgcOssCreateSystemBitmap,
 		(void *)&oss_findSystemFontByHandle,								(void *)cgcOssFindSystemFontByHandle,
 
 		(void *)&oss_alloc,													(void *)cgcOssAlloc,

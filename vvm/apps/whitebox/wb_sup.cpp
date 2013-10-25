@@ -320,7 +320,7 @@
 	bool iiwb_createScreenCanvas(u64 tnUniqueId, u32 tnWidth, u32 tnHeight, SScreen** tsScreen, SCallbacksW* screenCallbacks, SCanvas** tsCanvas, SCallbacks* canvasCallbacks)
 	{
 		SOssWindow*	lisw;
-		u64			lnOssWindowId, lnScreen;
+		u64			lnScreen;
 		SBGRA 		foreColor, backColor;
 		SScreen*	ls;
 		SCanvas*	lc;
@@ -358,13 +358,12 @@
 			// If we have a screen structure, create it
 			if (lisw)
 			{
-				ls = (SScreen*)oss_requestScreen(tnUniqueId, lisw);
+				ls = oss_createScreenAndVisibleWindow(tnUniqueId, lisw);
 				if (ls)
 				{
 					// Request a canvas for it
-					lnOssWindowId	= ls->ossWindowId;
-					lnScreen		= ls->ll.uniqueId;
-					lc				= (SCanvas*)oss_requestCanvasForScreen(ls);
+					lnScreen	= ls->ll.uniqueId;
+					lc			= oss_createCanvasForScreen(ls);
 				}
 			}
 

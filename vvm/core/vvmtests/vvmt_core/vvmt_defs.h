@@ -69,8 +69,9 @@ u64 CALLTYPE hj_window_resized(u64 tnUniqueId, SOssWindow* tisw, u32 tnWidthNew,
 u64 CALLTYPE hj_window_gotFocus(u64 tnUniqueId, SOssWindow* tisw);
 u64 CALLTYPE hj_window_lostFocus(u64 tnUniqueId, SOssWindow* tisw);
 
-u64 CALLTYPE hj_object_enter(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
-u64 CALLTYPE hj_object_leave(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
+u64 CALLTYPE hj_object_enter(u64 tnUniqueId, SOssWindow* tisw, SRegion* tr, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
+u64 CALLTYPE hj_object_leave(u64 tnUniqueId, SOssWindow* tisw, SRegion* tr, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
+u64 CALLTYPE hj_object_paint(u64 tnUniqueId, SOssWindow* tisw, SRegion* tr, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
 
 u64 CALLTYPE hj_mouse_down(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
 u64 CALLTYPE hj_mouse_up(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
