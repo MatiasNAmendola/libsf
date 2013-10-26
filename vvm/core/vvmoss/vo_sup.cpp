@@ -4718,30 +4718,50 @@ continueToNextAttribute:
 		lr = (SRegion*)oss_SEChain_append(&gseRootRegion, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SRegion), _COMMON_START_END_BLOCK_SIZE, NULL);
 		if (lr)
 		{
-			// Store any associated information
-			lr->associatedId	= tnAssociatedId;
+			//////////
+			// Standard initialization
+			//////
+				memset(lr, 0, sizeof(SRegion));
+				lr->associatedId	= tnAssociatedId;					// Store any associated information
+				lr->semRefresh		= oss_createSemaphore();			// Create this region's refresh semaphore
+				lr->width			= tnWidth;							// Width of this region
+				lr->height			= tnHeight;							// Height of this region
+				lr->type			= tnType;							// type of region (see _VVM_REGION_* constants in common_vvm.h)
 
-			// Create this region's refresh semaphore
-			lr->semRefresh		= oss_createSemaphore();
-
-			// Copy properties
-			lr->width			= tnWidth;							// Width of this region
-			lr->height			= tnHeight;							// Height of this region
-			lr->type			= tnType;							// type of region (see _VVM_REGION_* constants in common_vvm.h)
-
+			//////////
 			// Copy state information
-			if (tsState)		memcpy(&lr->state, tsState, sizeof(SRegionState));
+			//////
+				if (tsState)
+				{
+					// Copy the indicated state
+					memcpy(&lr->state, tsState, sizeof(SRegionState));
 
+				} else {
+					// Set the state to its default values
+					lr->state.isActive		= true;
+					lr->state.isVisible		= true;
+					lr->state.hasFocus		= false;
+					lr->state.tabOrder		= 0;
+					lr->state.useCallbacks	= (callback != NULL);
+				}
+
+
+			//////////
 			// Copy the callback definitions if specified
-			if (callback)		memcpy(&lr->callback, callback, sizeof(SCallbacks));
+			//////
+				if (callback)
+					memcpy(&lr->callback, callback, sizeof(SCallbacks));
 
+
+			//////////
 			// Copy the events if specified
-			if (events)
-			{
-				cb._func	= (u64)iioss_createRegionCallback;
-				cb.extra	= (u64)lr;
-				oss_SEChain_iterateThroughForCallback(events, &cb);
-			}
+			//////
+				if (events)
+				{
+					cb._func	= (u64)iioss_createRegionAppendEventsCallback;
+					cb.extra	= (u64)lr;
+					oss_SEChain_iterateThroughForCallback(events, &cb);
+				}
 		}
 
 		// Unlock the canvas access semaphore
@@ -4749,6 +4769,20 @@ continueToNextAttribute:
 
 		// Indicate our status
 		return(lr);
+	}
+
+
+
+
+//////////
+//
+// We use cb->extra for the total pixels drawn
+//
+//////
+	void ioss_regionRefreshCallback(SStartEndCallback* cb)
+	{
+		// Process this region
+		oss_regionRefresh(cb->ptrRegion, cb->ex1PtrRegion);
 	}
 
 
@@ -5419,7 +5453,7 @@ continueToNextAttribute:
 // list from the template for the new region.
 //
 //////
-	void iioss_createRegionCallback(SStartEndCallback* cb)
+	void iioss_createRegionAppendEventsCallback(SStartEndCallback* cb)
 	{
 		bool		llResult;
 		SEvent*		le;
@@ -5441,45 +5475,6 @@ continueToNextAttribute:
 				leNew->eventId		= le->eventId;
 				leNew->signalFlags	= le->signalFlags;
 				leNew->_event		= le->_event;
-			}
-		}
-	}
-
-
-
-
-//////////
-//
-// Refresh this canvas and all of its children
-//
-//////
-	void iioss_screenRefreshCallback(SStartEndCallback* cb)
-	{
-		SRegion*			lr;
-		SCanvas*			lc;
-
-
-// TODO:  Incomplete code, not yet developed
-		// Get our canvas pointer
-		lr = (SRegion*)cb->ptr;
-		if (lr && lr->state.isVisible)
-		{
-			// Initialize the background onto the accumulator
-			if (lr->canvas)
-			{
-				// Draw the canvas
-				lc = lr->canvas;
-				oss_canvasFillRect(lc, lc->bda, 0, 0, lc->width, lc->height, 0, lc->backColor, lc->backColor);
-
-				// See how it should be painted
-				if (lr->callback.object._callback_paint != 0)
-				{
-					// There is a custom paint algorithm
-
-				} else {
-					// Paint it manually
-					oss_regionDefaultPaint(lr);
-				}
 			}
 		}
 	}
@@ -5574,6 +5569,28 @@ continueToNextAttribute:
 		}
 		// Indicate if we did anything
 		return(lnPixelsDrawn);
+	}
+
+
+
+
+//////////
+//
+// Called to see if there is a debug trap callback we can call to signal that something odd happened
+//
+//////
+	void ioss_regionDoDefaultDebugTrapCallback(SRegion* tr, u64 tnIdentifier, u64 tnExtra)
+	{
+		// Try the region's callback itself
+		if (tr->callback.region._callback_debugTrap)
+		{
+			// We're good, do this region's callback
+			tr->callback.region.callback_debugTrap(tr, tnIdentifier, tnExtra);
+
+		} else if (tr->parentScreen && tr->parentScreen->activeRegion && tr->parentScreen->activeRegion->callback.region._callback_debugTrap) {
+			// Try the parent screen's activeRegion default callback
+			tr->parentScreen->activeRegion->callback.region.callback_debugTrap(tr, tnIdentifier, tnExtra);
+		}
 	}
 
 

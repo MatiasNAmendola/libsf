@@ -427,18 +427,18 @@
 
 		// Visible window information
 		SScreen*		(CALLTYPE *oss_createScreenAndVisibleWindow)			(u64 tnAssociatedId, SOssWindow* tisw/*tisw was created by oss_createScreenTemplate()*/);
-		SRegion*		(CALLTYPE *oss_createRegionForScreen)					(SScreen* ts);
+		SRegion*		(CALLTYPE *oss_createRegionForScreen)					(SScreen* ts, SRegionState* trs);
 		SCanvas*		(CALLTYPE *oss_createCanvasForScreen)					(SScreen* ts);
 		SCanvas*		(CALLTYPE *oss_createCanvas)							(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, u32 tnBackColor);
 		SRegion*		(CALLTYPE *oss_createRegion)							(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, u32 tnWidth, u32 tnHeight, SCallbacksW* callback, SStartEnd* events);
-		bool			(CALLTYPE *oss_createRegionAndCanvas)					(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, bool tlIsActive, bool tlUseTransparency, SCanvas** tc, SRegion** tr, SCallbacksW* callbacks, SStartEnd* events);
+		bool			(CALLTYPE *oss_createRegionAndCanvas)					(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, SCanvas** tc, SRegion** tr, SRegionState* regionState, SCallbacksW* callbacks, SStartEnd* events);
 		u64				(CALLTYPE *oss_createFontHandle)						(s8* fontName, u32 fontWidth, bool bold, bool italics, bool underline, bool strikethrough);
 
 		u64				(CALLTYPE *oss_screenRefresh)							(SScreen* ts);
 
 		SRegion*		(CALLTYPE *oss_regionDuplicate)							(u64 tnAssociatedId, SRegion* templateRegion);
 		u64				(CALLTYPE *oss_regionDefaultPaint)						(SRegion* tr);
-		u64				(CALLTYPE *oss_regionRefresh)							(SRegion* tr);
+		u64				(CALLTYPE *oss_regionRefresh)							(SRegion* tr, SRegion* trParent);
 
 		u64				(CALLTYPE *oss_canvasDrawFixedPointText)				(SCanvas* tc, SBGRA* bd, u32 fontWidth, u32 fontHeight, s32 ulx, s32 uly,    s8*  text, u32 characterCount, SBGRA foreground, SBGRA background);
 		u64				(CALLTYPE *oss_canvasDrawText)							(SCanvas* tc, SBGRA* bd, u64 fontHandle, s32 ulx, s32 uly, s32 lrx, s32 lry, s8*  tcText, u32 tnTextLength, SBGRA foreground, SBGRA background);

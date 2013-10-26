@@ -86,18 +86,18 @@
 		u64 CALLTYPE			oss_deleteCanvas							(u64 id, SCanvas* tc);
 
 		SScreen* CALLTYPE		oss_createScreenAndVisibleWindow			(u64 tnAssociatedId, SOssWindow*  tisw/*tisw was created by oss_createScreenTemplate()*/);
-		SRegion* CALLTYPE		oss_createRegionForScreen					(SScreen* ts);
+		SRegion* CALLTYPE		oss_createRegionForScreen					(SScreen* ts, SRegionState* trs);
 		SCanvas* CALLTYPE		oss_createCanvasForScreen					(SScreen* ts);
 		SCanvas* CALLTYPE	 	oss_createCanvas							(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor);
 		SRegion* CALLTYPE		oss_createRegion							(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, s32 ulx, s32 uly, s32 lrx, s32 lry, SCallbacks* callback, SStartEnd* events);
-		bool CALLTYPE			oss_createRegionAndCanvas					(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, bool tlIsActive, bool tlUseTransparency, s32 ulx, s32 uly, s32 lrx, s32 lry, SCanvas** tc, SRegion** tr, SCallbacks* callbacks, SStartEnd* events);
+		bool CALLTYPE			oss_createRegionAndCanvas					(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, s32 ulx, s32 uly, s32 lrx, s32 lry, SCanvas** tc, SRegion** tr, SRegionState* regionState, SCallbacks* callbacks, SStartEnd* events);
 		u64 CALLTYPE		 	oss_createFontHandle						(s8* fontName, u32 fontWidth, bool bold, bool italics, bool underline, bool strikethrough);
 
 		u64 CALLTYPE			oss_screenRefresh							(SScreen* ts);
 
 		SRegion* CALLTYPE		oss_regionDuplicate							(u64 tnAssociatedId, SRegion* templateRegion);
 		u64 CALLTYPE			oss_regionDefaultPaint						(SRegion* tr);
-		u64 CALLTYPE			oss_regionRefresh							(SRegion* tr);
+		u64 CALLTYPE			oss_regionRefresh							(SRegion* tr, SRegion* trParent);
 
 		u64 CALLTYPE		 	oss_canvasDrawFixedPointText				(SCanvas* tc, SBGRA* bd, u32 fontWidth, u32 fontHeight, s32 ulx, s32 uly,    s8*  text, u32 characterCount, SBGRA foreground, SBGRA background);
 		u64 CALLTYPE		 	oss_canvasDrawText							(SCanvas* tc, SBGRA* bd, u64 fontHandle, s32 ulx, s32 uly, s32 lrx, s32 lry, s8*  tcText, u32 tnTextLength, SBGRA foreground, SBGRA background);
@@ -595,6 +595,7 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	SScreen*				ioss_createScreen								(u64 tnAssociatedId);
 	SCanvas*				ioss_createCanvas								(u64 tnAssociatedId,                                    u32 tnWidth, u32 tnHeight, SBGRA tnBackColor);
 	SRegion*				ioss_createRegion								(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, u32 tnWidth, u32 tnHeight, SCallbacks* callback, SStartEnd* events);
+	void					ioss_regionRefreshCallback						(SStartEndCallback* cb);
 
 	// TODO:  to be added later: regions need to be able to trigger custom region events (see common.h's Custom event)
 	bool					iioss_findCanvasCallback						(SStartEndCallback* cb);
@@ -607,7 +608,7 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	void					iioss_bitBltSection_Opaque						(SBGRA* trgbaDstRoot, SCanvas* tsDst, s32 dulx, s32 duly, SBGRA* trgbaSrcRoot, SCanvas* tsSrc, s32 sulx, s32 suly, s32 slrx, s32 slry);
 	void					iioss_bitBltSection_Alpha						(SBGRA* trgbaDstRoot, SCanvas* tsDst, s32 dulx, s32 duly, SBGRA* trgbaSrcRoot, SCanvas* tsSrc, s32 sulx, s32 suly, s32 slrx, s32 slry);
 	u32						iioss_gradient									(SCanvas* tc, SBGRA* bd, SBGRA ul, SBGRA ur, SBGRA lr, SBGRA ll);
-	void					iioss_createRegionCallback						(SStartEndCallback* cb);
+	void					iioss_createRegionAppendEventsCallback			(SStartEndCallback* cb);
 	void					iioss_screenRefreshCallback						(SStartEndCallback* cb);
 
 	u64						ioss_regionDefaultPaintEditbox					(SRegion* tr, SCanvas* tc, SBGRA* bd, SRegionEditboxData* editbox);
@@ -616,6 +617,7 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	u64						ioss_regionDefaultPaintLabel					(SRegion* tr, SCanvas* tc, SBGRA* bd, SRegionLabelData* label);
 	u64						ioss_regionDefaultPaintCheckbox					(SRegion* tr, SCanvas* tc, SBGRA* bd, SRegionCheckboxData* checkbox);
 	u64						ioss_regionDefaultPaintRectangle				(SRegion* tr, SCanvas* tc, SBGRA* bd, SRegionRectangleData* rectangle);
+	void					ioss_regionDoDefaultDebugTrapCallback			(SRegion* tr, u64 tnIdentifier, u64 tnExtra);
 
 	void*					ioss_SEChain_appendOrPrepend					(SStartEnd* ptrSE, u64 tnUniqueId, u64 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool tlPrepend, bool* tlResult);
 	void*					ioss_SEChain_appendOrPrependExisting			(SStartEnd* ptrSE, SLL* ptrExisting, u32 tnBlockSizeIfNewBlockNeeded, bool tlPrepend, bool* tlResult);

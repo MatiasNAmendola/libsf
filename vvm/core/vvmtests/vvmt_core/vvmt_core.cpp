@@ -528,8 +528,8 @@ return(false);
 			cb.window._callback_gotFocus	= (u64)&hj_window_gotFocus;
 			cb.window._callback_lostFocus	= (u64)&hj_window_lostFocus;
 
-			cb.object._callback_enter		= (u64)&hj_object_enter;
-			cb.object._callback_leave		= (u64)&hj_object_leave;
+			cb.object._callback_enter		= (u64)&hj_region_enter;
+			cb.object._callback_leave		= (u64)&hj_region_leave;
 
 			cb.mouse._callback_down			= (u64)&hj_mouse_down;
 			cb.mouse._callback_up			= (u64)&hj_mouse_up;
@@ -570,52 +570,16 @@ return(false);
 											true, true, true, true, true,
 											&cb);
 
+			// Create a screen
 			screen = oss_createScreenAndVisibleWindow(0, lst);
 			if (screen)
 			{
-				region = oss_createRegionForScreen(screen);
+				// Create a region and canvas
+				region = oss_createRegionForScreen(screen, NULL);
 				if (region->canvas)
 				{
 					lc = region->canvas;
-// 					SBGRA white1 = { 255, 255, 255, 255 };
-// 					SBGRA white2 = { 255, 215, 215, 255 };
-// 					SBGRA white3 = { 215, 255, 215, 255 };
-// 					SBGRA white4 = { 215, 215, 255, 255 };
-// 					SBGRA black = { 0, 0, 0, 255 };
- 					SBGRA blue = { 255, 0, 0, 255 };
-// 					oss_canvasFillRect(lc, lc->bd, 0, 0, lc->width, lc->height, 0, white1, white1);
-// 					oss_canvasGradient(lc, lc->bd, white1, white2, white3, white4);
-// 
-// 					int lnI, lnJ, lnLength;
-// 					char* foo;
-// 					lnLength = (lc->width / 8) + 2;
-// 					foo = (char*)malloc(lnLength);
-// 
-// 					for (lnI = 0; lnI < lc->height; lnI += 14)
-// 					{
-// 						memset(foo, 0, lnLength);
-// 						for (lnJ = 0; lnJ < lc->width / 8; lnJ++)
-// 							foo[lnJ] = (lnI + lnJ) % 256;
-// 
-// 						oss_canvasDrawFixedPointText(lc, lc->bd, 8, 14, 0, lnI, foo, lc->width / 8, black, white1);
-// 					}
-// 
- 					int lnI;
- 					for (lnI = 1; lnI < 10; lnI++)
- 						oss_canvasLine(lc, lc->bd, 300 + (lnI * 30), 300, 400 + (lnI * 30), 680, lnI, blue);
- 
-// 					f32 lfTheta;
-// 					for (lnI = 0, lfTheta = 0; lfTheta < 6.28f * 3.0f; lnI += 4, lfTheta += 6.28f / 90.0f)
-// 						oss_canvasLine(lc, lc->bd, 100 + lnI, 700, 100 + lnI + (s32)(cos(lfTheta) * 200), 700 + (s32)(sin(lfTheta) * 200), lnI % 5, blue);
-
-// 					oss_canvasLine(lc, lc->bd, 40, 40, 800, 40, 2, black);
-// 					oss_canvasLine(lc, lc->bd, 800, 40, 800, 800, 2, black);
-// 					oss_canvasLine(lc, lc->bd, 40, 800, 800, 800, 2, black);
-
-//					oss_canvasFillRect(lc, lc->bd, 200, 200, 600, 600, 6, black, white1);
-
-//					oss_canvasArc(lc, lc->bd, 200, 200, 40.0f, 0.0f, 3.14f, 2, black);
-
+					region->callback.region._callback_paint = (u64)&hj_region_paint;
 					oss_screenRefresh(screen);
 				}
 			}
@@ -663,17 +627,60 @@ u64 CALLTYPE hj_window_lostFocus(u64 tnUniqueId, SOssWindow* tisw)
 	return(0);
 }
 
-u64 CALLTYPE hj_object_enter(u64 tnUniqueId, SOssWindow* tisw, SRegion* tr, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)
+u64 CALLTYPE hj_region_enter(SRegion* tr)
 {
 	return(0);
 }
 
-u64 CALLTYPE hj_object_leave(u64 tnUniqueId, SOssWindow* tisw, SRegion* tr, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)
+u64 CALLTYPE hj_region_leave(SRegion* tr)
 {
 	return(0);
 }
 
-u64 CALLTYPE hj_object_paint(u64 tnUniqueId, SOssWindow* tisw, SRegion* tr, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)
+u64 CALLTYPE hj_region_paint(SRegion* tr, SCanvas* tc, SBGRA* bd)
+{
+	// 					SBGRA white1 = { 255, 255, 255, 255 };
+	// 					SBGRA white2 = { 255, 215, 215, 255 };
+	// 					SBGRA white3 = { 215, 255, 215, 255 };
+	// 					SBGRA white4 = { 215, 215, 255, 255 };
+	// 					SBGRA black = { 0, 0, 0, 255 };
+	SBGRA blue = { 255, 0, 0, 255 };
+	// 					oss_canvasFillRect(lc, lc->bd, 0, 0, lc->width, lc->height, 0, white1, white1);
+	// 					oss_canvasGradient(lc, lc->bd, white1, white2, white3, white4);
+	// 
+	// 					int lnI, lnJ, lnLength;
+	// 					char* foo;
+	// 					lnLength = (lc->width / 8) + 2;
+	// 					foo = (char*)malloc(lnLength);
+	// 
+	// 					for (lnI = 0; lnI < lc->height; lnI += 14)
+	// 					{
+	// 						memset(foo, 0, lnLength);
+	// 						for (lnJ = 0; lnJ < lc->width / 8; lnJ++)
+	// 							foo[lnJ] = (lnI + lnJ) % 256;
+	// 
+	// 						oss_canvasDrawFixedPointText(lc, lc->bd, 8, 14, 0, lnI, foo, lc->width / 8, black, white1);
+	// 					}
+	// 
+	int lnI;
+	for (lnI = 0; lnI < 10; lnI++)
+		oss_canvasLine(tc, bd, 300 + (lnI * 30), 300, 400 + (lnI * 30), 680, lnI, blue);
+
+	// 					f32 lfTheta;
+	// 					for (lnI = 0, lfTheta = 0; lfTheta < 6.28f * 3.0f; lnI += 4, lfTheta += 6.28f / 90.0f)
+	// 						oss_canvasLine(lc, lc->bd, 100 + lnI, 700, 100 + lnI + (s32)(cos(lfTheta) * 200), 700 + (s32)(sin(lfTheta) * 200), lnI % 5, blue);
+
+	// 					oss_canvasLine(lc, lc->bd, 40, 40, 800, 40, 2, black);
+	// 					oss_canvasLine(lc, lc->bd, 800, 40, 800, 800, 2, black);
+	// 					oss_canvasLine(lc, lc->bd, 40, 800, 800, 800, 2, black);
+
+	//					oss_canvasFillRect(lc, lc->bd, 200, 200, 600, 600, 6, black, white1);
+
+	//					oss_canvasArc(lc, lc->bd, 200, 200, 40.0f, 0.0f, 3.14f, 2, black);
+	return(1);
+}
+
+u64 CALLTYPE hj_region_debugTrap(SRegion* tr, u64 tnIdentifier, u64 tnExtra)
 {
 	return(0);
 }

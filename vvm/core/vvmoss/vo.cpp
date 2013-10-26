@@ -710,12 +710,10 @@
 // canvas since it is related to the screen
 //
 //////
-	SRegion* CALLTYPE oss_createRegionForScreen(SScreen* ts)
+	SRegion* CALLTYPE oss_createRegionForScreen(SScreen* ts, SRegionState* trs)
 	{
 		SRegion*		lr;
-		SCanvas*		lc;
 		u32				lnWidth, lnHeight;
-		SRegionState	regionState;
 		SBGRA			lrgba;
 
 
@@ -723,15 +721,8 @@
 		lr = NULL;
 		if (oss_getScreenDimensions(ts->_iOssWindowId, NULL, NULL, &lnWidth, &lnHeight, NULL, NULL, NULL, NULL))
 		{
-			// Populate the region state
-			regionState.isActive		= true;
-			regionState.isVisible		= true;
-			regionState.hasFocus		= false;
-			regionState.tabOrder		= 0;
-			regionState.useCallbacks	= false;
-
 			// Create a region
-			lr = ioss_createRegion(ts->ll.uniqueId, &regionState, 0, lnWidth, lnHeight, NULL, NULL);
+			lr = ioss_createRegion(ts->ll.uniqueId, trs, 0, lnWidth, lnHeight, NULL, NULL);
 			if (lr)
 			{
 				// Does this screen have an active region yet?
@@ -740,7 +731,7 @@
 
 				// Create the associated canvas of the current size
 				lrgba.color = rgba(255,255,255,255);
-				lc			= ioss_createCanvas(lr->ll.uniqueId, lnWidth, lnHeight, lrgba);
+				lr->canvas	= ioss_createCanvas(lr->ll.uniqueId, lnWidth, lnHeight, lrgba);
 			}
 		}
 		// Indicate our success or failure
@@ -863,6 +854,11 @@
 				case _VVM_REGION_RECTANGLE:
 					lnPixelsDrawn = ioss_regionDefaultPaintRectangle(tr, tr->canvas, tr->canvas->bda, (SRegionRectangleData*)tr->data);
 					break;
+
+				default:
+					// There is no default type that is recognized
+					ioss_regionDoDefaultDebugTrapCallback(tr, _VVM_DEBUGTRAP_UNKNOWN_TYPE, lnType);
+					break;
 			}
 		}
 		// Indicate how many pixels were drawn
@@ -877,10 +873,75 @@
 // Called to refresh this region by drawing all sub-regions within
 //
 //////
-	u64 CALLTYPE oss_regionRefresh(SRegion* tr)
+	u64 CALLTYPE oss_regionRefresh(SRegion* tr, SRegion* trParent)
 	{
-// TODO:  Uncoded algorithm
-		return(0);
+		u32					lnPixelsDrawn;
+		SStartEndCallback	cb;
+
+
+		// Prepare our callback
+		// Note:  We use cb->count1 for the pixels drawn
+		memset(&cb, 0, sizeof(cb));
+
+		// Make sure our environment is sane
+		lnPixelsDrawn = 0;
+		if (tr->canvas)
+		{
+			//////////
+			// Lock the canvas's semaphore for drawing
+			//////
+//				oss_lockSemaphore(tr->canvas->semRefresh);
+
+
+			//////////
+			// Paint the region
+			//////
+				// See if it has its own repaint algorithm
+				if (tr->callback.region._callback_paint != 0)
+				{
+					// Custom callback for painting
+					cb.count1 += tr->callback.region.callback_paint(tr, tr->canvas, tr->canvas->bd);
+
+				} else {
+					// Paint the background
+					cb.count1 += oss_canvasFillRect(tr->canvas, tr->canvas->bd, 0, 0, tr->canvas->width, tr->canvas->height, 0, tr->canvas->backColor, tr->canvas->backColor);
+
+					// Use a default drawing algorithm
+					cb.count1 += oss_regionDefaultPaint(tr);
+				}
+
+
+			//////////
+			// Iterate through any child regions, redrawing them as necessary
+			//////
+				if (tr->subRegions.masterCount != 0)
+				{
+					cb._func		= (u64)&ioss_regionRefreshCallback;
+					cb.ex2PtrRegion	= trParent;
+					oss_SEChain_iterateThroughForCallback(&tr->subRegions, &cb);
+				}
+
+
+			//////////
+			// Draw this item onto its parent (if any)
+			//////
+				if (trParent && trParent->canvas)
+				{
+					// Paint it onto the parent
+					cb.count1 += oss_canvasBitBlt(trParent->canvas, false, tr->x, tr->y, tr->canvas, false, 0, 0, tr->canvas->width, tr->canvas->height);
+
+					// Mark this region's canvas as no longer being dirty (because it's just been updated)
+					tr->canvas->isDirty = false;
+				}
+
+
+			//////////
+			// Unlock the canvas's semaphore
+			//////
+//				oss_unlockSemaphore(tr->canvas->semRefresh);
+		}
+		// Indicate the number of pixels drawn for this region
+		return(cb.count1);
 	}
 
 
@@ -893,7 +954,7 @@
 // area.  As such, a combined function is created to allow this creation in one shot.
 //
 //////
-	bool CALLTYPE oss_createRegionAndCanvas(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, bool tlIsActive, bool tlUseTransparency, s32 ulx, s32 uly, s32 lrx, s32 lry, SCanvas** tc, SRegion** tr, SCallbacks* callbacks, SStartEnd* events)
+	bool CALLTYPE oss_createRegionAndCanvas(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, s32 ulx, s32 uly, s32 lrx, s32 lry, SCanvas** tc, SRegion** tr, SRegionState* regionState, SCallbacks* callbacks, SStartEnd* events)
 	{
 		SRegion*	lr;
 		SCanvas*	lc;
@@ -906,7 +967,7 @@
 			lc	= oss_createCanvas(tnAssociatedId, tnWidth, tnHeight, tnBackColor);
 
 			// Apply our region to it
-			lr	= ioss_createRegion(tnAssociatedId, NULL, 0, tnWidth, tnHeight, callbacks, events);
+			lr	= ioss_createRegion(tnAssociatedId, regionState, 0, tnWidth, tnHeight, callbacks, events);
 			
 			// Indicate our success or failure
 			return(lc && lr);
@@ -1623,7 +1684,7 @@
 		if (ts && ts->activeRegion && ts->activeRegion->canvas)
 		{
 			// Refresh this region
-			if (oss_regionRefresh(ts->activeRegion) != 0)
+			if (oss_regionRefresh(ts->activeRegion, NULL) != 0)
 			{
 				// Something was updated, refresh this screen
 				lnPixelsDrawn = oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb(ts->_iOssWindowId, ts->activeRegion->canvas->bd, ts->activeRegion->canvas->width, ts->activeRegion->canvas->height);

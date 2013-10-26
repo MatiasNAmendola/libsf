@@ -151,35 +151,48 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 // Various macros
 //////
 	#define oss_strlen(tcData)			oss_scanForwardUntilCharacter(tcData, 0)
+	#define defineCallback1(x, arg1) \
+											u64 semaphore_ ## x; \
+												union { \
+													u64		_callback_ ## x; \
+													u64		(CALLBACK *callback_ ## x )( arg1 ); \
+												};
+
 	#define defineCallback2(x, arg1, arg2) \
 											u64 semaphore_ ## x; \
 												union { \
 													u64		_callback_ ## x; \
-													void	(CALLBACK *callback_ ## x )( arg1, arg2 ); \
+													u64		(CALLBACK *callback_ ## x )( arg1, arg2 ); \
+												};
+	#define defineCallback3(x, arg1, arg2, arg3) \
+											u64 semaphore_ ## x; \
+												union { \
+													u64		_callback_ ## x; \
+													u64		(CALLBACK *callback_ ## x )( arg1, arg2, arg3 ); \
 												};
 	#define defineCallback4(x, arg1, arg2, arg3, arg4) \
 											u64 semaphore_ ## x; \
 												union { \
 													u64		_callback_ ## x; \
-													void	(CALLBACK *callback_ ## x )( arg1, arg2, arg3, arg4 ); \
+													u64		(CALLBACK *callback_ ## x )( arg1, arg2, arg3, arg4 ); \
 												};
 	#define defineCallback6(x, arg1, arg2, arg3, arg4, arg5, arg6) \
 											u64 semaphore_ ## x; \
 												union { \
 													u64		_callback_ ## x; \
-													void	(CALLBACK *callback_ ## x )( arg1, arg2, arg3, arg4, arg5, arg6 ); \
+													u64		(CALLBACK *callback_ ## x )( arg1, arg2, arg3, arg4, arg5, arg6 ); \
 												};
 	#define defineCallback7(x, arg1, arg2, arg3, arg4, arg5, arg6, arg7) \
 											u64 semaphore_ ## x; \
 												union { \
 													u64		_callback_ ## x; \
-													void	(CALLBACK *callback_ ## x )( arg1, arg2, arg3, arg4, arg5, arg6, arg7 ); \
+													u64		(CALLBACK *callback_ ## x )( arg1, arg2, arg3, arg4, arg5, arg6, arg7 ); \
 												};
 	#define defineCallback8(x, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) \
 											u64 semaphore_ ## x; \
 												union { \
 													u64		_callback_ ## x; \
-													void	(CALLBACK *callback_ ## x )( arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 ); \
+													u64		(CALLBACK *callback_ ## x )( arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8 ); \
 												};
 
 
@@ -382,15 +395,17 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	};
 	#define SCbPW SCallbackPartsWindow
 
-	struct SCallbackPartsObject
+	struct SCallbackPartsRegion
 	{
-		defineCallback7( enter,			u64 tnUniqueId, SOssWindow* tisw, SRegion* tr, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)							// When the mouse moves into a control
-		defineCallback7( leave,			u64 tnUniqueId, SOssWindow* tisw, SRegion* tr, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)							// When the mouse leaves a control
-		defineCallback7( paint,			u64 tnUniqueId, SOssWindow* tisw, SRegion* tr, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)							// When the mouse leaves a control
+		defineCallback1( enter,			SRegion* tr)																										// When the mouse moves into a region
+		defineCallback1( leave,			SRegion* tr)																										// When the mouse leaves a region
+		defineCallback3( paint,			SRegion* tr, SCanvas* tc, SBGRA* bd)																				// When the region needs repainted
+		defineCallback3( debugTrap,		SRegion* tr, u64 tnIdentifier, u64 tnExtra);																		// When unexpected things happen, this will be called
 		// Simple templates to build from:
-		//u64 CALLTYPE _object_enter(u64 tnUniqueId, SOssWindow* tisw, SRegion* tr, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
-		//u64 CALLTYPE _object_leave(u64 tnUniqueId, SOssWindow* tisw, SRegion* tr, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
-		//u64 CALLTYPE _object_paint(u64 tnUniqueId, SOssWindow* tisw, SRegion* tr, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
+		//u64 CALLTYPE _region_enter(SRegion* tr);
+		//u64 CALLTYPE _region_leave(SRegion* tr);
+		//u64 CALLTYPE _region_paint(SRegion* tr, SCanvas* tc, SBGRA* bd);
+		//u64 CALLTYPE _region_debugTrap(SRegion* tr, u64 tnIdentifier, u64 tnExtra); // See the _VVM_DEBUGTRAP_* constants in common_vvmoss_const.h
 	};
 	#define SCbPO SCallbackPartsObject
 
@@ -450,7 +465,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		// it is locked immediately before,
 		// and unlocked immediately after, example:  u64 semaphore_x;
 		SCallbackPartsWindow		window;
-		SCallbackPartsObject		object;
+		SCallbackPartsRegion		object;
 		SCallbackPartsMouse			mouse;
 		SCallbackPartsKeyboard		keyboard;
 		SCallbackPartsDrag			drag;
@@ -461,7 +476,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	// Callbacks for everything except window controls
 	struct SCallbacks
 	{
-		SCallbackPartsObject		object;
+		SCallbackPartsRegion		region;
 		SCallbackPartsMouse			mouse;
 		SCallbackPartsKeyboard		keyboard;
 		SCallbackPartsDrag			drag;
@@ -846,12 +861,50 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		};
 
 		// Data items for this callback
-		void*	ptr;
+		// Primary pointer
 		union {
-			u64		extra;
-			u64		extra1;
+			void*		ptr;
+			SScreen*	ptrScreen;
+			SRegion*	ptrRegion;
+			SCanvas*	ptrCanvas;
+			SBxml*		ptrBxml;
+			SBxmla*		ptrBxmla;
 		};
-		u64		extra2;
+
+		union {
+			// Extra1
+			u64			ex1;
+			u64			extra1;
+			u64			extra;
+			u64			count1;
+			union {
+				u32		count1_1;
+				u32		count1_2;
+			};
+			void*		ex1Ptr;
+			SScreen*	ex1PtrScreen;
+			SRegion*	ex1PtrRegion;
+			SCanvas*	ex1PtrCanvas;
+			SBxml*		ex1PtrBxml;
+			SBxmla*		ex1PtrBxmla;
+		};
+
+		union {
+			// Extra2
+			u64			ex2;
+			u64			extra2;
+			u64			count2;
+			union {
+				u32		count2_1;
+				u32		count2_2;
+			};
+			void*		ex2Ptr;
+			SScreen*	ex2PtrScreen;
+			SRegion*	ex2PtrRegion;
+			SCanvas*	ex2PtrCanvas;
+			SBxml*		ex2PtrBxml;
+			SBxmla*		ex2PtrBxmla;
+		};
 	};
 
 	// The values here have been changed into VVMOSS_* values, which are common throughout the system externally.
@@ -1087,6 +1140,9 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		SLL				ll;						// 2-way link list
 		u64				associatedId;			// The associated id, provided at creation for creator's private use and reference
 
+		// Instance/application defined information
+		void*			extraInfo;				// Extra info this region stores which is application specific
+
 		// Limited access is granted during a refresh operation
 		u64				semRefresh;				// Limited access to 
 		bool			isRefreshing;			// Is this region refreshing?
@@ -1094,6 +1150,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		// Conditions for this particular instance
 		SRegionState	state;					// Settings like active, focus, tab order, etc.
 		SCanvas*		canvas;					// Canvas for this region (if any, not all regions have a canvas)
+		SScreen*		parentScreen;			// The screen this region belongs to
 
 		// Region information
 		u32				type;					// Type of input, see _VVM_REGION_* constants
