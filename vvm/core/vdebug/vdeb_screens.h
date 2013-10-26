@@ -136,7 +136,7 @@
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcScratch17, sizeof(gcScratch17) - 1, foreColor, backColor);
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcScratch18, sizeof(gcScratch18) - 1, foreColor, backColor);
 		//vvm_canvasBitBlt(lc, false, 0, 0, lc->width, lc->height, lc, true, 0, 0, lc->width, lc->height);
-		oss_canvasRefresh(lc);
+		oss_screenRefresh(ls);
 
 		// We're good
 		return 0;
@@ -246,7 +246,7 @@
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcProgramRegisters17, sizeof(gcProgramRegisters17) - 1, foreColor, backColor);
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcProgramRegisters18, sizeof(gcProgramRegisters18) - 1, foreColor, backColor);
 		//vvm_canvasBitBlt(lc, false, 0, 0, lc->width, lc->height, lc, true, 0, 0, lc->width, lc->height);
-		oss_canvasRefresh(lc);
+		oss_screenRefresh(ls);
 
 		// We're good
 		return 0;
@@ -356,7 +356,7 @@
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcControlRegisters17, sizeof(gcControlRegisters17) - 1, foreColor, backColor);
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcControlRegisters18, sizeof(gcControlRegisters18) - 1, foreColor, backColor);
 		//vvm_canvasBitBlt(lc, false, 0, 0, lc->width, lc->height, lc, true, 0, 0, lc->width, lc->height);
-		oss_canvasRefresh(lc);
+		oss_screenRefresh(ls);
 
 		// We're good
 		return 0;
@@ -466,7 +466,7 @@
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcIntegerRegisters17, sizeof(gcIntegerRegisters17) - 1, foreColor, backColor);
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcIntegerRegisters18, sizeof(gcIntegerRegisters18) - 1, foreColor, backColor);
 		//vvm_canvasBitBlt(lc, false, 0, 0, lc->width, lc->height, lc, true, 0, 0, lc->width, lc->height);
-		oss_canvasRefresh(lc);
+		oss_screenRefresh(ls);
 
 		// We're good
 		return 0;
@@ -577,7 +577,7 @@
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcFloatingPointRegisters17, sizeof(gcFloatingPointRegisters17) - 1, foreColor, backColor);
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcFloatingPointRegisters18, sizeof(gcFloatingPointRegisters18) - 1, foreColor, backColor);
 		//vvm_canvasBitBlt(lc, false, 0, 0, lc->width, lc->height, lc, true, 0, 0, lc->width, lc->height);
-		oss_canvasRefresh(lc);
+		oss_screenRefresh(ls);
 
 		// We're good
 		return 0;
@@ -688,7 +688,7 @@
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcStack17, sizeof(gcStack17) - 1, foreColor, backColor);
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcStack18, sizeof(gcStack18) - 1, foreColor, backColor);
 		//vvm_canvasBitBlt(lc, false, 0, 0, lc->width, lc->height, lc, true, 0, 0, lc->width, lc->height);
-		oss_canvasRefresh(lc);
+		oss_screenRefresh(ls);
 
 		// We're good
 		return 0;
@@ -798,7 +798,7 @@
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcWatch17, sizeof(gcWatch17) - 1, foreColor, backColor);
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcWatch18, sizeof(gcWatch18) - 1, foreColor, backColor);
 		//vvm_canvasBitBlt(lc, false, 0, 0, lc->width, lc->height, lc, true, 0, 0, lc->width, lc->height);
-		oss_canvasRefresh(lc);
+		oss_screenRefresh(ls);
 
 		// We're good
 		return 0;
@@ -908,7 +908,7 @@
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcHover17, sizeof(gcHover17) - 1, foreColor, backColor);
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcHover18, sizeof(gcHover18) - 1, foreColor, backColor);
 		//vvm_canvasBitBlt(lc, false, 0, 0, lc->width, lc->height, lc, true, 0, 0, lc->width, lc->height);
-		oss_canvasRefresh(lc);
+		oss_screenRefresh(ls);
 
 		// We're good
 		return 0;
@@ -1018,7 +1018,7 @@
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcLocals17, sizeof(gcLocals17) - 1, foreColor, backColor);
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcLocals18, sizeof(gcLocals18) - 1, foreColor, backColor);
 		//vvm_canvasBitBlt(lc, false, 0, 0, lc->width, lc->height, lc, true, 0, 0, lc->width, lc->height);
-		oss_canvasRefresh(lc);
+		oss_screenRefresh(ls);
 
 		// We're good
 		return 0;
@@ -1128,7 +1128,7 @@
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcAutos17, sizeof(gcAutos17) - 1, foreColor, backColor);
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcAutos18, sizeof(gcAutos18) - 1, foreColor, backColor);
 		//vvm_canvasBitBlt(lc, false, 0, 0, lc->width, lc->height, lc, true, 0, 0, lc->width, lc->height);
-		oss_canvasRefresh(lc);
+		oss_screenRefresh(ls);
 
 		// We're good
 		return 0;
@@ -1238,7 +1238,7 @@
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcTimers17, sizeof(gcTimers17) - 1, foreColor, backColor);
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcTimers18, sizeof(gcTimers18) - 1, foreColor, backColor);
 		//vvm_canvasBitBlt(lc, false, 0, 0, lc->width, lc->height, lc, true, 0, 0, lc->width, lc->height);
-		oss_canvasRefresh(lc);
+		oss_screenRefresh(ls);
 
 		// We're good
 		return 0;
@@ -1348,7 +1348,7 @@
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcMemory17, sizeof(gcMemory17) - 1, foreColor, backColor);
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcMemory18, sizeof(gcMemory18) - 1, foreColor, backColor);
 		//vvm_canvasBitBlt(lc, false, 0, 0, lc->width, lc->height, lc, true, 0, 0, lc->width, lc->height);
-		oss_canvasRefresh(lc);
+		oss_screenRefresh(ls);
 
 		// We're good
 		return 0;
@@ -1458,7 +1458,7 @@
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcPrograms17, sizeof(gcPrograms17) - 1, foreColor, backColor);
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcPrograms18, sizeof(gcPrograms18) - 1, foreColor, backColor);
 		//vvm_canvasBitBlt(lc, false, 0, 0, lc->width, lc->height, lc, true, 0, 0, lc->width, lc->height);
-		oss_canvasRefresh(lc);
+		oss_screenRefresh(ls);
 
 		// We're good
 		return 0;
@@ -1568,7 +1568,7 @@
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcThreads17, sizeof(gcThreads17) - 1, foreColor, backColor);
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcThreads18, sizeof(gcThreads18) - 1, foreColor, backColor);
 		//vvm_canvasBitBlt(lc, false, 0, 0, lc->width, lc->height, lc, true, 0, 0, lc->width, lc->height);
-		oss_canvasRefresh(lc);
+		oss_screenRefresh(ls);
 
 		// We're good
 		return 0;
@@ -1745,7 +1745,7 @@
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcAsciiChart18, sizeof(gcAsciiChart18) - 1, foreColor, backColor);
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcAsciiChart19, sizeof(gcAsciiChart19) - 1, foreColor, backColor);
 		//vvm_canvasBitBlt(lc, false, 0, 0, lc->width, lc->height, lc, true, 0, 0, lc->width, lc->height);
-		oss_canvasRefresh(lc);
+		oss_screenRefresh(ls);
 
 		// We're good
 		return 0;
@@ -1858,7 +1858,7 @@
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcVDebLauncher18, sizeof(gcVDebLauncher18) - 1, foreColor, backColor);
 		oss_canvasDrawFixedPointText(lc, lc->bd, lnFontWidth, lnFontHeight, 0, (lnTop += lnFontSkip), gcVDebLauncher19, sizeof(gcVDebLauncher19) - 1, foreColor, backColor);
 		//vvm_canvasBitBlt(lc, false, 0, 0, lc->width, lc->height, lc, true, 0, 0, lc->width, lc->height);
-		oss_canvasRefresh(lc);
+		oss_screenRefresh(ls);
 
 		// We're good
 		return 0;

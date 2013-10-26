@@ -25,16 +25,20 @@ EXPORTS
 
 	oss_createScreenAndVisibleWindow
 	oss_createRegionForScreen
+	oss_createCanvasForScreen
 	oss_createCanvas
-	oss_createCanvasAndRegion
 	oss_createRegion
+	oss_createRegionAndCanvas
+	oss_createFontHandle
+
+	oss_screenRefresh
+	
 	oss_regionDuplicate
 	oss_regionDefaultPaint
 	oss_regionRefresh
-	oss_createFontHandle
+	
 	oss_canvasDrawFixedPointText
 	oss_canvasDrawText
-	oss_canvasDrawTextUnicode
 	oss_canvasFrameRect
 	oss_canvasFillRect
 	oss_canvasLine
@@ -44,11 +48,6 @@ EXPORTS
 	oss_canvasGrayscale
 	oss_canvasGradient
 	oss_canvasBitBlt
-	oss_screenRefresh
-	oss_canvasRefresh
-	oss_canvasSetRegionAndEventCallback
-	oss_canvasGetRegionsList
-	oss_canvasRemoveRegion
 	
 	oss_caskDefineStandard
 	oss_caskDefineEncompassingRectangle

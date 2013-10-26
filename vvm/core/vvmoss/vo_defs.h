@@ -87,16 +87,20 @@
 
 		SScreen* CALLTYPE		oss_createScreenAndVisibleWindow			(u64 tnAssociatedId, SOssWindow*  tisw/*tisw was created by oss_createScreenTemplate()*/);
 		SRegion* CALLTYPE		oss_createRegionForScreen					(SScreen* ts);
-		SCanvas* CALLTYPE	 	oss_createCanvas							(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, bool tlIsActive, bool tlUseTransparency);
+		SCanvas* CALLTYPE		oss_createCanvasForScreen					(SScreen* ts);
+		SCanvas* CALLTYPE	 	oss_createCanvas							(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor);
 		SRegion* CALLTYPE		oss_createRegion							(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, s32 ulx, s32 uly, s32 lrx, s32 lry, SCallbacks* callback, SStartEnd* events);
+		bool CALLTYPE			oss_createRegionAndCanvas					(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, bool tlIsActive, bool tlUseTransparency, s32 ulx, s32 uly, s32 lrx, s32 lry, SCanvas** tc, SRegion** tr, SCallbacks* callbacks, SStartEnd* events);
+		u64 CALLTYPE		 	oss_createFontHandle						(s8* fontName, u32 fontWidth, bool bold, bool italics, bool underline, bool strikethrough);
+
+		u64 CALLTYPE			oss_screenRefresh							(SScreen* ts);
+
 		SRegion* CALLTYPE		oss_regionDuplicate							(u64 tnAssociatedId, SRegion* templateRegion);
 		u64 CALLTYPE			oss_regionDefaultPaint						(SRegion* tr);
 		u64 CALLTYPE			oss_regionRefresh							(SRegion* tr);
-		bool CALLTYPE			oss_createCanvasAndRegion					(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, bool tlIsActive, bool tlUseTransparency, s32 ulx, s32 uly, s32 lrx, s32 lry, SCanvas** tc, SRegion** tr, SCallbacks* callbacks, SStartEnd* events);
-		u64 CALLTYPE		 	oss_createFontHandle						(s8* fontName, u32 fontWidth, bool bold, bool italics, bool underline, bool strikethrough);
+
 		u64 CALLTYPE		 	oss_canvasDrawFixedPointText				(SCanvas* tc, SBGRA* bd, u32 fontWidth, u32 fontHeight, s32 ulx, s32 uly,    s8*  text, u32 characterCount, SBGRA foreground, SBGRA background);
-		u64 CALLTYPE		 	oss_canvasDrawText							(SCanvas* tc, SBGRA* bd, u64 fontHandle, s32 ulx, s32 uly, s32 lrx, s32 lry, s8*  tcText, u32 tnTextLength, SBGRA foreground, SBGRA background, SDrawState* tsDrawState);
-		u64 CALLTYPE		 	oss_canvasDrawTextUnicode					(SCanvas* tc, SBGRA* bd, u64 fontHandle, s32 ulx, s32 uly, s32 lrx, s32 lry, w16* tuText, u32 tnTextLength, SBGRA foreground, SBGRA background, SDrawState* tsDrawState);
+		u64 CALLTYPE		 	oss_canvasDrawText							(SCanvas* tc, SBGRA* bd, u64 fontHandle, s32 ulx, s32 uly, s32 lrx, s32 lry, s8*  tcText, u32 tnTextLength, SBGRA foreground, SBGRA background);
 		u64 CALLTYPE		 	oss_canvasFrameRect							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 borderThickness, SBGRA border);
 		u64 CALLTYPE		 	oss_canvasFillRect							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 borderThickness, SBGRA border, SBGRA background);
 		u64 CALLTYPE		 	oss_canvasLine								(SCanvas* tc, SBGRA* bd, s32 p1x, s32 p1y, s32 p2x, s32 p2y, s32 lineThickness, SBGRA line);
@@ -107,11 +111,6 @@
 		u64 CALLTYPE		 	oss_canvasGradient							(SCanvas* tc, SBGRA* bd, SBGRA ul, SBGRA ur, SBGRA lr, SBGRA ll);
 		u64 CALLTYPE		 	oss_canvasBitBlt							(SCanvas* tcDst, bool tlDstAccumulator, s32 dulx, s32 duly, SCanvas* tsSrc, bool tlSrcAccumulator, s32 sulx, s32 suly, s32 slrx, s32 slry);
 		u64 CALLTYPE			oss_canvasScale								(SCanvas* tcDst, SCanvas* tcSrc);
-		u64 CALLTYPE			oss_screenRefresh							(SScreen* ts);
-		u64 CALLTYPE			oss_canvasRefresh							(SCanvas* tc);
-		u64 CALLTYPE			oss_canvasSetRegionAndEventCallback			(SCanvas* tc, SRegion*  region,  SEvent*  event);
-		void CALLTYPE			oss_canvasGetRegionsList					(SCanvas* tc, SRegion** regions, SEvent** events, u32* count);
-		u64 CALLTYPE			oss_canvasRemoveRegion						(SCanvas* tc, SRegion* region);
 
 		SCask* CALLTYPE			oss_caskDefineStandard						(u32 tnHeight, u32 tnWidth, u32 tnLeftStyle, u32 tnLeftState, u32 tnLeftPipCount, u32 tnLeftColor, csu8p tcLeftText, u32 tnRightStyle, u32 tnRightState, u32 tnRightPipCount, u32 tnRightColor, csu8p tcRightText);
 		SCask* CALLTYPE			oss_caskDefineEncompassingRectangle			(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SRectXYXY* tsOuter);
@@ -154,7 +153,7 @@
 		bool CALLTYPE			oss_setFocus								(u64 tnScreenId);
 		u64 CALLTYPE			oss_bitBlt									(u64 tnOssWindowId, SBGRA* buffer, u32 width, u32 height);
 		u64 CALLTYPE			oss_bitBltSystemBitmapToSBGRA				(u64 bdoss, s32 tnX, s32 tnY, u32 tnWidth, u32 tnHeight, SCanvas* tc, SBGRA* bdRoot);
-		u64 CALLTYPE			oss_drawText								(s8* tcText, u32 tnTextLength, s32 ulx, s32 uly, s32 lrx, s32 lry, SBGRA foreground, SBGRA background, SDrawState* tsDrawState, u64 tnSystemFont, u64 tnSystemBitmap);
+		u64 CALLTYPE			oss_drawText								(s8* tcText, u32 tnTextLength, s32 ulx, s32 uly, s32 lrx, s32 lry, SBGRA foreground, SBGRA background, u64 tnSystemFont, u64 tnSystemBitmap);
 		u64 CALLTYPE			oss_getNextMessage							(u32* message, void* extra);
 		u64 CALLTYPE			oss_messageBox								(u64 id, s8*  tcText, s8*  tcCaption, bool tlYes, bool tlNo, bool tlOk, bool tlRetry, bool tlCancel);
 		u64 CALLTYPE			oss_messageBoxUnicode						(u64 id, w16* tuText, w16* tuCaption, bool tlYes, bool tlNo, bool tlOk, bool tlRetry, bool tlCancel);
@@ -594,7 +593,7 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	SBxmla*					iioss_bxmlFindAttribute							(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance);
 
 	SScreen*				ioss_createScreen								(u64 tnAssociatedId);
-	SCanvas*				ioss_createCanvas								(u64 tnAssociatedId, SCanvasState* tsState, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor);
+	SCanvas*				ioss_createCanvas								(u64 tnAssociatedId,                                    u32 tnWidth, u32 tnHeight, SBGRA tnBackColor);
 	SRegion*				ioss_createRegion								(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, u32 tnWidth, u32 tnHeight, SCallbacks* callback, SStartEnd* events);
 
 	// TODO:  to be added later: regions need to be able to trigger custom region events (see common.h's Custom event)

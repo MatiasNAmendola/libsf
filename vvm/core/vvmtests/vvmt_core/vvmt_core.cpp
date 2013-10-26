@@ -511,7 +511,7 @@ return(false);
 	{
 		s32				lnX, lnY;
 		u32				lnWidth, lnHeight, lnMinWidth, lnMinHeight, lnMaxWidth, lnMaxHeight;
-		SOssWindow*		w;
+		SOssWindow*		lst;
 		SCallbacksW		cb;
 		SStartEnd		lse;
 
@@ -551,8 +551,8 @@ return(false);
 		// Create our window position
 		//////
 			memset(&lse, 0, sizeof(SStartEnd));
-			w = oss_enumerateMonitors(&lse);
-			oss_computeMonitorCoordinates(w, 90.0f, _VVMOSS_SCREEN_UPPER_LEFT, 5.0f, &lnX, &lnY, &lnWidth, &lnHeight, &lnMaxWidth, &lnMaxHeight, &lnMinWidth, &lnMinHeight);
+			lst = oss_enumerateMonitors(&lse);
+			oss_computeMonitorCoordinates(lst, 90.0f, _VVMOSS_SCREEN_UPPER_LEFT, 5.0f, &lnX, &lnY, &lnWidth, &lnHeight, &lnMaxWidth, &lnMaxHeight, &lnMinWidth, &lnMinHeight);
 
 
 		//////////
@@ -561,7 +561,7 @@ return(false);
 			SBGRA foreground, background;
 			foreground.color = rgba(0,0,0,0);
 			background.color = rgba(255,255,255,255);
-			w = oss_createScreenTemplate(	oss_getNextUniqueId(),
+			lst = oss_createScreenTemplate(	oss_getNextUniqueId(),
 											oss_getNextUniqueId(),
 											"Test Window", -1, 
 											lnX, lnY, lnWidth, lnHeight, lnMaxWidth, lnMaxHeight, lnMinWidth, lnMinHeight,
@@ -569,7 +569,7 @@ return(false);
 											true, true, true, true, true,
 											&cb);
 
-			screen = oss_createScreenAndVisibleWindow(0, w);
+			screen = oss_createScreenAndVisibleWindow(0, lst);
 			if (screen)
 			{
 				canvas = oss_createCanvasForScreen(screen);
@@ -614,7 +614,7 @@ return(false);
 
 //					oss_canvasArc(canvas, canvas->bd, 200, 200, 40.0f, 0.0f, 3.14f, 2, black);
 
-					oss_canvasRefresh(canvas);
+					oss_screenRefresh(screen);
 				}
 			}
 	}

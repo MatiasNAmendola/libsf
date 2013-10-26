@@ -1002,12 +1002,12 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		SLL				ll;						// 2-way link list
 		u64				associatedId;			// A user-defined id of something associated with this screen
 
-		// Limited access is granted during a refresh operation
+		// Single-access is granted to multiple threads vying
 		u64				semRefresh;				// Limit access to this screen
 		bool			isRefreshing;			// Is this screen refreshing?
 
-		// Associated region for this screen
-		SRegion*		activeRegion;			// Pointer to this screen's first region
+		// Associated region to this screen
+		SRegion*		activeRegion;			// Pointer to this screen's first region, which must have a canvas
 
 		// Internal information used to make it happen for the target OS
 		u64				_iOssWindowId;			// OSS specific information for this instance (pointer to SOssWindow struct, for example)
@@ -1015,55 +1015,22 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 
 
 
-
 //////////
 //
-// Used for text, indicates the drawing state for the text item
+// Canvases are used exclusively for drawing.  They can exist independently, or as part of a
+// region.  In that way, each canvas can be associated with a rectangle, allowing it to respond
+// to events and redraw itself.  Each region can have sub-regions, allowing sub-components to
+// be drawn upon the top of the region's canvas, allowing for complex controls to be constructed
+// inside the VVM as they would be in a higher level language.
 //
 //////
-	// Attributes to use for drawing text
-	struct SDrawState
-	{
-		bool			condensed		: 1;				// Is this item to be drawn condensed (shrunk)
-		bool			extend			: 1;				// Is this item to be drawn extended (wide)
-		bool			shadow			: 1;				// Is this item to be drawn with a shadow
-		bool			outline			: 1;				// Is this item to be drawn with an outline
-		u32				alignment		: 1;				// 0-left, 1-right, 2-center
-	};
-
-
-
-//////////
-//
-// Canvases are used exclusively for drawing, and as a parent for child objects.
-// Every canvas is a single-instance creation.  It exists as a logical object,
-// but only has interaction with the VVM when it is associated with a screen
-// directly, or is the child of a canvas associated with a screen.
-//
-// Canvases will respond properly to events, but they will only render
-// themselves on render events if they are associated with a Screen.  Since
-// a single Canvas can exist on multiple Screens, the Canvas will be rendered
-// one time, and then painted as needed onto each parent screen to which it
-// belongs.
-//
-//////
-	// Used to indicate the state of settings on the root object, or an instance of its use
-	struct SCanvasState
-	{
-		// The state of a canvas or a canvas instance
-		bool			isEnabled;				// Is this instance enabled?  (does it respond to updates if/when it has focus? It still can even if it's not visible)
-		bool			isVisible;				// Is this instance visible?  (which also controls the visibility of all children)
-		bool			useTransparency;		// Does this canvas use transparency?
-		bool			isDirty;				// Has this canvas been drawn to?  Reset after each oss_canvasRefresh()
-	};
-
 	struct SCanvas
 	{
 		SLL				ll;						// 2-way link list
 		u64				associatedId;			// The associated id, provided at creation for creator's private use and reference
-		SCanvasState	state;					// Settings like active, focus, tab order, etc.
 
 		// Limited access is granted during a refresh operation, only the bd memory area is accessible publicly
+		bool			isDirty;				// Has this canvas been drawn to?  Reset after each oss_canvasRefresh()
 		u64				semRefresh;				// Limited access to 
 		bool			isRefreshing;			// Is this canvas currently refreshing?  If yes, this means its children are also potentially busy.
 
@@ -1083,19 +1050,25 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 
 //////////
 //
-// The State condition is used on regions by the VVM to maintain their status, and determine how
-// to handle messages issued by the VVMOSS.
+// Regions are rectangular single instance objects.  Each region may have a canvas, but does not
+// have to, except for the first region associated with a screen, which must have a canvas.  If
+// other regions do not have a canvas, it simply responds to events within its defined area.  This
+// feature is used for the new mouseGlow features of Visual FreePro.  The mouseGlow is an area
+// outside of the control which allows some action to take place when the mouse enters that outer
+// region.  This allows the object to respond to mouse events in a space larger than it is drawn.
+// This is useful for stand-alone controls which are a ways off, to aid in the user not having to
+// exercise their precision mouse moving skills to click exactly on the control, but only close.
+// In addition, for touch operations, it can also have added benefit for more rapid navigation.
 //
-// The order of precedence for SRegionState determination is:
-//		root object overrides instances if root is negative (switched off/disabled)
-//			- This means if the root is not active, even if instances are set to active, then instances are also inactive
-//		instance object overrides root if root is positive (switched on/enabled)
-//			- If root is active, but instance is not active, then instance is not active
-//		callbacks can be set independently on root, or instances, or both
-//		only instance callbacks are called if defined, otherwise root callbacks are called
-//		if the instance desires to have the root object's callback called as well, then it must issue that call explicitly itself
-//			- This consideration was given because it may be desirable to perform some operation, then call the root object, then continue after root's processing is completed
-//			- This also more closely models xbase languages with their SUPER() or DODEFAULT() type codes
+// If a region has a canvas, then it will be drawn (re-drawn if dirty) whenever that region is
+// updated with the oss_screenRefresh() function.
+//
+//////
+//
+// The State condition is used on regions by the VVM to maintain their status, and determine how
+// to handle messages issued by the VVMOSS.  It was separated out so entire states can be copied
+// with a single operation, allowing entire blocks of controls to be changed in a similar motion.
+//
 //////
 	// Used to indicate the state of settings on the root object, or an instance of its use
 	struct SRegionState
@@ -1108,16 +1081,6 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		u32				tabOrder;				// -1=not a tab stop, 0 or greater, tab order
 	};
 
-//////////
-//
-// Regions are rectangular instance objects which can be applied to canvases.  They typically define
-// something that will be drawn, or responded to via keyboard or mouse interaction and callbacks.  They
-// can also trigger custom events programmatically.  Regions are instance objects that can exist on
-// multiple parents.  For this reason, SRegionList instances are used to reference regions indirectly,
-// and potentially multiply if an event is triggered on more than one parent simultaneously (such as
-// if two parent objects have focus and receive a keystroke, mouse movement, etc).
-//
-//////
 	// Rectangular definitions
 	struct SRegion
 	{
@@ -1147,6 +1110,8 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		SStartEnd		subRegions;				// A list of sub-regions within this one					(SRegion*)
 	};
 
+	// For standard controls, the data associated with each type
+	// Note:  Each of these standard controls are low-level controls using the 8x14 font only.
 	struct SRegionEditboxData
 	{
 		SDatum2			data;					// Whatever is being input

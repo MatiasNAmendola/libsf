@@ -119,7 +119,7 @@
 		//////////
 		// Update the OS window so it repaints itself
 		//////
-			oss_canvasRefresh(tsWbScreen->canvas);
+			oss_screenRefresh(tsWbScreen->screen);
 
 		// We're good
 		return(true);
@@ -152,7 +152,7 @@
 		//////////
 		// Update the OS window
 		//////
-			oss_canvasRefresh(tsWbScreen->canvas);
+			oss_screenRefresh(tsWbScreen->screen);
 
 		// We're good
 		return(true);
@@ -185,7 +185,7 @@
 		//////////
 		// Update the OS window
 		//////
-			oss_canvasRefresh(tsWbScreen->canvas);
+			oss_screenRefresh(tsWbScreen->screen);
 
 		// We're good
 		return(true);

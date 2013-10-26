@@ -3384,7 +3384,7 @@ _asm int 3;
 
 		// Mark the item dirty
 		if (lnPixelsDrawn != 0)
-			tcDst->state.isDirty = true;
+			tcDst->isDirty = true;
 
 		// Indicate our failure or success
 		return(lnPixelsDrawn);
@@ -4654,7 +4654,7 @@ continueToNextAttribute:
 // Create a new canvas in the master list
 //
 //////
-	SCanvas* ioss_createCanvas(u64 tnAssociatedId, SCanvasState* tsState, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor)
+	SCanvas* ioss_createCanvas(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor)
 	{
 		SCanvas*	lc;
 
@@ -4687,13 +4687,6 @@ continueToNextAttribute:
 			// Initialize it with the default background color
 			if (lc->bd)			oss_memset4((u32*)lc->bd,  oss_swapEndian(oss_RGBA2BGRA(tnBackColor.color)), tnHeight * tnWidth);	// Initialize bd to the indicated color
 			if (lc->bda)		oss_memset4((u32*)lc->bda, oss_swapEndian(oss_RGBA2BGRA(tnBackColor.color)), tnHeight * tnWidth);	// Initialize bda to the indicated color
-
-			// Store the state
-			memcpy(&lc->state, tsState, sizeof(SCanvasState));								// Use provided information
-
-			// Update the state based on the condition of the alpha channel of the rgba color
-			if (tnBackColor.alp != 255)
-				lc->state.useTransparency = true;
 		}
 
 		// Unlock the canvas access semaphore
@@ -5030,8 +5023,8 @@ continueToNextAttribute:
 				// Make sure the pointers are valid
 				if (lrgbaDstRoot || lrgbaSrcRoot)
 				{
-					if (tsSrc->state.useTransparency)	iioss_bitBltAll_Alpha( lrgbaDstRoot, tsDst, tnX, tnY, lrgbaSrcRoot, tsSrc);			// Use the slower algorithm to blend the the two 
-					else								iioss_bitBltAll_Opaque(lrgbaDstRoot, tsDst, tnX, tnY, lrgbaSrcRoot, tsSrc);			// Iterate through every row for all pixels to copy
+					iioss_bitBltAll_Alpha( lrgbaDstRoot, tsDst, tnX, tnY, lrgbaSrcRoot, tsSrc);				// Use the slower algorithm to blend the the two 
+					//iioss_bitBltAll_Opaque(lrgbaDstRoot, tsDst, tnX, tnY, lrgbaSrcRoot, tsSrc);			// Iterate through every row for all pixels to copy
 					
 					// We always indicate we processed this many rows, even if something wasn't updated
 					lnRowCount = tsSrc->height;
@@ -5195,8 +5188,8 @@ continueToNextAttribute:
 				// Make sure the pointers are valid
 				if (lrgbaDstRoot || lrgbaSrcRoot)
 				{
-					if (tsDst->state.useTransparency)	iioss_bitBltSection_Alpha( lrgbaDstRoot, tsDst, dulx, duly, lrgbaSrcRoot, tsSrc, sulx, suly, slrx, slry);		// Use the slower algorithm to blend the the two 
-					else								iioss_bitBltSection_Opaque(lrgbaDstRoot, tsDst, dulx, duly, lrgbaSrcRoot, tsSrc, sulx, suly, slrx, slry);		// Iterate through every row for all pixels to copy
+					iioss_bitBltSection_Alpha( lrgbaDstRoot, tsDst, dulx, duly, lrgbaSrcRoot, tsSrc, sulx, suly, slrx, slry);		// Use the slower algorithm to blend the the two 
+					//iioss_bitBltSection_Opaque(lrgbaDstRoot, tsDst, dulx, duly, lrgbaSrcRoot, tsSrc, sulx, suly, slrx, slry);		// Iterate through every row for all pixels to copy
 					
 					// We always indicate we processed this many rows, even if something wasn't updated
 					lnRowCount = tsSrc->height;
