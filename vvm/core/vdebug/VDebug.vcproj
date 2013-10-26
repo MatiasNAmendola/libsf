@@ -65,7 +65,7 @@
 				OutputFile="\libsf\vvm\dev\vdebug.dll"
 				LinkIncremental="2"
 				ManifestFile="$(TargetDir)int\$(TargetFileName).intermediate.manifest"
-				ModuleDefinitionFile="VDebug.def"
+				ModuleDefinitionFile="VDeb.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)pdbs\$(TargetName).pdb"
 				SubSystem="2"
@@ -144,7 +144,7 @@
 				OutputFile="\libsf\vvm\dev\vdebug.dll"
 				LinkIncremental="1"
 				ManifestFile="$(TargetDir)int\$(TargetFileName).intermediate.manifest"
-				ModuleDefinitionFile="VDebug.def"
+				ModuleDefinitionFile="VDeb.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)pdbs\$(TargetName).pdb"
 				SubSystem="2"
@@ -224,7 +224,7 @@
 				OutputFile="\libsf\vvm\dev\vdebug.dll"
 				LinkIncremental="2"
 				ManifestFile="$(TargetDir)int\$(TargetFileName).intermediate.manifest"
-				ModuleDefinitionFile="VDebug.def"
+				ModuleDefinitionFile="VDeb.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)pdbs\$(TargetName).pdb"
 				SubSystem="2"
@@ -263,6 +263,14 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\vdeb.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\vdeb.def"
+				>
+			</File>
+			<File
 				RelativePath=".\vdeb_sup.cpp"
 				>
 				<FileConfiguration
@@ -289,14 +297,6 @@
 						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\vdebug.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\vdebug.def"
-				>
 			</File>
 		</Filter>
 		<Filter
@@ -358,18 +358,6 @@
 			</File>
 			<File
 				RelativePath="..\common\vvm_key_const.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="misc"
-			>
-			<File
-				RelativePath=".\graphics\exit.bmp"
-				>
-			</File>
-			<File
-				RelativePath=".\VDebug.rc"
 				>
 			</File>
 		</Filter>

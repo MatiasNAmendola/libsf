@@ -51,59 +51,35 @@
 
 
 	// vdeb_screens.h
-	u64					iBuildNewScreen_Scratch							(u64 tnUniqueId);
-	void CALLTYPE		iScratchCallbackMouseHover						(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing);
-	u64					iBuildNewScreen_ProgramRegisters				(u64 tnUniqueId);
-	void CALLTYPE		iProgramRegistersCallbackMouseHover				(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing);
-	u64					iBuildNewScreen_ControlRegisters				(u64 tnUniqueId);
-	void CALLTYPE		iControlRegistersCallbackMouseHover				(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing);
-	u64					iBuildNewScreen_IntegerRegisters				(u64 tnUniqueId);
-	void CALLTYPE		iIntegerRegistersCallbackMouseHover				(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing);
-	u64					iBuildNewScreen_FloatingPointRegisters			(u64 tnUniqueId);
-	void CALLTYPE		iFloatingPointRegistersCallbackMouseHover		(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing);
-	u64					iBuildNewScreen_Stack							(u64 tnUniqueId);
-	void CALLTYPE		iStackCallbackMouseHover						(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing);
-	u64					iBuildNewScreen_Watch							(u64 tnUniqueId);
-	void CALLTYPE		iWatchCallbackMouseHover						(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing);
-	u64					iBuildNewScreen_Hover							(u64 tnUniqueId);
-	void CALLTYPE		iHoverCallbackMouseHover						(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing);
-	u64					iBuildNewScreen_Locals							(u64 tnUniqueId);
-	void CALLTYPE		iLocalsCallbackMouseHover						(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing);
-	u64					iBuildNewScreen_Autos							(u64 tnUniqueId);
-	void CALLTYPE		iAutosCallbackMouseHover						(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing);
-	u64					iBuildNewScreen_Timers							(u64 tnUniqueId);
-	void CALLTYPE		iTimersCallbackMouseHover						(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing);
-	u64					iBuildNewScreen_Memory							(u64 tnUniqueId);
-	void CALLTYPE		iMemoryCallbackMouseHover						(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing);
-	u64					iBuildNewScreen_Programs						(u64 tnUniqueId);
-	void CALLTYPE		iProgramsCallbackMouseHover						(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing);
-	u64					iBuildNewScreen_Threads							(u64 tnUniqueId);
-	void CALLTYPE		iThreadsCallbackMouseHover						(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing);
-	u64					iBuildNewScreen_AsciiChart						(u64 tnUniqueId);
-	void CALLTYPE		iAsciiCallbackMouseHover						(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing);
-	u64					iBuildNewScreen_VDebLauncher					(u64 tnUniqueId);
-	void CALLTYPE		iVDebLauncherCallbackKeyDown					(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode);
 
 
 	// vdeb_sup.h
-	SOssWindow*			iBuildScreen									(u64 tnUniqueId, s8* tcCaption, u32 tnCaptionLength, u32 tnX, u32 tnY, u32 tnWidth, u32 tnHeight, u32 tnWidthMin, u32 tnHeightMin, u32 tnWidthMax, u32 tnHeightMax, SBGRA foreColor, SBGRA backColor, bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder, SCallbacksW* tsCallbacks);
-	void				iInitializeCallbacksToNull						(SCallbacksW* tcb);
+	u64 CALLTYPE		vdeb_window_created								(u64 tnUniqueId, SOssWindow* tisw);
+	u64 CALLTYPE		vdeb_window_unload								(u64 tnUniqueId, SOssWindow* tisw);
+	u64 CALLTYPE		vdeb_window_closed								(u64 tnUniqueId, SOssWindow* tisw);
+	u64 CALLTYPE		vdeb_window_moved								(u64 tnUniqueId, SOssWindow* tisw, u32 tnXNew, u32 tnYNew);
+	u64 CALLTYPE		vdeb_window_resized								(u64 tnUniqueId, SOssWindow* tisw, u32 tnWidthNew, u32 tnHeightNew);
+	u64 CALLTYPE		vdeb_window_gotFocus							(u64 tnUniqueId, SOssWindow* tisw);
+	u64 CALLTYPE		vdeb_window_lostFocus							(u64 tnUniqueId, SOssWindow* tisw);
 
-	void CALLTYPE		iCallbackWindowMoved							(u64 tnUniqueId, SOssWindow* tisw, u32 tnXNew, u32 tnYNew);
-	void CALLTYPE		iCallbackWindowResized							(u64 tnUniqueId, SOssWindow* tisw, u32 tnWidthNew, u32 tnHeightNew);
-	void CALLTYPE		iCallbackWindowGotFocus							(u64 tnUniqueId, SOssWindow* tisw);
-	void CALLTYPE		iCallbackWindowLostFocus						(u64 tnUniqueId, SOssWindow* tisw);
+	u64 CALLTYPE		vdeb_region_enter								(SRegion* tr);
+	u64 CALLTYPE		vdeb_region_leave								(SRegion* tr);
+	u64 CALLTYPE		vdeb_region_paint								(SRegion* tr, SCanvas* tc, SBGRA* bd);
+	u64 CALLTYPE		vdeb_region_debugTrap							(SRegion* tr, u64 tnIdentifier, u64 tnExtra);
 
-	void CALLTYPE		iCallbackMouseDown								(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
-	void CALLTYPE		iCallbackMouseUp								(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
-	void CALLTYPE		iCallbackMouseMove								(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
-	void CALLTYPE		iCallbackMouseHover								(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing);
+	u64 CALLTYPE		vdeb_mouse_down									(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
+	u64 CALLTYPE		vdeb_mouse_up									(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
+	u64 CALLTYPE		vdeb_mouse_move									(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
+	u64 CALLTYPE		vdeb_mouse_hover								(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing);
 
-	void CALLTYPE		iCallbackDragStart								(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
-	void CALLTYPE		iCallbackDragging								(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds);
-	void CALLTYPE		iCallbackDragDrop								(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds);
+	u64 CALLTYPE		vdeb_keyboard_down								(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode);
+	u64 CALLTYPE		vdeb_keyboard_up								(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode);
+	u64 CALLTYPE		vdeb_keyboard_press								(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode);
+	u64 CALLTYPE		vdeb_keyboard_flags								(u64 tnUniqueId, SOssWindow* tisw, u32 tnKeyFlagsOld, u32 tnKeyFlagsNew);
 
-	void CALLTYPE		iCallbackKeyDown								(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode);
-	void CALLTYPE		iCallbackKeyUp									(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode);
-	void CALLTYPE		iCallbackKeyPress								(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode);
-	void CALLTYPE		iCallbackKeyFlags								(u64 tnUniqueId, SOssWindow* tisw, u32 tnKeyFlagsOld, u32 tnKeyFlagsNew);
+	u64 CALLTYPE		vdeb_drag_start									(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
+	u64 CALLTYPE		vdeb_drag_dragging								(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds);
+	u64 CALLTYPE		vdeb_drag_drop									(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds);
+
+	u64 CALLTYPE		vdeb_custom_custom								(u64 tnUniqueId, SOssWindow* tisw, u64 tnCustomEventId, u64 tnOtherData);
+

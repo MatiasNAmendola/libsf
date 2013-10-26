@@ -32,6 +32,7 @@ EXPORTS
 	oss_createFontHandle
 
 	oss_screenRefresh
+	oss_screenSetFocus
 	
 	oss_regionDuplicate
 	oss_regionDefaultPaint
@@ -77,7 +78,6 @@ EXPORTS
 	oss_computeMonitorCoordinates
 	oss_enumerateMonitors
 	oss_getScreenDimensions
-	oss_setFocus
 	oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb
 	oss_lowLevel_bitBlt_ossRgb_onto_canvasBgra
 	oss_drawText

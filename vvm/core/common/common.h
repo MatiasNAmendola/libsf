@@ -465,7 +465,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		// it is locked immediately before,
 		// and unlocked immediately after, example:  u64 semaphore_x;
 		SCallbackPartsWindow		window;
-		SCallbackPartsRegion		object;
+		SCallbackPartsRegion		region;
 		SCallbackPartsMouse			mouse;
 		SCallbackPartsKeyboard		keyboard;
 		SCallbackPartsDrag			drag;
@@ -1055,12 +1055,16 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		SLL				ll;						// 2-way link list
 		u64				associatedId;			// A user-defined id of something associated with this screen
 
+		// Instance/application defined information
+		void*			extraInfo;				// Extra info this screen stores which is application specific
+
 		// Single-access is granted to multiple threads vying
 		u64				semRefresh;				// Limit access to this screen
 		bool			isRefreshing;			// Is this screen refreshing?
 
 		// Associated region to this screen
 		SRegion*		activeRegion;			// Pointer to this screen's first region, which must have a canvas
+		SRegion*		scaleRegion;			// If the activeRegion is not the same size as the system window, it must be scaled to the scaleRegion size and then bitBlt'd
 
 		// Internal information used to make it happen for the target OS
 		u64				_iOssWindowId;			// OSS specific information for this instance (pointer to SOssWindow struct, for example)

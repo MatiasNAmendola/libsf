@@ -42,257 +42,54 @@
 
 
 
-//////////
-//
-// Test code, builds various screen forms to try out features
-//
-/////
-	SOssWindow* iBuildScreen(	u64 tnUniqueId,
-								s8* tcCaption, u32 tnCaptionLength,
-								u32 tnX, u32 tnY,
-								u32 tnWidth, u32 tnHeight,
-								u32 tnWidthMin, u32 tnHeightMin,
-								u32 tnWidthMax, u32 tnHeightMax,
-								SBGRA foreColor, SBGRA backColor,
-								bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder,
-								SCallbacksW* callbacks	)
-	{
-		SOssWindow* lisw;
-
-
-		// Validate parameters
-		if (tnWidthMin  == -1 || !tlResizable)		tnWidthMin	= tnWidth;
-		if (tnHeightMin == -1 || !tlResizable)		tnHeightMin	= tnHeight;
-		if (tnWidthMax  == -1 || !tlResizable)		tnWidthMax	= tnWidth;
-		if (tnHeightMax == -1 || !tlResizable)		tnHeightMax	= tnHeight;
-
-		// Create the indicated screen structure
-		lisw = oss_createScreenTemplate(	tnUniqueId, vvm_getNextUniqueId(),
-											tcCaption, tnCaptionLength,
-											tnX, tnY,
-											tnWidth, tnHeight,
-											tnWidthMin, tnHeightMin,
-											tnWidthMax, tnHeightMax,
-											0, 0, tnWidth, 32, 4,
-											foreColor, backColor,
-											tlResizable, tlMovable, tlClosable, tlVisible, tlBorder,
-											callbacks);
-
-// TODO:  Append the unique ID on here to the caption if there is more than one instance running
-		// All done
-		return(lisw);
-	}
-
-
-
 
 //////////
 //
-// Set the callbacks to an empty/null state
+// Template keyboard processor
 //
 //////
-	void iInitializeCallbacksToNull(SCallbacksW* tcb)
+	void CALLTYPE iVDebLauncherCallbackKeyDown(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode)
 	{
-		memset(tcb, 0, sizeof(SCallbacksW));
-	}
+		switch (tnKey)
+		{
+			case VVM_F1:
+				break;
 
+			case VVM_F2:
+				break;
 
+			case VVM_F3:
+				break;
 
+			case VVM_F4:
+				break;
 
+			case VVM_F5:
+				break;
 
-//////////
-//
-// Callback when the window is moved by user or programmatically
-//
-/////
-	void CALLTYPE iCallbackWindowMoved(u64 tnUniqueId, SOssWindow* tisw, u32 tnXNew, u32 tnYNew)
-	{
-		_asm nop;
-	}
+			case VVM_F6:
+				break;
 
+			case VVM_F7:
+				break;
 
+			case VVM_F8:
+				break;
 
+			case VVM_F9:
+				break;
 
-//////////
-//
-// Callback when the window is resized
-//
-/////
-	void CALLTYPE iCallbackWindowResized(u64 tnUniqueId, SOssWindow* tisw, u32 tnWidthNew, u32 tnHeightNew)
-	{
-		_asm nop;
-	}
+			case VVM_F10:
+				break;
 
+			case VVM_F11:
+				break;
 
+			case VVM_F12:
+				break;
 
-
-//////////
-//
-// Callback when the window receives focus, including after initial creation
-//
-/////
-	void CALLTYPE iCallbackWindowGotFocus(u64 tnUniqueId, SOssWindow* tisw)
-	{
-		_asm nop;
-	}
-
-
-
-
-//////////
-//
-// Callback when the window loses focus
-//
-/////
-	void CALLTYPE iCallbackWindowLostFocus(u64 tnUniqueId, SOssWindow* tisw)
-	{
-		_asm nop;
-	}
-
-
-
-
-
-//////////
-//
-// Callback when a mouse button is pressed down
-//
-/////
-	void CALLTYPE iCallbackMouseDown(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)
-	{
-		_asm nop;
-	}
-
-
-
-
-//////////
-//
-// Callback when a mouse button is released
-//
-/////
-	void CALLTYPE iCallbackMouseUp(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)
-	{
-		_asm nop;
-	}
-
-
-
-
-//////////
-//
-// Callback when the mouse is moved with buttons either up or down
-//
-/////
-	void CALLTYPE iCallbackMouseMove(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)
-	{
-		_asm nop;
-	}
-
-
-
-
-//////////
-//
-// Callback when the mouse hovers over a particular point
-// Closing flag is signaled if a hover event has been signaled, and now it's no longer hovering
-//
-/////
-	void CALLTYPE iCallbackMouseHover(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing)
-	{
-		_asm nop;
-	}
-
-
-
-
-//////////
-//
-// Callback when a drag by the mouse is detected
-//
-/////
-	void CALLTYPE iCallbackDragStart(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys)
-	{
-		_asm nop;
-	}
-
-
-
-
-//////////
-//
-// Callback when a drag by the mouse is in motion, called in lieu of iCallbackMouseMove()
-//
-/////
-	void CALLTYPE iCallbackDragging(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds)
-	{
-		_asm nop;
-	}
-
-
-
-
-//////////
-//
-// Callback when a drag by the mouse has ended and the dragging button released
-//
-/////
-	void CALLTYPE iCallbackDragDrop(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds)
-	{
-		_asm nop;
-	}
-
-
-
-
-
-//////////
-//
-// Callback when a key is pressed down.  It is not called on repeated keystrokes.  Use KeyPress for that.
-//
-/////
-	void CALLTYPE iCallbackKeyDown(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode)
-	{
-		_asm nop;
-	}
-
-
-
-
-//////////
-//
-// Callback when a key is released.
-//
-/////
-	void CALLTYPE iCallbackKeyUp(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode)
-	{
-		_asm nop;
-	}
-
-
-
-
-//////////
-//
-// Callback when a key is signaled by being pressed down, either initially, or through repeating.
-// This function is identical to KeyDown except that it is signaled for every repeat.
-//
-/////
-	void CALLTYPE iCallbackKeyPress(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode)
-	{
-		_asm nop;
-	}
-
-
-
-
-//////////
-//
-// Callback when a special key flag condition changes.  Makes it easy to identify shift, alt,
-// control, caps lock, num lock and scroll lock.
-//
-/////
-	void CALLTYPE iCallbackKeyFlags(u64 tnUniqueId, SOssWindow* tisw, u32 tnKeyFlagsOld, u32 tnKeyFlagsNew)
-	{
-		_asm nop;
+			default:
+				// Unknown key
+				return;
+		}
 	}

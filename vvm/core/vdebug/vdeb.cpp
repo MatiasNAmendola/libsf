@@ -105,7 +105,7 @@
 
 
 		//////////
-		// Spawn the initial thread which will operate and run the debugger
+		// Spawn the initial thread which will create and run the debugger instance
 		//////
 			CreateThread(0, 0, &iDebuggerMain, (void*)tnUniqueId, 0, &lnThreadId);
 
@@ -152,17 +152,17 @@
 //////
 	DWORD CALLTYPE iDebuggerMain(LPVOID lpParameter)
 	{
-		u32 lnDebuggerUid;
+		u32		lnDebuggerUid;
+		SBxml*	bxmlDebuggerSettings;
 
 
 		// Grab the unique id for this instance
 		lnDebuggerUid = (u32)lpParameter;
 
-		// Build the screens
-		iBuildNewScreen_VDebLauncher(lnDebuggerUid);
+		// Build the debugger screen
+		bxmlDebuggerSettings = ivdeb_getDebuggerSettings();
 
-		// All done
-		return(0);
+		// Create the debugger screen
 	}
 
 

@@ -121,8 +121,8 @@
 		<icon name="pursueCount" tip="Shows current pursue view level, and total nested levels" var1="pursueCurrent" var2="pursueCount"/>
 		<icon name="assemblyOnly" tip="Toggle display of virtual machine disassembly"/>
 		<icon name="anchorCount" tip="Shows current anchor view level, and total anchor levels" var1="anchorCurrent" var2="anchorCount"/>
-		<icon name="suspend" tip="Suspend the virtual machine" var1="suspend1" var2="suspend2" var3="suspend3" var4="suspend4" var5="suspend5" var6="suspend6" var7="suspend7" var8="suspend8"/>
-		<icon name="resume" tip="Resume the virtual machine" var1="resume1" var2="resume2" var3="resume3" var4="resume4" var5="resume5" var6="resume6" var7="resume7" var8="resume8"/>
+		<icon name="vvmSuspend" tip="Suspend the virtual machine" var1="suspend1" var2="suspend2" var3="suspend3" var4="suspend4" var5="suspend5" var6="suspend6" var7="suspend7" var8="suspend8"/>
+		<icon name="vvmResume" tip="Resume the virtual machine" var1="resume1" var2="resume2" var3="resume3" var4="resume4" var5="resume5" var6="resume6" var7="resume7" var8="resume8"/>
 		<icon name="breadcrumbsCount" tip="Shows the breadcrumbs count" var1="breadcrumbsCount"/>
 		<icon name="pursueEnabled" tip="Shown when pursue mode is enabled"/>
 		<icon name="clipListCount" tip="Shows how many items are in the clip list"/>
@@ -219,8 +219,8 @@
 		<icon name="breadcrumbsHorizontalEnable" tip="Horizontal breadcrumbs"/>
 		<icon name="breadcrumbsDeltasDisable" tip="Breadcrumb deltas disabled"/>
 		<icon name="breadcrumbsClear" tip="Enable breadcrumbs deltas"/>
-		<icon name="vvmDebuggers" tip="View the multiple VVM debugger instance running"/>
-		<icon name="vvmLink" tip="Link this debugger instance to another debugger instance"/>
+		<icon name="vvmDebugger" tip="View the multiple VVM debugger instances running"/>
+		<icon name="vvmLink" tip="Link this debugger instance to another debugger instance, or to a running program or thread"/>
 		<icon name="chainPursue" tip="Add pursue line data to the active chain view window"/>
 		<icon name="breadcrumbsDeltaPrev" tip="Move to previous breadcrumb in the current document which had a delta"/>
 		<icon name="breadcrumbsDeltaNext" tip="Move to next breadcrumb in the current document which had a delta"/>

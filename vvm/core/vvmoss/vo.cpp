@@ -710,7 +710,7 @@
 // canvas since it is related to the screen
 //
 //////
-	SRegion* CALLTYPE oss_createRegionForScreen(SScreen* ts, SRegionState* trs)
+	SRegion* CALLTYPE oss_createRegionForScreen(SScreen* ts, SCallbacks* callbacks, SStartEnd* events, SRegionState* trs)
 	{
 		SRegion*		lr;
 		u32				lnWidth, lnHeight;
@@ -722,7 +722,7 @@
 		if (oss_getScreenDimensions(ts->_iOssWindowId, NULL, NULL, &lnWidth, &lnHeight, NULL, NULL, NULL, NULL))
 		{
 			// Create a region
-			lr = ioss_createRegion(ts->ll.uniqueId, trs, 0, lnWidth, lnHeight, NULL, NULL);
+			lr = ioss_createRegion(ts->ll.uniqueId, trs, 0, lnWidth, lnHeight, callbacks, events);
 			if (lr)
 			{
 				// Does this screen have an active region yet?
@@ -791,9 +791,22 @@
 // Returns a new region of the specified settings
 //
 //////
-	SRegion* CALLTYPE oss_createRegion(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, u32 ulx, u32 uly, u32 lrx, u32 lry, SCallbacks* callback, SStartEnd* events)
+	SRegion* CALLTYPE oss_createRegion(u64 tnAssociatedId, u32 tnType, u32 ulx, u32 uly, u32 lrx, u32 lry, SCallbacks* callbacks, SStartEnd* events, SRegionState* trs)
 	{
-		return(NULL);
+		SRegion* lr;
+
+
+		// Try to create the region
+		lr = ioss_createRegion(tnAssociatedId, trs, 0, lrx - ulx, lry - uly, callbacks, events);
+		if (lr)
+		{
+			// Store the coordinates for this item
+			lr->x = ulx;
+			lr->y = uly;
+			// Note:  It does not have a canvas, just dimensions
+		}
+		// Indicate our success or failure
+		return(lr);
 	}
 
 
@@ -1676,7 +1689,9 @@
 //////
 	u64 CALLTYPE oss_screenRefresh(SScreen* ts)
     {
-		u64 lnPixelsDrawn;
+		u64					lnPixelsDrawn;
+		_iswSOssWindowLL*	w;
+
 
 
 		// Make sure our environment is sane
@@ -1687,12 +1702,57 @@
 			if (oss_regionRefresh(ts->activeRegion, NULL) != 0)
 			{
 				// Something was updated, refresh this screen
-				lnPixelsDrawn = oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb(ts->_iOssWindowId, ts->activeRegion->canvas->bd, ts->activeRegion->canvas->width, ts->activeRegion->canvas->height);
+				w = ioss_find_iswSOssWindowLL_By_iOssWindowId(ts->_iOssWindowId);
+				if (w)
+				{
+					// See if the window is the same size
+					if (!ts->scaleRegion->canvas || (w->isw.width == ts->activeRegion->canvas->width && w->isw.height == ts->activeRegion->canvas->height))
+					{
+						// They are the same size, use the standard window drawing
+						lnPixelsDrawn = oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb(ts->_iOssWindowId, ts->activeRegion->canvas->bd, ts->activeRegion->canvas->width, ts->activeRegion->canvas->height);
+
+					} else {
+						// They are not the same size, scale the window up/down to the destination size
+						oss_canvasScale(ts->scaleRegion->canvas, ts->activeRegion->canvas);
+						lnPixelsDrawn = oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb(ts->_iOssWindowId, ts->scaleRegion->canvas->bd, ts->scaleRegion->canvas->width, ts->scaleRegion->canvas->height);
+					}
+				}
 			}
 		}
 		// Indicate our success or failure
 		return(lnPixelsDrawn);
     }
+
+
+
+
+//////////
+//
+// Called to specify that the indicated screen should have keyboard focus
+//
+//////
+	bool CALLTYPE oss_screenSetFocus(SScreen* ts)
+	{
+		_iswSOssWindowLL* low;
+
+
+		// Make sure the environment is sane
+		if (ts)
+		{
+			// Make sure the screen they indicated is valid
+			low = ioss_findSOssWindowLLByScreenId(ts->_iOssWindowId);
+			if (low)
+			{
+				// Sends the WM_SETFOCUS message so it hits the window-owner thread, which then
+				// signals the events for change of focus
+				SetFocus((HWND)low->isw.osHandle);
+				return(true);
+			}
+		}
+
+		// The window wasn't found
+		return(false);
+	}
 
 
 
@@ -2269,7 +2329,7 @@
 			memset(tisw, 0, sizeof(SOssWindow));
 
 			// Populate it
-			tisw->uniqueId					= uniqueScreenId;
+			tisw->uniqueId			= uniqueScreenId;
 
 			// Set the length if necessary
 			if (tnCaptionLength == -1)
@@ -2308,24 +2368,8 @@
 			tisw->border			= tlBorder;
 
 			// Callbacks
-			tisw->callback.window._callback_created			= callbacks->window._callback_created,
-			tisw->callback.window._callback_unload			= callbacks->window._callback_unload,
-			tisw->callback.window._callback_closed			= callbacks->window._callback_closed,
-			tisw->callback.window._callback_moved			= callbacks->window._callback_moved;
-			tisw->callback.window._callback_resized			= callbacks->window._callback_resized;
-			tisw->callback.window._callback_gotFocus		= callbacks->window._callback_gotFocus;
-			tisw->callback.window._callback_lostFocus		= callbacks->window._callback_lostFocus;
-			tisw->callback.mouse._callback_down				= callbacks->mouse._callback_down;
-			tisw->callback.mouse._callback_up				= callbacks->mouse._callback_up;
-			tisw->callback.mouse._callback_move				= callbacks->mouse._callback_move;
-			tisw->callback.mouse._callback_hover			= callbacks->mouse._callback_hover;
-			tisw->callback.drag._callback_start				= callbacks->drag._callback_start;
-			tisw->callback.drag._callback_dragging			= callbacks->drag._callback_dragging;
-			tisw->callback.drag._callback_drop				= callbacks->drag._callback_drop;
-			tisw->callback.keyboard._callback_down			= callbacks->keyboard._callback_down;
-			tisw->callback.keyboard._callback_up			= callbacks->keyboard._callback_up;
-			tisw->callback.keyboard._callback_press			= callbacks->keyboard._callback_press;
-			tisw->callback.keyboard._callback_flags			= callbacks->keyboard._callback_flags;
+			if (callbacks)
+				memcpy(&tisw->callback, callbacks, sizeof(tisw->callback));
 		}
 		// When we get here, we're done
 		return(tisw);
@@ -2506,31 +2550,6 @@
 			if (tnHeightMax)	*tnHeightMax	= low->isw.heightMax;
 			if (tnWidthMin)		*tnWidthMin		= low->isw.widthMin;
 			if (tnHeightMin)	*tnHeightMin	= low->isw.heightMin;
-			return(true);
-		}
-		// The window wasn't found
-		return(false);
-	}
-
-
-
-
-//////////
-//
-// Called to specify that the indicated screen should have keyboard focus
-//
-//////
-	bool CALLTYPE oss_setFocus(u64 tnScreenId)
-	{
-		_iswSOssWindowLL* low;
-
-
-		// Make sure the screen they indicated is valid
-		low = ioss_findSOssWindowLLByScreenId(tnScreenId);
-		if (low)
-		{
-			// Sends the WM_SETFOCUS message so it hits the window-owner thread
-			SetFocus((HWND)low->isw.osHandle);
 			return(true);
 		}
 		// The window wasn't found

@@ -85,6 +85,7 @@
 	const s8		cgcOssCreateFontHandle[]								= "oss_createFontHandle";
 
 	const s8		cgcOssScreenRefresh[]									= "oss_screenRefresh";
+	const s8		cgcOssScreenSetFocus[]									= "oss_screenSetFocus";
 
 	const s8		cgcOssRegionDuplicate[]									= "oss_regionDuplicate";
 	const s8		cgcOssRegionDefaultPaint[]								= "oss_regionDefaultPaint";
@@ -427,14 +428,15 @@
 
 		// Visible window information
 		SScreen*		(CALLTYPE *oss_createScreenAndVisibleWindow)			(u64 tnAssociatedId, SOssWindow* tisw/*tisw was created by oss_createScreenTemplate()*/);
-		SRegion*		(CALLTYPE *oss_createRegionForScreen)					(SScreen* ts, SRegionState* trs);
+		SRegion*		(CALLTYPE *oss_createRegionForScreen)					(SScreen* ts, SCallbacks* callbacks, SStartEnd* events, SRegionState* trs);
 		SCanvas*		(CALLTYPE *oss_createCanvasForScreen)					(SScreen* ts);
 		SCanvas*		(CALLTYPE *oss_createCanvas)							(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, u32 tnBackColor);
-		SRegion*		(CALLTYPE *oss_createRegion)							(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, u32 tnWidth, u32 tnHeight, SCallbacksW* callback, SStartEnd* events);
+		SRegion*		(CALLTYPE *oss_createRegion)							(u64 tnAssociatedId, u32 tnType, u32 tnWidth, u32 tnHeight, SCallbacksW* callbacks, SStartEnd* events, SRegionState* trs);
 		bool			(CALLTYPE *oss_createRegionAndCanvas)					(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, SCanvas** tc, SRegion** tr, SRegionState* regionState, SCallbacksW* callbacks, SStartEnd* events);
 		u64				(CALLTYPE *oss_createFontHandle)						(s8* fontName, u32 fontWidth, bool bold, bool italics, bool underline, bool strikethrough);
 
 		u64				(CALLTYPE *oss_screenRefresh)							(SScreen* ts);
+		bool			(CALLTYPE *oss_screenSetFocus)							(SScreen *ts);
 
 		SRegion*		(CALLTYPE *oss_regionDuplicate)							(u64 tnAssociatedId, SRegion* templateRegion);
 		u64				(CALLTYPE *oss_regionDefaultPaint)						(SRegion* tr);
@@ -490,7 +492,6 @@
 		void			(CALLTYPE *oss_computeMonitorCoordinates)				(SOssWindow* tow, f32 tfPercent, u32 tnPosition, f32 tfMargin, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin);
 		bool			(CALLTYPE *oss_getScreenDimensions)						(u64 tnOssWindowId, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin);
 
-		bool			(CALLTYPE *oss_setFocus)								(u64 tnScreenId);
 		u64				(CALLTYPE *oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb)	(u64 tnOssWindowId, SBGRA* bd, u32 width, u32 height);
 		u64				(CALLTYPE *oss_lowLevel_bitBlt_ossRgb_onto_canvasBgra)	(u64 bdoss, s32 tnX, s32 tnY, u32 tnWidth, u32 tnHeight, SCanvas* tc, SBGRA* bdRoot);
 		u64				(CALLTYPE *oss_drawText)								(s8* tcText, u32 tnTextLength, s32 ulx, s32 uly, s32 lrx, s32 lry, u32 foreground, u32 background, u64 tnSystemFont, u64 tnSystemBitmap);
@@ -877,6 +878,7 @@
 		(void *)&oss_createFontHandle,										(void *)cgcOssCreateFontHandle,
 
 		(void *)&oss_screenRefresh,											(void *)cgcOssScreenRefresh,
+		(void *)&oss_screenSetFocus,										(void *)cgcOssScreenSetFocus,
 
 		(void *)&oss_regionDuplicate,										(void *)cgcOssRegionDuplicate,
 		(void *)&oss_regionDefaultPaint,									(void *)cgcOssRegionDefaultPaint,
@@ -1153,7 +1155,6 @@
 		(void *)&oss_computeMonitorCoordinates,								(void *)cgcOssComputeMonitorCoordinates,
 		(void *)&oss_enumerateMonitors,										(void *)cgcOssEnumerateMonitors,
 		(void *)&oss_getScreenDimensions,									(void *)cgcOssGetScreenDimensions,
-		(void *)&oss_setFocus,												(void *)cgcOssSetFocus,
 
 		(void *)&oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb,				(void *)cgcOssLowLevelBitBltCanvasBgraOntoOssRgb,
 		(void *)&oss_lowLevel_bitBlt_ossRgb_onto_canvasBgra,				(void *)cgcOssLowLevelBitBltOssRgbOntoCanvasBgra,

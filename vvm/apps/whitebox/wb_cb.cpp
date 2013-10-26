@@ -204,9 +204,6 @@
 				// Unknown key
 				return;
 		}
-
-		// Restore focus on this window
-		oss_setFocus(tisw->screenId);
 	}
 
 

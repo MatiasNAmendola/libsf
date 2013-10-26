@@ -52,44 +52,6 @@
 
 		bool CALLTYPE			vvmt_executeTests										(u64 lnHandleLog);
 
-//////////
-// Temporarily hijacked to convey some conversion from the existing icon.bmp files and their
-// corresponding bxml files, to extract individual icons into a single BXML which is written
-// to disk.
-//////////
-void hijack_loadIcons(void);
-void hijack_verifyIcons(void);
-void hijack_createWindow(void);
-
-u64 CALLTYPE hj_window_created(u64 tnUniqueId, SOssWindow* tisw);
-u64 CALLTYPE hj_window_unload(u64 tnUniqueId, SOssWindow* tisw);
-u64 CALLTYPE hj_window_closed(u64 tnUniqueId, SOssWindow* tisw);
-u64 CALLTYPE hj_window_moved(u64 tnUniqueId, SOssWindow* tisw, u32 tnXNew, u32 tnYNew);
-u64 CALLTYPE hj_window_resized(u64 tnUniqueId, SOssWindow* tisw, u32 tnWidthNew, u32 tnHeightNew);
-u64 CALLTYPE hj_window_gotFocus(u64 tnUniqueId, SOssWindow* tisw);
-u64 CALLTYPE hj_window_lostFocus(u64 tnUniqueId, SOssWindow* tisw);
-
-u64 CALLTYPE hj_region_enter(SRegion* tr);
-u64 CALLTYPE hj_region_leave(SRegion* tr);
-u64 CALLTYPE hj_region_paint(SRegion* tr, SCanvas* tc, SBGRA* bd);
-u64 CALLTYPE hj_region_debugTrap(SRegion* tr, u64 tnIdentifier, u64 tnExtra);
-
-u64 CALLTYPE hj_mouse_down(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
-u64 CALLTYPE hj_mouse_up(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
-u64 CALLTYPE hj_mouse_move(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
-u64 CALLTYPE hj_mouse_hover(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing);
-
-u64 CALLTYPE hj_keyboard_down(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode);
-u64 CALLTYPE hj_keyboard_up(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode);
-u64 CALLTYPE hj_keyboard_press(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode);
-u64 CALLTYPE hj_keyboard_flags(u64 tnUniqueId, SOssWindow* tisw, u32 tnKeyFlagsOld, u32 tnKeyFlagsNew);
-
-u64 CALLTYPE hj_drag_start(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
-u64 CALLTYPE hj_drag_dragging(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds);
-u64 CALLTYPE hj_drag_drop(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds);
-
-u64 CALLTYPE hj_custom_custom(u64 tnUniqueId, SOssWindow* tisw, u64 tnCustomEventId, u64 tnOtherData);
-
 		void CALLTYPE			vvmt_enableBreakpoints									(void);
 		void CALLTYPE			vvmt_disableBreakpoints									(void);
 
