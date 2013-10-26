@@ -78,8 +78,8 @@ EXPORTS
 	oss_enumerateMonitors
 	oss_getScreenDimensions
 	oss_setFocus
-	oss_bitBlt
-	oss_bitBltSystemBitmapToSBGRA
+	oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb
+	oss_lowLevel_bitBlt_ossRgb_onto_canvasBgra
 	oss_drawText
 	oss_getNextMessage
 	oss_messageBox

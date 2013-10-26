@@ -354,8 +354,8 @@
 	const s8		cgcOssGetScreenDimensions[]								= "oss_getScreenDimensions";
 	const s8		cgcOssSetFocus[]										= "oss_setFocus";
 
-	const s8		cgcOssBitBlt[]											= "oss_bitBlt";
-	const s8		cgcOssBitBltSystemBitmapToSBGRA[]						= "oss_bitBltSystemBitmapToSBGRA";
+	const s8		cgcOssLowLevelBitBltCanvasBgraOntoOssRgb[]				= "oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb";
+	const s8		cgcOssLowLevelBitBltOssRgbOntoCanvasBgra[]				= "oss_lowLevel_bitBlt_ossRgb_onto_canvasBgra";
 
 	const s8		cgcOssDrawText[]										= "oss_drawText";
 
@@ -491,8 +491,8 @@
 		bool			(CALLTYPE *oss_getScreenDimensions)						(u64 tnOssWindowId, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin);
 
 		bool			(CALLTYPE *oss_setFocus)								(u64 tnScreenId);
-		u64				(CALLTYPE *oss_bitBlt)									(u64 tnOssWindowId, SBGRA* buffer, u32 width, u32 height);
-		u64				(CALLTYPE *oss_bitBltSystemBitmapToSBGRA)				(u64 bdoss, s32 tnX, s32 tnY, u32 tnWidth, u32 tnHeight, SCanvas* tc, SBGRA* bdRoot);
+		u64				(CALLTYPE *oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb)	(u64 tnOssWindowId, SBGRA* bd, u32 width, u32 height);
+		u64				(CALLTYPE *oss_lowLevel_bitBlt_ossRgb_onto_canvasBgra)	(u64 bdoss, s32 tnX, s32 tnY, u32 tnWidth, u32 tnHeight, SCanvas* tc, SBGRA* bdRoot);
 		u64				(CALLTYPE *oss_drawText)								(s8* tcText, u32 tnTextLength, s32 ulx, s32 uly, s32 lrx, s32 lry, u32 foreground, u32 background, u64 tnSystemFont, u64 tnSystemBitmap);
 		u64				(CALLTYPE *oss_getNextMessage)							(u32* message, void* extra);
 		u64				(CALLTYPE *oss_messageBox)								(u64 id, s8* tcText, s8* tcCaption, bool tlYes, bool tlNo, bool tlOk, bool tlRetry, bool tlCancel);
@@ -1155,8 +1155,8 @@
 		(void *)&oss_getScreenDimensions,									(void *)cgcOssGetScreenDimensions,
 		(void *)&oss_setFocus,												(void *)cgcOssSetFocus,
 
-		(void *)&oss_bitBlt,												(void *)cgcOssBitBlt,
-		(void *)&oss_bitBltSystemBitmapToSBGRA,								(void *)cgcOssBitBltSystemBitmapToSBGRA,
+		(void *)&oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb,				(void *)cgcOssLowLevelBitBltCanvasBgraOntoOssRgb,
+		(void *)&oss_lowLevel_bitBlt_ossRgb_onto_canvasBgra,				(void *)cgcOssLowLevelBitBltOssRgbOntoCanvasBgra,
 
 		(void *)&oss_drawText,												(void *)cgcOssDrawText,
 

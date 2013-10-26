@@ -2342,7 +2342,7 @@ _asm int 3;
 // BitBlt the indicated SBGRA buffer to the specified screen
 //
 //////
-	u64 ioss_bitBlt_SbgraBuffer_onto_ossWindow(_iswSOssWindowLL* tw, SBGRA* bd, u32 width, u32 height)
+	u64 ioss_lowLevel_bitBlt_Sgra_onto_ossWindow(_iswSOssWindowLL* tw, SBGRA* bd, u32 width, u32 height)
 	{
 		u64		lnResult;
 		u32		lnX, lnY, lnActualWidth;

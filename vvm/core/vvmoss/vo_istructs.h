@@ -69,7 +69,7 @@
 		HDC				hdc;								// Device context for this instance
 		HBITMAP			hbmp;								// Handle to the DIB bitmap
 		BITMAPINFO		bi;									// Information used at creation for its size
-		s8*				bdRoot;								// Root pointer to the bits
+		s8*				bd;									// Root pointer to the bits
 		// Speedups
 		u32				width;								// Shortcut to bi.bmiHeader.biWidth
 		u32				height;								// Shortcut to bi.bmiHeader.biHeight

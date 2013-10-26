@@ -151,8 +151,8 @@
 		SOssWindow* CALLTYPE	oss_enumerateMonitors						(SStartEnd* tsMonitors/*Returns SOssWindow* structures*/);
 		bool CALLTYPE			oss_getScreenDimensions						(u64 tnOssWindowId, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin);
 		bool CALLTYPE			oss_setFocus								(u64 tnScreenId);
-		u64 CALLTYPE			oss_bitBlt									(u64 tnOssWindowId, SBGRA* buffer, u32 width, u32 height);
-		u64 CALLTYPE			oss_bitBltSystemBitmapToSBGRA				(u64 bdoss, s32 tnX, s32 tnY, u32 tnWidth, u32 tnHeight, SCanvas* tc, SBGRA* bdRoot);
+		u64 CALLTYPE			oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb	(u64 tnOssWindowId, SBGRA* bd, u32 width, u32 height);
+		u64 CALLTYPE			oss_lowLevel_bitBlt_ossRgb_onto_canvasBgra	(u64 bdoss, s32 tnX, s32 tnY, u32 tnWidth, u32 tnHeight, SCanvas* tc, SBGRA* bdRoot);
 		u64 CALLTYPE			oss_drawText								(s8* tcText, u32 tnTextLength, s32 ulx, s32 uly, s32 lrx, s32 lry, SBGRA foreground, SBGRA background, u64 tnSystemFont, u64 tnSystemBitmap);
 		u64 CALLTYPE			oss_getNextMessage							(u32* message, void* extra);
 		u64 CALLTYPE			oss_messageBox								(u64 id, s8*  tcText, s8*  tcCaption, bool tlYes, bool tlNo, bool tlOk, bool tlRetry, bool tlCancel);
@@ -542,7 +542,7 @@
 	bool					iioss_signalWindowFocusCallbacksCallback		(SStartEndCallback* cb);
 	void					ioss_signalWindowUnloadCallback					(HWND hwnd);
 	void					ioss_signalWindowClosedCallback					(_iswSOssWindowLL* w);
-	u64						ioss_bitBlt_SbgraBuffer_onto_ossWindow										(_iswSOssWindowLL* tow, SBGRA* bd, u32 width, u32 height);
+	u64						ioss_lowLevel_bitBlt_Sgra_onto_ossWindow		(_iswSOssWindowLL* tow, SBGRA* bd, u32 width, u32 height);
 	bool					ioss_openAndReadBitmapFile						(s8* tcPathname, SBitmapHeader* tbh, SBitmapInfo* tbi, s8** tbd, u32* tnResult);
 	void					ioss_allocateSBGRAandCopy32Bit_BitmapTopDown	(SBGRA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SBGRA* lrgbas,    u32* tnResult, u32 tnErrorValue);
 	void					ioss_allocateSBGRAandCopy32Bit_BitmapBottomUp	(SBGRA** trgbad, SBitmapHeader* tbh, SBitmapInfo* tbi, SBGRA* lrgbas,    u32* tnResult, u32 tnErrorValue);

@@ -992,7 +992,7 @@
 			if (lnResult > 0)
 			{
 				// Copy the text drawn onto the system bitmap onto the canvas
-				lnResult = oss_bitBltSystemBitmapToSBGRA(tc->bd_vvmoss, ulx, uly, lrx-ulx, lry-uly, tc, bd);
+				lnResult = oss_lowLevel_bitBlt_ossRgb_onto_canvasBgra(tc->bd_vvmoss, ulx, uly, lrx-ulx, lry-uly, tc, bd);
 
 				// Mark the item dirty
 				if (lnResult != 0)
@@ -1615,20 +1615,22 @@
 //////
 	u64 CALLTYPE oss_screenRefresh(SScreen* ts)
     {
+		u64 lnPixelsDrawn;
+
+
 		// Make sure our environment is sane
-		if (ts && ts->activeRegion)
+		lnPixelsDrawn = 0;
+		if (ts && ts->activeRegion && ts->activeRegion->canvas)
 		{
 			// Refresh this region
-			oss_regionRefresh(ts->activeRegion);
-
-// TODO:  Incomplete code, needs written
-			// Refresh this screen
-			//lnPixelsDrawn = oss_bitBlt(ls->_iOssWindowId, lc->bd, lc->width, lc->height);
-			return(0);
-
-		} else {
-			return(0);
+			if (oss_regionRefresh(ts->activeRegion) != 0)
+			{
+				// Something was updated, refresh this screen
+				lnPixelsDrawn = oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb(ts->_iOssWindowId, ts->activeRegion->canvas->bd, ts->activeRegion->canvas->width, ts->activeRegion->canvas->height);
+			}
 		}
+		// Indicate our success or failure
+		return(lnPixelsDrawn);
     }
 
 
@@ -1636,13 +1638,20 @@
 
 //////////
 //
-// Refreshes the canvas
+// Refreshes the canvas (draws its accumulator buffer onto its main buffer)
 //
 //////
 	u64 CALLTYPE oss_canvasRefresh(SCanvas* tc)
 	{
-// TODO:  Incomplete code, needs written
-		return(0);
+		u64 lnPixelsDrawn;
+		
+
+		// Make sure our environment is sane
+		lnPixelsDrawn = 0;
+		if (tc && tc->bd && tc->bda)
+			lnPixelsDrawn = oss_canvasBitBlt(tc, false, 0, 0, tc, true, 0, 0, tc->width, tc->height);
+
+		return(lnPixelsDrawn);
 	}
 
 
@@ -2128,7 +2137,7 @@
 		{
 			// Create our new DC and bitmap
 			lsb->hdc		= CreateCompatibleDC(GetDC(GetDesktopWindow()));
-			lsb->hbmp		= (HBITMAP)ioss_createDibWithBitBuffer(lsb->hdc, tnWidth, tnHeight, &lsb->bi, &lsb->bdRoot, &lsb->actualWidth);
+			lsb->hbmp		= (HBITMAP)ioss_createDibWithBitBuffer(lsb->hdc, tnWidth, tnHeight, &lsb->bi, &lsb->bd, &lsb->actualWidth);
 			lsb->width		= lsb->bi.bmiHeader.biWidth;
 			lsb->height		= lsb->bi.bmiHeader.biHeight;
 
@@ -2475,9 +2484,8 @@
 // Blt the specified buffer onto the indicated operating-system specific screen id
 //
 //////
-	u64 CALLTYPE oss_bitBlt(u64 tnOssWindowId, SBGRA* buffer, u32 width, u32 height)
+	u64 CALLTYPE oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb(u64 tnOssWindowId, SBGRA* bd, u32 width, u32 height)
 	{
-		u64			lnResult;
 		_iswSOssWindowLL* w;
 
 
@@ -2486,14 +2494,12 @@
 		if (w)
 		{
 			// Copy over the buffer contents, as much as will fit (should be all of it)
-			lnResult = ioss_bitBlt_SbgraBuffer_onto_ossWindow(w, buffer, width, height);
+			return(ioss_lowLevel_bitBlt_Sgra_onto_ossWindow(w, bd, width, height));
 
 		} else {
 			// Indicate failure
-			lnResult = -1;
+			return(-1);
 		}
-		// Indicate success or failure
-		return lnResult;
 	}
 
 
@@ -2501,11 +2507,12 @@
 
 //////////
 //
-// Blt the specified system buffer onto the indicated SBGRA using the tnX,tnY coordinates for the
-// upper-left, for the width and the height.
+// Blts the specified OSS buffer onto the indicated SBGRA using the tnX,tnY coordinates for the
+// upper-left, for the width and the height.  This function is used for things that the OS itself
+// renders into a bit bucket, which is then copied into our buffer.
 //
 //////
-	u64 CALLTYPE oss_bitBltSystemBitmapToSBGRA(u64 bdoss, s32 tnX, s32 tnY, u32 tnWidth, u32 tnHeight, SCanvas* tc, SBGRA* bdRoot)
+	u64 CALLTYPE oss_lowLevel_bitBlt_ossRgb_onto_canvasBgra(u64 bdoss, s32 tnX, s32 tnY, u32 tnWidth, u32 tnHeight, SCanvas* tc, SBGRA* bd)
 	{
 		u64					lnPixels;
 		s32					lnY, lnX, lnThisY, lnThisX;
@@ -2526,8 +2533,8 @@
 			if (lnThisY >= 0 && lnThisY < (s32)lsb->height && lnThisY < (s32)tc->height)
 			{
 				// Set our source and destination pointers
-				lrgbs	= (SRGB*)( (s8*)lsb->bdRoot + ((lsb->height - (lnY + tnY) - 1) * lsb->actualWidth)          + (tnX * sizeof(SRGB)));
-				lrgbad	= (SBGRA*)((s8*)bdRoot      + ((lnY + tnY)                     * tc->width * sizeof(SBGRA)) + (tnX * sizeof(SBGRA)));
+				lrgbs	= (SRGB*)( (s8*)lsb->bd + ((lsb->height - (lnY + tnY) - 1) * lsb->actualWidth)  + (tnX * sizeof(SRGB)));
+				lrgbad	= bd + ((lnY + tnY) * tc->width) + tnX;
 
 				// Repeat for every valid pixel
 				for (	lnX = 0, lnThisX = tnX;

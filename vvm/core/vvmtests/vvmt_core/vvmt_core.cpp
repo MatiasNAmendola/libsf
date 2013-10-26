@@ -505,12 +505,13 @@ return(false);
 //
 /////
 	SScreen* screen;
-	SCanvas* canvas;
+	SRegion* region;
 
 	void hijack_createWindow(void)
 	{
 		s32				lnX, lnY;
 		u32				lnWidth, lnHeight, lnMinWidth, lnMinHeight, lnMaxWidth, lnMaxHeight;
+		SCanvas*		lc;
 		SOssWindow*		lst;
 		SCallbacksW		cb;
 		SStartEnd		lse;
@@ -572,47 +573,48 @@ return(false);
 			screen = oss_createScreenAndVisibleWindow(0, lst);
 			if (screen)
 			{
-				canvas = oss_createCanvasForScreen(screen);
-				if (canvas)
+				region = oss_createRegionForScreen(screen);
+				if (region->canvas)
 				{
+					lc = region->canvas;
 // 					SBGRA white1 = { 255, 255, 255, 255 };
 // 					SBGRA white2 = { 255, 215, 215, 255 };
 // 					SBGRA white3 = { 215, 255, 215, 255 };
 // 					SBGRA white4 = { 215, 215, 255, 255 };
 // 					SBGRA black = { 0, 0, 0, 255 };
  					SBGRA blue = { 255, 0, 0, 255 };
-// 					oss_canvasFillRect(canvas, canvas->bd, 0, 0, canvas->width, canvas->height, 0, white1, white1);
-// 					oss_canvasGradient(canvas, canvas->bd, white1, white2, white3, white4);
+// 					oss_canvasFillRect(lc, lc->bd, 0, 0, lc->width, lc->height, 0, white1, white1);
+// 					oss_canvasGradient(lc, lc->bd, white1, white2, white3, white4);
 // 
 // 					int lnI, lnJ, lnLength;
 // 					char* foo;
-// 					lnLength = (canvas->width / 8) + 2;
+// 					lnLength = (lc->width / 8) + 2;
 // 					foo = (char*)malloc(lnLength);
 // 
-// 					for (lnI = 0; lnI < canvas->height; lnI += 14)
+// 					for (lnI = 0; lnI < lc->height; lnI += 14)
 // 					{
 // 						memset(foo, 0, lnLength);
-// 						for (lnJ = 0; lnJ < canvas->width / 8; lnJ++)
+// 						for (lnJ = 0; lnJ < lc->width / 8; lnJ++)
 // 							foo[lnJ] = (lnI + lnJ) % 256;
 // 
-// 						oss_canvasDrawFixedPointText(canvas, canvas->bd, 8, 14, 0, lnI, foo, canvas->width / 8, black, white1);
+// 						oss_canvasDrawFixedPointText(lc, lc->bd, 8, 14, 0, lnI, foo, lc->width / 8, black, white1);
 // 					}
 // 
  					int lnI;
  					for (lnI = 1; lnI < 10; lnI++)
- 						oss_canvasLine(canvas, canvas->bd, 300 + (lnI * 30), 300, 400 + (lnI * 30), 680, lnI, blue);
+ 						oss_canvasLine(lc, lc->bd, 300 + (lnI * 30), 300, 400 + (lnI * 30), 680, lnI, blue);
  
 // 					f32 lfTheta;
 // 					for (lnI = 0, lfTheta = 0; lfTheta < 6.28f * 3.0f; lnI += 4, lfTheta += 6.28f / 90.0f)
-// 						oss_canvasLine(canvas, canvas->bd, 100 + lnI, 700, 100 + lnI + (s32)(cos(lfTheta) * 200), 700 + (s32)(sin(lfTheta) * 200), lnI % 5, blue);
+// 						oss_canvasLine(lc, lc->bd, 100 + lnI, 700, 100 + lnI + (s32)(cos(lfTheta) * 200), 700 + (s32)(sin(lfTheta) * 200), lnI % 5, blue);
 
-// 					oss_canvasLine(canvas, canvas->bd, 40, 40, 800, 40, 2, black);
-// 					oss_canvasLine(canvas, canvas->bd, 800, 40, 800, 800, 2, black);
-// 					oss_canvasLine(canvas, canvas->bd, 40, 800, 800, 800, 2, black);
+// 					oss_canvasLine(lc, lc->bd, 40, 40, 800, 40, 2, black);
+// 					oss_canvasLine(lc, lc->bd, 800, 40, 800, 800, 2, black);
+// 					oss_canvasLine(lc, lc->bd, 40, 800, 800, 800, 2, black);
 
-//					oss_canvasFillRect(canvas, canvas->bd, 200, 200, 600, 600, 6, black, white1);
+//					oss_canvasFillRect(lc, lc->bd, 200, 200, 600, 600, 6, black, white1);
 
-//					oss_canvasArc(canvas, canvas->bd, 200, 200, 40.0f, 0.0f, 3.14f, 2, black);
+//					oss_canvasArc(lc, lc->bd, 200, 200, 40.0f, 0.0f, 3.14f, 2, black);
 
 					oss_screenRefresh(screen);
 				}
