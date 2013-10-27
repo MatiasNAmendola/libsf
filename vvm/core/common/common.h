@@ -1064,7 +1064,6 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 
 		// Associated region to this screen
 		SRegion*		activeRegion;			// Pointer to this screen's first region, which must have a canvas
-		SRegion*		scaleRegion;			// If the activeRegion is not the same size as the system window, it must be scaled to the scaleRegion size and then bitBlt'd
 
 		// Internal information used to make it happen for the target OS
 		u64				_iOssWindowId;			// OSS specific information for this instance (pointer to SOssWindow struct, for example)
@@ -1081,6 +1080,24 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 // inside the VVM as they would be in a higher level language.
 //
 //////
+	struct SScaleCompute
+	{
+		// Refer to the oss_canvasScale() functionality
+		SLL*			next;					// Pointer to next computation in the chain
+		u32				sbgraOffsetDst;			// Offset to the destination SBGRA pixel
+		u32				sbgraOffsetSrc;			// Offset to the source SBGRA pixel
+		f32				multiplier;				// The multiplier for the pixel accumulator for that value (dst += source * multiplier)
+	};
+
+	struct SScaleMap
+	{
+		// Refer to the oss_canvasScale() functionality
+		SLL*			next;					// Pointer to next scale map in the chain
+		SSize			src;					// Width of the source SBGRA
+		SSize			dst;					// Width of the destination SBGRA
+		SScaleCompute*	firstScale;				// The mathematical progression to use for this scale
+	};
+
 	struct SCanvas
 	{
 		SLL				ll;						// 2-way link list
@@ -1100,6 +1117,9 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		SBGRA*			bd;						// buffer data
 		SBGRA*			bda;					// buffer data accumulator (for building child items onto this item)
 		u64				bd_vvmoss;				// OS-specific information used for drawing OSS-fonts (used only by vvmoss code)
+
+		// For scale operations
+		SScaleMap*		firstScale;				// List of computed scale maps (used for scaling operations)
 	};
 
 
@@ -1143,6 +1163,8 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	{
 		SLL				ll;						// 2-way link list
 		u64				associatedId;			// The associated id, provided at creation for creator's private use and reference
+		SScreen*		parentScreen;			// The screen this region belongs to
+		SRegionState	state;					// Settings like active, focus, tab order, etc.
 
 		// Instance/application defined information
 		void*			extraInfo;				// Extra info this region stores which is application specific
@@ -1151,18 +1173,19 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		u64				semRefresh;				// Limited access to 
 		bool			isRefreshing;			// Is this region refreshing?
 
-		// Conditions for this particular instance
-		SRegionState	state;					// Settings like active, focus, tab order, etc.
+		// If this is a region that is drawn to, it has at least canvas defined.
 		SCanvas*		canvas;					// Canvas for this region (if any, not all regions have a canvas)
-		SScreen*		parentScreen;			// The screen this region belongs to
+
+		// If canvas is not the same size as the logical region, it must be scaled into that size
+		SCanvas*		canvasScale;			// Canvas for scaling operations
 
 		// Region information
 		u32				type;					// Type of input, see _VVM_REGION_* constants
 		void*			data;					// Based on the type of input, data may or may not be populated
-		u32				x;						// Upper-left X coordinate
-		u32				y;						// Upper-left Y coordinate
-		u32				width;					// Width of the region
-		u32				height;					// Height of the region
+		f32				x;						// Upper-left X coordinate (relative to the parent object)
+		f32				y;						// Upper-left Y coordinate (relative to the parent object)
+		f32				width;					// Width of the region (relative to the width of the parent object)
+		f32				height;					// Height of the region (relative to the width of the parent object)
 		// Note:  The x,y coordinates are assigned when they are applied to a canvas or other region as part of the SRegionList entry
 
 		// Default region callbacks and sub-regions

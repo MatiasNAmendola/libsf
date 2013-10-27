@@ -431,8 +431,8 @@
 		SRegion*		(CALLTYPE *oss_createRegionForScreen)					(SScreen* ts, SCallbacks* callbacks, SStartEnd* events, SRegionState* trs);
 		SCanvas*		(CALLTYPE *oss_createCanvasForScreen)					(SScreen* ts);
 		SCanvas*		(CALLTYPE *oss_createCanvas)							(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, u32 tnBackColor);
-		SRegion*		(CALLTYPE *oss_createRegion)							(u64 tnAssociatedId, u32 tnType, u32 tnWidth, u32 tnHeight, SCallbacksW* callbacks, SStartEnd* events, SRegionState* trs);
-		bool			(CALLTYPE *oss_createRegionAndCanvas)					(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, SCanvas** tc, SRegion** tr, SRegionState* regionState, SCallbacksW* callbacks, SStartEnd* events);
+		SRegion*		(CALLTYPE *oss_createRegion)							(u64 tnAssociatedId, u32 tnType, f32 ulx, f32 uly, f32 lrx, f32 lry, SCallbacks* callbacks, SStartEnd* events, SRegionState* trs);
+		bool			(CALLTYPE *oss_createRegionAndCanvas)					(u64 tnAssociatedId, SBGRA tnBackColor, f32 ulx, f32 uly, f32 lrx, f32 lry, SCanvas** tc, SRegion** tr, SRegionState* regionState, SCallbacks* callbacks, SStartEnd* events);
 		u64				(CALLTYPE *oss_createFontHandle)						(s8* fontName, u32 fontWidth, bool bold, bool italics, bool underline, bool strikethrough);
 
 		u64				(CALLTYPE *oss_screenRefresh)							(SScreen* ts);
@@ -452,8 +452,8 @@
 		u64				(CALLTYPE *oss_canvasColorize)							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, SBGRA color);
 		u64				(CALLTYPE *oss_canvasGrayscale)							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry);
 		u64				(CALLTYPE *oss_canvasGradient)							(SCanvas* tc, SBGRA* bd, SBGRA ul, SBGRA ur, SBGRA lr, SBGRA ll);
-		u64				(CALLTYPE *oss_canvasBitBlt)							(SCanvas* tcDst, bool tlDstAccumulator, s32 dulx, s32 duly, SCanvas* tsSrc, bool tlSrcAccumulator, s32 sulx, s32 suly, s32 slrx, s32 slry);
-		u64				(CALLTYPE *oss_canvasScale)								(SCanvas* tcDst, SCanvas* tcSrc);
+		u64				(CALLTYPE *oss_canvasBitBlt)							(SCanvas* tsDst, bool tlDstAccumulator, s32 dulx, s32 duly, SCanvas* tsSrc, bool tlSrcAccumulator, s32 sulx, s32 suly, s32 slrx, s32 slry);
+		u64				(CALLTYPE *oss_canvasScale)								(SCanvas* tsDst, SCanvas* tsSrc, SScaleMap* tsSm);
 
 		SCask*			(CALLTYPE *oss_caskDefineStandard)						(u32 tnHeight, u32 tnWidth, u32 tnLeftStyle, u32 tnLeftState, u32 tnLeftPipCount, u32 tnLeftColor, csu8p tcLeftText, u32 tnRightStyle, u32 tnRightState, u32 tnRightPipCount, u32 tnRightColor, csu8p tcRightText);
 		SCask*			(CALLTYPE *oss_caskDefineEncompassingRectangle)			(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SRectXYXY* tsOuter);

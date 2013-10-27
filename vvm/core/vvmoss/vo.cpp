@@ -722,7 +722,7 @@
 		if (oss_getScreenDimensions(ts->_iOssWindowId, NULL, NULL, &lnWidth, &lnHeight, NULL, NULL, NULL, NULL))
 		{
 			// Create a region
-			lr = ioss_createRegion(ts->ll.uniqueId, trs, 0, lnWidth, lnHeight, callbacks, events);
+			lr = ioss_createRegion(ts->ll.uniqueId, trs, 0, 0.0f, 0.0f, (f32)lnWidth, (f32)lnHeight, callbacks, events);
 			if (lr)
 			{
 				// Does this screen have an active region yet?
@@ -791,13 +791,13 @@
 // Returns a new region of the specified settings
 //
 //////
-	SRegion* CALLTYPE oss_createRegion(u64 tnAssociatedId, u32 tnType, u32 ulx, u32 uly, u32 lrx, u32 lry, SCallbacks* callbacks, SStartEnd* events, SRegionState* trs)
+	SRegion* CALLTYPE oss_createRegion(u64 tnAssociatedId, u32 tnType, f32 ulx, f32 uly, f32 lrx, f32 lry, SCallbacks* callbacks, SStartEnd* events, SRegionState* trs)
 	{
 		SRegion* lr;
 
 
 		// Try to create the region
-		lr = ioss_createRegion(tnAssociatedId, trs, 0, lrx - ulx, lry - uly, callbacks, events);
+		lr = ioss_createRegion(tnAssociatedId, trs, 0, ulx, uly, lrx, lry, callbacks, events);
 		if (lr)
 		{
 			// Store the coordinates for this item
@@ -941,7 +941,21 @@
 				if (trParent && trParent->canvas)
 				{
 					// Paint it onto the parent
-					cb.count1 += oss_canvasBitBlt(trParent->canvas, false, tr->x, tr->y, tr->canvas, false, 0, 0, tr->canvas->width, tr->canvas->height);
+					if (tr->canvas->width == tr->width && tr->canvas->height == tr->height)
+					{
+						// The region is the same size as the canvas, do a literal bitBlt
+						cb.count1 += oss_canvasBitBlt(trParent->canvas, false, 
+														(s32)(tr->x * (f32)trParent->canvas->width),
+														(s32)(tr->y * (f32)trParent->canvas->height),
+														tr->canvas, false, 0, 0, tr->canvas->width, tr->canvas->height);
+
+					} else {
+						// They are not the same size.  Perfor the scale, and then do the bitBlt
+						cb.count1 += oss_canvasBitBlt(trParent->canvas, false, 
+														(s32)(tr->x * (f32)trParent->canvas->width),
+														(s32)(tr->y * (f32)trParent->canvas->height),
+														tr->canvas, false, 0, 0, tr->canvas->width, tr->canvas->height);
+					}
 
 					// Mark this region's canvas as no longer being dirty (because it's just been updated)
 					tr->canvas->isDirty = false;
@@ -967,7 +981,7 @@
 // area.  As such, a combined function is created to allow this creation in one shot.
 //
 //////
-	bool CALLTYPE oss_createRegionAndCanvas(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, s32 ulx, s32 uly, s32 lrx, s32 lry, SCanvas** tc, SRegion** tr, SRegionState* regionState, SCallbacks* callbacks, SStartEnd* events)
+	bool CALLTYPE oss_createRegionAndCanvas(u64 tnAssociatedId, SBGRA tnBackColor, f32 ulx, f32 uly, f32 lrx, f32 lry, SCanvas** tc, SRegion** tr, SRegionState* regionState, SCallbacks* callbacks, SStartEnd* events)
 	{
 		SRegion*	lr;
 		SCanvas*	lc;
@@ -977,10 +991,10 @@
 		if (tc && tr)
 		{
 			// Create our canvas
-			lc	= oss_createCanvas(tnAssociatedId, tnWidth, tnHeight, tnBackColor);
+			lc	= oss_createCanvas(tnAssociatedId, (u32)ceil(lrx - ulx), (u32)ceil(lry - uly), tnBackColor);
 
 			// Apply our region to it
-			lr	= ioss_createRegion(tnAssociatedId, regionState, 0, tnWidth, tnHeight, callbacks, events);
+			lr	= ioss_createRegion(tnAssociatedId, regionState, 0, ulx, uly, lrx, lry, callbacks, events);
 			
 			// Indicate our success or failure
 			return(lc && lr);
@@ -1659,20 +1673,20 @@
 // Called to scale a canvas from the src size to the dst size
 //
 //////
-	u64 CALLTYPE oss_canvasScale(SCanvas* tcDst, SCanvas* tcSrc)
+	u64 CALLTYPE oss_canvasScale(SCanvas* tsDst, SCanvas* tsSrc, SScaleMap** tsSm)
 	{
 		u64 lnPixelsDrawn;
 
 
 		// Make sure the environment is sane
-		if (tcDst && tcSrc && tcDst->bd && tcSrc->bd)
+		if (tsDst && tsSrc && tsDst->bd && tsSrc->bd && tsSm)
 		{
 			// Perform the scale
-			lnPixelsDrawn = iioss_canvasScale(tcDst, tcSrc);
+			lnPixelsDrawn = iioss_canvasScale(tsDst, tsSrc, tsSm);
 
 			// Mark the item dirty
 			if (lnPixelsDrawn != 0)
-				tcDst->isDirty = true;
+				tsDst->isDirty = true;
 		}
 
 		// If we get here, failure
@@ -1706,15 +1720,15 @@
 				if (w)
 				{
 					// See if the window is the same size
-					if (!ts->scaleRegion->canvas || (w->isw.width == ts->activeRegion->canvas->width && w->isw.height == ts->activeRegion->canvas->height))
+					if (w->isw.width == ts->activeRegion->canvas->width && w->isw.height == ts->activeRegion->canvas->height)
 					{
 						// They are the same size, use the standard window drawing
 						lnPixelsDrawn = oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb(ts->_iOssWindowId, ts->activeRegion->canvas->bd, ts->activeRegion->canvas->width, ts->activeRegion->canvas->height);
 
 					} else {
-						// They are not the same size, scale the window up/down to the destination size
-						oss_canvasScale(ts->scaleRegion->canvas, ts->activeRegion->canvas);
-						lnPixelsDrawn = oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb(ts->_iOssWindowId, ts->scaleRegion->canvas->bd, ts->scaleRegion->canvas->width, ts->scaleRegion->canvas->height);
+						// They are not the same size, scale the canvas up/down to the destination size, and then draw
+						oss_canvasScale(ts->activeRegion->canvasScale, ts->activeRegion->canvas, &ts->activeRegion->canvasScale->firstScale);
+						lnPixelsDrawn = oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb(ts->_iOssWindowId, ts->activeRegion->canvasScale->bd, ts->activeRegion->canvasScale->width, ts->activeRegion->canvasScale->height);
 					}
 				}
 			}

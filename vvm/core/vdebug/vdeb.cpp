@@ -160,6 +160,7 @@
 		lnDebuggerUid = (u32)lpParameter;
 
 		// Build the debugger screen
+// TODO:  Working on vdebug.bxml
 		bxmlDebuggerSettings = ivdeb_getDebuggerSettings();
 
 		// Create the debugger screen

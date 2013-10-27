@@ -3360,31 +3360,69 @@ _asm int 3;
 // Scales the canvas from source to destination
 //
 //////
-	u64 iioss_canvasScale(SCanvas* tcDst, SCanvas* tcSrc)
+	u64 iioss_canvasScale(SCanvas* tsDst, SCanvas* tsSrc, SScaleMap** tsSm)
 	{
-		u64		lnPixelsDrawn;
-		f32		lfVertical, lfHorizontal;
+		u64			lnPixelsDrawn;
+		f32			lfVertical, lfHorizontal;
+		SScaleMap*	lsm;
+		SScaleMap**	lsmLast;
 
 
 		// Make sure our environment is sane
 		lnPixelsDrawn = 0;
 		// We have valid source and destination canvases
-		if (tcSrc->width == tcDst->width && tcSrc->height == tcDst->height)
+		if (tsSrc->width == tsDst->width && tsSrc->height == tsDst->height)
 		{
 			// They're the same size, just copy them
-			memcpy(tcDst->bd, tcSrc->bd, tcSrc->width * tcSrc->height * sizeof(SBGRA));
-			lnPixelsDrawn = tcSrc->width * tcSrc->height;
+			memcpy(tsDst->bd, tsSrc->bd, tsSrc->width * tsSrc->height * sizeof(SBGRA));
+			lnPixelsDrawn = tsSrc->width * tsSrc->height;
 
 		} else {
 			// We need to scale
-			lfVertical		= (f32)tcSrc->height / (f32)tcDst->height;
-			lfHorizontal	= (f32)tcSrc->width  / (f32)tcDst->width;
-			lnPixelsDrawn	= iioss_canvasScaleProcess(tcDst, tcSrc, lfVertical, lfHorizontal);
+			lsmLast	= tsSm;
+			lsm		= NULL;
+
+			// See if there is already an existing map
+			if (*tsSm)
+			{
+				// Maybe one of those can be used
+				lsm = *tsSm;
+				while (lsm)
+				{
+					// See if it's the same size
+					if (     /*Source*/ lsm->src.width == tsSrc->width && lsm->src.height == tsSrc->height &&
+					    /*Destination*/ lsm->dst.width == tsDst->width && lsm->dst.height == tsDst->height)
+					{
+						// It is a full match, we can use this scale computation
+						break;
+					}
+
+					// Move to the next entry
+					lsmLast = (SScaleMap**)&lsm->next;
+					lsm		= (SScaleMap*)lsm->next;
+				}
+			}
+
+			// Do we need to create a new block?
+			if (!lsm)
+			{
+				// Yes
+				lsm = (SScaleMap*)oss_alloc(sizeof(SScaleMap), true);
+
+				// If we fail, we cannot proceed
+				if (!lsm)
+					return(0);
+			}
+
+			// Physically perform the scale
+			lfVertical		= (f32)tsSrc->height / (f32)tsDst->height;
+			lfHorizontal	= (f32)tsSrc->width  / (f32)tsDst->width;
+			lnPixelsDrawn	= iioss_canvasScaleProcess(tsDst, tsSrc, lsm, lfVertical, lfHorizontal);
 		}
 
 		// Mark the item dirty
 		if (lnPixelsDrawn != 0)
-			tcDst->isDirty = true;
+			tsDst->isDirty = true;
 
 		// Indicate our failure or success
 		return(lnPixelsDrawn);
@@ -3408,59 +3446,89 @@ _asm int 3;
 //		-7		- Unable to write to output file
 //
 //////
-	u64 iioss_canvasScaleProcess(SCanvas* tcDst, SCanvas* tcSrc, f32 tfVerticalScaler, f32 tfHorizontalScaler)
+	u64 iioss_canvasScaleProcess(SCanvas* tsDst, SCanvas* tsSrc, SScaleMap* tsSm, f32 tfVerticalScaler, f32 tfHorizontalScaler)
 	{
 		u64					lnPixelsDrawn;
+		f32					lfMult;
 		s32					lnY, lnX;
 		_isSBitmapProcess	bp;
+		SScaleCompute*		lsc;
+		SBGRA*				lbgras;
+		SBGRA*				lbgrad;
 
 
-		// Being the scaling procedure
-		bp.dst		= tcDst;
-		bp.src		= tcSrc;
-		bp.ratioV	= (f32)tcSrc->height	/ (f32)tcDst->height;
-		bp.ratioH	= (f32)tcSrc->width		/ (f32)tcDst->width;
-		bp.pixels	= (SBGRAF*)malloc(((u32)bp.ratioV + 16) * ((u32)bp.ratioH + 16) * sizeof(SBGRAF));
-
-		// Iterate through every pixel
-		lnPixelsDrawn = 0;
-		for (lnY = 0; lnY < tcDst->height; lnY++)
+		// Are we scaling based on the formula already derived?
+		if (tsSm->firstScale)
 		{
-			// Grab the offset for this line
-			bp.optr = tcDst->bd + ((tcDst->height - lnY - 1) * tcDst->width);
+			// Yes, initialize everything in the destination to black, for every pixel computation is added
+			oss_memset4((u32*)tsDst->bd, 0, tsDst->width * tsDst->height);
 
-			// Repeat for every pixel across this row
-			for (lnX = 0; lnX < tcDst->width; lnX++)
+			// Apply the scaling computation
+			lsc = tsSm->firstScale;
+			while (lsc)
 			{
-				// Compute data for this spanned pixel
-				bp.uly	= min((f32)lnY * bp.ratioV, (f32)tcSrc->height - bp.ratioV);
-				bp.ulx	= min((f32)lnX * bp.ratioH, (f32)tcSrc->width  - bp.ratioH);
-				bp.lry	= bp.uly + bp.ratioV;
-				bp.lrx	= bp.ulx + bp.ratioH;
+				// Compute this portion
+				lbgras			= tsSrc->bd + lsc->sbgraOffsetSrc;
+				lbgrad			= tsDst->bd + lsc->sbgraOffsetDst;
+				lfMult			= lsc->multiplier;
+
+				// Compute the translation
+				lbgrad->alp		+= (u8)((f32)lbgras->alp * lfMult);
+				lbgrad->red		+= (u8)((f32)lbgras->red * lfMult);
+				lbgrad->grn		+= (u8)((f32)lbgras->grn * lfMult);
+				lbgrad->blu		+= (u8)((f32)lbgras->blu * lfMult);
+
+				// Move to next scale entry
+				lsc = (SScaleCompute*)lsc->next;
+			}
+			// When we get here, the source is scaled into the destination
+
+		} else {
+			// Being the scaling procedure
+			bp.dst		= tsDst;
+			bp.src		= tsSrc;
+			bp.sm		= tsSm;
+			bp.ratioV	= (f32)tsSrc->height	/ (f32)tsDst->height;
+			bp.ratioH	= (f32)tsSrc->width		/ (f32)tsDst->width;
+			bp.pixels	= (SBGRAF*)malloc(((u32)bp.ratioV + 16) * ((u32)bp.ratioH + 16) * sizeof(SBGRAF));
+
+			// Iterate through every pixel
+			lnPixelsDrawn = 0;
+			for (lnY = 0; lnY < tsDst->height; lnY++)
+			{
+				// Grab the offset for this line
+				bp.optr = tsDst->bd + ((tsDst->height - lnY - 1) * tsDst->width);
+
+				// Repeat for every pixel across this row
+				for (lnX = 0; lnX < tsDst->width; lnX++)
+				{
+					// Compute data for this spanned pixel
+					bp.uly	= min((f32)lnY * bp.ratioV, (f32)tsSrc->height - bp.ratioV);
+					bp.ulx	= min((f32)lnX * bp.ratioH, (f32)tsSrc->width  - bp.ratioH);
+					bp.lry	= bp.uly + bp.ratioV;
+					bp.lrx	= bp.ulx + bp.ratioH;
 
 // if ((lnY == 2 && lnX == 516) || (lnY == 5 && lnX == 516) || (lnY == 798 && lnX == 516))
 // 	_asm nop;
 
-				// Get all the color information for this potentially spanned pixel
-				iioss_getSpannedPixelColors(&bp);
+					// Get all the color information for this potentially spanned pixel
+					iioss_getSpannedPixelColors(&bp);
 
-				// Store the color
-				bp.optr->red = (u8)bp.red;
-				bp.optr->grn = (u8)bp.grn;
-				bp.optr->blu = (u8)bp.blu;
-				bp.optr->alp = (u8)bp.alp;
+					// Store the color
+					bp.optr->red = (u8)bp.red;
+					bp.optr->grn = (u8)bp.grn;
+					bp.optr->blu = (u8)bp.blu;
+					bp.optr->alp = (u8)bp.alp;
 
-				// Increase the pixel count
-				++lnPixelsDrawn;
-
-				// Move to the next pixel
-				++bp.optr;
+					// Move to the next pixel
+					++bp.optr;
+				}
 			}
+			// When we get here, we've computed everything
 		}
-		// When we get here, we've computed everything
 
 		// Finished, indicate the pixel count
-		return(tcDst->height * tcDst->width * sizeof(SBGRA));
+		return(tsDst->width * tsDst->height);
 	}
 
 
@@ -3511,8 +3579,10 @@ _asm int 3;
 		f32		lfRed, lfGrn, lfBlu, lfAlp, lfAreaAccumulator;
 
 
+// TODO:  This algorithm was originally written to work with 24-bit bitmaps which are stored in reverse vertical pixel row order.  It could be changed to scale up for the SBGRA format.
 		// Raise the flags for which portions are valid / required
-		bp->spans2H		= (ioss_getIntegersBetween(bp->ulx, bp->lrx) >= 1);		// It occupies at least two pixels horizontally (itself and one more)
+// TODO:  Working here
+		b p->spans2H		= (ioss_getIntegersBetween(bp->ulx, bp->lrx) >= 1);		// It occupies at least two pixels horizontally (itself and one more)
 		bp->spans3H		= (ioss_getIntegersBetween(bp->ulx, bp->lrx) >= 2);		// It occupies at least three pixels horizontally (itself, at least one in the middle, and one at the right)
 		bp->spans2V		= (ioss_getIntegersBetween(bp->uly, bp->lry) >= 1);		// It occupies at least two pixels vertically (itself and one more)
 		bp->spans3V		= (ioss_getIntegersBetween(bp->uly, bp->lry) >= 2);		// It occupies at least three pixels vertically (itself, at least one in the middle, and one at the right)
@@ -4705,7 +4775,7 @@ continueToNextAttribute:
 // events, and can be an optional tab stop.
 //
 //////
-	SRegion* ioss_createRegion(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, u32 tnWidth, u32 tnHeight, SCallbacks* callback, SStartEnd* events)
+	SRegion* ioss_createRegion(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, f32 ulx, f32 uly, f32 lrx, f32 lry, SCallbacks* callback, SStartEnd* events)
 	{
 		SRegion*			lr;
 		SStartEndCallback	cb;
@@ -4724,8 +4794,10 @@ continueToNextAttribute:
 				memset(lr, 0, sizeof(SRegion));
 				lr->associatedId	= tnAssociatedId;					// Store any associated information
 				lr->semRefresh		= oss_createSemaphore();			// Create this region's refresh semaphore
-				lr->width			= tnWidth;							// Width of this region
-				lr->height			= tnHeight;							// Height of this region
+				lr->x				= ulx;
+				lr->y				= uly;
+				lr->width			= lrx - ulx;						// Width of this region
+				lr->height			= lry - uly;						// Height of this region
 				lr->type			= tnType;							// type of region (see _VVM_REGION_* constants in common_vvm.h)
 
 			//////////

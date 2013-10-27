@@ -89,8 +89,8 @@
 		SRegion* CALLTYPE		oss_createRegionForScreen					(SScreen* ts, SCallbacks* callbacks, SStartEnd* events, SRegionState* trs);
 		SCanvas* CALLTYPE		oss_createCanvasForScreen					(SScreen* ts);
 		SCanvas* CALLTYPE	 	oss_createCanvas							(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor);
-		SRegion* CALLTYPE		oss_createRegion							(u64 tnAssociatedId, u32 tnType, s32 ulx, s32 uly, s32 lrx, s32 lry, SCallbacks* callbacks, SStartEnd* events, SRegionState* trs);
-		bool CALLTYPE			oss_createRegionAndCanvas					(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor, s32 ulx, s32 uly, s32 lrx, s32 lry, SCanvas** tc, SRegion** tr, SRegionState* regionState, SCallbacks* callbacks, SStartEnd* events);
+		SRegion* CALLTYPE		oss_createRegion							(u64 tnAssociatedId, u32 tnType, f32 ulx, f32 uly, f32 lrx, f32 lry, SCallbacks* callbacks, SStartEnd* events, SRegionState* trs);
+		bool CALLTYPE			oss_createRegionAndCanvas					(u64 tnAssociatedId, SBGRA tnBackColor, f32 ulx, f32 uly, f32 lrx, f32 lry, SCanvas** tc, SRegion** tr, SRegionState* regionState, SCallbacks* callbacks, SStartEnd* events);
 		u64 CALLTYPE		 	oss_createFontHandle						(s8* fontName, u32 fontWidth, bool bold, bool italics, bool underline, bool strikethrough);
 
 		u64 CALLTYPE			oss_screenRefresh							(SScreen* ts);
@@ -110,8 +110,8 @@
 		u64 CALLTYPE		 	oss_canvasColorize							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, SBGRA color);
 		u64 CALLTYPE		 	oss_canvasGrayscale							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry);
 		u64 CALLTYPE		 	oss_canvasGradient							(SCanvas* tc, SBGRA* bd, SBGRA ul, SBGRA ur, SBGRA lr, SBGRA ll);
-		u64 CALLTYPE		 	oss_canvasBitBlt							(SCanvas* tcDst, bool tlDstAccumulator, s32 dulx, s32 duly, SCanvas* tsSrc, bool tlSrcAccumulator, s32 sulx, s32 suly, s32 slrx, s32 slry);
-		u64 CALLTYPE			oss_canvasScale								(SCanvas* tcDst, SCanvas* tcSrc);
+		u64 CALLTYPE		 	oss_canvasBitBlt							(SCanvas* tsDst, bool tlDstAccumulator, s32 dulx, s32 duly, SCanvas* tsSrc, bool tlSrcAccumulator, s32 sulx, s32 suly, s32 slrx, s32 slry);
+		u64 CALLTYPE			oss_canvasScale								(SCanvas* tsDst, SCanvas* tsSrc, SScaleMap** tsSm);
 
 		SCask* CALLTYPE			oss_caskDefineStandard						(u32 tnHeight, u32 tnWidth, u32 tnLeftStyle, u32 tnLeftState, u32 tnLeftPipCount, u32 tnLeftColor, csu8p tcLeftText, u32 tnRightStyle, u32 tnRightState, u32 tnRightPipCount, u32 tnRightColor, csu8p tcRightText);
 		SCask* CALLTYPE			oss_caskDefineEncompassingRectangle			(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SRectXYXY* tsOuter);
@@ -567,8 +567,8 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	u32						ioss_convertValidatedNumericStringToU32			(s8* tcData, u32 tnMaxLength);
 	u64						ioss_convertValidatedNumericStringToU64			(s8* tcData, u32 tnMaxLength);
 	void					ioss_bufferVerifySizeForNewBytes				(SBuffer* buffRoot, u32 tnDataLength);
-	u64						iioss_canvasScale								(SCanvas* tcDst, SCanvas* tcSrc);
-	u64						iioss_canvasScaleProcess						(SCanvas* tcDst, SCanvas* tcSrc, f32 tfVerticalScaler, f32 tfHorizontalScaler);
+	u64						iioss_canvasScale								(SCanvas* tsDst, SCanvas* tcSrc, SScaleMap** tsSm);
+	u64						iioss_canvasScaleProcess						(SCanvas* tsDst, SCanvas* tsSrc, SScaleMap*  tsSm, f32 tfVerticalScaler, f32 tfHorizontalScaler);
 	void					iioss_getSpannedPixelColors						(_isSBitmapProcess* bp);
 	void					iioss_getSpannedPixelColors1					(_isSBitmapProcess* bp);
 	void					iioss_getSpannedPixelColors2					(_isSBitmapProcess* bp);
@@ -593,8 +593,8 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	SBxmla*					iioss_bxmlFindAttribute							(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance);
 
 	SScreen*				ioss_createScreen								(u64 tnAssociatedId);
-	SCanvas*				ioss_createCanvas								(u64 tnAssociatedId,                                    u32 tnWidth, u32 tnHeight, SBGRA tnBackColor);
-	SRegion*				ioss_createRegion								(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, u32 tnWidth, u32 tnHeight, SCallbacks* callback, SStartEnd* events);
+	SCanvas*				ioss_createCanvas								(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor);
+	SRegion*				ioss_createRegion								(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, f32 ulx, f32 uly, f32 lrx, f32 lry, SCallbacks* callback, SStartEnd* events);
 	void					ioss_regionRefreshCallback						(SStartEndCallback* cb);
 
 	// TODO:  to be added later: regions need to be able to trigger custom region events (see common.h's Custom event)

@@ -177,6 +177,7 @@
 		// Holds canvas information
 		SCanvas*			dst;				// Destination for the scale
 		SCanvas*			src;				// Source for the scale
+		SScaleMap*			sm;					// Scale map being computed
 
 		// Holds storage data for single spanned pixels
 		u32					red;
