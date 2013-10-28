@@ -172,12 +172,13 @@
 		u8*		buffer64Bytes;								// A temporary buffer used for computing values with sprintf
 	};
 
-	struct _isSBitmapProcess
+	struct _isSSpannedPixelProcessing
 	{
 		// Holds canvas information
 		SCanvas*			dst;				// Destination for the scale
 		SCanvas*			src;				// Source for the scale
 		SScaleMap*			sm;					// Scale map being computed
+		SScaleCompute*		lastSc;			// Used to rapidly append new entries to the end
 
 		// Holds storage data for single spanned pixels
 		u32					red;
@@ -192,8 +193,10 @@
 		//
 		f32					ratioV;				// (f32)bio->biHeight	/ (f32)bii->biHeight;
 		f32					ratioH;				// (f32)bio->biWidth	/ (f32)bii->biWidth;
-		u32					count;				// Number of valid points in tpoints
-		SBGRAF*				pixels;				// Accumulation buffer for point data needed to feed into destination
+
+		// For iterating through the destination and source, deriving pixel offsets
+		s32					lnOffsetDst;		// Offset to the destination pixel for this spanned pixel operation
+		s32					lnOffsetSrc;		// Offset to the upper-left-most pixel for each spanned block
 
 		// Temporary variables used for processing
 		SBGRA*				optr;				// Output pointer to the upper-left pixel for this x,y

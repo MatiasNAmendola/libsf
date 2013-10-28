@@ -763,15 +763,6 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		};
 	};
 
-	struct SBGRAF
-	{
-		f32		blu;				// 24-bit RGB values in bitmap files are physically stored as BGR
-		f32		grn;
-		f32		red;
-		f32		alp;				// Alpha
-		f32		area;				// Holds area
-	};
-
 	struct SRectXYWH
 	{
 		u32		x;
@@ -1119,7 +1110,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		u64				bd_vvmoss;				// OS-specific information used for drawing OSS-fonts (used only by vvmoss code)
 
 		// For scale operations
-		SScaleMap*		firstScale;				// List of computed scale maps (used for scaling operations)
+		SScaleMap*		firstScaleMap;			// List of computed scale maps (used for scaling operations)
 	};
 
 

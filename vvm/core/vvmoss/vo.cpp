@@ -951,10 +951,11 @@
 
 					} else {
 						// They are not the same size.  Perfor the scale, and then do the bitBlt
+						oss_canvasScale(tr->canvasScale, tr->canvas, &tr->canvasScale->firstScaleMap);
 						cb.count1 += oss_canvasBitBlt(trParent->canvas, false, 
 														(s32)(tr->x * (f32)trParent->canvas->width),
 														(s32)(tr->y * (f32)trParent->canvas->height),
-														tr->canvas, false, 0, 0, tr->canvas->width, tr->canvas->height);
+														tr->canvasScale, false, 0, 0, tr->canvasScale->width, tr->canvasScale->height);
 					}
 
 					// Mark this region's canvas as no longer being dirty (because it's just been updated)
@@ -1727,7 +1728,7 @@
 
 					} else {
 						// They are not the same size, scale the canvas up/down to the destination size, and then draw
-						oss_canvasScale(ts->activeRegion->canvasScale, ts->activeRegion->canvas, &ts->activeRegion->canvasScale->firstScale);
+						oss_canvasScale(ts->activeRegion->canvasScale, ts->activeRegion->canvas, &ts->activeRegion->canvasScale->firstScaleMap);
 						lnPixelsDrawn = oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb(ts->_iOssWindowId, ts->activeRegion->canvasScale->bd, ts->activeRegion->canvasScale->width, ts->activeRegion->canvasScale->height);
 					}
 				}
