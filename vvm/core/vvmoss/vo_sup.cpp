@@ -3526,7 +3526,7 @@ _asm int 3;
 				lsc = (SScaleCompute*)lsc->next;
 
 				// So long as we're dealing with the same destination pixel, acumulate the alpha, red, green and blue values
-				if (lsc->sbgraOffsetDst == lnOffset)
+				if (lsc && lsc->sbgraOffsetDst == lnOffset)
 				{
 					// Accumulate everything for this destination offset
 					do {
@@ -3603,17 +3603,11 @@ _asm int 3;
 //////
 	void iioss_getSpannedPixelComputation(_isSSpannedPixelProcessing* spp)
 	{
-// TODO:  This algorithm was originally written to work with 24-bit bitmaps which are stored in reverse vertical pixel row order.  It could be changed to scale up for the SBGRA format.
 		// Raise the flags for which portions are valid / required
-// TODO:  Working here
 		spp->spans2H		= (ioss_getIntegersBetween(spp->ulx, spp->lrx) >= 1);		// It occupies at least two pixels horizontally (itself and one more)
 		spp->spans3H		= (ioss_getIntegersBetween(spp->ulx, spp->lrx) >= 2);		// It occupies at least three pixels horizontally (itself, at least one in the middle, and one at the right)
 		spp->spans2V		= (ioss_getIntegersBetween(spp->uly, spp->lry) >= 1);		// It occupies at least two pixels vertically (itself and one more)
 		spp->spans3V		= (ioss_getIntegersBetween(spp->uly, spp->lry) >= 2);		// It occupies at least three pixels vertically (itself, at least one in the middle, and one at the right)
-// 
-// 		// Indicate the start of this input line
-// 		spp->iptr			= spp->src->bd + ((spp->src->height - (s32)spp->uly - 1) * spp->src->width);		// current line
-// 		spp->iptra			= spp->src->bd + ((spp->src->height                    ) * spp->src->width);		// root anchor (does not include the conversion from base-1)
 
 		// Compute the information necessary to process each of the 9 portions of points
 		// Store left- and right-sides for this spanned pixel
@@ -3644,372 +3638,113 @@ _asm int 3;
 			//////////
 			// 1 - upper-left (always, spans at most one pixel)
 			//////
-				iioss_getSpannedPixelComputation1(spp);
+				// Compute the area for this pixel component
+				spp->area = spp->widthLeft * spp->height;
+				// Store the colors for this point
+				iioss_getSpannedPixelComputationAppend(spp, 0, 0, spp->area);
 
 
 			//////////
 			// 2 - upper-middle (optional, spans at most multiple partial or full pixels, but only if 1, 2 and 3 exist)
 			//////
 				if (spp->spans3H)
-					iioss_getSpannedPixelComputation2(spp);
+				{
+					s32 lnX, lnPixel;
+					// For every middle pixel, apply these values
+					for (lnX = 1, lnPixel = spp->middleStartH; lnPixel <= spp->middleFinishH; lnX++, lnPixel++)
+						iioss_getSpannedPixelComputationAppend(spp, lnX, 0, spp->height);
+				}
 
 
 			//////////
 			// 3 - upper-right (optional, spans at most one pixel, but only if 1 and 3 exist (as 1 and 2))
 			//////
 				if (spp->spans2H)
-					iioss_getSpannedPixelComputation3(spp);
+				{
+					// Find out where this upper-left pixel falls
+					spp->widthRight	= spp->lrx - (f64)spp->right;		// It spans from the start of the right-most pixel to wherever it falls therein
+					// Compute the area for this pixel component
+					spp->area = spp->widthRight * spp->height;
+					// Store this pixel data
+					iioss_getSpannedPixelComputationAppend(spp, spp->rightDelta, 0, spp->area);
+				}
 
 
 			//////////
 			// 4 - middle-left (optional, spans at most multiple partial or full pixels)
 			//////
 				if (spp->spans3V)
-					iioss_getSpannedPixelComputation4(spp);
+				{
+					s32 lnY, lnPixelY;
+					// Repeat for each middle pixel
+					for (lnY = 1, lnPixelY = spp->middleStartV; lnPixelY <= spp->middleFinishV; lnY++, lnPixelY++)
+						iioss_getSpannedPixelComputationAppend(spp, 0, lnY, spp->widthLeft);
+				}
 
 
 			//////////
 			// 5 - middle-middle (optional, can span multiple partial or full pixels)
 			//////
 				if (spp->spans3V && spp->spans3H)
-					iioss_getSpannedPixelComputation5(spp);
+				{
+					s32 lnX, lnY, lnPixelY, lnPixelX;
+					// Iterate for each pixel row vertically
+					for (lnY = 1, lnPixelY = spp->middleStartV; lnPixelY <= spp->middleFinishV; lnY++, lnPixelY++)
+					{
+						// And each individual pixel horizontally
+						for (lnX = 1, lnPixelX = spp->middleStartH; lnPixelX <= spp->middleFinishH; lnX++, lnPixelX++)
+						{
+							iioss_getSpannedPixelComputationAppend(spp, lnX, lnY, 1.0f);
+						}
+					}
+				}
 
 
 			//////////
 			// 6 - middle-right (optional, spans at most multiple partial or full pixels)
 			//////
 				if (spp->spans3V && spp->spans2H)
-					iioss_getSpannedPixelComputation6(spp);
+				{
+					s32 lnY, lnPixelY;
+					// Repeat for each middle pixel
+					for (lnY = 1, lnPixelY = spp->middleStartV; lnPixelY <= spp->middleFinishV; lnY++, lnPixelY++)
+						iioss_getSpannedPixelComputationAppend(spp, spp->rightDelta, lnY, spp->widthRight);
+				}
 
 
 			//////////
 			// 7 - lower-left (optional, spans at most one pixel)
 			//////
 				if (spp->spans2V)
-					iioss_getSpannedPixelComputation7(spp);
+				{
+					// Compute the area
+					spp->height	= spp->lry - (f64)((s32)spp->lry);
+					spp->area	= spp->widthLeft * spp->height;
+					iioss_getSpannedPixelComputationAppend(spp, 0, spp->bottomDelta, spp->area);
+				}
 
 
 			//////////
 			// 8 - lower-middle (optional, spans at most multiple partial or full pixels)
 			//////
 				if (spp->spans2V && spp->spans3H)
-					iioss_getSpannedPixelComputation8(spp);
+				{
+					s32 lnX, lnPixelX;
+					// For every middle pixel, apply these values
+					for (lnX = 1, lnPixelX = spp->middleStartH; lnPixelX <= spp->middleFinishH; lnX++, lnPixelX++)
+						iioss_getSpannedPixelComputationAppend(spp, lnX, spp->bottomDelta, spp->height);
+				}
 
 
 			//////////
 			// 9 - lower-right (optional, spans at most one pixel)
 			//////
 				if (spp->spans2V && spp->spans2H)
-					iioss_getSpannedPixelComputation9(spp);
-
-
-// 		//////////
-// 		// Add up all the pixels to compute the specified value
-// 		//////
-// 			lfAreaAccumulator = 0.0;
-// 			for (lnI = 0; lnI < spp->count; lnI++)
-// 				lfAreaAccumulator += spp->pixels[lnI].area;
-// 
-// 			// Now, compute each component as its part of the total area
-// 			lfRed	= 0;
-// 			lfGrn	= 0;
-// 			lfBlu	= 0;
-// 			lfAlp	= 0;
-// 			for (lnI = 0; lnI < spp->count; lnI++)
-// 			{
-// 				// Derive this portion component
-// 				lfRed	+=		spp->pixels[lnI].red		*	(spp->pixels[lnI].area / lfAreaAccumulator);
-// 				lfGrn	+=		spp->pixels[lnI].grn		*	(spp->pixels[lnI].area / lfAreaAccumulator);
-// 				lfBlu	+=		spp->pixels[lnI].blu		*	(spp->pixels[lnI].area / lfAreaAccumulator);
-// 				lfAlp	+=		spp->pixels[lnI].alp		*	(spp->pixels[lnI].area / lfAreaAccumulator);
-// 			}
-// 			// When we get here, we have our values, now create the final summed up output
-// 			spp->red = (u8)(lfRed + 0.5);
-// 			spp->grn = (u8)(lfGrn + 0.5);
-// 			spp->blu = (u8)(lfBlu + 0.5);
-// 			spp->alp = (u8)(lfAlp + 0.5);
-	}
-
-
-
-
-//////////
-//
-// 1 - upper-left (see iGetSpannedPixelColors() above)
-// Upper left pixels is ALWAYS computed. It may be the ONLY one computed, but it is always computed.
-//
-//////
-	void iioss_getSpannedPixelComputation1(_isSSpannedPixelProcessing* spp)
-	{
-		// Compute the area for this pixel component
-		spp->area = spp->widthLeft * spp->height;
-
-		// Store the colors for this point
-		iioss_getSpannedPixelComputationAppend(spp, 0, 0, spp->area);
-
-// 		(bp->pixels[bp->count]).red		= (f64)((bp->iptr + bp->left)->red);
-// 		(bp->pixels[bp->count]).grn		= (f64)((bp->iptr + bp->left)->grn);
-// 		(bp->pixels[bp->count]).blu		= (f64)((bp->iptr + bp->left)->blu);
-// 		(bp->pixels[bp->count]).alp		= (f64)((bp->iptr + bp->left)->alp);
-// 		(bp->pixels[bp->count]).area	= bp->area;
-// 
-// 		// Move over for the next point
-// 		++bp->count;
-	}
-
-
-
-
-//////////
-//
-// 2 - upper-middle (see iGetSpannedPixelColors() above)
-// It is known when this function is called that there is at least one, full, middle pixel
-//
-//////
-	void iioss_getSpannedPixelComputation2(_isSSpannedPixelProcessing* spp)
-	{
-		s32 lnX, lnPixel;
-
-
-		// For every middle pixel, apply these values
-		for (lnX = 1, lnPixel = spp->middleStartH; lnPixel <= spp->middleFinishH; lnX++, lnPixel++)
-		{
-			// Store this pixel data
-			iioss_getSpannedPixelComputationAppend(spp, lnX, 0, spp->height);
-
-// 			(bp->pixels[bp->count]).red		= (f64)((bp->iptr + lnPixel)->red);
-// 			(bp->pixels[bp->count]).grn		= (f64)((bp->iptr + lnPixel)->grn);
-// 			(bp->pixels[bp->count]).blu		= (f64)((bp->iptr + lnPixel)->blu);
-// 			(bp->pixels[bp->count]).alp		= (f64)((bp->iptr + lnPixel)->alp);
-// 			(bp->pixels[bp->count]).area	= bp->height;
-// 
-// 			// Move over for the next point
-// 			++bp->count;
-		}
-	}
-
-
-
-
-//////////
-//
-// 3 - upper-right (see iGetSpannedPixelColors() above)
-// It is known when this function is called that there is at least a second row
-//
-//////
-	void iioss_getSpannedPixelComputation3(_isSSpannedPixelProcessing* spp)
-	{
-		// Find out where this upper-left pixel falls
-		spp->widthRight	= spp->lrx - (f64)spp->right;		// It spans from the start of the right-most pixel to wherever it falls therein
-
-		// Compute the area for this pixel component
-		spp->area = spp->widthRight * spp->height;
-
-		// Store this pixel data
-		iioss_getSpannedPixelComputationAppend(spp, spp->rightDelta, 0, spp->area);
-
-// 		(bp->pixels[bp->count]).red		= (f64)((bp->iptr + bp->right)->red);
-// 		(bp->pixels[bp->count]).grn		= (f64)((bp->iptr + bp->right)->grn);
-// 		(bp->pixels[bp->count]).blu		= (f64)((bp->iptr + bp->right)->blu);
-// 		(bp->pixels[bp->count]).alp		= (f64)((bp->iptr + bp->right)->alp);
-// 		(bp->pixels[bp->count]).area	= bp->area;
-// 
-// 		// Move over for the next point
-// 		++bp->count;
-	}
-
-
-
-
-//////////
-//
-// 4 - middle-left (see iGetSpannedPixelColors() above)
-// It is known when this function is called that there is at least an entire second row
-//
-//////
-// 	void iValidatePoint(SBitmapProcess* bp, s32 tnX, s32 tnY)
-// 	{
-// 		if (tnX >= bp->bii->biWidth)
-// 			_asm nop;
-// 
-// 		if (tnY >= bp->bii->biHeight)
-// 			_asm nop;
-// 	}
-
-	void iioss_getSpannedPixelComputation4(_isSSpannedPixelProcessing* spp)
-	{
-		s32 lnY, lnPixelY;
-
-
-		// Repeat for each middle pixel
-		for (lnY = 1, lnPixelY = spp->middleStartV; lnPixelY <= spp->middleFinishV; lnY++, lnPixelY++)
-		{
-			iioss_getSpannedPixelComputationAppend(spp, 0, lnY, spp->widthLeft);
-
-// 			// Store the colors for this point
-// 			(bp->pixels[bp->count]).red		= (f64)((bp->iptra - (lnPixelY * bp->src->width) + bp->left)->red);
-// 			(bp->pixels[bp->count]).grn		= (f64)((bp->iptra - (lnPixelY * bp->src->width) + bp->left)->grn);
-// 			(bp->pixels[bp->count]).blu		= (f64)((bp->iptra - (lnPixelY * bp->src->width) + bp->left)->blu);
-// 			(bp->pixels[bp->count]).alp		= (f64)((bp->iptra - (lnPixelY * bp->src->width) + bp->left)->alp);
-// 			(bp->pixels[bp->count]).area	= bp->widthLeft;
-// 
-// 			// Move over for the next point
-// 			++bp->count;
-		}
-	}
-
-
-
-
-//////////
-//
-// 5 - middle-middle (see iGetSpannedPixelColors() above)
-// It is known when this function is called that there is at least a second row, and at least
-// one pixel in the middle
-//
-//////
-	void iioss_getSpannedPixelComputation5(_isSSpannedPixelProcessing* spp)
-	{
-		s32 lnX, lnY, lnPixelY, lnPixelX;
-
-
-		// Iterate for each pixel row vertically
-		for (lnY = 1, lnPixelY = spp->middleStartV; lnPixelY <= spp->middleFinishV; lnY++, lnPixelY++)
-		{
-			// And each individual pixel horizontally
-			for (lnX = 1, lnPixelX = spp->middleStartH; lnPixelX <= spp->middleFinishH; lnX++, lnPixelX++)
-			{
-				iioss_getSpannedPixelComputationAppend(spp, lnX, lnY, 1.0f);
-
-// 				// Store the colors for this point
-// 				(bp->pixels[bp->count]).red		= (f64)((bp->iptra - (lnPixelY * bp->src->width) + lnPixelX)->red);
-// 				(bp->pixels[bp->count]).grn		= (f64)((bp->iptra - (lnPixelY * bp->src->width) + lnPixelX)->grn);
-// 				(bp->pixels[bp->count]).blu		= (f64)((bp->iptra - (lnPixelY * bp->src->width) + lnPixelX)->blu);
-// 				(bp->pixels[bp->count]).alp		= (f64)((bp->iptra - (lnPixelY * bp->src->width) + lnPixelX)->alp);
-// 				(bp->pixels[bp->count]).area	= 1.0;
-// 
-// 				// Move over for the next point
-// 				++bp->count;
-			}
-		}
-	}
-
-
-
-
-//////////
-//
-// 6 - middle-right (see iGetSpannedPixelColors() above)
-// It is known when this function is called that there is at least a second row, and a right pixel
-//
-//////
-	void iioss_getSpannedPixelComputation6(_isSSpannedPixelProcessing* spp)
-	{
-		s32 lnY, lnPixelY;
-
-
-		// Repeat for each middle pixel
-		for (lnY = 1, lnPixelY = spp->middleStartV; lnPixelY <= spp->middleFinishV; lnY++, lnPixelY++)
-		{
-			iioss_getSpannedPixelComputationAppend(spp, spp->rightDelta, lnY, spp->widthRight);
-
-// 			// Store the colors for this point
-// 			(bp->pixels[bp->count]).red		= (f64)((bp->iptra - (lnPixelY * bp->src->width) + bp->right)->red);
-// 			(bp->pixels[bp->count]).grn		= (f64)((bp->iptra - (lnPixelY * bp->src->width) + bp->right)->grn);
-// 			(bp->pixels[bp->count]).blu		= (f64)((bp->iptra - (lnPixelY * bp->src->width) + bp->right)->blu);
-// 			(bp->pixels[bp->count]).alp		= (f64)((bp->iptra - (lnPixelY * bp->src->width) + bp->right)->alp);
-// 			(bp->pixels[bp->count]).area	= bp->widthRight;
-// 
-// 			// Move over for the next point
-// 			++bp->count;
-		}
-	}
-
-
-
-
-//////////
-//
-// 7 - lower-left (see iGetSpannedPixelColors() above)
-// It is known when this function is called that there is at least a second row
-//
-//////
-	void iioss_getSpannedPixelComputation7(_isSSpannedPixelProcessing* spp)
-	{
-		// Compute the area
-		spp->height	= spp->lry - (f64)((s32)spp->lry);
-		spp->area	= spp->widthLeft * spp->height;
-
-		iioss_getSpannedPixelComputationAppend(spp, 0, spp->bottomDelta, spp->area);
-
-// 		// Store the colors for this point
-// 		(bp->pixels[bp->count]).red		= (f64)((bp->iptra - ((bp->middleFinishV + 1) * bp->src->width) + bp->left)->red);
-// 		(bp->pixels[bp->count]).grn		= (f64)((bp->iptra - ((bp->middleFinishV + 1) * bp->src->width) + bp->left)->grn);
-// 		(bp->pixels[bp->count]).blu		= (f64)((bp->iptra - ((bp->middleFinishV + 1) * bp->src->width) + bp->left)->blu);
-// 		(bp->pixels[bp->count]).alp		= (f64)((bp->iptra - ((bp->middleFinishV + 1) * bp->src->width) + bp->left)->alp);
-// 		(bp->pixels[bp->count]).area	= bp->area;
-// 
-// 		// Move over for the next point
-// 		++bp->count;
-	}
-
-
-
-
-//////////
-//
-// 8 - lower-middle (see iGetSpannedPixelColors() above)
-// It is known when this function is called that there is at least a second row, and at least one
-// pixel in the middle
-//
-//////
-	void iioss_getSpannedPixelComputation8(_isSSpannedPixelProcessing* spp)
-	{
-		s32 lnX, lnPixelX;
-
-
-		// For every middle pixel, apply these values
-		for (lnX = 1, lnPixelX = spp->middleStartH; lnPixelX <= spp->middleFinishH; lnX++, lnPixelX++)
-		{
-			iioss_getSpannedPixelComputationAppend(spp, lnX, spp->bottomDelta, spp->height);
-
-//			// Store the colors for this point
-// 			(bp->pixels[bp->count]).red		= (f64)((bp->iptra - ((bp->middleFinishV + 1) * bp->src->width) + lnPixelX)->red);
-// 			(bp->pixels[bp->count]).grn		= (f64)((bp->iptra - ((bp->middleFinishV + 1) * bp->src->width) + lnPixelX)->grn);
-// 			(bp->pixels[bp->count]).blu		= (f64)((bp->iptra - ((bp->middleFinishV + 1) * bp->src->width) + lnPixelX)->blu);
-// 			(bp->pixels[bp->count]).alp		= (f64)((bp->iptra - ((bp->middleFinishV + 1) * bp->src->width) + lnPixelX)->alp);
-// 			(bp->pixels[bp->count]).area	= bp->height;
-// 
-// 			// Move over for the next point
-// 			++bp->count;
-		}
-	}
-
-
-
-
-//////////
-//
-// 9 - lower-right (see iGetSpannedPixelColors() above)
-// It is known when this function is called that there is at least a second row, and a right pixel
-//
-//////
-	void iioss_getSpannedPixelComputation9(_isSSpannedPixelProcessing* spp)
-	{
-		// Compute the area
-		spp->area = spp->widthRight * spp->height;
-
-		iioss_getSpannedPixelComputationAppend(spp, spp->rightDelta, spp->bottomDelta, spp->area);
-
-// 		// Store the colors for this point
-// 		(bp->pixels[bp->count]).red		= (f64)((bp->iptra - ((bp->middleFinishV + 1) * bp->src->width) + bp->right)->red);
-// 		(bp->pixels[bp->count]).grn		= (f64)((bp->iptra - ((bp->middleFinishV + 1) * bp->src->width) + bp->right)->grn);
-// 		(bp->pixels[bp->count]).blu		= (f64)((bp->iptra - ((bp->middleFinishV + 1) * bp->src->width) + bp->right)->blu);
-// 		(bp->pixels[bp->count]).alp		= (f64)((bp->iptra - ((bp->middleFinishV + 1) * bp->src->width) + bp->right)->alp);
-// 		(bp->pixels[bp->count]).area	= bp->area;
-// 
-// 		// Move over for the next point
-// 		++bp->count;
+				{
+					// Compute the area
+					spp->area = spp->widthRight * spp->height;
+					iioss_getSpannedPixelComputationAppend(spp, spp->rightDelta, spp->bottomDelta, spp->area);
+				}
 	}
 
 

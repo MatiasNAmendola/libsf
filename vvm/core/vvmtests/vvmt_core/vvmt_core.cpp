@@ -193,9 +193,9 @@ SCanvas*	lcScaled;
 oss_bitmapLoadFromDisk("c:\\temp\\test.bmp", &lc, &lnWidth, &lnHeight, white);
 f64 lnH, lnW, lnHStep, lnWStep;
 s8 buffer[256];
-lnHStep = (f64)lnHeight / 40.0;
-lnWStep = (f64)lnWidth / 40.0;
-for (lnH = lnHStep, lnW = lnWStep; lnH < (f64)lnHeight; lnH += lnHStep, lnW += lnWStep)
+lnHStep = (f64)lnHeight / 3.0;
+lnWStep = (f64)lnWidth / 3.0;
+for (lnH = lnHeight, lnW = lnWidth; lnH < (f64)lnHeight * 2.0f; lnH += lnHStep, lnW += lnWStep)
 {
 	lcScaled = oss_createCanvas(0, (u32)lnW, (u32)lnH, white);
 	oss_canvasScale(lcScaled, lc, &lcScaled->firstScaleMap);
