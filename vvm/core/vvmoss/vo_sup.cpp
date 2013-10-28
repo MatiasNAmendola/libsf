@@ -3423,10 +3423,6 @@ _asm int 3;
 			lnPixelsDrawn	= iioss_canvasScaleProcess(tsDst, tsSrc, lsm, lfVertical, lfHorizontal);
 		}
 
-		// Mark the item dirty
-		if (lnPixelsDrawn != 0)
-			tsDst->isDirty = true;
-
 		// Indicate our failure or success
 		return(lnPixelsDrawn);
 	}
@@ -3454,41 +3450,45 @@ _asm int 3;
 		u64							lnPixelsDrawn;
 		f32							lfMult;
 		s32							lnY, lnX;
-		_isSSpannedPixelProcessing	bp;
+		_isSSpannedPixelProcessing	spp;
 		SScaleCompute*				lsc;
 		SBGRA*						lbgras;
 		SBGRA*						lbgrad;
 
 
+		// Initialize everything in the spp
+		memset(&spp, 0, sizeof(spp));
+
 		// Are we scaling based on the formula already derived?
 		if (!tsSm->firstScale)
 		{
 			// Build the scale computation
-			bp.dst		= tsDst;
-			bp.src		= tsSrc;
-			bp.sm		= tsSm;
-			bp.ratioV	= (f32)tsSrc->height	/ (f32)tsDst->height;
-			bp.ratioH	= (f32)tsSrc->width		/ (f32)tsDst->width;
+			spp.dst		= tsDst;
+			spp.src		= tsSrc;
+			spp.sm		= tsSm;
+			spp.ratioV	= (f32)tsSrc->height	/ (f32)tsDst->height;
+			spp.ratioH	= (f32)tsSrc->width		/ (f32)tsDst->width;
 
 			// Iterate through every pixel row by row, column by column
 			lnPixelsDrawn = 0;
-			for (lnY = 0; lnY < tsDst->height; lnY++)
+			for (lnY = 0; lnY < 10/*tsDst->height*/; lnY++)
 			{
 				for (lnX = 0; lnX < tsDst->width; lnX++)
 				{
 					// Compute data for this spanned pixel
-					bp.uly	= min((f32)lnY * bp.ratioV, (f32)tsSrc->height - bp.ratioV);
-					bp.ulx	= min((f32)lnX * bp.ratioH, (f32)tsSrc->width  - bp.ratioH);
-					bp.lry	= bp.uly + bp.ratioV;
-					bp.lrx	= bp.ulx + bp.ratioH;
+					spp.uly			= min((f32)lnY * spp.ratioV, (f32)tsSrc->height - spp.ratioV);
+					spp.ulx			= min((f32)lnX * spp.ratioH, (f32)tsSrc->width  - spp.ratioH);
+					spp.lry			= spp.uly + spp.ratioV;
+					spp.lrx			= spp.ulx + spp.ratioH;
+					spp.areaSpanned	= (spp.lrx - spp.ulx) * (spp.lry - spp.uly);
 
-					bp.lnOffsetSrc	= (((tsDst->height - (s32)bp.uly - 1)  * tsDst->width) + (s32)bp.ulx) * sizeof(SBGRA);
-					bp.lnOffsetDst	= (((tsDst->height - lnY         - 1)  * tsDst->width) + lnX)         * sizeof(SBGRA);
+					spp.lnOffsetSrc	= (((tsSrc->height - (s32)spp.uly - 1)  * tsSrc->width) + (s32)spp.ulx);
+					spp.lnOffsetDst	= (((tsDst->height - lnY          - 1)  * tsDst->width) + lnX);
 
 // if ((lnY == 2 && lnX == 516) || (lnY == 5 && lnX == 516) || (lnY == 798 && lnX == 516))
 // 	_asm nop;
 					// Derive the scale computation for this spanned pixel
-					iioss_getSpannedPixelComputation(&bp);
+					iioss_getSpannedPixelComputation(&spp);
 				}
 			}
 			// When we get here, we've computed everything
@@ -3498,7 +3498,7 @@ _asm int 3;
 		// Now perform the scale
 		if (tsSm->firstScale)
 		{
-			// Yes, initialize everything in the destination to black, for every pixel computation is added
+			// Initialize everything in the destination to black and 0 alpha (because every pixel computation is added to the prior values)
 			oss_memset4((u32*)tsDst->bd, 0, tsDst->width * tsDst->height);
 
 			// Apply the scaling computation
@@ -3988,14 +3988,14 @@ _asm int 3;
 		SScaleCompute**	lscLast;
 
 
-		// See if we are adding 
+		// See where we are adding 
 		if (spp->lastSc)
 		{
 			// We're appending to the existing chain
 			lscLast = (SScaleCompute**)&spp->lastSc->next;
 
 		} else {
-			// This is the first ever entry
+			// This is the first entry
 			lscLast = &spp->sm->firstScale;
 		}
 
@@ -4008,9 +4008,11 @@ _asm int 3;
 			// Set this item's properties
 			*lscLast				= lsc;								// Update the back-link
 			spp->lastSc				= lsc;								// Update the last scale
+
+			// Store information specific to this part of the computation
 			lsc->sbgraOffsetSrc		= spp->lnOffsetSrc + tnOffset;		// Offset into the source canvas (unscaled canvas)
 			lsc->sbgraOffsetDst		= spp->lnOffsetDst;					// Offset into the destination canvas (scaled canvas)
-			lsc->multiplier			= tfMultiplier;						// Multiplier for this pixel portion to add in to the total for that pixel
+			lsc->multiplier			= tfMultiplier / spp->areaSpanned;	// Multiplier for this pixel portion to add in to the total for that spanned pixel
 		}
 	}
 
@@ -4797,7 +4799,7 @@ continueToNextAttribute:
 			// Initialize the canvas buffers
 			lc->bd				= (SBGRA*)malloc(tnHeight * tnWidth * 4);					// buffer data
 			lc->bda				= (SBGRA*)malloc(tnHeight * tnWidth * 4);					// buffer accumulator data (for building child items onto a canvas before copying and using this canvas above)
-			lc->bd_vvmoss		= oss_createSystemBitmap(tnWidth, tnHeight);				// Used primarily for rendering system fonts
+			lc->bd_vvmoss		= oss_systemCreateBitmap(tnWidth, tnHeight);				// Used primarily for rendering system fonts
 
 			// Initialize it with the default background color
 			if (lc->bd)			oss_memset4((u32*)lc->bd,  oss_swapEndian(oss_RGBA2BGRA(tnBackColor.color)), tnHeight * tnWidth);	// Initialize bd to the indicated color
@@ -4907,16 +4909,55 @@ continueToNextAttribute:
 
 //////////
 //
-// Append this region to this region
+// Called to draw some text in the indicated font onto the indicated dib bitmap
 //
-// Returns:
-//		-2		= tcParent and tcChild are the same
-//		-3		= ts, tcParent, or tcChild is null
+// Note:  tnSystemFont and tnSystemBitmap are _isWSystem* structures
 //
 //////
-	SRegion* ioss_appendRegionToRegion(SRegion* trParent, SRegion* trChild, u64 tnAssociatedId, SRegionState* tsState, s32 tnX, s32 tnY, SCallbacks* callback)
+	u64 ioss_drawText(s8* tcText, u32 tnTextLength, s32 ulx, s32 uly, s32 lrx, s32 lry, SBGRA foreground, SBGRA background, u64 tnSystemFont, u64 tnSystemBitmap)
 	{
-		return NULL;
+		u32					lnCount, lnFormat, lnForeColor, lnBackColor;
+		RECT				lrc;
+		HBRUSH				lhBrush;
+		_iswSSystemBitmap*	lsb;
+		_iswSSystemFont*	lsf;
+
+
+		// Make sure there's something to do
+		lnCount = 0;
+		if (tcText && tnTextLength != 0)
+		{
+			// Convert the passed u64 values to their proper structure
+			lsb	= (_iswSSystemBitmap*)tnSystemBitmap;
+			lsf	= (_iswSSystemFont*)tnSystemFont;
+
+			// Load our font
+			SelectObject(lsb->hdc, (HGDIOBJ)lsf->handle);
+
+			// Prepare our text info
+			lnForeColor = foreground.color;
+			lnBackColor = background.color;
+			SetTextColor(lsb->hdc, lnForeColor);
+			SetBkColor	(lsb->hdc, lnBackColor);
+			SetBkMode	(lsb->hdc, OPAQUE);
+
+			// Get our initial condition
+			lnFormat = DT_LEFT | DT_END_ELLIPSIS;
+
+			// Set our rectangle
+			SetRect(&lrc, ulx, uly, lrx, lry);
+
+			// Fill the rectangle with the explicit opaque color
+			lhBrush = CreateSolidBrush(lnBackColor);
+			FillRect(lsb->hdc, &lrc, lhBrush);
+			DeleteObject((HGDIOBJ)lhBrush);
+
+			// Physically draw it
+			if (DrawTextA(lsb->hdc, tcText, tnTextLength, &lrc, lnFormat) != 0)
+				lnCount = tnTextLength;
+		}
+		// Return the number of characters we copied
+		return(lnCount);
 	}
 
 

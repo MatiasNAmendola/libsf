@@ -161,9 +161,13 @@
 
 		// Build the debugger screen
 // TODO:  Working on vdebug.bxml
-		bxmlDebuggerSettings = ivdeb_getDebuggerSettings();
+//		bxmlDebuggerSettings = ivdeb_getDebuggerSettings();
 
 		// Create the debugger screen
+		while (1 /*Need to add a global variable for this instance of the debugger running*/)
+		{
+			Sleep(1);
+		}
 	}
 
 

@@ -212,6 +212,7 @@
 		f32					widthRight;			// Width for each right-most pixel
 		f32					height;				// Height for a particular pixel portion (upper, lower)
 		f32					area;				// Temporary computed area for various pixels
+		f32					areaSpanned;		// The total area of the spanned pixel
 		s32					left;				// Left-side pixel offset into line
 		s32					right;				// Number of pixels to reach the right-most pixel
 		s32					middleStartH;		// Starting pixel offset for middle span

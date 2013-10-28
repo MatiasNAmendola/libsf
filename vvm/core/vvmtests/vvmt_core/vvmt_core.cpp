@@ -185,6 +185,17 @@
 		bool llResult;
 
 
+// Test code
+SBGRA		white				= {255,255,255,255};
+u32			lnWidth, lnHeight;
+SCanvas*	lc;
+SCanvas*	lcScaled;
+oss_bitmapLoadFromDisk("c:\\temp\\test.bmp", &lc, &lnWidth, &lnHeight, white);
+lcScaled = oss_createCanvas(0, lnWidth/2, lnHeight/2, white);
+// TODO: The scale code using scale map and scale computation components is not working properly
+oss_ canvasScale(lcScaled, lc, &lcScaled->firstScaleMap);
+oss_bitmapSaveToDisk(lcScaled, lcScaled->bd, "c:\\temp\\scaled.bmp");
+
 		//////////
 		// If any test fails, early out
 		//////

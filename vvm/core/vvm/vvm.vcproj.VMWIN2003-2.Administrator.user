@@ -11,7 +11,7 @@
 			<DebugSettings
 				Command="vvm.exe"
 				WorkingDirectory="\libsf\vvm\dev"
-				CommandArguments="-notest"
+				CommandArguments="-test"
 				Attach="false"
 				DebuggerType="3"
 				Remote="1"

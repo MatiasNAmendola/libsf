@@ -120,11 +120,11 @@
 	const s8		cgcOssScreenKeyboardRemoveEventCallback[]				= "oss_screenKeyboardRemoveEventCallback";
 	const s8		cgcOssScreenKeyboardGetEventCallbacksList[]				= "oss_screenKeyboardGetEventCallbacksList";
 
-	const s8		cgcOssLoadBitmapFromDisk[]								= "oss_loadBitmapFromDisk";
-	const s8		cgcOssSaveBitmapToDisk[]								= "oss_saveBitmapToDisk";
-	const s8		cgcOssCreateSystemFont[]								= "oss_createSystemFont";
-	const s8		cgcOssCreateSystemBitmap[]								= "oss_createSystemBitmap";
-	const s8		cgcOssFindSystemFontByHandle[]							= "oss_findSystemFontByHandle";
+	const s8		cgcOssLoadBitmapFromDisk[]								= "oss_bitmapLoadFromDisk";
+	const s8		cgcOssSaveBitmapToDisk[]								= "oss_bitmapSaveToDisk";
+	const s8		cgcOssCreateSystemFont[]								= "oss_systemCreateFont";
+	const s8		cgcOssCreateSystemBitmap[]								= "oss_systemCreateBitmap";
+	const s8		cgcOssFindSystemFontByHandle[]							= "oss_systemFindFontByHandle";
 
 	const s8		cgcOssAlloc[]											= "oss_alloc";
 	const s8		cgcOssRealloc[]											= "oss_realloc";
@@ -349,16 +349,14 @@
 	const s8		cgcOssThreadResume[]									= "oss_threadResume";
 	const s8		cgcOssThreadTerminate[]									= "oss_threadTerminate";
 
-	const s8		cgcOssCreateScreenTemplate[]							= "oss_createScreenTemplate";
-	const s8		cgcOssComputeMonitorCoordinates[]						= "oss_computeMonitorCoordinates";
-	const s8		cgcOssEnumerateMonitors[]								= "oss_enumerateMonitors";
-	const s8		cgcOssGetScreenDimensions[]								= "oss_getScreenDimensions";
+	const s8		cgcOssCreateScreenTemplate[]							= "oss_screenCreateTemplate";
+	const s8		cgcOssComputeMonitorCoordinates[]						= "oss_screenComputeMonitorCoordinates";
+	const s8		cgcOssEnumerateMonitors[]								= "oss_screenEnumerateMonitors";
+	const s8		cgcOssGetScreenDimensions[]								= "oss_screenGetDimensions";
 	const s8		cgcOssSetFocus[]										= "oss_setFocus";
 
 	const s8		cgcOssLowLevelBitBltCanvasBgraOntoOssRgb[]				= "oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb";
 	const s8		cgcOssLowLevelBitBltOssRgbOntoCanvasBgra[]				= "oss_lowLevel_bitBlt_ossRgb_onto_canvasBgra";
-
-	const s8		cgcOssDrawText[]										= "oss_drawText";
 
 	const s8		cgcOssGetNextMessage[]									= "oss_getNextMessage";
 	const s8		cgcOssMessageBox[]										= "oss_messageBox";
@@ -427,10 +425,10 @@
 		u64				(CALLTYPE *oss_deleteCanvas)							(u64 id, SCanvas* tc);
 
 		// Visible window information
-		SScreen*		(CALLTYPE *oss_createScreenAndVisibleWindow)			(u64 tnAssociatedId, SOssWindow* tisw/*tisw was created by oss_createScreenTemplate()*/);
+		SScreen*		(CALLTYPE *oss_createScreenAndVisibleWindow)			(u64 tnAssociatedId, SOssWindow* tisw/*tisw was created by oss_screenCreateTemplate()*/);
 		SRegion*		(CALLTYPE *oss_createRegionForScreen)					(SScreen* ts, SCallbacks* callbacks, SStartEnd* events, SRegionState* trs);
 		SCanvas*		(CALLTYPE *oss_createCanvasForScreen)					(SScreen* ts);
-		SCanvas*		(CALLTYPE *oss_createCanvas)							(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, u32 tnBackColor);
+		SCanvas*		(CALLTYPE *oss_createCanvas)							(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor);
 		SRegion*		(CALLTYPE *oss_createRegion)							(u64 tnAssociatedId, u32 tnType, f32 ulx, f32 uly, f32 lrx, f32 lry, SCallbacks* callbacks, SStartEnd* events, SRegionState* trs);
 		bool			(CALLTYPE *oss_createRegionAndCanvas)					(u64 tnAssociatedId, SBGRA tnBackColor, f32 ulx, f32 uly, f32 lrx, f32 lry, SCanvas** tc, SRegion** tr, SRegionState* regionState, SCallbacks* callbacks, SStartEnd* events);
 		u64				(CALLTYPE *oss_createFontHandle)						(s8* fontName, u32 fontWidth, bool bold, bool italics, bool underline, bool strikethrough);
@@ -453,7 +451,7 @@
 		u64				(CALLTYPE *oss_canvasGrayscale)							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry);
 		u64				(CALLTYPE *oss_canvasGradient)							(SCanvas* tc, SBGRA* bd, SBGRA ul, SBGRA ur, SBGRA lr, SBGRA ll);
 		u64				(CALLTYPE *oss_canvasBitBlt)							(SCanvas* tsDst, bool tlDstAccumulator, s32 dulx, s32 duly, SCanvas* tsSrc, bool tlSrcAccumulator, s32 sulx, s32 suly, s32 slrx, s32 slry);
-		u64				(CALLTYPE *oss_canvasScale)								(SCanvas* tsDst, SCanvas* tsSrc, SScaleMap* tsSm);
+		u64				(CALLTYPE *oss_canvasScale)								(SCanvas* tsDst, SCanvas* tsSrc, SScaleMap** tsScaleMap);
 
 		SCask*			(CALLTYPE *oss_caskDefineStandard)						(u32 tnHeight, u32 tnWidth, u32 tnLeftStyle, u32 tnLeftState, u32 tnLeftPipCount, u32 tnLeftColor, csu8p tcLeftText, u32 tnRightStyle, u32 tnRightState, u32 tnRightPipCount, u32 tnRightColor, csu8p tcRightText);
 		SCask*			(CALLTYPE *oss_caskDefineEncompassingRectangle)			(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SRectXYXY* tsOuter);
@@ -472,13 +470,13 @@
 		void			(CALLTYPE *oss_screenKeyboardGetEventCallbacksList)		(u64 id, SCanvas* tc, SEvent** events, u32* count);
 
 		// Only 24-bit or 32-bit bitmaps can be loaded from disk at present.
-		u64				(CALLTYPE *oss_loadBitmapFromDisk)						(s8* tcPathname, SCanvas** tc, u32* tnWidth, u32* tnHeight, SBGRA tnBackColor);
-		u64				(CALLTYPE *oss_saveBitmapToDisk)						(SCanvas* tc, SBGRA* bd, s8* tcPathname);
-		u64				(CALLTYPE *oss_createSystemFont)						(s8* fontName, u32 fontPointSize, bool bold, bool italics, bool underline, bool strikethrough);
-		u64				(CALLTYPE *oss_createSystemBitmap)						(u32 tnWidth, u32 tnHeight);
-		u64				(CALLTYPE *oss_findSystemFontByHandle)					(u64 tnFontHandle);
+		u64				(CALLTYPE *oss_bitmapLoadFromDisk)						(s8* tcPathname, SCanvas** tc, u32* tnWidth, u32* tnHeight, SBGRA tnBackColor);
+		u64				(CALLTYPE *oss_bitmapSaveToDisk)						(SCanvas* tc, SBGRA* bd, s8* tcPathname);
+		u64				(CALLTYPE *oss_systemCreateFont)						(s8* fontName, u32 fontPointSize, bool bold, bool italics, bool underline, bool strikethrough);
+		u64				(CALLTYPE *oss_systemCreateBitmap)						(u32 tnWidth, u32 tnHeight);
+		u64				(CALLTYPE *oss_systemFindFontByHandle)					(u64 tnFontHandle);
 
-		SOssWindow*		(CALLTYPE *oss_createScreenTemplate)					(u64 id, u64 uniqueScreenId,
+		SOssWindow*		(CALLTYPE *oss_screenCreateTemplate)					(u64 id, u64 uniqueScreenId,
 																					s8* tcCaption, u32 tnCaptionLength,
 																					s32 tnX, s32 tnY,
 																					u32 tnWidth, u32 tnHeight,
@@ -488,13 +486,12 @@
 																					SBGRA tnForeColor, SBGRA tnBackColor,
 																					bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder,
 																					SCallbacksW* callbacks);
-		SOssWindow*		(CALLTYPE *oss_enumerateMonitors)						(SStartEnd* tsMonitors/*Returns SOssWindow* structures*/);
-		void			(CALLTYPE *oss_computeMonitorCoordinates)				(SOssWindow* tow, f32 tfPercent, u32 tnPosition, f32 tfMargin, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin);
-		bool			(CALLTYPE *oss_getScreenDimensions)						(u64 tnOssWindowId, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin);
+		SOssWindow*		(CALLTYPE *oss_screenEnumerateMonitors)						(SStartEnd* tsMonitors/*Returns SOssWindow* structures*/);
+		void			(CALLTYPE *oss_screenComputeMonitorCoordinates)				(SOssWindow* tow, f32 tfPercent, u32 tnPosition, f32 tfMargin, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin);
+		bool			(CALLTYPE *oss_screenGetDimensions)						(u64 tnOssWindowId, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin);
 
 		u64				(CALLTYPE *oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb)	(u64 tnOssWindowId, SBGRA* bd, u32 width, u32 height);
 		u64				(CALLTYPE *oss_lowLevel_bitBlt_ossRgb_onto_canvasBgra)	(u64 bdoss, s32 tnX, s32 tnY, u32 tnWidth, u32 tnHeight, SCanvas* tc, SBGRA* bdRoot);
-		u64				(CALLTYPE *oss_drawText)								(s8* tcText, u32 tnTextLength, s32 ulx, s32 uly, s32 lrx, s32 lry, u32 foreground, u32 background, u64 tnSystemFont, u64 tnSystemBitmap);
 		u64				(CALLTYPE *oss_getNextMessage)							(u32* message, void* extra);
 		u64				(CALLTYPE *oss_messageBox)								(u64 id, s8* tcText, s8* tcCaption, bool tlYes, bool tlNo, bool tlOk, bool tlRetry, bool tlCancel);
 		u64				(CALLTYPE *oss_messageBoxUnicode)						(u64 id, w16* tcText, w16* tcCaption, bool tlYes, bool tlNo, bool tlOk, bool tlRetry, bool tlCancel);
@@ -914,12 +911,12 @@
 		(void *)&oss_screenKeyboardGetEventCallbacksList,					(void *)cgcOssScreenKeyboardGetEventCallbacksList,
 
 		(void *)&oss_canvasScale,											(void *)cgcOssCanvasScale,
-		(void *)&oss_loadBitmapFromDisk,									(void *)cgcOssLoadBitmapFromDisk,
-		(void *)&oss_saveBitmapToDisk,										(void *)cgcOssSaveBitmapToDisk,
+		(void *)&oss_bitmapLoadFromDisk,									(void *)cgcOssLoadBitmapFromDisk,
+		(void *)&oss_bitmapSaveToDisk,										(void *)cgcOssSaveBitmapToDisk,
 
-		(void *)&oss_createSystemFont,										(void *)cgcOssCreateSystemFont,
-		(void *)&oss_createSystemBitmap,									(void *)cgcOssCreateSystemBitmap,
-		(void *)&oss_findSystemFontByHandle,								(void *)cgcOssFindSystemFontByHandle,
+		(void *)&oss_systemCreateFont,										(void *)cgcOssCreateSystemFont,
+		(void *)&oss_systemCreateBitmap,									(void *)cgcOssCreateSystemBitmap,
+		(void *)&oss_systemFindFontByHandle,								(void *)cgcOssFindSystemFontByHandle,
 
 		(void *)&oss_alloc,													(void *)cgcOssAlloc,
 		(void *)&oss_realloc,												(void *)cgcOssRealloc,
@@ -1151,15 +1148,13 @@
 		(void *)&oss_threadResume,											(void *)cgcOssThreadResume,
 		(void *)&oss_threadTerminate,										(void *)cgcOssThreadTerminate,
 
-		(void *)&oss_createScreenTemplate,									(void *)cgcOssCreateScreenTemplate,
-		(void *)&oss_computeMonitorCoordinates,								(void *)cgcOssComputeMonitorCoordinates,
-		(void *)&oss_enumerateMonitors,										(void *)cgcOssEnumerateMonitors,
-		(void *)&oss_getScreenDimensions,									(void *)cgcOssGetScreenDimensions,
+		(void *)&oss_screenCreateTemplate,									(void *)cgcOssCreateScreenTemplate,
+		(void *)&oss_screenComputeMonitorCoordinates,								(void *)cgcOssComputeMonitorCoordinates,
+		(void *)&oss_screenEnumerateMonitors,										(void *)cgcOssEnumerateMonitors,
+		(void *)&oss_screenGetDimensions,									(void *)cgcOssGetScreenDimensions,
 
 		(void *)&oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb,				(void *)cgcOssLowLevelBitBltCanvasBgraOntoOssRgb,
 		(void *)&oss_lowLevel_bitBlt_ossRgb_onto_canvasBgra,				(void *)cgcOssLowLevelBitBltOssRgbOntoCanvasBgra,
-
-		(void *)&oss_drawText,												(void *)cgcOssDrawText,
 
 		(void *)&oss_getNextMessage,										(void *)cgcOssGetNextMessage,
 		(void *)&oss_messageBox,											(void *)cgcOssMessageBox,

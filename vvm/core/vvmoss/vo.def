@@ -33,6 +33,10 @@ EXPORTS
 
 	oss_screenRefresh
 	oss_screenSetFocus
+	oss_screenCreateTemplate
+	oss_screenComputeMonitorCoordinates
+	oss_screenEnumerateMonitors
+	oss_screenGetDimensions
 	
 	oss_regionDuplicate
 	oss_regionDefaultPaint
@@ -49,6 +53,7 @@ EXPORTS
 	oss_canvasGrayscale
 	oss_canvasGradient
 	oss_canvasBitBlt
+	oss_canvasScale
 	
 	oss_caskDefineStandard
 	oss_caskDefineEncompassingRectangle
@@ -66,21 +71,15 @@ EXPORTS
 	oss_screenKeyboardRemoveEventCallback
 	oss_screenKeyboardGetEventCallbacksList
 	
-	oss_canvasScale
-	oss_loadBitmapFromDisk
-	oss_saveBitmapToDisk
+	oss_bitmapLoadFromDisk
+	oss_bitmapSaveToDisk
 	
-	oss_createSystemFont
-	oss_createSystemBitmap
-	oss_findSystemFontByHandle
+	oss_systemCreateFont
+	oss_systemCreateBitmap
+	oss_systemFindFontByHandle
 	
-	oss_createScreenTemplate
-	oss_computeMonitorCoordinates
-	oss_enumerateMonitors
-	oss_getScreenDimensions
 	oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb
 	oss_lowLevel_bitBlt_ossRgb_onto_canvasBgra
-	oss_drawText
 	oss_getNextMessage
 	oss_messageBox
 	oss_messageBoxUnicode

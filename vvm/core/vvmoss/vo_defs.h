@@ -85,7 +85,7 @@
 		u64 CALLTYPE			oss_deleteScreen							(u64 id, SScreen* ts);
 		u64 CALLTYPE			oss_deleteCanvas							(u64 id, SCanvas* tc);
 
-		SScreen* CALLTYPE		oss_createScreenAndVisibleWindow			(u64 tnAssociatedId, SOssWindow*  tisw/*tisw was created by oss_createScreenTemplate()*/);
+		SScreen* CALLTYPE		oss_createScreenAndVisibleWindow			(u64 tnAssociatedId, SOssWindow*  tisw/*tisw was created by oss_screenCreateTemplate()*/);
 		SRegion* CALLTYPE		oss_createRegionForScreen					(SScreen* ts, SCallbacks* callbacks, SStartEnd* events, SRegionState* trs);
 		SCanvas* CALLTYPE		oss_createCanvasForScreen					(SScreen* ts);
 		SCanvas* CALLTYPE	 	oss_createCanvas							(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor);
@@ -111,7 +111,7 @@
 		u64 CALLTYPE		 	oss_canvasGrayscale							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry);
 		u64 CALLTYPE		 	oss_canvasGradient							(SCanvas* tc, SBGRA* bd, SBGRA ul, SBGRA ur, SBGRA lr, SBGRA ll);
 		u64 CALLTYPE		 	oss_canvasBitBlt							(SCanvas* tsDst, bool tlDstAccumulator, s32 dulx, s32 duly, SCanvas* tsSrc, bool tlSrcAccumulator, s32 sulx, s32 suly, s32 slrx, s32 slry);
-		u64 CALLTYPE			oss_canvasScale								(SCanvas* tsDst, SCanvas* tsSrc, SScaleMap** tsSm);
+		u64 CALLTYPE			oss_canvasScale								(SCanvas* tsDst, SCanvas* tsSrc, SScaleMap** tsScaleMap);
 
 		SCask* CALLTYPE			oss_caskDefineStandard						(u32 tnHeight, u32 tnWidth, u32 tnLeftStyle, u32 tnLeftState, u32 tnLeftPipCount, u32 tnLeftColor, csu8p tcLeftText, u32 tnRightStyle, u32 tnRightState, u32 tnRightPipCount, u32 tnRightColor, csu8p tcRightText);
 		SCask* CALLTYPE			oss_caskDefineEncompassingRectangle			(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SRectXYXY* tsOuter);
@@ -130,14 +130,14 @@
 		void CALLTYPE			oss_screenKeyboardGetEventCallbacksList		(u64 id, SCanvas* tc, SEvent** events, u32* count);
 
 		// Only 24-bit or 32-bit bitmaps can be loaded from disk at present.
-		u64 CALLTYPE			oss_loadBitmapFromDisk						(s8* tcPathname, SCanvas** tc, u32* tnWidth, u32* tnHeight, SBGRA tnBackColor);
-		u64 CALLTYPE			oss_saveBitmapToDisk						(SCanvas* tc, SBGRA* bd, s8* tcPathname);
-		u64 CALLTYPE			oss_createSystemFont						(s8* fontName, u32 fontWidth, bool bold, bool italics, bool underline, bool strikethrough);
-		u64 CALLTYPE			oss_createSystemBitmap						(u32 tnWidth, u32 tnHeight);
-		u64 CALLTYPE			oss_findSystemFontByHandle					(u64 tnFontHandle);
+		u64 CALLTYPE			oss_bitmapLoadFromDisk						(s8* tcPathname, SCanvas** tc, u32* tnWidth, u32* tnHeight, SBGRA tnBackColor);
+		u64 CALLTYPE			oss_bitmapSaveToDisk						(SCanvas* tc, SBGRA* bd, s8* tcPathname);
+		u64 CALLTYPE			oss_systemCreateFont						(s8* fontName, u32 fontWidth, bool bold, bool italics, bool underline, bool strikethrough);
+		u64 CALLTYPE			oss_systemCreateBitmap						(u32 tnWidth, u32 tnHeight);
+		u64 CALLTYPE			oss_systemFindFontByHandle					(u64 tnFontHandle);
 
 		// This 64-bit return value is used as input into vvm_requestScreen()
-		SOssWindow* CALLTYPE	oss_createScreenTemplate					(u64 id, u64 uniqueScreenId,
+		SOssWindow* CALLTYPE	oss_screenCreateTemplate					(u64 id, u64 uniqueScreenId,
 																				s8* tcCaption, u32 tnCaptionLength,
 																				s32 tnX, s32 tnY,
 																				u32 tnWidth, u32 tnHeight,
@@ -148,12 +148,11 @@
 																				bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder,
 																				SCallbacksW* callbacks);
 
-		void CALLTYPE			oss_computeMonitorCoordinates				(SOssWindow* tow, f32 tfPercent, u32 tnPosition, f32 tfMargin, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin);
-		SOssWindow* CALLTYPE	oss_enumerateMonitors						(SStartEnd* tsMonitors/*Returns SOssWindow* structures*/);
-		bool CALLTYPE			oss_getScreenDimensions						(u64 tnOssWindowId, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin);
+		void CALLTYPE			oss_screenComputeMonitorCoordinates				(SOssWindow* tow, f32 tfPercent, u32 tnPosition, f32 tfMargin, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin);
+		SOssWindow* CALLTYPE	oss_screenEnumerateMonitors						(SStartEnd* tsMonitors/*Returns SOssWindow* structures*/);
+		bool CALLTYPE			oss_screenGetDimensions						(u64 tnOssWindowId, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin);
 		u64 CALLTYPE			oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb	(u64 tnOssWindowId, SBGRA* bd, u32 width, u32 height);
 		u64 CALLTYPE			oss_lowLevel_bitBlt_ossRgb_onto_canvasBgra	(u64 bdoss, s32 tnX, s32 tnY, u32 tnWidth, u32 tnHeight, SCanvas* tc, SBGRA* bdRoot);
-		u64 CALLTYPE			oss_drawText								(s8* tcText, u32 tnTextLength, s32 ulx, s32 uly, s32 lrx, s32 lry, SBGRA foreground, SBGRA background, u64 tnSystemFont, u64 tnSystemBitmap);
 		u64 CALLTYPE			oss_getNextMessage							(u32* message, void* extra);
 		u64 CALLTYPE			oss_messageBox								(u64 id, s8*  tcText, s8*  tcCaption, bool tlYes, bool tlNo, bool tlOk, bool tlRetry, bool tlCancel);
 		u64 CALLTYPE			oss_messageBoxUnicode						(u64 id, w16* tuText, w16* tuCaption, bool tlYes, bool tlNo, bool tlOk, bool tlRetry, bool tlCancel);
@@ -597,6 +596,8 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	SCanvas*				ioss_createCanvas								(u64 tnAssociatedId, u32 tnWidth, u32 tnHeight, SBGRA tnBackColor);
 	SRegion*				ioss_createRegion								(u64 tnAssociatedId, SRegionState* tsState, u32 tnType, f32 ulx, f32 uly, f32 lrx, f32 lry, SCallbacks* callback, SStartEnd* events);
 	void					ioss_regionRefreshCallback						(SStartEndCallback* cb);
+
+	u64						ioss_drawText									(s8* tcText, u32 tnTextLength, s32 ulx, s32 uly, s32 lrx, s32 lry, SBGRA foreground, SBGRA background, u64 tnSystemFont, u64 tnSystemBitmap);
 
 	// TODO:  to be added later: regions need to be able to trigger custom region events (see common.h's Custom event)
 	bool					iioss_findCanvasCallback						(SStartEndCallback* cb);

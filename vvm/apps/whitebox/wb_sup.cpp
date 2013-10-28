@@ -62,7 +62,7 @@
 		if (tnHeightMax == -1 || !tlResizable)		tnHeightMax	= tnHeight;
 
 		// Create the indicated screen structure
-		lisw = oss_createScreenTemplate(	tnUniqueId, vvm_getNextUniqueId(),
+		lisw = oss_screenCreateTemplate(	tnUniqueId, vvm_getNextUniqueId(),
 											tcCaption, tnCaptionLength,
 											tnX, tnY,
 											tnWidth, tnHeight,

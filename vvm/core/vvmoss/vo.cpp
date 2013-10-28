@@ -719,7 +719,7 @@
 
 		// Get the screen dimensions
 		lr = NULL;
-		if (oss_getScreenDimensions(ts->_iOssWindowId, NULL, NULL, &lnWidth, &lnHeight, NULL, NULL, NULL, NULL))
+		if (oss_screenGetDimensions(ts->_iOssWindowId, NULL, NULL, &lnWidth, &lnHeight, NULL, NULL, NULL, NULL))
 		{
 			// Create a region
 			lr = ioss_createRegion(ts->ll.uniqueId, trs, 0, 0.0f, 0.0f, (f32)lnWidth, (f32)lnHeight, callbacks, events);
@@ -753,7 +753,7 @@
 
 
 		// Get the screen dimensions
-		if (ts && oss_getScreenDimensions(ts->_iOssWindowId, NULL, NULL, &lnWidth, &lnHeight, NULL, NULL, NULL, NULL))
+		if (ts && oss_screenGetDimensions(ts->_iOssWindowId, NULL, NULL, &lnWidth, &lnHeight, NULL, NULL, NULL, NULL))
 		{
 			lrgba.color = rgba(255,255,255,255);
 			return(ioss_createCanvas(ts->ll.uniqueId, lnWidth, lnHeight, lrgba));
@@ -1016,7 +1016,7 @@
 //////
 	u64 CALLTYPE oss_createFontHandle(s8* fontName, u32 fontPointSize, bool bold, bool italics, bool underline, bool strikethrough)
     {
-		return(oss_createSystemFont(fontName, fontPointSize, bold, italics, underline, strikethrough));
+		return(oss_systemCreateFont(fontName, fontPointSize, bold, italics, underline, strikethrough));
     }
 
 
@@ -1077,7 +1077,7 @@
 		if (tc)
 		{
 			// Draw the text
-			lnResult = oss_drawText(tcText, tnTextLength, ulx, uly, lrx, lry, foreground, background, fontHandle, tc->bd_vvmoss);
+			lnResult = ioss_drawText(tcText, tnTextLength, ulx, uly, lrx, lry, foreground, background, fontHandle, tc->bd_vvmoss);
 			if (lnResult > 0)
 			{
 				// Copy the text drawn onto the system bitmap onto the canvas
@@ -1674,16 +1674,16 @@
 // Called to scale a canvas from the src size to the dst size
 //
 //////
-	u64 CALLTYPE oss_canvasScale(SCanvas* tsDst, SCanvas* tsSrc, SScaleMap** tsSm)
+	u64 CALLTYPE oss_canvasScale(SCanvas* tsDst, SCanvas* tsSrc, SScaleMap** tsScaleMap)
 	{
 		u64 lnPixelsDrawn;
 
 
 		// Make sure the environment is sane
-		if (tsDst && tsSrc && tsDst->bd && tsSrc->bd && tsSm)
+		if (tsDst && tsSrc && tsDst->bd && tsSrc->bd && tsScaleMap)
 		{
 			// Perform the scale
-			lnPixelsDrawn = iioss_canvasScale(tsDst, tsSrc, tsSm);
+			lnPixelsDrawn = iioss_canvasScale(tsDst, tsSrc, tsScaleMap);
 
 			// Mark the item dirty
 			if (lnPixelsDrawn != 0)
@@ -1691,7 +1691,7 @@
 		}
 
 		// If we get here, failure
-		return(-1);
+		return(0);
 	}
 
 
@@ -2032,7 +2032,7 @@
 //		-50				- Invalid parameters
 //
 //////
-	u64 CALLTYPE oss_loadBitmapFromDisk(s8* tcPathname, SCanvas** tc, u32* tnWidth, u32* tnHeight, SBGRA tnBackColor)
+	u64 CALLTYPE oss_bitmapLoadFromDisk(s8* tcPathname, SCanvas** tc, u32* tnWidth, u32* tnHeight, SBGRA tnBackColor)
 	{
 		bool			llLoadResult;
 		u32				lnResult;
@@ -2131,7 +2131,7 @@
 // Saves the indicated canvas to disk
 //
 //////
-	u64 CALLTYPE oss_saveBitmapToDisk(SCanvas* tc, SBGRA* bd, s8* tcPathname)
+	u64 CALLTYPE oss_bitmapSaveToDisk(SCanvas* tc, SBGRA* bd, s8* tcPathname)
 	{
 		u64				lnResult, lnHandle, lnNumread;
 		SBitmapHeader	lbh;		// Header
@@ -2204,7 +2204,7 @@
 //		Note:  use _isWSSystemFont->handle for HFONT
 //
 //////
-	u64 CALLTYPE oss_createSystemFont(s8* fontName, u32 fontPointSize, bool bold, bool italics, bool underline, bool strikethrough)
+	u64 CALLTYPE oss_systemCreateFont(s8* fontName, u32 fontPointSize, bool bold, bool italics, bool underline, bool strikethrough)
 	{
 		u64					lnUniqueId;
 		s32					lnHeight;
@@ -2262,7 +2262,7 @@
 //		           _isWSystemBitmap->height
 //
 //////
-	u64 CALLTYPE oss_createSystemBitmap(u32 tnWidth, u32 tnHeight)
+	u64 CALLTYPE oss_systemCreateBitmap(u32 tnWidth, u32 tnHeight)
 	{
 		_iswSSystemBitmap*	lsb;
 
@@ -2296,7 +2296,7 @@
 //		others		- HFONT
 //
 //////
-	u64 CALLTYPE oss_findSystemFontByHandle(u64 tnFontHandle)
+	u64 CALLTYPE oss_systemFindFontByHandle(u64 tnFontHandle)
 	{
 		_iswSSystemFont*	lsf;
 		SStartEndCallback	cb;
@@ -2322,7 +2322,7 @@
 // Create the specified screen structure
 //
 //////
-	SOssWindow* CALLTYPE oss_createScreenTemplate(u64 id, u64 uniqueScreenId,
+	SOssWindow* CALLTYPE oss_screenCreateTemplate(u64 id, u64 uniqueScreenId,
 													 s8* tcCaption, u32 tnCaptionLength,
 													 s32 tnX, s32 tnY,
 													 u32 tnWidth, u32 tnHeight,
@@ -2398,7 +2398,7 @@
 // Called to determine how big a screen should be to fit on the indicated monitor
 //
 //////
-	void CALLTYPE oss_computeMonitorCoordinates(SOssWindow* tow, f32 tfPercent, u32 tnPosition, f32 tfMargin, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin)
+	void CALLTYPE oss_screenComputeMonitorCoordinates(SOssWindow* tow, f32 tfPercent, u32 tnPosition, f32 tfMargin, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin)
 	{
 		bool		llDelete;
 		f32			lfX, lfY, lfWidth, lfHeight, lfMarginX, lfMarginY;
@@ -2413,7 +2413,7 @@
 				// Nope, we have to get our own
 				memset(&lse, 0, sizeof(lse));
 				llDelete	= true;
-				tow			= oss_enumerateMonitors(&lse);
+				tow			= oss_screenEnumerateMonitors(&lse);
 
 			} else {
 				// We do not need to delete the SStartEnd chain
@@ -2511,7 +2511,7 @@
 // Note:  Returns the SOssWindow* structure, one for each monitor, in the SStartEnd.
 //
 //////
-	SOssWindow* CALLTYPE oss_enumerateMonitors(SStartEnd* tsMonitors)
+	SOssWindow* CALLTYPE oss_screenEnumerateMonitors(SStartEnd* tsMonitors)
 	{
 		SOssWindow*			low;
 		SStartEndCallback	cb;
@@ -2547,7 +2547,7 @@
 // Return dimensions for the indicated screen (if found)
 //
 //////
-	bool CALLTYPE oss_getScreenDimensions(u64 tnOssWindowId, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin)
+	bool CALLTYPE oss_screenGetDimensions(u64 tnOssWindowId, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin)
 	{
 		_iswSOssWindowLL* low;
 
@@ -2656,62 +2656,6 @@
 		}
 		// Indicate what we did
 		return(lnPixels);
-	}
-
-
-
-
-//////////
-//
-// Called to draw some text in the indicated font onto the indicated dib bitmap
-//
-// Note:  tnSystemFont and tnSystemBitmap are _isWSystem* structures
-//
-//////
-	u64 CALLTYPE oss_drawText(s8* tcText, u32 tnTextLength, s32 ulx, s32 uly, s32 lrx, s32 lry, SBGRA foreground, SBGRA background, u64 tnSystemFont, u64 tnSystemBitmap)
-	{
-		u32					lnCount, lnFormat, lnForeColor, lnBackColor;
-		RECT				lrc;
-		HBRUSH				lhBrush;
-		_iswSSystemBitmap*	lsb;
-		_iswSSystemFont*	lsf;
-
-
-		// Make sure there's something to do
-		lnCount = 0;
-		if (tcText && tnTextLength != 0)
-		{
-			// Convert the passed u64 values to their proper structure
-			lsb	= (_iswSSystemBitmap*)tnSystemBitmap;
-			lsf	= (_iswSSystemFont*)tnSystemFont;
-
-			// Load our font
-			SelectObject(lsb->hdc, (HGDIOBJ)lsf->handle);
-
-			// Prepare our text info
-			lnForeColor = foreground.color;
-			lnBackColor = background.color;
-			SetTextColor(lsb->hdc, lnForeColor);
-			SetBkColor	(lsb->hdc, lnBackColor);
-			SetBkMode	(lsb->hdc, OPAQUE);
-
-			// Get our initial condition
-			lnFormat = DT_LEFT | DT_END_ELLIPSIS;
-
-			// Set our rectangle
-			SetRect(&lrc, ulx, uly, lrx, lry);
-
-			// Fill the rectangle with the explicit opaque color
-			lhBrush = CreateSolidBrush(lnBackColor);
-			FillRect(lsb->hdc, &lrc, lhBrush);
-			DeleteObject((HGDIOBJ)lhBrush);
-
-			// Physically draw it
-			if (DrawTextA(lsb->hdc, tcText, tnTextLength, &lrc, lnFormat) != 0)
-				lnCount = tnTextLength;
-		}
-		// Return the number of characters we copied
-		return(lnCount);
 	}
 
 
