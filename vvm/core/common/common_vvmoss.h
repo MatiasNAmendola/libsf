@@ -421,8 +421,8 @@
 //
 //////
 		// Clean house
-		u64				(CALLTYPE *oss_deleteScreen)							(u64 id, SScreen* ts);
-		u64				(CALLTYPE *oss_deleteCanvas)							(u64 id, SCanvas* tc);
+		u64				(CALLTYPE *oss_deleteScreen)							(SScreen* ts);
+		u64				(CALLTYPE *oss_deleteCanvas)							(SCanvas* tc);
 
 		// Visible window information
 		SScreen*		(CALLTYPE *oss_createScreenAndVisibleWindow)			(u64 tnAssociatedId, SOssWindow* tisw/*tisw was created by oss_screenCreateTemplate()*/);

@@ -1077,7 +1077,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		SLL*			next;					// Pointer to next computation in the chain
 		u32				sbgraOffsetDst;			// Offset to the destination SBGRA pixel
 		u32				sbgraOffsetSrc;			// Offset to the source SBGRA pixel
-		f32				multiplier;				// The multiplier for the pixel accumulator for that value (dst += source * multiplier)
+		f64				multiplier;				// The multiplier for the pixel accumulator for that value (dst += source * multiplier)
 	};
 
 	struct SScaleMap

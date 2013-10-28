@@ -191,34 +191,37 @@
 		//		tpoints	= (SBGRAF*)malloc(		((u32)(1.0/ratioV) + 3)   *
 		//										((u32)(1.0/ratioH) + 3))
 		//
-		f32					ratioV;				// (f32)bio->biHeight	/ (f32)bii->biHeight;
-		f32					ratioH;				// (f32)bio->biWidth	/ (f32)bii->biWidth;
+		f64					ratioV;				// (f64)bio->biHeight	/ (f64)bii->biHeight;
+		f64					ratioH;				// (f64)bio->biWidth	/ (f64)bii->biWidth;
 
 		// For iterating through the destination and source, deriving pixel offsets
-		s32					lnOffsetDst;		// Offset to the destination pixel for this spanned pixel operation
-		s32					lnOffsetSrc;		// Offset to the upper-left-most pixel for each spanned block
+		s32					offsetSrc;			// Offset to the source pixel for this iteration
+		s32					offsetDst;			// Offset to the destination pixel for this iteration
 
 		// Temporary variables used for processing
-		SBGRA*				optr;				// Output pointer to the upper-left pixel for this x,y
-		SBGRA*				iptra;				// Input pointer to the left-most pixel of the first row (the anchor)
-		SBGRA*				iptr;				// Input pointer to the left-most pixel for this y row
+// 		SBGRA*				optr;				// Output pointer to the upper-left pixel for this x,y
+// 		SBGRA*				iptra;				// Input pointer to the left-most pixel of the first row (the anchor)
+// 		SBGRA*				iptr;				// Input pointer to the left-most pixel for this y row
 		u32					x;					// X-coordinate
 		u32					y;					// Y-coordinate
-		f32					ulx;				// Upper-left X
-		f32					uly;				// Upper-left Y
-		f32					lrx;				// Lower-right X
-		f32					lry;				// Lower-right Y
-		f32					widthLeft;			// Width for each left-most pixel
-		f32					widthRight;			// Width for each right-most pixel
-		f32					height;				// Height for a particular pixel portion (upper, lower)
-		f32					area;				// Temporary computed area for various pixels
-		f32					areaSpanned;		// The total area of the spanned pixel
+		f64					ulx;				// Upper-left X
+		f64					uly;				// Upper-left Y
+		f64					lrx;				// Lower-right X
+		f64					lry;				// Lower-right Y
+		f64					widthLeft;			// Width for each left-most pixel
+		f64					widthRight;			// Width for each right-most pixel
+		f64					height;				// Height for a particular pixel portion (upper, lower)
+		f64					area;				// Temporary computed area for various pixels
+		f64					areaSpanned;		// The total area of the spanned pixel
 		s32					left;				// Left-side pixel offset into line
 		s32					right;				// Number of pixels to reach the right-most pixel
 		s32					middleStartH;		// Starting pixel offset for middle span
 		s32					middleFinishH;		// Ending pixel offset for middle span
 		s32					middleStartV;		// Middle starting pixel
 		s32					middleFinishV;		// Middle ending pixel
+		s32					rightDelta;			// How far over is the right-most pixel?
+		s32					bottomDelta;		// How far over was the bottom-most pixel?
+		s32					rowWidth;			// How wide is each row in bytes?
 
 		// Indicates the span from upper-left corner
 		bool				spans2H;			// Spans at least 2 pixels horizontally, meaning it begins somewhere in 1.x, for example, and ends somewhere beyond 2.x

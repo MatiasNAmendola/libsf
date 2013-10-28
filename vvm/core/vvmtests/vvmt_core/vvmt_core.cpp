@@ -191,10 +191,18 @@ u32			lnWidth, lnHeight;
 SCanvas*	lc;
 SCanvas*	lcScaled;
 oss_bitmapLoadFromDisk("c:\\temp\\test.bmp", &lc, &lnWidth, &lnHeight, white);
-lcScaled = oss_createCanvas(0, lnWidth/2, lnHeight/2, white);
-// TODO: The scale code using scale map and scale computation components is not working properly
-oss_ canvasScale(lcScaled, lc, &lcScaled->firstScaleMap);
-oss_bitmapSaveToDisk(lcScaled, lcScaled->bd, "c:\\temp\\scaled.bmp");
+f64 lnH, lnW, lnHStep, lnWStep;
+s8 buffer[256];
+lnHStep = (f64)lnHeight / 40.0;
+lnWStep = (f64)lnWidth / 40.0;
+for (lnH = lnHStep, lnW = lnWStep; lnH < (f64)lnHeight; lnH += lnHStep, lnW += lnWStep)
+{
+	lcScaled = oss_createCanvas(0, (u32)lnW, (u32)lnH, white);
+	oss_canvasScale(lcScaled, lc, &lcScaled->firstScaleMap);
+	sprintf(buffer, "c:\\temp\\scaled_%04ux%04u.bmp\0", (u32)lnW, (u32)lnH);
+	oss_bitmapSaveToDisk(lcScaled, lcScaled->bd, buffer);
+	oss_deleteCanvas(lcScaled);
+}
 
 		//////////
 		// If any test fails, early out

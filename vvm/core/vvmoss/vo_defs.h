@@ -82,8 +82,8 @@
 // All windows use 24-bit presentations.
 //
 //////
-		u64 CALLTYPE			oss_deleteScreen							(u64 id, SScreen* ts);
-		u64 CALLTYPE			oss_deleteCanvas							(u64 id, SCanvas* tc);
+		u64 CALLTYPE			oss_deleteScreen							(SScreen* ts);
+		u64 CALLTYPE			oss_deleteCanvas							(SCanvas* tc);
 
 		SScreen* CALLTYPE		oss_createScreenAndVisibleWindow			(u64 tnAssociatedId, SOssWindow*  tisw/*tisw was created by oss_screenCreateTemplate()*/);
 		SRegion* CALLTYPE		oss_createRegionForScreen					(SScreen* ts, SCallbacks* callbacks, SStartEnd* events, SRegionState* trs);
@@ -567,7 +567,7 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	u64						ioss_convertValidatedNumericStringToU64			(s8* tcData, u32 tnMaxLength);
 	void					ioss_bufferVerifySizeForNewBytes				(SBuffer* buffRoot, u32 tnDataLength);
 	u64						iioss_canvasScale								(SCanvas* tsDst, SCanvas* tcSrc, SScaleMap** tsSm);
-	u64						iioss_canvasScaleProcess						(SCanvas* tsDst, SCanvas* tsSrc, SScaleMap*  tsSm, f32 tfVerticalScaler, f32 tfHorizontalScaler);
+	u64						iioss_canvasScaleProcess						(SCanvas* tsDst, SCanvas* tsSrc, SScaleMap*  tsSm, f64 tfVerticalScaler, f64 tfHorizontalScaler);
 	void					iioss_getSpannedPixelComputation				(_isSSpannedPixelProcessing* bp);
 	void					iioss_getSpannedPixelComputation1				(_isSSpannedPixelProcessing* bp);
 	void					iioss_getSpannedPixelComputation2				(_isSSpannedPixelProcessing* bp);
@@ -578,8 +578,8 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	void					iioss_getSpannedPixelComputation7				(_isSSpannedPixelProcessing* bp);
 	void					iioss_getSpannedPixelComputation8				(_isSSpannedPixelProcessing* bp);
 	void					iioss_getSpannedPixelComputation9				(_isSSpannedPixelProcessing* bp);
-	void					iioss_getSpannedPixelComputationAppend			(_isSSpannedPixelProcessing* bp, s32 tnOffset, f32 tfMultiplier);
-	u32						ioss_getIntegersBetween							(f32 p1, f32 p2);
+	void					iioss_getSpannedPixelComputationAppend			(_isSSpannedPixelProcessing* bp, s32 tnDeltaX, s32 tnDeltaY, f64 tfMultiplier);
+	u32						ioss_getIntegersBetween							(f64 p1, f64 p2);
 	void					ioss_setFindFileStatus							(SFindFile* tsFileInfo, WIN32_FIND_DATAA* twfd);
 	void					ioss_convertFileTimeToSDateTime					(SFileTime* tsDateTime, FILETIME* tsFiletime);
 
@@ -630,6 +630,7 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	BOOL CALLBACK			iioss_enumerateMonitors							(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData);
 	void					iioss_enumerateMonitorsIterateCallback			(SStartEndCallback* cb);
 
+	void					ioss_deleteScaleCompute							(SScaleMap* tsm);
 
 
 

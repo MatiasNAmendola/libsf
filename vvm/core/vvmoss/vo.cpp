@@ -653,7 +653,7 @@
 // Deletes the specified screen and its associated os-specific window
 //
 //////
-	u64 CALLTYPE oss_deleteScreen(u64 id, SScreen* ts)
+	u64 CALLTYPE oss_deleteScreen(SScreen* ts)
 	{
 		return(0);
 	}
@@ -666,9 +666,54 @@
 // Deletes the specified canvas and removes it from everything it's connected to
 //
 //////
-	u64 CALLTYPE oss_deleteCanvas(u64 id, SCanvas* tc)
+	u64 CALLTYPE oss_deleteCanvas(SCanvas* tc)
 	{
-		return(0);
+		SScaleMap*	lsm;
+		SScaleMap*	lsmNext;
+
+
+		// Make sure the environment is sane
+		if (tc)
+		{
+			// Lock the semaphore
+			oss_lockSemaphore(tc->semRefresh);
+
+			// Do we need to delete the scale maps?
+			if (tc->firstScaleMap)
+			{
+				lsm = tc->firstScaleMap;
+				while (lsm)
+				{
+					// Grab the next item
+					lsmNext = (SScaleMap*)lsm->next;
+
+					// Delete this map
+					ioss_deleteScaleCompute(lsm);
+
+					// Move to next one
+					lsm = lsmNext;
+				}
+			}
+
+			// Delete the allocated buffers
+			if (tc->bd)			free(tc->bd);
+			if (tc->bda)		free(tc->bda);
+			if (tc->bd_vvmoss)	free((void*)tc->bd_vvmoss);
+
+			// Release the semaphore
+			oss_unlockSemaphore(tc->semRefresh);
+			oss_deleteSemaphore(tc->semRefresh);
+
+			// Free the canvas itself
+			free(tc);
+
+			// Indicate success
+			return(0);
+
+		} else {
+			// Indicate failure
+			return(-1);
+		}
 	}
 
 
@@ -2729,38 +2774,43 @@
 //////
 	void* CALLTYPE oss_alloc(u64 tnSize, bool tlInitialize)
 	{
-		SDatumLL* ldll;
+		s8* ptr;
+//		SDatumLL* ldll;
 
 
 		// Make sure our environment's sane
 // TODO:  (future enhancement) make this a true 64-bit alloc
 		if (tnSize == 0 || tnSize > 0xffffffff)
-			return(NULL);		// Nice try, wise guy! :-)
+			return(NULL);
 
 
-		// Append it to the list of memory blocks we have
-		ldll = (SDatumLL*)oss_SEChain_append(&gseRootMemoryBlocks, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SDatumLL), _COMMON_START_END_BLOCK_SIZE, NULL);
-		if (ldll)
-		{
-			// Allocate this datum's data.  Think through that a few times... :-)
-			ldll->datum.data._s8 = (s8*)malloc((u32)tnSize);
-			if (ldll->datum.data._s8)
-			{
-				// Success!
-				ldll->datum.length = tnSize;
+// 		// Append it to the list of memory blocks we have
+// 		ldll = (SDatumLL*)oss_SEChain_append(&gseRootMemoryBlocks, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SDatumLL), _COMMON_START_END_BLOCK_SIZE, NULL);
+// 		if (ldll)
+// 		{
+// 			// Allocate this datum's data.  Think through that a few times... :-)
+// 			ldll->datum.data._s8 = (s8*)malloc((u32)tnSize);
+// 			if (ldll->datum.data._s8)
+// 			{
+// 				// Success!
+// 				ldll->datum.length = tnSize;
+// 
+// 				// Initialize to NULLs
+// 				if (tlInitialize)
+// 					oss_memset(ldll->datum.data._s8, 0, tnSize);
+// 
+// 				// Indicate our success
+// 				return(ldll->datum.data._v);
+// 			}
+// 			// Failure!
+// 			oss_SEChain_deleteFrom(&gseRootMemoryBlocks, (SLL*)ldll, true);
+// 		}
+		ptr = (s8*)malloc((u32)tnSize);
+		if (ptr && tlInitialize)
+			memset(ptr, 0, tnSize);
 
-				// Initialize to NULLs
-				if (tlInitialize)
-					oss_memset(ldll->datum.data._s8, 0, tnSize);
-
-				// Indicate our success
-				return(ldll->datum.data._v);
-			}
-			// Failure!
-			oss_SEChain_deleteFrom(&gseRootMemoryBlocks, (SLL*)ldll, true);
-		}
 		// Indicate failure
-		return(NULL);
+		return(ptr);
 	}
 
 
