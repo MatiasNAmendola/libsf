@@ -64,7 +64,7 @@
 	u64					iibxml_scanForwardToCharacter					(s8* buffer, u64 tnMaxLength, s8 tcChar);
 	SBxml*				iibxml_createNewSBxml							(u32 tnLevel, SBxml* bxmlRelation, bool tlIsChild, SBxml* next, SBxml* prev, SBxml* parent, SBxml* child);
 	void				iibxml_storeErrorCode							(u64* tnErrorOffsetStore, u64 tnErrorOffset, u64* tnErrorCodeStore, u64 tnErrorCode);
-	void				ibxml_saveNode									(SBuffer* build, SBxml* bxml, bool tlSaveChildNodes, bool tlSaveSiblings, u64* lnError);
+	void				ibxml_saveNode									(SBuilder* build, SBxml* bxml, bool tlSaveChildNodes, bool tlSaveSiblings, u64* lnError);
 	void				iibxml_saveNodeCallback							(SStartEndCallback* cb);
 	bool				iibxml_AttributeDeleteCallback					(SStartEndCallback* cb);
 	bool				iibxml_attributeInsertCallback					(SStartEndCallback* cb);

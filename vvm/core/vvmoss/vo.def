@@ -14,7 +14,7 @@ EXPORTS
 	
 	oss_getSystemInfo
 	oss_sleep
-	oss_storeDateTime
+	oss_dateTimeGet
 	oss_changePathnameExtension
 	oss_validateFilenameCharacter
 	oss_getNextUniqueId
@@ -222,10 +222,10 @@ EXPORTS
 	oss_fileFindNext
 	oss_fileFindClose
 	
-	oss_buildBufferCreateAndInitialize
-	oss_buildBufferAppendText
-	oss_buildBufferSetSize
-	oss_buildBufferFreeAndRelease
+	oss_builderCreateAndInitialize
+	oss_builderAppendText
+	oss_builderSetSize
+	oss_builderFreeAndRelease
 	
 	oss_sha1ComputeSha1
 	oss_sha1ComputeSha1As64Bit

@@ -459,7 +459,7 @@
 // Called to store the immediate / current date and time to the specified structure.
 //
 //////
-	void CALLTYPE oss_storeDateTime(SDateTime* tdt)
+	void CALLTYPE oss_dateTimeGet(SDateTime* tdt)
 	{
 		SYSTEMTIME		lst;
 		LARGE_INTEGER	lpc;
@@ -2807,7 +2807,7 @@
 // 		}
 		ptr = (s8*)malloc((u32)tnSize);
 		if (ptr && tlInitialize)
-			memset(ptr, 0, tnSize);
+			memset(ptr, 0, (u32)tnSize);
 
 		// Indicate failure
 		return(ptr);
@@ -2824,23 +2824,23 @@
 	void* CALLTYPE oss_realloc(void* ptrOld, u64 tnNewSize)
 	{
 		void*				txPtrNew;
-		SDatumLL*			ldll;
-		SStartEndCallback	cb;
+// 		SDatumLL*			ldll;
+// 		SStartEndCallback	cb;
 
 
 
 		// Make sure the environment's sane
 // TODO:  (future enhancement) make this a true 64-bit realloc
 		if (!ptrOld || tnNewSize == 0 || tnNewSize > 0xffffffff)
-			return(NULL);		// Not gonna do it, wouldn't be prudent, at this... juncture...
+			return(NULL);
 
 
-		// Locate the existing master list pointer
-		cb._func	= (u64)iioss_reallocAndFreeCallback;
-		cb.extra	= (u64)ptrOld;
-		ldll = (SDatumLL*)oss_SEChain_searchByCallback(&gseRootMemoryBlocks, &cb);
-		if (!ldll)
-			return(NULL);		// It's not one of our pointers, tisk, tisk!
+// 		// Locate the existing master list pointer
+// 		cb._func	= (u64)iioss_reallocAndFreeCallback;
+// 		cb.extra	= (u64)ptrOld;
+// 		ldll = (SDatumLL*)oss_SEChain_searchByCallback(&gseRootMemoryBlocks, &cb);
+// 		if (!ldll)
+// 			return(NULL);		// It's not one of our pointers, tisk, tisk!
 
 
 		// Attempt the resize
@@ -2849,8 +2849,8 @@
 		{
 			// It worked
 			// Update the entry in the associated structure
-			ldll->datum.data._s8	= (s8*)txPtrNew;
-			ldll->datum.length		= tnNewSize;
+// 			ldll->datum.data._s8	= (s8*)txPtrNew;
+// 			ldll->datum.length		= tnNewSize;
 		}
 		// Indicate failure or success
 		return(txPtrNew);
@@ -4091,7 +4091,7 @@ openAgain:
 			lsf->handle = lnHandle;
 
 			// Store date and time
-			oss_storeDateTime(&lsf->fileOpened);
+			oss_dateTimeGet(&lsf->fileOpened);
 			memcpy(&lsf->fileAccessed, &lsf->fileOpened, sizeof(SDateTime));
 
 			// Indicate success
@@ -4129,7 +4129,7 @@ openAgain:
 
 
 		// Update last accessed time
-		oss_storeDateTime(&lsf->fileAccessed);
+		oss_dateTimeGet(&lsf->fileAccessed);
 
 
 		// Make sure we have something to do
@@ -4179,7 +4179,7 @@ openAgain:
 
 
 		// Update last accessed time
-		oss_storeDateTime(&lsf->fileAccessed);
+		oss_dateTimeGet(&lsf->fileAccessed);
 
 
 		// Attempt the read
@@ -4232,7 +4232,7 @@ openAgain:
 
 
 		// Update last accessed time
-		oss_storeDateTime(&lsf->fileAccessed);
+		oss_dateTimeGet(&lsf->fileAccessed);
 
 
 		// Attempt the write
@@ -4277,7 +4277,7 @@ openAgain:
 
 
 		// Update last accessed time
-		oss_storeDateTime(&lsf->fileAccessed);
+		oss_dateTimeGet(&lsf->fileAccessed);
 
 
 		//////////
@@ -4299,7 +4299,7 @@ openAgain:
 			if (lsfl)
 			{
 				// Store lock time
-				oss_storeDateTime(&lsfl->locked);
+				oss_dateTimeGet(&lsfl->locked);
 
 				// Store lock info
 				lsfl->offset = tnStart;
@@ -4347,7 +4347,7 @@ openAgain:
 
 
 		// Update last accessed time
-		oss_storeDateTime(&lsf->fileAccessed);
+		oss_dateTimeGet(&lsf->fileAccessed);
 
 
 		//////////
@@ -4432,7 +4432,7 @@ openAgain:
 
 
 		// Update last accessed time
-		oss_storeDateTime(&lsf->fileAccessed);
+		oss_dateTimeGet(&lsf->fileAccessed);
 
 
 		// Get the current offset
@@ -8185,15 +8185,15 @@ _asm int 3;
 // Returns:  
 //		Pointer to the point in the buffer where the
 //////
-	void CALLTYPE oss_buildBufferCreateAndInitialize(SBuffer** buffRoot, u32 tnAllocationBlockSize)
+	void CALLTYPE oss_builderCreateAndInitialize(SBuilder** buffRoot, u32 tnAllocationBlockSize)
 	{
-		SBuffer*	buffNew;
+		SBuilder*	buffNew;
 
 
 		// Make sure our environment is sane
 		if (buffRoot && tnAllocationBlockSize != 0)
 		{
-			buffNew = (SBuffer*)oss_alloc(sizeof(SBuffer), true);
+			buffNew = (SBuilder*)oss_alloc(sizeof(SBuilder), true);
 			if (buffNew)
 			{
 				// Store the pointer
@@ -8226,7 +8226,7 @@ _asm int 3;
 //		Pointer to the point in the buffer where the text was inserted, can be used
 //		for a furthering or continuance of this function embedded in a higher call.
 //////
-	s8* CALLTYPE oss_buildBufferAppendText(SBuffer* buffRoot, s8* tcData, u32 tnDataLength)
+	s8* CALLTYPE oss_builderAppendText(SBuilder* buffRoot, s8* tcData, u32 tnDataLength)
 	{
 // TODO:  untested code, breakpoint and examine
 		// Make sure our environment is sane
@@ -8257,7 +8257,7 @@ _asm int 3;
 // is changed, however the buffer pointer value could be changed from oss_realloc().
 //
 //////
-	void CALLTYPE oss_buildBufferSetSize(SBuffer** buffRoot, u32 tnBufferLength)
+	void CALLTYPE oss_builderSetSize(SBuilder** buffRoot, u32 tnBufferLength)
 	{
 // TODO:  untested code, breakpoint and examine
 // Note:  This code should not be being executed.  The code in ioss_bufferVerifySizeForNewBytes() should be used
@@ -8265,7 +8265,7 @@ _asm int 3;
 		// Make sure our environment is sane
 		if (buffRoot && *buffRoot && tnBufferLength != 0)
 		{
-			*buffRoot = (SBuffer*)oss_realloc(*buffRoot, tnBufferLength);
+			*buffRoot = (SBuilder*)oss_realloc(*buffRoot, tnBufferLength);
 			if (*buffRoot)
 				(*buffRoot)->allocatedLength = tnBufferLength;
 		}
@@ -8276,12 +8276,12 @@ _asm int 3;
 
 //////////
 //
-// Releases the buffer allocated for the SBuffer structure
+// Releases the buffer allocated for the SBuilder structure
 //
 //////
-	void CALLTYPE oss_buildBufferFreeAndRelease(SBuffer** buffRoot)
+	void CALLTYPE oss_builderFreeAndRelease(SBuilder** buffRoot)
 	{
-		SBuffer* buffDelete;
+		SBuilder* buffDelete;
 
 
 // TODO:  untested code, breakpoint and examine
@@ -8306,7 +8306,7 @@ _asm int 3;
 				buffDelete->data = NULL;
 			}
 
-			// Release the SBuffer structure
+			// Release the SBuilder structure
 			oss_free(buffDelete);
 		}
 	}
@@ -8460,7 +8460,7 @@ _asm int 3;
 		u64			lnHandle, lnError;
 		s64			lnBytesWritten;
 		bool		llResult;
-		SBuffer*	build;
+		SBuilder*	build;
 
 
 		// Initialize our return values
@@ -8476,7 +8476,7 @@ _asm int 3;
 			if (lnHandle)
 			{
 				// Create our accumulation buffer
-				oss_buildBufferCreateAndInitialize(&build, _COMMON_BUFFER_BLOCK_SIZE);
+				oss_builderCreateAndInitialize(&build, _COMMON_BUFFER_BLOCK_SIZE);
 				while (build)
 				{
 					// Save this node, which will save all child nodes
@@ -8497,7 +8497,7 @@ _asm int 3;
 						break;		// Failure
 
 					// Release our build buffer
-					oss_buildBufferFreeAndRelease(&build);
+					oss_builderFreeAndRelease(&build);
 
 					// When we get here, success
 					llResult = true;
@@ -8521,13 +8521,13 @@ _asm int 3;
 // Serializes the BXML content to a buffer
 //
 //////
-	void CALLTYPE oss_bxmlSaveToBuffer(SBxml* bxml, SBuffer** build, bool tlSaveChildNodes, bool tlSaveSiblings, u64* tnErrorNumber)
+	void CALLTYPE oss_bxmlSaveToBuffer(SBxml* bxml, SBuilder** build, bool tlSaveChildNodes, bool tlSaveSiblings, u64* tnErrorNumber)
 	{
 		// Make sure our environment is sane
 		if (bxml && build)
 		{
 			// Create our accumulation buffer
-			oss_buildBufferCreateAndInitialize(build, _COMMON_BUFFER_BLOCK_SIZE);
+			oss_builderCreateAndInitialize(build, _COMMON_BUFFER_BLOCK_SIZE);
 
 			// Save this node, which will save all child nodes
 			if (*build)

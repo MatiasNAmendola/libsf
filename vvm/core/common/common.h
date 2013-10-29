@@ -235,7 +235,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	struct SBxml;
 	struct SBxmla;
 	struct SBxmlError;
-	struct SBuffer;
+	struct SBuilder;
 	struct SFileTime;
 	struct SDateTime;
 	struct SFindFile;
@@ -617,7 +617,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	};
 
 	// Buffer accumulators
-	struct SBuffer
+	struct SBuilder
 	{
 		s8*			data;												// Pointer to a buffer allocated in blocks
 		u32			allocatedLength;									// How much of space has been allocated for the buffer
@@ -1074,7 +1074,6 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	struct SScaleCompute
 	{
 		// Refer to the oss_canvasScale() functionality
-		SLL*			next;					// Pointer to next computation in the chain
 		u32				sbgraOffsetDst;			// Offset to the destination SBGRA pixel
 		u32				sbgraOffsetSrc;			// Offset to the source SBGRA pixel
 		f64				multiplier;				// The multiplier for the pixel accumulator for that value (dst += source * multiplier)
@@ -1086,7 +1085,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		SLL*			next;					// Pointer to next scale map in the chain
 		SSize			src;					// Width of the source SBGRA
 		SSize			dst;					// Width of the destination SBGRA
-		SScaleCompute*	firstScale;				// The mathematical progression to use for this scale
+		SBuilder*		scaleData;				// The mathematical progression to use for this scale
 	};
 
 	struct SCanvas

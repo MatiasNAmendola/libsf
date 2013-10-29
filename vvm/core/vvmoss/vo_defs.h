@@ -68,7 +68,7 @@
 //////
 		void CALLTYPE			oss_getSystemInfo							(SSysInfo* tsi);
 		void CALLTYPE			oss_sleep									(u32 tnMilliseconds);
-		void CALLTYPE			oss_storeDateTime							(SDateTime* tdt);
+		void CALLTYPE			oss_dateTimeGet							(SDateTime* tdt);
 		s8* CALLTYPE			oss_changePathnameExtension					(s8* tcPathname, s8* tcNewPathname);
 		bool CALLTYPE			oss_validateFilenameCharacter				(s8* tcPathname, u64 tnPathnameLength, u64* tnErrorPosition);
 		u64 CALLTYPE			oss_getNextUniqueId							(void);
@@ -344,10 +344,10 @@
 // size and then randomly updating it.
 //
 //////////
-		void CALLTYPE			oss_buildBufferCreateAndInitialize			(SBuffer** buffRoot, u32 tnAllocationSize);
-		s8* CALLTYPE			oss_buildBufferAppendText					(SBuffer*  buffRoot, s8* tcData, u32 tnDataLength);
-		void CALLTYPE			oss_buildBufferSetSize						(SBuffer** buffRoot, u32 tnBufferLength);
-		void CALLTYPE			oss_buildBufferFreeAndRelease				(SBuffer** buffRoot);
+		void CALLTYPE			oss_builderCreateAndInitialize				(SBuilder** buffRoot, u32 tnAllocationSize);
+		s8* CALLTYPE			oss_builderAppendText						(SBuilder*  buffRoot, s8* tcData, u32 tnDataLength);
+		void CALLTYPE			oss_builderSetSize							(SBuilder** buffRoot, u32 tnBufferLength);
+		void CALLTYPE			oss_builderFreeAndRelease					(SBuilder** buffRoot);
 
 
 //////////
@@ -383,7 +383,7 @@
 		SBxml* CALLTYPE			oss_bxmlLoad								(s8* tcPathname, u32 tnPathnameLength, u64* tnBytesRead, u64* tnErrorOffset, u64* tnErrorCode);
 		SBxml* CALLTYPE			oss_bxmlLoadFromBuffer						(s8* tcBxmlData, u32 tnBxmlDataLength,                   u64* tnErrorOffset, u64* tnErrorCode);
 		bool CALLTYPE			oss_bxmlSave								(SBxml* bxml, s8* tcPathname, u32 tnPathnameLength, bool tlSaveChildNodes, bool tlSaveSiblings, u64* tnErrorNumber);
-		void CALLTYPE			oss_bxmlSaveToBuffer						(SBxml* bxml, SBuffer** build, bool tlSaveChildNodes, bool tlSaveSiblings, u64* tnErrorNumber);
+		void CALLTYPE			oss_bxmlSaveToBuffer						(SBxml* bxml, SBuilder** build, bool tlSaveChildNodes, bool tlSaveSiblings, u64* tnErrorNumber);
 
 		SBxmla* CALLTYPE		oss_bxmlaCreate								(s8* tcNewName, u32 tnNewNameLength, s8* tcData, u32 tnDataLength, u32 tnTotalDataLength);
 		bool CALLTYPE			oss_bxmlaSetName							(SBxmla* bxmla, s8* tcNewName, u32 tnNewNameLength);
@@ -565,7 +565,7 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	bool					ioss_isAlphanumeric								(s8 c);
 	u32						ioss_convertValidatedNumericStringToU32			(s8* tcData, u32 tnMaxLength);
 	u64						ioss_convertValidatedNumericStringToU64			(s8* tcData, u32 tnMaxLength);
-	void					ioss_bufferVerifySizeForNewBytes				(SBuffer* buffRoot, u32 tnDataLength);
+	void					ioss_bufferVerifySizeForNewBytes				(SBuilder* buffRoot, u32 tnDataLength);
 	u64						iioss_canvasScale								(SCanvas* tsDst, SCanvas* tcSrc, SScaleMap** tsSm);
 	u64						iioss_canvasScaleProcess						(SCanvas* tsDst, SCanvas* tsSrc, SScaleMap*  tsSm, f64 tfVerticalScaler, f64 tfHorizontalScaler);
 	void					iioss_getSpannedPixelComputation				(_isSSpannedPixelProcessing* bp);

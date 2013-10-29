@@ -67,7 +67,7 @@
 
 	const s8		cgcOssGetSystemInfo[]									= "oss_getSystemInfo";
 	const s8		cgcOssSleep[]											= "oss_sleep";
-	const s8		cgcOssStoreDateTime[]									= "oss_storeDateTime";
+	const s8		cgcOssDateTimeGet[]										= "oss_dateTimeGet";
 	const s8		cgcOssChangePathnameExtension[]							= "oss_changePathnameExtension";
 	const s8		cgcOssValidateFilenameCharacter[]						= "oss_validateFilenameCharacter";
 	const s8		cgcOssGetNextUniqueId[]									= "oss_getNextUniqueId";
@@ -259,10 +259,10 @@
 	const s8		cgcOssFindNextFile[]									= "oss_fileFindNext";
 	const s8		cgcOssFindClose[]										= "oss_fileFindClose";
 
-	const s8		cgcOssBuildBufferCreateAndInitialize[]					= "oss_buildBufferCreateAndInitialize";
-	const s8		cgcOssBuildBufferAppendText[]							= "oss_buildBufferAppendText";
-	const s8		cgcOssBuildBufferSetSize[]								= "oss_buildBufferSetSize";
-	const s8		cgcOssBuildBufferFreeAndRelease[]						= "oss_buildBufferFreeAndRelease";
+	const s8		cgcOssBuildBufferCreateAndInitialize[]					= "oss_builderCreateAndInitialize";
+	const s8		cgcOssBuildBufferAppendText[]							= "oss_builderAppendText";
+	const s8		cgcOssBuildBufferSetSize[]								= "oss_builderSetSize";
+	const s8		cgcOssBuildBufferFreeAndRelease[]						= "oss_builderFreeAndRelease";
 
 	const s8		cgcOssSha1ComputeSha1[]									= "oss_sha1ComputeSha1";
 	const s8		cgcOssSha1ComputeSha1As64Bit[]							= "oss_sha1ComputeSha1As64Bit";
@@ -406,7 +406,7 @@
 //////
 		void			(CALLTYPE *oss_getSystemInfo)							(SSysInfo* tsi);
 		void			(CALLTYPE *oss_sleep)									(u32 tnMilliseconds);
-		void			(CALLTYPE *oss_storeDateTime)							(SDateTime* tdt);
+		void			(CALLTYPE *oss_dateTimeGet)							(SDateTime* tdt);
 		s8*				(CALLTYPE *oss_changePathnameExtension)					(s8* tcPathname, s8* tcNewPathname);
 		bool			(CALLTYPE *oss_validateFilenameCharacter)				(s8* tcPathname, u64 tnPathnameLength, u64* tnErrorPosition);
 		u64				(CALLTYPE *oss_getNextUniqueId)							(void);
@@ -688,10 +688,10 @@
 // size and then randomly updating it.
 //
 //////////
-		void			(CALLTYPE *oss_buildBufferCreateAndInitialize)		(SBuffer** buffRoot, u32 tnAllocationSize);
-		s8*				(CALLTYPE *oss_buildBufferAppendText)				(SBuffer*  buffRoot, s8* tcData, u32 tnDataLength);
-		void			(CALLTYPE *oss_buildBufferSetSize)					(SBuffer** buffRoot, u32 tnBufferLength);
-		void			(CALLTYPE *oss_buildBufferFreeAndRelease)			(SBuffer** buffRoot);
+		void			(CALLTYPE *oss_builderCreateAndInitialize)		(SBuilder** buffRoot, u32 tnAllocationSize);
+		s8*				(CALLTYPE *oss_builderAppendText)				(SBuilder*  buffRoot, s8* tcData, u32 tnDataLength);
+		void			(CALLTYPE *oss_builderSetSize)					(SBuilder** buffRoot, u32 tnBufferLength);
+		void			(CALLTYPE *oss_builderFreeAndRelease)			(SBuilder** buffRoot);
 
 
 //////////
@@ -727,7 +727,7 @@
 		SBxml*			(CALLTYPE *oss_bxmlLoad)							(s8* tcPathname, u32 tnPathnameLength, u64* tnBytesRead, u64* tnErrorOffset, u64* tnErrorCode);
 		SBxml*			(CALLTYPE *oss_bxmlLoadFromBuffer)					(s8* tcBxmlData, u32 tnBxmlDataLength,                   u64* tnErrorOffset, u64* tnErrorCode);
 		bool			(CALLTYPE *oss_bxmlSave)							(SBxml* bxml, s8* tcPathname, u32 tnPathnameLength, bool tlSaveChildNodes, bool tlSaveSiblings, u64* tnBytesWritten);
-		void			(CALLTYPE *oss_bxmlSaveToBuffer)					(SBxml* bxml, SBuffer** build, bool tlSaveChildNodes, bool tlSaveSiblings, u64* tnErrorNumber);
+		void			(CALLTYPE *oss_bxmlSaveToBuffer)					(SBxml* bxml, SBuilder** build, bool tlSaveChildNodes, bool tlSaveSiblings, u64* tnErrorNumber);
 
 		SBxmla*			(CALLTYPE *oss_bxmlaCreate)							(s8* tcNewName, u32 tnNewNameLength, s8* tcData, u32 tnDataLength, u32 tnTotalDataLength);
 		bool			(CALLTYPE *oss_bxmlaSetName)						(SBxmla* bxmla, s8* tcNewName, u32 tnNewNameLength);
@@ -857,7 +857,7 @@
 
 		(void *)&oss_getSystemInfo,											(void *)cgcOssGetSystemInfo,
 		(void *)&oss_sleep,													(void *)cgcOssSleep,
-		(void *)&oss_storeDateTime,											(void *)cgcOssStoreDateTime,
+		(void *)&oss_dateTimeGet,											(void *)cgcOssDateTimeGet,
 		(void *)&oss_changePathnameExtension,								(void *)cgcOssChangePathnameExtension,
 		(void *)&oss_validateFilenameCharacter,								(void *)cgcOssValidateFilenameCharacter,
 		(void *)&oss_getNextUniqueId,										(void *)cgcOssGetNextUniqueId,
@@ -1059,10 +1059,10 @@
 		(void *)&oss_fileFindNext,											(void *)cgcOssFindNextFile,
 		(void *)&oss_fileFindClose,											(void *)cgcOssFindClose,
 
-		(void *)&oss_buildBufferCreateAndInitialize,						(void *)cgcOssBuildBufferCreateAndInitialize,
-		(void *)&oss_buildBufferAppendText,									(void *)cgcOssBuildBufferAppendText,
-		(void *)&oss_buildBufferSetSize,									(void *)cgcOssBuildBufferSetSize,
-		(void *)&oss_buildBufferFreeAndRelease,								(void *)cgcOssBuildBufferFreeAndRelease,
+		(void *)&oss_builderCreateAndInitialize,						(void *)cgcOssBuildBufferCreateAndInitialize,
+		(void *)&oss_builderAppendText,									(void *)cgcOssBuildBufferAppendText,
+		(void *)&oss_builderSetSize,									(void *)cgcOssBuildBufferSetSize,
+		(void *)&oss_builderFreeAndRelease,								(void *)cgcOssBuildBufferFreeAndRelease,
 
 		(void *)&oss_sha1ComputeSha1,										(void *)cgcOssSha1ComputeSha1,
 		(void *)&oss_sha1ComputeSha1As64Bit,								(void *)cgcOssSha1ComputeSha1As64Bit,

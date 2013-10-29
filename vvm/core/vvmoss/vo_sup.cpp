@@ -3327,7 +3327,7 @@ _asm int 3;
 // issue.  If not, reallocates the buffer.
 //
 //////
-	void ioss_bufferVerifySizeForNewBytes(SBuffer* buffRoot, u32 tnDataLength)
+	void ioss_bufferVerifySizeForNewBytes(SBuilder* buffRoot, u32 tnDataLength)
 	{
 		// Make sure our environment is sane
 		if (buffRoot && tnDataLength != 0)
@@ -3416,6 +3416,15 @@ _asm int 3;
 				// Initialize the block
 				memset(lsm, 0, sizeof(SScaleMap));
 
+				// Create the builder block for the stored scale compute records
+				oss_builderCreateAndInitialize(&lsm->scaleData, 8192000);	// Allocate 8MB at a time
+
+				// Store its sizing parameters
+				lsm->src.width	= tsSrc->width;
+				lsm->src.height	= tsSrc->height;
+				lsm->dst.width	= tsDst->width;
+				lsm->dst.height	= tsDst->height;
+
 				// Update the back-link
 				*lsmLast = lsm;
 			}
@@ -3453,7 +3462,7 @@ _asm int 3;
 		u64							lnPixelsDrawn;
 		f64							lfMult, lfRed, lfGrn, lfBlu, lfAlp;
 		s32							lnY, lnX;
-		u32							lnOffset;
+		u32							lnOffset, lnMaxOffset, lnOffsetDst;
 		_isSSpannedPixelProcessing	spp;
 		SScaleCompute*				lsc;
 		SBGRA*						lbgras;
@@ -3464,7 +3473,7 @@ _asm int 3;
 		memset(&spp, 0, sizeof(spp));
 
 		// Are we scaling based on the formula already derived?
-		if (!tsSm->firstScale)
+		if (tsSm->scaleData->populatedLength == 0)
 		{
 			// Build the scale computation
 			spp.dst			= tsDst;
@@ -3501,14 +3510,16 @@ _asm int 3;
 
 
 		// Now perform the scale
-		if (tsSm->firstScale)
+		if (tsSm->scaleData->populatedLength)
 		{
 			// Initialize everything in the destination to black and 0 alpha (because every pixel computation is added to the prior values)
 			oss_memset4((u32*)tsDst->bd, 0, tsDst->width * tsDst->height);
 
 			// Apply the scaling computation
-			lsc = tsSm->firstScale;
-			while (lsc)
+			lnOffset	= 0;
+			lnMaxOffset	= tsSm->scaleData->populatedLength;
+			lsc			= (SScaleCompute*)tsSm->scaleData->data;
+			while (lnOffset < lnMaxOffset)
 			{
 				// Compute this portion
 				lbgras		= (SBGRA*)((s8*)tsSrc->bd + lsc->sbgraOffsetSrc);
@@ -3520,13 +3531,14 @@ _asm int 3;
 				lfRed		= (f64)lbgras->red * lfMult;
 				lfGrn		= (f64)lbgras->grn * lfMult;
 				lfBlu		= (f64)lbgras->blu * lfMult;
-				lnOffset	= lsc->sbgraOffsetDst;
+				lnOffsetDst	= lsc->sbgraOffsetDst;
 				
 				// Move to next scale entry
-				lsc = (SScaleCompute*)lsc->next;
+				lnOffset	+= sizeof(SScaleCompute);
+				lsc			= (SScaleCompute*)(tsSm->scaleData->data + lnOffset);
 
-				// So long as we're dealing with the same destination pixel, acumulate the alpha, red, green and blue values
-				if (lsc && lsc->sbgraOffsetDst == lnOffset)
+				// So long as we're dealing with the same destination pixel, accumulate the alpha, red, green and blue values
+				if (lnOffset < lnMaxOffset && lsc->sbgraOffsetDst == lnOffsetDst)
 				{
 					// Accumulate everything for this destination offset
 					do {
@@ -3541,9 +3553,10 @@ _asm int 3;
 						lfBlu	+= (f64)lbgras->blu * lfMult;
 
 						// Move to next scale entry
-						lsc = (SScaleCompute*)lsc->next;
+						lnOffset	+= sizeof(SScaleCompute);
+						lsc			= (SScaleCompute*)(tsSm->scaleData->data + lnOffset);
 
-					} while (lsc && lsc->sbgraOffsetDst == lnOffset);
+					} while (lnOffset < lnMaxOffset && lsc->sbgraOffsetDst == lnOffsetDst);
 				}
 
 				// Store the physical data
@@ -3757,52 +3770,29 @@ _asm int 3;
 //////
 	void iioss_getSpannedPixelComputationAppend(_isSSpannedPixelProcessing* spp, s32 tnDeltaX, s32 tnDeltaY, f64 tfMultiplier)
 	{
-		SScaleCompute*	lsc;
-		SScaleCompute**	lscLast;
+		SScaleCompute	lsc;
 
 		// Make sure there's some valid data here (something that a human eye could see)
 		if (tfMultiplier > 0.00001f)
 		{
-			// See where we're adding
-			if (spp->lastSc)
-			{
-				// We're appending to the existing chain
-				lscLast = (SScaleCompute**)&spp->lastSc->next;
+			// Store information specific to this part of the computation
+			// Compute the relative offset into the source canvas (unscaled canvas)
+			lsc.sbgraOffsetSrc		= spp->offsetSrc;
 
-			} else {
-				// This is the first entry
-				lscLast = &spp->sm->firstScale;
-			}
+			// If there is a Y delta, apply it
+			if (tnDeltaY != 0)
+				lsc.sbgraOffsetSrc	+= (tnDeltaY * spp->rowWidth);
 
-			// Create the new entry
-			lsc = (SScaleCompute*)malloc(sizeof(SScaleCompute));
+			// If there is an X delta, apply it
+			if (tnDeltaX != 0)
+				lsc.sbgraOffsetSrc	+= (tnDeltaX * sizeof(SBGRA));
 
-			// Did it create okay?
-			if (lsc)
-			{
-				// Initialize it to emptiness
-				memset(lsc, 0, sizeof(SScaleCompute));
+			// Store the destination offset and multiplier for this portion of the pixel
+			lsc.sbgraOffsetDst		= spp->offsetDst;					// Offset into the destination canvas (scaled canvas)
+			lsc.multiplier			= tfMultiplier / spp->areaSpanned;	// Multiplier for this pixel portion to add in to the total for that spanned pixel
 
-				// Set this item's properties
-				*lscLast				= lsc;								// Update the back-link
-				spp->lastSc				= lsc;								// Update the last scale
-
-				// Store information specific to this part of the computation
-				// Compute the relative offset into the source canvas (unscaled canvas)
-				lsc->sbgraOffsetSrc		= spp->offsetSrc;
-
-				// If there is a Y delta, apply it
-				if (tnDeltaY != 0)
-					lsc->sbgraOffsetSrc	+= (tnDeltaY * spp->rowWidth);
-
-				// If there is an X delta, apply it
-				if (tnDeltaX != 0)
-					lsc->sbgraOffsetSrc	+= (tnDeltaX * sizeof(SBGRA));
-
-				// Store the destination offset and multiplier for this portion of the pixel
-				lsc->sbgraOffsetDst		= spp->offsetDst;					// Offset into the destination canvas (scaled canvas)
-				lsc->multiplier			= tfMultiplier / spp->areaSpanned;	// Multiplier for this pixel portion to add in to the total for that spanned pixel
-			}
+			// Append this entry
+			oss_builderAppendText(spp->sm->scaleData, (s8*)&lsc, sizeof(lsc));
 		}
 	}
 
@@ -5676,30 +5666,7 @@ continueToNextAttribute:
 //////
 	void ioss_deleteScaleCompute(SScaleMap* tsm)
 	{
-		SScaleCompute*	lsc;
-		SScaleCompute*	lscNext;
-
-
 		// Make sure our environment is sane
-		if (tsm)
-		{
-			// Grab the starting point
-			lsc = tsm->firstScale;
-
-			// Indicate this entry no longer exists
-			tsm->firstScale	= NULL;
-
-			// Iterate through every entry
-			while (lsc)
-			{
-				// Grab the next entry
-				lscNext = (SScaleCompute*)lsc->next;
-
-				// Delete this entry
-				free(lsc);
-
-				// Move to next entry
-				lsc = lscNext;
-			}
-		}
+		if (tsm && tsm->scaleData)
+			oss_builderFreeAndRelease(&tsm->scaleData);
 	}
