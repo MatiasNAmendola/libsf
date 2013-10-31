@@ -185,39 +185,45 @@
 		bool llResult;
 
 
+//////////
 // Test code
-SBGRA		white				= {255,255,255,255};
-SDateTime	lsdtStart, lsdtStop;
-u32			lnI, lnWidth, lnHeight;
-SCanvas*	lc;
-SCanvas*	lcScaled;
-SBuilder*	builder;
-f64			lnH, lnW, lnHStep, lnWStep;
-s8			buffer[256];
-s8			timing[256];
+//////
+	SBGRA		white				= {255,255,255,255};
+	SDateTime	lsdtStart, lsdtStop;
+	u32			lnI, lnWidth, lnHeight;
+	SCanvas*	lc;
+	SCanvas*	lcScaled;
+	SCanvas*	lcExtract;
+	SBuilder*	builder;
+	f64			lnH, lnW, lnHStep, lnWStep;
+	s8			buffer[256];
+	s8			timing[256];
 
-oss_builderCreateAndInitialize(&builder, 2048);
-oss_bitmapLoadFromDisk("c:\\temp\\test.bmp", &lc, &lnWidth, &lnHeight, white);
+	oss_builderCreateAndInitialize(&builder, 2048);
+	oss_bitmapLoadFromDisk("c:\\temp\\test.bmp", &lc, &lnWidth, &lnHeight, white);
 
-lnHStep = (f64)lnHeight / 5.0;
-lnWStep = (f64)lnWidth / 5.0;
-for (lnH = lnHeight / 5, lnW = lnWidth / 5; lnH < (f64)lnHeight * 2.0f; lnH += lnHStep, lnW += lnWStep)
-{
-	lcScaled = oss_createCanvas(0, (u32)lnW, (u32)lnH, white);
-	for (lnI = 0; lnI < 10; lnI++)
-	{
-		oss_dateTimeGet(&lsdtStart);
-		oss_canvasScale(lcScaled, lc, &lcScaled->firstScaleMap);
-		oss_dateTimeGet(&lsdtStop);
-		sprintf(timing, "\\temp\\Scale_%ux%u_Iteration_%u_Milliseconds_%f.bmp\0", (u32)lnW, (u32)lnH, lnI, (f32)((f64)(lsdtStop.tickCount - lsdtStart.tickCount) / (f64)lsdtStart.frequency));
-		oss_builderAppendText(builder, timing + 6, strlen(timing) - 6 - 4);
-		oss_bitmapSaveToDisk(lcScaled, lcScaled->bd, timing);
-		oss_builderAppendText(builder, "\n", 1);
-	}
-	//oss_bitmapSaveToDisk(lcScaled, lcScaled->bd, buffer);
-	//oss_deleteCanvas(lcScaled);
-}
-oss_sharedAsciiWriteOutFile("c:\\temp\\information.txt", builder->data, builder->populatedLength);
+	lcExtract = oss_canvasExtract(lc, lc->bd, 200, 200, 50, 50);
+	oss_canvasRotate(lc, lc->bd, 200, 200, lcExtract, lcExtract->bd, 6.28f * 45.0f / 360.0f);
+
+// 	lnHStep = (f64)lnHeight / 5.0;
+// 	lnWStep = (f64)lnWidth / 5.0;
+// 	for (lnH = lnHeight / 5, lnW = lnWidth / 5; lnH < (f64)lnHeight * 2.0f; lnH += lnHStep, lnW += lnWStep)
+// 	{
+// 		lcScaled = oss_createCanvas(0, (u32)lnW, (u32)lnH, white);
+// 		for (lnI = 0; lnI < 10; lnI++)
+// 		{
+// 			oss_dateTimeGet(&lsdtStart);
+// 			oss_canvasScale(lcScaled, lc, &lcScaled->firstScaleMap);
+// 			oss_dateTimeGet(&lsdtStop);
+// 			sprintf(timing, "\\temp\\Scale_%ux%u_Iteration_%u_Milliseconds_%f.bmp\0", (u32)lnW, (u32)lnH, lnI, (f32)((f64)(lsdtStop.tickCount - lsdtStart.tickCount) / (f64)lsdtStart.frequency));
+// 			oss_builderAppendText(builder, timing + 6, strlen(timing) - 6 - 4);
+// 	//		oss_bitmapSaveToDisk(lcScaled, lcScaled->bd, timing);
+// 			oss_builderAppendText(builder, "\n", 1);
+// 		}
+// 		//oss_bitmapSaveToDisk(lcScaled, lcScaled->bd, buffer);
+// 		//oss_deleteCanvas(lcScaled);
+// 	}
+// 	oss_sharedAsciiWriteOutFile("c:\\temp\\information.txt", builder->data, builder->populatedLength);
 
 		//////////
 		// If any test fails, early out

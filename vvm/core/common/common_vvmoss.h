@@ -103,6 +103,8 @@
 	const s8		cgcOssCanvasGradient[]									= "oss_canvasGradient";
 	const s8		cgcOssCanvasBitBlt[]									= "oss_canvasBitBlt";
 	const s8		cgcOssCanvasScale[]										= "oss_canvasScale";
+	const s8		cgcOssCanvasRotate[]									= "oss_canvasRotate";
+	const s8		cgcOssCanvasRotateAbout[]								= "oss_canvasRotateAbout";
 
 	const s8		cgcOssCaskDefineStandard[]								= "oss_caskDefineStandard";
 	const s8		cgcOssCaskDefineEncompassingRectangle[]					= "oss_caskDefineEncompassingRectangle";
@@ -254,6 +256,9 @@
 	const s8		cgcOssIsNeedleInHaystackUnicode[]						= "oss_isNeedleInHaystack_Unicode";
 	const s8		cgcOssCountConsecutiveAsciiNumericDigits[]				= "oss_countConsecutiveAsciiNumericDigits";
 	const s8		cgcOssConvertTextToU32[]								= "oss_convertTextToU32";
+
+	const s8		cgcOssMathTrianglePopulateArea[]						= "oss_math_triangleCompute";
+	const s8		cgcOssMathSquareRotateAbout[]							= "oss_math_squareRotateAbout";
 
 	const s8		cgcOssFindFirstFile[]									= "oss_fileFindFirst";
 	const s8		cgcOssFindNextFile[]									= "oss_fileFindNext";
@@ -452,6 +457,8 @@
 		u64				(CALLTYPE *oss_canvasGradient)							(SCanvas* tc, SBGRA* bd, SBGRA ul, SBGRA ur, SBGRA lr, SBGRA ll);
 		u64				(CALLTYPE *oss_canvasBitBlt)							(SCanvas* tsDst, bool tlDstAccumulator, s32 dulx, s32 duly, SCanvas* tsSrc, bool tlSrcAccumulator, s32 sulx, s32 suly, s32 slrx, s32 slry);
 		u64				(CALLTYPE *oss_canvasScale)								(SCanvas* tsDst, SCanvas* tsSrc, SScaleMap** tsScaleMap);
+		u64				(CALLTYPE *oss_canvasRotate)							(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians);
+		u64				(CALLTYPE *oss_canvasRotateAbout)						(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, s32 ox, s32 oy);
 
 		SCask*			(CALLTYPE *oss_caskDefineStandard)						(u32 tnHeight, u32 tnWidth, u32 tnLeftStyle, u32 tnLeftState, u32 tnLeftPipCount, u32 tnLeftColor, csu8p tcLeftText, u32 tnRightStyle, u32 tnRightState, u32 tnRightPipCount, u32 tnRightColor, csu8p tcRightText);
 		SCask*			(CALLTYPE *oss_caskDefineEncompassingRectangle)			(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SRectXYXY* tsOuter);
@@ -669,6 +676,10 @@
 		bool			(CALLTYPE *oss_isNeedleInHaystack_Unicode)			(w16* twHaystack, w16* twNeedle);
 		u32				(CALLTYPE *oss_countConsecutiveAsciiNumericDigits)	(s8* buffer, u32 tnMaxLength);
 		u32				(CALLTYPE *oss_convertTextToU32)					(s8* tcNumbers, u32 tnMaxLength);
+
+		void			(CALLTYPE *oss_math_triangleCompute)				(STriangleInOutF64* tri);
+		void			(CALLTYPE *oss_math_squareCompute)					(SSquareInOutF64* sq, s32 ox, s32 oy);
+		void			(CALLTYPE *oss_math_squareRotateAbout)				(SSquareInOutF64* sq);
 
 
 //////////
@@ -893,6 +904,8 @@
 		(void *)&oss_canvasGradient,										(void *)cgcOssCanvasGradient,
 		(void *)&oss_canvasBitBlt,											(void *)cgcOssCanvasBitBlt,
 		(void *)&oss_canvasScale,											(void *)cgcOssCanvasScale,
+		(void *)&oss_canvasRotate,											(void *)cgcOssCanvasRotate,
+		(void *)&oss_canvasRotateAbout,										(void *)cgcOssCanvasRotateAbout,
 
 		(void *)&oss_caskDefineStandard,									(void *)cgcOssCaskDefineStandard,
 		(void *)&oss_caskDefineEncompassingRectangle,						(void *)cgcOssCaskDefineEncompassingRectangle,
@@ -910,7 +923,6 @@
 		(void *)&oss_screenKeyboardRemoveEventCallback,						(void *)cgcOssScreenKeyboardRemoveEventCallback,
 		(void *)&oss_screenKeyboardGetEventCallbacksList,					(void *)cgcOssScreenKeyboardGetEventCallbacksList,
 
-		(void *)&oss_canvasScale,											(void *)cgcOssCanvasScale,
 		(void *)&oss_bitmapLoadFromDisk,									(void *)cgcOssLoadBitmapFromDisk,
 		(void *)&oss_bitmapSaveToDisk,										(void *)cgcOssSaveBitmapToDisk,
 
@@ -1055,14 +1067,17 @@
 		(void*)&oss_countConsecutiveAsciiNumericDigits,						(void*)cgcOssCountConsecutiveAsciiNumericDigits,
 		(void*)&oss_convertTextToU32,										(void*)cgcOssConvertTextToU32,
 
+		(void*)&oss_math_triangleCompute,								(void*)cgcOssMathTrianglePopulateArea,
+		(void*)&oss_math_squareRotateAbout,									(void*)cgcOssMathSquareRotateAbout,
+
 		(void *)&oss_fileFindFirst,											(void *)cgcOssFindFirstFile,
 		(void *)&oss_fileFindNext,											(void *)cgcOssFindNextFile,
 		(void *)&oss_fileFindClose,											(void *)cgcOssFindClose,
 
-		(void *)&oss_builderCreateAndInitialize,						(void *)cgcOssBuildBufferCreateAndInitialize,
-		(void *)&oss_builderAppendText,									(void *)cgcOssBuildBufferAppendText,
-		(void *)&oss_builderSetSize,									(void *)cgcOssBuildBufferSetSize,
-		(void *)&oss_builderFreeAndRelease,								(void *)cgcOssBuildBufferFreeAndRelease,
+		(void *)&oss_builderCreateAndInitialize,							(void *)cgcOssBuildBufferCreateAndInitialize,
+		(void *)&oss_builderAppendText,										(void *)cgcOssBuildBufferAppendText,
+		(void *)&oss_builderSetSize,										(void *)cgcOssBuildBufferSetSize,
+		(void *)&oss_builderFreeAndRelease,									(void *)cgcOssBuildBufferFreeAndRelease,
 
 		(void *)&oss_sha1ComputeSha1,										(void *)cgcOssSha1ComputeSha1,
 		(void *)&oss_sha1ComputeSha1As64Bit,								(void *)cgcOssSha1ComputeSha1As64Bit,

@@ -3464,7 +3464,7 @@ _asm int 3;
 		s32							lnY, lnX;
 		u32							lnOffset, lnMaxOffset, lnOffsetDst;
 		_isSSpannedPixelProcessing	spp;
-		SScaleCompute*				lsc;
+		SBbgraCompute*				lsc;
 		SBGRA*						lbgras;
 		SBGRA*						lbgrad;
 
@@ -3518,7 +3518,7 @@ _asm int 3;
 			// Apply the scaling computation
 			lnOffset	= 0;
 			lnMaxOffset	= tsSm->scaleData->populatedLength;
-			lsc			= (SScaleCompute*)tsSm->scaleData->data;
+			lsc			= (SBbgraCompute*)tsSm->scaleData->data;
 			while (lnOffset < lnMaxOffset)
 			{
 				// Compute this portion
@@ -3534,8 +3534,8 @@ _asm int 3;
 				lnOffsetDst	= lsc->sbgraOffsetDst;
 				
 				// Move to next scale entry
-				lnOffset	+= sizeof(SScaleCompute);
-				lsc			= (SScaleCompute*)(tsSm->scaleData->data + lnOffset);
+				lnOffset	+= sizeof(SBbgraCompute);
+				lsc			= (SBbgraCompute*)(tsSm->scaleData->data + lnOffset);
 
 				// So long as we're dealing with the same destination pixel, accumulate the alpha, red, green and blue values
 				if (lnOffset < lnMaxOffset && lsc->sbgraOffsetDst == lnOffsetDst)
@@ -3553,8 +3553,8 @@ _asm int 3;
 						lfBlu	+= (f64)lbgras->blu * lfMult;
 
 						// Move to next scale entry
-						lnOffset	+= sizeof(SScaleCompute);
-						lsc			= (SScaleCompute*)(tsSm->scaleData->data + lnOffset);
+						lnOffset	+= sizeof(SBbgraCompute);
+						lsc			= (SBbgraCompute*)(tsSm->scaleData->data + lnOffset);
 
 					} while (lnOffset < lnMaxOffset && lsc->sbgraOffsetDst == lnOffsetDst);
 				}
@@ -3770,7 +3770,7 @@ _asm int 3;
 //////
 	void iioss_getSpannedPixelComputationAppend(_isSSpannedPixelProcessing* spp, s32 tnDeltaX, s32 tnDeltaY, f64 tfMultiplier)
 	{
-		SScaleCompute	lsc;
+		SBbgraCompute	lsc;
 
 		// Make sure there's some valid data here (something that a human eye could see)
 		if (tfMultiplier > 0.00001f)
@@ -5669,4 +5669,22 @@ continueToNextAttribute:
 		// Make sure our environment is sane
 		if (tsm && tsm->scaleData)
 			oss_builderFreeAndRelease(&tsm->scaleData);
+	}
+
+
+
+
+//////////
+//
+// Rotates the indicated canvas about the indicated point.
+//
+//////
+	u64 iioss_canvasRotateAbout(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, s32 xo, s32 xy)
+	{
+		f64		lfUlx, lfUly, lfM, lfMP, lfWidth, lfHeight;
+
+
+		// Rotate the starting point around the corner
+
+		return(0);
 	}

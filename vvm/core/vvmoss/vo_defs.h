@@ -112,6 +112,8 @@
 		u64 CALLTYPE		 	oss_canvasGradient							(SCanvas* tc, SBGRA* bd, SBGRA ul, SBGRA ur, SBGRA lr, SBGRA ll);
 		u64 CALLTYPE		 	oss_canvasBitBlt							(SCanvas* tsDst, bool tlDstAccumulator, s32 dulx, s32 duly, SCanvas* tsSrc, bool tlSrcAccumulator, s32 sulx, s32 suly, s32 slrx, s32 slry);
 		u64 CALLTYPE			oss_canvasScale								(SCanvas* tsDst, SCanvas* tsSrc, SScaleMap** tsScaleMap);
+		u64 CALLTYPE			oss_canvasRotate							(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians);
+		u64 CALLTYPE			oss_canvasRotateAbout						(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, s32 ox, s32 oy);
 
 		SCask* CALLTYPE			oss_caskDefineStandard						(u32 tnHeight, u32 tnWidth, u32 tnLeftStyle, u32 tnLeftState, u32 tnLeftPipCount, u32 tnLeftColor, csu8p tcLeftText, u32 tnRightStyle, u32 tnRightState, u32 tnRightPipCount, u32 tnRightColor, csu8p tcRightText);
 		SCask* CALLTYPE			oss_caskDefineEncompassingRectangle			(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SRectXYXY* tsOuter);
@@ -325,6 +327,10 @@
 		bool CALLTYPE			oss_isNeedleInHaystack_Unicode				(w16* twHaystack, w16* twNeedle);
 		u32 CALLTYPE			oss_countConsecutiveAsciiNumericDigits		(s8* buffer, u32 tnMaxLength);
 		u32 CALLTYPE			oss_convertTextToU32						(s8* tcNumbers, u32 tnMaxLength);
+
+		void CALLTYPE			oss_math_triangleCompute					(STriangleInOutF64* tri);
+		void CALLTYPE			oss_math_squareCompute						(SSquareInOutF64* sq, s32 ox, s32 oy);
+		void CALLTYPE			oss_math_squareRotateAbout					(SSquareInOutF64* sq);
 
 
 //////////
@@ -622,7 +628,7 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	void					iioss_enumerateMonitorsIterateCallback			(SStartEndCallback* cb);
 
 	void					ioss_deleteScaleCompute							(SScaleMap* tsm);
-
+	u64						iioss_canvasRotateAbout							(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, s32 xo, s32 xy);
 
 
 //////////

@@ -1744,6 +1744,48 @@
 
 //////////
 //
+// Rotates the indicated canvas onto the destination at the (ulx,uly) coordinates.  Those
+// coordinates represent where the upper-left corner would've been before the rotation.  The
+// rotation will be about the center of the source canvas, rotating the indicated number of
+// radians from there, so that it may exceed the bounds ranging from (ulx,uly) to (ulx+w,uly+h).
+// Please bear this in mind. :-)
+//
+//////
+	u64 CALLTYPE oss_canvasRotate(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians)
+	{
+		if (tsDst && bdd && tsSrc && bds)
+			return(iioss_canvasRotateAbout(tsDst, bdd, ulx, uly, tsSrc, bds, tfRadians, (ulx+tsSrc->width) / 2, (uly+tsSrc->height) / 2));
+
+		// If we get here, failure
+		return(0);
+	}
+
+
+
+
+//////////
+//
+// Rotates the indicated canvas onto the destination at the (ulx,uly) coordinates.  Those
+// coordinates represent where the upper-left corner would've been before the rotation.  The
+// rotation will be about the center of the source canvas, rotating the indicated number of
+// radians from there, so that it may exceed the bounds ranging from (ulx,uly) to (ulx+w,uly+h).
+// Please bear this in mind. :-)
+//
+//////
+	u64 CALLTYPE oss_canvasRotateAbout(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, s32 ox, s32 oy)
+	{
+		if (tsDst && bdd && tsSrc && bds)
+			return(iioss_canvasRotateAbout(tsDst, bdd, ulx, uly, tsSrc, bds, tfRadians, ox, oy));
+
+		// If we get here, failure
+		return(0);
+	}
+
+
+
+
+//////////
+//
 // Refreshes the screen (draws all regions within)
 //
 //////
@@ -8056,6 +8098,197 @@ _asm int 3;
 		// We have our converted value
 		return(lnValue);
 	}
+
+
+
+
+//////////
+//
+// Called to perform various math operations.
+//
+// Heron's formula:  area = sqrt(s*(s-a)*(s-b)*(s-c))
+//                      s = (a+b+c) / 2
+//                      a = length(p1,p2)    // tri->l12
+//                      b = length(p2,p3)    // tri->l23
+//                      c = length(p3,p1)    // tri->l31
+//
+//////
+	// Given three points, what are the side lengths, semiperimeter, and area
+	void CALLTYPE oss_math_triangleCompute(STriangleInOutF64* tri)
+	{
+		f64 lfdx, lfdy;
+
+
+		// Make sure the environment is sane
+		if (tri)
+		{
+			//////////
+			// P1..P2 length
+			//////
+				lfdx					= tri->input->p1x - tri->input->p2x;
+				lfdy					= tri->input->p1y - tri->input->p2y;
+				tri->computed->p1_p2	= sqrt(lfdx*lfdx + lfdy*lfdy);
+
+			//////////
+			// P2..P3 length
+			//////
+				lfdx					= tri->input->p2x - tri->input->p3x;
+				lfdy					= tri->input->p2y - tri->input->p3y;
+				tri->computed->p2_p3	= sqrt(lfdx*lfdx + lfdy*lfdy);
+
+			//////////
+			// P3..P1 length
+			//////
+				lfdx					= tri->input->p3x - tri->input->p1x;
+				lfdy					= tri->input->p3y - tri->input->p1y;
+				tri->computed->p3_p1	= sqrt(lfdx*lfdx + lfdy*lfdy);
+
+			//////////
+			// Semiperimeter (half the perimeter)
+			//////
+				tri->computed->sp		= (tri->computed->p1_p2 + tri->computed->p2_p3 + tri->computed->p3_p1) / 2.0;
+
+			//////////
+			// Area
+			//////
+				tri->computed->area		= sqrt(		 tri->computed->sp 
+												*	(tri->computed->sp - tri->computed->p1_p2) 
+												*	(tri->computed->sp - tri->computed->p2_p3)
+												*	(tri->computed->sp - tri->computed->p3_p1));
+		}
+	}
+
+	// Given the 4 points of a square, the origin by which it rotates around, and the radians to
+	// rotate, compute the new four point locations.  To do this, we assume all the points are proper.
+	// Note:  If they are not the computation will not be correct, but it will not cause an error.
+	void CALLTYPE oss_math_squareCompute(SSquareInOutF64* sq, s32 ox, s32 oy)
+	{
+		f64 lfdx, lfdy;
+
+
+		// Make sure our environment is sane
+		if (sq && sq->input && sq->computed)
+		{
+			//////////
+			// Copy the origin from input to computed
+			//////
+				sq->computed->ox		= (f64)ox;
+				sq->computed->oy		= (f64)oy;
+
+			//////////
+			// P1..P2 length, slope, and perpendicular slope
+			//////
+				lfdx					= sq->input->p1x - sq->input->p2x;
+				lfdy					= sq->input->p1y - sq->input->p2y;
+				sq->computed->p1_p2		= sqrt(lfdx*lfdx + lfdy*lfdy);
+				sq->computed->m			= lfdy / lfdx;					// Compute the slope P1..P2 (rise/run)
+				sq->computed->mp		= -1.0 / sq->computed->m;		// Compute the perpendicular slope, which is the slope of P1..P4
+
+			//////////
+			// P2..P3 length
+			//////
+				lfdx					= sq->input->p2x - sq->input->p3x;
+				lfdy					= sq->input->p2y - sq->input->p3y;
+				sq->computed->p2_p3		= sqrt(lfdx*lfdx + lfdy*lfdy);
+
+			//////////
+			// P3..P4 length
+			//////
+				lfdx					= sq->input->p3x - sq->input->p4x;
+				lfdy					= sq->input->p3y - sq->input->p4y;
+				sq->computed->p3_p4		= sqrt(lfdx*lfdx + lfdy*lfdy);
+
+			//////////
+			// P4..P1 length
+			//////
+				lfdx					= sq->input->p4x - sq->input->p1x;
+				lfdy					= sq->input->p4y - sq->input->p1y;
+				sq->computed->p4_p1		= sqrt(lfdx*lfdx + lfdy*lfdy);
+
+			//////////
+			// P1..P3 hypotenuse
+			//////
+				sq->computed->p1_p3		= sqrt(		sq->computed->p1_p2 * sq->computed->p1_p2
+												+	sq->computed->p2_p3 * sq->computed->p2_p3);
+
+			//////////
+			// Determine the theta values and radius to the origin
+			// P1 theta
+			//////
+				lfdx					= sq->input->p1x - sq->computed->ox;
+				lfdy					= sq->input->p1y - sq->computed->oy;
+				sq->computed->thetaP1	= atan2(lfdy, lfdx);
+				sq->computed->radiusP1	= sqrt(lfdx*lfdx + lfdy*lfdy);
+
+			//////////
+			// P2 theta
+			//////
+				lfdx					= sq->input->p2x - sq->computed->ox;
+				lfdy					= sq->input->p2y - sq->computed->oy;
+				sq->computed->thetaP2	= atan2(lfdy, lfdx);
+				sq->computed->radiusP2	= sqrt(lfdx*lfdx + lfdy*lfdy);
+
+			//////////
+			// P3 theta
+			//////
+				lfdx					= sq->input->p3x - sq->computed->ox;
+				lfdy					= sq->input->p3y - sq->computed->oy;
+				sq->computed->thetaP3	= atan2(lfdy, lfdx);
+				sq->computed->radiusP3	= sqrt(lfdx*lfdx + lfdy*lfdy);
+
+			//////////
+			// P4 theta
+			//////
+				lfdx					= sq->input->p2x - sq->computed->ox;
+				lfdy					= sq->input->p2y - sq->computed->oy;
+				sq->computed->thetaP4	= atan2(lfdy, lfdx);
+				sq->computed->radiusP4	= sqrt(lfdx*lfdx + lfdy*lfdy);
+		}
+	}
+
+
+
+
+//////////
+//
+// Given the 4 points of a square, the origin by which it rotates around, and the radians to
+// rotate, compute the new four point locations.  To do this, we assume all the points are proper
+// or that a call to oss_math_squareCompute() was done immediately prior.
+//
+// Note:  If they are not the computation will not be correct, but it will not cause an error.
+//
+//////
+	void CALLTYPE oss_math_squareRotateAbout(SSquareInOutF64* sq)
+	{
+		// Make sure our environment is sane
+		if (sq && sq->input && sq->computed && sq->output)
+		{
+			//////////
+			// Rotate P1
+			//////
+				sq->output->p1x		= sq->computed->radiusP1 * cos(sq->computed->thetaP1 + sq->computed->radians);
+				sq->output->p1y		= sq->computed->radiusP1 * sin(sq->computed->thetaP1 + sq->computed->radians);
+
+			//////////
+			// Rotate P2
+			//////
+				sq->output->p2x		= sq->computed->radiusP2 * cos(sq->computed->thetaP2 + sq->computed->radians);
+				sq->output->p2y		= sq->computed->radiusP2 * sin(sq->computed->thetaP2 + sq->computed->radians);
+
+			//////////
+			// Rotate P3
+			//////
+				sq->output->p3x		= sq->computed->radiusP3 * cos(sq->computed->thetaP3 + sq->computed->radians);
+				sq->output->p3y		= sq->computed->radiusP3 * sin(sq->computed->thetaP3 + sq->computed->radians);
+
+			//////////
+			// Rotate P4
+			//////
+				sq->output->p4x		= sq->computed->radiusP4 * cos(sq->computed->thetaP4 + sq->computed->radians);
+				sq->output->p4y		= sq->computed->radiusP4 * sin(sq->computed->thetaP4 + sq->computed->radians);
+		}
+	}
+
 
 
 

@@ -54,6 +54,8 @@ EXPORTS
 	oss_canvasGradient
 	oss_canvasBitBlt
 	oss_canvasScale
+	oss_canvasRotate
+	oss_canvasRotateAbout
 	
 	oss_caskDefineStandard
 	oss_caskDefineEncompassingRectangle
@@ -217,6 +219,10 @@ EXPORTS
 	oss_isNeedleInHaystack_Unicode
 	oss_countConsecutiveAsciiNumericDigits
 	oss_convertTextToU32
+
+	oss_math_triangleCompute
+	oss_math_squareCompute
+	oss_math_squareRotateAbout
 	
 	oss_fileFindFirst
 	oss_fileFindNext

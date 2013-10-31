@@ -792,6 +792,135 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		};
 	};
 
+	struct STriangleF64
+	{
+		f64			p1x;						// p1 = (xp1,yp2)
+		f64			p1y;
+
+		f64			p2x;						// p2 = (xp2,yp2)
+		f64			p2y;
+
+		f64			p3x;						// p3 = (xp3,yp3)
+		f64			p3y;
+	};
+
+	struct STriangleComputedF64
+	{
+		f64			p1_p2;						// Length of p1..p2
+		f64			p2_p3;						// Length of p2..p3
+		f64			p3_p1;						// Length of p3..p1
+
+		f64			sp;							//                      s = (l12 + l23 + l31) / 2
+		f64			area;						// Heron's formula:  area = sqrt(s * (s - l12) * (s - l23) * (s - l31))
+	};
+
+	struct STriangleInOutF64
+	{
+		STriangleF64*			input;			// The input STriangle structure
+		STriangleComputedF64*	computed;		// Computed data between input and output
+		STriangleF64*			output;			// The computed output values after manipulation
+	};
+
+	struct SSquareF64
+	{
+		// p1 = (ulx,uly)
+		union {
+			f64		ulx;
+			f64		p1x;		
+		};
+		union {
+			f64		uly;
+			f64		p1y;
+		};
+
+		// p2 = (urx,ury)
+		union {
+			f64		urx;
+			f64		p2x;
+		};
+		union {
+			f64		ury;
+			f64		p2y;
+		};
+
+		// p3 = (lrx,lry)
+		union {
+			f64		lrx;
+			f64		p3x;
+		};
+		union {
+			f64		lry;
+			f64		p3y;
+		};
+
+		// p4 = (llx,lly)
+		union {
+			f64		llx;
+			f64		p4x;
+		};
+		union {
+			f64		lly;
+			f64		p4y;
+		};
+	};
+
+	struct SSquareComputedF64
+	{
+		// Computed values:
+		f64			m;							// Slope of p1..p2, and p3..p4
+		f64			mp;							// Slope of p2..p3, and p1..p4
+
+		// Side lengths
+		union {
+			f64		p1_p2;
+			f64		ul_ur;
+		};
+		union {
+			f64		p2_p3;
+			f64		ur_lr;
+		};
+		union {
+			f64		p3_p4;
+			f64		lr_ll;
+		};
+		union {
+			f64		p4_p1;
+			f64		ll_ul;
+		};
+
+		// Hypotenuse
+		union {
+			f64		p1_p3;
+			f64		p2_p4;
+			f64		ul_lr;
+			f64		ur_ll;
+		};
+
+		// Theta values for each point
+		f64			thetaP1;
+		f64			thetaP2;
+		f64			thetaP3;
+		f64			thetaP4;
+
+		// Radius lengths relative to supplied origin
+		f64			radiusP1;
+		f64			radiusP2;
+		f64			radiusP3;
+		f64			radiusP4;
+
+		// Origin for the computation
+		f64			radians;					// (if rotated, radians used)
+		f64			ox;							// Origin x
+		f64			oy;							// Origin y
+	};
+
+	struct SSquareInOutF64
+	{
+		SSquareF64*			input;				// The input SSquareF structure
+		SSquareF64*			output;				// The computed output values for SSquareComputedF
+		SSquareComputedF64*	computed;			// Computed data between input and output
+	};
+
 	struct SLLCallback
 	{
 		union
@@ -1071,9 +1200,9 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 // inside the VVM as they would be in a higher level language.
 //
 //////
-	struct SScaleCompute
+	struct SBbgraCompute
 	{
-		// Refer to the oss_canvasScale() functionality
+		// For an example, refer to the oss_canvasScale() functionality of how this structure is used
 		u32				sbgraOffsetDst;			// Offset to the destination SBGRA pixel
 		u32				sbgraOffsetSrc;			// Offset to the source SBGRA pixel
 		f64				multiplier;				// The multiplier for the pixel accumulator for that value (dst += source * multiplier)
@@ -1086,6 +1215,15 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		SSize			src;					// Width of the source SBGRA
 		SSize			dst;					// Width of the destination SBGRA
 		SBuilder*		scaleData;				// The mathematical progression to use for this scale
+	};
+
+	struct SRotateMap
+	{
+		// Refer to the oss_canvasRotate() and oss_canvasRotateAbout() functionality
+		SLL*				next;					// Pointer to next scale map in the chain
+		SRectXYWH			src;					// X, Y, width and height of the source SBGRA
+		SSquareComputedF64	compute;				// Radius and theta
+		SBuilder*			scaleData;				// The mathematical progression to use for this scale
 	};
 
 	struct SCanvas

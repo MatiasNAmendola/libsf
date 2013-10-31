@@ -178,7 +178,7 @@
 		SCanvas*			dst;				// Destination for the scale
 		SCanvas*			src;				// Source for the scale
 		SScaleMap*			sm;					// Scale map being computed
-		SScaleCompute*		lastSc;			// Used to rapidly append new entries to the end
+		SBbgraCompute*		lastSc;			// Used to rapidly append new entries to the end
 
 		// Holds storage data for single spanned pixels
 		u32					red;
