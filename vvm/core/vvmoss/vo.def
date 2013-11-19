@@ -56,6 +56,7 @@ EXPORTS
 	oss_canvasScale
 	oss_canvasRotate
 	oss_canvasRotateAbout
+	oss_canvas_drawPolygon
 	
 	oss_caskDefineStandard
 	oss_caskDefineEncompassingRectangle
@@ -220,16 +221,22 @@ EXPORTS
 	oss_countConsecutiveAsciiNumericDigits
 	oss_convertTextToU32
 
-	oss_math_triangleCompute
-	oss_math_squareCompute
+	oss_math_computeTriangle
+	oss_math_computeSquare
+	oss_math_computeLine
 	oss_math_squareRotateAbout
+	
+	oss_polygon_initialize
+	oss_polygon_setByPolyLine
+	oss_polygon_setByValues
 	
 	oss_fileFindFirst
 	oss_fileFindNext
 	oss_fileFindClose
 	
 	oss_builderCreateAndInitialize
-	oss_builderAppendText
+	oss_builderAppendData
+	oss_builderAllocateBytes
 	oss_builderSetSize
 	oss_builderFreeAndRelease
 	

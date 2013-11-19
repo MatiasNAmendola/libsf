@@ -1048,6 +1048,69 @@ _asm int 3;
 
 //////////
 //
+// Draws an aliased line on the indicated canvas, ether floaned or aliased
+//
+//////
+	u64 ioss_canvasLine(SCanvas* tc, SBGRA* bd, f32 p1x, f32 p1y, f32 p2x, f32 p2y, f32 lineThickness, SBGRA line)
+	{
+		f64			lfDeltaX, lfDeltaY, lfLineLength, lfTheta, lfHalfLineX, lfHalfLineY, lfStepXM, lfStepYM;
+		u64			lnPixelsDrawn;
+		SPolygon	polygon;
+		SXYF64		p1, p2, p3, p4, gravity;
+
+
+		// Initialize the polygon
+		polygon.lineCount	= 0;
+		polygon.line		= (SPolyLine**)NULL;
+		if (oss_polygon_initialize(&polygon, 4, true))
+		{
+			// Convert our parameters for use
+			lfDeltaX		= (f64)p2x - (f64)p1x;
+			lfDeltaY		= (f64)p2y - (f64)p1y;
+			lfLineLength	= sqrt(lfDeltaX*lfDeltaX + lfDeltaY*lfDeltaY);
+			lfHalfLineX		= lineThickness * 0.5;
+			lfHalfLineY		= lfLineLength * 0.5;
+			lfTheta			= atan2(lfDeltaY, lfDeltaX);
+			lfStepXM		= cos(lfTheta);
+			lfStepYM		= sin(lfTheta);
+			// We translate this into a 4-sided polygon
+
+			// p1
+			p1.x			= (f64)p1x - (lfStepXM * lfHalfLineX);
+			p1.y			= (f64)p1y + (lfStepYM * lfHalfLineX);
+			// p2
+			p2.x			= (f64)p1x + (lfStepXM * lfHalfLineX);
+			p2.y			= (f64)p1y - (lfStepYM * lfHalfLineX);
+			// p3
+			p3.x			= (f64)p2x + (lfStepXM * lfHalfLineX);
+			p3.y			= (f64)p2y - (lfStepYM * lfHalfLineX);
+			// p2
+			p4.x			= (f64)p2x - (lfStepXM * lfHalfLineX);
+			p4.y			= (f64)p2y + (lfStepYM * lfHalfLineX);
+
+			// Gravity is the center point of the line's 4 point coordinates
+			gravity.x		= (p1.x + p2.x + p3.x + p4.x) / 4.0;
+			gravity.y		= (p1.y + p2.y + p3.y + p4.y) / 4.0;
+
+			// Set the lines
+			oss_polygon_setByValues(&polygon, 0, &p1, &p2, &gravity);		// p1..p2
+			oss_polygon_setByValues(&polygon, 1, &p2, &p3, &gravity);		// p2..p3
+			oss_polygon_setByValues(&polygon, 2, &p3, &p4, &gravity);		// p3..p4
+			oss_polygon_setByValues(&polygon, 3, &p4, &p1, &gravity);		// p4..p1
+
+			// Draw the polygon
+			lnPixelsDrawn = iioss_canvas_drawPolygon(tc, bd, &polygon);
+		}
+
+		// Indicate what we did
+		return(lnPixelsDrawn);
+	}
+
+
+
+
+//////////
+//
 // Called when the user tries to resize the window.  Sets programmed upper and lower
 // boundaries per the given constraints.
 //
@@ -3496,16 +3559,17 @@ _asm int 3;
 					spp.lrx			= spp.ulx + spp.ratioH - 0.000000000001f;
 					spp.areaSpanned	= (spp.lrx - spp.ulx) * (spp.lry - spp.uly);
 
+					// Compute offsets for this point (beginning at upper-left of any spanned pixels)
 					spp.offsetSrc	= (((s32)spp.uly * tsSrc->width) + (s32)spp.ulx) * sizeof(SBGRA);
 					spp.offsetDst	= ((lnY          * tsDst->width) + lnX         ) * sizeof(SBGRA);
 
-// if ((lnY == 2 && lnX == 516) || (lnY == 5 && lnX == 516) || (lnY == 798 && lnX == 516))
-// 	_asm nop;
 					// Derive the scale computation for this spanned pixel
 					iioss_getSpannedPixelComputation(&spp);
 				}
 			}
 			// When we get here, we've computed everything
+			// Reduce the size of the scaleData builder to whatever was used
+			oss_builderSetSize(tsSm->scaleData, -1);
 		}
 
 
@@ -3522,29 +3586,29 @@ _asm int 3;
 			while (lnOffset < lnMaxOffset)
 			{
 				// Compute this portion
-				lbgras		= (SBGRA*)((s8*)tsSrc->bd + lsc->sbgraOffsetSrc);
-				lbgrad		= (SBGRA*)((s8*)tsDst->bd + lsc->sbgraOffsetDst);
-				lfMult		= lsc->multiplier;
+				lbgras		= (SBGRA*)((s8*)tsSrc->bd + lsc->offsetSrc);
+				lbgrad		= (SBGRA*)((s8*)tsDst->bd + lsc->offsetDst);
+				lfMult		= lsc->alpha;
 
 				// Compute the translation
 				lfAlp		= (f64)lbgras->alp * lfMult;
 				lfRed		= (f64)lbgras->red * lfMult;
 				lfGrn		= (f64)lbgras->grn * lfMult;
 				lfBlu		= (f64)lbgras->blu * lfMult;
-				lnOffsetDst	= lsc->sbgraOffsetDst;
+				lnOffsetDst	= lsc->offsetDst;
 				
 				// Move to next scale entry
 				lnOffset	+= sizeof(SBbgraCompute);
 				lsc			= (SBbgraCompute*)(tsSm->scaleData->data + lnOffset);
 
 				// So long as we're dealing with the same destination pixel, accumulate the alpha, red, green and blue values
-				if (lnOffset < lnMaxOffset && lsc->sbgraOffsetDst == lnOffsetDst)
+				if (lnOffset < lnMaxOffset && lsc->offsetDst == lnOffsetDst)
 				{
 					// Accumulate everything for this destination offset
 					do {
 						// Get the multiplier for this pixel
-						lbgras	= (SBGRA*)((s8*)tsSrc->bd + lsc->sbgraOffsetSrc);
-						lfMult	= lsc->multiplier;
+						lbgras	= (SBGRA*)((s8*)tsSrc->bd + lsc->offsetSrc);
+						lfMult	= lsc->alpha;
 
 						// Add in this part of the computation
 						lfAlp	+= (f64)lbgras->alp * lfMult;
@@ -3556,7 +3620,7 @@ _asm int 3;
 						lnOffset	+= sizeof(SBbgraCompute);
 						lsc			= (SBbgraCompute*)(tsSm->scaleData->data + lnOffset);
 
-					} while (lnOffset < lnMaxOffset && lsc->sbgraOffsetDst == lnOffsetDst);
+					} while (lnOffset < lnMaxOffset && lsc->offsetDst == lnOffsetDst);
 				}
 
 				// Store the physical data
@@ -3768,31 +3832,32 @@ _asm int 3;
 // Store the pixel for this as another step for the addition and subtraction of pixel information
 //
 //////
-	void iioss_getSpannedPixelComputationAppend(_isSSpannedPixelProcessing* spp, s32 tnDeltaX, s32 tnDeltaY, f64 tfMultiplier)
+	void iioss_getSpannedPixelComputationAppend(_isSSpannedPixelProcessing* spp, s32 tnDeltaX, s32 tnDeltaY, f64 tfAlpha)
 	{
 		SBbgraCompute	lsc;
 
+
 		// Make sure there's some valid data here (something that a human eye could see)
-		if (tfMultiplier > 0.00001f)
+		if (tfAlpha > 0.00001f)
 		{
 			// Store information specific to this part of the computation
 			// Compute the relative offset into the source canvas (unscaled canvas)
-			lsc.sbgraOffsetSrc		= spp->offsetSrc;
+			lsc.offsetSrc		= spp->offsetSrc;
 
 			// If there is a Y delta, apply it
 			if (tnDeltaY != 0)
-				lsc.sbgraOffsetSrc	+= (tnDeltaY * spp->rowWidth);
+				lsc.offsetSrc	+= (tnDeltaY * spp->rowWidth);
 
 			// If there is an X delta, apply it
 			if (tnDeltaX != 0)
-				lsc.sbgraOffsetSrc	+= (tnDeltaX * sizeof(SBGRA));
+				lsc.offsetSrc	+= (tnDeltaX * sizeof(SBGRA));
 
 			// Store the destination offset and multiplier for this portion of the pixel
-			lsc.sbgraOffsetDst		= spp->offsetDst;					// Offset into the destination canvas (scaled canvas)
-			lsc.multiplier			= tfMultiplier / spp->areaSpanned;	// Multiplier for this pixel portion to add in to the total for that spanned pixel
+			lsc.offsetDst		= spp->offsetDst;					// Offset into the destination canvas (scaled canvas)
+			lsc.alpha			= tfAlpha / spp->areaSpanned;	// Multiplier for this pixel portion to add in to the total for that spanned pixel
 
 			// Append this entry
-			oss_builderAppendText(spp->sm->scaleData, (s8*)&lsc, sizeof(lsc));
+			oss_builderAppendData(spp->sm->scaleData, (s8*)&lsc, sizeof(lsc));
 		}
 	}
 
@@ -5676,15 +5741,3090 @@ continueToNextAttribute:
 
 //////////
 //
+// Computes the sides, semiperimeter and area of a triangle
+//
+//////
+	void iioss_math_computeTriangle(STriangleF64* tri)
+	{
+		f64 lfdx, lfdy;
+
+
+		//////////
+		// P1..P2 length
+		//////
+			lfdx		= tri->p1.x - tri->p2.x;
+			lfdy		= tri->p1.y - tri->p2.y;
+			tri->p1_p2	= sqrt(lfdx*lfdx + lfdy*lfdy);
+
+		//////////
+		// P2..P3 length
+		//////
+			lfdx			= tri->p2.x - tri->p3.x;
+			lfdy			= tri->p2.y - tri->p3.y;
+			tri->p2_p3	= sqrt(lfdx*lfdx + lfdy*lfdy);
+
+		//////////
+		// P3..P1 length
+		//////
+			lfdx			= tri->p3.x - tri->p1.x;
+			lfdy			= tri->p3.y - tri->p1.y;
+			tri->p3_p1	= sqrt(lfdx*lfdx + lfdy*lfdy);
+
+		//////////
+		// Semi-perimeter (half the perimeter)
+		//////
+			tri->sp		= (tri->p1_p2 + tri->p2_p3 + tri->p3_p1) / 2.0;
+
+		//////////
+		// Area:  sqrt(s * (s-p12) * (s-p23) * (s-p31))
+		//////
+			tri->area	= sqrt( tri->sp * (tri->sp - tri->p1_p2) * (tri->sp - tri->p2_p3) * (tri->sp - tri->p3_p1));
+	}
+
+
+
+
+//////////
+//
+// Computes information about a square relative to a given origin
+//
+//////
+	void iioss_math_computeSquare(SSquareInOutF64* sq, f32 ox, f32 oy)
+	{
+		f64 lfdx, lfdy;
+
+
+		//////////
+		// Store origin
+		//////
+			sq->compute->origin.x		= (f64)ox;
+			sq->compute->origin.y		= (f64)oy;
+
+		//////////
+		// Compute center
+		//////
+			sq->compute->center.x		= (sq->input->p1.x + sq->input->p2.x + sq->input->p3.x + sq->input->p4.x) / 4.0;
+			sq->compute->center.y		= (sq->input->p1.y + sq->input->p2.y + sq->input->p3.y + sq->input->p4.y) / 4.0;
+
+		//////////
+		// Compute midpoints
+		//////
+			// p1..p2
+			sq->compute->p1_p2mid.x		= (sq->input->p1.x + sq->input->p2.x) / 2.0;
+			sq->compute->p1_p2mid.y		= (sq->input->p1.y + sq->input->p2.y) / 2.0;
+			// p2..p3
+			sq->compute->p2_p3mid.x		= (sq->input->p2.x + sq->input->p3.x) / 2.0;
+			sq->compute->p2_p3mid.y		= (sq->input->p2.y + sq->input->p3.y) / 2.0;
+			// p3..p4
+			sq->compute->p3_p4mid.x		= (sq->input->p3.x + sq->input->p4.x) / 2.0;
+			sq->compute->p3_p4mid.y		= (sq->input->p3.y + sq->input->p4.y) / 2.0;
+			// p4..p1
+			sq->compute->p4_p1mid.x		= (sq->input->p4.x + sq->input->p1.x) / 2.0;
+			sq->compute->p4_p1mid.y		= (sq->input->p4.y + sq->input->p1.y) / 2.0;
+
+		//////////
+		// Compute lengths and slopes
+		//////
+			// p1..p2
+			lfdx						= sq->input->p2.x - sq->input->p1.x;
+			lfdy						= sq->input->p2.y - sq->input->p1.y;
+			sq->compute->p1_p2			= sqrt(lfdx*lfdx + lfdy*lfdy);
+			sq->compute->p1_p2mmp.m		= lfdy / lfdx;
+			sq->compute->p1_p2mmp.mp	= -lfdx / lfdy;
+			// p2..p3
+			lfdx						= sq->input->p3.x - sq->input->p2.x;
+			lfdy						= sq->input->p3.y - sq->input->p2.y;
+			sq->compute->p2_p3			= sqrt(lfdx*lfdx + lfdy*lfdy);
+			sq->compute->p2_p3mmp.m		= lfdy / lfdx;
+			sq->compute->p2_p3mmp.mp	= -lfdx / lfdy;
+			// p3..p4
+			lfdx						= sq->input->p4.x - sq->input->p3.x;
+			lfdy						= sq->input->p4.y - sq->input->p3.y;
+			sq->compute->p3_p4			= sqrt(lfdx*lfdx + lfdy*lfdy);
+			sq->compute->p3_p4mmp.m		= lfdy / lfdx;
+			sq->compute->p3_p4mmp.mp	= -lfdx / lfdy;
+			// p4..p1
+			lfdx						= sq->input->p1.x - sq->input->p4.x;
+			lfdy						= sq->input->p1.y - sq->input->p4.y;
+			sq->compute->p4_p1			= sqrt(lfdx*lfdx + lfdy*lfdy);
+			sq->compute->p4_p1mmp.m		= lfdy / lfdx;
+			sq->compute->p4_p1mmp.mp	= -lfdx / lfdy;
+
+		//////////
+		// Compute radius and theta
+		//////
+			// p1
+			sq->compute->p1rt.theta		= atan2(sq->input->p1.y - sq->compute->center.y, sq->input->p1.x - sq->compute->center.x);
+			lfdx						= sq->input->p1.x - sq->compute->center.x;
+			lfdy						= sq->input->p1.y - sq->compute->center.y;
+			sq->compute->p1rt.radius	= sqrt(lfdx*lfdx + lfdy*lfdy);
+			// p2
+			sq->compute->p2rt.theta		= atan2(sq->input->p2.y - sq->compute->center.y, sq->input->p2.x - sq->compute->center.x);
+			lfdx						= sq->input->p2.x - sq->compute->center.x;
+			lfdy						= sq->input->p2.y - sq->compute->center.y;
+			sq->compute->p2rt.radius	= sqrt(lfdx*lfdx + lfdy*lfdy);
+			// p3
+			sq->compute->p3rt.theta		= atan2(sq->input->p3.y - sq->compute->center.y, sq->input->p3.x - sq->compute->center.x);
+			lfdx						= sq->input->p3.x - sq->compute->center.x;
+			lfdy						= sq->input->p3.y - sq->compute->center.y;
+			sq->compute->p3rt.radius	= sqrt(lfdx*lfdx + lfdy*lfdy);
+			// p4
+			sq->compute->p4rt.theta		= atan2(sq->input->p4.y - sq->compute->center.y, sq->input->p4.x - sq->compute->center.x);
+			lfdx						= sq->input->p4.x - sq->compute->center.x;
+			lfdy						= sq->input->p4.y - sq->compute->center.y;
+			sq->compute->p4rt.radius	= sqrt(lfdx*lfdx + lfdy*lfdy);
+	}
+
+
+
+
+//////////
+//
+// Called to compute the midpoint, slope, and perpendicular slope of a line
+//
+//////
+	void iioss_math_computeLine(SLineF64* line)
+	{
+		f64 lfdx, lfdy;
+
+
+		// Midpoint = (x2-x1)/2, (y2-y1)/2
+		line->mid.x	= (line->start.x + line->end.x) / 2.0;
+		line->mid.y	= (line->start.y + line->end.y) / 2.0;
+
+		// Compute our deltas
+		lfdx = line->end.x - line->start.x;
+		lfdy = line->end.y - line->start.y;
+
+		// Slope = rise over run
+		line->m = lfdy / lfdx;
+
+		// Perpendicular slope = -1/m
+		line->mp = -1.0 / line->m;
+	}
+
+
+
+
+//////////
+//
+// Called to rotate the square about the sq->computed radians.  The data in sq->computed
+// should've already been set (or computed with a call to ioss_math_computeSquare() relative
+// to the indicated origin pixel).
+//
+//////
+	void ioss_math_squareRotateAbout(SSquareInOutF64* sq)
+	{
+//		f64 lfdx, lfdy;
+
+
+		// Make sure our environment is sane
+		if (sq && sq->input && sq->output)
+		{
+// 			//////////
+// 			// Rotate P1
+// 			//////
+// 				sq->output->p1x		= sq->computed->ox + (sq->computed->radiusP1 * cos(sq->computed->thetaP1 + sq->computed->radians));
+// 				sq->output->p1y		= sq->computed->oy + (sq->computed->radiusP1 * sin(sq->computed->thetaP1 + sq->computed->radians));
+// 
+// 			//////////
+// 			// Rotate P2
+// 			//////
+// 				sq->output->p2x		= sq->computed->ox + (sq->computed->radiusP2 * cos(sq->computed->thetaP2 + sq->computed->radians));
+// 				sq->output->p2y		= sq->computed->oy + (sq->computed->radiusP2 * sin(sq->computed->thetaP2 + sq->computed->radians));
+// 
+// 			//////////
+// 			// Rotate P3
+// 			//////
+// 				sq->output->p3x		= sq->computed->ox + (sq->computed->radiusP3 * cos(sq->computed->thetaP3 + sq->computed->radians));
+// 				sq->output->p3y		= sq->computed->oy + (sq->computed->radiusP3 * sin(sq->computed->thetaP3 + sq->computed->radians));
+// 
+// 			//////////
+// 			// Rotate P4
+// 			//////
+// 				sq->output->p4x		= sq->computed->ox + (sq->computed->radiusP4 * cos(sq->computed->thetaP4 + sq->computed->radians));
+// 				sq->output->p4y		= sq->computed->oy + (sq->computed->radiusP4 * sin(sq->computed->thetaP4 + sq->computed->radians));
+// 
+// 			//////////
+// 			// Compute the new slope, and perpendicular slope
+// 			//////
+// 				lfdx				=   sq->output->p2x - sq->output->p1x;
+// 				lfdy				= -(sq->output->p2y - sq->output->p1y);				// Negative because Y is reversed on-screen
+// 
+// 				if (lfdx == 0)		sq->output->m = lfdy / 0.0000000000001;
+// 				else				sq->output->m = lfdy / lfdx;						// Compute the slope P1..P2 (rise/run)
+// 
+// 				sq->output->mp		= -1.0 / sq->output->m;								// Compute the perpendicular slope, which is the slope of P1..P4
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to initialize a new polygon (or re-initialize an existing polygon), and to
+// optionally allocate new lines and initialize those as well.
+//
+//////
+	bool iioss_polygon_initialize(SPolygon* poly, s32 tnLineCount, bool tlAllocatePolyLines)
+	{
+		s32			lnI;
+		bool		llResult;
+		SPolyLine**	lplp;
+		SPolyLine*	lpl;
+
+
+		// Is it already allocated?
+		llResult = false;
+		if (poly->line)
+		{
+			// We may need to increase its size
+			if (poly->lineCount < tnLineCount)
+			{
+				//////////
+				// We need to increase the allocation
+				//////
+					lplp = (SPolyLine**)realloc(poly->line, tnLineCount * sizeof(SPolyLine));
+					if (lplp)
+					{
+						//////////
+						// We're good
+						//////
+							poly->line = lplp;
+
+
+						//////////
+						// Initialize the extra entries
+						//////
+							llResult = true;
+							for (lnI = poly->lineCount; lnI < tnLineCount; lnI++)
+							{
+								if (tlAllocatePolyLines)
+								{
+									// Allocate the new entry
+									poly->line[lnI] = (SPolyLine*)malloc(sizeof(SPolyLine));
+
+									// If it was allocated, initialize it to empty
+									if (poly->line[lnI])
+									{
+										// Initialize it
+										memset(poly->line[lnI], 0, sizeof(SPolyLine));
+
+									} else {
+										// There was a failure at some point
+										llResult = false;
+									}
+
+								} else {
+									// Initialize the new entry to nothingness
+									poly->line[lnI] = NULL;
+								}
+							}
+
+
+						//////////
+						// Store the new count
+						//////
+							poly->lineCount	= tnLineCount;
+					}
+
+			// We may need to decrease its size
+			} else if (poly->lineCount > tnLineCount) {
+				//////////
+				// We need to decrease the allocation
+				//////
+					// Free the extra allocated entries
+					for (lnI = tnLineCount + 1; lnI < poly->lineCount; lnI++)
+					{
+						// Grab that line
+						lpl = poly->line[lnI];
+
+						// Free it if need be
+						if (lpl)
+							free(lpl);
+
+						// Mark it freed
+						poly->line[lnI] = NULL;
+					}
+
+					// Resize to the newer, lower size
+					lplp = (SPolyLine**)realloc(poly->line, tnLineCount * sizeof(SPolyLine));
+					if (lplp)
+					{
+						//////////
+						// We're good
+						//////
+							poly->line		= lplp;
+							poly->lineCount	= tnLineCount;
+							llResult		= true;
+					}
+			}
+
+		} else {
+			// We need to allocate the lot
+			lplp = (SPolyLine**)malloc(tnLineCount * sizeof(SPolyLine));
+			if (lplp)
+			{
+				// We're good
+				poly->line		= lplp;
+				poly->lineCount	= tnLineCount;
+
+				//////////
+				// Initialize the new entries
+				//////
+					llResult = true;
+					for (lnI = 0; lnI < tnLineCount; lnI++)
+					{
+						if (tlAllocatePolyLines)
+						{
+							// Allocate the new entry
+							poly->line[lnI] = (SPolyLine*)malloc(sizeof(SPolyLine));
+
+							// If it was allocated, initialize it to empty
+							if (poly->line[lnI])
+							{
+								// Populate the line
+								memset(poly->line[lnI], 0, sizeof(SPolyLine));
+
+							} else {
+								// There was a failure at some point
+								llResult = false;
+							}
+
+						} else {
+							// Initialize the new entry to nothingness
+							poly->line[lnI] = NULL;
+						}
+					}
+			}
+		}
+		// Indicate our success or failure
+		return(llResult);
+	}
+
+
+
+
+//////////
+//
+// Called to set the indicated polygon
+//
+//////
+	bool iioss_polygon_setByPolyLine(SPolygon* poly, s32 tnEntry, SPolyLine* line)
+	{
+		//////////
+		// If this slot hasn't already been allocated, allocate it
+		//////
+			if (!poly->line[tnEntry])
+			{
+				// There isn't an entry yet allocated.
+				// Create one.
+				poly->line[tnEntry] = (SPolyLine*)malloc(sizeof(SPolyLine));
+			}
+
+
+		//////////
+		// If we have an allocated slot, copy it
+		//////
+			if (poly->line[tnEntry])
+			{
+				// Copy, and indicate success
+				memcpy(poly->line[tnEntry], line, sizeof(SPolyLine));
+				return(true);
+
+			} else {
+				// Indicate failure
+				return(false);
+			}
+	}
+
+
+
+
+//////////
+//
+// Called to set the indicated polygon by values
+//
+//////
+	bool iioss_polygon_setByValues(SPolygon* poly, s32 tnEntry, SXYF64* start, SXYF64* end, SXYF64* gravity)
+	{
+		//////////
+		// If this slot hasn't already been allocated, allocate it
+		//////
+			if (!poly->line[tnEntry])
+			{
+				// There isn't an entry yet allocated.
+				// Create one.
+				poly->line[tnEntry] = (SPolyLine*)malloc(sizeof(SPolyLine));
+			}
+
+
+		//////////
+		// If we have an allocated slot, copy it
+		//////
+			if (poly->line[tnEntry])
+			{
+				// Copy the values
+				memcpy(&poly->line[tnEntry]->start,		start,		sizeof(SXYF64));
+				memcpy(&poly->line[tnEntry]->end,		end,		sizeof(SXYF64));
+				memcpy(&poly->line[tnEntry]->gravity,	gravity,	sizeof(SXYF64));
+
+				// Indicate success
+				return(true);
+
+			} else {
+				// Indicate failure
+				return(false);
+			}
+	}
+
+
+
+
+//////////
+//
+// Called to draw the polygon.  This algorithm uses floaning, and was originally created for
+// support of the DSF (dynamic scalable font) in the VVM.
+//
+//////
+	u64 iioss_canvas_drawPolygon(SCanvas* tsDst, SBGRA* bd, SPolygon* poly)
+	{
+		s32							lnI;
+		bool						llLeft;
+		u64							lnPixelsDrawn;
+		f64							lfDeltaX, lfDeltaY, lfM, lfMP, lfTheta, lfStepX, lfStepY, lfLength;
+		SPolyLine*					lpl;
+		SBuilder*					corners;		// SXYF64 indicating where the corner falls
+		SBuilder*					floans;			// STriangleF64 indicating each part of possibly multiple triangles which make up the total area of this floan
+		_isSStoreFloan_pointToPoint	sf;
+
+
+		// If we don't already have polygon drawing data for this polygon, create it
+		lnPixelsDrawn = 0;
+		if (!poly->floans && !poly->lines)
+		{
+			//////////
+			// Allocate for the corners, floans, and lines, and initialize our internal structure
+			//////
+				oss_builderCreateAndInitialize(&corners,		_COMMON_BUILDER_BLOCK_SIZE);
+				oss_builderCreateAndInitialize(&floans,			_COMMON_BUILDER_BLOCK_SIZE_BIG);
+				oss_builderCreateAndInitialize(&poly->lines,	_COMMON_BUILDER_BLOCK_SIZE_BIG);
+				memset(&sf, 0, sizeof(sf));
+
+
+			//////////
+			// Iterate through each polygon side, computing all floans based upon gravity
+			//////
+				for (lnI = 0; lnI < poly->lineCount; lnI++)
+				{
+					//////////
+					// Grab this polyline
+					//////
+						lpl = poly->line[0];
+
+					//////////
+					// Compute deltas, slope, theta and gravity
+					//////
+						lfDeltaX			= lpl->end.x - lpl->start.x;
+						lfDeltaY			= lpl->end.y - lpl->start.y;
+						lfDeltaX			= ((lfDeltaX == 0.0) ? 0.0000000000001 : lfDeltaX);
+						lfM					= lfDeltaY / lfDeltaX;
+						lfMP				= -1.0 / lfM;
+						lfTheta				= iioss_canvas_drawPolygon_adjustTheta(atan2(lfDeltaY, lfDeltaX));
+						lfLength			= sqrt(lfDeltaX*lfDeltaX + lfDeltaY*lfDeltaY);
+						// Taken from "(y - lineStarty) * (lineEndx - lineStartx) > (x - lineStartx) * (lineEndy - lineStarty)"
+						llLeft				= ((lpl->gravity.y - lpl->start.y) * (lpl->end.x - lpl->start.x)) > ((lpl->gravity.x - lpl->start.x) * (lpl->end.y - lpl->start.y));
+						sf.gravityDecorated	= iioss_canvas_drawpolygon_gravityPerThetaAndLeft(lfTheta, llLeft);
+						sf.gravity07		= sf.gravityDecorated & _COMPASS_CARDINAL_ORDINAL_MASK;
+						sf.end.x			= (s32)lpl->end.x;
+						sf.end.y			= (s32)lpl->end.y;
+
+					
+					//////////
+					// Store the information used for computing all the floans
+					//////
+						sf.floans	= floans;
+
+					//////////
+					// Store the starting floan
+					//////
+						iioss_canvas_drawPolygon_storeCorner(corners, lpl->start.x, lpl->start.y);
+
+
+					//////////
+					// Compute each middle floan
+					//////
+						sf.p2.x = lpl->start.x;
+						sf.p2.y = lpl->start.y;
+						do {
+							//////////
+							// Move forward to the next pixel
+							//////
+								sf.p1.x = sf.p2.x;
+								sf.p1.y = sf.p1.y;
+								if (!iioss_canvas_drawPolygon_moveNextAxis(&sf))
+									break;		// We're done, no more pixels to move to
+
+
+							//////////
+							// Store the floans for this pixel
+							//////
+								sf.po.x		= (s32)sf.p1.x;
+								sf.po.y		= (s32)sf.p1.y;
+								sf.offset	= (sf.po.y * tsDst->width) + sf.po.x;
+								iioss_canvas_drawPolygon_storeFloans(&sf);
+
+
+							//////////
+							// Continue on through next iteration
+							//////
+						} while (1);
+
+
+					//////////
+					// Store the ending floan
+					//////
+						iioss_canvas_drawPolygon_storeCorner(corners, lpl->end.x, lpl->end.y);
+
+
+					//////////
+					// Derive our x and y steps to move a pixel span at a time
+					//////
+						lfStepX		= cos(lfTheta);
+						lfStepY		= sin(lfTheta);
+				}
+			// When we get here, the polygon has been built
+		}
+
+
+		//////////
+		// Physically draw the polygon
+		//////
+			
+
+
+		//////////
+		// Indicate our success or failure
+		//////
+			return(lnPixelsDrawn);
+	}
+
+
+
+
+/////////
+//
+// Called to move from the previous X or Y axis to the next pixel along the line of this polygon
+//
+//////
+	bool iioss_canvas_drawPolygon_moveNextAxis(_isSStoreFloan_pointToPoint* sf)
+	{
+		f64		lfNextXLength, lfNextYLength, lfDeltaX, lfDeltaY;
+		SXYF64	lfNextX, lfNextY;
+
+
+		//////////
+		// Make sure we're not already done
+		//////
+			if (sf->p2.x == sf->end.x && (s32)sf->p2.y == sf->end.y)
+				return(false);		// We're done
+
+
+		//////////
+		// Determine where the next intercepts are
+		//////
+			switch (sf->gravityDecorated & _COMPASS_CARDINAL_ORDINAL_MASK)
+			{
+				case _COMPASS_NORTH:
+					// Line is going straight up (toward +Y), X will not change, Y will be next larger integer
+					sf->p2.y = (f64)((s32)sf->p2.y + 1);
+					return(true);
+
+				case _COMPASS_SOUTH:
+					// Line is going straight down (toward -Y), X will not change, Y will be next smaller integer
+					sf->p2.y = (f64)((s32)sf->p2.y - 1);
+					return(true);
+
+				case _COMPASS_WEST:
+					// Line is going due left (toward -X), Y will not change, X will be next smaller integer
+					sf->p2.x = (f64)((s32)sf->p2.x - 1);
+					return(true);
+
+				case _COMPASS_EAST:
+					// Line is going due right (toward +X), Y will not change, X will be next larger integer
+					sf->p2.x = (f64)((s32)sf->p2.x + 1);
+					return(true);
+			}
+
+			// If we get here, it's not a cardinal line, but rather an "ordinalish" line
+			iioss_canvas_drawPolygon_moveNextAxis_xIntercept(&sf->p2.x, &sf->p2.y, &lfNextX, sf->gravityDecorated, sf->m);
+			iioss_canvas_drawPolygon_moveNextAxis_yIntercept(&sf->p2.x, &sf->p2.y, &lfNextY, sf->gravityDecorated, sf->m);
+
+
+		//////////
+		// Grab the distances
+		//////
+			// Deltas to next X-axis intercept
+			lfDeltaX		= lfNextX.x - sf->p2.x;
+			lfDeltaY		= lfNextX.y - sf->p2.y;
+			lfNextXLength	= sqrt((lfDeltaX*lfDeltaX) + (lfDeltaY*lfDeltaY));
+
+			// Deltas to next Y-axis intercept
+			lfDeltaX		= lfNextY.x - sf->p2.x;
+			lfDeltaY		= lfNextY.y - sf->p2.y;
+			lfNextYLength	= sqrt((lfDeltaX*lfDeltaX) + (lfDeltaY*lfDeltaY));
+
+
+		//////////
+		// See which one is closer
+		//////
+			if (lfNextYLength < lfNextXLength)
+			{
+				// The Y intercept is closer
+				sf->p2.x = lfNextX.x;
+				sf->p2.y = lfNextX.y;
+
+			} else {
+				// The X-intercept is closer or equal to the Y-intercept distance
+				sf->p2.x = lfNextY.x;
+				sf->p2.y = lfNextY.y;
+			}
+
+		// We're good
+		return(true);
+	}
+
+
+
+
+//////////
+//
+// Called to determine the (X,Y) coordinate of the next X-intercept.  To do this we use the
+// Y-intercept formula, and we solve for y:
+//
+//       __ __ __
+//     3|__|__|__|
+//     2|__|._|__|    Point is at (1.2,1.2), slope = 0.5
+//     1|__|__|__|
+//     0   1  2  3
+//
+//         Y-Intercept formula, find Y:    y = mx + b
+//         Y-Intercept formula, find X:    y = mx + b   ==>   y - b = mx   ==>   x = (y-b)/m
+//
+//     Note:  The values to use for the next X and Y follow the gravity and slope of the line
+//            and are, in that way, a type of variable in their own right.
+//
+//////
+	//
+	// X-Intercept using Y-Intercept formula:
+	void iioss_canvas_drawPolygon_moveNextAxis_xIntercept(f64* tfX, f64* tfY, SXYF64* tfNextX, u32 tnGravity, f64 tfM)
+	{
+		// We are trying to find the X,Y coordinate where the X intercepts the next integer
+		// Solve for Y using the next available X
+		switch (tnGravity & _COMPASS_CARDINAL_ORDINAL_MASK)
+		{
+			case _COMPASS_NORTH_EAST:
+			case _COMPASS_SOUTH_EAST:
+				// Line is going toward the right (toward +X), either up or down, Y will be computed, X will be the next larger integer
+				tfNextX->x = (f64)((s32)*tfX + 1);
+				tfNextX->y = (f64)(tfNextX->x * tfM + *tfY);
+				break;
+
+			case _COMPASS_NORTH_WEST:
+			case _COMPASS_SOUTH_WEST:
+				// Line is going toward the left (toward -X), either up or down, Y will be computed, X will be the next smaller integer
+				tfNextX->x = (f64)((s32)*tfX - 1);
+				tfNextX->y = (f64)(tfNextX->x * tfM + *tfY);
+				break;
+		}
+	}
+
+	// Y-Intercept
+	void iioss_canvas_drawPolygon_moveNextAxis_yIntercept(f64* tfX, f64* tfY, SXYF64* tfNextY, u32 tnGravity, f64 tfM)
+	{
+		// We are trying to find the X,Y coordinate where the Y intercepts the next integer
+		// Solve for X using the next available Y
+		switch (tnGravity & _COMPASS_CARDINAL_ORDINAL_MASK)
+		{
+			case _COMPASS_NORTH_EAST:
+			case _COMPASS_NORTH_WEST:
+				// Line is going up (toward +Y), either right or left, X will be computed, Y will be the next larger integer
+				tfNextY->y = (f64)((s32)*tfY + 1);
+				tfNextY->x = (tfNextY->y - *tfY) / tfM;
+				break;
+
+			case _COMPASS_SOUTH_WEST:
+			case _COMPASS_SOUTH_EAST:
+				// Line is going down (toward -Y), either right or left, X will be computed, Y will be the next smaller integer
+				tfNextY->y = (f64)((s32)*tfY - 1);
+				tfNextY->x = (tfNextY->y - *tfY) / tfM;
+				break;
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to store the corner point.  This is used for final assembly after all corners and floans
+// are computed.  The corner floans are then computed based on overlay information.
+//
+// Note (from code in iioss_canvas_drawPolygon()): SBuilder* corners; // SXYF64 indicating where the corner falls
+//
+//////
+	void iioss_canvas_drawPolygon_storeCorner(SBuilder* corners, f64 tfX, f64 tfY)
+	{
+		SXYF64 lxy;
+
+
+		// Copy to our temporary buffer
+		lxy.x = tfX;
+		lxy.y = tfY;
+
+		// Append it
+		oss_builderAppendData(corners, (s8*)&lxy, sizeof(lxy));
+	}
+
+
+
+
+/////////
+//
+// Called to store all of the triangles required to make up this floan.
+// There are 8 parts where a line can intersect with, thereby bisecting a pixel:
+//        2__3__4  
+//        1     5
+//        0__7__6
+//
+//	From those locations, pixels can run in up to 20 combinations (disregarding direction):
+//		0..6, 0..5, 0..4, 0..3, 0..2
+//		1..3, 1..4, 1..5, 1..6, 1..7
+//		2..4, 2..5, 2..6, 2..7
+//		3..5, 3..6, 3..7
+//		4..6, 4..7
+//		5..7
+//
+// Given the gravity direction, this then determines how the area is computed for the partial
+// pixel which intersects in one of the 20 ways, resulting in 40 total gravity formulas. :-)
+//
+// Yes, I did this all manually.  And yes, I hope there's an easier and better way to do it
+// that someone will show me because I really hated doing this.  It took me almost three weeks
+// (during the midst of two weeks of insomnia anyway, which I'm sure was the biggest cause of
+// the three week time frame). :-)
+//
+// (tfX,tfY) is the corner closest toward the origin of the current pixel.
+// (tfX1,tfY1) is any point on any of the 8 parts
+// (tfX2,tfY2) is any other point on any of the 8 parts
+//
+//////
+	_isS_iioss_canvas_drawPolygon_storeFloans shortcuts[64] = 
+	{
+		// The naming convention here is the FROM:TO or the corresponding TO:FROM indicator so as to reduce duplication
+		(u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_2_0, (u32)&storeFloan_pointToPoint_3_0, (u32)&storeFloan_pointToPoint_4_0, (u32)&storeFloan_pointToPoint_5_0, (u32)&storeFloan_pointToPoint_6_0, (u32)&storeFloan_pointToPoint_bad,
+		(u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_3_1, (u32)&storeFloan_pointToPoint_4_1, (u32)&storeFloan_pointToPoint_5_1, (u32)&storeFloan_pointToPoint_6_1, (u32)&storeFloan_pointToPoint_7_1,
+		(u32)&storeFloan_pointToPoint_0_2, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_4_2, (u32)&storeFloan_pointToPoint_5_2, (u32)&storeFloan_pointToPoint_6_2, (u32)&storeFloan_pointToPoint_7_2,
+		(u32)&storeFloan_pointToPoint_0_3, (u32)&storeFloan_pointToPoint_1_3, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_5_3, (u32)&storeFloan_pointToPoint_6_3, (u32)&storeFloan_pointToPoint_7_3,
+		(u32)&storeFloan_pointToPoint_0_4, (u32)&storeFloan_pointToPoint_1_4, (u32)&storeFloan_pointToPoint_2_4, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_6_4, (u32)&storeFloan_pointToPoint_7_4,
+		(u32)&storeFloan_pointToPoint_0_5, (u32)&storeFloan_pointToPoint_1_5, (u32)&storeFloan_pointToPoint_2_5, (u32)&storeFloan_pointToPoint_3_5, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_7_5,
+		(u32)&storeFloan_pointToPoint_0_6, (u32)&storeFloan_pointToPoint_1_6, (u32)&storeFloan_pointToPoint_2_6, (u32)&storeFloan_pointToPoint_3_6, (u32)&storeFloan_pointToPoint_4_6, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad,
+		(u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_1_7, (u32)&storeFloan_pointToPoint_2_7, (u32)&storeFloan_pointToPoint_3_7, (u32)&storeFloan_pointToPoint_4_7, (u32)&storeFloan_pointToPoint_5_7, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad
+	};
+
+	void iioss_canvas_drawPolygon_storeFloans(_isSStoreFloan_pointToPoint* sf)
+	{
+		u32 lnOperation, lnGravity1, lnGravity2;
+
+
+		// Make sure we will be drawing on a canvas
+		if (sf->p1.x < 0 || sf->p1.y < 0 || sf->p2.x < 0 || sf->p2.y < 0)
+			return;		// This floan extends into invisible areas
+
+
+		//////////
+		// Grab our gravity for the points (south-west is toward the (0,0) origin)
+		//      NW __N__ NE     2__3__4
+		//      W |     |E      1     5
+		//      SW|__S__|SE     0__7__6
+		//////
+			lnGravity1 = iioss_canvas_drawPolygon_storeFloans_gravity(&sf->p1, sf);
+			lnGravity2 = iioss_canvas_drawPolygon_storeFloans_gravity(&sf->p2, sf);
+
+
+		//////////
+		// Dispatch the operation, from which point to which point
+		//////
+			lnOperation	= (lnGravity1 << 3) | lnGravity2;
+			shortcuts[lnOperation].storeFloan_pointToPoint(sf);
+	}
+
+
+
+
+//////////
+//
+// Returns the cardinal or ordinal direction for the indicated point given the corner point.
+// Note:  The corner point is the point closest to (0,0).
+//
+//////
+	u32 iioss_canvas_drawPolygon_storeFloans_gravity(SXYF64* p, _isSStoreFloan_pointToPoint* sf)
+	{
+		//////////
+		//
+		// Consider that we're always in quadrant 1 at this point, because we've tested and filtered out for 
+		//      NW __N__ NE     2__3__4
+		//      W |     |E      1     5
+		//      SW|__S__|SE     0__7__6
+		//
+		//////
+			if (p->x == sf->po.x && p->y == sf->po.y)
+			{
+				// It's the point closest to the origin
+													return(0);		// It's Southwest
+
+			} else if (p->x == sf->po.x) {
+				// It's on the SW..NW side
+				if (p->y != sf->po.y + 1)		return(1);		// It's west
+				else								return(2);		// It's northwest
+
+			} else if (p->y == sf->po.y) {
+				// It's on the SW..SE side
+				if (p->x != sf->po.x + 1)		return(7);		// It's south
+				else								return(6);		// It's southeast
+
+			} else if (p->x == sf->po.x + 1) {
+				// It's on the SE..NE side
+				if (p->y != sf->po.y + 1)		return(5);		// It's east
+				else								return(4);		// It's northeast
+
+			} else {
+				// It can only be north
+													return(3);		// It's north
+			}
+	}
+
+
+
+//////////
+//
+// Called to adjust theta into the range 0..2pi
+//
+//////
+	f64 iioss_canvas_drawPolygon_adjustTheta(f64 tfTheta)
+	{
+		// Validate theta is positive
+		while (tfTheta < 0.0)
+			tfTheta += _2PI;
+
+		// Validate theta is 0..2pi
+		while (tfTheta > _2PI)
+			tfTheta -= _2PI;
+
+		return(tfTheta);
+	}
+
+
+
+
+//////////
+//
+// Called to determine which direction the gravity point goes based on the line's direction and slope
+//
+//////
+	u32 iioss_canvas_drawpolygon_gravityPerThetaAndLeft(f64 tfTheta, bool tlLeft)
+	{
+		// Based on the slope of the line, determine which portion of each pixel will hold the 
+		if (tfTheta == 0 || tfTheta == _2PI)
+		{
+			// Slope is due east
+			if (tlLeft)		return(_COMPASS_NORTH	| _COMPASS_DECORATION_TOP);
+			else			return(_COMPASS_SOUTH	| _COMPASS_DECORATION_BOTTOM);
+
+		} else if (tfTheta > 0.0f && tfTheta < _PI_2) {
+			// Slope is north-east
+			if (tlLeft)		return(_COMPASS_NORTH_WEST	| _COMPASS_DECORATION_TOP		| _COMPASS_DECORATION_LEFT);
+			else			return(_COMPASS_SOUTH_EAST	| _COMPASS_DECORATION_BOTTOM	| _COMPASS_DECORATION_RIGHT);
+
+		} else if (tfTheta == _PI_2) {
+			// Slope is north
+			if (tlLeft)		return(_COMPASS_WEST	| _COMPASS_DECORATION_LEFT);
+			else			return(_COMPASS_EAST	| _COMPASS_DECORATION_RIGHT);
+
+		} else if (tfTheta > _PI_2 && tfTheta < _PI) {
+			// Slope is north-west
+			if (tlLeft)		return(_COMPASS_NORTH_EAST	| _COMPASS_DECORATION_TOP		| _COMPASS_DECORATION_RIGHT);
+			else			return(_COMPASS_SOUTH_WEST	| _COMPASS_DECORATION_BOTTOM	| _COMPASS_DECORATION_LEFT);
+
+		} else if (tfTheta == _PI) {
+			// Slope is west
+			if (tlLeft)		return(_COMPASS_NORTH	| _COMPASS_DECORATION_TOP);
+			else			return(_COMPASS_SOUTH	| _COMPASS_DECORATION_BOTTOM);
+
+		} else if (tfTheta > _PI && tfTheta < _3PI_2) {
+			// Slope is south-west
+			if (tlLeft)		return(_COMPASS_NORTH_WEST	| _COMPASS_DECORATION_TOP		| _COMPASS_DECORATION_LEFT);
+			else			return(_COMPASS_SOUTH_EAST	| _COMPASS_DECORATION_BOTTOM	| _COMPASS_DECORATION_RIGHT);
+
+		} else if (tfTheta == _3PI_2) {
+			// Slope is south
+			if (tlLeft)		return(_COMPASS_WEST	| _COMPASS_DECORATION_LEFT);
+			else			return(_COMPASS_EAST	| _COMPASS_DECORATION_RIGHT);
+
+		} else /*if (tfTheta > _3PI_2 && tfTheta < _2PI)*/ {
+			// Slope is south-east
+			if (tlLeft)		return(_COMPASS_NORTH_EAST	| _COMPASS_DECORATION_TOP		| _COMPASS_DECORATION_RIGHT);
+			else			return(_COMPASS_SOUTH_WEST	| _COMPASS_DECORATION_BOTTOM	| _COMPASS_DECORATION_LEFT);
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to physically render the floan, being from P1 to P2, and thusly in a straight line, and
+// in that direction, gravity being where gravity is.
+//
+//////
+	void storeFloan_pointToPoint_bad(_isSStoreFloan_pointToPoint* sf)
+	{
+		// This one should NEVER be called.
+		// If it is called, it's because a line is trying to go from an invalid location to
+		// another invalid location, such as from S to S, or SE to S, or some part that's not
+		// a valid line intersection with a square.
+		// In shrot:  it's an error somewhere, and is time to put your debug on.
+		_asm int 3;
+	}
+
+
+//////////
+//	2_____
+//	|     |		Runs from SW to NW
+//	0_____|		Constant 1.0 if gravity is not left
+//
+// There is one possible floan for the line 0:2:
+//		2__3__4
+//		1     5		floan:	the square 0:2:4:6, which is the constant 1.0
+//		0__7__6
+//
+//////
+	void storeFloan_pointToPoint_0_2(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*	sbgrac;
+
+
+		// See where gravity is
+		if (sf->gravityDecorated & _COMPASS_DECORATION_LEFT)
+		{
+			// They are asking for a floan to the left of this coordinate, of which there is no such animal.
+			// NOP (no operation)
+
+		} else {
+			// Full floanage.
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the full pixel value since the gravity runs eastward
+				sbgrac->offsetDst	= sf->offset;
+				sbgrac->alpha		= 1.0;
+			}
+		}
+	}
+
+
+
+//////////
+//	 __3__ 
+//	|     |		Runs from SW to N
+//	0_____|		(p1,p1) to (p1,p2) to (p2,p2)
+//
+// There are two possible floans depending on gravity for the line 0:3:
+//		2__3__4
+//		1     5		Smaller floan:	0:2:3
+//		0__7__6		Larger floan:	0:3:4 + 0:4:6
+//
+//////
+	void storeFloan_pointToPoint_0_3(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 0 - (p1,p1)
+			tri.p1.x	= sf->p1.x;
+			tri.p1.y	= sf->p1.y;
+
+			// 2 - (p1,p2)
+			tri.p2.x	= sf->p1.x;
+			tri.p2.y	= sf->p2.y;
+
+			// 3 - (p2,p2)
+			tri.p3.x	= sf->p2.x;
+			tri.p3.y	= sf->p2.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from SW to N
+				if (sf->gravity07 >= 0 && sf->gravity07 <= 3)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	 _____4
+//	|     |		Runs from SW to NE
+//	0_____|		Will be a constant 0.5 in all cases
+//
+// There are two possible floans depending on gravity for the line 0:4:
+//		2__3__4
+//		1     5		Floan 1:	0:2:4
+//		0__7__6		Floan 2:	0:4:6
+//
+//////
+	void storeFloan_pointToPoint_0_4(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute* sbgrac;
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+		sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+		if (sbgrac)
+		{
+			// Store the destination offset
+			sbgrac->offsetDst	= sf->offset;
+			sbgrac->alpha		= 0.5;
+		}
+	}
+
+
+
+//////////
+//	 _____ 
+//	|     5		Runs from SW to E
+//	0_____|		(p1,p1) to (p2,p2) to (p2,p1)
+//
+// There are two possible floans depending on gravity for the line 0:4:
+//		2__3__4
+//		1     5		Larger floan:	0:2:4 + 0:4:5
+//		0__7__6		Smaller floan:	0:5:6
+//
+//////
+	void storeFloan_pointToPoint_0_5(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 0 - (p1,p1)
+			tri.p1.x	= sf->p1.x;
+			tri.p1.y	= sf->p1.y;
+
+			// 5 - (p2,p2)
+			tri.p2.x	= sf->p2.x;
+			tri.p2.y	= sf->p2.y;
+
+			// 6 - (p2,p1)
+			tri.p3.x	= sf->p2.x;
+			tri.p3.y	= sf->p1.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from SW to NE
+				if (sf->gravity07 >= 0 && sf->gravity07 <= 4)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	 _____ 
+//	|     |		Runs from NW to NE
+//	0_____6
+//
+// There is one possible floan for the line 0:6:
+//		2__3__4
+//		1     5		floan:	the square 0:2:4:6, which is the constant 1.0
+//		0__7__6
+//
+//////
+	void storeFloan_pointToPoint_0_6(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*	sbgrac;
+
+
+		// See where gravity is
+		if (sf->gravityDecorated & _COMPASS_DECORATION_BOTTOM)
+		{
+			// They are asking for a floan to the bottom of this coordinate, of which there is no such animal.
+			// NOP (no operation)
+
+		} else {
+			// Full floanage.
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the full pixel value since the gravity runs northward
+				sbgrac->offsetDst	= sf->offset;
+				sbgrac->alpha		= 1.0;
+			}
+		}
+	}
+
+
+
+//////////
+//	 __3__ 
+//	1     |		Runs from W to N
+//	|_____|		(p1,p1) to (p1,p2) to (p2,p2)
+//
+// There are two possible floans depending on gravity for the line 1:3:
+//		2__3__4
+//		1     5		Smaller floan:	1:2:3
+//		0__7__6		Larger floan:	0:1:3 + 0:3:4 + 0:4:6
+//
+//////
+	void storeFloan_pointToPoint_1_3(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 1 - (p1,p1)
+			tri.p1.x	= sf->p1.x;
+			tri.p1.y	= sf->p1.y;
+
+			// 2 - (p1,p2)
+			tri.p2.x	= sf->p1.x;
+			tri.p2.y	= sf->p2.y;
+
+			// 3 - (p2,p2)
+			tri.p3.x	= sf->p2.x;
+			tri.p3.y	= sf->p2.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to N
+				if (sf->gravity07 >= 1 && sf->gravity07 <= 3)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	 _____4
+//	1     |		Runs from W to SE
+//	|_____|		(p1,p1) to (p1,p2) to (p2,p2)
+//
+// There are two possible floans depending on gravity for the line 1:4:
+//		2__3__4
+//		1     5		Smaller floan:	1:2:4
+//		0__7__6		Larger floan:	0:1:4 + 0:4:6
+//
+//////
+	void storeFloan_pointToPoint_1_4(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 1 - (p1,p1)
+			tri.p1.x	= sf->p1.x;
+			tri.p1.y	= sf->p1.y;
+
+			// 2 - (p1,p2)
+			tri.p2.x	= sf->p1.x;
+			tri.p2.y	= sf->p2.y;
+
+			// 4 - (p2,p2)
+			tri.p3.x	= sf->p2.x;
+			tri.p3.y	= sf->p2.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to NE
+				if (sf->gravity07 >= 1 && sf->gravity07 <= 4)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	 _____ 
+//	1     5		Runs from W to E, requires two triangles
+//	|_____|		#1 - (p1,p1) to (p1,po) to (p2,po)
+//				#2 - (p2,p2) to (p1,p1) to (p2,po)
+//
+// There are two possible floans depending on gravity for the line 1:5:
+//		2__3__4
+//		1     5		North floan:	1:2:4 + 1:4:5
+//		0__7__6		South floan:	0:1:5 + 0:5:6
+//
+//////
+	void storeFloan_pointToPoint_1_5(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri1, tri2;
+
+
+		//////////
+		// Compute the north floan, and then use its value in the appropriate way
+		//////
+			// Triangle 1
+			tri1.p1.x	= sf->p1.x;					// 1 - (p1,p1)
+			tri1.p1.y	= sf->p1.y;
+			tri1.p2.x	= sf->p1.x;					// 2 - (p1,po)
+			tri1.p2.y	= (f64)sf->po.y;
+			tri1.p3.x	= sf->p2.x;					// 4 - (p2,po)
+			tri1.p3.y	= tri1.p2.y;
+			iioss_math_computeTriangle(&tri1);		// Compute the area
+
+			// Triangle 2
+			tri2.p1.x	= sf->p2.x;					// 1 - (p2,p2)
+			tri2.p1.y	= sf->p2.y;
+			tri2.p2.x	= sf->p1.x;					// 4 - (p1,p1)
+			tri2.p2.y	= sf->p1.y;
+			tri2.p3.x	= sf->p2.x;					// 5 - (p2,p0)
+			tri2.p3.y	= (f64)sf->po.y;
+			iioss_math_computeTriangle(&tri2);		// Compute the area
+
+			// Combine their areas into tri1
+			tri1.area	+= tri2.area;
+			// Right now, tri1.area is the total area
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to E
+				if (sf->gravity07 >= 1 && sf->gravity07 <= 5)
+				{
+					// North floan
+					sbgrac->alpha	= 1.0 - tri1.area;
+
+				} else {
+					// South floan
+					sbgrac->alpha	= tri1.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	 _____ 
+//	1     |		Runs from W to SE
+//	|_____6		(p1,p1) to (p1,p2) to (p2,p2)
+//
+// There are two possible floans depending on gravity for the line 1:6:
+//		2__3__4
+//		1     5		Larger floan:	1:2:4 + 1:4:6
+//		0__7__6		Smaller floan:	0:1:6
+//
+//////
+	void storeFloan_pointToPoint_1_6(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 0 - (p1,p1)
+			tri.p1.x	= sf->p1.x;
+			tri.p1.y	= sf->p1.y;
+
+			// 1 - (p1,p2)
+			tri.p2.x	= sf->p1.x;
+			tri.p2.y	= sf->p2.y;
+
+			// 6 - (p2,p2)
+			tri.p3.x	= sf->p2.x;
+			tri.p3.y	= sf->p2.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to NE
+				if (sf->gravity07 <= 1 || sf->gravity07 >= 6)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	 _____ 
+//	1     |		Runs from W to S
+//	|__7__|		(p1,p1) to (p1,p2) to (p2,p2)
+//
+// There are two possible floans depending on gravity for the line 1:7:
+//		2__3__4
+//		1     5		Larger floan:	1:2:4 + 1:4:6 + 1:6:7
+//		0__7__6		Smaller floan:	0:1:7
+//
+//////
+	void storeFloan_pointToPoint_1_7(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 0 - (p1,p1)
+			tri.p1.x	= sf->p1.x;
+			tri.p1.y	= sf->p1.y;
+
+			// 1 - (p1,p2)
+			tri.p2.x	= sf->p1.x;
+			tri.p2.y	= sf->p2.y;
+
+			// 7 - (p2,p2)
+			tri.p3.x	= sf->p2.x;
+			tri.p3.y	= sf->p2.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to N
+				if (sf->gravity07 <= 1 || sf->gravity07 >= 7)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	2_____
+//	|     |		Runs from NW to SW
+//	0_____|		Constant of 1.0 if gravity is not left
+//
+// There is one possible floan for the line 0:2:
+//		2__3__4
+//		1     5		floan:	the square 0:2:4:6, which is the constant 1.0
+//		0__7__6
+//
+//////
+	void storeFloan_pointToPoint_2_0(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*	sbgrac;
+
+
+		// See where gravity is
+		if (sf->gravityDecorated & _COMPASS_DECORATION_LEFT)
+		{
+			// They are asking for a floan to the left of this coordinate, of which there is no such animal.
+			// NOP (no operation)
+
+		} else {
+			// Full floanage.
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the full pixel value since the gravity runs eastward
+				sbgrac->offsetDst	= sf->offset;
+				sbgrac->alpha		= 1.0;
+			}
+		}
+	}
+
+
+
+//////////
+//	2_____4
+//	|     |		Runs from NW to NE
+//	|_____|		Constant 1.0 if gravity is not north
+//
+// There is one possible floan for the line 2:4:
+//		2__3__4
+//		1     5		floan:	the square 0:2:4:6, which is the constant 1.0
+//		0__7__6
+//
+//////
+	void storeFloan_pointToPoint_2_4(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*	sbgrac;
+
+
+		// See where gravity is
+		if (sf->gravityDecorated & _COMPASS_DECORATION_TOP)
+		{
+			// They are asking for a floan to the top of this coordinate, of which there is no such animal.
+			// NOP (no operation)
+
+		} else {
+			// Full floanage.
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the full pixel value since the gravity runs southward
+				sbgrac->offsetDst	= sf->offset;
+				sbgrac->alpha		= 1.0;
+			}
+		}
+	}
+
+
+
+//////////
+//	2_____ 
+//	|     5		Runs from NW to E
+//	|_____|		(p1,p1) to (p2,p1) to (p2,p2)
+//
+// There are two possible floans depending on gravity for the line 2:5:
+//		2__3__4
+//		1     5		Larger floan:	1:2:6 + 2:5:6
+//		0__7__6		Smaller floan:	2:4:5
+//
+//////
+	void storeFloan_pointToPoint_2_5(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 2 - (p1,p1)
+			tri.p1.x	= sf->p1.x;
+			tri.p1.y	= sf->p1.y;
+
+			// 4 - (p2,p1)
+			tri.p2.x	= sf->p2.x;
+			tri.p2.y	= sf->p1.y;
+
+			// 5 - (p2,p2)
+			tri.p3.x	= sf->p2.x;
+			tri.p3.y	= sf->p2.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to N
+				if (sf->gravity07 >= 2 && sf->gravity07 <= 5)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	2_____ 
+//	|     |		Runs from NW to SE
+//	|_____6		Will be a constant 0.5 in all cases
+//
+// There are two possible floans depending on gravity for the line 2:6:
+//		2__3__4
+//		1     5		Floan 1:	0:2:6
+//		0__7__6		Floan 2:	2:4:6
+//
+//////
+	void storeFloan_pointToPoint_2_6(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute* sbgrac;
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+		sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+		if (sbgrac)
+		{
+			// Store the destination offset
+			sbgrac->offsetDst	= sf->offset;
+			sbgrac->alpha		= 0.5;
+		}
+	}
+
+
+
+//////////
+//	2_____ 
+//	|     |		Runs from NW to S
+//	|__7__|		(p1,p2) to (p1,p1) to (p2,p2)
+//
+// There are two possible floans depending on gravity for the line 2:7:
+//		2__3__4
+//		1     5		Larger floan:	2:4:6 + 2:6:7
+//		0__7__6		Smaller floan:	0:2:7
+//
+//////
+	void storeFloan_pointToPoint_2_7(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 0 - (p1,p2)
+			tri.p1.x	= sf->p1.x;
+			tri.p1.y	= sf->p2.y;
+
+			// 2 - (p1,p1)
+			tri.p2.x	= sf->p1.x;
+			tri.p2.y	= sf->p1.y;
+
+			// 7 - (p2,p2)
+			tri.p3.x	= sf->p2.x;
+			tri.p3.y	= sf->p2.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to N
+				if (sf->gravity07 <= 2 || sf->gravity07 == 7)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	 __3__ 
+//	|     |		Runs from N to SW
+//	0_____|		(p2,p2) to (p2,p1) to (p1,p1)
+//
+// There are two possible floans depending on gravity for the line 0:3:
+//		2__3__4
+//		1     5		Smaller floan:	0:2:3
+//		0__7__6		Larger floan:	0:3:4 + 0:4:6
+//
+//////
+	void storeFloan_pointToPoint_3_0(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 0 - (p2,p2)
+			tri.p1.x	= sf->p2.x;
+			tri.p1.y	= sf->p2.y;
+
+			// 2 - (p2,p1)
+			tri.p2.x	= sf->p2.x;
+			tri.p2.y	= sf->p1.y;
+
+			// 3 - (p1,p1)
+			tri.p3.x	= sf->p1.x;
+			tri.p3.y	= sf->p1.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to N
+				if (sf->gravity07 <= 3)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	 __3__ 
+//	1     |		Runs from N to W
+//	|_____|		(p2,p2) to (p2,p1) to (p1,p1)
+//
+// There are two possible floans depending on gravity for the line 1:3:
+//		2__3__4
+//		1     5		Smaller floan:	1:2:3
+//		0__7__6		Larger floan:	0:1:3 + 0:3:4 + 0:4:6
+//
+//////
+	void storeFloan_pointToPoint_3_1(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 1 - (p2,p2)
+			tri.p1.x	= sf->p2.x;
+			tri.p1.y	= sf->p2.y;
+
+			// 2 - (p2,p1)
+			tri.p2.x	= sf->p2.x;
+			tri.p2.y	= sf->p1.y;
+
+			// 3 - (p1,p1)
+			tri.p3.x	= sf->p1.x;
+			tri.p3.y	= sf->p1.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to N
+				if (sf->gravity07 >= 1 && sf->gravity07 <= 3)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	 __3__ 
+//	|     5		Runs from N to E
+//	|_____|		(p1,p1) to (p2,p1) to (p2,p2)
+//
+// There are two possible floans depending on gravity for the line 3:5:
+//		2__3__4
+//		1     5		Larger floan:	0:2:6 + 2:3:6 + 3:5:6
+//		0__7__6		Smaller floan:	3:4:5
+//
+//////
+	void storeFloan_pointToPoint_3_5(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 3 - (p1,p1)
+			tri.p1.x	= sf->p1.x;
+			tri.p1.y	= sf->p1.y;
+
+			// 4 - (p2,p1)
+			tri.p2.x	= sf->p2.x;
+			tri.p2.y	= sf->p1.y;
+
+			// 5 - (p2,p2)
+			tri.p3.x	= sf->p2.x;
+			tri.p3.y	= sf->p2.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to N
+				if (sf->gravity07 >= 3 && sf->gravity07 <= 5)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	 __3__ 
+//	|     |		Runs from N to SE
+//	|_____6		(p1,p1) to (p2,p1) to (p2,p2)
+//
+// There are two possible floans depending on gravity for the line 3:6:
+//		2__3__4
+//		1     5		Larger floan:	0:2:6 + 2:3:6
+//		0__7__6		Smaller floan:	3:4:6
+//
+//////
+	void storeFloan_pointToPoint_3_6(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 3 - (p1,p1)
+			tri.p1.x	= sf->p1.x;
+			tri.p1.y	= sf->p1.y;
+
+			// 4 - (p2,p1)
+			tri.p2.x	= sf->p2.x;
+			tri.p2.y	= sf->p1.y;
+
+			// 6 - (p2,p2)
+			tri.p3.x	= sf->p2.x;
+			tri.p3.y	= sf->p2.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to N
+				if (sf->gravity07 >= 3 && sf->gravity07 <= 6)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	 __3__ 
+//	|     |		Runs from N to S, requires two triangles
+//	|__7__|		#1 - (po,po) to (po,p1) to (p1,p1)
+//				#2 - (po,po) to (p1,p1) to (p2,p2)
+//
+// There are two possible floans depending on gravity for the line 1:7:
+//		2__3__4
+//		1     5		Floan 1:	0:2:7 + 2:3:7
+//		0__7__6		Floan 2:	3:4:7 + 4:6:7
+//
+//////
+	void storeFloan_pointToPoint_3_7(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri1, tri2;
+
+
+		//////////
+		// Compute the north floan, and then use its value in the appropriate way
+		//////
+			// Triangle 1
+			tri1.p1.x	= (f64)sf->po.x;			// 0 - (po,po)
+			tri1.p1.y	= (f64)sf->po.y;
+			tri1.p2.x	= tri1.p1.x;				// 2 - (po,p1)
+			tri1.p2.y	= sf->p1.y;
+			tri1.p3.x	= sf->p1.x;					// 3 - (p1,p1)
+			tri1.p3.y	= sf->p1.y;
+			iioss_math_computeTriangle(&tri1);		// Compute the area
+
+			// Triangle 2
+			tri2.p1.x	= tri1.p1.x;				// 0 - (po,po)
+			tri2.p1.y	= tri1.p1.y;
+			tri2.p2.x	= sf->p1.x;					// 3 - (p1,p1)
+			tri2.p2.y	= sf->p1.y;
+			tri2.p3.x	= sf->p2.x;					// 7 - (p2,p2)
+			tri2.p3.y	= sf->p2.y;
+			iioss_math_computeTriangle(&tri2);		// Compute the area
+
+			// Combine their areas into tri1
+			tri1.area	+= tri2.area;
+			// Right now, tri1.area is the total area
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to E
+				if (sf->gravity07 >= 3 && sf->gravity07 <= 7)
+				{
+					// North floan
+					sbgrac->alpha	= 1.0 - tri1.area;
+
+				} else {
+					// South floan
+					sbgrac->alpha	= tri1.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	 _____4
+//	|     |		Runs from NE to SW
+//	0_____|		Will be a constant 0.5 in all cases
+//
+// There are two possible floans depending on gravity for the line 0:4:
+//		2__3__4
+//		1     5		Floan 1:	0:2:4
+//		0__7__6		Floan 2:	0:4:6
+//
+//////
+	void storeFloan_pointToPoint_4_0(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute* sbgrac;
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+		sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+		if (sbgrac)
+		{
+			// Store the destination offset
+			sbgrac->offsetDst	= sf->offset;
+			sbgrac->alpha		= 0.5;
+		}
+	}
+
+
+
+//////////
+//	 _____4
+//	1     |		Runs from SE to W
+//	|_____|		(p2,p2) to (p2,p1) to (p1,p1)
+//
+// There are two possible floans depending on gravity for the line 1:4:
+//		2__3__4
+//		1     5		Smaller floan:	1:2:4
+//		0__7__6		Larger floan:	0:1:4 + 0:4:6
+//
+//////
+	void storeFloan_pointToPoint_4_1(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 1 - (p2,p2)
+			tri.p1.x	= sf->p2.x;
+			tri.p1.y	= sf->p2.y;
+
+			// 2 - (p2,p1)
+			tri.p2.x	= sf->p2.x;
+			tri.p2.y	= sf->p1.y;
+
+			// 4 - (p1,p1)
+			tri.p3.x	= sf->p1.x;
+			tri.p3.y	= sf->p1.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to before NE
+				if (sf->gravity07 >= 1 && sf->gravity07 < 4)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	2_____4
+//	|     |		Runs from NE to NW
+//	|_____|		Constant 1.0 if gravity points anywhere but north
+//
+// There is one possible floan for the line 2:4:
+//		2__3__4
+//		1     5		floan:	the square 0:2:4:6, which is the constant 1.0
+//		0__7__6
+//
+//////
+	void storeFloan_pointToPoint_4_2(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*	sbgrac;
+
+
+		// See where gravity is
+		if (sf->gravityDecorated & _COMPASS_DECORATION_TOP)
+		{
+			// They are asking for a floan to the top of this coordinate, of which there is no such animal.
+			// NOP (no operation)
+
+		} else {
+			// Full floanage.
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the full pixel value since the gravity runs southward
+				sbgrac->offsetDst	= sf->offset;
+				sbgrac->alpha		= 1.0;
+			}
+		}
+	}
+
+
+
+//////////
+//	 _____4
+//	|     |		Runs from NE to SE
+//	|_____6		Constant 1.0 if gravity is anywhere but right
+//
+// There is one possible floan for the line 4:6:
+//		2__3__4
+//		1     5		floan:	the square 0:2:4:6, which is the constant 1.0
+//		0__7__6
+//
+//////
+	void storeFloan_pointToPoint_4_6(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*	sbgrac;
+
+
+		// See where gravity is
+		if (sf->gravityDecorated & _COMPASS_DECORATION_RIGHT)
+		{
+			// They are asking for a floan to the left of this coordinate, of which there is no such animal.
+			// NOP (no operation)
+
+		} else {
+			// Full floanage.
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the full pixel value since the gravity runs eastward
+				sbgrac->offsetDst	= sf->offset;
+				sbgrac->alpha		= 1.0;
+			}
+		}
+	}
+
+
+
+//////////
+//	 _____4
+//	|     |		Runs from NE to S
+//	|__7__|		(p1,p1) to (p1,p2) to (p2,p2)
+//
+// There are two possible floans depending on gravity for the line 4:7:
+//		2__3__4
+//		1     5		Larger floan:	0:2:4 + 0:4:7
+//		0__7__6		Smaller floan:	4:6:7
+//
+//////
+	void storeFloan_pointToPoint_4_7(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 4 - (p1,p1)
+			tri.p1.x	= sf->p1.x;
+			tri.p1.y	= sf->p1.y;
+
+			// 6 - (p1,p2)
+			tri.p2.x	= sf->p1.x;
+			tri.p2.y	= sf->p2.y;
+
+			// 7 - (p2,p2)
+			tri.p3.x	= sf->p2.x;
+			tri.p3.y	= sf->p2.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to before NE
+				if (sf->gravity07 > 4 && sf->gravity07 <= 7)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	 _____ 
+//	|     5		Runs from E to SW
+//	0_____|		(p1,p1) to (p1,p2) to (p2,p2)
+//
+// There are two possible floans depending on gravity for the line 5:0:
+//		2__3__4
+//		1     5		Larger floan:	0:2:4 + 0:4:5
+//		0__7__6		Smaller floan:	0:5:6
+//
+//////
+	void storeFloan_pointToPoint_5_0(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 5 - (p1,p1)
+			tri.p1.x	= sf->p1.x;
+			tri.p1.y	= sf->p1.y;
+
+			// 6 - (p1,p2)
+			tri.p2.x	= sf->p1.x;
+			tri.p2.y	= sf->p2.y;
+
+			// 0 - (p2,p2)
+			tri.p3.x	= sf->p2.x;
+			tri.p3.y	= sf->p2.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to before NE
+				if (sf->gravity07 >= 5 && sf->gravity07 <= 7)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	 _____ 
+//	1     5		Runs from E to W
+//	|_____|		#1 - (po,po) to (p1,p1) to (p2,p2)
+//				#2 - (po,po) to (p2,p2) to (p2,po)
+//
+// There are two possible floans depending on gravity for the line 5:1:
+//		2__3__4
+//		1     5		North floan:	1:2:4 + 1:4:5
+//		0__7__6		South floan:	0:1:5 + 0:5:6
+//
+//////
+	void storeFloan_pointToPoint_5_1(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri1, tri2;
+
+
+		//////////
+		// Compute the north floan, and then use its value in the appropriate way
+		//////
+			// Triangle 1
+			tri1.p1.x	= (f64)sf->po.x;			// 0 - (po,po)
+			tri1.p1.y	= (f64)sf->po.y;
+			tri1.p2.x	= sf->p1.x;					// 1 - (p1,p1)
+			tri1.p2.y	= sf->p1.y;
+			tri1.p3.x	= sf->p2.x;					// 5 - (p2,p2)
+			tri1.p3.y	= sf->p2.y;
+			iioss_math_computeTriangle(&tri1);		// Compute the area
+
+			// Triangle 2
+			tri2.p1.x	= tri1.p1.x;				// 0 - (po,po)
+			tri2.p1.y	= tri1.p1.y;
+			tri2.p2.x	= sf->p2.x;					// 5 - (p2,p2)
+			tri2.p2.y	= sf->p2.y;
+			tri2.p3.x	= sf->p2.x;					// 6 - (p2,po)
+			tri2.p3.y	= tri1.p1.y;
+			iioss_math_computeTriangle(&tri2);		// Compute the area
+
+			// Combine their areas into tri1
+			tri1.area	+= tri2.area;
+			// Right now, tri1.area is the total area
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to E
+				if (sf->gravity07 >= 1 && sf->gravity07 <= 5)
+				{
+					// North floan
+					sbgrac->alpha	= 1.0 - tri1.area;
+
+				} else {
+					// South floan
+					sbgrac->alpha	= tri1.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	2_____ 
+//	|     5		Runs from E to NW
+//	|_____|		(p2,p2) to (p2,p1) to (p1,p1)
+//
+// There are two possible floans depending on gravity for the line 5:2:
+//		2__3__4
+//		1     5		Larger floan:	1:2:6 + 2:5:6
+//		0__7__6		Smaller floan:	2:4:5
+//
+//////
+	void storeFloan_pointToPoint_5_2(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 2 - (p2,p2)
+			tri.p1.x	= sf->p2.x;
+			tri.p1.y	= sf->p2.y;
+
+			// 4 - (p2,p1)
+			tri.p2.x	= sf->p2.x;
+			tri.p2.y	= sf->p1.y;
+
+			// 5 - (p1,p1)
+			tri.p3.x	= sf->p1.x;
+			tri.p3.y	= sf->p1.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to before NE
+				if (sf->gravity07 > 2 && sf->gravity07 <= 5)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	 __3__ 
+//	|     5		Runs from E to N
+//	|_____|		(p2,p2) to (p1,p2) to (p1,p1)
+//
+// There are two possible floans depending on gravity for the line 5:3:
+//		2__3__4
+//		1     5		Larger floan:	0:2:6 + 2:3:6 + 3:5:6
+//		0__7__6		Smaller floan:	3:4:5
+//
+//////
+	void storeFloan_pointToPoint_5_3(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 3 - (p2,p2)
+			tri.p1.x	= sf->p2.x;
+			tri.p1.y	= sf->p2.y;
+
+			// 4 - (p1,p2)
+			tri.p2.x	= sf->p1.x;
+			tri.p2.y	= sf->p2.y;
+
+			// 5 - (p1,p1)
+			tri.p3.x	= sf->p1.x;
+			tri.p3.y	= sf->p1.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to before NE
+				if (sf->gravity07 >= 3 && sf->gravity07 <= 5)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	 _____ 
+//	|     5		Runs from E to S
+//	|__7__|		(p1,p1) to (p1,p2) to (p2,p2)
+//
+// There are two possible floans depending on gravity for the line 5:7:
+//		2__3__4
+//		1     5		Larger floan:	0:2:4 + 0:4:5 + 0:5:7
+//		0__7__6		Smaller floan:	5:6:7
+//
+//////
+	void storeFloan_pointToPoint_5_7(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 5 - (p1,p1)
+			tri.p1.x	= sf->p1.x;
+			tri.p1.y	= sf->p1.y;
+
+			// 6 - (p1,p2)
+			tri.p2.x	= sf->p1.x;
+			tri.p2.y	= sf->p2.y;
+
+			// 7 - (p2,p2)
+			tri.p3.x	= sf->p2.x;
+			tri.p3.y	= sf->p2.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to before NE
+				if (sf->gravity07 >= 5 && sf->gravity07 <= 7)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	 _____ 
+//	|     |		Runs from NE to NW
+//	0_____6		Constant 1.0 if gravity points anywhere but down
+//
+// There is one possible floan for the line 6:0:
+//		2__3__4
+//		1     5		floan:	the square 0:2:4:6, which is the constant 1.0
+//		0__7__6
+//
+//////
+	void storeFloan_pointToPoint_6_0(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*	sbgrac;
+
+
+		// See where gravity is
+		if (sf->gravityDecorated & _COMPASS_DECORATION_BOTTOM)
+		{
+			// They are asking for a floan to the bottom of this coordinate, of which there is no such animal.
+			// NOP (no operation)
+
+		} else {
+			// Full floanage.
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the full pixel value since the gravity runs northward
+				sbgrac->offsetDst	= sf->offset;
+				sbgrac->alpha		= 1.0;
+			}
+		}
+	}
+
+
+
+//////////
+//	 _____ 
+//	1     |		Runs from SE to W
+//	|_____6		(p1,p2) to (p1,p1) to (p2,p2)
+//
+// There are two possible floans depending on gravity for the line 6:1:
+//		2__3__4
+//		1     5		Larger floan:	1:2:4 + 1:4:6
+//		0__7__6		Smaller floan:	0:1:6
+//
+//////
+	void storeFloan_pointToPoint_6_1(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 0 - (p1,p2)
+			tri.p1.x	= sf->p1.x;
+			tri.p1.y	= sf->p2.y;
+
+			// 1 - (p1,p1)
+			tri.p2.x	= sf->p1.x;
+			tri.p2.y	= sf->p1.y;
+
+			// 6 - (p2,p2)
+			tri.p3.x	= sf->p2.x;
+			tri.p3.y	= sf->p2.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to before NE
+				if (sf->gravity07 <= 1 || sf->gravity07 > 6)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	2_____ 
+//	|     |		Runs from SE to NW
+//	|_____6		Will be a constant 0.5 in all cases
+//
+// There are two possible floans depending on gravity for the line 6:2:
+//		2__3__4
+//		1     5		Floan 1:	0:2:6
+//		0__7__6		Floan 2:	2:4:6
+//
+//////
+	void storeFloan_pointToPoint_6_2(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute* sbgrac;
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+				sbgrac->alpha		= 0.5;
+			}
+	}
+
+
+
+//////////
+//	 __3__ 
+//	|     |		Runs from SE to N
+//	|_____6		(p2,p2) to (p1,p2) to (p1,p1)
+//
+// There are two possible floans depending on gravity for the line 6:3:
+//		2__3__4
+//		1     5		Larger floan:	0:2:6 + 2:3:6
+//		0__7__6		Smaller floan:	3:4:6
+//
+//////
+	void storeFloan_pointToPoint_6_3(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 3 - (p2,p2)
+			tri.p1.x	= sf->p2.x;
+			tri.p1.y	= sf->p2.y;
+
+			// 4 - (p1,p2)
+			tri.p2.x	= sf->p1.x;
+			tri.p2.y	= sf->p2.y;
+
+			// 6 - (p1,p1)
+			tri.p3.x	= sf->p1.x;
+			tri.p3.y	= sf->p1.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to before NE
+				if (sf->gravity07 >= 3 && sf->gravity07 < 6)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	 _____4
+//	|     |		Runs from SE to NE
+//	|_____6		Will be a constant 1.0 if gravity runs any direction except right
+//
+// There is one possible floan for the line 6:4:
+//		2__3__4
+//		1     5		floan:	the square 0:2:4:6, which is the constant 1.0
+//		0__7__6
+//
+//////
+	void storeFloan_pointToPoint_6_4(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*	sbgrac;
+
+
+		// See where gravity is
+		if (sf->gravityDecorated & _COMPASS_DECORATION_RIGHT)
+		{
+			// They are asking for a floan to the right of this coordinate, of which there is no such animal.
+			// NOP (no operation)
+
+		} else {
+			// Full floanage.
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the full pixel value since the gravity runs westward
+				sbgrac->offsetDst	= sf->offset;
+				sbgrac->alpha		= 1.0;
+			}
+		}
+	}
+
+
+
+//////////
+//	 _____ 
+//	1     |		Runs from S to W
+//	|__7__|		(p2,p1) to (p2,p2) to (p2,p2)
+//
+// There are two possible floans depending on gravity for the line 7:1:
+//		2__3__4
+//		1     5		Larger floan:	1:2:4 + 1:4:6 + 1:6:7
+//		0__7__6		Smaller floan:	0:1:7
+//
+//////
+	void storeFloan_pointToPoint_7_1(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 0 - (p2,p1)
+			tri.p1.x	= sf->p2.x;
+			tri.p1.y	= sf->p1.y;
+
+			// 1 - (p2,p2)
+			tri.p2.x	= sf->p2.x;
+			tri.p2.y	= sf->p2.y;
+
+			// 7 - (p1,p1)
+			tri.p3.x	= sf->p1.x;
+			tri.p3.y	= sf->p1.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to before NE
+				if (sf->gravity07 <= 1 || sf->gravity07 >= 7)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	2_____ 
+//	|     |		Runs from S to NW
+//	|__7__|		(p2,p1) to (p2,p2) to (p1,p1)
+//
+// There are two possible floans depending on gravity for the line 7:2:
+//		2__3__4
+//		1     5		Larger floan:	2:4:6 + 2:6:7
+//		0__7__6		Smaller floan:	0:2:7
+//
+//////
+	void storeFloan_pointToPoint_7_2(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 0 - (p2,p1)
+			tri.p1.x	= sf->p2.x;
+			tri.p1.y	= sf->p1.y;
+
+			// 2 - (p2,p2)
+			tri.p2.x	= sf->p2.x;
+			tri.p2.y	= sf->p2.y;
+
+			// 7 - (p1,p1)
+			tri.p3.x	= sf->p1.x;
+			tri.p3.y	= sf->p1.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to before NE
+				if (sf->gravity07 < 2 || sf->gravity07 >= 7)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	 __3__ 
+//	|     |		Runs from S to N, requires two triangles
+//	|__7__|		#1 - (po,p1) to (po,p2) to (p1,p1)
+//				#2 - (po,p2) to (p2,p2) to (p1,p1)
+//
+// There are two possible floans depending on gravity for the line 7:3:
+//		2__3__4
+//		1     5		Floan 1:	0:2:7 + 2:3:7
+//		0__7__6		Floan 2:	3:4:7 + 4:6:7
+//
+//////
+	void storeFloan_pointToPoint_7_3(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri1, tri2;
+
+
+		//////////
+		// Compute the north floan, and then use its value in the appropriate way
+		//////
+			// Triangle 1
+			tri1.p1.x	= (f64)sf->po.x;			// 0 - (po,p1)
+			tri1.p1.y	= sf->p1.y;
+			tri1.p2.x	= tri1.p1.x;				// 2 - (po,p2)
+			tri1.p2.y	= sf->p2.y;
+			tri1.p3.x	= sf->p1.x;					// 7 - (p1,p1)
+			tri1.p3.y	= sf->p1.y;
+			iioss_math_computeTriangle(&tri1);		// Compute the area
+
+			// Triangle 2
+			tri2.p1.x	= tri1.p1.x;				// 2 - (po,p2)
+			tri2.p1.y	= sf->p2.y;
+			tri2.p2.x	= sf->p2.x;					// 3 - (p2,p2)
+			tri2.p2.y	= sf->p2.y;
+			tri2.p3.x	= sf->p1.x;					// 7 - (p1,p1)
+			tri2.p3.y	= sf->p1.y;
+			iioss_math_computeTriangle(&tri2);		// Compute the area
+
+			// Combine their areas into tri1
+			tri1.area	+= tri2.area;
+			// Right now, tri1.area is the total area
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to E
+				if (sf->gravity07 >= 3 && sf->gravity07 <= 7)
+				{
+					// North floan
+					sbgrac->alpha	= 1.0 - tri1.area;
+
+				} else {
+					// South floan
+					sbgrac->alpha	= tri1.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	 _____4
+//	|     |		Runs from S to NE
+//	|__7__|		(p2,p2) to (p2,p1) to (p1,p1)
+//
+// There are two possible floans depending on gravity for the line 7:4:
+//		2__3__4
+//		1     5		Larger floan:	0:2:4 + 0:4:7
+//		0__7__6		Smaller floan:	4:6:7
+//
+//////
+	void storeFloan_pointToPoint_7_4(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 4 - (p2,p2)
+			tri.p1.x	= sf->p2.x;
+			tri.p1.y	= sf->p2.y;
+
+			// 6 - (p2,p1)
+			tri.p2.x	= sf->p2.x;
+			tri.p2.y	= sf->p1.y;
+
+			// 7 - (p1,p1)
+			tri.p3.x	= sf->p1.x;
+			tri.p3.y	= sf->p1.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to before NE
+				if (sf->gravity07 > 4)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//	 _____ 
+//	|     5		Runs from S to E
+//	|__7__|		(p2,p2) to (p2,p1) to (p1,p1)
+//
+// There are two possible floans depending on gravity for the line 7:5:
+//		2__3__4
+//		1     5		Larger floan:	0:2:4 + 0:4:5 + 0:5:7
+//		0__7__6		Smaller floan:	5:6:7
+//
+//////
+	void storeFloan_pointToPoint_7_5(_isSStoreFloan_pointToPoint* sf)
+	{
+		SBbgraCompute*		sbgrac;
+		STriangleF64		tri;
+
+
+		//////////
+		// Compute the smaller floan, and then use its value in the appropriate way
+		//////
+			// 4 - (p2,p2)
+			tri.p1.x	= sf->p2.x;
+			tri.p1.y	= sf->p2.y;
+
+			// 6 - (p2,p1)
+			tri.p2.x	= sf->p2.x;
+			tri.p2.y	= sf->p1.y;
+
+			// 7 - (p1,p1)
+			tri.p3.x	= sf->p1.x;
+			tri.p3.y	= sf->p1.y;
+
+			// Compute the area
+			iioss_math_computeTriangle(&tri);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBbgraCompute*)oss_builderAllocateBytes(sf->floans, sizeof(SBbgraCompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->offsetDst	= sf->offset;
+
+				// See if gravity runs from W to before NE
+				if (sf->gravity07 >= 5)
+				{
+					// Smaller floan
+					sbgrac->alpha	= tri.area;
+
+				} else {
+					// Larger floan
+					sbgrac->alpha	= 1.0 - tri.area;
+				}
+			}
+	}
+
+
+
+//////////
+//
 // Rotates the indicated canvas about the indicated point.
 //
 //////
-	u64 iioss_canvasRotateAbout(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, s32 xo, s32 xy)
+	u64 iioss_canvasRotateAbout(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, f32 ox, f32 oy)
 	{
-		f64		lfUlx, lfUly, lfM, lfMP, lfWidth, lfHeight;
-
-
-		// Rotate the starting point around the corner
-
+// TODO:  Write this algorithm. :-)
 		return(0);
 	}

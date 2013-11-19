@@ -851,7 +851,7 @@ _asm nop;
 				{
 					// Two spaces per indention
 					for (lnI = 0; lnI < bxml->level; lnI++)
-						oss_builderAppendText(build, (s8*)cgcSpaceBxmlIndent, sizeof(cgcSpaceBxmlIndent) - 1);
+						oss_builderAppendData(build, (s8*)cgcSpaceBxmlIndent, sizeof(cgcSpaceBxmlIndent) - 1);
 				}
 
 
@@ -859,10 +859,10 @@ _asm nop;
 			// Append the tag format
 			//////
 				// <
-				oss_builderAppendText(build, (s8*)cgcTagLeader, sizeof(cgcTagLeader) - 1);
+				oss_builderAppendData(build, (s8*)cgcTagLeader, sizeof(cgcTagLeader) - 1);
 
 				// tag name
-				oss_builderAppendText(build, bxml->_name.data._s8, (u32)bxml->_name.length);
+				oss_builderAppendData(build, bxml->_name.data._s8, (u32)bxml->_name.length);
 
 				// If there are attributes, process them
 				if (bxml->_attributes.masterCount != 0)
@@ -878,10 +878,10 @@ _asm nop;
 				if (bxml->ll4.child && tlSaveChildNodes)
 				{
 					// There are children, so this tag is not closed
-					oss_builderAppendText(build, (s8*)cgcTagCloser, sizeof(cgcTagCloser) - 1);
+					oss_builderAppendData(build, (s8*)cgcTagCloser, sizeof(cgcTagCloser) - 1);
 
 					// Append CR/LF
-					oss_builderAppendText(build, (s8*)cgcCrLf, sizeof(cgcCrLf) - 1);
+					oss_builderAppendData(build, (s8*)cgcCrLf, sizeof(cgcCrLf) - 1);
 
 					// Append the children
 					ibxml_saveNode(build, (SBxml*)bxml->ll4.child, tlSaveChildNodes, tlSaveSiblings, tnError);
@@ -891,27 +891,27 @@ _asm nop;
 					// Close the tag
 					// Two spaces per indention
 					for (lnI = 0; lnI < bxml->level; lnI++)
-						oss_builderAppendText(build, (s8*)cgcSpaceBxmlIndent, sizeof(cgcSpaceBxmlIndent) - 1);
+						oss_builderAppendData(build, (s8*)cgcSpaceBxmlIndent, sizeof(cgcSpaceBxmlIndent) - 1);
 
 					// </
-					oss_builderAppendText(build, (s8*)cgcTagClosingLeader, sizeof(cgcTagClosingLeader) - 1);
+					oss_builderAppendData(build, (s8*)cgcTagClosingLeader, sizeof(cgcTagClosingLeader) - 1);
 
 					// tag name
-					oss_builderAppendText(build, bxml->_name.data._s8, (u32)bxml->_name.length);
+					oss_builderAppendData(build, bxml->_name.data._s8, (u32)bxml->_name.length);
 
 					// closing tag
-					oss_builderAppendText(build, (s8*)cgcTagCloser, sizeof(cgcTagCloser) - 1);
+					oss_builderAppendData(build, (s8*)cgcTagCloser, sizeof(cgcTagCloser) - 1);
 
 				} else {
 					// We are completed, there are no children, or they do not want to see children, so we add the singleCloser
-					oss_builderAppendText(build, (s8*)cgcTagSingleCloser, sizeof(cgcTagSingleCloser) - 1);
+					oss_builderAppendData(build, (s8*)cgcTagSingleCloser, sizeof(cgcTagSingleCloser) - 1);
 				}
 
 
 			//////////
 			// Append CR/LF
 			//////
-				oss_builderAppendText(build, (s8*)cgcCrLf, sizeof(cgcCrLf) - 1);
+				oss_builderAppendData(build, (s8*)cgcCrLf, sizeof(cgcCrLf) - 1);
 
 
 			//////////
@@ -949,10 +949,10 @@ _asm nop;
 		// Append our attribute
 		//////
 			// Append space before each attribute
-			oss_builderAppendText(build, (s8*)cgcSpace1, sizeof(cgcSpace1) - 1);
+			oss_builderAppendData(build, (s8*)cgcSpace1, sizeof(cgcSpace1) - 1);
 
 			// Attribute name
-			oss_builderAppendText(build, bxmla->_name.data._s8, (u32)bxmla->_name.length);
+			oss_builderAppendData(build, bxmla->_name.data._s8, (u32)bxmla->_name.length);
 			if (bxmla->_data.datum.data._s8)
 			{
 				// There is actually data allocated for the tag
@@ -965,35 +965,35 @@ _asm nop;
 					{
 						// It's all NULL, we need to write, so we write "attr::##"
 						sprintf_s(buffer, sizeof(buffer), "%u\0", bxmla->_data.lengthTotal);
-						oss_builderAppendText(build, (s8*)cgcColonColon, sizeof(cgcColonColon) - 1);
-						oss_builderAppendText(build, buffer, strlen(buffer));
+						oss_builderAppendData(build, (s8*)cgcColonColon, sizeof(cgcColonColon) - 1);
+						oss_builderAppendData(build, buffer, strlen(buffer));
 						llStoreAttributeData = false;
 
 					} else {
 						// There is data we need to write, so we write "attr:##="
 						sprintf_s(buffer, sizeof(buffer), "%u\0", bxmla->_data.lengthTotal);
-						oss_builderAppendText(build, (s8*)cgcColon, sizeof(cgcColon) - 1);
-						oss_builderAppendText(build, buffer, strlen(buffer));
+						oss_builderAppendData(build, (s8*)cgcColon, sizeof(cgcColon) - 1);
+						oss_builderAppendData(build, buffer, strlen(buffer));
 					}
 
 				} else {
 					// The attribute length and the total space assigned to it are not the same, so we must store as attr:#1:#2=
 					// Append total length indicated
 					sprintf_s(buffer, sizeof(buffer), "%u\0", bxmla->_data.lengthTotal);
-					oss_builderAppendText(build, (s8*)cgcColon, sizeof(cgcColon) - 1);
-					oss_builderAppendText(build, buffer, strlen(buffer));
+					oss_builderAppendData(build, (s8*)cgcColon, sizeof(cgcColon) - 1);
+					oss_builderAppendData(build, buffer, strlen(buffer));
 					// Append data length
 					sprintf_s(buffer, sizeof(buffer), "%u\0", bxmla->_data.datum.length);
-					oss_builderAppendText(build, (s8*)cgcColon, sizeof(cgcColon) - 1);
-					oss_builderAppendText(build, buffer, strlen(buffer));
+					oss_builderAppendData(build, (s8*)cgcColon, sizeof(cgcColon) - 1);
+					oss_builderAppendData(build, buffer, strlen(buffer));
 				}
 
 				// If we need to store the literal data, do so
 				if (llStoreAttributeData)
 				{
 					// Store the attribute data (equal sign and content)
-					oss_builderAppendText(build, (s8*)cgcEqual, sizeof(cgcEqual) - 1);
-					oss_builderAppendText(build, bxmla->_data.datum.data._s8, (u32)bxmla->_data.datum.length);
+					oss_builderAppendData(build, (s8*)cgcEqual, sizeof(cgcEqual) - 1);
+					oss_builderAppendData(build, bxmla->_data.datum.data._s8, (u32)bxmla->_data.datum.length);
 				}
 
 
@@ -1001,8 +1001,8 @@ _asm nop;
 				// There is no data allocated, so it's a storage mechanism that has no data associated with it
 				// These are stored as attr::##
 				sprintf_s(buffer, sizeof(buffer), "%u\0", max(bxmla->_data.lengthTotal, bxmla->_data.lengthTotal));
-				oss_builderAppendText(build, (s8*)cgcColonColon, sizeof(cgcColonColon) - 1);
-				oss_builderAppendText(build, buffer, strlen(buffer));
+				oss_builderAppendData(build, (s8*)cgcColonColon, sizeof(cgcColonColon) - 1);
+				oss_builderAppendData(build, buffer, strlen(buffer));
 			}
 		}
 	}

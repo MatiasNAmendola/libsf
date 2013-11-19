@@ -104,7 +104,7 @@
 		u64 CALLTYPE		 	oss_canvasDrawText							(SCanvas* tc, SBGRA* bd, u64 fontHandle, s32 ulx, s32 uly, s32 lrx, s32 lry, s8*  tcText, u32 tnTextLength, SBGRA foreground, SBGRA background);
 		u64 CALLTYPE		 	oss_canvasFrameRect							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 borderThickness, SBGRA border);
 		u64 CALLTYPE		 	oss_canvasFillRect							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 borderThickness, SBGRA border, SBGRA background);
-		u64 CALLTYPE		 	oss_canvasLine								(SCanvas* tc, SBGRA* bd, s32 p1x, s32 p1y, s32 p2x, s32 p2y, s32 lineThickness, SBGRA line);
+		u64 CALLTYPE		 	oss_canvasLine								(SCanvas* tc, SBGRA* bd, f32 p1x, f32 p1y, f32 p2x, f32 p2y, f32 lineThickness, SBGRA line, bool tlFloan);
 		u64 CALLTYPE		 	oss_canvasArc								(SCanvas* tc, SBGRA* bd, s32 ox, s32 oy, f32 radius, f32 start, f32 end, s32 lineThickness, SBGRA line);
 		SCanvas* CALLTYPE	 	oss_canvasExtract							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry);
 		u64 CALLTYPE		 	oss_canvasColorize							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, SBGRA color);
@@ -113,7 +113,8 @@
 		u64 CALLTYPE		 	oss_canvasBitBlt							(SCanvas* tsDst, bool tlDstAccumulator, s32 dulx, s32 duly, SCanvas* tsSrc, bool tlSrcAccumulator, s32 sulx, s32 suly, s32 slrx, s32 slry);
 		u64 CALLTYPE			oss_canvasScale								(SCanvas* tsDst, SCanvas* tsSrc, SScaleMap** tsScaleMap);
 		u64 CALLTYPE			oss_canvasRotate							(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians);
-		u64 CALLTYPE			oss_canvasRotateAbout						(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, s32 ox, s32 oy);
+		u64 CALLTYPE			oss_canvasRotateAbout						(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, f32 ox, f32 oy);
+		u64 CALLTYPE			oss_canvas_drawPolygon						(SCanvas* tsDst, SBGRA* bd, SPolygon* poly);
 
 		SCask* CALLTYPE			oss_caskDefineStandard						(u32 tnHeight, u32 tnWidth, u32 tnLeftStyle, u32 tnLeftState, u32 tnLeftPipCount, u32 tnLeftColor, csu8p tcLeftText, u32 tnRightStyle, u32 tnRightState, u32 tnRightPipCount, u32 tnRightColor, csu8p tcRightText);
 		SCask* CALLTYPE			oss_caskDefineEncompassingRectangle			(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SRectXYXY* tsOuter);
@@ -328,9 +329,14 @@
 		u32 CALLTYPE			oss_countConsecutiveAsciiNumericDigits		(s8* buffer, u32 tnMaxLength);
 		u32 CALLTYPE			oss_convertTextToU32						(s8* tcNumbers, u32 tnMaxLength);
 
-		void CALLTYPE			oss_math_triangleCompute					(STriangleInOutF64* tri);
-		void CALLTYPE			oss_math_squareCompute						(SSquareInOutF64* sq, s32 ox, s32 oy);
+		void CALLTYPE			oss_math_computeTriangle					(STriangleInOutF64* tri);
+		void CALLTYPE			oss_math_computeSquare						(SSquareInOutF64* sq, f32 ox, f32 oy);
+		void CALLTYPE			oss_math_computeLine						(SLineF64* line);
 		void CALLTYPE			oss_math_squareRotateAbout					(SSquareInOutF64* sq);
+
+		bool CALLTYPE			oss_polygon_initialize						(SPolygon* poly, s32 tnLineCount, bool tlAllocatePolyLines);
+		bool CALLTYPE			oss_polygon_setByPolyLine					(SPolygon* poly, s32 tnEntry, SPolyLine* line);
+		bool CALLTYPE			oss_polygon_setByValues						(SPolygon* poly, s32 tnEntry, SXYF64* start, SXYF64* end, SXYF64* gravity);
 
 
 //////////
@@ -351,8 +357,9 @@
 //
 //////////
 		void CALLTYPE			oss_builderCreateAndInitialize				(SBuilder** buffRoot, u32 tnAllocationSize);
-		s8* CALLTYPE			oss_builderAppendText						(SBuilder*  buffRoot, s8* tcData, u32 tnDataLength);
-		void CALLTYPE			oss_builderSetSize							(SBuilder** buffRoot, u32 tnBufferLength);
+		s8* CALLTYPE			oss_builderAppendData						(SBuilder*  buffRoot, s8* tcData, u32 tnDataLength);
+		s8* CALLTYPE			oss_builderAllocateBytes					(SBuilder*	buffRoot, u32 tnDataLength);
+		void CALLTYPE			oss_builderSetSize							(SBuilder*  buffRoot, u32 tnBufferLength);
 		void CALLTYPE			oss_builderFreeAndRelease					(SBuilder** buffRoot);
 
 
@@ -529,11 +536,12 @@
 	void					ioss_initializeBackground						(u32 tnWidth, u32 tnHeight, u32 tnBackColor, s8* tbd, u32 tnActualWidth);
 	u32						ioss_computeActualWidth							(u32 tnWidth);
 	bool					ioss_paintWindow								(HWND hwnd);
+	u64						ioss_canvasLine									(SCanvas* tc, SBGRA* bd, f32 p1x, f32 p1y, f32 p2x, f32 p2y, f32 lineThickness, SBGRA line);
 	_iswSOssWindowLL*		ioss_findSOssWindowLLByHwnd						(HWND hwnd);
 	bool					iioss_findSOssWindowLLByHwndCallback			(SStartEndCallback* cb);
 	_iswSOssWindowLL*		ioss_findSOssWindowLLByScreenId					(u64 tnScreenId);
 	bool					iioss_findSOssWindowLLByScreenId				(SStartEndCallback* cb);
-	_iswSOssWindowLL*		ioss_find_iswSOssWindowLL_By_iOssWindowId				(u64 tnOssWindowId);
+	_iswSOssWindowLL*		ioss_find_iswSOssWindowLL_By_iOssWindowId		(u64 tnOssWindowId);
 	bool					iioss_findSOssWindowByOssWindowIdCallback		(SStartEndCallback* cb);
 	void					ioss_deriveMouseInformation						(u32* tnX, u32* tnY, u32* tnButtons, u32* tnKeyFlags, u32 tnWinKeys, u32 tnXlowYhigh);
 	void					ioss_recordMouseEvent							(HWND hwnd, u32 tnEVent, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeyFlags);
@@ -575,7 +583,7 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	u64						iioss_canvasScale								(SCanvas* tsDst, SCanvas* tcSrc, SScaleMap** tsSm);
 	u64						iioss_canvasScaleProcess						(SCanvas* tsDst, SCanvas* tsSrc, SScaleMap*  tsSm, f64 tfVerticalScaler, f64 tfHorizontalScaler);
 	void					iioss_getSpannedPixelComputation				(_isSSpannedPixelProcessing* bp);
-	void					iioss_getSpannedPixelComputationAppend			(_isSSpannedPixelProcessing* bp, s32 tnDeltaX, s32 tnDeltaY, f64 tfMultiplier);
+	void					iioss_getSpannedPixelComputationAppend			(_isSSpannedPixelProcessing* bp, s32 tnDeltaX, s32 tnDeltaY, f64 tfAlpha);
 	u32						ioss_getIntegersBetween							(f64 p1, f64 p2);
 	void					ioss_setFindFileStatus							(SFindFile* tsFileInfo, WIN32_FIND_DATAA* twfd);
 	void					ioss_convertFileTimeToSDateTime					(SFileTime* tsDateTime, FILETIME* tsFiletime);
@@ -628,7 +636,72 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	void					iioss_enumerateMonitorsIterateCallback			(SStartEndCallback* cb);
 
 	void					ioss_deleteScaleCompute							(SScaleMap* tsm);
-	u64						iioss_canvasRotateAbout							(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, s32 xo, s32 xy);
+	void					iioss_math_computeTriangle						(STriangleF64* tri);
+	void					iioss_math_computeSquare						(SSquareInOutF64* sq, f32 ox, f32 oy);
+	void					iioss_math_computeLine							(SLineF64* line);
+	void					ioss_math_squareRotateAbout						(SSquareInOutF64* sq);
+	bool					iioss_polygon_initialize						(SPolygon* poly, s32 tnLineCount, bool tlAllocatePolyLines);
+	bool					iioss_polygon_setByPolyLine						(SPolygon* poly, s32 tnEntry, SPolyLine* line);
+	bool					iioss_polygon_setByValues						(SPolygon* poly, s32 tnEntry, SXYF64* start, SXYF64* end, SXYF64* gravity);
+	u64						iioss_canvas_drawPolygon						(SCanvas* tsDst, SBGRA* bd, SPolygon* poly);
+	bool					iioss_canvas_drawPolygon_moveNextAxis			(_isSStoreFloan_pointToPoint* sf);
+	void					iioss_canvas_drawPolygon_moveNextAxis_xIntercept(f64* tfx, f64* tfY, SXYF64* nextX, u32 tnGravity, f64 tfM);
+	void					iioss_canvas_drawPolygon_moveNextAxis_yIntercept(f64* tfx, f64* tfY, SXYF64* nextY, u32 tnGravity, f64 tfM);
+	void					iioss_canvas_drawPolygon_storeCorner			(SBuilder* corners, f64 tfX, f64 tfY);
+	void					iioss_canvas_drawPolygon_storeFloans			(_isSStoreFloan_pointToPoint* sf);
+	u32						iioss_canvas_drawPolygon_storeFloans_gravity	(SXYF64* p, _isSStoreFloan_pointToPoint* sf);
+	f64						iioss_canvas_drawPolygon_adjustTheta			(f64 tfTheta);
+	u32						iioss_canvas_drawpolygon_gravityPerThetaAndLeft	(f64 tfTheta, bool tlLeft);
+	u64						iioss_canvasRotateAbout							(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, f32 ox, f32 oy);
+
+
+//////////
+// The following functions handle floan segments from point to point.
+//      NW __N__ NE     2__3__4
+//      W |     |E      1     5
+//      SW|__S__|SE     0__7__6
+//////
+	void					storeFloan_pointToPoint_bad						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_0_2						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_0_3						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_0_4						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_0_5						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_0_6						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_1_3						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_1_4						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_1_5						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_1_6						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_1_7						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_2_0						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_2_4						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_2_5						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_2_6						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_2_7						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_3_0						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_3_1						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_3_5						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_3_6						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_3_7						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_4_0						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_4_1						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_4_2						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_4_6						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_4_7						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_5_0						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_5_1						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_5_2						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_5_3						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_5_7						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_6_0						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_6_1						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_6_2						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_6_3						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_6_4						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_7_1						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_7_2						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_7_3						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_7_4						(_isSStoreFloan_pointToPoint* sf);
+	void					storeFloan_pointToPoint_7_5						(_isSStoreFloan_pointToPoint* sf);
 
 
 //////////

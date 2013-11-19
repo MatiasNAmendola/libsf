@@ -105,6 +105,7 @@
 	const s8		cgcOssCanvasScale[]										= "oss_canvasScale";
 	const s8		cgcOssCanvasRotate[]									= "oss_canvasRotate";
 	const s8		cgcOssCanvasRotateAbout[]								= "oss_canvasRotateAbout";
+	const s8		cgcOssCanvasDrawPolygon[]								= "oss_canvas_drawPolygon";
 
 	const s8		cgcOssCaskDefineStandard[]								= "oss_caskDefineStandard";
 	const s8		cgcOssCaskDefineEncompassingRectangle[]					= "oss_caskDefineEncompassingRectangle";
@@ -257,15 +258,22 @@
 	const s8		cgcOssCountConsecutiveAsciiNumericDigits[]				= "oss_countConsecutiveAsciiNumericDigits";
 	const s8		cgcOssConvertTextToU32[]								= "oss_convertTextToU32";
 
-	const s8		cgcOssMathTrianglePopulateArea[]						= "oss_math_triangleCompute";
+	const s8		cgcOssMathComputeTriangle[]								= "oss_math_computeTriangle";
+	const s8		cgcOssMathComputeSquare[]								= "oss_math_computeSquare";
+	const s8		cgcOssMathComputeLine[]									= "oss_math_computeLine";
 	const s8		cgcOssMathSquareRotateAbout[]							= "oss_math_squareRotateAbout";
+
+	const s8		cgcOssPolygonInitialize[]								= "oss_polygon_initialize";
+	const s8		cgcOssPolygonSetByPolyLine[]							= "oss_polygon_setByPolyLine";
+	const s8		cgcOssPolygonSetByValues[]								= "oss_polygon_setByValues";
 
 	const s8		cgcOssFindFirstFile[]									= "oss_fileFindFirst";
 	const s8		cgcOssFindNextFile[]									= "oss_fileFindNext";
 	const s8		cgcOssFindClose[]										= "oss_fileFindClose";
 
 	const s8		cgcOssBuildBufferCreateAndInitialize[]					= "oss_builderCreateAndInitialize";
-	const s8		cgcOssBuildBufferAppendText[]							= "oss_builderAppendText";
+	const s8		cgcOssBuildBufferAppendData[]							= "oss_builderAppendData";
+	const s8		cgcOssBuilderAllocateBytes[]							= "oss_builderAllocateBytes";
 	const s8		cgcOssBuildBufferSetSize[]								= "oss_builderSetSize";
 	const s8		cgcOssBuildBufferFreeAndRelease[]						= "oss_builderFreeAndRelease";
 
@@ -449,7 +457,7 @@
 		u64				(CALLTYPE *oss_canvasDrawText)							(SCanvas* tc, SBGRA* bd, u64 fontHandle, s32 ulx, s32 uly, s32 lrx, s32 lry, s8*  tcText, u32 tnTextLength, SBGRA foreground, SBGRA background);
 		u64				(CALLTYPE *oss_canvasFrameRect)							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 borderThickness, SBGRA border);
 		u64				(CALLTYPE *oss_canvasFillRect)							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 borderThickness, SBGRA border, SBGRA background);
-		u64				(CALLTYPE *oss_canvasLine)								(SCanvas* tc, SBGRA* bd, s32 p1x, s32 p1y, s32 p2x, s32 p2y, s32 lineThickness, SBGRA line);
+		u64				(CALLTYPE *oss_canvasLine)								(SCanvas* tc, SBGRA* bd, f32 p1x, f32 p1y, f32 p2x, f32 p2y, f32 lineThickness, SBGRA line, bool tlFloan);
 		u64				(CALLTYPE *oss_canvasArc)								(SCanvas* tc, SBGRA* bd, s32 ox, s32 oy, f32 radius, f32 start, f32 end, s32 lineThickness, SBGRA line);
 		SCanvas*		(CALLTYPE *oss_canvasExtract)							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry);
 		u64				(CALLTYPE *oss_canvasColorize)							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, SBGRA color);
@@ -459,6 +467,7 @@
 		u64				(CALLTYPE *oss_canvasScale)								(SCanvas* tsDst, SCanvas* tsSrc, SScaleMap** tsScaleMap);
 		u64				(CALLTYPE *oss_canvasRotate)							(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians);
 		u64				(CALLTYPE *oss_canvasRotateAbout)						(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, s32 ox, s32 oy);
+		u64				(CALLTYPE *oss_canvas_drawPolygon)						(SPolygon* poly);
 
 		SCask*			(CALLTYPE *oss_caskDefineStandard)						(u32 tnHeight, u32 tnWidth, u32 tnLeftStyle, u32 tnLeftState, u32 tnLeftPipCount, u32 tnLeftColor, csu8p tcLeftText, u32 tnRightStyle, u32 tnRightState, u32 tnRightPipCount, u32 tnRightColor, csu8p tcRightText);
 		SCask*			(CALLTYPE *oss_caskDefineEncompassingRectangle)			(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SRectXYXY* tsOuter);
@@ -677,9 +686,14 @@
 		u32				(CALLTYPE *oss_countConsecutiveAsciiNumericDigits)	(s8* buffer, u32 tnMaxLength);
 		u32				(CALLTYPE *oss_convertTextToU32)					(s8* tcNumbers, u32 tnMaxLength);
 
-		void			(CALLTYPE *oss_math_triangleCompute)				(STriangleInOutF64* tri);
-		void			(CALLTYPE *oss_math_squareCompute)					(SSquareInOutF64* sq, s32 ox, s32 oy);
+		void			(CALLTYPE *oss_math_computeTriangle)				(STriangleInOutF64* tri);
+		void			(CALLTYPE *oss_math_computeSquare)					(SSquareInOutF64* sq, f32 ox, f32 oy);
+		void			(CALLTYPE *oss_math_computeLine)					(SLineF64* line);
 		void			(CALLTYPE *oss_math_squareRotateAbout)				(SSquareInOutF64* sq);
+		bool			(CALLTYPE *oss_polygon_initialize)					(SPolygon* poly, s32 tnLineCount, bool tlAllocatePolyLines);
+		bool			(CALLTYPE *oss_polygon_setByPolyLine)				(SPolygon* poly, s32 tnEntry, SPolyLine* line);
+		bool			(CALLTYPE *oss_polygon_setByValues)					(SPolygon* poly, s32 tnEntry, SXYF64* start, SXYF64* end, SXYF64* gravity);
+
 
 
 //////////
@@ -700,8 +714,9 @@
 //
 //////////
 		void			(CALLTYPE *oss_builderCreateAndInitialize)		(SBuilder** buffRoot, u32 tnAllocationSize);
-		s8*				(CALLTYPE *oss_builderAppendText)				(SBuilder*  buffRoot, s8* tcData, u32 tnDataLength);
-		void			(CALLTYPE *oss_builderSetSize)					(SBuilder** buffRoot, u32 tnBufferLength);
+		s8*				(CALLTYPE *oss_builderAppendData)				(SBuilder*  buffRoot, s8* tcData, u32 tnDataLength);
+		s8*				(CALLTYPE *oss_builderAllocateBytes)			(SBuilder*	buffRoot, u32 tnDataLength);
+		void			(CALLTYPE *oss_builderSetSize)					(SBuilder*  buffRoot, u32 tnBufferLength);
 		void			(CALLTYPE *oss_builderFreeAndRelease)			(SBuilder** buffRoot);
 
 
@@ -906,6 +921,7 @@
 		(void *)&oss_canvasScale,											(void *)cgcOssCanvasScale,
 		(void *)&oss_canvasRotate,											(void *)cgcOssCanvasRotate,
 		(void *)&oss_canvasRotateAbout,										(void *)cgcOssCanvasRotateAbout,
+		(void *)&oss_canvas_drawPolygon,									(void *)cgcOssCanvasDrawPolygon,
 
 		(void *)&oss_caskDefineStandard,									(void *)cgcOssCaskDefineStandard,
 		(void *)&oss_caskDefineEncompassingRectangle,						(void *)cgcOssCaskDefineEncompassingRectangle,
@@ -1067,15 +1083,22 @@
 		(void*)&oss_countConsecutiveAsciiNumericDigits,						(void*)cgcOssCountConsecutiveAsciiNumericDigits,
 		(void*)&oss_convertTextToU32,										(void*)cgcOssConvertTextToU32,
 
-		(void*)&oss_math_triangleCompute,								(void*)cgcOssMathTrianglePopulateArea,
+		(void*)&oss_math_computeTriangle,									(void*)cgcOssMathComputeTriangle,
+		(void*)&oss_math_computeSquare,										(void*)cgcOssMathComputeSquare,
+		(void*)&oss_math_computeLine,										(void*)cgcOssMathComputeLine,
 		(void*)&oss_math_squareRotateAbout,									(void*)cgcOssMathSquareRotateAbout,
+
+		(void*)&oss_polygon_initialize,										(void*)cgcOssPolygonInitialize,
+		(void*)&oss_polygon_setByPolyLine,									(void*)cgcOssPolygonSetByPolyLine,
+		(void*)&oss_polygon_setByValues,									(void*)cgcOssPolygonSetByValues,
 
 		(void *)&oss_fileFindFirst,											(void *)cgcOssFindFirstFile,
 		(void *)&oss_fileFindNext,											(void *)cgcOssFindNextFile,
 		(void *)&oss_fileFindClose,											(void *)cgcOssFindClose,
 
 		(void *)&oss_builderCreateAndInitialize,							(void *)cgcOssBuildBufferCreateAndInitialize,
-		(void *)&oss_builderAppendText,										(void *)cgcOssBuildBufferAppendText,
+		(void *)&oss_builderAppendData,										(void *)cgcOssBuildBufferAppendData,
+		(void *)&oss_builderAllocateBytes,									(void *)cgcOssBuilderAllocateBytes,
 		(void *)&oss_builderSetSize,										(void *)cgcOssBuildBufferSetSize,
 		(void *)&oss_builderFreeAndRelease,									(void *)cgcOssBuildBufferFreeAndRelease,
 

@@ -1367,105 +1367,17 @@
 // Draws a line on the canvas.
 //
 //////
-	u64 CALLTYPE oss_canvasLine(SCanvas* tc, SBGRA* bd, s32 p1x, s32 p1y, s32 p2x, s32 p2y, s32 lineThickness, SBGRA line)
+	u64 CALLTYPE oss_canvasLine(SCanvas* tc, SBGRA* bd, f32 p1x, f32 p1y, f32 p2x, f32 p2y, f32 lineThickness, SBGRA line, bool tlFloan)
     {
-		f32		lfI, lfX, lfY, lfDeltaX, lfDeltaY, lfStepI, lfStepX, lfStepY, lfHyp, lfHalfLine;
-		f32		lfXP, lfYP, lfStepXP, lfStepYP, lfThetaP;
-		s32		lnX0;
-		u64		lnPixelsDrawn;
-		u8		lnRed, lnGrn, lnBlu;
-		SBGRA*	lrgba;
+		u64 lnPixelsDrawn;
 
 
 		// Make sure the environment is sane
 		if (!tc || !bd || lineThickness < 1)
 			return(-1);
 
-		// See what type of line it is
-		lnPixelsDrawn	= 0;
-		lfHalfLine		= (f32)lineThickness / 2.0f;
-		if (p1x == p2x)
-		{
-			// Vertical line
-			lnPixelsDrawn = oss_canvasFillRect(tc, bd, (s32)((f32)p1x - lfHalfLine), min(p1y, p2y), (s32)((f32)p1x + lfHalfLine), max(p1y, p2y), 0, line, line);
-
-		} else if (p1y == p2y) {
-			// Horizontal line
-			lnPixelsDrawn = oss_canvasFillRect(tc, bd, min(p1x, p2x), (s32)((f32)p1y - lfHalfLine), max(p1x, p2x), (s32)((f32)p1y + lfHalfLine), 0, line, line);
-
-		} else {
-			// Arbitrary line
-			lfX				= (f32)p1x;
-			lfY				= (f32)p1y;
-			lfDeltaX		= (f32)p2x - (f32)p1x;
-			lfDeltaY		= (f32)p2y - (f32)p1y;
-			lfHyp			= sqrt(lfDeltaX*lfDeltaX + lfDeltaY*lfDeltaY);
-			lfStepX			= lfDeltaX / lfHyp;
-			lfStepY			= lfDeltaY / lfHyp;
-			lfStepI			= 1.0f / lfHyp;
-
-			// Compute slope
-			if (lineThickness != 1)
-			{
-				lfThetaP		= atan2(-lfDeltaX, lfDeltaY);		// Get theta for X
-				lfStepXP		= cos(lfThetaP) / 3.0f;
-				lfStepYP		= sin(lfThetaP) / 3.0f;
-				lfHalfLine		= lfHalfLine * 3.0f;
-				lineThickness	= lineThickness * 3;
-			}
-
-			// Grab the colors
-			lnRed		= line.red;
-			lnGrn		= line.grn;
-			lnBlu		= line.blu;
-
-			// Iterate for every pixel along the hypotenuse
-			for (	lfI = 0;
-					lfI < 1.0f;
-					lfI += lfStepI, lfX += lfStepX, lfY += lfStepY	)
-			{
-				// Are we on the canvas vertically?
-				if (lfY >= 0.0f && (s32)lfY < tc->height)
-				{
-					// Based on our line thickness, we use one of two formulas
-					if (lineThickness != 1)
-					{
-						// Do the perpendicular slope for the line, one point at a time
-						lfXP = lfX - (lfHalfLine * lfStepXP);
-						lfYP = lfY - (lfHalfLine * lfStepYP);
-						for (lnX0 = 0; lnX0 < lineThickness; lnX0++, lfXP += lfStepXP, lfYP += lfStepYP)
-						{
-							// Find out on what row this pixel data will go
-							lrgba = bd + ((s32)lfYP * tc->width) + (s32)lfXP;
-
-							// Store the color
-							lrgba->red	= lnRed;
-							lrgba->grn	= lnGrn;
-							lrgba->blu	= lnBlu;
-
-							// Increase our pixel drawn count
-							++lnPixelsDrawn;
-						}
-
-					} else {
-						// Are we on the canvas horizontally?
-						if (lfX >= 0.0f && (s32)lfX < tc->width)
-						{
-							// Find out on what row this pixel data will go
-							lrgba = bd + ((s32)lfY * tc->width) + (s32)lfX;
-
-							// Store the color
-							lrgba->red	= lnRed;
-							lrgba->grn	= lnGrn;
-							lrgba->blu	= lnBlu;
-
-							// Increase our pixel drawn count
-							++lnPixelsDrawn;
-						}
-					}
-				}
-			}
-		}
+		// Draw the line in floaned fashion
+		lnPixelsDrawn = ioss_canvasLine(tc, bd, p1x, p1y, p2x, p2y, lineThickness, line);
 
 		// Mark the item dirty
 		if (lnPixelsDrawn != 0)
@@ -1754,7 +1666,7 @@
 	u64 CALLTYPE oss_canvasRotate(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians)
 	{
 		if (tsDst && bdd && tsSrc && bds)
-			return(iioss_canvasRotateAbout(tsDst, bdd, ulx, uly, tsSrc, bds, tfRadians, (ulx+tsSrc->width) / 2, (uly+tsSrc->height) / 2));
+			return(iioss_canvasRotateAbout(tsDst, bdd, ulx, uly, tsSrc, bds, tfRadians, (f32)ulx + ((f32)tsSrc->width / 2.0f), (f32)uly + ((f32)tsSrc->height / 2.0f)));
 
 		// If we get here, failure
 		return(0);
@@ -1772,10 +1684,27 @@
 // Please bear this in mind. :-)
 //
 //////
-	u64 CALLTYPE oss_canvasRotateAbout(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, s32 ox, s32 oy)
+	u64 CALLTYPE oss_canvasRotateAbout(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, f32 ox, f32 oy)
 	{
 		if (tsDst && bdd && tsSrc && bds)
 			return(iioss_canvasRotateAbout(tsDst, bdd, ulx, uly, tsSrc, bds, tfRadians, ox, oy));
+
+		// If we get here, failure
+		return(0);
+	}
+
+
+
+
+//////////
+//
+// Called to draw the polygon onto the canvas.
+//
+//////
+	u64 CALLTYPE oss_canvas_drawPolygon(SCanvas* tsDst, SBGRA* bd, SPolygon* poly)
+	{
+		if (tsDst && bd && poly && poly->line && poly->lineCount >= 3)
+			return(iioss_canvas_drawPolygon(tsDst, bd, poly));
 
 		// If we get here, failure
 		return(0);
@@ -8114,136 +8043,27 @@ _asm int 3;
 //
 //////
 	// Given three points, what are the side lengths, semiperimeter, and area
-	void CALLTYPE oss_math_triangleCompute(STriangleInOutF64* tri)
+	void CALLTYPE oss_math_computeTriangle(STriangleInOutF64* tri)
 	{
-		f64 lfdx, lfdy;
-
-
-		// Make sure the environment is sane
-		if (tri)
-		{
-			//////////
-			// P1..P2 length
-			//////
-				lfdx					= tri->input->p1x - tri->input->p2x;
-				lfdy					= tri->input->p1y - tri->input->p2y;
-				tri->computed->p1_p2	= sqrt(lfdx*lfdx + lfdy*lfdy);
-
-			//////////
-			// P2..P3 length
-			//////
-				lfdx					= tri->input->p2x - tri->input->p3x;
-				lfdy					= tri->input->p2y - tri->input->p3y;
-				tri->computed->p2_p3	= sqrt(lfdx*lfdx + lfdy*lfdy);
-
-			//////////
-			// P3..P1 length
-			//////
-				lfdx					= tri->input->p3x - tri->input->p1x;
-				lfdy					= tri->input->p3y - tri->input->p1y;
-				tri->computed->p3_p1	= sqrt(lfdx*lfdx + lfdy*lfdy);
-
-			//////////
-			// Semiperimeter (half the perimeter)
-			//////
-				tri->computed->sp		= (tri->computed->p1_p2 + tri->computed->p2_p3 + tri->computed->p3_p1) / 2.0;
-
-			//////////
-			// Area
-			//////
-				tri->computed->area		= sqrt(		 tri->computed->sp 
-												*	(tri->computed->sp - tri->computed->p1_p2) 
-												*	(tri->computed->sp - tri->computed->p2_p3)
-												*	(tri->computed->sp - tri->computed->p3_p1));
-		}
+		if (tri && tri->input && tri->output)
+			iioss_math_computeTriangle(tri->input);
 	}
 
 	// Given the 4 points of a square, the origin by which it rotates around, and the radians to
 	// rotate, compute the new four point locations.  To do this, we assume all the points are proper.
 	// Note:  If they are not the computation will not be correct, but it will not cause an error.
-	void CALLTYPE oss_math_squareCompute(SSquareInOutF64* sq, s32 ox, s32 oy)
+	void CALLTYPE oss_math_computeSquare(SSquareInOutF64* sq, f32 ox, f32 oy)
 	{
-		f64 lfdx, lfdy;
-
-
 		// Make sure our environment is sane
-		if (sq && sq->input && sq->computed)
-		{
-			//////////
-			// Copy the origin from input to computed
-			//////
-				sq->computed->ox		= (f64)ox;
-				sq->computed->oy		= (f64)oy;
+		if (sq && sq->input && sq->compute && sq->output)
+			iioss_math_computeSquare(sq, ox, oy);
+	}
 
-			//////////
-			// P1..P2 length, slope, and perpendicular slope
-			//////
-				lfdx					= sq->input->p1x - sq->input->p2x;
-				lfdy					= sq->input->p1y - sq->input->p2y;
-				sq->computed->p1_p2		= sqrt(lfdx*lfdx + lfdy*lfdy);
-				sq->computed->m			= lfdy / lfdx;					// Compute the slope P1..P2 (rise/run)
-				sq->computed->mp		= -1.0 / sq->computed->m;		// Compute the perpendicular slope, which is the slope of P1..P4
-
-			//////////
-			// P2..P3 length
-			//////
-				lfdx					= sq->input->p2x - sq->input->p3x;
-				lfdy					= sq->input->p2y - sq->input->p3y;
-				sq->computed->p2_p3		= sqrt(lfdx*lfdx + lfdy*lfdy);
-
-			//////////
-			// P3..P4 length
-			//////
-				lfdx					= sq->input->p3x - sq->input->p4x;
-				lfdy					= sq->input->p3y - sq->input->p4y;
-				sq->computed->p3_p4		= sqrt(lfdx*lfdx + lfdy*lfdy);
-
-			//////////
-			// P4..P1 length
-			//////
-				lfdx					= sq->input->p4x - sq->input->p1x;
-				lfdy					= sq->input->p4y - sq->input->p1y;
-				sq->computed->p4_p1		= sqrt(lfdx*lfdx + lfdy*lfdy);
-
-			//////////
-			// P1..P3 hypotenuse
-			//////
-				sq->computed->p1_p3		= sqrt(		sq->computed->p1_p2 * sq->computed->p1_p2
-												+	sq->computed->p2_p3 * sq->computed->p2_p3);
-
-			//////////
-			// Determine the theta values and radius to the origin
-			// P1 theta
-			//////
-				lfdx					= sq->input->p1x - sq->computed->ox;
-				lfdy					= sq->input->p1y - sq->computed->oy;
-				sq->computed->thetaP1	= atan2(lfdy, lfdx);
-				sq->computed->radiusP1	= sqrt(lfdx*lfdx + lfdy*lfdy);
-
-			//////////
-			// P2 theta
-			//////
-				lfdx					= sq->input->p2x - sq->computed->ox;
-				lfdy					= sq->input->p2y - sq->computed->oy;
-				sq->computed->thetaP2	= atan2(lfdy, lfdx);
-				sq->computed->radiusP2	= sqrt(lfdx*lfdx + lfdy*lfdy);
-
-			//////////
-			// P3 theta
-			//////
-				lfdx					= sq->input->p3x - sq->computed->ox;
-				lfdy					= sq->input->p3y - sq->computed->oy;
-				sq->computed->thetaP3	= atan2(lfdy, lfdx);
-				sq->computed->radiusP3	= sqrt(lfdx*lfdx + lfdy*lfdy);
-
-			//////////
-			// P4 theta
-			//////
-				lfdx					= sq->input->p2x - sq->computed->ox;
-				lfdy					= sq->input->p2y - sq->computed->oy;
-				sq->computed->thetaP4	= atan2(lfdy, lfdx);
-				sq->computed->radiusP4	= sqrt(lfdx*lfdx + lfdy*lfdy);
-		}
+	// Called to compute the midpoint of a line, and its slope and perpendicular slope.
+	void CALLTYPE oss_math_computeLine (SLineF64* line)
+	{
+		if (line)
+			iioss_math_computeLine(line);
 	}
 
 
@@ -8253,39 +8073,77 @@ _asm int 3;
 //
 // Given the 4 points of a square, the origin by which it rotates around, and the radians to
 // rotate, compute the new four point locations.  To do this, we assume all the points are proper
-// or that a call to oss_math_squareCompute() was done immediately prior.
+// or that a call to oss_math_computeSquare() was done immediately prior.
 //
 // Note:  If they are not the computation will not be correct, but it will not cause an error.
 //
 //////
 	void CALLTYPE oss_math_squareRotateAbout(SSquareInOutF64* sq)
 	{
-		// Make sure our environment is sane
-		if (sq && sq->input && sq->computed && sq->output)
+		if (sq)
+			ioss_math_squareRotateAbout(sq);
+	}
+
+
+
+
+//////////
+//
+// Called to initialize a polygon to the number indicated by poly->lineCount.
+//
+//////
+	bool CALLTYPE oss_polygon_initialize(SPolygon* poly, s32 tnLineCount, bool tlAllocatePolyLines)
+	{
+		if (poly && (s32)tnLineCount >= 1)
 		{
-			//////////
-			// Rotate P1
-			//////
-				sq->output->p1x		= sq->computed->radiusP1 * cos(sq->computed->thetaP1 + sq->computed->radians);
-				sq->output->p1y		= sq->computed->radiusP1 * sin(sq->computed->thetaP1 + sq->computed->radians);
+			// Pass it through
+			return(iioss_polygon_initialize(poly, tnLineCount, tlAllocatePolyLines));
 
-			//////////
-			// Rotate P2
-			//////
-				sq->output->p2x		= sq->computed->radiusP2 * cos(sq->computed->thetaP2 + sq->computed->radians);
-				sq->output->p2y		= sq->computed->radiusP2 * sin(sq->computed->thetaP2 + sq->computed->radians);
+		} else {
+			// Indicate our failure
+			return(false);
+		}
+	}
 
-			//////////
-			// Rotate P3
-			//////
-				sq->output->p3x		= sq->computed->radiusP3 * cos(sq->computed->thetaP3 + sq->computed->radians);
-				sq->output->p3y		= sq->computed->radiusP3 * sin(sq->computed->thetaP3 + sq->computed->radians);
 
-			//////////
-			// Rotate P4
-			//////
-				sq->output->p4x		= sq->computed->radiusP4 * cos(sq->computed->thetaP4 + sq->computed->radians);
-				sq->output->p4y		= sq->computed->radiusP4 * sin(sq->computed->thetaP4 + sq->computed->radians);
+
+
+//////////
+//
+// Called to set the indicated polyline for the indicated polygon.
+//
+///////
+	bool CALLTYPE oss_polygon_setByPolyLine(SPolygon* poly, s32 tnEntry, SPolyLine* line)
+	{
+		if (poly && tnEntry < poly->lineCount)
+		{
+			// Pass it through
+			return(iioss_polygon_setByPolyLine(poly, tnEntry, line));
+
+		} else {
+			// Indicate our failure
+			return(false);
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to set the indicated polyline for the indicated polygon by values.
+//
+//////
+	bool CALLTYPE oss_polygon_setByValues(SPolygon* poly, s32 tnEntry, SXYF64* start, SXYF64* end, SXYF64* gravity)
+	{
+		if (poly && tnEntry < poly->lineCount && start && end && gravity)
+		{
+			// Pass it through
+			return(iioss_polygon_setByValues(poly, tnEntry, start, end, gravity));
+
+		} else {
+			// Indicate our failure
+			return(false);
 		}
 	}
 
@@ -8459,22 +8317,45 @@ _asm int 3;
 //		Pointer to the point in the buffer where the text was inserted, can be used
 //		for a furthering or continuance of this function embedded in a higher call.
 //////
-	s8* CALLTYPE oss_builderAppendText(SBuilder* buffRoot, s8* tcData, u32 tnDataLength)
+	s8* CALLTYPE oss_builderAppendData(SBuilder* buffRoot, s8* tcData, u32 tnDataLength)
 	{
-// TODO:  untested code, breakpoint and examine
 		// Make sure our environment is sane
 		if (buffRoot)
 		{
-			if (tcData && tnDataLength != 0)
+			if (tnDataLength != 0)
 			{
 				// Make sure this much data will fit there in the buffer
 				ioss_bufferVerifySizeForNewBytes(buffRoot, tnDataLength);
 
 				// If we're still valid, proceed with the copy
-				if (buffRoot->data)
+				if (buffRoot->data && tcData)
 					oss_memcpy(buffRoot->data + buffRoot->populatedLength - tnDataLength, tcData, tnDataLength);
 			}
-			// Indicate where we are
+			// Indicate where the start of that buffer is
+			return(buffRoot->data + buffRoot->populatedLength - tnDataLength);
+		}
+		// If we get here, things are bad
+		return(NULL);
+	}
+
+
+
+
+//////////
+//
+// Called to allocate bytes in the builder, but not yet populate them with anything
+//
+//////
+	s8* CALLTYPE oss_builderAllocateBytes(SBuilder*	buffRoot, u32 tnDataLength)
+	{
+		// Make sure our environment is sane
+		if (buffRoot)
+		{
+			// Make sure this much data will fit there in the buffer
+			if (tnDataLength != 0)
+				ioss_bufferVerifySizeForNewBytes(buffRoot, tnDataLength);
+			
+			// Indicate where the start of that buffer is
 			return(buffRoot->data + buffRoot->populatedLength - tnDataLength);
 		}
 		// If we get here, things are bad
@@ -8488,19 +8369,66 @@ _asm int 3;
 //
 // Specifies the size the buffer should be.  Either allocates up or down. No content
 // is changed, however the buffer pointer value could be changed from oss_realloc().
+// In addition, this function should not be used for resizing in general.  Simply call
+// the oss_builderAppendData() function and it will automatically resize if needed, as
+// per the allocated block size.
 //
 //////
-	void CALLTYPE oss_builderSetSize(SBuilder** buffRoot, u32 tnBufferLength)
+	void CALLTYPE oss_builderSetSize(SBuilder* buffRoot, u32 tnBufferLength)
 	{
-// TODO:  untested code, breakpoint and examine
-// Note:  This code should not be being executed.  The code in ioss_bufferVerifySizeForNewBytes() should be used
+		s8* lcNew;
+
+
+// TODO:  Untested code, breakpoint and examine
 _asm int 3;
 		// Make sure our environment is sane
-		if (buffRoot && *buffRoot && tnBufferLength != 0)
+		if (buffRoot)
 		{
-			*buffRoot = (SBuilder*)oss_realloc(*buffRoot, tnBufferLength);
-			if (*buffRoot)
-				(*buffRoot)->allocatedLength = tnBufferLength;
+			//////////
+			// See if they want to make it whatever the populated size is
+			//////
+				if (tnBufferLength == -1)
+					tnBufferLength = buffRoot->populatedLength;
+
+
+			//////////
+			// See if they're releasing everything
+			//////
+				if (tnBufferLength == 0)
+				{
+					//////////
+					// They are freeing everything
+					//////
+						free(buffRoot->data);
+						buffRoot->data				= NULL;
+						buffRoot->populatedLength	= 0;
+						buffRoot->allocatedLength	= 0;
+
+
+				} else if (tnBufferLength != buffRoot->allocatedLength) {
+					//////////
+					// They are resizing
+					//////
+						lcNew = (s8*)oss_realloc(buffRoot->data, tnBufferLength);
+						if (lcNew)
+						{
+							//////////
+							// Set the allocated length
+							//////
+								buffRoot->data				= lcNew;
+								buffRoot->allocatedLength	= tnBufferLength;
+
+
+							//////////
+							// If our populated length no longer fits into the new allocated space, then adjust it down
+							//////
+								if (buffRoot->populatedLength > buffRoot->allocatedLength)
+									buffRoot->populatedLength = buffRoot->allocatedLength;		// Bring the populated area down to the new size
+
+						} else {
+							// Failure on resize
+						}
+				}
 		}
 	}
 
@@ -8709,7 +8637,7 @@ _asm int 3;
 			if (lnHandle)
 			{
 				// Create our accumulation buffer
-				oss_builderCreateAndInitialize(&build, _COMMON_BUFFER_BLOCK_SIZE);
+				oss_builderCreateAndInitialize(&build, _COMMON_BUILDER_BLOCK_SIZE);
 				while (build)
 				{
 					// Save this node, which will save all child nodes
@@ -8760,7 +8688,7 @@ _asm int 3;
 		if (bxml && build)
 		{
 			// Create our accumulation buffer
-			oss_builderCreateAndInitialize(build, _COMMON_BUFFER_BLOCK_SIZE);
+			oss_builderCreateAndInitialize(build, _COMMON_BUILDER_BLOCK_SIZE);
 
 			// Save this node, which will save all child nodes
 			if (*build)

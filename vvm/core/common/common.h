@@ -134,8 +134,66 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	cu32					_COMMON_START_END_BLOCK_SIZE			= 32;			// Allocate 32 entries/slots at a time (Start/end)
 	cu32					_COMMON_START_END_SMALL_BLOCK_SIZE		= 4;			// Allocate 4 entries/slots at a time (Start/end)
 	cu32					_COMMON_START_END_BIG_BLOCK_SIZE		= 256;			// Allocate 256 entries/slots at a time (Start/end)
-	cu32					_COMMON_BUFFER_BLOCK_SIZE				= 16384;		// Allocate 16KB at a time
-	// Constant strings
+	cu32					_COMMON_BUILDER_BLOCK_SIZE				= 16384;		// Allocate 16KB at a time
+	cu32					_COMMON_BUILDER_BLOCK_SIZE_BIG			= 10240000;		// Allocate 1MB at a time
+
+	// Common constants
+	cf64					_2PI									= 6.28318530717959;		// 2*pi
+	cf64					_3PI_2									= 4.71238898038469;		// 3*pi/2
+	cf64					_4PI_3									= 4.18879020478639;		// 4*pi/3
+	cf64					_PI										= 3.14159265358979;		// pi
+	cf64					_2PI_3									= 2.09439510239320;		// 2*pi/3
+	cf64					_PI_2									= 1.57079632679490;		// pi/2
+	cf64					_PI_3									= 1.04719755119660;		// pi/3
+	cf64					_PI_4									= 0.78539816339745;		// pi/4
+	cf64					_PI_6									= 0.52359877559830;		// pi/6
+	cf64					_E										= 2.718281828459045;	// e
+	cf64					_GR										= 1.618033988749895;	// golden ratio
+
+
+//////////
+// Compass directions, used by iioss_canvas_drawPolygon()
+//////
+// TODO: I'd like to revisit these naming conventions
+	cu32					_COMPASS_UP_DOWN								= 0x10;
+	cu32					_COMPASS_SIDE_SIDE								= 0x20;
+	cu32					_COMPASS_ORDINAL								= 0x40;		// Note:  If this bit is 0, then it's a cardinal position
+	cu32					_COMPASS_CARDINAL								= 0x80;		// This bit is not used, but can be.  Normally test the _COMPASS_ORDINAL bit for 0 to determine if cardinal.
+
+	cu32					_COMPASS_DECORATION_TOP							= 0x100;	// NW,N,NE
+	cu32					_COMPASS_DECORATION_BOTTOM						= 0x200;	// SW,S,SE
+	cu32					_COMPASS_DECORATION_LEFT						= 0x400;	// NW,W,SW
+	cu32					_COMPASS_DECORATION_RIGHT						= 0x800;	// NE,E,SE
+	cu32					_COMPASS_DECORATION_LEFT_TOP					= _COMPASS_DECORATION_LEFT		| _COMPASS_DECORATION_TOP;
+	cu32					_COMPASS_DECORATION_RIGHT_TOP					= _COMPASS_DECORATION_RIGHT		| _COMPASS_DECORATION_TOP;
+	cu32					_COMPASS_DECORATION_LEFT_BOTTOM					= _COMPASS_DECORATION_LEFT		| _COMPASS_DECORATION_BOTTOM;
+	cu32					_COMPASS_DECORATION_RIGHT_BOTTOM				= _COMPASS_DECORATION_RIGHT		| _COMPASS_DECORATION_BOTTOM;
+	cu32					_COMPASS_DECORATION_MASK						= 0xf00;
+
+	// Cardinal
+	cu32					_COMPASS_NORTH									= 0x01;
+	cu32					_COMPASS_SOUTH									= 0x02;
+	cu32					_COMPASS_EAST									= 0x04;
+	cu32					_COMPASS_WEST									= 0x08;
+	cu32					_COMPASS_CARDINAL_ORDINAL_MASK					= 0xf;
+
+	// Ordinal
+	cu32					_COMPASS_NORTH_EAST								= _COMPASS_NORTH	| _COMPASS_EAST;
+	cu32					_COMPASS_SOUTH_EAST								= _COMPASS_SOUTH	| _COMPASS_EAST;
+	cu32					_COMPASS_SOUTH_WEST								= _COMPASS_SOUTH	| _COMPASS_WEST;
+	cu32					_COMPASS_NORTH_WEST								= _COMPASS_NORTH	| _COMPASS_WEST;
+
+	// Cross
+	cu32					_COMPASS_NORTH_SOUTH							= _COMPASS_NORTH	| _COMPASS_SOUTH;
+	cu32					_COMPASS_EAST_WEST								= _COMPASS_EAST		| _COMPASS_WEST;
+	cu32					_COMPASS_SOUTH_NORTH							= _COMPASS_NORTH_SOUTH;
+	cu32					_COMPASS_WEST_EAST								= _COMPASS_EAST_WEST;
+	// Note: In vo_sup.cpp, there are the polygon functions, and they use an alternate numbering system for the directions to the constraints of navigating a small array of function addresses for a speedup.
+
+
+//////////
+// Constant strings
+//////
 	cs8						cgcSpace1[]								= " ";			// A single space
 	cs8						cgcSpaceBxmlIndent[]					= "\t";			// We use tab characters for each indentation level
 	cs8						cgcTagLeader[]							= "<";			// The <  in an BXML file
@@ -763,20 +821,50 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		};
 	};
 
+	struct SXYS32
+	{
+		s32			x;
+		s32			y;
+	};
+
+	struct SXYF64
+	{
+		f64			x;
+		f64			y;
+	};
+
+	struct SRTF64
+	{
+		f64			radius;
+		f64			theta;
+	};
+
+	struct SPointF64
+	{
+		SXYF64		point;						// Point
+		SRTF64		trig;						// Radius and theta
+	};
+
+	struct SMMPF64
+	{
+		f64			m;							// Slope
+		f64			mp;							// Perpendicular slope
+	};
+
 	struct SRectXYWH
 	{
-		u32		x;
-		u32		y;
-		u32		width;
-		u32		height;
+		u32			x;
+		u32			y;
+		u32			width;
+		u32			height;
 	};
 
 	struct SRectXYXY
 	{
-		u32		ulx;
-		u32		uly;
-		u32		lrx;
-		u32		lry;
+		u32			ulx;
+		u32			uly;
+		u32			lrx;
+		u32			lry;
 	};
 
 	struct SSize
@@ -792,133 +880,151 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		};
 	};
 
-	struct STriangleF64
+	// This is a compute accumulator.
+	// It is used inside a builder to rapidly allocate structures used in creating the final product.
+	// This compute component represents a mathematical operation to take some source data and apply
+	// it do the destination, without having to re-compute what to do on successive operations.
+	// Typically the first time through it is computed, then applied, then on successive times through
+	// it is simply applied.  It is only re-computed when it has been deleted and is no longer
+	// available.  Each compute relates to its parent, which is something like a scale operation,
+	// a rotate operation, a polygon operation, etc.
+	struct SBbgraCompute
 	{
-		f64			p1x;						// p1 = (xp1,yp2)
-		f64			p1y;
+		// For an example, refer to the oss_canvasScale() functionality of how this structure is used
+		union {
+			u32			dstStart;				// For lines, the starting offset (lower value)
+			u32			offsetDst;				// Offset to the destination SBGRA pixel
+		};
 
-		f64			p2x;						// p2 = (xp2,yp2)
-		f64			p2y;
+		union {
+			u32			dstEnd;					// For lines, the ending offset (greater value)
+			u32			offsetSrc;				// Offset to the source SBGRA pixel
+		};
 
-		f64			p3x;						// p3 = (xp3,yp3)
-		f64			p3y;
+		f64				alpha;					// The alpha percentage for the pixel
+		// Note:  If using an accumulator, then dst += source * alpha
+		// Note:  If alpha blending, then dst = (dst * 1.0 - alpha) + (source * alpha)
 	};
 
-	struct STriangleComputedF64
+	struct SScaleMap
 	{
+		// Refer to the oss_canvasScale() functionality
+		SLL*			next;					// Pointer to next scale map in the chain
+		SSize			src;					// Width of the source SBGRA
+		SSize			dst;					// Width of the destination SBGRA
+		SBuilder*		scaleData;				// The mathematical progression to use for this scale (SBbgraCompute array)
+	};
+
+	struct SRotateMap
+	{
+		// Refer to the oss_canvasRotate() and oss_canvasRotateAbout() functionality
+		SLL*			next;					// Pointer to next scale map in the chain
+		SRectXYWH		src;					// X, Y, width and height of the source SBGRA
+		SBuilder*		scale_Data;				// The mathematical progression to use for this scale (SBbgraCompute array)
+	};
+
+	struct STriangleF64
+	{
+		// Points of the triangle can start anywhere
+		SXYF64		p1;
+		SXYF64		p2;
+		SXYF64		p3;
+
 		f64			p1_p2;						// Length of p1..p2
 		f64			p2_p3;						// Length of p2..p3
 		f64			p3_p1;						// Length of p3..p1
 
-		f64			sp;							//                      s = (l12 + l23 + l31) / 2
+		f64			sp;							// Semiperimeter:  s = (l12 + l23 + l31) / 2
 		f64			area;						// Heron's formula:  area = sqrt(s * (s - l12) * (s - l23) * (s - l31))
 	};
 
 	struct STriangleInOutF64
 	{
-		STriangleF64*			input;			// The input STriangle structure
-		STriangleComputedF64*	computed;		// Computed data between input and output
-		STriangleF64*			output;			// The computed output values after manipulation
+		STriangleF64*	input;					// The input STriangle structure
+		STriangleF64*	output;					// The computed output values after manipulation
 	};
 
 	struct SSquareF64
 	{
-		// p1 = (ulx,uly)
-		union {
-			f64		ulx;
-			f64		p1x;		
-		};
-		union {
-			f64		uly;
-			f64		p1y;
-		};
-
-		// p2 = (urx,ury)
-		union {
-			f64		urx;
-			f64		p2x;
-		};
-		union {
-			f64		ury;
-			f64		p2y;
-		};
-
-		// p3 = (lrx,lry)
-		union {
-			f64		lrx;
-			f64		p3x;
-		};
-		union {
-			f64		lry;
-			f64		p3y;
-		};
-
-		// p4 = (llx,lly)
-		union {
-			f64		llx;
-			f64		p4x;
-		};
-		union {
-			f64		lly;
-			f64		p4y;
-		};
+		// Points proceed clockwise from upper-left.  I use upper-left because on a video display, upper-left is 0,0 which, on the number lines, would be the origin
+		SXYF64		p1;							// Upper-left
+		SXYF64		p2;							// Upper-right
+		SXYF64		p3;							// Lower-right
+		SXYF64		p4;							// Lower-left
 	};
 
-	struct SSquareComputedF64
+	struct SSquareComputeF64
 	{
-		// Computed values:
-		f64			m;							// Slope of p1..p2, and p3..p4
-		f64			mp;							// Slope of p2..p3, and p1..p4
+		SXYF64		center;						// Center point of the square
+		SXYF64		origin;						// Origin point (used for rotation or scaling)
 
-		// Side lengths
-		union {
-			f64		p1_p2;
-			f64		ul_ur;
-		};
-		union {
-			f64		p2_p3;
-			f64		ur_lr;
-		};
-		union {
-			f64		p3_p4;
-			f64		lr_ll;
-		};
-		union {
-			f64		p4_p1;
-			f64		ll_ul;
-		};
+		// Computed point data
+		SRTF64		p1rt;						// p1 radius and theta relative to center
+		SRTF64		p2rt;						// p1 radius and theta relative to center
+		SRTF64		p3rt;						// p1 radius and theta relative to center
+		SRTF64		p4rt;						// p1 radius and theta relative to center
 
-		// Hypotenuse
-		union {
-			f64		p1_p3;
-			f64		p2_p4;
-			f64		ul_lr;
-			f64		ur_ll;
-		};
+		SXYF64		p1_p2mid;					// p1..p2 midpoint 
+		SXYF64		p2_p3mid;					// p2..p3 midpoint 
+		SXYF64		p3_p4mid;					// p3..p4 midpoint 
+		SXYF64		p4_p1mid;					// p4..p1 midpoint 
 
-		// Theta values for each point
-		f64			thetaP1;
-		f64			thetaP2;
-		f64			thetaP3;
-		f64			thetaP4;
+		// Computed side data
+		f64			p1_p2;						// Length of p1..p2
+		f64			p2_p3;						// Length of p2..p3
+		f64			p3_p4;						// Length of p3..p4
+		f64			p4_p1;						// Length of p4..p1
+		f64			p1_p3;						// Hypotenuse, should be the same as p2_p4, but we don't compute that one
 
-		// Radius lengths relative to supplied origin
-		f64			radiusP1;
-		f64			radiusP2;
-		f64			radiusP3;
-		f64			radiusP4;
-
-		// Origin for the computation
-		f64			radians;					// (if rotated, radians used)
-		f64			ox;							// Origin x
-		f64			oy;							// Origin y
+		// Computed side slope data
+		SMMPF64		p1_p2mmp;					// p1's m and mp
+		SMMPF64		p2_p3mmp;					// p2's m and mp
+		SMMPF64		p3_p4mmp;					// p3's m and mp
+		SMMPF64		p4_p1mmp;					// p4's m and mp
 	};
 
 	struct SSquareInOutF64
 	{
-		SSquareF64*			input;				// The input SSquareF structure
-		SSquareF64*			output;				// The computed output values for SSquareComputedF
-		SSquareComputedF64*	computed;			// Computed data between input and output
+		SSquareF64*			input;				// The input square
+		SSquareComputeF64*	compute;			// Other computed data for this square
+		SSquareF64*			output;				// Output square
+	};
+
+	struct SLineF64
+	{
+		SXYF64		start;						// Starting point
+		SXYF64		end;						// Endpoint
+		SXYF64		mid;						// Midpoint
+		f64			m;							// Slope
+		f64			mp;							// Perpendicular slope
+	};
+
+	struct SPolyLine
+	{
+		SXYF64		start;						// Where this line starts
+		SXYF64		end;						// Where this line ends
+		SXYF64		gravity;					// The side that should be filled in (a point somewhere that is to the left/right/top/bottom of the start..end line, depending on its slope -- typically, choose a point which is perpendicular out some distance from the midpoint of the start..end line)
+	};
+
+	struct SPolyTriangle
+	{
+		// Points of the triangle can start anywhere
+		SXYF64		p1;
+		SXYF64		p2;
+		SXYF64		p3;
+		f64			area;						// Heron's formula:  area = sqrt(s * (s - l12) * (s - l23) * (s - l31))
+	};
+
+	// Note:  A polygon should be complete, meaning it should start somewhere and return back to where it started.
+	struct SPolygon
+	{
+		// Number of lines in the original polygon
+		s32				lineCount;				// Number of polyline segments
+		SPolyLine**		line;					// An array to access each polyline segment
+
+		// The derived data for where they are drawn
+		SBuilder*		floans;					// The mathematical progression to use for the floan triangles for this polygon (SBbgraCompute array in source/destination form)
+		SBuilder*		lines;					// The mathematical progression to use for the fully aliased points for this polygon (SBbgraCompute array in destination start/end form)
 	};
 
 	struct SLLCallback
@@ -1200,32 +1306,6 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 // inside the VVM as they would be in a higher level language.
 //
 //////
-	struct SBbgraCompute
-	{
-		// For an example, refer to the oss_canvasScale() functionality of how this structure is used
-		u32				sbgraOffsetDst;			// Offset to the destination SBGRA pixel
-		u32				sbgraOffsetSrc;			// Offset to the source SBGRA pixel
-		f64				multiplier;				// The multiplier for the pixel accumulator for that value (dst += source * multiplier)
-	};
-
-	struct SScaleMap
-	{
-		// Refer to the oss_canvasScale() functionality
-		SLL*			next;					// Pointer to next scale map in the chain
-		SSize			src;					// Width of the source SBGRA
-		SSize			dst;					// Width of the destination SBGRA
-		SBuilder*		scaleData;				// The mathematical progression to use for this scale
-	};
-
-	struct SRotateMap
-	{
-		// Refer to the oss_canvasRotate() and oss_canvasRotateAbout() functionality
-		SLL*				next;					// Pointer to next scale map in the chain
-		SRectXYWH			src;					// X, Y, width and height of the source SBGRA
-		SSquareComputedF64	compute;				// Radius and theta
-		SBuilder*			scaleData;				// The mathematical progression to use for this scale
-	};
-
 	struct SCanvas
 	{
 		SLL				ll;						// 2-way link list

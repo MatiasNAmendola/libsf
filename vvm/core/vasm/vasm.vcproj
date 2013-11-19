@@ -278,7 +278,7 @@
 					Name="sha1"
 					>
 					<File
-						RelativePath="..\..\utils\sha1\sha1.cpp"
+						RelativePath="..\..\..\utils\sha1\sha1.cpp"
 						>
 						<FileConfiguration
 							Name="Debug|Win32"
@@ -306,7 +306,7 @@
 						</FileConfiguration>
 					</File>
 					<File
-						RelativePath="..\..\utils\sha1\sha1.h"
+						RelativePath="..\..\..\utils\sha1\sha1.h"
 						>
 					</File>
 				</Filter>

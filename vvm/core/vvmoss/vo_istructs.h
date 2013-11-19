@@ -258,6 +258,33 @@
 		bool				freeMemory;			// Should its memory be freed?
 	};
 
+//////////
+//
+// Used by iioss_canvas_drawPolygon_storeFloans() to rapidly drawn floans
+//
+//////
+	struct _isSStoreFloan_pointToPoint
+	{
+		SBuilder*			floans;				// Where we're storing the floans
+
+		SXYS32				end;				// Where does this end?
+		SXYS32				po;					// Where is this pixel's origin (the pixel number identifying the pixel's coordinate closest to (0,0))?
+		u32					offset;				// The destination offset within the canvas
+
+		SXYF64				p1;					// Point 1 (from point)
+		SXYF64				p2;					// Point 2 (destination point)
+		f64					m;					// Slope
+		u32					gravityDecorated;	// Gravity with cardinal, ordinal, and decorations
+		s32					gravity07;			// Gravity with the range of 0..7, as from SW=0, clockwise to S=7 (see vo_sup.cpp polygon functions)
+	};
+
+	struct _isS_iioss_canvas_drawPolygon_storeFloans
+	{
+		union {
+			u32				_storeFloan_pointToPoint;
+			void			(*storeFloan_pointToPoint)		(_isSStoreFloan_pointToPoint* sf);
+		};
+	};
 
 
 //////////

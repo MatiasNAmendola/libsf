@@ -153,7 +153,7 @@
 	DWORD CALLTYPE iDebuggerMain(LPVOID lpParameter)
 	{
 		u32		lnDebuggerUid;
-		SBxml*	bxmlDebuggerSettings;
+//		SBxml*	bxmlDebuggerSettings;
 
 
 		// Grab the unique id for this instance

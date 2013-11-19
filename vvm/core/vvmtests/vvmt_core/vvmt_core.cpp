@@ -189,6 +189,7 @@
 // Test code
 //////
 	SBGRA		white				= {255,255,255,255};
+	SBGRA		black				= {0,0,0,255};
 	SDateTime	lsdtStart, lsdtStop;
 	u32			lnI, lnWidth, lnHeight;
 	SCanvas*	lc;
@@ -199,11 +200,23 @@
 	s8			buffer[256];
 	s8			timing[256];
 
+	// Create a canvas, draw a line
+	lc = oss_createCanvas(0, 600, 600, white);
+	if (lc)
+	{
+		oss_canvasLine(lc, lc->bd, 200.0, 200.0, 400.0, 400.0, 5.0, black, true);
+		oss_bitmapSaveToDisk(lc, lc->bd, "c:\\temp\\test.bmp");
+	}
+
+
+//////////
+// Test for rotating an image
+//////
 	oss_builderCreateAndInitialize(&builder, 2048);
 	oss_bitmapLoadFromDisk("c:\\temp\\test.bmp", &lc, &lnWidth, &lnHeight, white);
 
-	lcExtract = oss_canvasExtract(lc, lc->bd, 200, 200, 50, 50);
-	oss_canvasRotate(lc, lc->bd, 200, 200, lcExtract, lcExtract->bd, 6.28f * 45.0f / 360.0f);
+	lcExtract = oss_canvasExtract(lc, lc->bd, 200, 200, 205, 205);
+	oss_canvasRotate(lc, lc->bd, 200, 200, lcExtract, lcExtract->bd, 6.28f * (45.0f / 360.0f));
 
 // 	lnHStep = (f64)lnHeight / 5.0;
 // 	lnWStep = (f64)lnWidth / 5.0;
@@ -216,9 +229,9 @@
 // 			oss_canvasScale(lcScaled, lc, &lcScaled->firstScaleMap);
 // 			oss_dateTimeGet(&lsdtStop);
 // 			sprintf(timing, "\\temp\\Scale_%ux%u_Iteration_%u_Milliseconds_%f.bmp\0", (u32)lnW, (u32)lnH, lnI, (f32)((f64)(lsdtStop.tickCount - lsdtStart.tickCount) / (f64)lsdtStart.frequency));
-// 			oss_builderAppendText(builder, timing + 6, strlen(timing) - 6 - 4);
+// 			oss_builderAppendData(builder, timing + 6, strlen(timing) - 6 - 4);
 // 	//		oss_bitmapSaveToDisk(lcScaled, lcScaled->bd, timing);
-// 			oss_builderAppendText(builder, "\n", 1);
+// 			oss_builderAppendData(builder, "\n", 1);
 // 		}
 // 		//oss_bitmapSaveToDisk(lcScaled, lcScaled->bd, buffer);
 // 		//oss_deleteCanvas(lcScaled);
