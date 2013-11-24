@@ -281,8 +281,9 @@
 
 	struct _isSStoreFloan_cornerData
 	{
-		SXYF64						p;			// Corner point
-		_isSStoreFloan_lineData		lineData;	// Data computed when this line was stored
+		SXYF64						po;					// Corner point
+		SXYF64						pi;					// Intercept point from within the pixel
+		_isSStoreFloan_lineData		lineData;			// Data computed when this line was stored
 	};
 
 	struct _isS_iioss_canvas_drawPolygon_storeFloans

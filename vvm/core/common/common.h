@@ -903,7 +903,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 			s32			y;						// Y coordinate
 		};
 
-		s32				gravity;				// Holds gravity for polygons, not used for other items
+//		s32				gravity;				// Holds gravity for polygons, not used for other items
 		f64				alpha;					// The alpha percentage for the pixel
 		// Note:  If using an accumulator, then dst += source * alpha
 		// Note:  If alpha blending, then dst = (dst * 1.0 - alpha) + (source * alpha)

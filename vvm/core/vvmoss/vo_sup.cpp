@@ -6236,38 +6236,38 @@ continueToNextAttribute:
 					//////////
 					// Compute deltas, slope, theta and gravity
 					//////
-						lfDeltaX			= lpl->end.x - lpl->start.x;
-						lfDeltaY			= lpl->end.y - lpl->start.y;
-						lfLength			= sqrt(lfDeltaX*lfDeltaX + lfDeltaY*lfDeltaY);
-						llLeft				= (((lpl->gravity.y - lpl->start.y) * (lpl->end.x - lpl->start.x)) > ((lpl->gravity.x - lpl->start.x) * (lpl->end.y - lpl->start.y)));
+						lfDeltaX				= lpl->end.x - lpl->start.x;
+						lfDeltaY				= lpl->end.y - lpl->start.y;
+						lfLength				= sqrt(lfDeltaX*lfDeltaX + lfDeltaY*lfDeltaY);
+						llLeft					= (((lpl->gravity.y - lpl->start.y) * (lpl->end.x - lpl->start.x)) > ((lpl->gravity.x - lpl->start.x) * (lpl->end.y - lpl->start.y)));
 						// Note:  llLeft is taken from the algorithm: ((y - starty) * (endx - startx) > (x - startx) * (endy - starty))
 						// Note:  It is basically the shortened form of the algorithm whereby you rotate everything around so start (X,Y) is at (0,0), and then rotate theta around to 0, then examine if the gravity point is above or below the Y axis
 
 						// Store the passed parameter values
-						sfld.end.x			= (s32)lpl->end.x;
-						sfld.end.y			= (s32)lpl->end.y;
-						sfld.m				= lfDeltaY / ((lfDeltaX == 0.0) ? 0.0000000000001 : lfDeltaX);
-						sfld.theta			= iioss_canvas_drawPolygon_adjustTheta(atan2(lfDeltaY, lfDeltaX));
+						sfld.end.x				= (s32)lpl->end.x;
+						sfld.end.y				= (s32)lpl->end.y;
+						sfld.m					= lfDeltaY / ((lfDeltaX == 0.0) ? 0.0000000000001 : lfDeltaX);
+						sfld.theta				= iioss_adjustTheta(atan2(lfDeltaY, lfDeltaX));
 						sfld.gravityDecorated	= iioss_canvas_drawpolygon_gravityPerThetaAndLeft(sfld.theta, llLeft);
-						sfld.gravity07		= iioss_canvas_drawpolygon_gravity07(sfld.gravityDecorated & _COMPASS_CARDINAL_ORDINAL_MASK);
-
-					
-					//////////
-					// Store the starting floan, and move to the first whole pixel start
-					//////
-						iioss_canvas_drawPolygon_storeCorner(corners, &lpl->start, &sfld);
+						sfld.gravity07			= iioss_canvas_drawpolygon_gravity07(sfld.gravityDecorated & _COMPASS_CARDINAL_ORDINAL_MASK);
 
 
 					//////////
 					// Begin where we are starting, and move to the next axis, and then use that as our starting point
 					//////
-						sfld.p1.x = lpl->start.x;
-						sfld.p1.y = lpl->start.y;
-						sfld.p2.x = lpl->start.x;
-						sfld.p2.y = lpl->start.y;
-						sfld.po.x = (s32)sfld.p1.x;
-						sfld.po.y = (s32)sfld.p1.y;
+						sfld.p1.x				 = lpl->start.x;
+						sfld.p1.y				 = lpl->start.y;
+						sfld.p2.x				 = lpl->start.x;
+						sfld.p2.y				 = lpl->start.y;
+						sfld.po.x				 = (s32)sfld.p1.x;
+						sfld.po.y				 = (s32)sfld.p1.y;
 						iioss_canvas_drawPolygon_nextIntercept(&sfld.p2, sfld.theta);
+
+					
+					//////////
+					// Store the starting floan, and move to the first whole pixel start
+					//////
+						iioss_canvas_drawPolygon_storeCorner(corners, &lpl->start, &sfld.p2, &sfld);
 
 
 					//////////
@@ -6320,7 +6320,12 @@ continueToNextAttribute:
 					//////////
 					// Store the ending floan
 					//////
-						iioss_canvas_drawPolygon_storeCorner(corners, &lpl->end, &sfld);
+						// Recompute the ending floan just in case there was "jitter" in the last two iterations
+						sfld.p2.x = lpl->end.x;
+						sfld.p2.y = lpl->end.y;
+						iioss_canvas_drawPolygon_nextIntercept(&sfld.p2, iioss_adjustTheta(sfld.theta + _PI));
+						// Store it
+						iioss_canvas_drawPolygon_storeCorner(corners, &lpl->end, &sfld.p2, &sfld);
 
 				}
 
@@ -6345,11 +6350,12 @@ continueToNextAttribute:
 							sfcd = (_isSStoreFloan_cornerData*)(corners->data + lnJ);
 
 							// If it's at the same coordinate as the previous corner, it's a match
-							if (sfcdRoot->p.x == sfcd->p.x && sfcdRoot->p.y == sfcd->p.y)
+							if (sfcdRoot->po.x == sfcd->po.x && sfcdRoot->po.y == sfcd->po.y)
 							{
 								// This is a match
 								// Grab all the points for this pixel
 								iioss_canvas_drawPolygon_storeFloansCorner(&sfld, sfcdRoot, sfcd);
+								break;
 							}
 						}
 					}
@@ -6624,7 +6630,7 @@ continueToNextAttribute:
 // Note (from code in iioss_canvas_drawPolygon()): SBuilder* corners; // SXYF64 indicating where the corner falls
 //
 //////
-	void iioss_canvas_drawPolygon_storeCorner(SBuilder* corners, SXYF64* p, _isSStoreFloan_lineData* sfld)
+	void iioss_canvas_drawPolygon_storeCorner(SBuilder* corners, SXYF64* po, SXYF64* pi, _isSStoreFloan_lineData* sfld)
 	{
 		_isSStoreFloan_cornerData lsfcd;
 
@@ -6633,9 +6639,13 @@ continueToNextAttribute:
 		// Copy to our temporary buffer
 		//////
 
-			// Point
-			lsfcd.p.x = p->x;
-			lsfcd.p.y = p->y;
+			// Corner point
+			lsfcd.po.x = po->x;
+			lsfcd.po.y = po->y;
+
+			// Intercept point
+			lsfcd.pi.x = pi->x;
+			lsfcd.pi.y = pi->y;
 
 			// Line data
 			memcpy(&lsfcd.lineData, sfld, sizeof(_isSStoreFloan_lineData));
@@ -6718,60 +6728,32 @@ continueToNextAttribute:
 
 	void iioss_canvas_drawPolygon_storeFloansCorner(_isSStoreFloan_lineData* sfld, _isSStoreFloan_cornerData* sfcd1, _isSStoreFloan_cornerData* sfcd2)
 	{
-		s32							lnGravity1i, lnGravity2i, lnGravity1io;
+		s32							lnGravity1i, lnGravity2i;
 		f64							lfArea;
-		SXYS32						po;
-		SXYF64						p1i, p2i;		// X-Intercept or Y-Intercept points within the pixel
-		SXYF64						p1io;			// X-Intercept or Y-Intercept point within the single pixel (on the opposite end of the line -- other side of the pixel)
+		SXYS32						poBase;
 		SBGRACompute*				sbgrac;
-		_isSStoreFloan_cornerData	lsfcd1, lsfcd2;
 
 
 		//////////
-		// Copy to our local variables
+		// Get the integer-based position of the corner point (where they intersect)
+		// It is the same for sfcd1 and sfcd2, as they intersect at some fraction within.
 		//////
-			memcpy(&lsfcd1, sfcd1, sizeof(_isSStoreFloan_cornerData));
-			memcpy(&lsfcd2, sfcd2, sizeof(_isSStoreFloan_cornerData));
-
-
-		//////////
-		// Find out where these points do their intersecting
-		//////
-			// po (same for both sfcd1 and sfcd2, only the line data changes)
-			po.x = (s32)lsfcd1.p.x;
-			po.y = (s32)lsfcd1.p.y;
-
-
-			//////////
-			// P1
-			//////
-				memcpy(&p1i, &lsfcd1.p, sizeof(SXYF64));
-				iioss_canvas_drawPolygon_nextIntercept(&p1i, lsfcd1.lineData.theta);
-				// p1o -- Opposite side of pixel via line
-				memcpy(&p1io, &p1i, sizeof(SXYF64));
-				iioss_canvas_drawPolygon_nextIntercept(&p1io, lsfcd1.lineData.theta + _PI);
-
-
-			//////////
-			// P2
-			//////
-				memcpy(&p2i, &lsfcd2.p, sizeof(SXYF64));
-				iioss_canvas_drawPolygon_nextIntercept(&p2i, lsfcd2.lineData.theta);
+			poBase.x = (s32)sfcd1->po.x;
+			poBase.y = (s32)sfcd1->po.y;
 
 
 		//////////
 		// Grab their gravities
 		//////
-			lnGravity1i		= iioss_canvas_drawPolygon_gravityPoint(&p1i,	&po);
-			lnGravity1io	= iioss_canvas_drawPolygon_gravityPoint(&p1io,	&po);
-			lnGravity2i		= iioss_canvas_drawPolygon_gravityPoint(&p2i,	&po);
+			lnGravity1i		= iioss_canvas_drawPolygon_gravityPoint(&sfcd1->pi, &poBase);
+			lnGravity2i		= iioss_canvas_drawPolygon_gravityPoint(&sfcd2->pi, &poBase);
 
 
 		//////////
 		// Compute their floan based on gravity of the first line, and use its points for the area
 		// Note:  We assume these two sides have gravities facing toward each other, so we only need one
 		//////
-			lfArea = iioss_canvas_drawPolygon_storeFloansCorner_getArea(lnGravity1i, lnGravity1io, lsfcd1.lineData.gravity07, &lsfcd1.p, &p1i, &p2i);
+			lfArea = iioss_canvas_drawPolygon_storeFloansCorner_getArea(lnGravity1i, lnGravity2i, sfcd1->lineData.gravity07, &sfcd1->po, &sfcd1->pi, &sfcd2->pi);
 
 
 		//////////
@@ -6781,8 +6763,8 @@ continueToNextAttribute:
 			if (sbgrac)
 			{
 				// Store the destination offset
-				sbgrac->x		= (s32)lsfcd1.p.x;
-				sbgrac->y		= (s32)lsfcd1.p.y;
+				sbgrac->x		= poBase.x;
+				sbgrac->y		= poBase.y;
 				sbgrac->alpha	= lfArea;
 			}
 	}
@@ -6810,6 +6792,9 @@ continueToNextAttribute:
 		// For most computations, we compute the triangle po..p1..p2, and then either use
 		// that area, or (1.0 - area).	For some computations we need two triangles.
 		//////
+			// We assume the small triangle
+			llOneMinusArea		= false;
+
 			// We assume one triangle to begin with, and then adjust as needed
 			llTwoTriangles		= false;
 			llThreeTriangles	= false;
@@ -6833,6 +6818,7 @@ continueToNextAttribute:
 					case 2:		// Runs from SW to NW
 						if (tnGravity07 >= 3 && tnGravity07 <= 7)		llOneMinusArea = true;		// Fills in from 0..7..6..5..4..3..2
 						// else																		// Fills in from 0..1..2
+						break;
 
 					case 3:		// Runs from SW to N
 						//////////
@@ -6856,6 +6842,7 @@ continueToNextAttribute:
 						// Indicate if we need the area, or 1.0-area
 						if (tnGravity07 >= 4 && tnGravity07 <= 7)		llOneMinusArea = true;		// Fills in from 0..7..6..5..4..3
 						// else																		// Fills in from 0..1..2..3
+						break;
 
 					case 4:		// Runs from SW to NE
 						// This is a constant, it's always 0.5 (half the pixel)
@@ -6883,10 +6870,12 @@ continueToNextAttribute:
 						// Indicate if we need the area, or 1.0-area
 						if (!(tnGravity07 >= 6 && tnGravity07 <= 7))	llOneMinusArea = true;		// Fills in from 0..1..2..3..4..5
 						// else																		// Fills in from 0..7..6..5
+						break;
 
 					case 6:		// Runs from SW to SE
 						if (tnGravity07 >= 1 && tnGravity07 <= 5)		llOneMinusArea = true;		// Fills in from 0..1..2..3..4..5..6
 						// else																		// Fills in from 0..7..6
+						break;
 
 					default:
 						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
@@ -6905,10 +6894,12 @@ continueToNextAttribute:
 					case 3:		// Runs from W to N
 						if (tnGravity07 == 0 || tnGravity07 >= 4)		llOneMinusArea = true;		// Fills in from 1..0..7..6..5..4..3
 						// else																		// Fills in from 1..2..3
+						break;
 
 					case 4:		// Runs from W to NE
 						if (tnGravity07 == 0 || tnGravity07 >= 5)		llOneMinusArea = true;		// Fills in from 1..0..7..6..5..4
 						// else																		// Fills in from 1..2..3..4
+						break;
 
 					case 5:		// Runs from W to E
 						//////////
@@ -6951,6 +6942,7 @@ continueToNextAttribute:
 								if (!(tnGravity07 > 1 && tnGravity07 <= 5))		llOneMinusArea = true;		// Fills in from 1..2..3..4..5
 								// else																		// Fills in from 1..0..7..6..5
 							}
+							break;
 
 					case 6:		// Runs from W to SE
 						//////////
@@ -6977,10 +6969,12 @@ continueToNextAttribute:
 						//////
 							if (!(tnGravity07 == 0 || tnGravity07 >= 7))		llOneMinusArea = true;		// Fills in from 1..0..7..6
 							// else																			// Fills in from 1..2..3..4..5..6
+							break;
 
 					case 7:		// Runs from W to S
 						if (!(tnGravity07 <= 1 || tnGravity07 >= 7))	llOneMinusArea = true;		// Fills in from 1..2..3..4..5..6..7
 						// else																		// Fills in from 1..0..7
+						break;
 
 					default:
 						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
@@ -6999,10 +6993,12 @@ continueToNextAttribute:
 					case 0:		// Runs from NW to SW
 						if (tnGravity07 >= 3)							llOneMinusArea = true;		// Fills in from 2..3..4..5..6..7..0
 						// else																		// Fills in from 2..1..0
+						break;
 
 					case 4:		// Runs from NW to NE
 						if (tnGravity07 <= 1 || tnGravity07 >= 5)		llOneMinusArea = true;		// Fills in from 2..1..0..7..6..5..4
 						// else																		// Fills in from 2..3..4
+						break;
 
 					case 5:		// Runs from NW to E
 						//////////
@@ -7029,6 +7025,7 @@ continueToNextAttribute:
 						//////
 							if (!(tnGravity07 >= 3 && tnGravity07 <= 5))	llOneMinusArea = true;		// Fills in from 2..1..0..7..6..5
 							// else																		// Fills in from 2..3..4..5
+							break;
 
 					case 6:		// Runs from NW to SE
 						// This is a constant, it's always 0.5 (half the pixel)
@@ -7059,6 +7056,7 @@ continueToNextAttribute:
 						//////
 							if (!(tnGravity07 <= 1))						llOneMinusArea = true;		// Fills in from 2..1..0..7
 							// else																		// Fills in from 2..3..4..5..6..7
+							break;
 
 					default:
 						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
@@ -7099,14 +7097,17 @@ continueToNextAttribute:
 						//////
 							if (tnGravity07 >= 4)						llOneMinusArea = true;		// Fills in from 3..4..5..6..7..0
 							// else																	// Fills in from 3..2..1..0
+							break;
 
 					case 1:		// Runs from N to W
 						if (tnGravity07 == 0 || tnGravity07 >= 4)		llOneMinusArea = true;		// Fills in from 3..4..5..6..7..0..1
 						// else																		// Fills in from 3..2..1
+						break;
 
 					case 5:		// Runs from N to E
 						if (tnGravity07 <= 2 || tnGravity07 >= 6)		llOneMinusArea = true;		// Fills in from 3..2..1..0..7..6..5
 						// else																		// Fills in from 3..4..5
+						break;
 
 					case 6:		// Runs from N to SE
 						//////////
@@ -7133,6 +7134,7 @@ continueToNextAttribute:
 						//////
 						   if (tnGravity07 <= 2 || tnGravity07 >= 7)	llOneMinusArea = true;		// Fills in from 3..2..1..0..7..6
 							// else																	// Fills in from 3..4..5..6
+						   break;
 
 					case 7:		// Runs from N to S
 						//////////
@@ -7175,6 +7177,7 @@ continueToNextAttribute:
 								if (tnGravity07 > 3 || tnGravity07 <= 7)	llOneMinusArea = true;	// Fills in from 3..4..5..6..7
 								// else																// Fills in from 3..2..1..0..7
 							}
+							break;
 
 					default:
 						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
@@ -7219,14 +7222,17 @@ continueToNextAttribute:
 						//////
 							if (tnGravity07 == 0 || tnGravity07 >= 5)		llOneMinusArea = true;		// Fills in from 4..5..6..7..0..1
 							// else																		// Fills in from 4..3..2..1
+							break;
 
 					case 2:		// Runs from NE to NW
 						if (tnGravity07 <= 1 || tnGravity07 >= 5)		llOneMinusArea = true;		// Fills in from 4..5..6..7..0..1..2
 						// else																		// Fills in from 4..3..2
+						break;
 
 					case 6:		// Runs from NE to SE
 						if (!(tnGravity07 <= 3 || tnGravity07 >= 7))	llOneMinusArea = true;		// Fills in from 4..3..2..1..0..7..6
 						// else																		// Fills in from 4..5..6
+						break;
 
 					case 7:		// Runs from NE to S
 						//////////
@@ -7253,6 +7259,7 @@ continueToNextAttribute:
 						//////
 							if (tnGravity07 <= 3)						llOneMinusArea = true;		// Fills in from 4..5..6..7
 							// else																	// Fills in from 4..3..2..1..0..7
+							break;
 
 					default:
 						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
@@ -7293,6 +7300,7 @@ continueToNextAttribute:
 						//////
 							if (!(tnGravity07 >= 6))					llOneMinusArea = true;		// Fills in from 5..6..7..0
 							// else																	// Fills in from 5..4..3..2..1..0
+							break;
 
 					case 1:		// Runs from E to W
 						//////////
@@ -7335,6 +7343,7 @@ continueToNextAttribute:
 								if (tnGravity07 > 1 || tnGravity07 <= 5)	llOneMinusArea = true;	// Fills in from 1..2..3..4..5
 								// else																// Fills in from 1..0..7..6..5
 							}
+							break;
 
 					case 2:		// Runs from E to NW
 						//////////
@@ -7361,14 +7370,17 @@ continueToNextAttribute:
 						//////
 							if (!(tnGravity07 >= 3 && tnGravity07 <= 4))	llOneMinusArea = true;	// Fills in from 5..4..3..2
 							// else																	// Fills in from 5..6..7..0..1..2
+							break;
 
 					case 3:		// Runs from E to N
 						if (!(tnGravity07 >= 2 && tnGravity07 <= 4))	llOneMinusArea = true;		// Fills in from 5..6..7..0..1..2..3
 						// else																		// Fills in from 5..4..3
+						break;
 
 					case 7:		// Runs from E to S
 						if (!(tnGravity07 >= 5))						llOneMinusArea = true;		// Fills in from 5..4..3..2..1..0..7
 						// else																		// Fills in from 5..6..7
+						break;
 
 					default:
 						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
@@ -7387,6 +7399,7 @@ continueToNextAttribute:
 					case 0:		// Runs from SE to SW
 						if (tnGravity07 >= 1 && tnGravity07 <= 5)		llOneMinusArea = true;		// Fills in from 6..5..4..3..2..1..0
 						// else																		// Fills in from 6..7..0
+						break;
 
 					case 1:		// Runs from SE to W
 						//////////
@@ -7413,6 +7426,7 @@ continueToNextAttribute:
 						//////
 							if (tnGravity07 >= 2 && tnGravity07 <= 6)	llOneMinusArea = true;		// Fills in from 6..5..4..3..2..1
 							// else																	// Fills in from 6..7..0..1
+							break;
 
 					case 2:		// Runs fro3 SE to NW
 						// This is a constant, it's always 0.5 (half the pixel)
@@ -7443,10 +7457,12 @@ continueToNextAttribute:
 						//////
 							if (!(tnGravity07 >= 3 && tnGravity07 <= 5))	llOneMinusArea = true;		// Fills in from 6..5..4..3
 							// else																		// Fills in from 6..7..0..1..2..3
+							break;
 
 					case 4:		// Runs from SE to NE
 						if (tnGravity07 <= 3 || tnGravity07 >= 7)		llOneMinusArea = true;		// Fills in from 6..7..0..1..2..3..4
 						// else																		// Fills in from 6..5..4
+						break;
 
 					default:
 						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
@@ -7465,6 +7481,7 @@ continueToNextAttribute:
 					case 1:		// Runs from S to W
 						if (tnGravity07 <= 6 && tnGravity07 >= 2)		llOneMinusArea = true;		// Fills in from 7..6..5..4..3..2..1
 						// else																		// Fills in from 7..0..1
+						break;
 
 					case 2:		// Runs from S to NW
 						//////////
@@ -7491,6 +7508,7 @@ continueToNextAttribute:
 						//////
 							if (tnGravity07 >= 3 && tnGravity07 <=6)	llOneMinusArea = true;		// Fills in from 7..6..5..4..3..2
 							// else																	// Fills in from 7..0..1..2
+							break;
 
 					case 3:		// Runs from S to N
 				//		NW __N__ NE		2__3__4
@@ -7537,6 +7555,7 @@ continueToNextAttribute:
 								if (tnGravity07 > 3 || tnGravity07 <= 7)	llOneMinusArea = true;	// Fills in from 3..4..5..6..7
 								// else																// Fills in from 3..2..1..0..7
 							}
+							break;
 
 					case 4:		// Runs from S to NE
 						//////////
@@ -7563,10 +7582,12 @@ continueToNextAttribute:
 						//////
 							if (tnGravity07 <= 3)					llOneMinusArea = true;			// Fills in from 7..6..5..4
 							// else																	// Fills in from 7..0..1..2..3..4
+							break;
 
 					case 5:		// Runs from S to E
 						if (!(tnGravity07 == 6))					llOneMinusArea = true;			// Fills in from 7..0..1..2..3..4..5
 						// else																		// Fills in from 7..6..5
+						break;
 
 					default:
 						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
@@ -7672,7 +7693,7 @@ continueToNextAttribute:
 // Called to adjust theta into the range 0..2pi
 //
 //////
-	f64 iioss_canvas_drawPolygon_adjustTheta(f64 tfTheta)
+	f64 iioss_adjustTheta(f64 tfTheta)
 	{
 		// Validate theta is positive
 		while (tfTheta < 0.0)
