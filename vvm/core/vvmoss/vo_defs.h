@@ -644,7 +644,6 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	bool					iioss_polygon_setByPolyLine						(SPolygon* poly, u32 tnEntry, SPolyLine* line);
 	bool					iioss_polygon_setByValues						(SPolygon* poly, u32 tnEntry, SXYF64* start, SXYF64* end, SXYF64* gravity);
 	u64						iioss_canvas_drawPolygon						(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color);
-	int						iioss_canvas_drawPolygon_qsortFloansCallback	(const void* l, const void* r);
 	void					iioss_canvas_drawPolygon_nextIntercept			(SXYF64* p, f64 tfTheta);
 	void					iioss_canvas_drawPolygon_storeCorner			(SBuilder* corners, SXYF64* po, SXYF64* pi, _isSStoreFloan_lineData* sfld);
 	void					iioss_canvas_drawPolygon_storeFloans			(_isSStoreFloan_lineData* sfld);

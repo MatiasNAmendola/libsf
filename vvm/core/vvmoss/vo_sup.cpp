@@ -6362,20 +6362,15 @@ continueToNextAttribute:
 
 
 				//////////
+				// We need to determine the horizontal line runs from floan to floan (if any)
+				//////
+
+
+				//////////
 				// When we get here, the polygon has been outlined.  All floans are present
 				// and accounted for.  The algorithm below adds the filler line portions.
 				//////
 					lnPixelsDrawn = poly->floans->populatedLength / sizeof(SBGRACompute);
-
-
-				//////////
-				// We need to consolidate the floans on adjacent pixels so that only the outer-most
-				// pixels on any horizontal run are the only ones populated.
-				//////
-					qsort(poly->floans->data, (size_t)lnPixelsDrawn, sizeof(SBGRACompute), iioss_canvas_drawPolygon_qsortFloansCallback);
-
-					// Iterate through each block and remove the 
-					sbgracRoot = (SBGRACompute*)poly->floans->data;
 		}
 
 
@@ -6410,22 +6405,6 @@ continueToNextAttribute:
 		// Indicate our success or failure
 		//////
 			return(lnPixelsDrawn);
-	}
-
-	int iioss_canvas_drawPolygon_qsortFloansCallback(const void* l, const void* r)
-	{ 
-		SBGRACompute*	left;
-		SBGRACompute*	right;
-
-
-		// Get our pointers properly
-		left	= (SBGRACompute*)l;
-		right	= (SBGRACompute*)l;
-
-		// See how the cookie crumbles
-		     if (left->y < right->y)		return(-1);						// Left is less than right
-		else if (left->y > right->y)		return(1);						// Left is greater than right
-		else								return(left->x - right->x);		// If left is less, return will be negative, otherwise equal or greater than
 	}
 
 
