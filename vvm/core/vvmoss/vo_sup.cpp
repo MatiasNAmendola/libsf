@@ -6365,13 +6365,13 @@ continueToNextAttribute:
 				//////////
 				// We need to determine the horizontal line runs from floan to floan (if any)
 				//////
-					qsort(poly->pixelFloans->data, (size_t)lnPixelsDrawn, sizeof(SBGRACompute), iioss_canvas_drawPolygon_qsortFloansCallback);
+					lnFloanCount = poly->pixelFloans->populatedLength / sizeof(SBGRACompute);
+					qsort(poly->pixelFloans->data, (size_t)lnFloanCount, sizeof(SBGRACompute), iioss_canvas_drawPolygon_qsortFloansCallback);
 
 					// Iterate through each block and grab horizontal line runs in blocks
 					// Note:  At each horizontal stop there may be one or more pixels side-by-side.
 					//        If they exist in this way, that grouping is considered to be a single
 					//        group, and the line data will begin beyond it.
-					lnFloanCount = poly->pixelFloans->populatedLength / sizeof(SBGRACompute);
 					for (lnI = 0; lnI < lnFloanCount; lnI = lnINext)
 					{
 						// Grab the next set of line entries for this block
@@ -6403,7 +6403,7 @@ continueToNextAttribute:
 									{
 										// Store the from and to locations
 										sbgrac->x		= sbgrac1->x + 1;
-										sbgrac->y		= sbgrac2->y;
+										sbgrac->y		= sbgrac1->y;
 										sbgrac->alpha	= 1.0;
 										++lnPixelsDrawn;
 									}
@@ -6466,7 +6466,7 @@ continueToNextAttribute:
 
 						// Populate this color into the target canvas for the range
 						sbgra	= bd + sbgrac->start;
-						for (lnI = sbgrac->start; lnI < sbgrac->end; lnI++, sbgra++)
+						for (lnJ = sbgrac->start; lnJ <= sbgrac->end; lnJ++, sbgra++)
 						{
 							// Populate the color
 							sbgra->red	= (s8)min((s32)((sbgra->red * malp) + (color.red * alp)), 255);
@@ -6531,7 +6531,7 @@ continueToNextAttribute:
 		*p2 = (sbgrac + lnSkip);			// First pixel of the right-side grouping
 
 		// Indicate how far we moved
-		return(tnIndex + lnSkip);
+		return(tnIndex + lnSkip + 1);
 	}
 
 
