@@ -7841,23 +7841,23 @@ continueToNextAttribute:
 
 		} else if (tfTheta > _PI_2 && tfTheta < _PI) {
 			// Slope is north-west
-			if (tlLeft)		return(_COMPASS_NORTH_EAST	| _COMPASS_DECORATION_TOP		| _COMPASS_DECORATION_RIGHT);
-			else			return(_COMPASS_SOUTH_WEST	| _COMPASS_DECORATION_BOTTOM	| _COMPASS_DECORATION_LEFT);
+			if (tlLeft)		return(_COMPASS_SOUTH_WEST	| _COMPASS_DECORATION_BOTTOM	| _COMPASS_DECORATION_LEFT);
+			else			return(_COMPASS_NORTH_EAST	| _COMPASS_DECORATION_TOP		| _COMPASS_DECORATION_RIGHT);
 
 		} else if (tfTheta == _PI) {
 			// Slope is west
-			if (tlLeft)		return(_COMPASS_NORTH	| _COMPASS_DECORATION_TOP);
-			else			return(_COMPASS_SOUTH	| _COMPASS_DECORATION_BOTTOM);
+			if (tlLeft)		return(_COMPASS_SOUTH	| _COMPASS_DECORATION_BOTTOM);
+			else			return(_COMPASS_NORTH	| _COMPASS_DECORATION_TOP);
 
 		} else if (tfTheta > _PI && tfTheta < _3PI_2) {
 			// Slope is south-west
-			if (tlLeft)		return(_COMPASS_NORTH_WEST	| _COMPASS_DECORATION_TOP		| _COMPASS_DECORATION_LEFT);
-			else			return(_COMPASS_SOUTH_EAST	| _COMPASS_DECORATION_BOTTOM	| _COMPASS_DECORATION_RIGHT);
+			if (tlLeft)		return(_COMPASS_SOUTH_EAST	| _COMPASS_DECORATION_BOTTOM	| _COMPASS_DECORATION_RIGHT);
+			else			return(_COMPASS_NORTH_WEST	| _COMPASS_DECORATION_TOP		| _COMPASS_DECORATION_LEFT);
 
 		} else if (tfTheta == _3PI_2) {
 			// Slope is south
-			if (tlLeft)		return(_COMPASS_WEST	| _COMPASS_DECORATION_LEFT);
-			else			return(_COMPASS_EAST	| _COMPASS_DECORATION_RIGHT);
+			if (tlLeft)		return(_COMPASS_EAST	| _COMPASS_DECORATION_RIGHT);
+			else			return(_COMPASS_WEST	| _COMPASS_DECORATION_LEFT);
 
 		} else if (tfTheta > _3PI_2 && tfTheta < _2PI) {
 			// Slope is south-east
