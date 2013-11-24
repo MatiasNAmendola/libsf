@@ -6190,7 +6190,7 @@ continueToNextAttribute:
 //////
 	u64 iioss_canvas_drawPolygon(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color)
 	{
-		u32							lnI, lnJ;
+		u32							lnI, lnJ, lnINext, lnFloanCount;
 		bool						llLeft;
 		u64							lnPixelsDrawn;
 		f64							alpc, alp, malp, lfDeltaX, lfDeltaY, lfLength;
@@ -6198,7 +6198,8 @@ continueToNextAttribute:
 		SBuilder*					corners;		// SXYF64 indicating where the corner falls
 		SBGRA*						sbgra;
 		SBGRACompute*				sbgrac;
-		SBGRACompute*				sbgracRoot;
+		SBGRACompute*				sbgrac1;
+		SBGRACompute*				sbgrac2;
 		_isSStoreFloan_lineData		sfld;
 		_isSStoreFloan_cornerData*	sfcdRoot;
 		_isSStoreFloan_cornerData*	sfcd;
@@ -6206,21 +6207,21 @@ continueToNextAttribute:
 
 		// If we don't already have polygon drawing data for this polygon, create it
 		lnPixelsDrawn = 0;
-		if (!poly->floans && !poly->lines)
+		if (!poly->pixelFloans && !poly->rangeFloans)
 		{
 			//////////
 			// Allocate for the corners, floans, and lines, and initialize our internal structure
 			//////
-				oss_builderCreateAndInitialize(&corners,		_COMMON_BUILDER_BLOCK_SIZE);
-				oss_builderCreateAndInitialize(&poly->floans,	_COMMON_BUILDER_BLOCK_SIZE_BIG);	// SBGRACompute structure indicating the area to populate at the destination offset
-				oss_builderCreateAndInitialize(&poly->lines,	_COMMON_BUILDER_BLOCK_SIZE_BIG);	// SBGRACompute structure indicating the starting 
+				oss_builderCreateAndInitialize(&corners,			_COMMON_BUILDER_BLOCK_SIZE);
+				oss_builderCreateAndInitialize(&poly->pixelFloans,	_COMMON_BUILDER_BLOCK_SIZE_BIG);	// SBGRACompute structure indicating individual pixel populations
+				oss_builderCreateAndInitialize(&poly->rangeFloans,	_COMMON_BUILDER_BLOCK_SIZE_BIG);	// SBGRACompute structure indicating the starting and ending range
 				memset(&sfld, 0, sizeof(sfld));
 
 
 			//////////
 			// Store the information used for computing all the floans
 			//////
-				sfld.floans	= poly->floans;
+				sfld.floans	= poly->pixelFloans;
 
 
 			//////////
@@ -6364,13 +6365,58 @@ continueToNextAttribute:
 				//////////
 				// We need to determine the horizontal line runs from floan to floan (if any)
 				//////
+					qsort(poly->pixelFloans->data, (size_t)lnPixelsDrawn, sizeof(SBGRACompute), iioss_canvas_drawPolygon_qsortFloansCallback);
 
+					// Iterate through each block and grab horizontal line runs in blocks
+					// Note:  At each horizontal stop there may be one or more pixels side-by-side.
+					//        If they exist in this way, that grouping is considered to be a single
+					//        group, and the line data will begin beyond it.
+					lnFloanCount = poly->pixelFloans->populatedLength / sizeof(SBGRACompute);
+					for (lnI = 0; lnI < lnFloanCount; lnI = lnINext)
+					{
+						// Grab the next set of line entries for this block
+						lnINext = iioss_canvas_drawPolygon_GetLineSegments(lnI, lnFloanCount, (SBGRACompute*)poly->pixelFloans->data, &sbgrac1, &sbgrac2);
+
+						// Are we still valid?
+						if (lnINext < lnFloanCount)
+						{
+							//////////
+							// Allocate space for the line segment entry
+							//////
+								if (sbgrac1->x + 1 != sbgrac2->x - 1)
+								{
+									// It is a range exceeding one pixel in length, so we add it as a range
+									sbgrac = (SBGRACompute*)oss_builderAllocateBytes(poly->rangeFloans, sizeof(SBGRACompute));
+									if (sbgrac)
+									{
+										// Store the from and to locations
+										sbgrac->start	= (sbgrac1->y * tsDst->width) + sbgrac1->x + 1;
+										sbgrac->end		= (sbgrac2->y * tsDst->width) + sbgrac2->x - 1;
+										sbgrac->alpha	= 1.0;
+										lnPixelsDrawn	= sbgrac2->x - sbgrac1->x;
+									}
+
+								} else {
+									// It is only a single pixel, we we simply add it as another pixel floan
+									sbgrac = (SBGRACompute*)oss_builderAllocateBytes(poly->pixelFloans, sizeof(SBGRACompute));
+									if (sbgrac)
+									{
+										// Store the from and to locations
+										sbgrac->x		= sbgrac1->x + 1;
+										sbgrac->y		= sbgrac2->y;
+										sbgrac->alpha	= 1.0;
+										++lnPixelsDrawn;
+									}
+								}
+						}
+					}
+					
 
 				//////////
 				// When we get here, the polygon has been outlined.  All floans are present
 				// and accounted for.  The algorithm below adds the filler line portions.
 				//////
-					lnPixelsDrawn = poly->floans->populatedLength / sizeof(SBGRACompute);
+					lnPixelsDrawn += (poly->pixelFloans->populatedLength / sizeof(SBGRACompute));
 		}
 
 
@@ -6380,24 +6426,57 @@ continueToNextAttribute:
 			//////////
 			// Physically draw the polygon
 			//////
-				alpc	= (f64)color.alp / 255.0;
-				for (lnI = 0; lnI < poly->floans->populatedLength; lnI += sizeof(SBGRACompute))
-				{
-					// Grab this entry
-					sbgrac		= (SBGRACompute*)(poly->floans->data + lnI);
+				lnPixelsDrawn = 0;
 
-					// Grab alpha and 1.0-alpha for this floan
-					alp			= sbgrac->alpha * alpc;
-					malp		= (1.0 - alp);
+				//////////
+				// Pixel floans
+				//////
+					alpc	= (f64)color.alp / 255.0;
+					for (lnI = 0; lnI < poly->pixelFloans->populatedLength; lnI += sizeof(SBGRACompute))
+					{
+						// Grab this entry
+						sbgrac		= (SBGRACompute*)(poly->pixelFloans->data + lnI);
 
-					// Populate this color into the target canvas
-					sbgra		= bd + (sbgrac->y * tsDst->width) + sbgrac->x;
-					sbgra->red	= (s8)min((s32)((sbgra->red * malp) + (color.red * alp)), 255);
-					sbgra->grn	= (s8)min((s32)((sbgra->grn * malp) + (color.grn * alp)), 255);
-					sbgra->blu	= (s8)min((s32)((sbgra->blu * malp) + (color.blu * alp)), 255);
-				}
-				// Increase our pixel drawn count
-				++lnPixelsDrawn;
+						// Grab alpha and 1.0-alpha for this floan
+						alp			= sbgrac->alpha * alpc;
+						malp		= (1.0 - alp);
+
+						// Populate this color into the target canvas
+						sbgra		= bd + (sbgrac->y * tsDst->width) + sbgrac->x;
+						sbgra->red	= (s8)min((s32)((sbgra->red * malp) + (color.red * alp)), 255);
+						sbgra->grn	= (s8)min((s32)((sbgra->grn * malp) + (color.grn * alp)), 255);
+						sbgra->blu	= (s8)min((s32)((sbgra->blu * malp) + (color.blu * alp)), 255);
+
+						// Increase our pixel drawn count
+						++lnPixelsDrawn;
+					}
+
+
+				//////////
+				// Range floans
+				//////
+					for (lnI = 0; lnI < poly->rangeFloans->populatedLength; lnI += sizeof(SBGRACompute))
+					{
+						// Grab this entry
+						sbgrac	= (SBGRACompute*)(poly->rangeFloans->data + lnI);
+
+						// Grab alpha and 1.0-alpha for this floan
+						alp		= sbgrac->alpha * alpc;
+						malp	= (1.0 - alp);
+
+						// Populate this color into the target canvas for the range
+						sbgra	= bd + sbgrac->start;
+						for (lnI = sbgrac->start; lnI < sbgrac->end; lnI++, sbgra++)
+						{
+							// Populate the color
+							sbgra->red	= (s8)min((s32)((sbgra->red * malp) + (color.red * alp)), 255);
+							sbgra->grn	= (s8)min((s32)((sbgra->grn * malp) + (color.grn * alp)), 255);
+							sbgra->blu	= (s8)min((s32)((sbgra->blu * malp) + (color.blu * alp)), 255);
+
+							// Increase our pixel drawn count
+							++lnPixelsDrawn;
+						}
+					}
 		}
 
 
@@ -6405,6 +6484,54 @@ continueToNextAttribute:
 		// Indicate our success or failure
 		//////
 			return(lnPixelsDrawn);
+	}
+
+	int iioss_canvas_drawPolygon_qsortFloansCallback(const void* l, const void* r)
+	{
+		SBGRACompute*        left;
+		SBGRACompute*        right;
+
+
+		// Get our pointers properly
+		left		= (SBGRACompute*)l;
+		right		= (SBGRACompute*)r;
+
+		// See how the cookie crumbles
+		     if (left->y < right->y)		return(-1);							// Left is less than right
+		else if (left->y > right->y)		return(1);							// Left is greater than right
+		else								return(left->x - right->x);			// If left is less, return will be negative, otherwise equal or greater than
+	}
+
+	u32 iioss_canvas_drawPolygon_GetLineSegments(u32 tnIndex, u32 tnMaxCount, SBGRACompute* sbgracRoot, SBGRACompute** p1, SBGRACompute** p2)
+	{
+		u32				lnSkip;
+		SBGRACompute*	sbgrac;
+
+
+		// While the pixels are adjacent, move forward
+		sbgrac = sbgracRoot + tnIndex;
+		for (lnSkip = 1; tnIndex + lnSkip < tnMaxCount; lnSkip++)
+		{
+			// Are we still on the same row?
+			if ((sbgrac + lnSkip)->y != sbgrac->y)
+			{
+				// We've passed to another row, we begin again, but from here
+				return(iioss_canvas_drawPolygon_GetLineSegments(tnIndex + lnSkip, tnMaxCount, sbgracRoot, p1, p2));
+			}
+
+			// Are the pixels adjacent?
+			if ((sbgrac + lnSkip)->x != sbgrac->x + 1)
+				break;		// We've found the end of the run
+			
+			// If we get here, we keep going because we're still on a side-by-side pixel grouping
+		}
+
+		// When we get here, we have found two pixels
+		*p1 = (sbgrac + lnSkip - 1);		// Last pixel in the left-side grouping
+		*p2 = (sbgrac + lnSkip);			// First pixel of the right-side grouping
+
+		// Indicate how far we moved
+		return(tnIndex + lnSkip);
 	}
 
 

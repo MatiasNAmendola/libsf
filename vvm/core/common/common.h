@@ -892,14 +892,14 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	{
 		// For an example, refer to the oss_canvasScale() functionality of how this structure is used
 		union {
-			u32			dstStart;				// For lines, the starting offset (lower value)
-			u32			offsetDst;				// Offset to the destination SBGRA pixel
+			u32			start;					// For lines, the starting offset (lower value)
+			u32			offsetSrc;				// Offset to the source SBGRA pixel
 			s32			x;						// X coordinate
 		};
 
 		union {
-			u32			dstEnd;					// For lines, the ending offset (greater value)
-			u32			offsetSrc;				// Offset to the source SBGRA pixel
+			u32			end;					// For lines, the ending offset (greater value)
+			u32			offsetDst;				// Offset to the destination SBGRA pixel
 			s32			y;						// Y coordinate
 		};
 
@@ -1022,12 +1022,12 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	struct SPolygon
 	{
 		// Number of lines in the original polygon
-		u32				lineCount;				// Number of polyline segments
-		SPolyLine**		line;					// An array to access each polyline segment
+		u32				lineCount;				// Number of polylines
+		SPolyLine**		line;					// An array to access each polyline
 
 		// The derived data for where they are drawn
-		SBuilder*		floans;					// The mathematical progression to use for the floan triangles for this polygon (SBbgraCompute array in source/destination form)
-		SBuilder*		lines;					// The mathematical progression to use for the fully aliased points for this polygon (SBbgraCompute array in destination start/end form)
+		SBuilder*		pixelFloans;			// (SBGRACompute) Individual pixel floans, at the indicated x,y
+		SBuilder*		rangeFloans;			// (SBGRACompute) A range of floans to write beginning at start, ending at end (poetic, isn't it?)
 	};
 
 	struct SLLCallback
