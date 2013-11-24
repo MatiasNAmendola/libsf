@@ -1367,7 +1367,7 @@
 // Draws a line on the canvas.
 //
 //////
-	u64 CALLTYPE oss_canvasLine(SCanvas* tc, SBGRA* bd, f32 p1x, f32 p1y, f32 p2x, f32 p2y, f32 lineThickness, SBGRA line, bool tlFloan)
+	u64 CALLTYPE oss_canvasLine(SCanvas* tc, SBGRA* bd, f32 p1x, f32 p1y, f32 p2x, f32 p2y, f32 lineThickness, SBGRA color, bool tlFloan)
     {
 		u64 lnPixelsDrawn;
 
@@ -1377,7 +1377,7 @@
 			return(-1);
 
 		// Draw the line in floaned fashion
-		lnPixelsDrawn = ioss_canvasLine(tc, bd, p1x, p1y, p2x, p2y, lineThickness, line);
+		lnPixelsDrawn = ioss_canvasLine(tc, bd, p1x, p1y, p2x, p2y, lineThickness, color);
 
 		// Mark the item dirty
 		if (lnPixelsDrawn != 0)
@@ -1701,10 +1701,10 @@
 // Called to draw the polygon onto the canvas.
 //
 //////
-	u64 CALLTYPE oss_canvas_drawPolygon(SCanvas* tsDst, SBGRA* bd, SPolygon* poly)
+	u64 CALLTYPE oss_canvas_drawPolygon(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color)
 	{
 		if (tsDst && bd && poly && poly->line && poly->lineCount >= 3)
-			return(iioss_canvas_drawPolygon(tsDst, bd, poly));
+			return(iioss_canvas_drawPolygon(tsDst, bd, poly, color));
 
 		// If we get here, failure
 		return(0);
@@ -8092,7 +8092,7 @@ _asm int 3;
 // Called to initialize a polygon to the number indicated by poly->lineCount.
 //
 //////
-	bool CALLTYPE oss_polygon_initialize(SPolygon* poly, s32 tnLineCount, bool tlAllocatePolyLines)
+	bool CALLTYPE oss_polygon_initialize(SPolygon* poly, u32 tnLineCount, bool tlAllocatePolyLines)
 	{
 		if (poly && (s32)tnLineCount >= 1)
 		{
@@ -8113,7 +8113,7 @@ _asm int 3;
 // Called to set the indicated polyline for the indicated polygon.
 //
 ///////
-	bool CALLTYPE oss_polygon_setByPolyLine(SPolygon* poly, s32 tnEntry, SPolyLine* line)
+	bool CALLTYPE oss_polygon_setByPolyLine(SPolygon* poly, u32 tnEntry, SPolyLine* line)
 	{
 		if (poly && tnEntry < poly->lineCount)
 		{
@@ -8134,7 +8134,7 @@ _asm int 3;
 // Called to set the indicated polyline for the indicated polygon by values.
 //
 //////
-	bool CALLTYPE oss_polygon_setByValues(SPolygon* poly, s32 tnEntry, SXYF64* start, SXYF64* end, SXYF64* gravity)
+	bool CALLTYPE oss_polygon_setByValues(SPolygon* poly, u32 tnEntry, SXYF64* start, SXYF64* end, SXYF64* gravity)
 	{
 		if (poly && tnEntry < poly->lineCount && start && end && gravity)
 		{

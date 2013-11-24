@@ -888,19 +888,22 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	// it is simply applied.  It is only re-computed when it has been deleted and is no longer
 	// available.  Each compute relates to its parent, which is something like a scale operation,
 	// a rotate operation, a polygon operation, etc.
-	struct SBbgraCompute
+	struct SBGRACompute
 	{
 		// For an example, refer to the oss_canvasScale() functionality of how this structure is used
 		union {
 			u32			dstStart;				// For lines, the starting offset (lower value)
 			u32			offsetDst;				// Offset to the destination SBGRA pixel
+			s32			x;						// X coordinate
 		};
 
 		union {
 			u32			dstEnd;					// For lines, the ending offset (greater value)
 			u32			offsetSrc;				// Offset to the source SBGRA pixel
+			s32			y;						// Y coordinate
 		};
 
+		s32				gravity;				// Holds gravity for polygons, not used for other items
 		f64				alpha;					// The alpha percentage for the pixel
 		// Note:  If using an accumulator, then dst += source * alpha
 		// Note:  If alpha blending, then dst = (dst * 1.0 - alpha) + (source * alpha)
@@ -1019,7 +1022,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	struct SPolygon
 	{
 		// Number of lines in the original polygon
-		s32				lineCount;				// Number of polyline segments
+		u32				lineCount;				// Number of polyline segments
 		SPolyLine**		line;					// An array to access each polyline segment
 
 		// The derived data for where they are drawn

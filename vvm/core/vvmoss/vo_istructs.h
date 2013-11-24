@@ -178,7 +178,7 @@
 		SCanvas*			dst;				// Destination for the scale
 		SCanvas*			src;				// Source for the scale
 		SScaleMap*			sm;					// Scale map being computed
-		SBbgraCompute*		lastSc;			// Used to rapidly append new entries to the end
+		SBGRACompute*		lastSc;			// Used to rapidly append new entries to the end
 
 		// Holds storage data for single spanned pixels
 		u32					red;
@@ -263,7 +263,7 @@
 // Used by iioss_canvas_drawPolygon_storeFloans() to rapidly drawn floans
 //
 //////
-	struct _isSStoreFloan_pointToPoint
+	struct _isSStoreFloan_lineData
 	{
 		SBuilder*			floans;				// Where we're storing the floans
 
@@ -274,15 +274,22 @@
 		SXYF64				p1;					// Point 1 (from point)
 		SXYF64				p2;					// Point 2 (destination point)
 		f64					m;					// Slope
+		f64					theta;				// Theta
 		u32					gravityDecorated;	// Gravity with cardinal, ordinal, and decorations
 		s32					gravity07;			// Gravity with the range of 0..7, as from SW=0, clockwise to S=7 (see vo_sup.cpp polygon functions)
+	};
+
+	struct _isSStoreFloan_cornerData
+	{
+		SXYF64						p;			// Corner point
+		_isSStoreFloan_lineData		lineData;	// Data computed when this line was stored
 	};
 
 	struct _isS_iioss_canvas_drawPolygon_storeFloans
 	{
 		union {
 			u32				_storeFloan_pointToPoint;
-			void			(*storeFloan_pointToPoint)		(_isSStoreFloan_pointToPoint* sf);
+			void			(*storeFloan_pointToPoint)		(_isSStoreFloan_lineData* sfld);
 		};
 	};
 
