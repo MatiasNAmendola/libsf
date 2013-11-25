@@ -919,12 +919,22 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 			u32			start;					// For lines, the starting offset (lower value)
 			u32			offsetSrc;				// Offset to the source SBGRA pixel
 			s32			x;						// X coordinate
+			// This structure is used for when there needs to be a starting and ending x,y coordinate set
+			struct {
+				s16		xStart;
+				s16		yStart;
+			};
 		};
 
 		union {
 			u32			end;					// For lines, the ending offset (greater value)
 			u32			offsetDst;				// Offset to the destination SBGRA pixel
 			s32			y;						// Y coordinate
+			// This structure is used for when there needs to be a starting and ending x,y coordinate set
+			struct {
+				s16		xEnd;
+				s16		yEnd;
+			};
 		};
 
 		f64				alpha;					// The alpha percentage for the pixel

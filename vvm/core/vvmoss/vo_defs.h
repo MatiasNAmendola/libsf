@@ -655,8 +655,9 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	bool					iioss_polygon_setByPolyLine						(SPolygon* poly, u32 tnEntry, SPolyLine* line);
 	bool					iioss_polygon_setByValues						(SPolygon* poly, u32 tnEntry, SXYF64* start, SXYF64* end, SXYF64* gravity);
 	u64						iioss_canvas_drawPolygon						(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color);
-	void					iioss_canvas_drawPolygon_draw					(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color, _isSCanvasDrawPolygonParameters* lcdp);
+	void					iioss_canvas_drawPolygon_processSmall			(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color, _isSCanvasDrawPolygonParameters* lcdp);
 	void					iioss_canvas_drawPolygon_processNormal			(SCanvas* tsDst, SPolygon* poly, _isSCanvasDrawPolygonParameters* lcdp);
+	void					iioss_canvas_drawPolygon_draw					(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color, _isSCanvasDrawPolygonParameters* lcdp);
 	void					iioss_canvas_drawPolygon_computeLine			(SCanvas* tsDst, _isSCanvasDrawPolygonParameters* lcdp);
 	void					iioss_canvas_drawPolygon_getCornerFloans		(_isSCanvasDrawPolygonParameters* lcdp);
 	void					iioss_canvas_drawPolygon_getRangeFloans			(SCanvas* tsDst, SPolygon* poly, _isSCanvasDrawPolygonParameters* lcdp);
@@ -676,6 +677,7 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	s32						iioss_math_fineAdjustGravityByTheta				(SXYF64* po, SXYF64* p, SXYF64* pg, s32 lnGravity07p, s32 lnGravity07pg);
 	f64						iioss_math_adjustTheta							(f64 tfTheta);
 	bool					iioss_math_withinDelta							(f64 tfValue1, f64 tfValue2, s32 tnDeltaDecimals);
+	void					iioss_math_multiplyBy							(SXYF64* p, f64 tfMultiplier);
 	u64						iioss_canvasRotateAbout							(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, f32 ox, f32 oy);
 
 

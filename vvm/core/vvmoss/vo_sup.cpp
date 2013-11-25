@@ -6194,15 +6194,15 @@ continueToNextAttribute:
 
 
 		//////////
-		// Compute
+		// Compute if need be
 		//////
 			if (!poly->pixelFloans && !poly->rangeFloans)
 			{
 				// Should it be computed as a small or big polygon?
 				if (iioss_canvas_drawPolygon_determineIfSmall(poly))
 				{
-					// Small.
-					// We process it at 16x normal (4x wide, 4x high), then merge down the computed values for the final / partial floan computations.
+					// We process it at 16x resolution (4x wider, 4x higher), then merge down the computed values for the final / partial floan computations.
+					iioss_canvas_drawPolygon_processSmall(tsDst, bd, poly, color, &lcdp);
 
 				} else {
 					// Normal.
@@ -6224,26 +6224,191 @@ continueToNextAttribute:
 			return(lcdp.lnPixelsDrawn);
 	}
 
-	void iioss_canvas_drawPolygon_draw(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color, _isSCanvasDrawPolygonParameters* lcdp)
+	void iioss_canvas_drawPolygon_processSmall(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color, _isSCanvasDrawPolygonParameters* lcdp)
 	{
+		u32				lnI;
+		s32				lnX, lnY, lnX4, lnY4, lnMinX, lnMinY, lnMaxX, lnMaxY, lnWidth, lnHeight, lnMinX4, lnMinY4, lnMaxX4, lnMaxY4;
+		f64				lfArea;
+		SXYF64			start, end;
+		SPolygon		lpoly;
+		SPolyLine*		line;
+		SBGRACompute*	sbgrac;
+		SBGRACompute	sbgracNew;
+
+
 		//////////
-		// If they want us to actually draw something, then draw it, otherwise we just store it
+		// Create our temporary polygon
 		//////
-			if (tsDst && bd)
+			if (!oss_polygon_initialize(&lpoly, poly->lineCount, true))
+				return;		// Failure allocating
+
+
+		//////////
+		// Find the point closest to the origin
+		//////
+			// Initialize our polygon
+			memset(&lpoly, 0, sizeof(lpoly));
+
+			// Initialize our min and max to out of range values so they'll be set in the loop
+			lnMinX	= 999999999;
+			lnMinY	= 999999999;
+			lnMaxX	= -999999999;
+			lnMaxY	= -999999999;
+
+			// Move forward
+			for (lnI = 0; lnI < poly->lineCount; lnI++)
 			{
-				// Grab our constants
-				lcdp->alpc	= (f64)color.alp / 255.0;
-				lcdp->lfRed	= (f64)color.red;
-				lcdp->lfGrn = (f64)color.grn;
-				lcdp->lfBlu = (f64)color.blu;
+				// Grab the line
+				line = poly->line[lnI];
 
-				// Reset our pixels drawn value
-				lcdp->lnPixelsDrawn = 0;
+				// Check our min's
+				if ((s32)line->start.x < lnMinX)		lnMinX = (s32)line->start.x;
+				if ((s32)line->start.y < lnMinY)		lnMinY = (s32)line->start.y;
+				if ((s32)line->end.x   < lnMinX)		lnMinX = (s32)line->end.x;
+				if ((s32)line->end.y   < lnMinY)		lnMinY = (s32)line->end.y;
 
-				// Physically draw the polygon
-				iioss_canvas_drawPolygon_drawPixelFloans(tsDst, bd, poly, lcdp);			// Draw the pixel floans
-				iioss_canvas_drawPolygon_drawRangeFloans(bd, poly, lcdp);					// Draw the range floans
+				// Check our max's
+				if ((s32)line->start.x > lnMaxX)		lnMaxX = (s32)line->start.x;
+				if ((s32)line->start.y > lnMaxY)		lnMaxY = (s32)line->start.y;
+				if ((s32)line->end.x   > lnMaxX)		lnMaxX = (s32)line->end.x;
+				if ((s32)line->end.y   > lnMaxY)		lnMaxY = (s32)line->end.y;
 			}
+
+			// Get our width and height
+			lnWidth		= lnMaxX - lnMinX;
+			lnHeight	= lnMaxY - lnMinY;
+
+
+		//////////
+		// Move the indicated polygon to (0,0) to (w,h)
+		//////
+			for (lnI = 0; lnI < poly->lineCount; lnI++)
+			{
+				// Grab the line
+				line = poly->line[lnI];
+
+				// Adjust start and end to 0,0
+				start.x		= line->start.x	- (f64)lnMinX;
+				start.y		= line->start.y	- (f64)lnMinY;
+				end.x		= line->end.x	- (f64)lnMinX;
+				end.y		= line->end.y	- (f64)lnMinY;
+
+				// Set this value
+				oss_polygon_setByValues(&lpoly, lnI, &start, &end, &line->gravity);
+			}
+		
+		
+		//////////
+		// Multiply every polygon line size by 4
+		// Note:  This could be combined with the above, but it's not that much slower, and
+		//        it is easier to mentally visualize and debug ... so ... why not leave it? :-)
+		//////
+			for (lnI = 0; lnI < poly->lineCount; lnI++)
+			{
+				// Grab the line
+				line = lpoly.line[lnI];
+
+				// Multiply each point size by 4
+				iioss_math_multiplyBy(&line->start,	4.0);
+				iioss_math_multiplyBy(&line->end,	4.0);
+			}
+		
+		
+		//////////
+		// Recompute
+		//////
+			iioss_canvas_drawPolygon(tsDst, NULL, &lpoly, color);
+
+
+		//////////
+		// Assemble the larger polygon down into the smaller polygon
+		//////
+			for (lnY = 0; lnY < lnHeight; lnY++)
+			{
+				for (lnX = 0; lnX < lnWidth; lnX++)
+				{
+					//////////
+					// Initialize
+					//////
+						lfArea	= 0.0;
+						lnMinX4 = lnX * 4;				// Set the X,Y range to be a-checkin' for, by gum!
+						lnMinY4 = lnY * 4;
+						lnMaxX4 = lnMinX4 + 3;
+						lnMaxY4 = lnMinY4 + 3;
+
+
+					//////////
+					// Add in any pixel floans
+					//////
+						for (lnI = 0; lnI < lpoly.pixelFloans->populatedLength; lnI += sizeof(SBGRACompute))
+						{
+							// Grab this floan pixel element
+							sbgrac = (SBGRACompute*)(lpoly.pixelFloans->data + lnI);
+
+							// Is it in range in both the X and Y directions?
+							if (sbgrac->y >= lnMinY4 && sbgrac->y <= lnMaxY4 && sbgrac->x >= lnMinX4 && sbgrac->x <= lnMaxX4)
+							{
+								// Yes, this is one
+								lfArea += sbgrac->alpha;
+							}
+						}
+
+
+					//////////
+					// Add in any range floans which occupy this pixel range
+					//////
+						for (lnI = 0; lnI < lpoly.rangeFloans->populatedLength; lnI += sizeof(SBGRACompute))
+						{
+							// Grab this floan range element
+							sbgrac = (SBGRACompute*)(lpoly.rangeFloans->data + lnI);
+
+							// See if it's in range
+							for (lnY4 = lnMinY4; lnY4 <= lnMaxY4; lnY4++)
+							{
+								// Are we on the right row?
+								if (lnY4 >= sbgrac->yStart && lnY4 <= sbgrac->yEnd)
+								{
+									// Yes, check the columns
+									for (lnX4 = lnMinX4; lnX4 <= lnMaxX4; lnX4++)
+									{
+										// Are we on the right column?
+										if (lnX4 >= sbgrac->xStart && lnX4 <= sbgrac->xEnd)
+										{
+											// Yes, this is one
+											lfArea += sbgrac->alpha;
+										}
+									}
+								}
+							}
+						}
+
+
+					/////////
+					// We have our total area
+					//////
+						lfArea /= 16.0;
+						if (lfArea != 0.0)
+						{
+							// Initialize our new floan information
+							memset(&sbgracNew, 0, sizeof(sbgracNew));
+
+							// Populate it
+							sbgracNew.x			= lnX + lnMinX;
+							sbgracNew.y			= lnY + lnMinY;
+							sbgracNew.alpha		= lfArea;
+
+							// Add in a floan to the destination polygon
+							oss_builderAppendData(poly->pixelFloans, (s8*)&sbgracNew, sizeof(sbgracNew));
+						}
+
+				}
+			}
+
+
+		//////////
+		// All done!
+		//////
+			oss_polygon_freeAndRelease(poly, true);
 	}
 
 	void iioss_canvas_drawPolygon_processNormal(SCanvas* tsDst, SPolygon* poly, _isSCanvasDrawPolygonParameters* lcdp)
@@ -6285,6 +6450,28 @@ continueToNextAttribute:
 		// When we get here, the polygon has been outlined.  All floans are present
 		//////
 			lcdp->lnPixelsDrawn += (poly->pixelFloans->populatedLength / sizeof(SBGRACompute));
+	}
+
+	void iioss_canvas_drawPolygon_draw(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color, _isSCanvasDrawPolygonParameters* lcdp)
+	{
+		//////////
+		// If they want us to actually draw something, then draw it, otherwise we just store it
+		//////
+			if (tsDst && bd)
+			{
+				// Grab our constants
+				lcdp->alpc	= (f64)color.alp / 255.0;
+				lcdp->lfRed	= (f64)color.red;
+				lcdp->lfGrn = (f64)color.grn;
+				lcdp->lfBlu = (f64)color.blu;
+
+				// Reset our pixels drawn value
+				lcdp->lnPixelsDrawn = 0;
+
+				// Physically draw the polygon
+				iioss_canvas_drawPolygon_drawPixelFloans(tsDst, bd, poly, lcdp);			// Draw the pixel floans
+				iioss_canvas_drawPolygon_drawRangeFloans(bd, poly, lcdp);					// Draw the range floans
+			}
 	}
 
 	void iioss_canvas_drawPolygon_computeLine(SCanvas* tsDst, _isSCanvasDrawPolygonParameters* lcdp)
@@ -8415,6 +8602,23 @@ continueToNextAttribute:
 				default:
 					return(false);
 			}
+	}
+
+
+
+
+//////////
+//
+// Called to multiply an x,y combination by a constant value
+//
+//////
+	void iioss_math_multiplyBy(SXYF64* p, f64 tfMultiplier)
+	{
+		if (p)
+		{
+			p->x *= tfMultiplier;
+			p->y *= tfMultiplier;
+		}
 	}
 
 

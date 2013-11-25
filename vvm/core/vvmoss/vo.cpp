@@ -1703,7 +1703,7 @@
 //////
 	u64 CALLTYPE oss_canvas_drawPolygon(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color)
 	{
-		if (tsDst && bd && poly && poly->line && poly->lineCount >= 3)
+		if (poly && poly->line && poly->lineCount >= 3)
 			return(iioss_canvas_drawPolygon(tsDst, bd, poly, color));
 
 		// If we get here, failure
