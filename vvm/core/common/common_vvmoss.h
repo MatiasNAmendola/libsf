@@ -269,10 +269,13 @@
 	const s8		cgcOssMathGetRelativeGravity[]							= "oss_math_getGravityByRelativePosition";
 	const s8		cgcOssMathFineAdjustGravityByTheta[]					= "oss_math_fineAdjustGravityByTheta";
 	const s8		cgcOssMathAdjustTheta[]									= "oss_math_adjustTheta";
+	const s8		cgcOssMathWithinDelta[]									= "oss_math_withinDelta";
 
 	const s8		cgcOssPolygonInitialize[]								= "oss_polygon_initialize";
 	const s8		cgcOssPolygonSetByPolyLine[]							= "oss_polygon_setByPolyLine";
 	const s8		cgcOssPolygonSetByValues[]								= "oss_polygon_setByValues";
+	const s8		cgcOssPolygonReset[]									= "oss_polygon_reset";
+	const s8		cgcOssPolygonFreeAndRelease[]							= "oss_polygon_freeAndRelease";
 
 	const s8		cgcOssFindFirstFile[]									= "oss_fileFindFirst";
 	const s8		cgcOssFindNextFile[]									= "oss_fileFindNext";
@@ -705,10 +708,13 @@
 		s32				(CALLTYPE *oss_math_getGravityByRelativePosition)	(SXYF64* p, SXYS32* po);
 		s32				(CALLTYPE *oss_math_fineAdjustGravityByTheta)		(SXYF64* po, SXYF64* p, SXYF64* pg, s32 lnGravity07p, s32 lnGravity07pg);
 		f64				(CALLTYPE *oss_math_adjustTheta)					(f64 tfTheta);
+		bool			(CALLTYPE *oss_math_withinDelta)					(f64 tfValue1, f64 tfValue2, s32 tnDeltaDecimals);
 
 		bool			(CALLTYPE *oss_polygon_initialize)					(SPolygon* poly, u32 tnLineCount, bool tlAllocatePolyLines);
 		bool			(CALLTYPE *oss_polygon_setByPolyLine)				(SPolygon* poly, u32 tnEntry, SPolyLine* line);
 		bool			(CALLTYPE *oss_polygon_setByValues)					(SPolygon* poly, u32 tnEntry, SXYF64* start, SXYF64* end, SXYF64* gravity);
+		bool			(CALLTYPE *oss_polygon_reset)						(SPolygon* poly, bool tlResetFloans);
+		bool			(CALLTYPE *oss_polygon_freeAndRelease)				(SPolygon* poly, bool tlReleaseFloans);
 
 
 
@@ -1111,10 +1117,13 @@
 		(void*)&oss_math_getGravityByRelativePosition,						(void*)cgcOssMathGetRelativeGravity,
 		(void*)&oss_math_fineAdjustGravityByTheta,							(void*)cgcOssMathFineAdjustGravityByTheta,
 		(void*)&oss_math_adjustTheta,										(void*)cgcOssMathAdjustTheta,
+		(void*)&oss_math_withinDelta,										(void*)cgcOssMathWithinDelta,
 
 		(void*)&oss_polygon_initialize,										(void*)cgcOssPolygonInitialize,
 		(void*)&oss_polygon_setByPolyLine,									(void*)cgcOssPolygonSetByPolyLine,
 		(void*)&oss_polygon_setByValues,									(void*)cgcOssPolygonSetByValues,
+		(void*)&oss_polygon_reset,											(void*)cgcOssPolygonReset,
+		(void*)&oss_polygon_freeAndRelease,									(void*)cgcOssPolygonFreeAndRelease,
 
 		(void *)&oss_fileFindFirst,											(void *)cgcOssFindFirstFile,
 		(void *)&oss_fileFindNext,											(void *)cgcOssFindNextFile,

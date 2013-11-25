@@ -6234,6 +6234,7 @@ continueToNextAttribute:
 					//////
 						lpl = poly->line[lnI];
 
+
 					//////////
 					// Compute deltas, slope, theta and gravity
 					//////
@@ -6250,7 +6251,7 @@ continueToNextAttribute:
 						sfld.m					= lfDeltaY / ((lfDeltaX == 0.0) ? 0.0000000000001 : lfDeltaX);
 						sfld.theta				= iioss_math_adjustTheta(atan2(lfDeltaY, lfDeltaX));
 						sfld.gravityDecorated	= iioss_math_getGravityOfThetaAndLeft(sfld.theta, llLeft);
-						sfld.gravity07			= iioss_math_getGravity07FromDecoratedGravity(sfld.gravityDecorated & _COMPASS_CARDINAL_ORDINAL_MASK);
+						sfld.gravity07			= iioss_math_getGravity07FromDecoratedGravity(sfld.gravityDecorated);
 
 
 					//////////
@@ -6286,11 +6287,11 @@ continueToNextAttribute:
 							//////////
 							// We have P1 above, now find out where P2 will go (what axis it will hit next)
 							//////
-								do {
+//								do {
 									// We may need to repeat this procedure (due to occasional errors due to floating point rounding)
 									iioss_math_getNextAxisInterceptXY(&sfld.p2, sfld.theta);
 
-								} while ((s32)sfld.p2.x == (s32)sfld.p1.x && (s32)sfld.p2.y == (s32)sfld.p1.y);
+//								} while ((s32)sfld.p2.x == (s32)sfld.p1.x && (s32)sfld.p2.y == (s32)sfld.p1.y);
 
 								// Store the actual pixel coordinate based on the midpoint's integer base
 								sfld.po.x		= (s32)((sfld.p1.x + sfld.p2.x) / 2.0);
@@ -7891,20 +7892,20 @@ continueToNextAttribute:
 		// Determine where the next intercepts are if it's a cardinal direction
 		//////
 			// Based on the slope of the line, determine which portion of each pixel will update
-			if (tfTheta == 0 || tfTheta == _2PI)
+			if (iioss_math_withinDelta(tfTheta, 0.0, 14) || iioss_math_withinDelta(tfTheta, _2PI, 14))
 			{
 				// Slope is due east (toward +X), Y will not change, X will be next larger integer
 				p->x = lfX + 1.0;
 
-			} else if (tfTheta == _PI_2) {
+			} else if (iioss_math_withinDelta(tfTheta, _PI_2, 14)) {
 				// Slope is north (toward +Y), X will not change, Y will be next larger integer
 				p->y = lfY + 1.0;
 
-			} else if (tfTheta == _PI) {
+			} else if (iioss_math_withinDelta(tfTheta, _PI, 14)) {
 				// Slope is west (toward -X), Y will not change, X will be next smaller integer
 				p->x = lfX - 1.0;
 
-			} else if (tfTheta == _3PI_2) {
+			} else if (iioss_math_withinDelta(tfTheta, _3PI_2, 14)) {
 				// Slope is south (toward -Y), X will not change, Y will be next smaller integer
 				p->y = lfY - 1.0;
 
@@ -8230,6 +8231,96 @@ continueToNextAttribute:
 
 //////////
 //
+// Called to see if the two floating point values are within the delta as is indicated by the
+// number of delta digits
+//
+//////
+	bool iioss_math_withinDelta(f64 tfValue1, f64 tfValue2, s32 tnDeltaDecimals)
+	{
+		f64 lfDiff;
+
+
+		//////////
+		// Grab the diff and find out the difference
+		//////
+			lfDiff = fabs(tfValue1 - tfValue2);
+			switch (tnDeltaDecimals)
+			{
+				case 1:
+					return(lfDiff <= 0.1);
+				case 2:
+					return(lfDiff <= 0.01);
+				case 3:
+					return(lfDiff <= 0.001);
+				case 4:
+					return(lfDiff <= 0.0001);
+				case 5:
+					return(lfDiff <= 0.00001);
+				case 6:
+					return(lfDiff <= 0.000001);
+				case 7:
+					return(lfDiff <= 0.0000001);
+				case 8:
+					return(lfDiff <= 0.00000001);
+				case 9:
+					return(lfDiff <= 0.000000001);
+				case 10:
+					return(lfDiff <= 0.0000000001);
+				case 11:
+					return(lfDiff <= 0.00000000001);
+				case 12:
+					return(lfDiff <= 0.000000000001);
+				case 13:
+					return(lfDiff <= 0.0000000000001);
+				case 14:
+					return(lfDiff <= 0.00000000000001);
+				case 15:
+					return(lfDiff <= 0.000000000000001);
+				case 16:
+					return(lfDiff <= 0.0000000000000001);
+				case -1:
+					return(lfDiff <= 1.0);
+				case -2:
+					return(lfDiff <= 10.0);
+				case -3:
+					return(lfDiff <= 100.0);
+				case -4:
+					return(lfDiff <= 1000.0);
+				case -5:
+					return(lfDiff <= 10000.0);
+				case -6:
+					return(lfDiff <= 100000.0);
+				case -7:
+					return(lfDiff <= 1000000.0);
+				case -8:
+					return(lfDiff <= 10000000.0);
+				case -9:
+					return(lfDiff <= 100000000.0);
+				case -10:
+					return(lfDiff <= 1000000000.0);
+				case -11:
+					return(lfDiff <= 10000000000.0);
+				case -12:
+					return(lfDiff <= 100000000000.0);
+				case -13:
+					return(lfDiff <= 1000000000000.0);
+				case -14:
+					return(lfDiff <= 10000000000000.0);
+				case -15:
+					return(lfDiff <= 100000000000000.0);
+				case -16:
+					return(lfDiff <= 1000000000000000.0);
+
+				default:
+					return(false);
+			}
+	}
+
+
+
+
+//////////
+//
 // Called to determine which direction the gravity point goes based on the line's direction and slope
 //
 //////
@@ -8299,16 +8390,24 @@ continueToNextAttribute:
 //////
 	s32 iioss_math_getGravity07FromDecoratedGravity(u32 tnGravityDecorated)
 	{
-		switch (tnGravityDecorated)
+		switch (tnGravityDecorated & _COMPASS_CARDINAL_ORDINAL_MASK)
 		{
-			case _COMPASS_SOUTH_WEST:		return(0);
-			case _COMPASS_WEST:				return(1);
-			case _COMPASS_NORTH_WEST:		return(2);
-			case _COMPASS_NORTH:			return(3);
-			case _COMPASS_NORTH_EAST:		return(4);
-			case _COMPASS_EAST:				return(5);
-			case _COMPASS_SOUTH_EAST:		return(6);
-			case _COMPASS_SOUTH:			return(7);
+			case _COMPASS_SOUTH_WEST:
+				return(0);
+			case _COMPASS_WEST:
+				return(1);
+			case _COMPASS_NORTH_WEST:
+				return(2);
+			case _COMPASS_NORTH:
+				return(3);
+			case _COMPASS_NORTH_EAST:
+				return(4);
+			case _COMPASS_EAST:
+				return(5);
+			case _COMPASS_SOUTH_EAST:
+				return(6);
+			case _COMPASS_SOUTH:
+				return(7);
 			default:
 				// This condition should never occur
 				// The only forms this input supports are _COMPASS_SOUTH_WEST through _COMPASS_SOUTH, at cardinal and ordinal stops

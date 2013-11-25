@@ -232,10 +232,13 @@ EXPORTS
 	oss_math_getGravityByRelativePosition
 	oss_math_fineAdjustGravityByTheta
 	oss_math_adjustTheta
+	oss_math_withinDelta
 	
 	oss_polygon_initialize
 	oss_polygon_setByPolyLine
 	oss_polygon_setByValues
+	oss_polygon_reset
+	oss_polygon_freeAndRelease
 	
 	oss_fileFindFirst
 	oss_fileFindNext

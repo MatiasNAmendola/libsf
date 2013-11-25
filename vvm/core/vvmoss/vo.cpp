@@ -8189,6 +8189,19 @@ _asm int 3;
 
 //////////
 //
+// Called to determine if the indicated floating point values are within the delta
+//
+//////
+	bool CALLTYPE oss_math_withinDelta(f64 tfValue1, f64 tfValue2, s32 tnDeltaDecimals)
+	{
+		return(iioss_math_withinDelta(tfValue1, tfValue2, tnDeltaDecimals));
+	}
+
+
+
+
+//////////
+//
 // Called to initialize a polygon to the number indicated by poly->lineCount.
 //
 //////
@@ -8243,6 +8256,75 @@ _asm int 3;
 
 		} else {
 			// Indicate our failure
+			return(false);
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to reset the polygon listing to empty.  This will force the polygon to be recomputed on
+// the next use, rather than just using the previously computed polygon floan data.
+//
+//////
+	bool CALLTYPE oss_polygon_reset(SPolygon* poly, bool tlResetFloans)
+	{
+		if (poly)
+		{
+			// Should we actually release the floans?
+			if (tlResetFloans)
+			{
+				// Yes, release both pixel floans and range floans
+				oss_builderFreeAndRelease(&poly->pixelFloans);
+				oss_builderFreeAndRelease(&poly->rangeFloans);
+
+			} else {
+				// Reset them locally to empty
+				poly->pixelFloans = NULL;
+				poly->rangeFloans = NULL;
+			}
+
+			// All done
+			return(true);
+
+		} else {
+			return(false);
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to release the polygon and optionally free the floans
+//
+//////
+	bool CALLTYPE oss_polygon_freeAndRelease(SPolygon* poly, bool tlReleaseFloans)
+	{
+		u32 lnI;
+		
+
+		// First, reset the polygon
+		if (poly && oss_polygon_reset(poly, tlReleaseFloans))
+		{
+			// Then release its lines
+			for (lnI = 0; lnI < poly->lineCount; lnI++)
+			{
+				// Delete this line
+				free(poly->line[lnI]);
+			}
+
+			// Release the physical polygon
+			free(poly);
+
+			// All done, indicate success
+			return(true);
+
+		} else {
+			// Nothing to do, indicate failure
 			return(false);
 		}
 	}

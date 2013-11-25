@@ -278,29 +278,52 @@
 		lc = oss_createCanvas(0, 600, 600, white);
 		if (lc)
 		{
-			f64		lfTheta, lfCos50, lfSin50, lfCos300, lfSin300;
-			SXYF32	p1, p2;
+			f64			lfTheta, lfDeltaX, lfDeltaY, lfLineLength, lfHalfLineX, lfHalfLineY, lfStepXM, lfStepYM;
+			u64			lnPixelsDrawn;
+			SPolygon	polygon;
+			SXYF64		p1, p2, p3, p4, gravity;
 
-			for (lfTheta = _PI / 4.0; lfTheta < _2PI / 2.0; lfTheta += _2PI / 32.0)
+			// Initialize the polygon
+			memset(&polygon, 0, sizeof(polygon));
+			polygon.line		= (SPolyLine**)NULL;
+			oss_polygon_initialize(&polygon, 4, true);
+
+			lfTheta = 0.0;
+			for (lfTheta = 0.0; lfTheta < _2PI; lfTheta += _2PI / 8.0)
 			{
-if (lfTheta >= 2.1598 && lfTheta <= 2.1599)
-	_asm nop;
-				// Inner radius
-				lfCos50		= 50.0 * cos(lfTheta);
-				lfSin50		= 50.0 * sin(lfTheta);
-
-				// Outer radius
-				lfCos300	= 290.0 * cos(lfTheta);
-				lfSin300	= 290.0 * sin(lfTheta);
-
 				// Set the points
-				p1.x		= (f32)(300.0 + lfCos50);
-				p1.y		= (f32)(300.0 + lfSin50);
-				p2.x		= (f32)(300.0 + lfCos300);
-				p2.y		= (f32)(300.0 + lfSin300);
+				// p1
+				p1.x			= 300.0 + (50.0 * cos(lfTheta + _PI / 32.0));
+				p1.y			= 300.0 + (50.0 * sin(lfTheta + _PI / 32.0));
+				// p2
+				p2.x			= 300.0 + (50.0 * cos(lfTheta - _PI / 32.0));
+				p2.y			= 300.0 + (50.0 * sin(lfTheta - _PI / 32.0));
+				// p3
+				p3.x			= 300.0 + (290.0 * cos(lfTheta - _PI / 32.0));
+				p3.y			= 300.0 + (290.0 * sin(lfTheta - _PI / 32.0));
+				// p2
+				p4.x			= 300.0 + (290.0 * cos(lfTheta + _PI / 32.0));
+				p4.y			= 300.0 + (290.0 * sin(lfTheta + _PI / 32.0));
 
-				// Draw this line
-				oss_canvasLine(lc, lc->bd, &p1, &p2, 5.0, black, true);
+				// Gravity is the center point of the line's 4 point coordinates
+				gravity.x		= (p1.x + p2.x + p3.x + p4.x) / 4.0;
+				gravity.y		= (p1.y + p2.y + p3.y + p4.y) / 4.0;
+
+				// Set the lines
+				oss_polygon_setByValues(&polygon, 0, &p1, &p2, &gravity);		// p1..p2
+				oss_polygon_setByValues(&polygon, 1, &p2, &p3, &gravity);		// p2..p3
+				oss_polygon_setByValues(&polygon, 2, &p3, &p4, &gravity);		// p3..p4
+				oss_polygon_setByValues(&polygon, 3, &p4, &p1, &gravity);		// p4..p1
+
+				// Draw the polygon
+				lnPixelsDrawn = oss_canvas_drawPolygon(lc, lc->bd, &polygon, black);
+
+				// Reset it for the next go-round
+				oss_polygon_reset(&polygon, true);
+
+// 				// Draw this line
+//				SXYF32 p1, p2;
+// 				oss_canvasLine(lc, lc->bd, &p1, &p2, 5.0, black, true);
 			}
 			oss_bitmapSaveToDisk(lc, lc->bd, "c:\\temp\\test.bmp");
 		}

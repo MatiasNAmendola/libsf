@@ -340,10 +340,13 @@
 		s32 CALLTYPE			oss_math_getGravityByRelativePosition		(SXYF64* p, SXYS32* po);
 		s32 CALLTYPE			oss_math_fineAdjustGravityByTheta			(SXYF64* po, SXYF64* p, SXYF64* pg, s32 lnGravity07p, s32 lnGravity07pg);
 		f64 CALLTYPE			oss_math_adjustTheta						(f64 tfTheta);
+		bool CALLTYPE			oss_math_withinDelta						(f64 tfValue1, f64 tfValue2, s32 tnDeltaDecimals);
 
 		bool CALLTYPE			oss_polygon_initialize						(SPolygon* poly, u32 tnLineCount, bool tlAllocatePolyLines);
 		bool CALLTYPE			oss_polygon_setByPolyLine					(SPolygon* poly, u32 tnEntry, SPolyLine* line);
 		bool CALLTYPE			oss_polygon_setByValues						(SPolygon* poly, u32 tnEntry, SXYF64* start, SXYF64* end, SXYF64* gravity);
+		bool CALLTYPE			oss_polygon_reset							(SPolygon* poly, bool tlResetFloans);
+		bool CALLTYPE			oss_polygon_freeAndRelease					(SPolygon* poly, bool tlReleaseFloans);
 
 
 //////////
@@ -664,6 +667,7 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	s32						iioss_math_getGravityByRelativePosition			(SXYF64* p, SXYS32* po);
 	s32						iioss_math_fineAdjustGravityByTheta				(SXYF64* po, SXYF64* p, SXYF64* pg, s32 lnGravity07p, s32 lnGravity07pg);
 	f64						iioss_math_adjustTheta							(f64 tfTheta);
+	bool					iioss_math_withinDelta							(f64 tfValue1, f64 tfValue2, s32 tnDeltaDecimals);
 	u64						iioss_canvasRotateAbout							(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, f32 ox, f32 oy);
 
 
