@@ -8059,7 +8059,7 @@ _asm int 3;
 			iioss_math_computeSquare(sq, ox, oy);
 	}
 
-	// Called to compute the midpoint of a line, and its slope and perpendicular slope.
+	// Called to compute the midpoint of a line, its length, slope, and perpendicular slope.
 	void CALLTYPE oss_math_computeLine (SLineF64* line)
 	{
 		if (line)

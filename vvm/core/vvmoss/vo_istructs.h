@@ -296,5 +296,29 @@
 
 
 //////////
+//
+// Used by the iioss_canvas_drawPolygon() function to handle passed parameters for divvying
+// up work to logical function breakouts.
+//
+//////
+	struct _isSCanvasDrawPolygonParameters
+	{
+		u32							lnI, lnJ, lnINext, lnFloanCount;
+		bool						llLeft;
+		u64							lnPixelsDrawn;
+		f64							alpc, alp, malp, lfDeltaX, lfDeltaY, lfLength, lfRed, lfGrn, lfBlu;
+		SPolyLine*					lpl;
+		SBuilder*					corners;		// SXYF64 indicating where the corner falls
+		SBGRA*						sbgra;
+		SBGRACompute*				sbgrac;
+		SBGRACompute*				sbgrac1;
+		SBGRACompute*				sbgrac2;
+		_isSStoreFloan_lineData		sfld;
+		_isSStoreFloan_cornerData*	sfcdRoot;
+		_isSStoreFloan_cornerData*	sfcd;
+	};
+
+
+//////////
 // Note:  There are sound plugin structures in vo_plugins.h
 //////

@@ -1018,9 +1018,13 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 
 	struct SLineF64
 	{
-		SXYF64		start;						// Starting point
-		SXYF64		end;						// Endpoint
+		SXYF64		start;						// [input] Starting point
+		SXYF64		end;						// [input] Ending point
+
+		// The following are computed with oss_math_computeLine()
+		SXYF64		delta;						// Delta between start and end
 		SXYF64		mid;						// Midpoint
+		f64			length;						// Length
 		f64			m;							// Slope
 		f64			mp;							// Perpendicular slope
 	};
