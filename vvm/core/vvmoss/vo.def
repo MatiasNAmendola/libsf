@@ -225,6 +225,13 @@ EXPORTS
 	oss_math_computeSquare
 	oss_math_computeLine
 	oss_math_squareRotateAbout
+	oss_math_getGravityOfThetaAndLeft
+	oss_math_getGravity07FromDecoratedGravity
+	oss_math_getAreaOfSquareUsing_po_p1_p2
+	oss_math_getNextAxisInterceptXY
+	oss_math_getGravityByRelativePosition
+	oss_math_fineAdjustGravityByTheta
+	oss_math_adjustTheta
 	
 	oss_polygon_initialize
 	oss_polygon_setByPolyLine
@@ -239,6 +246,7 @@ EXPORTS
 	oss_builderAllocateBytes
 	oss_builderSetSize
 	oss_builderFreeAndRelease
+	oss_builderAsciiWriteOutFile
 	
 	oss_sha1ComputeSha1
 	oss_sha1ComputeSha1As64Bit

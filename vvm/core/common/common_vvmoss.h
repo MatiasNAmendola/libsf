@@ -262,6 +262,13 @@
 	const s8		cgcOssMathComputeSquare[]								= "oss_math_computeSquare";
 	const s8		cgcOssMathComputeLine[]									= "oss_math_computeLine";
 	const s8		cgcOssMathSquareRotateAbout[]							= "oss_math_squareRotateAbout";
+	const s8		cgcOssMathGetGravityOfThetaAndLeft[]					= "oss_math_getGravityOfThetaAndLeft";
+	const s8		cgcOssMathGetGravity07FromDecoratedGravity[]			= "oss_math_getGravity07FromDecoratedGravity";
+	const s8		cgcOssMathGetAreaOfSquareUsingPoP1P2[]					= "oss_math_getAreaOfSquareUsing_po_p1_p2";
+	const s8		cgcOssMathGetNextAxisInterceptXY[]						= "oss_math_getNextAxisInterceptXY";
+	const s8		cgcOssMathGetRelativeGravity[]							= "oss_math_getGravityByRelativePosition";
+	const s8		cgcOssMathFineAdjustGravityByTheta[]					= "oss_math_fineAdjustGravityByTheta";
+	const s8		cgcOssMathAdjustTheta[]									= "oss_math_adjustTheta";
 
 	const s8		cgcOssPolygonInitialize[]								= "oss_polygon_initialize";
 	const s8		cgcOssPolygonSetByPolyLine[]							= "oss_polygon_setByPolyLine";
@@ -276,6 +283,7 @@
 	const s8		cgcOssBuilderAllocateBytes[]							= "oss_builderAllocateBytes";
 	const s8		cgcOssBuildBufferSetSize[]								= "oss_builderSetSize";
 	const s8		cgcOssBuildBufferFreeAndRelease[]						= "oss_builderFreeAndRelease";
+	const s8		cgcOssBuilderWriteOutAsciiFile[]						= "oss_builderAsciiWriteOutFile";
 
 	const s8		cgcOssSha1ComputeSha1[]									= "oss_sha1ComputeSha1";
 	const s8		cgcOssSha1ComputeSha1As64Bit[]							= "oss_sha1ComputeSha1As64Bit";
@@ -457,7 +465,7 @@
 		u64				(CALLTYPE *oss_canvasDrawText)							(SCanvas* tc, SBGRA* bd, u64 fontHandle, s32 ulx, s32 uly, s32 lrx, s32 lry, s8*  tcText, u32 tnTextLength, SBGRA foreground, SBGRA background);
 		u64				(CALLTYPE *oss_canvasFrameRect)							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 borderThickness, SBGRA border);
 		u64				(CALLTYPE *oss_canvasFillRect)							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 borderThickness, SBGRA border, SBGRA background);
-		u64				(CALLTYPE *oss_canvasLine)								(SCanvas* tc, SBGRA* bd, f32 p1x, f32 p1y, f32 p2x, f32 p2y, f32 lineThickness, SBGRA color, bool tlFloan);
+		u64				(CALLTYPE *oss_canvasLine)								(SCanvas* tc, SBGRA* bd, SXYF32* p1, SXYF32* p2, f32 lineThickness, SBGRA color, bool tlFloan);
 		u64				(CALLTYPE *oss_canvasArc)								(SCanvas* tc, SBGRA* bd, s32 ox, s32 oy, f32 radius, f32 start, f32 end, s32 lineThickness, SBGRA line);
 		SCanvas*		(CALLTYPE *oss_canvasExtract)							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry);
 		u64				(CALLTYPE *oss_canvasColorize)							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, SBGRA color);
@@ -690,6 +698,13 @@
 		void			(CALLTYPE *oss_math_computeSquare)					(SSquareInOutF64* sq, f32 ox, f32 oy);
 		void			(CALLTYPE *oss_math_computeLine)					(SLineF64* line);
 		void			(CALLTYPE *oss_math_squareRotateAbout)				(SSquareInOutF64* sq);
+		u32				(CALLTYPE *oss_math_getGravityOfThetaAndLeft)		(f64 tfTheta, bool tlLeft);
+		s32				(CALLTYPE *oss_math_getGravity07FromDecoratedGravity)(u32 tnGravityDecorated);
+		f64				(CALLTYPE *oss_math_getAreaOfSquareUsing_po_p1_p2)	(s32 tnGravity07_p1Intersect, s32 tnGravity07_p2Intersect, s32 tnGravity07_line1, SXYF64* po, SXYF64* p1, SXYF64* p2);
+		void			(CALLTYPE *oss_math_getNextAxisInterceptXY)			(SXYF64* p, f64 tfTheta);
+		s32				(CALLTYPE *oss_math_getGravityByRelativePosition)	(SXYF64* p, SXYS32* po);
+		s32				(CALLTYPE *oss_math_fineAdjustGravityByTheta)		(SXYF64* po, SXYF64* p, SXYF64* pg, s32 lnGravity07p, s32 lnGravity07pg);
+		f64				(CALLTYPE *oss_math_adjustTheta)					(f64 tfTheta);
 
 		bool			(CALLTYPE *oss_polygon_initialize)					(SPolygon* poly, u32 tnLineCount, bool tlAllocatePolyLines);
 		bool			(CALLTYPE *oss_polygon_setByPolyLine)				(SPolygon* poly, u32 tnEntry, SPolyLine* line);
@@ -719,6 +734,7 @@
 		s8*				(CALLTYPE *oss_builderAllocateBytes)			(SBuilder*	buffRoot, u32 tnDataLength);
 		void			(CALLTYPE *oss_builderSetSize)					(SBuilder*  buffRoot, u32 tnBufferLength);
 		void			(CALLTYPE *oss_builderFreeAndRelease)			(SBuilder** buffRoot);
+		u32				(CALLTYPE *oss_builderAsciiWriteOutFile)		(SBuilder*  buffRoot, s8* tcFilename);
 
 
 //////////
@@ -1088,6 +1104,13 @@
 		(void*)&oss_math_computeSquare,										(void*)cgcOssMathComputeSquare,
 		(void*)&oss_math_computeLine,										(void*)cgcOssMathComputeLine,
 		(void*)&oss_math_squareRotateAbout,									(void*)cgcOssMathSquareRotateAbout,
+		(void*)&oss_math_getGravityOfThetaAndLeft,							(void*)cgcOssMathGetGravityOfThetaAndLeft,
+		(void*)&oss_math_getGravity07FromDecoratedGravity,					(void*)cgcOssMathGetGravity07FromDecoratedGravity,
+		(void*)&oss_math_getAreaOfSquareUsing_po_p1_p2,						(void*)cgcOssMathGetAreaOfSquareUsingPoP1P2,
+		(void*)&oss_math_getNextAxisInterceptXY,							(void*)cgcOssMathGetNextAxisInterceptXY,
+		(void*)&oss_math_getGravityByRelativePosition,						(void*)cgcOssMathGetRelativeGravity,
+		(void*)&oss_math_fineAdjustGravityByTheta,							(void*)cgcOssMathFineAdjustGravityByTheta,
+		(void*)&oss_math_adjustTheta,										(void*)cgcOssMathAdjustTheta,
 
 		(void*)&oss_polygon_initialize,										(void*)cgcOssPolygonInitialize,
 		(void*)&oss_polygon_setByPolyLine,									(void*)cgcOssPolygonSetByPolyLine,
@@ -1102,6 +1125,7 @@
 		(void *)&oss_builderAllocateBytes,									(void *)cgcOssBuilderAllocateBytes,
 		(void *)&oss_builderSetSize,										(void *)cgcOssBuildBufferSetSize,
 		(void *)&oss_builderFreeAndRelease,									(void *)cgcOssBuildBufferFreeAndRelease,
+		(void *)&oss_builderAsciiWriteOutFile,								(void *)cgcOssBuilderWriteOutAsciiFile,
 
 		(void *)&oss_sha1ComputeSha1,										(void *)cgcOssSha1ComputeSha1,
 		(void *)&oss_sha1ComputeSha1As64Bit,								(void *)cgcOssSha1ComputeSha1As64Bit,

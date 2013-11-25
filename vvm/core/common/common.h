@@ -827,10 +827,22 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		s32			y;
 	};
 
+	struct SXYF32
+	{
+		f32			x;
+		f32			y;
+	};
+
 	struct SXYF64
 	{
 		f64			x;
 		f64			y;
+	};
+
+	struct SRTF32
+	{
+		f32			radius;
+		f32			theta;
 	};
 
 	struct SRTF64
@@ -839,10 +851,22 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		f64			theta;
 	};
 
+	struct SPointF32
+	{
+		SXYF32		point;						// Point
+		SRTF32		trig;						// Radius and theta
+	};
+
 	struct SPointF64
 	{
 		SXYF64		point;						// Point
 		SRTF64		trig;						// Radius and theta
+	};
+
+	struct SMMPF32
+	{
+		f32			m;							// Slope
+		f32			mp;							// Perpendicular slope
 	};
 
 	struct SMMPF64

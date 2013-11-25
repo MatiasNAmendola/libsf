@@ -1051,7 +1051,7 @@ _asm int 3;
 // Draws an aliased line on the indicated canvas, ether floaned or aliased
 //
 //////
-	u64 ioss_canvasLine(SCanvas* tc, SBGRA* bd, f32 p1x, f32 p1y, f32 p2x, f32 p2y, f32 lineThickness, SBGRA color)
+	u64 ioss_canvasLine(SCanvas* tc, SBGRA* bd, SXYF32* tsP1, SXYF32* tsP2, f32 lineThickness, SBGRA color)
 	{
 		f64			lfDeltaX, lfDeltaY, lfLineLength, lfTheta, lfHalfLineX, lfHalfLineY, lfStepXM, lfStepYM;
 		u64			lnPixelsDrawn;
@@ -1065,28 +1065,28 @@ _asm int 3;
 		if (oss_polygon_initialize(&polygon, 4, true))
 		{
 			// Convert our parameters for use
-			lfDeltaX		= (f64)p2x - (f64)p1x;
-			lfDeltaY		= (f64)p2y - (f64)p1y;
+			lfDeltaX		= (f64)(tsP2->x - tsP1->x);
+			lfDeltaY		= (f64)(tsP2->y - tsP1->y);
 			lfLineLength	= sqrt(lfDeltaX*lfDeltaX + lfDeltaY*lfDeltaY);
 			lfHalfLineX		= lineThickness * 0.5;
 			lfHalfLineY		= lfLineLength * 0.5;
 			lfTheta			= atan2(lfDeltaY, lfDeltaX);
-			lfStepXM		= cos(lfTheta);
-			lfStepYM		= sin(lfTheta);
+			lfStepXM		= sin(lfTheta);
+			lfStepYM		= cos(lfTheta);
 			// We translate this into a 4-sided polygon
 
 			// p1
-			p1.x			= (f64)p1x - (lfStepXM * lfHalfLineX);
-			p1.y			= (f64)p1y + (lfStepYM * lfHalfLineX);
+			p1.x			= (f64)tsP1->x - (lfStepXM * lfHalfLineX);
+			p1.y			= (f64)tsP1->y + (lfStepYM * lfHalfLineX);
 			// p2
-			p2.x			= (f64)p1x + (lfStepXM * lfHalfLineX);
-			p2.y			= (f64)p1y - (lfStepYM * lfHalfLineX);
+			p2.x			= (f64)tsP1->x + (lfStepXM * lfHalfLineX);
+			p2.y			= (f64)tsP1->y - (lfStepYM * lfHalfLineX);
 			// p3
-			p3.x			= (f64)p2x + (lfStepXM * lfHalfLineX);
-			p3.y			= (f64)p2y - (lfStepYM * lfHalfLineX);
+			p3.x			= (f64)tsP2->x + (lfStepXM * lfHalfLineX);
+			p3.y			= (f64)tsP2->y - (lfStepYM * lfHalfLineX);
 			// p2
-			p4.x			= (f64)p2x - (lfStepXM * lfHalfLineX);
-			p4.y			= (f64)p2y + (lfStepYM * lfHalfLineX);
+			p4.x			= (f64)tsP2->x - (lfStepXM * lfHalfLineX);
+			p4.y			= (f64)tsP2->y + (lfStepYM * lfHalfLineX);
 
 			// Gravity is the center point of the line's 4 point coordinates
 			gravity.x		= (p1.x + p2.x + p3.x + p4.x) / 4.0;
@@ -6248,9 +6248,9 @@ continueToNextAttribute:
 						sfld.end.x				= (s32)lpl->end.x;
 						sfld.end.y				= (s32)lpl->end.y;
 						sfld.m					= lfDeltaY / ((lfDeltaX == 0.0) ? 0.0000000000001 : lfDeltaX);
-						sfld.theta				= iioss_adjustTheta(atan2(lfDeltaY, lfDeltaX));
-						sfld.gravityDecorated	= iioss_canvas_drawpolygon_gravityPerThetaAndLeft(sfld.theta, llLeft);
-						sfld.gravity07			= iioss_canvas_drawpolygon_gravity07(sfld.gravityDecorated & _COMPASS_CARDINAL_ORDINAL_MASK);
+						sfld.theta				= iioss_math_adjustTheta(atan2(lfDeltaY, lfDeltaX));
+						sfld.gravityDecorated	= iioss_math_getGravityOfThetaAndLeft(sfld.theta, llLeft);
+						sfld.gravity07			= iioss_math_getGravity07FromDecoratedGravity(sfld.gravityDecorated & _COMPASS_CARDINAL_ORDINAL_MASK);
 
 
 					//////////
@@ -6262,7 +6262,7 @@ continueToNextAttribute:
 						sfld.p2.y				 = lpl->start.y;
 						sfld.po.x				 = (s32)sfld.p1.x;
 						sfld.po.y				 = (s32)sfld.p1.y;
-						iioss_canvas_drawPolygon_nextIntercept(&sfld.p2, sfld.theta);
+						iioss_math_getNextAxisInterceptXY(&sfld.p2, sfld.theta);
 
 					
 					//////////
@@ -6288,7 +6288,7 @@ continueToNextAttribute:
 							//////
 								do {
 									// We may need to repeat this procedure (due to occasional errors due to floating point rounding)
-									iioss_canvas_drawPolygon_nextIntercept(&sfld.p2, sfld.theta);
+									iioss_math_getNextAxisInterceptXY(&sfld.p2, sfld.theta);
 
 								} while ((s32)sfld.p2.x == (s32)sfld.p1.x && (s32)sfld.p2.y == (s32)sfld.p1.y);
 
@@ -6324,7 +6324,10 @@ continueToNextAttribute:
 						// Recompute the ending floan just in case there was "jitter" in the last two iterations
 						sfld.p2.x = lpl->end.x;
 						sfld.p2.y = lpl->end.y;
-						iioss_canvas_drawPolygon_nextIntercept(&sfld.p2, iioss_adjustTheta(sfld.theta + _PI));
+						sfld.po.x = (s32)sfld.p2.x;
+						sfld.po.y = (s32)sfld.p2.y;
+						iioss_math_getNextAxisInterceptXY(&sfld.p2, iioss_math_adjustTheta(sfld.theta + _PI));
+
 						// Store it
 						iioss_canvas_drawPolygon_storeCorner(corners, &lpl->end, &sfld.p2, &sfld);
 
@@ -6512,17 +6515,23 @@ continueToNextAttribute:
 		sbgrac = sbgracRoot + tnIndex;
 		for (lnSkip = 1; tnIndex + lnSkip < tnMaxCount; lnSkip++)
 		{
+			//////////
 			// Are we still on the same row?
-			if ((sbgrac + lnSkip)->y != sbgrac->y)
-			{
-				// We've passed to another row, we begin again, but from here
-				return(iioss_canvas_drawPolygon_GetLineSegments(tnIndex + lnSkip, tnMaxCount, sbgracRoot, p1, p2));
-			}
+			//////
+				if ((sbgrac + lnSkip)->y != (sbgrac + lnSkip - 1)->y)
+				{
+					// We've passed to another row, we begin again, but from here
+					return(iioss_canvas_drawPolygon_GetLineSegments(tnIndex + lnSkip, tnMaxCount, sbgracRoot, p1, p2));
+				}
 
-			// Are the pixels adjacent?
-			if ((sbgrac + lnSkip)->x != sbgrac->x + 1)
-				break;		// We've found the end of the run
+
+			//////////
+			// Are the pixels not adjacent?
+			//////
+				if ((sbgrac + lnSkip)->x != (sbgrac + lnSkip - 1)->x + 1)
+					break;		// Yes, they are not adjacent.  We've found the end of the grouping/run.
 			
+
 			// If we get here, we keep going because we're still on a side-by-side pixel grouping
 		}
 
@@ -6537,12 +6546,1333 @@ continueToNextAttribute:
 
 
 
+//////////
+//
+// Called to store the corner point.  This is used for final assembly after all corners and floans
+// are computed.  The corner floans are then computed based on overlay information.
+//
+// Note (from code in iioss_canvas_drawPolygon()): SBuilder* corners; // SXYF64 indicating where the corner falls
+//
+//////
+	void iioss_canvas_drawPolygon_storeCorner(SBuilder* corners, SXYF64* po, SXYF64* pi, _isSStoreFloan_lineData* sfld)
+	{
+		_isSStoreFloan_cornerData lsfcd;
+
+
+		//////////
+		// Copy to our temporary buffer
+		//////
+
+			// Corner point
+			lsfcd.po.x = po->x;
+			lsfcd.po.y = po->y;
+
+			// Intercept point
+			lsfcd.pi.x = pi->x;
+			lsfcd.pi.y = pi->y;
+
+			// Line data
+			memcpy(&lsfcd.lineData, sfld, sizeof(_isSStoreFloan_lineData));
+
+
+		//////////
+		// Append it
+		//////
+			oss_builderAppendData(corners, (s8*)&lsfcd, sizeof(lsfcd));
+	}
+
+
+
+
+/////////
+//
+// Called to store all of the triangles required to make up this floan.
+// There are 8 parts where a line can intersect with, thereby bisecting a pixel:
+//        2__3__4
+//        1     5
+//        0__7__6
+//
+//	From those locations, pixels can run in up to 20 combinations (disregarding direction):
+//		0..6, 0..5, 0..4, 0..3, 0..2
+//		1..3, 1..4, 1..5, 1..6, 1..7
+//		2..4, 2..5, 2..6, 2..7
+//		3..5, 3..6, 3..7
+//		4..6, 4..7
+//		5..7
+//
+// Given the gravity direction, this then determines how the area is computed for the partial
+// pixel which intersects in one of the 20 ways, resulting in 40 total gravity formulas. :-)
+//
+// Yes, I did this all manually.  And yes, I hope there's an easier and better way to do it
+// that someone will show me because I really hated doing this.  It took me almost three weeks
+// (during the midst of two weeks of insomnia anyway, which I'm sure was the biggest cause of
+// the three week time frame). :-)
+//
+// (tfX,tfY) is the corner closest toward the origin of the current pixel.
+// (tfX1,tfY1) is any point on any of the 8 parts
+// (tfX2,tfY2) is any other point on any of the 8 parts
+//
+//////
+	_isS_iioss_canvas_drawPolygon_storeFloans shortcuts[64] = 
+	{
+		// The naming convention here is the FROM:TO or the corresponding TO:FROM indicator so as to reduce duplication
+		(u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_2_0, (u32)&storeFloan_pointToPoint_3_0, (u32)&storeFloan_pointToPoint_4_0, (u32)&storeFloan_pointToPoint_5_0, (u32)&storeFloan_pointToPoint_6_0, (u32)&storeFloan_pointToPoint_bad,
+		(u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_3_1, (u32)&storeFloan_pointToPoint_4_1, (u32)&storeFloan_pointToPoint_5_1, (u32)&storeFloan_pointToPoint_6_1, (u32)&storeFloan_pointToPoint_7_1,
+		(u32)&storeFloan_pointToPoint_0_2, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_4_2, (u32)&storeFloan_pointToPoint_5_2, (u32)&storeFloan_pointToPoint_6_2, (u32)&storeFloan_pointToPoint_7_2,
+		(u32)&storeFloan_pointToPoint_0_3, (u32)&storeFloan_pointToPoint_1_3, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_5_3, (u32)&storeFloan_pointToPoint_6_3, (u32)&storeFloan_pointToPoint_7_3,
+		(u32)&storeFloan_pointToPoint_0_4, (u32)&storeFloan_pointToPoint_1_4, (u32)&storeFloan_pointToPoint_2_4, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_6_4, (u32)&storeFloan_pointToPoint_7_4,
+		(u32)&storeFloan_pointToPoint_0_5, (u32)&storeFloan_pointToPoint_1_5, (u32)&storeFloan_pointToPoint_2_5, (u32)&storeFloan_pointToPoint_3_5, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_7_5,
+		(u32)&storeFloan_pointToPoint_0_6, (u32)&storeFloan_pointToPoint_1_6, (u32)&storeFloan_pointToPoint_2_6, (u32)&storeFloan_pointToPoint_3_6, (u32)&storeFloan_pointToPoint_4_6, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad,
+		(u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_1_7, (u32)&storeFloan_pointToPoint_2_7, (u32)&storeFloan_pointToPoint_3_7, (u32)&storeFloan_pointToPoint_4_7, (u32)&storeFloan_pointToPoint_5_7, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad
+	};
+
+	void iioss_canvas_drawPolygon_storeFloans(_isSStoreFloan_lineData* sfld)
+	{
+		u32 lnOperation;
+		s32 lnGravityFrom, lnGravityTo;
+
+
+		// Make sure we will be drawing on a canvas
+		if (sfld->p1.x < 0 || sfld->p1.y < 0 || sfld->p2.x < 0 || sfld->p2.y < 0)
+			return;		// This floan extends into invisible areas
+
+
+		//////////
+		// Grab the gravity points for this intersection
+		//////
+			lnGravityFrom	= iioss_math_getGravityByRelativePosition(&sfld->p1, &sfld->po);
+			lnGravityTo		= iioss_math_getGravityByRelativePosition(&sfld->p2, &sfld->po);
+
+
+		//////////
+		// Dispatch the operation, from which point to which point
+		//////
+			if (lnGravityFrom >= 0 && lnGravityTo >= 0)
+			{
+				lnOperation	= ((u32)lnGravityTo << 3) | (u32)lnGravityFrom;
+				shortcuts[lnOperation].storeFloan_pointToPoint(sfld);
+			}
+	}
+
+	void iioss_canvas_drawPolygon_storeFloansCorner(_isSStoreFloan_lineData* sfld, _isSStoreFloan_cornerData* sfcd1, _isSStoreFloan_cornerData* sfcd2)
+	{
+		s32							lnGravity1i, lnGravity2i;
+		f64							lfArea;
+		SXYS32						poBase1, poBase2;
+		SBGRACompute*				sbgrac;
+
+
+		//////////
+		// Get the integer-based position of the corner point (where they intersect)
+		// It is the same for sfcd1 and sfcd2, as they intersect at some fraction within.
+		//////
+			poBase1.x = (s32)sfcd1->po.x;
+			poBase1.y = (s32)sfcd1->po.y;
+			poBase2.x = (s32)sfcd2->po.x;
+			poBase2.y = (s32)sfcd2->po.y;
+
+
+		//////////
+		// Grab their gravities
+		//////
+			lnGravity1i		= iioss_math_getGravityByRelativePosition(&sfcd1->pi, &poBase1);
+			lnGravity2i		= iioss_math_getGravityByRelativePosition(&sfcd2->pi, &poBase2);
+
+
+		//////////
+		// Compute their floan based on gravity of the first line, and use its points for the area
+		// Note:  We assume these two sides have gravities facing toward each other, so we only need one
+		//////
+			lfArea = iioss_math_getAreaOfSquareUsing_po_p1_p2(lnGravity1i, lnGravity2i, sfcd1->lineData.gravity07, &sfcd1->po, &sfcd1->pi, &sfcd2->pi);
+
+
+		//////////
+		// Allocate space for the floan entry
+		//////
+			sbgrac = (SBGRACompute*)oss_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			if (sbgrac)
+			{
+				// Store the destination offset
+				sbgrac->x		= poBase1.x;
+				sbgrac->y		= poBase1.y;
+				sbgrac->alpha	= lfArea;
+			}
+	}
+
+
+
+
+//////////
+//
+// Called to determine if we should go around the pixel clockwise, or counter-clockwise, based on gravity
+//
+//      NW __N__ NE     2__3__4
+//      W |     |E      1     5
+//      SW|__S__|SE     0__7__6
+//
+//////
+	f64 iioss_math_getAreaOfSquareUsing_po_p1_p2(s32 tnGravity07_p1, s32 tnGravity07_p2, s32 tnGravity07, SXYF64* po, SXYF64* p1, SXYF64* p2)
+	{
+		STriangleF64	tri1, tri2, tri3;
+		bool			llTwoTriangles, llThreeTriangles;
+		bool			llOneMinusArea;
+
+
+		//////////
+		// For most computations, we compute the triangle po..p1..p2, and then either use
+		// that area, or (1.0 - area).	For some computations we need two triangles.
+		//////
+			// We assume the small triangle
+			llOneMinusArea		= false;
+
+			// We assume one triangle to begin with, and then adjust as needed
+			llTwoTriangles		= false;
+			llThreeTriangles	= false;
+
+			// Triangle p1..p2..po
+			memcpy(&tri1.p1, p1, sizeof(SXYF64));
+			memcpy(&tri1.p2, p2, sizeof(SXYF64));
+			memcpy(&tri1.p3, po, sizeof(SXYF64));
+
+
+		// See where we're going from and to
+		switch (tnGravity07_p1)
+		{
+			case 0:
+				//		NW __N__ NE		2__3__4
+				//		W |		|E		1	  5
+				//		SW|__S__|SE		0__7__6
+				//
+				switch (tnGravity07_p2)
+				{
+					case 1:		// Runs from SW to W
+						if (!(tnGravity07 == 0 || tnGravity07 == 1))	llOneMinusArea = true;		// Fills in from 0..7..6..5..4..3..2..1
+						// else																		// Fills in from 0..1
+						break;
+
+					case 2:		// Runs from SW to NW
+						if (tnGravity07 >= 3 && tnGravity07 <= 7)		llOneMinusArea = true;		// Fills in from 0..7..6..5..4..3..2
+						// else																		// Fills in from 0..1..2
+						break;
+
+					case 3:		// Runs from SW to N
+						//////////
+						// This will require two triangles:
+						//		(1) p1..2..po
+						//		(2) 2..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..2..po
+							//tri1.p1										// p1
+							tri1.p2.x = p1->x;								// 2
+							tri1.p2.y = p2->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 2..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 2
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+						// Indicate if we need the area, or 1.0-area
+						if (tnGravity07 >= 4 && tnGravity07 <= 7)		llOneMinusArea = true;		// Fills in from 0..7..6..5..4..3
+						// else																		// Fills in from 0..1..2..3
+						break;
+
+					case 4:		// Runs from SW to NE
+						// This is a constant, it's always 0.5 (half the pixel)
+						 return(0.5);
+
+					case 5:		// Runs from SW to E
+						//////////
+						// This will require two triangles:
+						//		(1) p1..6..po
+						//		(2) 6..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..6..po
+							//tri1.p1										// p1
+							tri1.p2.x = p2->x;								// 6
+							tri1.p2.y = p1->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 6..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 6
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+						// Indicate if we need the area, or 1.0-area
+						if (!(tnGravity07 >= 6 && tnGravity07 <= 7))	llOneMinusArea = true;		// Fills in from 0..1..2..3..4..5
+						// else																		// Fills in from 0..7..6..5
+						break;
+
+					case 6:		// Runs from SW to SE
+						if (tnGravity07 >= 1 && tnGravity07 <= 5)		llOneMinusArea = true;		// Fills in from 0..1..2..3..4..5..6
+						// else																		// Fills in from 0..7..6
+						break;
+
+					case 7:		// Runs from SW to S
+						if (!(tnGravity07 == 0 || tnGravity07 == 7))	llOneMinusArea = true;		// Fills in from 0..1..2..3..4..5..6..7
+						// else																		// Fills in from 0..7
+						break;
+
+					default:
+						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
+						_asm int 3;
+						return false;
+				}
+				break;
+
+			case 1:
+				//		NW __N__ NE		2__3__4
+				//		W |		|E		1	  5
+				//		SW|__S__|SE		0__7__6
+				//
+				switch (tnGravity07_p2)
+				{
+					case 0:		// Runs from W to SW
+						if (!(tnGravity07 == 0 || tnGravity07 == 1))	llOneMinusArea = true;		// Fills in from 1..2..3..4..5..6..7..0
+						// else																		// Fills in from 1..0
+						break;
+
+					case 1:		// Runs from W to W
+						if (!(tnGravity07 == 1))						llOneMinusArea = true;		// Fills in from 1..2..3..4..5..6..7..0..1
+						// else																		// Fills in from 1..1
+						break;
+
+					case 2:		// Runs from W to NW
+						if (!(tnGravity07 == 1 || tnGravity07 == 2))	llOneMinusArea = true;		// Fills in from 1..0..7..6..5..4..3..2
+						// else																		// Fills in from 1..2
+						break;
+
+					case 3:		// Runs from W to N
+						//////////
+						// This will require two triangles:
+						//		(1) p1..2..po
+						//		(2) 2..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..2..po
+							//tri1.p1										// p1
+							tri1.p2.x = p1->x;								// 2
+							tri1.p2.y = p2->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 2..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 2
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+
+						//////////
+						// Indicate if we need the area, or 1.0-area
+						//////
+							if (tnGravity07 == 0 || tnGravity07 >= 4)		llOneMinusArea = true;		// Fills in from 1..0..7..6..5..4..3
+							// else																		// Fills in from 1..2..3
+							break;
+
+					case 4:		// Runs from W to NE
+						//////////
+						// This will require two triangles:
+						//		(1) p1..2..po
+						//		(2) 2..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..2..po
+							//tri1.p1										// p1
+							tri1.p2.x = p1->x;								// 2
+							tri1.p2.y = p2->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 2..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 2
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+
+						//////////
+						// Indicate if we need the area, or 1.0-area
+						//////
+							if (tnGravity07 == 0 || tnGravity07 >= 5)		llOneMinusArea = true;		// Fills in from 1..0..7..6..5..4
+							// else																		// Fills in from 1..2..3..4
+							break;
+
+					case 5:		// Runs from W to E
+						//////////
+						// This will require three triangles:
+						//		(1) p1..2..po
+						//		(2) 2..po..4
+						//		(3) 4..po..p2
+						//////
+							llThreeTriangles = true;
+
+							// Modify triangle one to be p1..2..po
+							// tri.p1												// p1
+							tri1.p2.x = tri1.p1.x;									// 2
+							tri1.p2.y = (f64)((s32)p1->y + 1);
+							// tri.p3												// po
+
+							// Make triangle two be 2..po..4
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));			// 2
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));			// po
+							tri2.p3.x = p2->x;										// 4
+							tri2.p3.y = tri1.p2.y;
+
+							// Make triangle three be 4..po..p2
+							memcpy(&tri3.p1, &tri2.p3,	sizeof(SXYF64));			// 4
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));			// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));			// p2
+
+
+						//////////
+						// See which way the line is going
+						//////
+							if (p1->y < p2->y)
+							{
+								// Line slants / up
+								if (!(tnGravity07 >= 1 && tnGravity07 < 5))		llOneMinusArea = true;		// Fills in from 1..2..3..4..5
+								// else																		// Fills in from 1..0..7..6..5
+
+							} else {
+								// Line slants \ down
+								if (!(tnGravity07 > 1 && tnGravity07 <= 5))		llOneMinusArea = true;		// Fills in from 1..2..3..4..5
+								// else																		// Fills in from 1..0..7..6..5
+							}
+							break;
+
+					case 6:		// Runs from W to SE
+						//////////
+						// This will require two triangles:
+						//		(1) p1..0..po
+						//		(2) 0..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..0..po
+							//tri1.p1										// p1
+							tri1.p2.x = p1->x;								// 0
+							tri1.p2.y = p2->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 0..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 0
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+
+						//////////
+						// Indicate if we need the area, or 1.0-area
+						//////
+							if (!(tnGravity07 == 0 || tnGravity07 >= 7))		llOneMinusArea = true;		// Fills in from 1..0..7..6
+							// else																			// Fills in from 1..2..3..4..5..6
+							break;
+
+					case 7:		// Runs from W to S
+						//////////
+						// This will require two triangles:
+						//		(1) p1..0..po
+						//		(2) 0..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..0..po
+							//tri1.p1										// p1
+							tri1.p2.x = p1->x;								// 0
+							tri1.p2.y = p2->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 0..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 0
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+
+						//////////
+						// Indicate if we need the area, or 1.0-area
+						//////
+							if (!(tnGravity07 <= 1 || tnGravity07 >= 7))	llOneMinusArea = true;		// Fills in from 1..2..3..4..5..6..7
+							// else																		// Fills in from 1..0..7
+							break;
+
+					default:
+						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
+						_asm int 3;
+						return false;
+				}
+				break;
+
+			case 2:
+				//		NW __N__ NE		2__3__4
+				//		W |		|E		1	  5
+				//		SW|__S__|SE		0__7__6
+				//
+				switch (tnGravity07_p2)
+				{
+					case 0:		// Runs from NW to SW
+						if (tnGravity07 >= 3)							llOneMinusArea = true;		// Fills in from 2..3..4..5..6..7..0
+						// else																		// Fills in from 2..1..0
+						break;
+
+					case 1:		// Runs from NW to W
+						if (!(tnGravity07 == 2 || tnGravity07 == 1))	llOneMinusArea = true;		// Fills in from 2..3..4..5..6..7..0..1
+						// else																		// Fills in from 2..1
+						break;
+
+					case 3:		// Runs from NW to N
+						if (!(tnGravity07 == 2 || tnGravity07 == 3))	llOneMinusArea = true;		// Fills in from 2..1..0..7..6..5..4..3
+						// else																		// Fills in from 2..3
+						break;
+
+					case 4:		// Runs from NW to NE
+						if (tnGravity07 <= 1 || tnGravity07 >= 5)		llOneMinusArea = true;		// Fills in from 2..1..0..7..6..5..4
+						// else																		// Fills in from 2..3..4
+						break;
+
+					case 5:		// Runs from NW to E
+						//////////
+						// This will require two triangles:
+						//		(1) p1..4..po
+						//		(2) 4..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..4..po
+							//tri1.p1										// p1
+							tri1.p2.x = p2->x;								// 4
+							tri1.p2.y = p1->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 4..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 4
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+
+						//////////
+						// Indicate if we need the area, or 1.0-area
+						//////
+							if (!(tnGravity07 >= 3 && tnGravity07 <= 5))	llOneMinusArea = true;		// Fills in from 2..1..0..7..6..5
+							// else																		// Fills in from 2..3..4..5
+							break;
+
+					case 6:		// Runs from NW to SE
+						// This is a constant, it's always 0.5 (half the pixel)
+						return(0.5);
+
+					case 7:		// Runs from NW to S
+						//////////
+						// This will require two triangles:
+						//		(1) p1..0..po
+						//		(2) 0..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..0..po
+							//tri1.p1										// p1
+							tri1.p2.x = p1->x;								// 0
+							tri1.p2.y = p2->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 0..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 0
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+
+						//////////
+						// Indicate if we need the area, or 1.0-area
+						//////
+							if (!(tnGravity07 <= 1))						llOneMinusArea = true;		// Fills in from 2..1..0..7
+							// else																		// Fills in from 2..3..4..5..6..7
+							break;
+
+					default:
+						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
+						_asm int 3;
+						return false;
+				}
+				break;
+
+			case 3:
+				//		NW __N__ NE		2__3__4
+				//		W |		|E		1	  5
+				//		SW|__S__|SE		0__7__6
+				//
+				switch (tnGravity07_p2)
+				{
+					case 0:		// Runs from N to SW
+						//////////
+						// This will require two triangles:
+						//		(1) p1..2..po
+						//		(2) 2..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..2..po
+							//tri1.p1										// p1
+							tri1.p2.x = p2->x;								// 2
+							tri1.p2.y = p1->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 2..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 2
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+
+						//////////
+						// Indicate if we need the area, or 1.0-area
+						//////
+							if (tnGravity07 >= 4)						llOneMinusArea = true;		// Fills in from 3..4..5..6..7..0
+							// else																	// Fills in from 3..2..1..0
+							break;
+
+					case 1:		// Runs from N to W
+						//////////
+						// This will require two triangles:
+						//		(1) p1..2..po
+						//		(2) 2..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..2..po
+							//tri1.p1										// p1
+							tri1.p2.x = p2->x;								// 2
+							tri1.p2.y = p1->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 2..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 2
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+
+						//////////
+						// Indicate if we need the area, or 1.0-area
+						//////
+							if (tnGravity07 == 0 || tnGravity07 >= 4)		llOneMinusArea = true;		// Fills in from 3..4..5..6..7..0..1
+							// else																		// Fills in from 3..2..1
+							break;
+
+					case 2:		// Runs from N to NW
+						if (!(tnGravity07 == 3 || tnGravity07 == 2))	llOneMinusArea = true;		// Fills in from 3..4..5..6..7..0..1..2
+						// else																		// Fills in from 3..2
+						break;
+
+					case 3:		// Runs from N to N
+						if (!(tnGravity07 == 3))						llOneMinusArea = true;		// Fills in from 3..4..5..6..7..0..1..2..3
+						// else																		// Fills in from 3..3
+						break;
+
+					case 4:		// Runs from N to NE
+						if (!(tnGravity07 == 3 || tnGravity07 == 4))	llOneMinusArea = true;		// Fills in from 3..2..1..0..7..6..5..4
+						// else																		// Fills in from 3..4
+						break;
+
+					case 5:		// Runs from N to E
+						//////////
+						// This will require two triangles:
+						//		(1) p1..4..po
+						//		(2) 4..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..4..po
+							//tri1.p1										// p1
+							tri1.p2.x = p2->x;								// 4
+							tri1.p2.y = p1->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 4..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 4
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+
+						//////////
+						// Indicate if we need the area, or 1.0-area
+						//////
+							if (tnGravity07 <= 2 || tnGravity07 >= 6)		llOneMinusArea = true;		// Fills in from 3..2..1..0..7..6..5
+							// else																		// Fills in from 3..4..5
+							break;
+
+					case 6:		// Runs from N to SE
+						//////////
+						// This will require two triangles:
+						//		(1) p1..4..po
+						//		(2) 4..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..4..po
+							//tri1.p1										// p1
+							tri1.p2.x = p2->x;								// 4
+							tri1.p2.y = p1->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 4..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 4
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+
+						//////////
+						// Indicate if we need the area, or 1.0-area
+						//////
+						   if (tnGravity07 <= 2 || tnGravity07 >= 7)	llOneMinusArea = true;		// Fills in from 3..2..1..0..7..6
+							// else																	// Fills in from 3..4..5..6
+						   break;
+
+					case 7:		// Runs from N to S
+						//////////
+						// We will process the left side.  It requires three triangles:
+						//		(1) p1..2..po
+						//		(2) 2..po..0
+						//		(3) 0..po..p2
+						//////
+							llThreeTriangles = true;
+
+							// Modify triangle one to be p1..2..po
+							// tri.p1												// p1
+							tri1.p2.x = (f64)((s32)p1->x);							// 2
+							tri1.p2.y = p1->y;
+							// tri.p3												// po
+
+							// Make triangle two be 2..po..0
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));			// 2
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));			// po
+							tri2.p3.x = tri1.p2.x;									// 0
+							tri2.p3.y = p2->y;
+
+							// Make triangle three be 2..po..p2
+							memcpy(&tri3.p1, &tri2.p3,	sizeof(SXYF64));			// 0
+							memcpy(&tri3.p2, po,		sizeof(SXYF64));			// po
+							memcpy(&tri3.p3, p2,		sizeof(SXYF64));			// p2
+
+
+						//////////
+						// See which way the line is going
+						//////
+							if (p1->x < p2->x)
+							{
+								// Line slants \ down
+								if (tnGravity07 >= 3 || tnGravity07 < 7)	llOneMinusArea = true;	// Fills in from 3..4..5..6..7
+								// else																// Fills in from 3..2..1..0..7
+
+							} else {
+								// Line slants / up
+								if (tnGravity07 > 3 || tnGravity07 <= 7)	llOneMinusArea = true;	// Fills in from 3..4..5..6..7
+								// else																// Fills in from 3..2..1..0..7
+							}
+							break;
+
+					default:
+						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
+						_asm int 3;
+						return false;
+				}
+				break;
+
+			case 4:
+				//		NW __N__ NE		2__3__4
+				//		W |		|E		1	  5
+				//		SW|__S__|SE		0__7__6
+				//
+				switch (tnGravity07_p2)
+				{
+					case 0:		// Runs from NE to SW
+						// This is a constant, it's always 0.5 (half the pixel)
+						return(0.5);
+
+					case 1:		// Runs from NE to W
+						//////////
+						// This will require two triangles:
+						//		(1) p1..2..po
+						//		(2) 2..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..2..po
+							//tri1.p1										// p1
+							tri1.p2.x = p1->x;								// 2
+							tri1.p2.y = p2->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 2..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 2
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+
+						//////////
+						// Indicate if we need the area, or 1.0-area
+						//////
+							if (tnGravity07 == 0 || tnGravity07 >= 5)		llOneMinusArea = true;		// Fills in from 4..5..6..7..0..1
+							// else																		// Fills in from 4..3..2..1
+							break;
+
+					case 2:		// Runs from NE to NW
+						if (tnGravity07 <= 1 || tnGravity07 >= 5)		llOneMinusArea = true;		// Fills in from 4..5..6..7..0..1..2
+						// else																		// Fills in from 4..3..2
+						break;
+
+					case 3:		// Runs from NE to N
+						if (!(tnGravity07 == 4 || tnGravity07 == 3))	llOneMinusArea = true;		// Fills in from 4..5..6..7..0..1..2..3
+						// else																		// Fills in from 4..3
+						break;
+
+					case 5:		// Runs from NE to E
+						if (!(tnGravity07 == 4 || tnGravity07 == 5))	llOneMinusArea = true;		// Fills in from 4..3..2..1..0..7..6..5
+						// else																		// Fills in from 4..5
+						break;
+
+					case 6:		// Runs from NE to SE
+						if (!(tnGravity07 <= 3 || tnGravity07 >= 7))	llOneMinusArea = true;		// Fills in from 4..3..2..1..0..7..6
+						// else																		// Fills in from 4..5..6
+						break;
+
+					case 7:		// Runs from NE to S
+						//////////
+						// This will require two triangles:
+						//		(1) p1..6..po
+						//		(2) 6..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..6..po
+							//tri1.p1										// p1
+							tri1.p2.x = p2->x;								// 6
+							tri1.p2.y = p1->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 6..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 6
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+
+						//////////
+						// Indicate if we need the area, or 1.0-area
+						//////
+							if (tnGravity07 <= 3)						llOneMinusArea = true;		// Fills in from 4..5..6..7
+							// else																	// Fills in from 4..3..2..1..0..7
+							break;
+
+					default:
+						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
+						_asm int 3;
+						return false;
+				}
+				break;
+
+			case 5:
+				//		NW __N__ NE		2__3__4
+				//		W |		|E		1	  5
+				//		SW|__S__|SE		0__7__6
+				//
+				switch (tnGravity07_p2)
+				{
+					case 0:		// Runs from E to SW
+						//////////
+						// This will require two triangles:
+						//		(1) p1..6..po
+						//		(2) 6..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..6..po
+							//tri1.p1										// p1
+							tri1.p2.x = p2->x;								// 6
+							tri1.p2.y = p1->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 6..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 6
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+
+						//////////
+						// Indicate if we need the area, or 1.0-area
+						//////
+							if (!(tnGravity07 >= 6))					llOneMinusArea = true;		// Fills in from 5..6..7..0
+							// else																	// Fills in from 5..4..3..2..1..0
+							break;
+
+					case 1:		// Runs from E to W
+						//////////
+						// We will process the top side.  It requires three triangles:
+						//		(1) p1..4..po
+						//		(2) 4..po..2
+						//		(3) 2..po..p2
+						//////
+							llThreeTriangles = true;
+
+							// Modify triangle one to be p1..4..po
+							// tri.p1												// p1
+							tri1.p2.x = (f64)((s32)p1->x + 1);						// 4
+							tri1.p2.y = (f64)((s32)p1->y + 1);
+							// tri.p3												// po
+
+							// Make triangle two be 4..po..2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));			// 4
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));			// po
+							tri2.p3.x = p2->x;										// 2
+							tri2.p3.y = tri1.p2.y;
+
+							// Make triangle three be 2..po..p2
+							memcpy(&tri3.p1, &tri2.p3,	sizeof(SXYF64));			// 2
+							memcpy(&tri3.p2, po,		sizeof(SXYF64));			// po
+							memcpy(&tri3.p3, p2,		sizeof(SXYF64));			// p2
+
+
+						//////////
+						// See which way the line is going
+						//////
+							if (p1->y < p2->y)
+							{
+								// Line slants \ down
+								if (tnGravity07 >= 1 || tnGravity07 < 5)	llOneMinusArea = true;	// Fills in from 1..2..3..4..5
+								// else																// Fills in from 1..0..7..6..5
+
+							} else {
+								// Line slants / up
+								if (tnGravity07 > 1 || tnGravity07 <= 5)	llOneMinusArea = true;	// Fills in from 1..2..3..4..5
+								// else																// Fills in from 1..0..7..6..5
+							}
+							break;
+
+					case 2:		// Runs from E to NW
+						//////////
+						// This will require two triangles:
+						//		(1) p1..4..po
+						//		(2) 4..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..4..po
+							//tri1.p1										// p1
+							tri1.p2.x = p1->x;								// 4
+							tri1.p2.y = p2->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 4..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 4
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+
+						//////////
+						// Indicate if we need the area, or 1.0-area
+						//////
+							if (!(tnGravity07 >= 3 && tnGravity07 <= 4))	llOneMinusArea = true;	// Fills in from 5..4..3..2
+							// else																	// Fills in from 5..6..7..0..1..2
+							break;
+
+					case 3:		// Runs from E to N
+						//////////
+						// This will require two triangles:
+						//		(1) p1..4..po
+						//		(2) 4..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..4..po
+							//tri1.p1										// p1
+							tri1.p2.x = p1->x;								// 4
+							tri1.p2.y = p2->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 4..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 4
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+
+						//////////
+						// Indicate if we need the area, or 1.0-area
+						//////
+							if (!(tnGravity07 >= 3 && tnGravity07 <= 5))	llOneMinusArea = true;		// Fills in from 5..6..7..0..1..2..3
+							// else																		// Fills in from 5..4..3
+							break;
+
+					case 4:		// Runs from E to NE
+						if (!(tnGravity07 == 5 || tnGravity07 == 4))	llOneMinusArea = true;		// Fills in from 5..6..7..0..1..2..3..4
+						// else																		// Fills in from 5..4
+						break;
+
+					case 5:		// Runs from E to E
+						if (!(tnGravity07 == 5))						llOneMinusArea = true;		// Fills in from 5..6..7..0..1..2..3..4..5
+						// else																		// Fills in from 5..5
+						break;
+
+					case 6:		// Runs from E to SE
+						if (!(tnGravity07 == 5 || tnGravity07 == 6))	llOneMinusArea = true;		// Fills in from 5..4..3..2..1..0..7..6
+						// else																		// Fills in from 5..6
+						break;
+
+					case 7:		// Runs from E to S
+						//////////
+						// This will require two triangles:
+						//		(1) p1..6..po
+						//		(2) 6..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..6..po
+							//tri1.p1										// p1
+							tri1.p2.x = p2->x;								// 6
+							tri1.p2.y = p1->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 6..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 6
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+
+						//////////
+						// Indicate if we need the area, or 1.0-area
+						//////
+							if (!(tnGravity07 >= 5))						llOneMinusArea = true;		// Fills in from 5..4..3..2..1..0..7
+							// else																		// Fills in from 5..6..7
+							break;
+
+					default:
+						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
+						_asm int 3;
+						return false;
+				}
+				break;
+
+			case 6:
+				//		NW __N__ NE		2__3__4
+				//		W |		|E		1	  5
+				//		SW|__S__|SE		0__7__6
+				//
+				switch (tnGravity07_p2)
+				{
+					case 0:		// Runs from SE to SW
+						if (tnGravity07 >= 1 && tnGravity07 <= 5)		llOneMinusArea = true;		// Fills in from 6..5..4..3..2..1..0
+						// else																		// Fills in from 6..7..0
+						break;
+
+					case 1:		// Runs from SE to W
+						//////////
+						// This will require two triangles:
+						//		(1) p1..0..po
+						//		(2) 0..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..0..po
+							//tri1.p1										// p1
+							tri1.p2.x = p2->x;								// 0
+							tri1.p2.y = p1->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 0..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 0
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+
+						//////////
+						// Indicate if we need the area, or 1.0-area
+						//////
+							if (tnGravity07 >= 2 && tnGravity07 <= 6)	llOneMinusArea = true;		// Fills in from 6..5..4..3..2..1
+							// else																	// Fills in from 6..7..0..1
+							break;
+
+					case 2:		// Runs fro3 SE to NW
+						// This is a constant, it's always 0.5 (half the pixel)
+						return(0.5);
+
+					case 3:		// Runs from SE to N
+						//////////
+						// This will require two triangles:
+						//		(1) p1..4..po
+						//		(2) 4..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..4..po
+							//tri1.p1										// p1
+							tri1.p2.x = p1->x;								// 4
+							tri1.p2.y = p2->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 4..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 4
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+
+						//////////
+						// Indicate if we need the area, or 1.0-area
+						//////
+							if (!(tnGravity07 >= 3 && tnGravity07 <= 5))	llOneMinusArea = true;		// Fills in from 6..5..4..3
+							// else																		// Fills in from 6..7..0..1..2..3
+							break;
+
+					case 4:		// Runs from SE to NE
+						if (tnGravity07 <= 3 || tnGravity07 >= 7)		llOneMinusArea = true;		// Fills in from 6..7..0..1..2..3..4
+						// else																		// Fills in from 6..5..4
+						break;
+
+					case 5:		// Runs from SE to E
+						if (!(tnGravity07 == 6 || tnGravity07 == 5))	llOneMinusArea = true;		// Fills in from 6..7..0..1..2..3..4..5
+						// else																		// Fills in from 6..5
+						break;
+
+					case 7:		// Runs from SE to S
+						if (!(tnGravity07 >= 6))						llOneMinusArea = true;		// Fills in from 6..5..4..3..2..1..0..7
+						// else																		// Fills in from 6..7
+						break;
+
+					default:
+						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
+						_asm int 3;
+						return false;
+				}
+				break;
+
+			case 7:
+				//		NW __N__ NE		2__3__4
+				//		W |		|E		1	  5
+				//		SW|__S__|SE		0__7__6
+				//
+				switch (tnGravity07_p2)
+				{
+					case 0:		// Runs from S to SW
+						if (!(tnGravity07 == 0 || tnGravity07 == 7))	llOneMinusArea = true;		// Fills in from 7..6..5..4..3..2..1..0
+						// else																		// Fills in from 7..0
+						break;
+
+					case 1:		// Runs from S to W
+						//////////
+						// This will require two triangles:
+						//		(1) p1..0..po
+						//		(2) 0..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..0..po
+							//tri1.p1										// p1
+							tri1.p2.x = p2->x;								// 0
+							tri1.p2.y = p1->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 0..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 6
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+
+						//////////
+						// Indicate if we need the area, or 1.0-area
+						//////
+							if (tnGravity07 <= 6 && tnGravity07 >= 2)		llOneMinusArea = true;		// Fills in from 7..6..5..4..3..2..1
+							// else																		// Fills in from 7..0..1
+							break;
+
+					case 2:		// Runs from S to NW
+						//////////
+						// This will require two triangles:
+						//		(1) p1..0..po
+						//		(2) 0..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..0..po
+							//tri1.p1										// p1
+							tri1.p2.x = p2->x;								// 0
+							tri1.p2.y = p1->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 0..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 0
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+
+						//////////
+						// Indicate if we need the area, or 1.0-area
+						//////
+							if (tnGravity07 >= 3 && tnGravity07 <=6)	llOneMinusArea = true;		// Fills in from 7..6..5..4..3..2
+							// else																	// Fills in from 7..0..1..2
+							break;
+
+					case 3:		// Runs from S to N
+						//////////
+						// We will process the left side.  It requires three triangles:
+						//		(1) p1..0..po
+						//		(2) 0..po..2
+						//		(3) 2..po..p2
+						//////
+							llThreeTriangles = true;
+
+							// Modify triangle one to be p1..0..po
+							// tri.p1												// p1
+							tri1.p2.x = (f64)((s32)p1->x);							// 0
+							tri1.p2.y = p1->y;
+							// tri.p3												// po
+
+							// Make triangle two be 0..po..2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));			// 0
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));			// po
+							tri2.p3.x = tri1.p2.x;									// 2
+							tri2.p3.y = p2->y;
+
+							// Make triangle three be 2..po..p2
+							memcpy(&tri3.p1, &tri2.p3,	sizeof(SXYF64));			// 2
+							memcpy(&tri3.p2, po,		sizeof(SXYF64));			// po
+							memcpy(&tri3.p3, p2,		sizeof(SXYF64));			// p2
+
+
+						//////////
+						// See which way the line is going
+						//////
+							if (p2->x < p1->x)
+							{
+								// Line slants \ down
+								if (tnGravity07 >= 3 || tnGravity07 < 7)	llOneMinusArea = true;	// Fills in from 3..4..5..6..7
+								// else																// Fills in from 3..2..1..0..7
+
+							} else {
+								// Line slants / up
+								if (tnGravity07 > 3 || tnGravity07 <= 7)	llOneMinusArea = true;	// Fills in from 3..4..5..6..7
+								// else																// Fills in from 3..2..1..0..7
+							}
+							break;
+
+					case 4:		// Runs from S to NE
+						//////////
+						// This will require two triangles:
+						//		(1) p1..6..po
+						//		(2) 6..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..6..po
+							//tri1.p1										// p1
+							tri1.p2.x = p1->x;								// 6
+							tri1.p2.y = p2->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 6..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 6
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+
+						//////////
+						// Indicate if we need the area, or 1.0-area
+						//////
+							if (tnGravity07 <= 3)					llOneMinusArea = true;			// Fills in from 7..6..5..4
+							// else																	// Fills in from 7..0..1..2..3..4
+							break;
+
+					case 5:		// Runs from S to E
+						//////////
+						// This will require two triangles:
+						//		(1) p1..6..po
+						//		(2) 6..po..p2
+						//////
+							llTwoTriangles = true;
+
+							// Modify triangle one to be p1..6..po
+							//tri1.p1										// p1
+							tri1.p2.x = p2->x;								// 6
+							tri1.p2.y = p1->y;
+							//tri1.p3										// po
+
+							// Make triangle two be 6..po..p2
+							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 6
+							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
+							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
+
+
+						//////////
+						// Indicate if we need the area, or 1.0-area
+						//////
+							if (!(tnGravity07 >= 5))					llOneMinusArea = true;			// Fills in from 7..0..1..2..3..4..5
+							// else																		// Fills in from 7..6..5
+							break;
+
+					case 6:		// Runs from S to SE
+						if (!(tnGravity07 >= 6))						llOneMinusArea = true;		// Fills in from 7..0..1..2..3..4..5..6
+						// else																		// Fills in from 7..6
+						break;
+
+					case 7:		// Runs from S to S
+						if (!(tnGravity07 == 7))						llOneMinusArea = true;		// Fills in from 7..6..5..4..3..2..1..0..7
+						// else																		// Fills in from 7..7
+						break;
+
+					default:
+						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
+						_asm int 3;
+						return false;
+				}
+				break;
+
+			default:
+				// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
+				_asm int 3;
+				return false;
+		}
+
+
+		//////////
+		// Ready to compute
+		//////
+			// Triangle 1
+			iioss_math_computeTriangle(&tri1);
+
+			// Do we need two triangles?
+			if (llTwoTriangles)
+			{
+				// Yes, add in the second triangle
+				iioss_math_computeTriangle(&tri2);
+				tri1.area += tri2.area;
+			}
+
+			// Do we need three triangles?
+			if (llThreeTriangles)
+			{
+				// Yes, add in the third triangle
+				iioss_math_computeTriangle(&tri3);
+				tri1.area += tri3.area;
+			}
+
+
+		//////////
+		// Ready to return our result
+		//////
+			if (llOneMinusArea)
+			{
+				// It's the opposite value
+				return(1.0 - tri1.area);
+
+			} else {
+				// It's the value
+				return(tri1.area);
+			}
+	}
+
+
+
+
 /////////
 //
 // Called to move from the X or Y coordinate to the next x-intercept or y-intercept along theta
 //
 //////
-	void iioss_canvas_drawPolygon_nextIntercept(SXYF64* p, f64 tfTheta)
+	void iioss_math_getNextAxisInterceptXY(SXYF64* p, f64 tfTheta)
 	{
 		f64		lfX, lfY, lfXLength, lfYLength, lfCosTheta, lfSinTheta;
 		s32		lnX, lnY;
@@ -6721,1029 +8051,15 @@ continueToNextAttribute:
 					p->x	+= lfYLength * lfCosTheta;
 					p->y	+= lfYLength * lfSinTheta;
 				}
+
+
+			//////////
+			// Round to nearest 15 significant digits to remove rounding issues
+			//////
+				p->x = ((f64)((u64)(p->x * 100000000000000.0)) / 100000000000000.0);
+				p->y = ((f64)((u64)(p->y * 100000000000000.0)) / 100000000000000.0);
 		}
 		// We're done
-	}
-
-
-
-
-//////////
-//
-// Called to store the corner point.  This is used for final assembly after all corners and floans
-// are computed.  The corner floans are then computed based on overlay information.
-//
-// Note (from code in iioss_canvas_drawPolygon()): SBuilder* corners; // SXYF64 indicating where the corner falls
-//
-//////
-	void iioss_canvas_drawPolygon_storeCorner(SBuilder* corners, SXYF64* po, SXYF64* pi, _isSStoreFloan_lineData* sfld)
-	{
-		_isSStoreFloan_cornerData lsfcd;
-
-
-		//////////
-		// Copy to our temporary buffer
-		//////
-
-			// Corner point
-			lsfcd.po.x = po->x;
-			lsfcd.po.y = po->y;
-
-			// Intercept point
-			lsfcd.pi.x = pi->x;
-			lsfcd.pi.y = pi->y;
-
-			// Line data
-			memcpy(&lsfcd.lineData, sfld, sizeof(_isSStoreFloan_lineData));
-
-
-		//////////
-		// Append it
-		//////
-			oss_builderAppendData(corners, (s8*)&lsfcd, sizeof(lsfcd));
-	}
-
-
-
-
-/////////
-//
-// Called to store all of the triangles required to make up this floan.
-// There are 8 parts where a line can intersect with, thereby bisecting a pixel:
-//        2__3__4
-//        1     5
-//        0__7__6
-//
-//	From those locations, pixels can run in up to 20 combinations (disregarding direction):
-//		0..6, 0..5, 0..4, 0..3, 0..2
-//		1..3, 1..4, 1..5, 1..6, 1..7
-//		2..4, 2..5, 2..6, 2..7
-//		3..5, 3..6, 3..7
-//		4..6, 4..7
-//		5..7
-//
-// Given the gravity direction, this then determines how the area is computed for the partial
-// pixel which intersects in one of the 20 ways, resulting in 40 total gravity formulas. :-)
-//
-// Yes, I did this all manually.  And yes, I hope there's an easier and better way to do it
-// that someone will show me because I really hated doing this.  It took me almost three weeks
-// (during the midst of two weeks of insomnia anyway, which I'm sure was the biggest cause of
-// the three week time frame). :-)
-//
-// (tfX,tfY) is the corner closest toward the origin of the current pixel.
-// (tfX1,tfY1) is any point on any of the 8 parts
-// (tfX2,tfY2) is any other point on any of the 8 parts
-//
-//////
-	_isS_iioss_canvas_drawPolygon_storeFloans shortcuts[64] = 
-	{
-		// The naming convention here is the FROM:TO or the corresponding TO:FROM indicator so as to reduce duplication
-		(u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_2_0, (u32)&storeFloan_pointToPoint_3_0, (u32)&storeFloan_pointToPoint_4_0, (u32)&storeFloan_pointToPoint_5_0, (u32)&storeFloan_pointToPoint_6_0, (u32)&storeFloan_pointToPoint_bad,
-		(u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_3_1, (u32)&storeFloan_pointToPoint_4_1, (u32)&storeFloan_pointToPoint_5_1, (u32)&storeFloan_pointToPoint_6_1, (u32)&storeFloan_pointToPoint_7_1,
-		(u32)&storeFloan_pointToPoint_0_2, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_4_2, (u32)&storeFloan_pointToPoint_5_2, (u32)&storeFloan_pointToPoint_6_2, (u32)&storeFloan_pointToPoint_7_2,
-		(u32)&storeFloan_pointToPoint_0_3, (u32)&storeFloan_pointToPoint_1_3, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_5_3, (u32)&storeFloan_pointToPoint_6_3, (u32)&storeFloan_pointToPoint_7_3,
-		(u32)&storeFloan_pointToPoint_0_4, (u32)&storeFloan_pointToPoint_1_4, (u32)&storeFloan_pointToPoint_2_4, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_6_4, (u32)&storeFloan_pointToPoint_7_4,
-		(u32)&storeFloan_pointToPoint_0_5, (u32)&storeFloan_pointToPoint_1_5, (u32)&storeFloan_pointToPoint_2_5, (u32)&storeFloan_pointToPoint_3_5, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_7_5,
-		(u32)&storeFloan_pointToPoint_0_6, (u32)&storeFloan_pointToPoint_1_6, (u32)&storeFloan_pointToPoint_2_6, (u32)&storeFloan_pointToPoint_3_6, (u32)&storeFloan_pointToPoint_4_6, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad,
-		(u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_1_7, (u32)&storeFloan_pointToPoint_2_7, (u32)&storeFloan_pointToPoint_3_7, (u32)&storeFloan_pointToPoint_4_7, (u32)&storeFloan_pointToPoint_5_7, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad
-	};
-
-	void iioss_canvas_drawPolygon_storeFloans(_isSStoreFloan_lineData* sfld)
-	{
-		u32 lnOperation, lnGravityFrom, lnGravityTo;
-
-
-		// Make sure we will be drawing on a canvas
-		if (sfld->p1.x < 0 || sfld->p1.y < 0 || sfld->p2.x < 0 || sfld->p2.y < 0)
-			return;		// This floan extends into invisible areas
-
-
-		//////////
-		// Grab the gravity points for this intersection
-		//////
-			lnGravityFrom	= iioss_canvas_drawPolygon_gravityPoint(&sfld->p1, &sfld->po);
-			lnGravityTo		= iioss_canvas_drawPolygon_gravityPoint(&sfld->p2, &sfld->po);
-
-
-		//////////
-		// Dispatch the operation, from which point to which point
-		//////
-			lnOperation	= (lnGravityTo << 3) | lnGravityFrom;
-			shortcuts[lnOperation].storeFloan_pointToPoint(sfld);
-	}
-
-	void iioss_canvas_drawPolygon_storeFloansCorner(_isSStoreFloan_lineData* sfld, _isSStoreFloan_cornerData* sfcd1, _isSStoreFloan_cornerData* sfcd2)
-	{
-		s32							lnGravity1i, lnGravity2i;
-		f64							lfArea;
-		SXYS32						poBase;
-		SBGRACompute*				sbgrac;
-
-
-		//////////
-		// Get the integer-based position of the corner point (where they intersect)
-		// It is the same for sfcd1 and sfcd2, as they intersect at some fraction within.
-		//////
-			poBase.x = (s32)sfcd1->po.x;
-			poBase.y = (s32)sfcd1->po.y;
-
-
-		//////////
-		// Grab their gravities
-		//////
-			lnGravity1i		= iioss_canvas_drawPolygon_gravityPoint(&sfcd1->pi, &poBase);
-			lnGravity2i		= iioss_canvas_drawPolygon_gravityPoint(&sfcd2->pi, &poBase);
-
-
-		//////////
-		// Compute their floan based on gravity of the first line, and use its points for the area
-		// Note:  We assume these two sides have gravities facing toward each other, so we only need one
-		//////
-			lfArea = iioss_canvas_drawPolygon_storeFloansCorner_getArea(lnGravity1i, lnGravity2i, sfcd1->lineData.gravity07, &sfcd1->po, &sfcd1->pi, &sfcd2->pi);
-
-
-		//////////
-		// Allocate space for the floan entry
-		//////
-			sbgrac = (SBGRACompute*)oss_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
-			if (sbgrac)
-			{
-				// Store the destination offset
-				sbgrac->x		= poBase.x;
-				sbgrac->y		= poBase.y;
-				sbgrac->alpha	= lfArea;
-			}
-	}
-
-
-
-
-//////////
-//
-// Called to determine if we should go around the pixel clockwise, or counter-clockwise, based on gravity
-//
-//      NW __N__ NE     2__3__4
-//      W |     |E      1     5
-//      SW|__S__|SE     0__7__6
-//
-//////
-	f64 iioss_canvas_drawPolygon_storeFloansCorner_getArea(s32 tnGravity07_p1, s32 tnGravity07_p2, s32 tnGravity07, SXYF64* po, SXYF64* p1, SXYF64* p2)
-	{
-		STriangleF64	tri1, tri2, tri3;
-		bool			llTwoTriangles, llThreeTriangles;
-		bool			llOneMinusArea;
-
-
-		//////////
-		// For most computations, we compute the triangle po..p1..p2, and then either use
-		// that area, or (1.0 - area).	For some computations we need two triangles.
-		//////
-			// We assume the small triangle
-			llOneMinusArea		= false;
-
-			// We assume one triangle to begin with, and then adjust as needed
-			llTwoTriangles		= false;
-			llThreeTriangles	= false;
-
-			// Triangle p1..p2..po
-			memcpy(&tri1.p1, p1, sizeof(SXYF64));
-			memcpy(&tri1.p2, p2, sizeof(SXYF64));
-			memcpy(&tri1.p3, po, sizeof(SXYF64));
-
-
-		// See where we're going from and to
-		switch (tnGravity07_p1)
-		{
-			case 0:
-				//		NW __N__ NE		2__3__4
-				//		W |		|E		1	  5
-				//		SW|__S__|SE		0__7__6
-				//
-				switch (tnGravity07_p2)
-				{
-					case 2:		// Runs from SW to NW
-						if (tnGravity07 >= 3 && tnGravity07 <= 7)		llOneMinusArea = true;		// Fills in from 0..7..6..5..4..3..2
-						// else																		// Fills in from 0..1..2
-						break;
-
-					case 3:		// Runs from SW to N
-						//////////
-						// This will require two triangles:
-						//		(1) p1..2..po
-						//		(2) 2..po..p2
-						//////
-							llTwoTriangles = true;
-
-							// Modify triangle one to be p1..2..po
-							//tri1.p1										// p1
-							tri1.p2.x = p1->x;								// 2
-							tri1.p2.y = p2->y;
-							//tri1.p3										// po
-
-							// Make triangle two be 2..po..p2
-							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 2
-							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
-							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
-
-						// Indicate if we need the area, or 1.0-area
-						if (tnGravity07 >= 4 && tnGravity07 <= 7)		llOneMinusArea = true;		// Fills in from 0..7..6..5..4..3
-						// else																		// Fills in from 0..1..2..3
-						break;
-
-					case 4:		// Runs from SW to NE
-						// This is a constant, it's always 0.5 (half the pixel)
-						 return(0.5);
-
-					case 5:		// Runs from SW to E
-						//////////
-						// This will require two triangles:
-						//		(1) p1..6..po
-						//		(2) 6..po..p2
-						//////
-							llTwoTriangles = true;
-
-							// Modify triangle one to be p1..6..po
-							//tri1.p1										// p1
-							tri1.p2.x = p2->x;								// 6
-							tri1.p2.y = p1->y;
-							//tri1.p3										// po
-
-							// Make triangle two be 6..po..p2
-							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 6
-							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
-							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
-
-						// Indicate if we need the area, or 1.0-area
-						if (!(tnGravity07 >= 6 && tnGravity07 <= 7))	llOneMinusArea = true;		// Fills in from 0..1..2..3..4..5
-						// else																		// Fills in from 0..7..6..5
-						break;
-
-					case 6:		// Runs from SW to SE
-						if (tnGravity07 >= 1 && tnGravity07 <= 5)		llOneMinusArea = true;		// Fills in from 0..1..2..3..4..5..6
-						// else																		// Fills in from 0..7..6
-						break;
-
-					default:
-						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
-						_asm int 3;
-						return false;
-				}
-				break;
-
-			case 1:
-				//		NW __N__ NE		2__3__4
-				//		W |		|E		1	  5
-				//		SW|__S__|SE		0__7__6
-				//
-				switch (tnGravity07_p2)
-				{
-					case 3:		// Runs from W to N
-						if (tnGravity07 == 0 || tnGravity07 >= 4)		llOneMinusArea = true;		// Fills in from 1..0..7..6..5..4..3
-						// else																		// Fills in from 1..2..3
-						break;
-
-					case 4:		// Runs from W to NE
-						if (tnGravity07 == 0 || tnGravity07 >= 5)		llOneMinusArea = true;		// Fills in from 1..0..7..6..5..4
-						// else																		// Fills in from 1..2..3..4
-						break;
-
-					case 5:		// Runs from W to E
-						//////////
-						// This will require three triangles:
-						//		(1) p1..2..po
-						//		(2) 2..po..4
-						//		(3) 4..po..p2
-						//////
-							llThreeTriangles = true;
-
-							// Modify triangle one to be p1..2..po
-							// tri.p1												// p1
-							tri1.p2.x = tri1.p1.x;									// 2
-							tri1.p2.y = (f64)((s32)p1->y + 1);
-							// tri.p3												// po
-
-							// Make triangle two be 2..po..4
-							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));			// 2
-							memcpy(&tri2.p2, po,		sizeof(SXYF64));			// po
-							tri2.p3.x = p2->x;										// 4
-							tri2.p3.y = tri1.p2.y;
-
-							// Make triangle three be 4..po..p2
-							memcpy(&tri3.p1, &tri2.p3,	sizeof(SXYF64));			// 4
-							memcpy(&tri2.p2, po,		sizeof(SXYF64));			// po
-							memcpy(&tri2.p3, p2,		sizeof(SXYF64));			// p2
-
-
-						//////////
-						// See which way the line is going
-						//////
-							if (p1->y < p2->y)
-							{
-								// Line slants / up
-								if (!(tnGravity07 >= 1 && tnGravity07 < 5))		llOneMinusArea = true;		// Fills in from 1..2..3..4..5
-								// else																		// Fills in from 1..0..7..6..5
-
-							} else {
-								// Line slants \ down
-								if (!(tnGravity07 > 1 && tnGravity07 <= 5))		llOneMinusArea = true;		// Fills in from 1..2..3..4..5
-								// else																		// Fills in from 1..0..7..6..5
-							}
-							break;
-
-					case 6:		// Runs from W to SE
-						//////////
-						// This will require two triangles:
-						//		(1) p1..0..po
-						//		(2) 0..po..p2
-						//////
-							llTwoTriangles = true;
-
-							// Modify triangle one to be p1..0..po
-							//tri1.p1										// p1
-							tri1.p2.x = p1->x;								// 0
-							tri1.p2.y = p2->y;
-							//tri1.p3										// po
-
-							// Make triangle two be 0..po..p2
-							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 0
-							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
-							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
-
-
-						//////////
-						// Indicate if we need the area, or 1.0-area
-						//////
-							if (!(tnGravity07 == 0 || tnGravity07 >= 7))		llOneMinusArea = true;		// Fills in from 1..0..7..6
-							// else																			// Fills in from 1..2..3..4..5..6
-							break;
-
-					case 7:		// Runs from W to S
-						if (!(tnGravity07 <= 1 || tnGravity07 >= 7))	llOneMinusArea = true;		// Fills in from 1..2..3..4..5..6..7
-						// else																		// Fills in from 1..0..7
-						break;
-
-					default:
-						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
-						_asm int 3;
-						return false;
-				}
-				break;
-
-			case 2:
-				//		NW __N__ NE		2__3__4
-				//		W |		|E		1	  5
-				//		SW|__S__|SE		0__7__6
-				//
-				switch (tnGravity07_p2)
-				{
-					case 0:		// Runs from NW to SW
-						if (tnGravity07 >= 3)							llOneMinusArea = true;		// Fills in from 2..3..4..5..6..7..0
-						// else																		// Fills in from 2..1..0
-						break;
-
-					case 4:		// Runs from NW to NE
-						if (tnGravity07 <= 1 || tnGravity07 >= 5)		llOneMinusArea = true;		// Fills in from 2..1..0..7..6..5..4
-						// else																		// Fills in from 2..3..4
-						break;
-
-					case 5:		// Runs from NW to E
-						//////////
-						// This will require two triangles:
-						//		(1) p1..4..po
-						//		(2) 4..po..p2
-						//////
-							llTwoTriangles = true;
-
-							// Modify triangle one to be p1..4..po
-							//tri1.p1										// p1
-							tri1.p2.x = p2->x;								// 4
-							tri1.p2.y = p1->y;
-							//tri1.p3										// po
-
-							// Make triangle two be 4..po..p2
-							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 4
-							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
-							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
-
-
-						//////////
-						// Indicate if we need the area, or 1.0-area
-						//////
-							if (!(tnGravity07 >= 3 && tnGravity07 <= 5))	llOneMinusArea = true;		// Fills in from 2..1..0..7..6..5
-							// else																		// Fills in from 2..3..4..5
-							break;
-
-					case 6:		// Runs from NW to SE
-						// This is a constant, it's always 0.5 (half the pixel)
-						return(0.5);
-
-					case 7:		// Runs from NW to S
-						//////////
-						// This will require two triangles:
-						//		(1) p1..0..po
-						//		(2) 0..po..p2
-						//////
-							llTwoTriangles = true;
-
-							// Modify triangle one to be p1..0..po
-							//tri1.p1										// p1
-							tri1.p2.x = p1->x;								// 0
-							tri1.p2.y = p2->y;
-							//tri1.p3										// po
-
-							// Make triangle two be 0..po..p2
-							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 0
-							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
-							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
-
-
-						//////////
-						// Indicate if we need the area, or 1.0-area
-						//////
-							if (!(tnGravity07 <= 1))						llOneMinusArea = true;		// Fills in from 2..1..0..7
-							// else																		// Fills in from 2..3..4..5..6..7
-							break;
-
-					default:
-						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
-						_asm int 3;
-						return false;
-				}
-				break;
-
-			case 3:
-				//		NW __N__ NE		2__3__4
-				//		W |		|E		1	  5
-				//		SW|__S__|SE		0__7__6
-				//
-				switch (tnGravity07_p2)
-				{
-					case 0:		// Runs from N to SW
-						//////////
-						// This will require two triangles:
-						//		(1) p1..2..po
-						//		(2) 2..po..p2
-						//////
-							llTwoTriangles = true;
-
-							// Modify triangle one to be p1..2..po
-							//tri1.p1										// p1
-							tri1.p2.x = p2->x;								// 2
-							tri1.p2.y = p1->y;
-							//tri1.p3										// po
-
-							// Make triangle two be 2..po..p2
-							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 2
-							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
-							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
-
-
-						//////////
-						// Indicate if we need the area, or 1.0-area
-						//////
-							if (tnGravity07 >= 4)						llOneMinusArea = true;		// Fills in from 3..4..5..6..7..0
-							// else																	// Fills in from 3..2..1..0
-							break;
-
-					case 1:		// Runs from N to W
-						if (tnGravity07 == 0 || tnGravity07 >= 4)		llOneMinusArea = true;		// Fills in from 3..4..5..6..7..0..1
-						// else																		// Fills in from 3..2..1
-						break;
-
-					case 5:		// Runs from N to E
-						if (tnGravity07 <= 2 || tnGravity07 >= 6)		llOneMinusArea = true;		// Fills in from 3..2..1..0..7..6..5
-						// else																		// Fills in from 3..4..5
-						break;
-
-					case 6:		// Runs from N to SE
-						//////////
-						// This will require two triangles:
-						//		(1) p1..4..po
-						//		(2) 4..po..p2
-						//////
-							llTwoTriangles = true;
-
-							// Modify triangle one to be p1..4..po
-							//tri1.p1										// p1
-							tri1.p2.x = p2->x;								// 4
-							tri1.p2.y = p1->y;
-							//tri1.p3										// po
-
-							// Make triangle two be 4..po..p2
-							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 4
-							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
-							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
-
-
-						//////////
-						// Indicate if we need the area, or 1.0-area
-						//////
-						   if (tnGravity07 <= 2 || tnGravity07 >= 7)	llOneMinusArea = true;		// Fills in from 3..2..1..0..7..6
-							// else																	// Fills in from 3..4..5..6
-						   break;
-
-					case 7:		// Runs from N to S
-						//////////
-						// We will process the left side.  It requires three triangles:
-						//		(1) p1..2..po
-						//		(2) 2..po..0
-						//		(3) 0..po..p2
-						//////
-							llThreeTriangles = true;
-
-							// Modify triangle one to be p1..2..po
-							// tri.p1												// p1
-							tri1.p2.x = (f64)((s32)p1->x);							// 2
-							tri1.p2.y = p1->y;
-							// tri.p3												// po
-
-							// Make triangle two be 2..po..0
-							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));			// 2
-							memcpy(&tri2.p2, po,		sizeof(SXYF64));			// po
-							tri2.p3.x = tri1.p2.x;									// 0
-							tri2.p3.y = p2->y;
-
-							// Make triangle three be 2..po..p2
-							memcpy(&tri3.p1, &tri2.p3,	sizeof(SXYF64));			// 0
-							memcpy(&tri3.p2, po,		sizeof(SXYF64));			// po
-							memcpy(&tri3.p3, p2,		sizeof(SXYF64));			// p2
-
-
-						//////////
-						// See which way the line is going
-						//////
-							if (p1->x < p2->x)
-							{
-								// Line slants \ down
-								if (tnGravity07 >= 3 || tnGravity07 < 7)	llOneMinusArea = true;	// Fills in from 3..4..5..6..7
-								// else																// Fills in from 3..2..1..0..7
-
-							} else {
-								// Line slants / up
-								if (tnGravity07 > 3 || tnGravity07 <= 7)	llOneMinusArea = true;	// Fills in from 3..4..5..6..7
-								// else																// Fills in from 3..2..1..0..7
-							}
-							break;
-
-					default:
-						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
-						_asm int 3;
-						return false;
-				}
-				break;
-
-			case 4:
-				//		NW __N__ NE		2__3__4
-				//		W |		|E		1	  5
-				//		SW|__S__|SE		0__7__6
-				//
-				switch (tnGravity07_p2)
-				{
-					case 0:		// Runs from NE to SW
-						// This is a constant, it's always 0.5 (half the pixel)
-						return(0.5);
-
-					case 1:		// Runs from NE to W
-						//////////
-						// This will require two triangles:
-						//		(1) p1..2..po
-						//		(2) 2..po..p2
-						//////
-							llTwoTriangles = true;
-
-							// Modify triangle one to be p1..2..po
-							//tri1.p1										// p1
-							tri1.p2.x = p1->x;								// 2
-							tri1.p2.y = p2->y;
-							//tri1.p3										// po
-
-							// Make triangle two be 2..po..p2
-							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 2
-							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
-							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
-
-
-						//////////
-						// Indicate if we need the area, or 1.0-area
-						//////
-							if (tnGravity07 == 0 || tnGravity07 >= 5)		llOneMinusArea = true;		// Fills in from 4..5..6..7..0..1
-							// else																		// Fills in from 4..3..2..1
-							break;
-
-					case 2:		// Runs from NE to NW
-						if (tnGravity07 <= 1 || tnGravity07 >= 5)		llOneMinusArea = true;		// Fills in from 4..5..6..7..0..1..2
-						// else																		// Fills in from 4..3..2
-						break;
-
-					case 6:		// Runs from NE to SE
-						if (!(tnGravity07 <= 3 || tnGravity07 >= 7))	llOneMinusArea = true;		// Fills in from 4..3..2..1..0..7..6
-						// else																		// Fills in from 4..5..6
-						break;
-
-					case 7:		// Runs from NE to S
-						//////////
-						// This will require two triangles:
-						//		(1) p1..6..po
-						//		(2) 6..po..p2
-						//////
-							llTwoTriangles = true;
-
-							// Modify triangle one to be p1..6..po
-							//tri1.p1										// p1
-							tri1.p2.x = p2->x;								// 6
-							tri1.p2.y = p1->y;
-							//tri1.p3										// po
-
-							// Make triangle two be 6..po..p2
-							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 6
-							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
-							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
-
-
-						//////////
-						// Indicate if we need the area, or 1.0-area
-						//////
-							if (tnGravity07 <= 3)						llOneMinusArea = true;		// Fills in from 4..5..6..7
-							// else																	// Fills in from 4..3..2..1..0..7
-							break;
-
-					default:
-						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
-						_asm int 3;
-						return false;
-				}
-				break;
-
-			case 5:
-				//		NW __N__ NE		2__3__4
-				//		W |		|E		1	  5
-				//		SW|__S__|SE		0__7__6
-				//
-				switch (tnGravity07_p2)
-				{
-					case 0:		// Runs from E to SW
-						//////////
-						// This will require two triangles:
-						//		(1) p1..6..po
-						//		(2) 6..po..p2
-						//////
-							llTwoTriangles = true;
-
-							// Modify triangle one to be p1..6..po
-							//tri1.p1										// p1
-							tri1.p2.x = p2->x;								// 6
-							tri1.p2.y = p1->y;
-							//tri1.p3										// po
-
-							// Make triangle two be 6..po..p2
-							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 6
-							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
-							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
-
-
-						//////////
-						// Indicate if we need the area, or 1.0-area
-						//////
-							if (!(tnGravity07 >= 6))					llOneMinusArea = true;		// Fills in from 5..6..7..0
-							// else																	// Fills in from 5..4..3..2..1..0
-							break;
-
-					case 1:		// Runs from E to W
-						//////////
-						// We will process the top side.  It requires three triangles:
-						//		(1) p1..4..po
-						//		(2) 4..po..2
-						//		(3) 2..po..p2
-						//////
-							llThreeTriangles = true;
-
-							// Modify triangle one to be p1..4..po
-							// tri.p1												// p1
-							tri1.p2.x = (f64)((s32)p1->x + 1);						// 4
-							tri1.p2.y = (f64)((s32)p1->y + 1);
-							// tri.p3												// po
-
-							// Make triangle two be 4..po..2
-							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));			// 4
-							memcpy(&tri2.p2, po,		sizeof(SXYF64));			// po
-							tri2.p3.x = p2->x;										// 2
-							tri2.p3.y = tri1.p2.y;
-
-							// Make triangle three be 2..po..p2
-							memcpy(&tri3.p1, &tri2.p3,	sizeof(SXYF64));			// 2
-							memcpy(&tri3.p2, po,		sizeof(SXYF64));			// po
-							memcpy(&tri3.p3, p2,		sizeof(SXYF64));			// p2
-
-
-						//////////
-						// See which way the line is going
-						//////
-							if (p1->y < p2->y)
-							{
-								// Line slants \ down
-								if (tnGravity07 >= 1 || tnGravity07 < 5)	llOneMinusArea = true;	// Fills in from 1..2..3..4..5
-								// else																// Fills in from 1..0..7..6..5
-
-							} else {
-								// Line slants / up
-								if (tnGravity07 > 1 || tnGravity07 <= 5)	llOneMinusArea = true;	// Fills in from 1..2..3..4..5
-								// else																// Fills in from 1..0..7..6..5
-							}
-							break;
-
-					case 2:		// Runs from E to NW
-						//////////
-						// This will require two triangles:
-						//		(1) p1..4..po
-						//		(2) 4..po..p2
-						//////
-							llTwoTriangles = true;
-
-							// Modify triangle one to be p1..4..po
-							//tri1.p1										// p1
-							tri1.p2.x = p1->x;								// 4
-							tri1.p2.y = p2->y;
-							//tri1.p3										// po
-
-							// Make triangle two be 4..po..p2
-							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 4
-							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
-							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
-
-
-						//////////
-						// Indicate if we need the area, or 1.0-area
-						//////
-							if (!(tnGravity07 >= 3 && tnGravity07 <= 4))	llOneMinusArea = true;	// Fills in from 5..4..3..2
-							// else																	// Fills in from 5..6..7..0..1..2
-							break;
-
-					case 3:		// Runs from E to N
-						if (!(tnGravity07 >= 2 && tnGravity07 <= 4))	llOneMinusArea = true;		// Fills in from 5..6..7..0..1..2..3
-						// else																		// Fills in from 5..4..3
-						break;
-
-					case 7:		// Runs from E to S
-						if (!(tnGravity07 >= 5))						llOneMinusArea = true;		// Fills in from 5..4..3..2..1..0..7
-						// else																		// Fills in from 5..6..7
-						break;
-
-					default:
-						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
-						_asm int 3;
-						return false;
-				}
-				break;
-
-			case 6:
-				//		NW __N__ NE		2__3__4
-				//		W |		|E		1	  5
-				//		SW|__S__|SE		0__7__6
-				//
-				switch (tnGravity07_p2)
-				{
-					case 0:		// Runs from SE to SW
-						if (tnGravity07 >= 1 && tnGravity07 <= 5)		llOneMinusArea = true;		// Fills in from 6..5..4..3..2..1..0
-						// else																		// Fills in from 6..7..0
-						break;
-
-					case 1:		// Runs from SE to W
-						//////////
-						// This will require two triangles:
-						//		(1) p1..0..po
-						//		(2) 0..po..p2
-						//////
-							llTwoTriangles = true;
-
-							// Modify triangle one to be p1..0..po
-							//tri1.p1										// p1
-							tri1.p2.x = p2->x;								// 0
-							tri1.p2.y = p1->y;
-							//tri1.p3										// po
-
-							// Make triangle two be 0..po..p2
-							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 0
-							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
-							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
-
-
-						//////////
-						// Indicate if we need the area, or 1.0-area
-						//////
-							if (tnGravity07 >= 2 && tnGravity07 <= 6)	llOneMinusArea = true;		// Fills in from 6..5..4..3..2..1
-							// else																	// Fills in from 6..7..0..1
-							break;
-
-					case 2:		// Runs fro3 SE to NW
-						// This is a constant, it's always 0.5 (half the pixel)
-						return(0.5);
-
-					case 3:		// Runs from SE to N
-						//////////
-						// This will require two triangles:
-						//		(1) p1..4..po
-						//		(2) 4..po..p2
-						//////
-							llTwoTriangles = true;
-
-							// Modify triangle one to be p1..4..po
-							//tri1.p1										// p1
-							tri1.p2.x = p1->x;								// 4
-							tri1.p2.y = p2->y;
-							//tri1.p3										// po
-
-							// Make triangle two be 4..po..p2
-							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 4
-							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
-							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
-
-
-						//////////
-						// Indicate if we need the area, or 1.0-area
-						//////
-							if (!(tnGravity07 >= 3 && tnGravity07 <= 5))	llOneMinusArea = true;		// Fills in from 6..5..4..3
-							// else																		// Fills in from 6..7..0..1..2..3
-							break;
-
-					case 4:		// Runs from SE to NE
-						if (tnGravity07 <= 3 || tnGravity07 >= 7)		llOneMinusArea = true;		// Fills in from 6..7..0..1..2..3..4
-						// else																		// Fills in from 6..5..4
-						break;
-
-					default:
-						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
-						_asm int 3;
-						return false;
-				}
-				break;
-
-			case 7:
-				//		NW __N__ NE		2__3__4
-				//		W |		|E		1	  5
-				//		SW|__S__|SE		0__7__6
-				//
-				switch (tnGravity07_p2)
-				{
-					case 1:		// Runs from S to W
-						if (tnGravity07 <= 6 && tnGravity07 >= 2)		llOneMinusArea = true;		// Fills in from 7..6..5..4..3..2..1
-						// else																		// Fills in from 7..0..1
-						break;
-
-					case 2:		// Runs from S to NW
-						//////////
-						// This will require two triangles:
-						//		(1) p1..0..po
-						//		(2) 0..po..p2
-						//////
-							llTwoTriangles = true;
-
-							// Modify triangle one to be p1..0..po
-							//tri1.p1										// p1
-							tri1.p2.x = p2->x;								// 0
-							tri1.p2.y = p1->y;
-							//tri1.p3										// po
-
-							// Make triangle two be 0..po..p2
-							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 0
-							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
-							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
-
-
-						//////////
-						// Indicate if we need the area, or 1.0-area
-						//////
-							if (tnGravity07 >= 3 && tnGravity07 <=6)	llOneMinusArea = true;		// Fills in from 7..6..5..4..3..2
-							// else																	// Fills in from 7..0..1..2
-							break;
-
-					case 3:		// Runs from S to N
-				//		NW __N__ NE		2__3__4
-				//		W |		|E		1	  5
-				//		SW|__S__|SE		0__7__6
-				//
-						//////////
-						// We will process the left side.  It requires three triangles:
-						//		(1) p1..0..po
-						//		(2) 0..po..2
-						//		(3) 2..po..p2
-						//////
-							llThreeTriangles = true;
-
-							// Modify triangle one to be p1..0..po
-							// tri.p1												// p1
-							tri1.p2.x = (f64)((s32)p1->x);							// 0
-							tri1.p2.y = p1->y;
-							// tri.p3												// po
-
-							// Make triangle two be 0..po..2
-							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));			// 0
-							memcpy(&tri2.p2, po,		sizeof(SXYF64));			// po
-							tri2.p3.x = tri1.p2.x;									// 2
-							tri2.p3.y = p2->y;
-
-							// Make triangle three be 2..po..p2
-							memcpy(&tri3.p1, &tri2.p3,	sizeof(SXYF64));			// 2
-							memcpy(&tri3.p2, po,		sizeof(SXYF64));			// po
-							memcpy(&tri3.p3, p2,		sizeof(SXYF64));			// p2
-
-
-						//////////
-						// See which way the line is going
-						//////
-							if (p2->x < p1->x)
-							{
-								// Line slants \ down
-								if (tnGravity07 >= 3 || tnGravity07 < 7)	llOneMinusArea = true;	// Fills in from 3..4..5..6..7
-								// else																// Fills in from 3..2..1..0..7
-
-							} else {
-								// Line slants / up
-								if (tnGravity07 > 3 || tnGravity07 <= 7)	llOneMinusArea = true;	// Fills in from 3..4..5..6..7
-								// else																// Fills in from 3..2..1..0..7
-							}
-							break;
-
-					case 4:		// Runs from S to NE
-						//////////
-						// This will require two triangles:
-						//		(1) p1..6..po
-						//		(2) 6..po..p2
-						//////
-							llTwoTriangles = true;
-
-							// Modify triangle one to be p1..6..po
-							//tri1.p1										// p1
-							tri1.p2.x = p1->x;								// 6
-							tri1.p2.y = p2->y;
-							//tri1.p3										// po
-
-							// Make triangle two be 6..po..p2
-							memcpy(&tri2.p1, &tri1.p2,	sizeof(SXYF64));	// 6
-							memcpy(&tri2.p2, po,		sizeof(SXYF64));	// po
-							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
-
-
-						//////////
-						// Indicate if we need the area, or 1.0-area
-						//////
-							if (tnGravity07 <= 3)					llOneMinusArea = true;			// Fills in from 7..6..5..4
-							// else																	// Fills in from 7..0..1..2..3..4
-							break;
-
-					case 5:		// Runs from S to E
-						if (!(tnGravity07 == 6))					llOneMinusArea = true;			// Fills in from 7..0..1..2..3..4..5
-						// else																		// Fills in from 7..6..5
-						break;
-
-					default:
-						// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
-						_asm int 3;
-						return false;
-				}
-				break;
-
-			default:
-				// This should never happen.  It means tnGravity07_p1 is not 0..7, but something else
-				_asm int 3;
-				return false;
-		}
-
-
-		//////////
-		// Ready to compute
-		//////
-			// Triangle 1
-			iioss_math_computeTriangle(&tri1);
-
-			// Do we need two triangles?
-			if (llTwoTriangles)
-			{
-				// Yes, add in the second triangle
-				iioss_math_computeTriangle(&tri2);
-				tri1.area += tri2.area;
-			}
-
-			// Do we need three triangles?
-			if (llThreeTriangles)
-			{
-				// Yes, add in the third triangle
-				iioss_math_computeTriangle(&tri3);
-				tri1.area += tri3.area;
-			}
-
-
-		//////////
-		// Ready to return our result
-		//////
-			if (llOneMinusArea)
-			{
-				// It's the opposite value
-				return(1.0 - tri1.area);
-
-			} else {
-				// It's the value
-				return(tri1.area);
-			}
 	}
 
 
@@ -7755,7 +8071,7 @@ continueToNextAttribute:
 // Note:  The corner point is the point closest to (0,0).
 //
 //////
-	s32 iioss_canvas_drawPolygon_gravityPoint(SXYF64* p, SXYS32* po)
+	s32 iioss_math_getGravityByRelativePosition(SXYF64* p, SXYS32* po)
 	{
 		//////////
 		//
@@ -7785,9 +8101,106 @@ continueToNextAttribute:
 				if (p->y != po->y + 1)				return(5);		// It's east
 				else								return(4);		// It's northeast
 
-			} else {
-				// It can only be north
+			} else if (p->y == po->y + 1) {
+				// It's north
 													return(3);		// It's north
+
+			} else {
+				// It wasn't found.  This will happen if one of the axis isn't at a true gravity
+				// condition (i.e. on an axis relative to po).  Even so, there are some conditions
+				// we can still examine.
+				if ((s32)p->y == po->y)
+				{
+					// The pixels are on the same y, so it's either west or east
+					if (p->x < po->x)				return(1);		// It's west
+					else							return(5);		// It's east
+
+				} else if ((s32)p->x == po->x) {
+					// The pixels are on the same x, so it's either north or south
+					if (p->y < po->y)				return(3);		// It's north
+					else							return(7);		// It's south
+
+				} else {
+													return(-1);		// It remains invalid :-(
+				}
+			}
+	}
+
+
+
+
+//////////
+//
+// Called to adjust the gravity based on the value of theta.  This is a slower process than the
+// standard relative point compare, but when the gravity point indicates the same side as another
+// point, it is time to fine-grain adjust it, and then indicate it as being either at, above, or below.
+//
+//////
+	s32 iioss_math_fineAdjustGravityByTheta(SXYF64* po, SXYF64* p, SXYF64* pg, s32 lnGravity07p, s32 lnGravity07pg)
+	{
+		f64 lfDeltaX, lfDeltaY, lfThetaP, lfThetaPg;
+
+
+		//////////
+		// If we're on a corner, then it is a perfect match already
+		//////
+			switch(lnGravity07p)
+			{
+				case 0:
+				case 2:
+				case 4:
+				case 6:
+					return(lnGravity07pg);		// It is correct being duplicated
+			}
+
+
+		//////////
+		// Grab both thetas
+		//////
+			// p
+			lfDeltaX	= p->x - po->x;
+			lfDeltaY	= p->y - po->y;
+			lfThetaP	= iioss_math_adjustTheta(atan2(lfDeltaY, lfDeltaX));
+
+			// pg
+			lfDeltaX	= pg->x - po->x;
+			lfDeltaY	= pg->y - po->y;
+			lfThetaPg	= iioss_math_adjustTheta(atan2(lfDeltaY, lfDeltaX));
+
+
+		//////////
+		// Are they the same?
+		//////
+			if (lfThetaP == lfThetaPg)
+				return(lnGravity07pg);		// Yes, it is correct being duplicated
+
+
+		//////////
+		// If we get here, we need to see where it goes, and adjust from there
+		//////
+			switch (lnGravity07p)
+			{
+				case 1:
+					if (lfThetaPg < lfThetaP)			return(2);		// Move it to NW
+					else								return(0);		// Move it to SW
+					break;
+
+				case 3:
+					if (lfThetaPg < lfThetaP)			return(4);		// Move it to NE
+					else								return(2);		// Move it to NW
+					break;
+
+				case 5:
+					if (lfThetaPg < lfThetaP)			return(4);		// Move it to NE
+					else								return(6);		// Move it to SE
+					break;
+
+				case 7:
+					if (lfThetaPg < lfThetaP)			return(0);		// Move it to SW
+					else								return(6);		// Move it to SE
+					break;
+				default:
+					return(lnGravity07pg);								// Control should never get here, but if it does just send back what was sent in
 			}
 	}
 
@@ -7799,7 +8212,7 @@ continueToNextAttribute:
 // Called to adjust theta into the range 0..2pi
 //
 //////
-	f64 iioss_adjustTheta(f64 tfTheta)
+	f64 iioss_math_adjustTheta(f64 tfTheta)
 	{
 		// Validate theta is positive
 		while (tfTheta < 0.0)
@@ -7820,7 +8233,7 @@ continueToNextAttribute:
 // Called to determine which direction the gravity point goes based on the line's direction and slope
 //
 //////
-	u32 iioss_canvas_drawpolygon_gravityPerThetaAndLeft(f64 tfTheta, bool tlLeft)
+	u32 iioss_math_getGravityOfThetaAndLeft(f64 tfTheta, bool tlLeft)
 	{
 		// Based on the slope of the line, determine which portion of each pixel will hold the 
 		if (tfTheta == 0 || tfTheta == _2PI)
@@ -7884,7 +8297,7 @@ continueToNextAttribute:
 //		1     5		 W     E
 //		0__7__6		SW__S__SE
 //////
-	s32 iioss_canvas_drawpolygon_gravity07(u32 tnGravityDecorated)
+	s32 iioss_math_getGravity07FromDecoratedGravity(u32 tnGravityDecorated)
 	{
 		switch (tnGravityDecorated)
 		{
@@ -8991,16 +9404,16 @@ continueToNextAttribute:
 			tri1.p1.y	= (f64)sfld->po.y;
 			tri1.p2.x	= tri1.p1.x;				// 2 - (po,p1)
 			tri1.p2.y	= sfld->p1.y;
-			tri1.p3.x	= sfld->p1.x;					// 3 - (p1,p1)
+			tri1.p3.x	= sfld->p1.x;				// 3 - (p1,p1)
 			tri1.p3.y	= sfld->p1.y;
 			iioss_math_computeTriangle(&tri1);		// Compute the area
 
 			// Triangle 2
 			tri2.p1.x	= tri1.p1.x;				// 0 - (po,po)
 			tri2.p1.y	= tri1.p1.y;
-			tri2.p2.x	= sfld->p1.x;					// 3 - (p1,p1)
+			tri2.p2.x	= sfld->p1.x;				// 3 - (p1,p1)
 			tri2.p2.y	= sfld->p1.y;
-			tri2.p3.x	= sfld->p2.x;					// 7 - (p2,p2)
+			tri2.p3.x	= sfld->p2.x;				// 7 - (p2,p2)
 			tri2.p3.y	= sfld->p2.y;
 			iioss_math_computeTriangle(&tri2);		// Compute the area
 

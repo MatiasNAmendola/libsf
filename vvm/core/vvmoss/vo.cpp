@@ -1367,7 +1367,7 @@
 // Draws a line on the canvas.
 //
 //////
-	u64 CALLTYPE oss_canvasLine(SCanvas* tc, SBGRA* bd, f32 p1x, f32 p1y, f32 p2x, f32 p2y, f32 lineThickness, SBGRA color, bool tlFloan)
+	u64 CALLTYPE oss_canvasLine(SCanvas* tc, SBGRA* bd, SXYF32* p1, SXYF32* p2, f32 lineThickness, SBGRA color, bool tlFloan)
     {
 		u64 lnPixelsDrawn;
 
@@ -1377,7 +1377,7 @@
 			return(-1);
 
 		// Draw the line in floaned fashion
-		lnPixelsDrawn = ioss_canvasLine(tc, bd, p1x, p1y, p2x, p2y, lineThickness, color);
+		lnPixelsDrawn = ioss_canvasLine(tc, bd, p1, p2, lineThickness, color);
 
 		// Mark the item dirty
 		if (lnPixelsDrawn != 0)
@@ -8089,6 +8089,106 @@ _asm int 3;
 
 //////////
 //
+// Called to get the decorated gravity of the indicated theta and left setting
+//
+//////
+	u32 CALLTYPE oss_math_getGravityOfThetaAndLeft(f64 tfTheta, bool tlLeft)
+	{
+		return(iioss_math_getGravityOfThetaAndLeft(tfTheta, tlLeft));
+	}
+
+
+
+
+//////////
+//
+// Called to obtain the 0..7 gravity range from a decorated gravity setting
+//
+//////
+	s32 CALLTYPE oss_math_getGravity07FromDecoratedGravity(u32 tnGravityDecorated)
+	{
+		return(iioss_math_getGravity07FromDecoratedGravity(tnGravityDecorated));
+	}
+
+
+
+
+//////////
+//
+// Called to compute the partial area of a square using an intersect/origin point, and then
+// two points which are on the X-Intercept or Y-Intercept axes.  It computes the area based on
+// gravity relative to the first line (PO..P1).
+//
+// Note:  The two Intersect gravities are where the intercept it the line in the 0..7 form.
+// Note:  The line1 gravity indicates which part of the area should be computed, it's either the
+//        side of the portion which is smaller or larger (unless it cuts the square exactly in half).
+//
+//////
+	f64 CALLTYPE oss_math_getAreaOfSquareUsing_po_p1_p2(s32 tnGravity07_p1Intersect, s32 tnGravity07_p2Intersect, s32 tnGravity07_line1, SXYF64* po, SXYF64* p1, SXYF64* p2)
+	{
+		return(iioss_math_getAreaOfSquareUsing_po_p1_p2(tnGravity07_p1Intersect, tnGravity07_p2Intersect, tnGravity07_line1, po, p1, p2));
+	}
+
+
+
+
+//////////
+//
+// Gets the next intercept given a point and a theta
+//
+//////
+	void CALLTYPE oss_math_getNextAxisInterceptXY(SXYF64* p, f64 tfTheta)
+	{
+		if (p)		iioss_math_getNextAxisInterceptXY(p, tfTheta);		// Compute it
+	}
+
+
+
+
+//////////
+//
+// Gets the gravity of p relative to po
+//
+//////
+	s32 CALLTYPE oss_math_getGravityByRelativePosition(SXYF64* p, SXYS32* po)
+	{
+		return(iioss_math_getGravityByRelativePosition(p, po));
+	}
+
+
+
+
+//////////
+//
+// Gets the true gravity position by slope when the gravity is on the same axis as another point
+// or points.  Only PO, PG and one of either P1 or P2 are required.  If 
+//
+//////
+	s32 CALLTYPE oss_math_fineAdjustGravityByTheta(SXYF64* po, SXYF64* p, SXYF64* pg, s32 lnGravity07p, s32 lnGravity07pg)
+	{
+		// If they sent us valid parameters, we adjust, otherwise whatever it is passes through
+		if (po && p && pg)		return(iioss_math_fineAdjustGravityByTheta(po, p, pg, lnGravity07p, lnGravity07pg));
+		else					return(lnGravity07pg);
+	}
+
+
+
+
+//////////
+//
+// Called to adjust theta into the range 0..2pi
+//
+//////
+	f64 CALLTYPE oss_math_adjustTheta(f64 tfTheta)
+	{
+		return(iioss_math_adjustTheta(tfTheta));
+	}
+
+
+
+
+//////////
+//
 // Called to initialize a polygon to the number indicated by poly->lineCount.
 //
 //////
@@ -8322,6 +8422,11 @@ _asm int 3;
 		// Make sure our environment is sane
 		if (buffRoot)
 		{
+			// If they want us to populate the length, do so
+			if (tnDataLength == -1)
+				tnDataLength = (u32)oss_strlen(_csu8p(tcData));
+
+			// If there's anything to do, do it
 			if (tnDataLength != 0)
 			{
 				// Make sure this much data will fit there in the buffer
@@ -8445,7 +8550,6 @@ _asm int 3;
 		SBuilder* buffDelete;
 
 
-// TODO:  untested code, breakpoint and examine
 		// Make sure our environment is sane
 		if (buffRoot && *buffRoot)
 		{
@@ -8470,6 +8574,20 @@ _asm int 3;
 			// Release the SBuilder structure
 			oss_free(buffDelete);
 		}
+	}
+
+
+
+
+//////////
+//
+// Called to write out the indicated builder file as an 8-bit ASCII file
+//
+//////
+	u32 CALLTYPE oss_builderAsciiWriteOutFile(SBuilder* buffRoot, s8* tcFilename)
+	{
+		if (buffRoot && tcFilename)		return(oss_sharedAsciiWriteOutFile(tcFilename, buffRoot->data, buffRoot->populatedLength));
+		else							return(-1);
 	}
 
 

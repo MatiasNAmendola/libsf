@@ -104,7 +104,7 @@
 		u64 CALLTYPE		 	oss_canvasDrawText							(SCanvas* tc, SBGRA* bd, u64 fontHandle, s32 ulx, s32 uly, s32 lrx, s32 lry, s8*  tcText, u32 tnTextLength, SBGRA foreground, SBGRA background);
 		u64 CALLTYPE		 	oss_canvasFrameRect							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 borderThickness, SBGRA border);
 		u64 CALLTYPE		 	oss_canvasFillRect							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 borderThickness, SBGRA border, SBGRA background);
-		u64 CALLTYPE		 	oss_canvasLine								(SCanvas* tc, SBGRA* bd, f32 p1x, f32 p1y, f32 p2x, f32 p2y, f32 lineThickness, SBGRA color, bool tlFloan);
+		u64 CALLTYPE		 	oss_canvasLine								(SCanvas* tc, SBGRA* bd, SXYF32* p1, SXYF32* p2, f32 lineThickness, SBGRA color, bool tlFloan);
 		u64 CALLTYPE		 	oss_canvasArc								(SCanvas* tc, SBGRA* bd, s32 ox, s32 oy, f32 radius, f32 start, f32 end, s32 lineThickness, SBGRA line);
 		SCanvas* CALLTYPE	 	oss_canvasExtract							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry);
 		u64 CALLTYPE		 	oss_canvasColorize							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, SBGRA color);
@@ -333,6 +333,13 @@
 		void CALLTYPE			oss_math_computeSquare						(SSquareInOutF64* sq, f32 ox, f32 oy);
 		void CALLTYPE			oss_math_computeLine						(SLineF64* line);
 		void CALLTYPE			oss_math_squareRotateAbout					(SSquareInOutF64* sq);
+		u32 CALLTYPE			oss_math_getGravityOfThetaAndLeft			(f64 tfTheta, bool tlLeft);
+		s32 CALLTYPE			oss_math_getGravity07FromDecoratedGravity	(u32 tnGravityDecorated);
+		f64 CALLTYPE			oss_math_getAreaOfSquareUsing_po_p1_p2		(s32 tnGravity07_p1Intersect, s32 tnGravity07_p2Intersect, s32 tnGravity07_line1, SXYF64* po, SXYF64* p1, SXYF64* p2);
+		void CALLTYPE			oss_math_getNextAxisInterceptXY				(SXYF64* p, f64 tfTheta);
+		s32 CALLTYPE			oss_math_getGravityByRelativePosition		(SXYF64* p, SXYS32* po);
+		s32 CALLTYPE			oss_math_fineAdjustGravityByTheta			(SXYF64* po, SXYF64* p, SXYF64* pg, s32 lnGravity07p, s32 lnGravity07pg);
+		f64 CALLTYPE			oss_math_adjustTheta						(f64 tfTheta);
 
 		bool CALLTYPE			oss_polygon_initialize						(SPolygon* poly, u32 tnLineCount, bool tlAllocatePolyLines);
 		bool CALLTYPE			oss_polygon_setByPolyLine					(SPolygon* poly, u32 tnEntry, SPolyLine* line);
@@ -361,6 +368,7 @@
 		s8* CALLTYPE			oss_builderAllocateBytes					(SBuilder*	buffRoot, u32 tnDataLength);
 		void CALLTYPE			oss_builderSetSize							(SBuilder*  buffRoot, u32 tnBufferLength);
 		void CALLTYPE			oss_builderFreeAndRelease					(SBuilder** buffRoot);
+		u32 CALLTYPE			oss_builderAsciiWriteOutFile				(SBuilder*  buffRoot, s8* tcFilename);
 
 
 //////////
@@ -427,8 +435,8 @@
 		f64 CALLTYPE			oss_bxmlaGetF64								(SBxmla* bxmla, bool* tlError);
 
 		// For 2-way navigation through the attributes (can be done manually, but these expressly do it
-		SBxmla* CALLTYPE		oss_bxmlaGetNext					(SBxmla* bxmla);
-		SBxmla* CALLTYPE		oss_bxmlaGetPrev					(SBxmla* bxmla);
+		SBxmla* CALLTYPE		oss_bxmlaGetNext							(SBxmla* bxmla);
+		SBxmla* CALLTYPE		oss_bxmlaGetPrev							(SBxmla* bxmla);
 
 		SBxml* CALLTYPE			oss_bxmlNodeCreate							(s8* tcNewName, u32 tnNewNameLength);
 		bool CALLTYPE			oss_bxmlNodeSetName							(SBxml* bxml, s8* tcNewName, u32 tnNewNameLength);
@@ -536,7 +544,7 @@
 	void					ioss_initializeBackground						(u32 tnWidth, u32 tnHeight, u32 tnBackColor, s8* tbd, u32 tnActualWidth);
 	u32						ioss_computeActualWidth							(u32 tnWidth);
 	bool					ioss_paintWindow								(HWND hwnd);
-	u64						ioss_canvasLine									(SCanvas* tc, SBGRA* bd, f32 p1x, f32 p1y, f32 p2x, f32 p2y, f32 lineThickness, SBGRA color);
+	u64						ioss_canvasLine									(SCanvas* tc, SBGRA* bd, SXYF32* p1, SXYF32* p2, f32 lineThickness, SBGRA color);
 	_iswSOssWindowLL*		ioss_findSOssWindowLLByHwnd						(HWND hwnd);
 	bool					iioss_findSOssWindowLLByHwndCallback			(SStartEndCallback* cb);
 	_iswSOssWindowLL*		ioss_findSOssWindowLLByScreenId					(u64 tnScreenId);
@@ -646,15 +654,16 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	u64						iioss_canvas_drawPolygon						(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color);
 	int						iioss_canvas_drawPolygon_qsortFloansCallback	(const void* l, const void* r);
 	u32						iioss_canvas_drawPolygon_GetLineSegments		(u32 tnIndex, u32 tnMaxCount, SBGRACompute* sbgracRoot, SBGRACompute** p1, SBGRACompute** p2);
-	void					iioss_canvas_drawPolygon_nextIntercept			(SXYF64* p, f64 tfTheta);
 	void					iioss_canvas_drawPolygon_storeCorner			(SBuilder* corners, SXYF64* po, SXYF64* pi, _isSStoreFloan_lineData* sfld);
 	void					iioss_canvas_drawPolygon_storeFloans			(_isSStoreFloan_lineData* sfld);
 	void					iioss_canvas_drawPolygon_storeFloansCorner		(_isSStoreFloan_lineData* sfld, _isSStoreFloan_cornerData* sfcd1, _isSStoreFloan_cornerData* sfcd2);
-	f64						iioss_canvas_drawPolygon_storeFloansCorner_getArea(s32 tnGravity07_p1, s32 tnGravity07_p2, s32 tnGravity07, SXYF64* po, SXYF64* p1, SXYF64* p2);
-	s32						iioss_canvas_drawPolygon_gravityPoint			(SXYF64* p, SXYS32* po);
-	f64						iioss_adjustTheta								(f64 tfTheta);
-	u32						iioss_canvas_drawpolygon_gravityPerThetaAndLeft	(f64 tfTheta, bool tlLeft);
-	s32						iioss_canvas_drawpolygon_gravity07				(u32 tnGravityDecorated);
+	u32						iioss_math_getGravityOfThetaAndLeft				(f64 tfTheta, bool tlLeft);
+	s32						iioss_math_getGravity07FromDecoratedGravity		(u32 tnGravityDecorated);
+	f64						iioss_math_getAreaOfSquareUsing_po_p1_p2		(s32 tnGravity07_p1Intersect, s32 tnGravity07_p2Intersect, s32 tnGravity07_line1, SXYF64* po, SXYF64* p1, SXYF64* p2);
+	void					iioss_math_getNextAxisInterceptXY				(SXYF64* p, f64 tfTheta);
+	s32						iioss_math_getGravityByRelativePosition			(SXYF64* p, SXYS32* po);
+	s32						iioss_math_fineAdjustGravityByTheta				(SXYF64* po, SXYF64* p, SXYF64* pg, s32 lnGravity07p, s32 lnGravity07pg);
+	f64						iioss_math_adjustTheta							(f64 tfTheta);
 	u64						iioss_canvasRotateAbout							(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, f32 ox, f32 oy);
 
 
