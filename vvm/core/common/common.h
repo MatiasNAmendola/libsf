@@ -152,7 +152,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 
 
 //////////
-// Compass directions, used by iioss_canvas_drawPolygon()
+// Compass directions, used by iioss_canvasPolygon()
 //////
 // TODO: I'd like to revisit these naming conventions
 	cu32					_COMPASS_UP_DOWN								= 0x10;
@@ -919,6 +919,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 			u32			start;					// For lines, the starting offset (lower value)
 			u32			offsetSrc;				// Offset to the source SBGRA pixel
 			s32			x;						// X coordinate
+			f32			fx;						// X coordinate in floating point space
 			// This structure is used for when there needs to be a starting and ending x,y coordinate set
 			struct {
 				s16		xStart;
@@ -930,6 +931,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 			u32			end;					// For lines, the ending offset (greater value)
 			u32			offsetDst;				// Offset to the destination SBGRA pixel
 			s32			y;						// Y coordinate
+			f32			fy;						// Y coordinate in floating point space
 			// This structure is used for when there needs to be a starting and ending x,y coordinate set
 			struct {
 				s16		xEnd;
@@ -1028,15 +1030,29 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 
 	struct SLineF64
 	{
-		SXYF64		start;						// [input] Starting point
-		SXYF64		end;						// [input] Ending point
+		union {
+			SXYF64	start;						// [input] Starting point
+			SXYF64	p1;
+		};
+
+		union {
+			SXYF64	end;						// [input] Ending point
+			SXYF64	p2;
+		};
 
 		// The following are computed with oss_math_computeLine()
 		SXYF64		delta;						// Delta between start and end
 		SXYF64		mid;						// Midpoint
-		f64			length;						// Length
+		union {
+			f64		length;						// Length
+			f64		radius;						// Radius for the trig function
+		};
 		f64			m;							// Slope
 		f64			mp;							// Perpendicular slope
+
+		// Only used if trig is true
+		bool		trig;						// Should trig functions be computed?
+		f64			theta;						// Theta (from p1 to p2, note: add _PI to reverse the angle from p2 to p1)
 	};
 
 	struct SPolyLine
@@ -1065,6 +1081,26 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		// The derived data for where they are drawn
 		SBuilder*		pixelFloans;			// (SBGRACompute) Individual pixel floans, at the indicated x,y
 		SBuilder*		rangeFloans;			// (SBGRACompute) A range of floans to write beginning at start, ending at end (poetic, isn't it?)
+	};
+
+	struct SBezier
+	{
+		// Beziers are either 3-point, 4-point, or 5-point (so far), and we compute fx,fy floan data
+		// This allows them to be drawn later using applied polygons as per the target resolution.
+		u32				points;					// Number of Pn points comprising the bezier curve
+		u32				pixelFloanPoints;		// Number of pixel floans to generate
+		SBGRA			color;					// The color to draw in
+
+		// Based on the number of points, some of these may not be populated or used
+		SXYF64			p1;						// First point
+		SXYF64			p2;						// Second point
+		SXYF64			p3;						// Third point (used when points >= 3)
+		SXYF64			p4;						// Fourth point (used when points >= 4)
+		SXYF64			p5;						// Fifth point (used when points >= 5)
+
+		// Holds each point generated for the Bezier curve
+		bool			wash;					// The bezier drawing algorithm can compute raw points, or it can wash them to be either only the X- and Y-Intercepts for pixel borders, or for drawing onto a canvas.  This is determined by this setting, and whether or not a valid SCanvas and SBGRA were passed to the computation algorithm.
+		SBuilder*		pixelFloans;			// (SBGRACompute) A range of floans which are either raw, or only touch each pixel
 	};
 
 	struct SLLCallback

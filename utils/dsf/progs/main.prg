@@ -77,9 +77,10 @@ SET SAFETY OFF
 
 
 **********
-* Did they specify that they want to go straight into the locals screen?
+* Display the main launcher screen.  If they passed a font filename
+* to begin editing, it will bring up the edit screen.
 *****
-	* Display the main form for upsizing
+	* Display the splash screen
 	DO FORM frmMain WITH tcOption1, tcOption2, tcOption3
 
 

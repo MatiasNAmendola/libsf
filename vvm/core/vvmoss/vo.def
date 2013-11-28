@@ -48,6 +48,7 @@ EXPORTS
 	oss_canvasFillRect
 	oss_canvasLine
 	oss_canvasArc
+	oss_canvasBezier
 	oss_canvasExtract
 	oss_canvasColorize
 	oss_canvasGrayscale
@@ -56,7 +57,7 @@ EXPORTS
 	oss_canvasScale
 	oss_canvasRotate
 	oss_canvasRotateAbout
-	oss_canvas_drawPolygon
+	oss_canvasPolygon
 	
 	oss_caskDefineStandard
 	oss_caskDefineEncompassingRectangle
@@ -233,7 +234,8 @@ EXPORTS
 	oss_math_fineAdjustGravityByTheta
 	oss_math_adjustTheta
 	oss_math_withinDelta
-	
+	oss_math_washFloans
+
 	oss_polygon_initialize
 	oss_polygon_setByPolyLine
 	oss_polygon_setByValues

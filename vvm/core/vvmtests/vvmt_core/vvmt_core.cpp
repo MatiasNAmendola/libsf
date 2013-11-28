@@ -316,7 +316,7 @@
 				oss_polygon_setByValues(&polygon, 3, &p4, &p1, &gravity);		// p4..p1
 
 				// Draw the polygon
-				lnPixelsDrawn = oss_canvas_drawPolygon(lc, lc->bd, &polygon, black);
+				lnPixelsDrawn = oss_canvasPolygon(lc, lc->bd, &polygon, black);
 
 				// Reset it for the next go-round
 				oss_polygon_reset(&polygon, true);

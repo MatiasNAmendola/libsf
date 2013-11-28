@@ -1414,6 +1414,36 @@
 
 //////////
 //
+// Called to draw a 3-point, 4-point, or 5-point Bezier curve, or to generate the points affected
+// for the given canvas
+//
+//////
+	u64 CALLTYPE oss_canvasBezier(SCanvas* tc, SBGRA* bd, SBezier* bez)
+	{
+		// Make sure our environment is sane
+		if (bez)
+		{
+			// Draw or generate the bezier curve points
+			switch (bez->points)
+			{
+				case 3:
+					return(iioss_canvasBezier3(tc, bd, bez));
+				case 4:
+					return(iioss_canvasBezier4(tc, bd, bez));
+				case 5:
+					return(iioss_canvasBezier5(tc, bd, bez));
+			}
+
+		}
+		// If we get here, invalid data
+		return(-1);
+	}
+
+
+
+
+//////////
+//
 // Extracts a portion of a canvas, creating a new canvas.
 //
 //////
@@ -1701,10 +1731,10 @@
 // Called to draw the polygon onto the canvas.
 //
 //////
-	u64 CALLTYPE oss_canvas_drawPolygon(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color)
+	u64 CALLTYPE oss_canvasPolygon(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color)
 	{
 		if (poly && poly->line && poly->lineCount >= 3)
-			return(iioss_canvas_drawPolygon(tsDst, bd, poly, color));
+			return(iioss_canvasPolygon(tsDst, bd, poly, color));
 
 		// If we get here, failure
 		return(0);
@@ -8195,6 +8225,29 @@ _asm int 3;
 	bool CALLTYPE oss_math_withinDelta(f64 tfValue1, f64 tfValue2, s32 tnDeltaDecimals)
 	{
 		return(iioss_math_withinDelta(tfValue1, tfValue2, tnDeltaDecimals));
+	}
+
+
+
+
+//////////
+//
+// Called to wash the floans.  Some floan generating algorithms are inside of pixels, sometimes
+// with many points being inside a single pixel.  This washing algorithm removes those extra
+// points and only includes points which explicitly hit an X- or Y-Intercept pixel boundary.
+// This allows the data to be used for later floan computation more accurately.
+//
+// It should be noted that there may be some loss or gain of floan area due to the rounding.
+// To bypass this, it is recommended to scale the floans up to some higher level, wash the
+// pixels there, and then scale back down and add up the alphas.  However, depending on the
+// source, the difference is likely to be very small, and typically not visually perceptible
+// (such as with bezier curve point data).
+//
+//////
+	bool CALLTYPE oss_math_washFloans(SCanvas* tc, SBGRA* bd, SBuilder* input, SBuilder** intermediate, SBuilder** drawFloans, bool tlAlsoComputeAsDrawFloans)
+	{
+		if (input && intermediate)		return(iioss_math_washFloans(tc, bd, input, intermediate, drawFloans, tlAlsoComputeAsDrawFloans));
+		else							return(false);
 	}
 
 

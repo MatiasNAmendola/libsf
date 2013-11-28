@@ -106,6 +106,7 @@
 		u64 CALLTYPE		 	oss_canvasFillRect							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 borderThickness, SBGRA border, SBGRA background);
 		u64 CALLTYPE		 	oss_canvasLine								(SCanvas* tc, SBGRA* bd, SXYF32* p1, SXYF32* p2, f32 lineThickness, SBGRA color, bool tlFloan);
 		u64 CALLTYPE		 	oss_canvasArc								(SCanvas* tc, SBGRA* bd, s32 ox, s32 oy, f32 radius, f32 start, f32 end, s32 lineThickness, SBGRA line);
+		u64 CALLTYPE			oss_canvasBezier							(SCanvas* tc, SBGRA* bd, SBezier* bez);
 		SCanvas* CALLTYPE	 	oss_canvasExtract							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry);
 		u64 CALLTYPE		 	oss_canvasColorize							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, SBGRA color);
 		u64 CALLTYPE		 	oss_canvasGrayscale							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry);
@@ -114,7 +115,7 @@
 		u64 CALLTYPE			oss_canvasScale								(SCanvas* tsDst, SCanvas* tsSrc, SScaleMap** tsScaleMap);
 		u64 CALLTYPE			oss_canvasRotate							(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians);
 		u64 CALLTYPE			oss_canvasRotateAbout						(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, f32 ox, f32 oy);
-		u64 CALLTYPE			oss_canvas_drawPolygon						(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color);
+		u64 CALLTYPE			oss_canvasPolygon							(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color);
 
 		SCask* CALLTYPE			oss_caskDefineStandard						(u32 tnHeight, u32 tnWidth, u32 tnLeftStyle, u32 tnLeftState, u32 tnLeftPipCount, u32 tnLeftColor, csu8p tcLeftText, u32 tnRightStyle, u32 tnRightState, u32 tnRightPipCount, u32 tnRightColor, csu8p tcRightText);
 		SCask* CALLTYPE			oss_caskDefineEncompassingRectangle			(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SRectXYXY* tsOuter);
@@ -341,6 +342,7 @@
 		s32 CALLTYPE			oss_math_fineAdjustGravityByTheta			(SXYF64* po, SXYF64* p, SXYF64* pg, s32 lnGravity07p, s32 lnGravity07pg);
 		f64 CALLTYPE			oss_math_adjustTheta						(f64 tfTheta);
 		bool CALLTYPE			oss_math_withinDelta						(f64 tfValue1, f64 tfValue2, s32 tnDeltaDecimals);
+		bool CALLTYPE			oss_math_washFloans							(SCanvas* tc, SBGRA* bd, SBuilder* input, SBuilder** intermediate, SBuilder** drawFloans, bool tlAlsoComputeAsDrawFloans);
 
 		bool CALLTYPE			oss_polygon_initialize						(SPolygon* poly, u32 tnLineCount, bool tlAllocatePolyLines);
 		bool CALLTYPE			oss_polygon_setByPolyLine					(SPolygon* poly, u32 tnEntry, SPolyLine* line);
@@ -650,25 +652,26 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	void					iioss_math_computeTriangle						(STriangleF64* tri);
 	void					iioss_math_computeSquare						(SSquareInOutF64* sq, f32 ox, f32 oy);
 	void					iioss_math_computeLine							(SLineF64* line);
+	void					iioss_copyLine									(SLineF64* line, SXYF64* p1, SXYF64* p2, bool tlComputeLine);
 	void					ioss_math_squareRotateAbout						(SSquareInOutF64* sq);
 	bool					iioss_polygon_initialize						(SPolygon* poly, u32 tnLineCount, bool tlAllocatePolyLines);
 	bool					iioss_polygon_setByPolyLine						(SPolygon* poly, u32 tnEntry, SPolyLine* line);
 	bool					iioss_polygon_setByValues						(SPolygon* poly, u32 tnEntry, SXYF64* start, SXYF64* end, SXYF64* gravity);
-	u64						iioss_canvas_drawPolygon						(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color);
-	void					iioss_canvas_drawPolygon_processSmall			(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color, _isSCanvasDrawPolygonParameters* lcdp);
-	void					iioss_canvas_drawPolygon_processNormal			(SCanvas* tsDst, SPolygon* poly, _isSCanvasDrawPolygonParameters* lcdp);
-	void					iioss_canvas_drawPolygon_draw					(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color, _isSCanvasDrawPolygonParameters* lcdp);
-	void					iioss_canvas_drawPolygon_computeLine			(SCanvas* tsDst, _isSCanvasDrawPolygonParameters* lcdp);
-	void					iioss_canvas_drawPolygon_getCornerFloans		(_isSCanvasDrawPolygonParameters* lcdp);
-	void					iioss_canvas_drawPolygon_getRangeFloans			(SCanvas* tsDst, SPolygon* poly, _isSCanvasDrawPolygonParameters* lcdp);
-	void					iioss_canvas_drawPolygon_drawPixelFloans		(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, _isSCanvasDrawPolygonParameters* lcdp);
-	void					iioss_canvas_drawPolygon_drawRangeFloans		(                SBGRA* bd, SPolygon* poly, _isSCanvasDrawPolygonParameters* lcdp);
-	bool					iioss_canvas_drawPolygon_determineIfSmall		(SPolygon* poly);
-	int						iioss_canvas_drawPolygon_qsortFloansCallback	(const void* l, const void* r);
-	u32						iioss_canvas_drawPolygon_getNextLineSegment		(u32 tnIndex, u32 tnMaxCount, SBGRACompute* sbgracRoot, SBGRACompute** p1, SBGRACompute** p2);
-	void					iioss_canvas_drawPolygon_storeCorner			(SBuilder* corners, SXYF64* po, SXYF64* pi, _isSStoreFloan_lineData* sfld);
-	void					iioss_canvas_drawPolygon_storeFloans			(_isSStoreFloan_lineData* sfld);
-	void					iioss_canvas_drawPolygon_storeFloansCorner		(_isSStoreFloan_lineData* sfld, _isSStoreFloan_cornerData* sfcd1, _isSStoreFloan_cornerData* sfcd2);
+	u64						iioss_canvasPolygon								(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color);
+	void					iioss_canvasPolygon_processSmall				(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color, _isSCanvasDrawPolygonParameters* lcdp);
+	void					iioss_canvasPolygon_processNormal				(SCanvas* tsDst, SPolygon* poly, _isSCanvasDrawPolygonParameters* lcdp);
+	void					iioss_canvasPolygon_draw						(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color, _isSCanvasDrawPolygonParameters* lcdp);
+	void					iioss_canvasPolygon_computeLine					(SCanvas* tsDst, _isSCanvasDrawPolygonParameters* lcdp);
+	void					iioss_canvasPolygon_getCornerFloans				(_isSCanvasDrawPolygonParameters* lcdp);
+	void					iioss_canvasPolygon_getRangeFloans				(SCanvas* tsDst, SPolygon* poly, _isSCanvasDrawPolygonParameters* lcdp);
+	void					iioss_canvasPolygon_drawPixelFloans				(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, _isSCanvasDrawPolygonParameters* lcdp);
+	void					iioss_canvasPolygon_drawRangeFloans				(                SBGRA* bd, SPolygon* poly, _isSCanvasDrawPolygonParameters* lcdp);
+	bool					iioss_canvasPolygon_determineIfSmall			(SPolygon* poly);
+	int						iioss_canvasPolygon_qsortFloansCallback			(const void* l, const void* r);
+	u32						iioss_canvasPolygon_getNextLineSegment			(u32 tnIndex, u32 tnMaxCount, SBGRACompute* sbgracRoot, SBGRACompute** p1, SBGRACompute** p2);
+	void					iioss_canvasPolygon_storeCorner					(SBuilder* corners, SXYF64* po, SXYF64* pi, _isSStoreFloan_lineData* sfld);
+	void					iioss_canvasPolygon_storeFloans					(_isSStoreFloan_lineData* sfld);
+	void					iioss_canvasPolygon_storeFloansCorner			(_isSStoreFloan_lineData* sfld, _isSStoreFloan_cornerData* sfcd1, _isSStoreFloan_cornerData* sfcd2);
 	u32						iioss_math_getGravityOfThetaAndLeft				(f64 tfTheta, bool tlLeft);
 	s32						iioss_math_getGravity07FromDecoratedGravity		(u32 tnGravityDecorated);
 	f64						iioss_math_getAreaOfSquareUsing_po_p1_p2		(s32 tnGravity07_p1Intersect, s32 tnGravity07_p2Intersect, s32 tnGravity07_line1, SXYF64* po, SXYF64* p1, SXYF64* p2);
@@ -679,6 +682,12 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	bool					iioss_math_withinDelta							(f64 tfValue1, f64 tfValue2, s32 tnDeltaDecimals);
 	void					iioss_math_multiplyBy							(SXYF64* p, f64 tfMultiplier);
 	u64						iioss_canvasRotateAbout							(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, f32 ox, f32 oy);
+	u64						iioss_canvasBezier3								(SCanvas* tc, SBGRA* bd, SBezier* bez);
+	u64						iioss_canvasBezier4								(SCanvas* tc, SBGRA* bd, SBezier* bez);
+	u64						iioss_canvasBezier5								(SCanvas* tc, SBGRA* bd, SBezier* bez);
+	void					iioss_canvasBezier_wash							(SCanvas* tc, SBGRA* bd, SBuilder* preFloans, SBuilder* postFloans, SBezier* bez);
+	u64						iioss_canvasBezier_draw							(SCanvas* tc, SBGRA* bd, SBezier* bez);
+	bool					iioss_math_washFloans							(SCanvas* tc, SBGRA* bd, SBuilder* input, SBuilder** intermediate, SBuilder** drawFloans, bool tlAlsoComputeAsDrawFloans);
 
 
 //////////

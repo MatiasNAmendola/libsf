@@ -260,7 +260,7 @@
 
 //////////
 //
-// Used by iioss_canvas_drawPolygon_storeFloans() to rapidly drawn floans
+// Used by iioss_canvasPolygon_storeFloans() to rapidly drawn floans
 //
 //////
 	struct _isSStoreFloan_lineData
@@ -286,7 +286,7 @@
 		_isSStoreFloan_lineData		lineData;			// Data computed when this line was stored
 	};
 
-	struct _isS_iioss_canvas_drawPolygon_storeFloans
+	struct _isS_iioss_canvasPolygon_storeFloans
 	{
 		union {
 			u32				_storeFloan_pointToPoint;
@@ -297,7 +297,7 @@
 
 //////////
 //
-// Used by the iioss_canvas_drawPolygon() function to handle passed parameters for divvying
+// Used by the iioss_canvasPolygon() function to handle passed parameters for divvying
 // up work to logical function breakouts.
 //
 //////

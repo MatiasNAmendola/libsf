@@ -97,6 +97,7 @@
 	const s8		cgcOssCanvasFillRect[]									= "oss_canvasFillRect";
 	const s8		cgcOssCanvasLine[]										= "oss_canvasLine";
 	const s8		cgcOssCanvasArc[]										= "oss_canvasArc";
+	const s8		cgcOssCanvasBezier[]									= "oss_canvasBezier";
 	const s8		cgcOssCanvasExtract[]									= "oss_canvasExtract";
 	const s8		cgcOssCanvasColorize[]									= "oss_canvasColorize";
 	const s8		cgcOssCanvasGrayscale[]									= "oss_canvasGrayscale";
@@ -105,7 +106,7 @@
 	const s8		cgcOssCanvasScale[]										= "oss_canvasScale";
 	const s8		cgcOssCanvasRotate[]									= "oss_canvasRotate";
 	const s8		cgcOssCanvasRotateAbout[]								= "oss_canvasRotateAbout";
-	const s8		cgcOssCanvasDrawPolygon[]								= "oss_canvas_drawPolygon";
+	const s8		cgcOssCanvasPolygon[]									= "oss_canvasPolygon";
 
 	const s8		cgcOssCaskDefineStandard[]								= "oss_caskDefineStandard";
 	const s8		cgcOssCaskDefineEncompassingRectangle[]					= "oss_caskDefineEncompassingRectangle";
@@ -270,6 +271,7 @@
 	const s8		cgcOssMathFineAdjustGravityByTheta[]					= "oss_math_fineAdjustGravityByTheta";
 	const s8		cgcOssMathAdjustTheta[]									= "oss_math_adjustTheta";
 	const s8		cgcOssMathWithinDelta[]									= "oss_math_withinDelta";
+	const s8		cgcOssMathWashFloans[]									= "oss_math_washFloans";
 
 	const s8		cgcOssPolygonInitialize[]								= "oss_polygon_initialize";
 	const s8		cgcOssPolygonSetByPolyLine[]							= "oss_polygon_setByPolyLine";
@@ -470,6 +472,7 @@
 		u64				(CALLTYPE *oss_canvasFillRect)							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, s32 borderThickness, SBGRA border, SBGRA background);
 		u64				(CALLTYPE *oss_canvasLine)								(SCanvas* tc, SBGRA* bd, SXYF32* p1, SXYF32* p2, f32 lineThickness, SBGRA color, bool tlFloan);
 		u64				(CALLTYPE *oss_canvasArc)								(SCanvas* tc, SBGRA* bd, s32 ox, s32 oy, f32 radius, f32 start, f32 end, s32 lineThickness, SBGRA line);
+		u64				(CALLTYPE *oss_canvasBezier)							(SCanvas* tc, SBGRA* bd, SBezier* bez);
 		SCanvas*		(CALLTYPE *oss_canvasExtract)							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry);
 		u64				(CALLTYPE *oss_canvasColorize)							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry, SBGRA color);
 		u64				(CALLTYPE *oss_canvasGrayscale)							(SCanvas* tc, SBGRA* bd, s32 ulx, s32 uly, s32 lrx, s32 lry);
@@ -478,7 +481,7 @@
 		u64				(CALLTYPE *oss_canvasScale)								(SCanvas* tsDst, SCanvas* tsSrc, SScaleMap** tsScaleMap);
 		u64				(CALLTYPE *oss_canvasRotate)							(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians);
 		u64				(CALLTYPE *oss_canvasRotateAbout)						(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, s32 ox, s32 oy);
-		u64				(CALLTYPE *oss_canvas_drawPolygon)						(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color);
+		u64				(CALLTYPE *oss_canvasPolygon)							(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color);
 
 		SCask*			(CALLTYPE *oss_caskDefineStandard)						(u32 tnHeight, u32 tnWidth, u32 tnLeftStyle, u32 tnLeftState, u32 tnLeftPipCount, u32 tnLeftColor, csu8p tcLeftText, u32 tnRightStyle, u32 tnRightState, u32 tnRightPipCount, u32 tnRightColor, csu8p tcRightText);
 		SCask*			(CALLTYPE *oss_caskDefineEncompassingRectangle)			(u32 tnInnerWidth, u32 tnInnerHeight, u32 tnColor, SRectXYXY* tsOuter);
@@ -709,6 +712,7 @@
 		s32				(CALLTYPE *oss_math_fineAdjustGravityByTheta)		(SXYF64* po, SXYF64* p, SXYF64* pg, s32 lnGravity07p, s32 lnGravity07pg);
 		f64				(CALLTYPE *oss_math_adjustTheta)					(f64 tfTheta);
 		bool			(CALLTYPE *oss_math_withinDelta)					(f64 tfValue1, f64 tfValue2, s32 tnDeltaDecimals);
+		bool			(CALLTYPE *oss_math_washFloans)						(SCanvas* tc, SBGRA* bd, SBuilder* input, SBuilder** intermediate, SBuilder** drawFloans, bool tlAlsoComputeAsDrawFloans);
 
 		bool			(CALLTYPE *oss_polygon_initialize)					(SPolygon* poly, u32 tnLineCount, bool tlAllocatePolyLines);
 		bool			(CALLTYPE *oss_polygon_setByPolyLine)				(SPolygon* poly, u32 tnEntry, SPolyLine* line);
@@ -936,6 +940,8 @@
 		(void *)&oss_canvasFillRect,										(void *)cgcOssCanvasFillRect,
 		(void *)&oss_canvasLine,											(void *)cgcOssCanvasLine,
 		(void *)&oss_canvasArc,												(void *)cgcOssCanvasArc,
+		(void *)&oss_canvasBezier,											(void *)cgcOssCanvasBezier,
+
 		(void *)&oss_canvasExtract,											(void *)cgcOssCanvasExtract,
 		(void *)&oss_canvasColorize,										(void *)cgcOssCanvasColorize,
 		(void *)&oss_canvasGrayscale,										(void *)cgcOssCanvasGrayscale,
@@ -944,7 +950,7 @@
 		(void *)&oss_canvasScale,											(void *)cgcOssCanvasScale,
 		(void *)&oss_canvasRotate,											(void *)cgcOssCanvasRotate,
 		(void *)&oss_canvasRotateAbout,										(void *)cgcOssCanvasRotateAbout,
-		(void *)&oss_canvas_drawPolygon,									(void *)cgcOssCanvasDrawPolygon,
+		(void *)&oss_canvasPolygon,											(void *)cgcOssCanvasPolygon,
 
 		(void *)&oss_caskDefineStandard,									(void *)cgcOssCaskDefineStandard,
 		(void *)&oss_caskDefineEncompassingRectangle,						(void *)cgcOssCaskDefineEncompassingRectangle,
@@ -1118,6 +1124,7 @@
 		(void*)&oss_math_fineAdjustGravityByTheta,							(void*)cgcOssMathFineAdjustGravityByTheta,
 		(void*)&oss_math_adjustTheta,										(void*)cgcOssMathAdjustTheta,
 		(void*)&oss_math_withinDelta,										(void*)cgcOssMathWithinDelta,
+		(void*)&oss_math_washFloans,										(void*)cgcOssMathWashFloans,
 
 		(void*)&oss_polygon_initialize,										(void*)cgcOssPolygonInitialize,
 		(void*)&oss_polygon_setByPolyLine,									(void*)cgcOssPolygonSetByPolyLine,
