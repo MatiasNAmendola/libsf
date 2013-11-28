@@ -1050,9 +1050,31 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		f64			m;							// Slope
 		f64			mp;							// Perpendicular slope
 
-		// Only used if trig is true
+		// Only used and computed if trig is true
 		bool		trig;						// Should trig functions be computed?
 		f64			theta;						// Theta (from p1 to p2, note: add _PI to reverse the angle from p2 to p1)
+
+		// Only used and computed if ints is true
+		bool		ints;						// Should integer approximations be calculated?
+		union {
+			SXYS32	starti;						// Starting x,y
+			SXYS32	p1i;
+		};
+		union {
+			SXYS32	endi;						// Ending x,y
+			SXYS32	p2i;
+		};
+
+		// Only used and computed if quads is true
+		bool		quads;						// Should we compute quadrants?
+		union {
+			s32		start_quad;					// What quadrant is start/p1 in?
+			s32		p1_quad;
+		};
+		union {
+			s32		end_quad;					// What quadrant is end/p2 in?
+			s32		p2_quad;
+		};
 	};
 
 	struct SPolyLine

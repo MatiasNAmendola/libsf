@@ -268,6 +268,7 @@
 	const s8		cgcOssMathGetAreaOfSquareUsingPoP1P2[]					= "oss_math_getAreaOfSquareUsing_po_p1_p2";
 	const s8		cgcOssMathGetNextAxisInterceptXY[]						= "oss_math_getNextAxisInterceptXY";
 	const s8		cgcOssMathGetRelativeGravity[]							= "oss_math_getGravityByRelativePosition";
+	const s8		cgcOssMathGetGravityInteger[]							= "oss_math_getGravityInteger";
 	const s8		cgcOssMathFineAdjustGravityByTheta[]					= "oss_math_fineAdjustGravityByTheta";
 	const s8		cgcOssMathAdjustTheta[]									= "oss_math_adjustTheta";
 	const s8		cgcOssMathWithinDelta[]									= "oss_math_withinDelta";
@@ -709,10 +710,11 @@
 		f64				(CALLTYPE *oss_math_getAreaOfSquareUsing_po_p1_p2)	(s32 tnGravity07_p1Intersect, s32 tnGravity07_p2Intersect, s32 tnGravity07_line1, SXYF64* po, SXYF64* p1, SXYF64* p2);
 		void			(CALLTYPE *oss_math_getNextAxisInterceptXY)			(SXYF64* p, f64 tfTheta);
 		s32				(CALLTYPE *oss_math_getGravityByRelativePosition)	(SXYF64* p, SXYS32* po);
+		s32				(CALLTYPE *oss_math_getGravityInteger)				(SXYS32* p, SXYS32* po);
 		s32				(CALLTYPE *oss_math_fineAdjustGravityByTheta)		(SXYF64* po, SXYF64* p, SXYF64* pg, s32 lnGravity07p, s32 lnGravity07pg);
 		f64				(CALLTYPE *oss_math_adjustTheta)					(f64 tfTheta);
 		bool			(CALLTYPE *oss_math_withinDelta)					(f64 tfValue1, f64 tfValue2, s32 tnDeltaDecimals);
-		bool			(CALLTYPE *oss_math_washFloans)						(SCanvas* tc, SBGRA* bd, SBuilder* input, SBuilder** intermediate, SBuilder** drawFloans, bool tlAlsoComputeAsDrawFloans);
+		u64				(CALLTYPE *oss_math_washFloans)						(SCanvas* tc, SBGRA* bd, SBuilder** preFloans, SBuilder** postFloans, SBuilder** drawFloans, bool tlIsFilledLeft);
 
 		bool			(CALLTYPE *oss_polygon_initialize)					(SPolygon* poly, u32 tnLineCount, bool tlAllocatePolyLines);
 		bool			(CALLTYPE *oss_polygon_setByPolyLine)				(SPolygon* poly, u32 tnEntry, SPolyLine* line);
@@ -1121,6 +1123,7 @@
 		(void*)&oss_math_getAreaOfSquareUsing_po_p1_p2,						(void*)cgcOssMathGetAreaOfSquareUsingPoP1P2,
 		(void*)&oss_math_getNextAxisInterceptXY,							(void*)cgcOssMathGetNextAxisInterceptXY,
 		(void*)&oss_math_getGravityByRelativePosition,						(void*)cgcOssMathGetRelativeGravity,
+		(void*)&oss_math_getGravityInteger,									(void*)cgcOssMathGetGravityInteger,
 		(void*)&oss_math_fineAdjustGravityByTheta,							(void*)cgcOssMathFineAdjustGravityByTheta,
 		(void*)&oss_math_adjustTheta,										(void*)cgcOssMathAdjustTheta,
 		(void*)&oss_math_withinDelta,										(void*)cgcOssMathWithinDelta,

@@ -8182,7 +8182,22 @@ _asm int 3;
 //////
 	s32 CALLTYPE oss_math_getGravityByRelativePosition(SXYF64* p, SXYS32* po)
 	{
-		return(iioss_math_getGravityByRelativePosition(p, po));
+		if (p && po)		return(iioss_math_getGravityByRelativePosition(p, po));
+		else				return(-1);
+	}
+
+
+
+
+//////////
+//
+// Gets the gravity of p relative to po as per the entire pixel's position
+//
+//////
+	s32 CALLTYPE oss_math_getGravityInteger(SXYS32* p, SXYS32* po)
+	{
+		if (p && po)		return(iioss_math_getGravityInteger(p, po));
+		else				return(-1);
 	}
 
 
@@ -8244,10 +8259,10 @@ _asm int 3;
 // (such as with bezier curve point data).
 //
 //////
-	bool CALLTYPE oss_math_washFloans(SCanvas* tc, SBGRA* bd, SBuilder* input, SBuilder** intermediate, SBuilder** drawFloans, bool tlAlsoComputeAsDrawFloans)
+	u64 CALLTYPE oss_math_washFloans(SCanvas* tc, SBGRA* bd, SBuilder** preFloans, SBuilder** postFloans, SBuilder** drawFloans, bool tlIsFilledLeft)
 	{
-		if (input && intermediate)		return(iioss_math_washFloans(tc, bd, input, intermediate, drawFloans, tlAlsoComputeAsDrawFloans));
-		else							return(false);
+		if (preFloans && postFloans)		return(iioss_math_washFloans(tc, bd, preFloans, postFloans, drawFloans, tlIsFilledLeft));
+		else								return(false);
 	}
 
 

@@ -5886,25 +5886,76 @@ continueToNextAttribute:
 	void iioss_math_computeLine(SLineF64* line)
 	{
 		// Midpoint = (x2-x1)/2, (y2-y1)/2
-		line->mid.x		= (line->p1.x + line->p2.x) / 2.0;
-		line->mid.y		= (line->p1.y + line->p2.y) / 2.0;
+		line->mid.x			= (line->p1.x + line->p2.x) / 2.0;
+		line->mid.y			= (line->p1.y + line->p2.y) / 2.0;
 
 		// Compute our deltas
-		line->delta.x	= line->p2.x - line->p1.x;
-		line->delta.y	= line->p2.y - line->p1.y;
+		line->delta.x		= line->p2.x - line->p1.x;
+		line->delta.y		= line->p2.y - line->p1.y;
 
 		// Length
-		line->length	= sqrt(line->delta.x*line->delta.x + line->delta.y*line->delta.y);
+		line->length		= sqrt(line->delta.x*line->delta.x + line->delta.y*line->delta.y);
 
 		// Slope = rise over run
-		line->m			= line->delta.y / line->delta.x;
+		line->m				= line->delta.y / ((line->delta.x == 0.0) ? 0.00000000000001 : line->delta.x);
 
 		// Perpendicular slope = -1/m
-		line->mp		= -1.0 / line->m;
+		line->mp			= -1.0 / line->m;
 
+
+		//////////
 		// Compute theta if need be (radius is same as length)
-		if (line->trig)
-			line->theta	= atan2(line->delta.y, line->delta.x);
+		/////
+			if (line->trig)
+				line->theta		= atan2(line->delta.y, line->delta.x);
+
+
+		//////////
+		// Compute the integer roundings if need be
+		//////
+			if (line->ints)
+			{
+				// Start
+				line->p1.x		= (s32)line->p1.x;
+				line->p1.y		= (s32)line->p1.y;
+				// End
+				line->p2.x		= (s32)line->p2.x;
+				line->p2.y		= (s32)line->p2.y;
+			}
+
+
+		//////////
+		// Compute the quadrants if need be
+		//////
+			if (line->quads)
+			{
+				// Quads 1..4
+				line->p1_quad	= iioss_math_computeQuad(&line->p1);
+				line->p2_quad	= iioss_math_computeQuad(&line->p2);
+			}
+	}
+
+
+
+
+//////////
+//
+// Returns the quadrant for the indicated point
+//
+//////
+	s32 iioss_math_computeQuad(SXYF64* p)
+	{
+		if (p->x >= 0.0)
+		{
+			// Either 1 or 4
+			if (p->y >= 0.0)		return(1);		// X is positive, Y is positive
+			else					return(4);		// X is positive, Y is negative
+
+		} else {
+			// Either 2 or 3
+			if (p->y >= 0.0)		return(2);		// X is negative, Y is positive
+			else					return(3);		// X is negative, Y is negative
+		}
 	}
 
 
@@ -8379,15 +8430,19 @@ continueToNextAttribute:
 
 //////////
 //
-// Returns the cardinal or ordinal direction for the indicated point given the corner point.
-// Note:  The corner point is the point closest to (0,0).
+// Returns the cardinal or ordinal direction for the indicated point given the pixel's point
+// (which is logically the 0/SW position).
+//
+// Note:  For quadrant I, the pixel point is the point closest to (0,0).
+// Note:  It is assumed that P is somewhere on the border of the pixel box of PO's pixel.
 //
 //////
 	s32 iioss_math_getGravityByRelativePosition(SXYF64* p, SXYS32* po)
 	{
 		//////////
 		//
-		// Consider that we're always in quadrant 1 at this point, because we've tested and filtered out for 
+		// Consider that we're always in quadrant 1 at this point, because we've tested and
+		// points that contain one or more coordinates in negative space.
 		//      NW __N__ NE     2__3__4
 		//      W |     |E      1     5
 		//      SW|__S__|SE     0__7__6
@@ -8436,6 +8491,53 @@ continueToNextAttribute:
 													return(-1);		// It remains invalid :-(
 				}
 			}
+	}
+
+
+
+
+//////////
+//
+// Returns the cardinal or ordinal direction for the indicated point given the pixel's point
+// (which is logically the 0/SW position).
+//
+// Note:  For quadrant I, the pixel point is the point closest to (0,0).
+// Note:  It is assumed that P is somewhere on the border of the pixel box of PO's pixel.
+//
+//////
+	s32 iioss_math_getGravityInteger(SXYS32* p, SXYS32* po)
+	{
+		//////////
+		//
+		// Consider that we're always in quadrant 1 at this point, because we've tested and
+		// points that contain one or more coordinates in negative space.
+		//      NW __N__ NE     2__3__4
+		//      W |  Eq |E      1  8  5
+		//      SW|__S__|SE     0__7__6
+		//
+		// For this value, we can also return -1 if the points are equal (since they are integer-
+		// aliased, we are comparing entire pixel positions to entire pixel positions for our
+		// derived gravity directions).
+		//
+		//////
+		if (p->x < po->x) {
+			// P's to the left of PO
+			if (p->y < po->y)						return(0);		// P's to the left and below PO
+			else if (p->y > po->y)					return(2);		// P's to the left and above PO
+			else									return(1);		// P's directly to the left of PO
+
+		} else if (p->x > po->x) {
+			// P's to the right of PO
+			if (p->y < po->y)						return(6);		// P's to the right and below PO
+			else if (p->y > po->y)					return(4);		// P's to the right and above PO
+			else									return(5);		// P's directly to the right of PO
+
+		} else {
+			// P is on the same vertical column as PO
+			if (p->y < po->y)						return(7);		// P's directly below PO
+			else if (p->y > po->y)					return(3);		// P's directly above PO
+			else									return(8);		// P is the same as PO
+		}
 	}
 
 
@@ -11041,7 +11143,7 @@ continueToNextAttribute:
 		SXYF64			p1, p2, pbez;
 		SLineF64		l1, l2;		// Line from bez->p1 to bez->p2, and bez->p2 to bez->p3
 		SLineF64		lmid;		// Line from l1 to l2
-		SBGRACompute*	sbgrac;
+		SXYF64*			lxy;
 		SBuilder*		preFloans;
 		SBuilder*		postFloans;
 
@@ -11055,8 +11157,8 @@ continueToNextAttribute:
 				memset(&l1,		0, sizeof(l1));
 				memset(&l2,		0, sizeof(l2));
 				memset(&lmid,	0, sizeof(lmid));
-				oss_builderCreateAndInitialize(&preFloans,	_COMMON_BUILDER_BLOCK_SIZE);
-				oss_builderCreateAndInitialize(&postFloans,	_COMMON_BUILDER_BLOCK_SIZE);
+				oss_builderCreateAndInitialize(&preFloans,	_COMMON_BUILDER_BLOCK_SIZE);		// SXYF64		- for raw floan data points
+				oss_builderCreateAndInitialize(&postFloans,	_COMMON_BUILDER_BLOCK_SIZE);		// SBGRACompute	- used for fx/fy (start/end) floan data points across each pixel
 
 
 			//////////
@@ -11118,20 +11220,19 @@ continueToNextAttribute:
 					//////
 						if (pbez.x >= 0.0 && pbez.y >= 0.0)
 						{
-							sbgrac = (SBGRACompute*)oss_builderAllocateBytes(preFloans, sizeof(SBGRACompute));
-							if (sbgrac)
+							lxy = (SXYF64*)oss_builderAllocateBytes(preFloans, sizeof(SXYF64));
+							if (lxy)
 							{
 								// Store the point where it was computed.
 								// It may go through a washing algorithm below to actually stores only those X- and Y-Intercept points for the generated points into coordinate space
-								sbgrac->fx		= (f32)pbez.x;
-								sbgrac->fy		= (f32)pbez.y;
-								sbgrac->alpha	= 1.0;
+								lxy->x	= pbez.x;
+								lxy->y	= pbez.y;
 							}
 						}
 				}
 
 				// Finish by washing
-				iioss_canvasBezier_wash(tc, bd, preFloans, postFloans, bez);
+				iioss_canvasBezier_wash(tc, bd, &preFloans, &postFloans, bez);
 		}
 
 
@@ -11183,7 +11284,7 @@ continueToNextAttribute:
 // by the common bezier drawing algorithm
 //
 //////
-	void iioss_canvasBezier_wash(SCanvas* tc, SBGRA* bd, SBuilder* preFloans, SBuilder* postFloans, SBezier* bez)
+	void iioss_canvasBezier_wash(SCanvas* tc, SBGRA* bd, SBuilder** preFloans, SBuilder** postFloans, SBezier* bez)
 	{
 		//////////
 		// Now, if need be, wash the prefloans into proper floans
@@ -11193,19 +11294,12 @@ continueToNextAttribute:
 				//////////
 				// Wash
 				/////
-					iioss_math_washFloans(tc, bd, preFloans, &postFloans, &bez->pixelFloans, (tc && bd));
-
-
-				//////////
-				// Clean up
-				//////
-					oss_builderFreeAndRelease(&preFloans);
-					oss_builderFreeAndRelease(&postFloans);
+					iioss_math_washFloans(tc, bd, preFloans, postFloans, ((tc && bd) ? &bez->pixelFloans : NULL), false);
 
 
 			} else {
 				// We're just computing
-				bez->pixelFloans = preFloans;
+				bez->pixelFloans = *preFloans;
 			}
 
 
@@ -11226,30 +11320,30 @@ continueToNextAttribute:
 //////
 	u64 iioss_canvasBezier_draw(SCanvas* tc, SBGRA* bd, SBezier* bez)
 	{
-		u32				lnI, lnFloans;
+		u32				lnI;
 		u64				lnPixelCount;
 		f64				lfRed, lfGrn, lfBlu, lfAlp, lfMalp, lfAlp2, lfMalp2;
 		SBGRA*			sbgra;
 		SBGRACompute*	sbgrac;
 
 
-		// Reset our pixel count
-		lnPixelCount = 0;
+		//////////
+		// Get our colors and alpha masks
+		//////
+			lfAlp	= (f64)bez->color.alp / 255.0;
+			lfMalp	= 1.0 - lfAlp;
+			lfRed	= bez->color.red * lfAlp;
+			lfGrn	= bez->color.grn * lfAlp;
+			lfBlu	= bez->color.blu * lfAlp;
 
-		// Get our colors
-		lfAlp		= (f64)bez->color.alp / 255.0;
-		lfMalp		= 1.0 - lfAlp;
-		lfRed		= bez->color.red * lfAlp;
-		lfGrn		= bez->color.grn * lfAlp;
-		lfBlu		= bez->color.blu * lfAlp;
 
 		// Draw each pixel where it goes
-		lnFloans	= bez->pixelFloans->populatedLength / sizeof(SBGRACompute);
+		lnPixelCount = 0;
 		if (bez->wash)
 		{
 // TODO:  This drawing algorithm should be moved into a generic algorithm used by the various things which drawn floans
 			// The pixels are ready to be drawn generically
-			for (lnI = 0; lnI < lnFloans; lnI++)
+			for (lnI = 0; lnI < bez->pixelFloans->populatedLength; lnI += sizeof(SBGRACompute))
 			{
 				// Grab our compute pointer
 				sbgrac = (SBGRACompute*)(bez->pixelFloans->data + lnI);
@@ -11270,7 +11364,7 @@ continueToNextAttribute:
 
 		} else {
 			// It is a bunch of raw points, so we simply do an aliased population of points along the line
-			for (lnI = 0; lnI < lnFloans; lnI++)
+			for (lnI = 0; lnI < bez->pixelFloans->populatedLength; lnI += sizeof(SBGRACompute))
 			{
 				// Grab our compute pointer
 				sbgrac = (SBGRACompute*)(bez->pixelFloans->data + lnI);
@@ -11301,7 +11395,142 @@ continueToNextAttribute:
 // Returns true if anything was converted.
 //
 //////
-	bool iioss_math_washFloans(SCanvas* tc, SBGRA* bd, SBuilder* input, SBuilder** intermediate, SBuilder** drawFloans, bool tlAlsoComputeAsDrawFloans)
+	u64 iioss_math_washFloans(SCanvas* tc, SBGRA* bd, SBuilder** preFloans, SBuilder** postFloans, SBuilder** drawFloans, bool tlIsFilledLeft)
 	{
-		return(false);
+		u32				lnI, lnMaxOffset;
+		u64				lnFloanCount;
+		SBuilder*		pre;
+		SBuilder*		post;
+		SBuilder*		draw;
+		SXYF64*			prexy0;
+		SXYF64*			prexy1;
+		SXYF64			lastPixelCross, borderProjected;
+		SLineF64		line, lineProjectedToPrexy1, lineProjectedToNextPixel;
+		SBGRACompute*	sbgrac;
+
+
+		//////////
+		// Initialize
+		//////
+			pre				= *preFloans;
+			post			= *postFloans;
+			lnFloanCount	= 0;
+			lnMaxOffset		= pre->populatedLength - sizeof(SXYF64);
+
+			// Turn on trig, ints, and quads, so we also get theta and integer approximations
+			line.trig		= true;
+			line.ints		= true;
+			line.quads		= true;
+
+
+		//////////
+		// Convert from preFloan form to the postFloan form
+		//////
+			for (lnI = 0; lnI < lnMaxOffset; lnI += sizeof(SXYF64))
+			{
+				//////////
+				// Grab our inputs
+				//////
+					prexy0 = (SXYF64*)(pre->data + lnI);
+					prexy1 = (SXYF64*)(pre->data + lnI + sizeof(SXYF64));
+					iioss_copyLine(&line, prexy0, prexy1, true);
+
+
+				//////////
+				// See if it crosses a pixel border in quadrant 1
+				//////
+					if (line.start_quad == 1 && line.end_quad == 1 && iioss_math_getGravityInteger(&line.starti, &line.endi) != 8)
+					{
+						//////////
+						// Yes, find out where it hits the pixel border
+						//////
+							// Prepare our crossing point
+							lastPixelCross.x = line.start.x;
+							lastPixelCross.y = line.start.y;
+
+							// Compute the intercept
+							iioss_math_getNextAxisInterceptXY(&lastPixelCross, line.theta);
+
+
+						//////////
+						// Store this point, and then repeatedly project ahead to see if we will cross any more pixels before this line ends
+						//////
+							do {
+								//////////
+								// Allocate and store it
+								//////
+									sbgrac = (SBGRACompute*)oss_builderAllocateBytes(post, sizeof(SBGRACompute));
+									if (sbgrac)
+									{
+										// Store the floan
+										sbgrac->fx		= (f32)lastPixelCross.x;
+										sbgrac->fy		= (f32)lastPixelCross.y;
+										sbgrac->alpha	= 1.0;
+										++lnFloanCount;
+									}
+
+
+								//////////
+								// Copy our point forward for the projection
+								//////
+									borderProjected.x = lastPixelCross.x;
+									borderProjected.y = lastPixelCross.y;
+									iioss_math_getNextAxisInterceptXY(&borderProjected, line.theta);
+
+
+								//////////
+								// Determine our remaining line lengths to prexy1, and the next pixel border
+								//////
+									iioss_copyLine(&lineProjectedToPrexy1,		&lastPixelCross,	prexy1,				true);
+									iioss_copyLine(&lineProjectedToNextPixel,	&lastPixelCross,	&borderProjected,	true);
+									if (lineProjectedToNextPixel.end_quad != 1)
+										break;		// We've entered a quadrant with at least one negative axis
+
+
+								//////////
+								// Continue on so long as we're hitting pixel borders before going past prexy1's end
+								//////
+									if (lineProjectedToNextPixel.length <= lineProjectedToPrexy1.length)
+									{
+										// Copy projected to a valid crossing
+										lastPixelCross.x	= borderProjected.x;
+										lastPixelCross.y	= borderProjected.y;
+
+									} else {
+										// All done
+										break;
+									}
+
+							} while (1);
+					}
+					// When we get here, we'll continue on with the next point
+			}
+
+
+		//////////
+		// Clean up preFloans
+		//////
+			oss_builderFreeAndRelease(preFloans);
+
+
+		//////////
+		// If we are supposed to draw, then do the draw floans
+		//////
+			if (drawFloans)
+			{
+				// Reset our floan count
+				lnFloanCount = 0;
+// TODO:  Working here
+
+				//////////
+				// Clean up postFloans
+				//////
+					oss_builderFreeAndRelease(postFloans);
+			}
+
+
+		//////////
+		// Indicate our converted floan count
+		//////
+			return(lnFloanCount);
 	}

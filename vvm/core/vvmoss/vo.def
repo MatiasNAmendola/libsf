@@ -231,6 +231,7 @@ EXPORTS
 	oss_math_getAreaOfSquareUsing_po_p1_p2
 	oss_math_getNextAxisInterceptXY
 	oss_math_getGravityByRelativePosition
+	oss_math_getGravityInteger
 	oss_math_fineAdjustGravityByTheta
 	oss_math_adjustTheta
 	oss_math_withinDelta
