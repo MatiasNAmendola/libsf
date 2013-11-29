@@ -8154,9 +8154,9 @@ _asm int 3;
 //        side of the portion which is smaller or larger (unless it cuts the square exactly in half).
 //
 //////
-	f64 CALLTYPE oss_math_getAreaOfSquareUsing_po_p1_p2(s32 tnGravity07_p1Intersect, s32 tnGravity07_p2Intersect, s32 tnGravity07_line1, SXYF64* po, SXYF64* p1, SXYF64* p2)
+	f64 CALLTYPE oss_math_getAreaOfSquareUsing_po_p1_p2(s32 tnGravity07_po, s32 tnGravity07_p1, s32 tnGravity07_p2, SXYF64* po, SXYF64* p1, SXYF64* p2)
 	{
-		return(iioss_math_getAreaOfSquareUsing_po_p1_p2(tnGravity07_p1Intersect, tnGravity07_p2Intersect, tnGravity07_line1, po, p1, p2));
+		return(iioss_math_getAreaOfSquareUsing_po_p1_p2(tnGravity07_po, tnGravity07_p1, tnGravity07_p2, po, p1, p2));
 	}
 
 
@@ -8259,9 +8259,9 @@ _asm int 3;
 // (such as with bezier curve point data).
 //
 //////
-	u64 CALLTYPE oss_math_washFloans(SCanvas* tc, SBGRA* bd, SBuilder** preFloans, SBuilder** postFloans, SBuilder** drawFloans, bool tlIsFilledLeft)
+	u64 CALLTYPE oss_math_washFloans(SCanvas* tc, SBGRA* bd, SBuilder** pointFloans, SBuilder** washFloans, SBuilder** drawFloans, bool tlIsFilledLeft)
 	{
-		if (preFloans && postFloans)		return(iioss_math_washFloans(tc, bd, preFloans, postFloans, drawFloans, tlIsFilledLeft));
+		if (pointFloans && washFloans)		return(iioss_math_washFloans(tc, bd, pointFloans, washFloans, drawFloans, tlIsFilledLeft));
 		else								return(false);
 	}
 

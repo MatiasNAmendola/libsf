@@ -7046,7 +7046,7 @@ continueToNextAttribute:
 		// Compute their floan based on gravity of the first line, and use its points for the area
 		// Note:  We assume these two sides have gravities facing toward each other, so we only need one
 		//////
-			lfArea = iioss_math_getAreaOfSquareUsing_po_p1_p2(lnGravity1i, lnGravity2i, sfcd1->lineData.gravity07, &sfcd1->po, &sfcd1->pi, &sfcd2->pi);
+			lfArea = iioss_math_getAreaOfSquareUsing_po_p1_p2(sfcd1->lineData.gravity07, lnGravity1i, lnGravity2i, &sfcd1->po, &sfcd1->pi, &sfcd2->pi);
 
 
 		//////////
@@ -7074,7 +7074,7 @@ continueToNextAttribute:
 //      SW|__S__|SE     0__7__6
 //
 //////
-	f64 iioss_math_getAreaOfSquareUsing_po_p1_p2(s32 tnGravity07_p1, s32 tnGravity07_p2, s32 tnGravity07, SXYF64* po, SXYF64* p1, SXYF64* p2)
+	f64 iioss_math_getAreaOfSquareUsing_po_p1_p2(s32 tnGravity07_po, s32 tnGravity07_p1, s32 tnGravity07_p2, SXYF64* po, SXYF64* p1, SXYF64* p2)
 	{
 		STriangleF64	tri1, tri2, tri3;
 		bool			llTwoTriangles, llThreeTriangles;
@@ -7109,12 +7109,12 @@ continueToNextAttribute:
 				switch (tnGravity07_p2)
 				{
 					case 1:		// Runs from SW to W
-						if (!(tnGravity07 == 0 || tnGravity07 == 1))	llOneMinusArea = true;		// Fills in from 0..7..6..5..4..3..2..1
-						// else																		// Fills in from 0..1
+						if (!(tnGravity07_po == 0 || tnGravity07_po == 1))	llOneMinusArea = true;		// Fills in from 0..7..6..5..4..3..2..1
+						// else																			// Fills in from 0..1
 						break;
 
 					case 2:		// Runs from SW to NW
-						if (tnGravity07 >= 3 && tnGravity07 <= 7)		llOneMinusArea = true;		// Fills in from 0..7..6..5..4..3..2
+						if (tnGravity07_po >= 3 && tnGravity07_po <= 7)		llOneMinusArea = true;		// Fills in from 0..7..6..5..4..3..2
 						// else																		// Fills in from 0..1..2
 						break;
 
@@ -7138,7 +7138,7 @@ continueToNextAttribute:
 							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
 
 						// Indicate if we need the area, or 1.0-area
-						if (tnGravity07 >= 4 && tnGravity07 <= 7)		llOneMinusArea = true;		// Fills in from 0..7..6..5..4..3
+						if (tnGravity07_po >= 4 && tnGravity07_po <= 7)		llOneMinusArea = true;		// Fills in from 0..7..6..5..4..3
 						// else																		// Fills in from 0..1..2..3
 						break;
 
@@ -7166,17 +7166,17 @@ continueToNextAttribute:
 							memcpy(&tri2.p3, p2,		sizeof(SXYF64));	// p2
 
 						// Indicate if we need the area, or 1.0-area
-						if (!(tnGravity07 >= 6 && tnGravity07 <= 7))	llOneMinusArea = true;		// Fills in from 0..1..2..3..4..5
+						if (!(tnGravity07_po >= 6 && tnGravity07_po <= 7))	llOneMinusArea = true;		// Fills in from 0..1..2..3..4..5
 						// else																		// Fills in from 0..7..6..5
 						break;
 
 					case 6:		// Runs from SW to SE
-						if (tnGravity07 >= 1 && tnGravity07 <= 5)		llOneMinusArea = true;		// Fills in from 0..1..2..3..4..5..6
+						if (tnGravity07_po >= 1 && tnGravity07_po <= 5)		llOneMinusArea = true;		// Fills in from 0..1..2..3..4..5..6
 						// else																		// Fills in from 0..7..6
 						break;
 
 					case 7:		// Runs from SW to S
-						if (!(tnGravity07 == 0 || tnGravity07 == 7))	llOneMinusArea = true;		// Fills in from 0..1..2..3..4..5..6..7
+						if (!(tnGravity07_po == 0 || tnGravity07_po == 7))	llOneMinusArea = true;		// Fills in from 0..1..2..3..4..5..6..7
 						// else																		// Fills in from 0..7
 						break;
 
@@ -7195,17 +7195,17 @@ continueToNextAttribute:
 				switch (tnGravity07_p2)
 				{
 					case 0:		// Runs from W to SW
-						if (!(tnGravity07 == 0 || tnGravity07 == 1))	llOneMinusArea = true;		// Fills in from 1..2..3..4..5..6..7..0
+						if (!(tnGravity07_po == 0 || tnGravity07_po == 1))	llOneMinusArea = true;		// Fills in from 1..2..3..4..5..6..7..0
 						// else																		// Fills in from 1..0
 						break;
 
 					case 1:		// Runs from W to W
-						if (!(tnGravity07 == 1))						llOneMinusArea = true;		// Fills in from 1..2..3..4..5..6..7..0..1
+						if (!(tnGravity07_po == 1))						llOneMinusArea = true;		// Fills in from 1..2..3..4..5..6..7..0..1
 						// else																		// Fills in from 1..1
 						break;
 
 					case 2:		// Runs from W to NW
-						if (!(tnGravity07 == 1 || tnGravity07 == 2))	llOneMinusArea = true;		// Fills in from 1..0..7..6..5..4..3..2
+						if (!(tnGravity07_po == 1 || tnGravity07_po == 2))	llOneMinusArea = true;		// Fills in from 1..0..7..6..5..4..3..2
 						// else																		// Fills in from 1..2
 						break;
 
@@ -7232,7 +7232,7 @@ continueToNextAttribute:
 						//////////
 						// Indicate if we need the area, or 1.0-area
 						//////
-							if (tnGravity07 == 0 || tnGravity07 >= 4)		llOneMinusArea = true;		// Fills in from 1..0..7..6..5..4..3
+							if (tnGravity07_po == 0 || tnGravity07_po >= 4)		llOneMinusArea = true;		// Fills in from 1..0..7..6..5..4..3
 							// else																		// Fills in from 1..2..3
 							break;
 
@@ -7259,7 +7259,7 @@ continueToNextAttribute:
 						//////////
 						// Indicate if we need the area, or 1.0-area
 						//////
-							if (tnGravity07 == 0 || tnGravity07 >= 5)		llOneMinusArea = true;		// Fills in from 1..0..7..6..5..4
+							if (tnGravity07_po == 0 || tnGravity07_po >= 5)		llOneMinusArea = true;		// Fills in from 1..0..7..6..5..4
 							// else																		// Fills in from 1..2..3..4
 							break;
 
@@ -7296,12 +7296,12 @@ continueToNextAttribute:
 							if (p1->y < p2->y)
 							{
 								// Line slants / up
-								if (!(tnGravity07 >= 1 && tnGravity07 < 5))		llOneMinusArea = true;		// Fills in from 1..2..3..4..5
+								if (!(tnGravity07_po >= 1 && tnGravity07_po < 5))		llOneMinusArea = true;		// Fills in from 1..2..3..4..5
 								// else																		// Fills in from 1..0..7..6..5
 
 							} else {
 								// Line slants \ down
-								if (!(tnGravity07 > 1 && tnGravity07 <= 5))		llOneMinusArea = true;		// Fills in from 1..2..3..4..5
+								if (!(tnGravity07_po > 1 && tnGravity07_po <= 5))		llOneMinusArea = true;		// Fills in from 1..2..3..4..5
 								// else																		// Fills in from 1..0..7..6..5
 							}
 							break;
@@ -7329,7 +7329,7 @@ continueToNextAttribute:
 						//////////
 						// Indicate if we need the area, or 1.0-area
 						//////
-							if (!(tnGravity07 == 0 || tnGravity07 >= 7))		llOneMinusArea = true;		// Fills in from 1..0..7..6
+							if (!(tnGravity07_po == 0 || tnGravity07_po >= 7))		llOneMinusArea = true;		// Fills in from 1..0..7..6
 							// else																			// Fills in from 1..2..3..4..5..6
 							break;
 
@@ -7356,7 +7356,7 @@ continueToNextAttribute:
 						//////////
 						// Indicate if we need the area, or 1.0-area
 						//////
-							if (!(tnGravity07 <= 1 || tnGravity07 >= 7))	llOneMinusArea = true;		// Fills in from 1..2..3..4..5..6..7
+							if (!(tnGravity07_po <= 1 || tnGravity07_po >= 7))	llOneMinusArea = true;		// Fills in from 1..2..3..4..5..6..7
 							// else																		// Fills in from 1..0..7
 							break;
 
@@ -7375,22 +7375,22 @@ continueToNextAttribute:
 				switch (tnGravity07_p2)
 				{
 					case 0:		// Runs from NW to SW
-						if (tnGravity07 >= 3)							llOneMinusArea = true;		// Fills in from 2..3..4..5..6..7..0
+						if (tnGravity07_po >= 3)							llOneMinusArea = true;		// Fills in from 2..3..4..5..6..7..0
 						// else																		// Fills in from 2..1..0
 						break;
 
 					case 1:		// Runs from NW to W
-						if (!(tnGravity07 == 2 || tnGravity07 == 1))	llOneMinusArea = true;		// Fills in from 2..3..4..5..6..7..0..1
+						if (!(tnGravity07_po == 2 || tnGravity07_po == 1))	llOneMinusArea = true;		// Fills in from 2..3..4..5..6..7..0..1
 						// else																		// Fills in from 2..1
 						break;
 
 					case 3:		// Runs from NW to N
-						if (!(tnGravity07 == 2 || tnGravity07 == 3))	llOneMinusArea = true;		// Fills in from 2..1..0..7..6..5..4..3
+						if (!(tnGravity07_po == 2 || tnGravity07_po == 3))	llOneMinusArea = true;		// Fills in from 2..1..0..7..6..5..4..3
 						// else																		// Fills in from 2..3
 						break;
 
 					case 4:		// Runs from NW to NE
-						if (tnGravity07 <= 1 || tnGravity07 >= 5)		llOneMinusArea = true;		// Fills in from 2..1..0..7..6..5..4
+						if (tnGravity07_po <= 1 || tnGravity07_po >= 5)		llOneMinusArea = true;		// Fills in from 2..1..0..7..6..5..4
 						// else																		// Fills in from 2..3..4
 						break;
 
@@ -7417,7 +7417,7 @@ continueToNextAttribute:
 						//////////
 						// Indicate if we need the area, or 1.0-area
 						//////
-							if (!(tnGravity07 >= 3 && tnGravity07 <= 5))	llOneMinusArea = true;		// Fills in from 2..1..0..7..6..5
+							if (!(tnGravity07_po >= 3 && tnGravity07_po <= 5))	llOneMinusArea = true;		// Fills in from 2..1..0..7..6..5
 							// else																		// Fills in from 2..3..4..5
 							break;
 
@@ -7448,7 +7448,7 @@ continueToNextAttribute:
 						//////////
 						// Indicate if we need the area, or 1.0-area
 						//////
-							if (!(tnGravity07 <= 1))						llOneMinusArea = true;		// Fills in from 2..1..0..7
+							if (!(tnGravity07_po <= 1))						llOneMinusArea = true;		// Fills in from 2..1..0..7
 							// else																		// Fills in from 2..3..4..5..6..7
 							break;
 
@@ -7489,7 +7489,7 @@ continueToNextAttribute:
 						//////////
 						// Indicate if we need the area, or 1.0-area
 						//////
-							if (tnGravity07 >= 4)						llOneMinusArea = true;		// Fills in from 3..4..5..6..7..0
+							if (tnGravity07_po >= 4)						llOneMinusArea = true;		// Fills in from 3..4..5..6..7..0
 							// else																	// Fills in from 3..2..1..0
 							break;
 
@@ -7516,22 +7516,22 @@ continueToNextAttribute:
 						//////////
 						// Indicate if we need the area, or 1.0-area
 						//////
-							if (tnGravity07 == 0 || tnGravity07 >= 4)		llOneMinusArea = true;		// Fills in from 3..4..5..6..7..0..1
+							if (tnGravity07_po == 0 || tnGravity07_po >= 4)		llOneMinusArea = true;		// Fills in from 3..4..5..6..7..0..1
 							// else																		// Fills in from 3..2..1
 							break;
 
 					case 2:		// Runs from N to NW
-						if (!(tnGravity07 == 3 || tnGravity07 == 2))	llOneMinusArea = true;		// Fills in from 3..4..5..6..7..0..1..2
+						if (!(tnGravity07_po == 3 || tnGravity07_po == 2))	llOneMinusArea = true;		// Fills in from 3..4..5..6..7..0..1..2
 						// else																		// Fills in from 3..2
 						break;
 
 					case 3:		// Runs from N to N
-						if (!(tnGravity07 == 3))						llOneMinusArea = true;		// Fills in from 3..4..5..6..7..0..1..2..3
+						if (!(tnGravity07_po == 3))						llOneMinusArea = true;		// Fills in from 3..4..5..6..7..0..1..2..3
 						// else																		// Fills in from 3..3
 						break;
 
 					case 4:		// Runs from N to NE
-						if (!(tnGravity07 == 3 || tnGravity07 == 4))	llOneMinusArea = true;		// Fills in from 3..2..1..0..7..6..5..4
+						if (!(tnGravity07_po == 3 || tnGravity07_po == 4))	llOneMinusArea = true;		// Fills in from 3..2..1..0..7..6..5..4
 						// else																		// Fills in from 3..4
 						break;
 
@@ -7558,7 +7558,7 @@ continueToNextAttribute:
 						//////////
 						// Indicate if we need the area, or 1.0-area
 						//////
-							if (tnGravity07 <= 2 || tnGravity07 >= 6)		llOneMinusArea = true;		// Fills in from 3..2..1..0..7..6..5
+							if (tnGravity07_po <= 2 || tnGravity07_po >= 6)		llOneMinusArea = true;		// Fills in from 3..2..1..0..7..6..5
 							// else																		// Fills in from 3..4..5
 							break;
 
@@ -7585,7 +7585,7 @@ continueToNextAttribute:
 						//////////
 						// Indicate if we need the area, or 1.0-area
 						//////
-						   if (tnGravity07 <= 2 || tnGravity07 >= 7)	llOneMinusArea = true;		// Fills in from 3..2..1..0..7..6
+						   if (tnGravity07_po <= 2 || tnGravity07_po >= 7)	llOneMinusArea = true;		// Fills in from 3..2..1..0..7..6
 							// else																	// Fills in from 3..4..5..6
 						   break;
 
@@ -7622,12 +7622,12 @@ continueToNextAttribute:
 							if (p1->x < p2->x)
 							{
 								// Line slants \ down
-								if (tnGravity07 >= 3 || tnGravity07 < 7)	llOneMinusArea = true;	// Fills in from 3..4..5..6..7
+								if (tnGravity07_po >= 3 || tnGravity07_po < 7)	llOneMinusArea = true;	// Fills in from 3..4..5..6..7
 								// else																// Fills in from 3..2..1..0..7
 
 							} else {
 								// Line slants / up
-								if (tnGravity07 > 3 || tnGravity07 <= 7)	llOneMinusArea = true;	// Fills in from 3..4..5..6..7
+								if (tnGravity07_po > 3 || tnGravity07_po <= 7)	llOneMinusArea = true;	// Fills in from 3..4..5..6..7
 								// else																// Fills in from 3..2..1..0..7
 							}
 							break;
@@ -7673,27 +7673,27 @@ continueToNextAttribute:
 						//////////
 						// Indicate if we need the area, or 1.0-area
 						//////
-							if (tnGravity07 == 0 || tnGravity07 >= 5)		llOneMinusArea = true;		// Fills in from 4..5..6..7..0..1
+							if (tnGravity07_po == 0 || tnGravity07_po >= 5)		llOneMinusArea = true;		// Fills in from 4..5..6..7..0..1
 							// else																		// Fills in from 4..3..2..1
 							break;
 
 					case 2:		// Runs from NE to NW
-						if (tnGravity07 <= 1 || tnGravity07 >= 5)		llOneMinusArea = true;		// Fills in from 4..5..6..7..0..1..2
+						if (tnGravity07_po <= 1 || tnGravity07_po >= 5)		llOneMinusArea = true;		// Fills in from 4..5..6..7..0..1..2
 						// else																		// Fills in from 4..3..2
 						break;
 
 					case 3:		// Runs from NE to N
-						if (!(tnGravity07 == 4 || tnGravity07 == 3))	llOneMinusArea = true;		// Fills in from 4..5..6..7..0..1..2..3
+						if (!(tnGravity07_po == 4 || tnGravity07_po == 3))	llOneMinusArea = true;		// Fills in from 4..5..6..7..0..1..2..3
 						// else																		// Fills in from 4..3
 						break;
 
 					case 5:		// Runs from NE to E
-						if (!(tnGravity07 == 4 || tnGravity07 == 5))	llOneMinusArea = true;		// Fills in from 4..3..2..1..0..7..6..5
+						if (!(tnGravity07_po == 4 || tnGravity07_po == 5))	llOneMinusArea = true;		// Fills in from 4..3..2..1..0..7..6..5
 						// else																		// Fills in from 4..5
 						break;
 
 					case 6:		// Runs from NE to SE
-						if (!(tnGravity07 <= 3 || tnGravity07 >= 7))	llOneMinusArea = true;		// Fills in from 4..3..2..1..0..7..6
+						if (!(tnGravity07_po <= 3 || tnGravity07_po >= 7))	llOneMinusArea = true;		// Fills in from 4..3..2..1..0..7..6
 						// else																		// Fills in from 4..5..6
 						break;
 
@@ -7720,7 +7720,7 @@ continueToNextAttribute:
 						//////////
 						// Indicate if we need the area, or 1.0-area
 						//////
-							if (tnGravity07 <= 3)						llOneMinusArea = true;		// Fills in from 4..5..6..7
+							if (tnGravity07_po <= 3)						llOneMinusArea = true;		// Fills in from 4..5..6..7
 							// else																	// Fills in from 4..3..2..1..0..7
 							break;
 
@@ -7761,7 +7761,7 @@ continueToNextAttribute:
 						//////////
 						// Indicate if we need the area, or 1.0-area
 						//////
-							if (!(tnGravity07 >= 6))					llOneMinusArea = true;		// Fills in from 5..6..7..0
+							if (!(tnGravity07_po >= 6))					llOneMinusArea = true;		// Fills in from 5..6..7..0
 							// else																	// Fills in from 5..4..3..2..1..0
 							break;
 
@@ -7798,12 +7798,12 @@ continueToNextAttribute:
 							if (p1->y < p2->y)
 							{
 								// Line slants \ down
-								if (tnGravity07 >= 1 || tnGravity07 < 5)	llOneMinusArea = true;	// Fills in from 1..2..3..4..5
+								if (tnGravity07_po >= 1 || tnGravity07_po < 5)	llOneMinusArea = true;	// Fills in from 1..2..3..4..5
 								// else																// Fills in from 1..0..7..6..5
 
 							} else {
 								// Line slants / up
-								if (tnGravity07 > 1 || tnGravity07 <= 5)	llOneMinusArea = true;	// Fills in from 1..2..3..4..5
+								if (tnGravity07_po > 1 || tnGravity07_po <= 5)	llOneMinusArea = true;	// Fills in from 1..2..3..4..5
 								// else																// Fills in from 1..0..7..6..5
 							}
 							break;
@@ -7831,7 +7831,7 @@ continueToNextAttribute:
 						//////////
 						// Indicate if we need the area, or 1.0-area
 						//////
-							if (!(tnGravity07 >= 3 && tnGravity07 <= 4))	llOneMinusArea = true;	// Fills in from 5..4..3..2
+							if (!(tnGravity07_po >= 3 && tnGravity07_po <= 4))	llOneMinusArea = true;	// Fills in from 5..4..3..2
 							// else																	// Fills in from 5..6..7..0..1..2
 							break;
 
@@ -7858,22 +7858,22 @@ continueToNextAttribute:
 						//////////
 						// Indicate if we need the area, or 1.0-area
 						//////
-							if (!(tnGravity07 >= 3 && tnGravity07 <= 5))	llOneMinusArea = true;		// Fills in from 5..6..7..0..1..2..3
+							if (!(tnGravity07_po >= 3 && tnGravity07_po <= 5))	llOneMinusArea = true;		// Fills in from 5..6..7..0..1..2..3
 							// else																		// Fills in from 5..4..3
 							break;
 
 					case 4:		// Runs from E to NE
-						if (!(tnGravity07 == 5 || tnGravity07 == 4))	llOneMinusArea = true;		// Fills in from 5..6..7..0..1..2..3..4
+						if (!(tnGravity07_po == 5 || tnGravity07_po == 4))	llOneMinusArea = true;		// Fills in from 5..6..7..0..1..2..3..4
 						// else																		// Fills in from 5..4
 						break;
 
 					case 5:		// Runs from E to E
-						if (!(tnGravity07 == 5))						llOneMinusArea = true;		// Fills in from 5..6..7..0..1..2..3..4..5
+						if (!(tnGravity07_po == 5))						llOneMinusArea = true;		// Fills in from 5..6..7..0..1..2..3..4..5
 						// else																		// Fills in from 5..5
 						break;
 
 					case 6:		// Runs from E to SE
-						if (!(tnGravity07 == 5 || tnGravity07 == 6))	llOneMinusArea = true;		// Fills in from 5..4..3..2..1..0..7..6
+						if (!(tnGravity07_po == 5 || tnGravity07_po == 6))	llOneMinusArea = true;		// Fills in from 5..4..3..2..1..0..7..6
 						// else																		// Fills in from 5..6
 						break;
 
@@ -7900,7 +7900,7 @@ continueToNextAttribute:
 						//////////
 						// Indicate if we need the area, or 1.0-area
 						//////
-							if (!(tnGravity07 >= 5))						llOneMinusArea = true;		// Fills in from 5..4..3..2..1..0..7
+							if (!(tnGravity07_po >= 5))						llOneMinusArea = true;		// Fills in from 5..4..3..2..1..0..7
 							// else																		// Fills in from 5..6..7
 							break;
 
@@ -7919,7 +7919,7 @@ continueToNextAttribute:
 				switch (tnGravity07_p2)
 				{
 					case 0:		// Runs from SE to SW
-						if (tnGravity07 >= 1 && tnGravity07 <= 5)		llOneMinusArea = true;		// Fills in from 6..5..4..3..2..1..0
+						if (tnGravity07_po >= 1 && tnGravity07_po <= 5)		llOneMinusArea = true;		// Fills in from 6..5..4..3..2..1..0
 						// else																		// Fills in from 6..7..0
 						break;
 
@@ -7946,7 +7946,7 @@ continueToNextAttribute:
 						//////////
 						// Indicate if we need the area, or 1.0-area
 						//////
-							if (tnGravity07 >= 2 && tnGravity07 <= 6)	llOneMinusArea = true;		// Fills in from 6..5..4..3..2..1
+							if (tnGravity07_po >= 2 && tnGravity07_po <= 6)	llOneMinusArea = true;		// Fills in from 6..5..4..3..2..1
 							// else																	// Fills in from 6..7..0..1
 							break;
 
@@ -7977,22 +7977,22 @@ continueToNextAttribute:
 						//////////
 						// Indicate if we need the area, or 1.0-area
 						//////
-							if (!(tnGravity07 >= 3 && tnGravity07 <= 5))	llOneMinusArea = true;		// Fills in from 6..5..4..3
+							if (!(tnGravity07_po >= 3 && tnGravity07_po <= 5))	llOneMinusArea = true;		// Fills in from 6..5..4..3
 							// else																		// Fills in from 6..7..0..1..2..3
 							break;
 
 					case 4:		// Runs from SE to NE
-						if (tnGravity07 <= 3 || tnGravity07 >= 7)		llOneMinusArea = true;		// Fills in from 6..7..0..1..2..3..4
+						if (tnGravity07_po <= 3 || tnGravity07_po >= 7)		llOneMinusArea = true;		// Fills in from 6..7..0..1..2..3..4
 						// else																		// Fills in from 6..5..4
 						break;
 
 					case 5:		// Runs from SE to E
-						if (!(tnGravity07 == 6 || tnGravity07 == 5))	llOneMinusArea = true;		// Fills in from 6..7..0..1..2..3..4..5
+						if (!(tnGravity07_po == 6 || tnGravity07_po == 5))	llOneMinusArea = true;		// Fills in from 6..7..0..1..2..3..4..5
 						// else																		// Fills in from 6..5
 						break;
 
 					case 7:		// Runs from SE to S
-						if (!(tnGravity07 >= 6))						llOneMinusArea = true;		// Fills in from 6..5..4..3..2..1..0..7
+						if (!(tnGravity07_po >= 6))						llOneMinusArea = true;		// Fills in from 6..5..4..3..2..1..0..7
 						// else																		// Fills in from 6..7
 						break;
 
@@ -8011,7 +8011,7 @@ continueToNextAttribute:
 				switch (tnGravity07_p2)
 				{
 					case 0:		// Runs from S to SW
-						if (!(tnGravity07 == 0 || tnGravity07 == 7))	llOneMinusArea = true;		// Fills in from 7..6..5..4..3..2..1..0
+						if (!(tnGravity07_po == 0 || tnGravity07_po == 7))	llOneMinusArea = true;		// Fills in from 7..6..5..4..3..2..1..0
 						// else																		// Fills in from 7..0
 						break;
 
@@ -8038,7 +8038,7 @@ continueToNextAttribute:
 						//////////
 						// Indicate if we need the area, or 1.0-area
 						//////
-							if (tnGravity07 <= 6 && tnGravity07 >= 2)		llOneMinusArea = true;		// Fills in from 7..6..5..4..3..2..1
+							if (tnGravity07_po <= 6 && tnGravity07_po >= 2)		llOneMinusArea = true;		// Fills in from 7..6..5..4..3..2..1
 							// else																		// Fills in from 7..0..1
 							break;
 
@@ -8065,7 +8065,7 @@ continueToNextAttribute:
 						//////////
 						// Indicate if we need the area, or 1.0-area
 						//////
-							if (tnGravity07 >= 3 && tnGravity07 <=6)	llOneMinusArea = true;		// Fills in from 7..6..5..4..3..2
+							if (tnGravity07_po >= 3 && tnGravity07_po <=6)	llOneMinusArea = true;		// Fills in from 7..6..5..4..3..2
 							// else																	// Fills in from 7..0..1..2
 							break;
 
@@ -8102,12 +8102,12 @@ continueToNextAttribute:
 							if (p2->x < p1->x)
 							{
 								// Line slants \ down
-								if (tnGravity07 >= 3 || tnGravity07 < 7)	llOneMinusArea = true;	// Fills in from 3..4..5..6..7
+								if (tnGravity07_po >= 3 || tnGravity07_po < 7)	llOneMinusArea = true;	// Fills in from 3..4..5..6..7
 								// else																// Fills in from 3..2..1..0..7
 
 							} else {
 								// Line slants / up
-								if (tnGravity07 > 3 || tnGravity07 <= 7)	llOneMinusArea = true;	// Fills in from 3..4..5..6..7
+								if (tnGravity07_po > 3 || tnGravity07_po <= 7)	llOneMinusArea = true;	// Fills in from 3..4..5..6..7
 								// else																// Fills in from 3..2..1..0..7
 							}
 							break;
@@ -8135,7 +8135,7 @@ continueToNextAttribute:
 						//////////
 						// Indicate if we need the area, or 1.0-area
 						//////
-							if (tnGravity07 <= 3)					llOneMinusArea = true;			// Fills in from 7..6..5..4
+							if (tnGravity07_po <= 3)					llOneMinusArea = true;			// Fills in from 7..6..5..4
 							// else																	// Fills in from 7..0..1..2..3..4
 							break;
 
@@ -8162,17 +8162,17 @@ continueToNextAttribute:
 						//////////
 						// Indicate if we need the area, or 1.0-area
 						//////
-							if (!(tnGravity07 >= 5))					llOneMinusArea = true;			// Fills in from 7..0..1..2..3..4..5
+							if (!(tnGravity07_po >= 5))					llOneMinusArea = true;			// Fills in from 7..0..1..2..3..4..5
 							// else																		// Fills in from 7..6..5
 							break;
 
 					case 6:		// Runs from S to SE
-						if (!(tnGravity07 >= 6))						llOneMinusArea = true;		// Fills in from 7..0..1..2..3..4..5..6
+						if (!(tnGravity07_po >= 6))						llOneMinusArea = true;		// Fills in from 7..0..1..2..3..4..5..6
 						// else																		// Fills in from 7..6
 						break;
 
 					case 7:		// Runs from S to S
-						if (!(tnGravity07 == 7))						llOneMinusArea = true;		// Fills in from 7..6..5..4..3..2..1..0..7
+						if (!(tnGravity07_po == 7))						llOneMinusArea = true;		// Fills in from 7..6..5..4..3..2..1..0..7
 						// else																		// Fills in from 7..7
 						break;
 
@@ -11141,11 +11141,11 @@ continueToNextAttribute:
 		u64				lnPixelCount;
 		f64				lfPercent, lfCosTheta1, lfSinTheta1, lfCosTheta2, lfSinTheta2;
 		SXYF64			p1, p2, pbez;
-		SLineF64		l1, l2;		// Line from bez->p1 to bez->p2, and bez->p2 to bez->p3
+		SLineF64		l1, l2;		// Lines from bez->p1 to bez->p2, and bez->p2 to bez->p3
 		SLineF64		lmid;		// Line from l1 to l2
 		SXYF64*			lxy;
-		SBuilder*		preFloans;
-		SBuilder*		postFloans;
+		SBuilder*		pointFloans;
+		SBuilder*		washFloans;
 
 
 		// Do we need to compute?
@@ -11157,8 +11157,8 @@ continueToNextAttribute:
 				memset(&l1,		0, sizeof(l1));
 				memset(&l2,		0, sizeof(l2));
 				memset(&lmid,	0, sizeof(lmid));
-				oss_builderCreateAndInitialize(&preFloans,	_COMMON_BUILDER_BLOCK_SIZE);		// SXYF64		- for raw floan data points
-				oss_builderCreateAndInitialize(&postFloans,	_COMMON_BUILDER_BLOCK_SIZE);		// SBGRACompute	- used for fx/fy (start/end) floan data points across each pixel
+				oss_builderCreateAndInitialize(&pointFloans,	_COMMON_BUILDER_BLOCK_SIZE);		// SXYF64		- for raw floan data points
+				oss_builderCreateAndInitialize(&washFloans,		_COMMON_BUILDER_BLOCK_SIZE);		// SBGRACompute	- used for fx/fy (start/end) floan data points across each pixel
 
 
 			//////////
@@ -11220,7 +11220,7 @@ continueToNextAttribute:
 					//////
 						if (pbez.x >= 0.0 && pbez.y >= 0.0)
 						{
-							lxy = (SXYF64*)oss_builderAllocateBytes(preFloans, sizeof(SXYF64));
+							lxy = (SXYF64*)oss_builderAllocateBytes(pointFloans, sizeof(SXYF64));
 							if (lxy)
 							{
 								// Store the point where it was computed.
@@ -11232,7 +11232,7 @@ continueToNextAttribute:
 				}
 
 				// Finish by washing
-				iioss_canvasBezier_wash(tc, bd, &preFloans, &postFloans, bez);
+				iioss_canvasBezier_wash(tc, bd, &pointFloans, &washFloans, bez);
 		}
 
 
@@ -11259,7 +11259,140 @@ continueToNextAttribute:
 //////
 	u64 iioss_canvasBezier4(SCanvas* tc, SBGRA* bd, SBezier* bez)
 	{
-		return(-1);
+		u32				lnI;
+		u64				lnPixelCount;
+		f64				lfPercent, lfCosTheta1, lfSinTheta1, lfCosTheta2, lfSinTheta2, lfCosTheta3, lfSinTheta3;
+		SXYF64			p1, p2, p3, pm1, pm2, pbez;
+		SLineF64		l1, l2, l3;				// Lines from bez->p1 to bez->p2, bez->p2 to bez->p3, and bez->p3 to bez->p4
+		SLineF64		lmid, lmid1, lmid2;		// Lines from lmid1 to lmid2, l1 to l2, l2 to l3
+		SXYF64*			lxy;
+		SBuilder*		pointFloans;
+		SBuilder*		washFloans;
+
+
+		// Do we need to compute?
+		if (!bez->pixelFloans)
+		{
+			//////////
+			// Initialize our line data
+			//////
+				memset(&l1,		0, sizeof(l1));
+				memset(&l2,		0, sizeof(l2));
+				memset(&l3,		0, sizeof(l3));
+				memset(&lmid,	0, sizeof(lmid));
+				memset(&lmid1,	0, sizeof(lmid1));
+				memset(&lmid2,	0, sizeof(lmid2));
+				oss_builderCreateAndInitialize(&pointFloans,	_COMMON_BUILDER_BLOCK_SIZE);		// SXYF64		- for raw floan data points
+				oss_builderCreateAndInitialize(&washFloans,		_COMMON_BUILDER_BLOCK_SIZE);		// SBGRACompute	- used for fx/fy (start/end) floan data points across each pixel
+
+
+			//////////
+			// Copy and compute our lines
+			//////
+				iioss_copyLine(&l1, &bez->p1, &bez->p2, true);
+				iioss_copyLine(&l2, &bez->p2, &bez->p3, true);
+				iioss_copyLine(&l3, &bez->p3, &bez->p4, true);
+
+
+			//////////
+			// Compute our thetas for rapid use
+			//////
+				// L1
+				lfCosTheta1		= cos(l1.theta);
+				lfSinTheta1		= sin(l1.theta);
+				// L2
+				lfCosTheta2		= cos(l2.theta);
+				lfSinTheta2		= sin(l2.theta);
+				// L3
+				lfCosTheta3		= cos(l3.theta);
+				lfSinTheta3		= sin(l3.theta);
+
+
+			//////////
+			// Now, iterate through the bezier building the points
+			//////
+				for (lnI = 0; lnI < bez->pixelFloanPoints; lnI++)
+				{
+					//////////
+					// Get our percentage
+					//////
+						lfPercent = (f64)lnI / (f64)bez->pixelFloanPoints;
+
+
+					//////////
+					// Determine the points for l1, l2, and l3
+					//////
+						// P1
+						p1.x = lfPercent * l1.radius * lfCosTheta1;
+						p1.y = lfPercent * l1.radius * lfSinTheta1;
+						// P2
+						p2.x = lfPercent * l2.radius * lfCosTheta2;
+						p2.y = lfPercent * l2.radius * lfSinTheta2;
+						// P3
+						p3.x = lfPercent * l3.radius * lfCosTheta3;
+						p3.y = lfPercent * l3.radius * lfSinTheta3;
+
+
+					//////////
+					// Construct the lines between
+					//////
+						iioss_copyLine(&lmid1, &p1, &p2, true);
+						iioss_copyLine(&lmid2, &p2, &p3, true);
+
+
+					//////////
+					// Based upon those points, find the middle of the line between them
+					//////
+						// PM1
+						pm1.x = lfPercent * l1.radius * cos(lmid1.theta);
+						pm1.y = lfPercent * l1.radius * sin(lmid1.theta);
+						// PM2
+						pm2.x = lfPercent * l2.radius * cos(lmid2.theta);
+						pm2.y = lfPercent * l2.radius * sin(lmid2.theta);
+						// Compute the line between
+						iioss_copyLine(&lmid, &pm1, &pm2, true);
+
+
+					//////////
+					// Derive the position of this bezier point
+					//////
+						// PBEZ
+						pbez.x = lfPercent * lmid.radius * cos(lmid.theta);
+						pbez.y = lfPercent * lmid.radius * sin(lmid.theta);
+
+
+					//////////
+					// Store it as a point floan for later processing
+					//////
+						if (pbez.x >= 0.0 && pbez.y >= 0.0)
+						{
+							lxy = (SXYF64*)oss_builderAllocateBytes(pointFloans, sizeof(SXYF64));
+							if (lxy)
+							{
+								// Store the point where it was computed.
+								// It may go through a washing algorithm below to actually stores only those X- and Y-Intercept points for the generated points into coordinate space
+								lxy->x	= pbez.x;
+								lxy->y	= pbez.y;
+							}
+						}
+				}
+
+				// Finish by washing
+				iioss_canvasBezier_wash(tc, bd, &pointFloans, &washFloans, bez);
+		}
+
+
+		//////////
+		// Populate onto the canvas
+		//////
+			if (tc && bd)
+				lnPixelCount = iioss_canvasBezier_draw(tc, bd, bez);
+
+
+		//////////
+		// Indicate how many pixels were computed, or drawn
+		//////
+			return(lnPixelCount);
 	}
 
 
@@ -11272,7 +11405,169 @@ continueToNextAttribute:
 //////
 	u64 iioss_canvasBezier5(SCanvas* tc, SBGRA* bd, SBezier* bez)
 	{
-		return(-1);
+		u32				lnI;
+		u64				lnPixelCount;
+		f64				lfPercent, lfCosTheta1, lfSinTheta1, lfCosTheta2, lfSinTheta2, lfCosTheta3, lfSinTheta3, lfCosTheta4, lfSinTheta4;
+		SXYF64			p1, p2, p3, p4, pm1, pm2, pm3, pmm1, pmm2, pbez;
+		SLineF64		l1, l2, l3, l4;							// Lines from bez->p1 to bez->p2, bez->p2 to bez->p3, bez->p3 to bez->p4, and bez->p4 to bez->p5
+		SLineF64		lmid, lmid1, lmid2, lmid3, lmmid1, lmmid2;		// Lines from lmmid1 to lmmid2, l1 to l2, l2 to l3, l3 to l4, lmid1 to lmid2, lmid2 to lmid3
+		SXYF64*			lxy;
+		SBuilder*		pointFloans;
+		SBuilder*		washFloans;
+
+
+		// Do we need to compute?
+		if (!bez->pixelFloans)
+		{
+			//////////
+			// Initialize our line data
+			//////
+				memset(&l1,		0, sizeof(l1));
+				memset(&l2,		0, sizeof(l2));
+				memset(&l3,		0, sizeof(l3));
+				memset(&l4,		0, sizeof(l3));
+				memset(&lmid,	0, sizeof(lmid));
+				memset(&lmid1,	0, sizeof(lmid1));
+				memset(&lmid2,	0, sizeof(lmid2));
+				memset(&lmid3,	0, sizeof(lmid3));
+				memset(&lmmid1,	0, sizeof(lmmid1));
+				memset(&lmmid2,	0, sizeof(lmmid2));
+				oss_builderCreateAndInitialize(&pointFloans,	_COMMON_BUILDER_BLOCK_SIZE);		// SXYF64		- for raw floan data points
+				oss_builderCreateAndInitialize(&washFloans,		_COMMON_BUILDER_BLOCK_SIZE);		// SBGRACompute	- used for fx/fy (start/end) floan data points across each pixel
+
+
+			//////////
+			// Copy and compute our lines
+			//////
+				iioss_copyLine(&l1, &bez->p1, &bez->p2, true);
+				iioss_copyLine(&l2, &bez->p2, &bez->p3, true);
+				iioss_copyLine(&l3, &bez->p3, &bez->p4, true);
+				iioss_copyLine(&l4, &bez->p4, &bez->p5, true);
+
+
+			//////////
+			// Compute our thetas for rapid use
+			//////
+				// L1
+				lfCosTheta1		= cos(l1.theta);
+				lfSinTheta1		= sin(l1.theta);
+				// L2
+				lfCosTheta2		= cos(l2.theta);
+				lfSinTheta2		= sin(l2.theta);
+				// L3
+				lfCosTheta3		= cos(l3.theta);
+				lfSinTheta3		= sin(l3.theta);
+				// L4
+				lfCosTheta4		= cos(l4.theta);
+				lfSinTheta4		= sin(l4.theta);
+
+
+			//////////
+			// Now, iterate through the bezier building the points
+			//////
+				for (lnI = 0; lnI < bez->pixelFloanPoints; lnI++)
+				{
+					//////////
+					// Get our percentage
+					//////
+						lfPercent = (f64)lnI / (f64)bez->pixelFloanPoints;
+
+
+					//////////
+					// Determine the points for l1, l2, and l3
+					//////
+						// P1
+						p1.x = lfPercent * l1.radius * lfCosTheta1;
+						p1.y = lfPercent * l1.radius * lfSinTheta1;
+						// P2
+						p2.x = lfPercent * l2.radius * lfCosTheta2;
+						p2.y = lfPercent * l2.radius * lfSinTheta2;
+						// P3
+						p3.x = lfPercent * l3.radius * lfCosTheta3;
+						p3.y = lfPercent * l3.radius * lfSinTheta3;
+						// P4
+						p4.x = lfPercent * l4.radius * lfCosTheta4;
+						p4.y = lfPercent * l4.radius * lfSinTheta4;
+
+
+					//////////
+					// Construct the lines between
+					//////
+						iioss_copyLine(&lmid1, &p1, &p2, true);
+						iioss_copyLine(&lmid2, &p2, &p3, true);
+						iioss_copyLine(&lmid3, &p3, &p4, true);
+
+
+					//////////
+					// Based upon those points, find the middle of the line between them
+					//////
+						// PM1
+						pm1.x = lfPercent * l1.radius * cos(lmid1.theta);
+						pm1.y = lfPercent * l1.radius * sin(lmid1.theta);
+						// PM2
+						pm2.x = lfPercent * l2.radius * cos(lmid2.theta);
+						pm2.y = lfPercent * l2.radius * sin(lmid2.theta);
+						// PM3
+						pm3.x = lfPercent * l3.radius * cos(lmid3.theta);
+						pm3.y = lfPercent * l3.radius * sin(lmid3.theta);
+						// Compute the lines between
+						iioss_copyLine(&lmmid1, &pm1, &pm2, true);
+						iioss_copyLine(&lmmid2, &pm2, &pm3, true);
+
+
+					//////////
+					// Based upon those final two lines, compute the middle of the line between
+					//////
+						// PMM1
+						pmm1.x = lfPercent * lmmid1.radius * cos(lmmid1.theta);
+						pmm1.y = lfPercent * lmmid1.radius * sin(lmmid1.theta);
+						// PMM2
+						pmm2.x = lfPercent * lmmid2.radius * cos(lmmid2.theta);
+						pmm2.y = lfPercent * lmmid2.radius * sin(lmmid2.theta);
+						// Compute the lines between
+						iioss_copyLine(&lmid, &pmm1, &pmm2, true);
+
+
+					//////////
+					// Derive the position of this bezier point
+					//////
+						// PBEZ
+						pbez.x = lfPercent * lmid.radius * cos(lmid.theta);
+						pbez.y = lfPercent * lmid.radius * sin(lmid.theta);
+
+
+					//////////
+					// Store it as a point floan for later processing
+					//////
+						if (pbez.x >= 0.0 && pbez.y >= 0.0)
+						{
+							lxy = (SXYF64*)oss_builderAllocateBytes(pointFloans, sizeof(SXYF64));
+							if (lxy)
+							{
+								// Store the point where it was computed.
+								// It may go through a washing algorithm below to actually stores only those X- and Y-Intercept points for the generated points into coordinate space
+								lxy->x	= pbez.x;
+								lxy->y	= pbez.y;
+							}
+						}
+				}
+
+				// Finish by washing
+				iioss_canvasBezier_wash(tc, bd, &pointFloans, &washFloans, bez);
+		}
+
+
+		//////////
+		// Populate onto the canvas
+		//////
+			if (tc && bd)
+				lnPixelCount = iioss_canvasBezier_draw(tc, bd, bez);
+
+
+		//////////
+		// Indicate how many pixels were computed, or drawn
+		//////
+			return(lnPixelCount);
 	}
 
 
@@ -11284,22 +11579,22 @@ continueToNextAttribute:
 // by the common bezier drawing algorithm
 //
 //////
-	void iioss_canvasBezier_wash(SCanvas* tc, SBGRA* bd, SBuilder** preFloans, SBuilder** postFloans, SBezier* bez)
+	void iioss_canvasBezier_wash(SCanvas* tc, SBGRA* bd, SBuilder** pointFloans, SBuilder** washFloans, SBezier* bez)
 	{
 		//////////
-		// Now, if need be, wash the prefloans into proper floans
+		// Now, if need be, wash the point floans into properly washed floans (pixel border to pixel border)
 		//////
 			if (bez->wash)
 			{
 				//////////
 				// Wash
 				/////
-					iioss_math_washFloans(tc, bd, preFloans, postFloans, ((tc && bd) ? &bez->pixelFloans : NULL), false);
+					iioss_math_washFloans(tc, bd, pointFloans, washFloans, ((tc && bd) ? &bez->pixelFloans : NULL), false);
 
 
 			} else {
 				// We're just computing
-				bez->pixelFloans = *preFloans;
+				bez->pixelFloans = *pointFloans;
 			}
 
 
@@ -11392,16 +11687,15 @@ continueToNextAttribute:
 //////////
 //
 // Called to wash the floans to only X- and Y-Intercept boundary points across its line domain.
-// Returns true if anything was converted.
+// Returns floans washed, or (if drawing was specified) drawn.
 //
 //////
-	u64 iioss_math_washFloans(SCanvas* tc, SBGRA* bd, SBuilder** preFloans, SBuilder** postFloans, SBuilder** drawFloans, bool tlIsFilledLeft)
+	u64 iioss_math_washFloans(SCanvas* tc, SBGRA* bd, SBuilder** pointFloans, SBuilder** washFloans, SBuilder** drawFloans, bool tlIsFilledLeft)
 	{
 		u32				lnI, lnMaxOffset;
 		u64				lnFloanCount;
 		SBuilder*		pre;
 		SBuilder*		post;
-		SBuilder*		draw;
 		SXYF64*			prexy0;
 		SXYF64*			prexy1;
 		SXYF64			lastPixelCross, borderProjected;
@@ -11412,8 +11706,8 @@ continueToNextAttribute:
 		//////////
 		// Initialize
 		//////
-			pre				= *preFloans;
-			post			= *postFloans;
+			pre				= *pointFloans;
+			post			= *washFloans;
 			lnFloanCount	= 0;
 			lnMaxOffset		= pre->populatedLength - sizeof(SXYF64);
 
@@ -11424,7 +11718,7 @@ continueToNextAttribute:
 
 
 		//////////
-		// Convert from preFloan form to the postFloan form
+		// Wash (convert from raw point floan form to the washed floan form (pixel border to pixel border))
 		//////
 			for (lnI = 0; lnI < lnMaxOffset; lnI += sizeof(SXYF64))
 			{
@@ -11444,7 +11738,7 @@ continueToNextAttribute:
 						//////////
 						// Yes, find out where it hits the pixel border
 						//////
-							// Prepare our crossing point
+							// Prepare to compute our crossing point
 							lastPixelCross.x = line.start.x;
 							lastPixelCross.y = line.start.y;
 
@@ -11455,7 +11749,8 @@ continueToNextAttribute:
 						//////////
 						// Store this point, and then repeatedly project ahead to see if we will cross any more pixels before this line ends
 						//////
-							do {
+							while (1)
+							{
 								//////////
 								// Allocate and store it
 								//////
@@ -11500,37 +11795,135 @@ continueToNextAttribute:
 										// All done
 										break;
 									}
-
-							} while (1);
+							}
 					}
 					// When we get here, we'll continue on with the next point
 			}
 
 
 		//////////
-		// Clean up preFloans
+		// Clean up pointFloans (since they've now been washed into washFloans)
 		//////
-			oss_builderFreeAndRelease(preFloans);
+			oss_builderFreeAndRelease(pointFloans);
 
 
 		//////////
 		// If we are supposed to draw, then do the draw floans
 		//////
-			if (drawFloans)
-			{
-				// Reset our floan count
-				lnFloanCount = 0;
-// TODO:  Working here
-
-				//////////
-				// Clean up postFloans
-				//////
-					oss_builderFreeAndRelease(postFloans);
-			}
+			if (tc && bd && drawFloans)
+				lnFloanCount = iioss_math_washFloans_doDraw(tc, bd, washFloans, drawFloans, tlIsFilledLeft);
 
 
 		//////////
 		// Indicate our converted floan count
+		//////
+			return(lnFloanCount);
+	}
+
+
+
+
+//////////
+//
+// Called to draw the washed floans.
+//
+//////
+	u64 iioss_math_washFloans_doDraw(SCanvas* tc, SBGRA* bd, SBuilder** washFloans, SBuilder** drawFloans, bool tlIsFilledLeft)
+	{
+		s32				lnGravityPO, lnGravityP1, lnGravityP2;
+		u32				lnI;
+		u64				lnFloanCount;
+		f64				lfArea;
+		SLineF64		line;
+		SXYS32			poi;
+		SXYF64			pof, p1, p2;
+		SBuilder*		wash;
+		SBuilder*		draw;
+		SBGRACompute*	sbgrac;
+		SBGRACompute*	sbgrac1;
+		SBGRACompute*	sbgrac2;
+
+
+		//////////
+		// Wash floans are already pixel border to pixel border.  As such, we can easily convert
+		// them to floans.
+		//////
+			lnFloanCount	= 0;
+			wash			= *washFloans;
+			draw			= *drawFloans;
+			for (lnI = 0; lnI < wash->populatedLength; lnI += sizeof(SBGRACompute))
+			{
+				//////////
+				// Grab the pointers
+				//////
+					sbgrac1 = (SBGRACompute*)(wash->data + lnI);
+					sbgrac2 = (SBGRACompute*)(wash->data + lnI + sizeof(SBGRACompute));
+
+
+				//////////
+				// Convert to f64
+				//////
+					// po
+					poi.x	= (s32)sbgrac1->fx;
+					poi.y	= (s32)sbgrac1->fy;
+					pof.x	= (f64)poi.x;
+					pof.y	= (f64)poi.y;
+					// p1
+					p1.x	= (f64)sbgrac1->fx;
+					p1.y	= (f64)sbgrac1->fy;
+					// p2
+					p2.x	= (f64)sbgrac2->fx;
+					p2.y	= (f64)sbgrac2->fy;
+
+
+				//////////
+				// pg (compute the gravity to be either to the left or right of the center of this point)
+				//////
+					iioss_copyLine(&line, &p1, &p2, true);
+					line.theta = iioss_math_adjustTheta(line.theta + ((tlIsFilledLeft) ? _PI_4 : -_PI_4));
+					iioss_math_getNextAxisInterceptXY(&line.mid, line.theta);
+
+
+				//////////
+				// Grab the gravities
+				//////
+					lnGravityPO		= iioss_math_getGravityByRelativePosition(&line.mid,	&poi);
+					lnGravityP1		= iioss_math_getGravityByRelativePosition(&p1,			&poi);
+					lnGravityP2		= iioss_math_getGravityByRelativePosition(&p2,			&poi);
+
+
+				//////////
+				// Convert it to floanage
+				//////
+					if (p1.x >= 0.0 && p1.y >= 0.0 && p2.x >= 0.0 && p2.y >= 0.0)
+					{
+						// Compute the area
+						lfArea	= iioss_math_getAreaOfSquareUsing_po_p1_p2(lnGravityPO, lnGravityP1, lnGravityP2, &pof, &p1, &p2);
+
+						// Store the floan
+						sbgrac	= (SBGRACompute*)oss_builderAllocateBytes(draw, sizeof(SBGRACompute));
+						if (sbgrac)
+						{
+							// Store the offset and area (alpha) for this part
+							sbgrac->offsetDst	= ((s32)poi.y * tc->width) + (s32)poi.x;
+							sbgrac->alpha		= lfArea;
+
+							// Indicate we stored another floan
+							++lnFloanCount;
+						}
+					}
+			}
+			
+
+		//////////
+		// Clean up washFloans, and resize drawFloans
+		//////
+			oss_builderFreeAndRelease(washFloans);
+			oss_builderSetSize(draw, draw->populatedLength);
+
+
+		//////////
+		// Indicate how many floans we generated
 		//////
 			return(lnFloanCount);
 	}

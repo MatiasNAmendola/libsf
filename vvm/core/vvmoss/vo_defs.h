@@ -336,14 +336,14 @@
 		void CALLTYPE			oss_math_squareRotateAbout					(SSquareInOutF64* sq);
 		u32 CALLTYPE			oss_math_getGravityOfThetaAndLeft			(f64 tfTheta, bool tlLeft);
 		s32 CALLTYPE			oss_math_getGravity07FromDecoratedGravity	(u32 tnGravityDecorated);
-		f64 CALLTYPE			oss_math_getAreaOfSquareUsing_po_p1_p2		(s32 tnGravity07_p1Intersect, s32 tnGravity07_p2Intersect, s32 tnGravity07_line1, SXYF64* po, SXYF64* p1, SXYF64* p2);
+		f64 CALLTYPE			oss_math_getAreaOfSquareUsing_po_p1_p2		(s32 tnGravity07_po, s32 tnGravity07_p1, s32 tnGravity07_p2, SXYF64* po, SXYF64* p1, SXYF64* p2);
 		void CALLTYPE			oss_math_getNextAxisInterceptXY				(SXYF64* p, f64 tfTheta);
 		s32 CALLTYPE			oss_math_getGravityByRelativePosition		(SXYF64* p, SXYS32* po);
 		s32 CALLTYPE			oss_math_getGravityInteger					(SXYS32* p, SXYS32* po);
 		s32 CALLTYPE			oss_math_fineAdjustGravityByTheta			(SXYF64* po, SXYF64* p, SXYF64* pg, s32 lnGravity07p, s32 lnGravity07pg);
 		f64 CALLTYPE			oss_math_adjustTheta						(f64 tfTheta);
 		bool CALLTYPE			oss_math_withinDelta						(f64 tfValue1, f64 tfValue2, s32 tnDeltaDecimals);
-		u64 CALLTYPE			oss_math_washFloans							(SCanvas* tc, SBGRA* bd, SBuilder** preFloans, SBuilder** postFloans, SBuilder** drawFloans, bool tlIsFilledLeft);
+		u64 CALLTYPE			oss_math_washFloans							(SCanvas* tc, SBGRA* bd, SBuilder** pointFloans, SBuilder** washFloans, SBuilder** drawFloans, bool tlIsFilledLeft);
 
 		bool CALLTYPE			oss_polygon_initialize						(SPolygon* poly, u32 tnLineCount, bool tlAllocatePolyLines);
 		bool CALLTYPE			oss_polygon_setByPolyLine					(SPolygon* poly, u32 tnEntry, SPolyLine* line);
@@ -676,7 +676,7 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	void					iioss_canvasPolygon_storeFloansCorner			(_isSStoreFloan_lineData* sfld, _isSStoreFloan_cornerData* sfcd1, _isSStoreFloan_cornerData* sfcd2);
 	u32						iioss_math_getGravityOfThetaAndLeft				(f64 tfTheta, bool tlLeft);
 	s32						iioss_math_getGravity07FromDecoratedGravity		(u32 tnGravityDecorated);
-	f64						iioss_math_getAreaOfSquareUsing_po_p1_p2		(s32 tnGravity07_p1Intersect, s32 tnGravity07_p2Intersect, s32 tnGravity07_line1, SXYF64* po, SXYF64* p1, SXYF64* p2);
+	f64						iioss_math_getAreaOfSquareUsing_po_p1_p2		(s32 tnGravity07po, s32 tnGravity07_p1, s32 tnGravity07_p2, SXYF64* po, SXYF64* p1, SXYF64* p2);
 	void					iioss_math_getNextAxisInterceptXY				(SXYF64* p, f64 tfTheta);
 	s32						iioss_math_getGravityByRelativePosition			(SXYF64* p, SXYS32* po);
 	s32						iioss_math_getGravityInteger					(SXYS32* p, SXYS32* po);
@@ -688,15 +688,16 @@ inline bool					ioss_verifyLength								(u64 tnGoingTo, u64 tnMaxAllowable);
 	u64						iioss_canvasBezier3								(SCanvas* tc, SBGRA* bd, SBezier* bez);
 	u64						iioss_canvasBezier4								(SCanvas* tc, SBGRA* bd, SBezier* bez);
 	u64						iioss_canvasBezier5								(SCanvas* tc, SBGRA* bd, SBezier* bez);
-	void					iioss_canvasBezier_wash							(SCanvas* tc, SBGRA* bd, SBuilder** preFloans, SBuilder** postFloans, SBezier* bez);
+	void					iioss_canvasBezier_wash							(SCanvas* tc, SBGRA* bd, SBuilder** pointFloans, SBuilder** washFloans, SBezier* bez);
 	u64						iioss_canvasBezier_draw							(SCanvas* tc, SBGRA* bd, SBezier* bez);
-	u64 					iioss_math_washFloans							(SCanvas* tc, SBGRA* bd, SBuilder** preFloans, SBuilder** postFloans, SBuilder** drawFloans, bool tlIsFilledLeft);
+	u64 					iioss_math_washFloans							(SCanvas* tc, SBGRA* bd, SBuilder** pointFloans, SBuilder** washFloans, SBuilder** drawFloans, bool tlIsFilledLeft);
+	u64						iioss_math_washFloans_doDraw					(SCanvas* tc, SBGRA* bd, SBuilder** washFloans, SBuilder** drawFloans, bool tlIsFilledLeft);
 
 
 //////////
 // The following functions handle floan segments from point to point.
 //      NW __N__ NE     2__3__4
-//      W |     |E      1     5
+//      W |     |E      1  8  5		// Note:  8 is only used when comparing integers, as they refer to entire pixels compared with other entire pixels, 8 means they are both of the same location
 //      SW|__S__|SE     0__7__6
 //////
 	void					storeFloan_pointToPoint_bad						(_isSStoreFloan_lineData* sfld);
