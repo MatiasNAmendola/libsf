@@ -274,6 +274,9 @@
 	const s8		cgcOssMathWithinDelta[]									= "oss_math_withinDelta";
 	const s8		cgcOssMathWashFloans[]									= "oss_math_washFloans";
 
+	const s8		cgcOssBezierInitialize[]								= "oss_bezier_initialize";
+	const s8		cgcOssBezierSetByValues[]								= "oss_bezier_setByValues";
+
 	const s8		cgcOssPolygonInitialize[]								= "oss_polygon_initialize";
 	const s8		cgcOssPolygonSetByPolyLine[]							= "oss_polygon_setByPolyLine";
 	const s8		cgcOssPolygonSetByValues[]								= "oss_polygon_setByValues";
@@ -716,6 +719,9 @@
 		bool			(CALLTYPE *oss_math_withinDelta)					(f64 tfValue1, f64 tfValue2, s32 tnDeltaDecimals);
 		u64				(CALLTYPE *oss_math_washFloans)						(SCanvas* tc, SBGRA* bd, SBuilder** pointFloans, SBuilder** washFloans, SBuilder** drawFloans, bool tlIsFilledLeft);
 
+		bool			(CALLTYPE *oss_bezier_initialize)					(SBezier* bez, u32 tnCurveCount, u32 tnComputePointCount, bool tlWash);
+		bool			(CALLTYPE* oss_bezier_setByValues)					(SBezier* bez, SBGRA color, SXYF64* p1, SXYF64* p2, SXYF64* p3, SXYF64* p4, SXYF64* p5);
+
 		bool			(CALLTYPE *oss_polygon_initialize)					(SPolygon* poly, u32 tnLineCount, bool tlAllocatePolyLines);
 		bool			(CALLTYPE *oss_polygon_setByPolyLine)				(SPolygon* poly, u32 tnEntry, SPolyLine* line);
 		bool			(CALLTYPE *oss_polygon_setByValues)					(SPolygon* poly, u32 tnEntry, SXYF64* start, SXYF64* end, SXYF64* gravity);
@@ -1128,6 +1134,9 @@
 		(void*)&oss_math_adjustTheta,										(void*)cgcOssMathAdjustTheta,
 		(void*)&oss_math_withinDelta,										(void*)cgcOssMathWithinDelta,
 		(void*)&oss_math_washFloans,										(void*)cgcOssMathWashFloans,
+
+		(void*)&oss_bezier_initialize,										(void*)cgcOssBezierInitialize,
+		(void*)&oss_bezier_setByValues,										(void*)cgcOssBezierSetByValues,
 
 		(void*)&oss_polygon_initialize,										(void*)cgcOssPolygonInitialize,
 		(void*)&oss_polygon_setByPolyLine,									(void*)cgcOssPolygonSetByPolyLine,

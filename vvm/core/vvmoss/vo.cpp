@@ -1421,10 +1421,10 @@
 	u64 CALLTYPE oss_canvasBezier(SCanvas* tc, SBGRA* bd, SBezier* bez)
 	{
 		// Make sure our environment is sane
-		if (bez)
+		if (bez && bez->computePointCount >= bez->curveCount && bez->curveCount >= 3 && bez->curveCount <= 5)
 		{
 			// Draw or generate the bezier curve points
-			switch (bez->points)
+			switch (bez->curveCount)
 			{
 				case 3:
 					return(iioss_canvasBezier3(tc, bd, bez));
@@ -8270,6 +8270,112 @@ _asm int 3;
 
 //////////
 //
+// Called to initialize a bezier curve to the indicated points, and resolution
+//
+//////
+	bool CALLTYPE oss_bezier_initialize(SBezier* bez, u32 tnCurveCount, u32 tnComputePointCount, bool tlWash)
+	{
+		if (bez && tnCurveCount >= 3 && tnCurveCount <= 5)
+		{
+// TODO:  We may want to manually verify that the floan components are released here
+			// Initialize
+			memset(bez, 0, sizeof(SBezier));
+
+			// Store parameters
+			bez->curveCount			= tnCurveCount;
+			bez->computePointCount	= tnComputePointCount;
+			bez->wash				= tlWash;
+
+			// Indicate success
+			return(true);
+
+		} else {
+			// Failure of some kind
+			return(false);
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to set the bezier curve values based upon the indicated points
+//
+//////
+	bool CALLTYPE oss_bezier_setByValues(SBezier* bez, SBGRA color, SXYF64* p1, SXYF64* p2, SXYF64* p3, SXYF64* p4, SXYF64* p5)
+	{
+		bool llSuccess;
+
+
+		// Make sure our environment is sane
+		llSuccess = false;
+		if (bez)
+		{
+			// Store the color
+			bez->color = color;
+
+			// Test each explicitly to indicate success or failure
+			if (bez->curveCount == 3 && p1 && p2 && p3)
+			{
+				// P1
+				bez->p1.x = p1->x;
+				bez->p1.y = p1->y;
+				// P2
+				bez->p2.x = p2->x;
+				bez->p2.y = p2->y;
+				// P3
+				bez->p3.x = p3->x;
+				bez->p3.y = p3->y;
+				// We're good
+				llSuccess = true;
+
+			} else if (bez->curveCount == 4 && p1 && p2 && p3 && p4) {
+				// P1
+				bez->p1.x = p1->x;
+				bez->p1.y = p1->y;
+				// P2
+				bez->p2.x = p2->x;
+				bez->p2.y = p2->y;
+				// P3
+				bez->p3.x = p3->x;
+				bez->p3.y = p3->y;
+				// P4
+				bez->p4.x = p4->x;
+				bez->p4.y = p4->y;
+				// We're good
+				llSuccess = true;
+
+			} else if (bez->curveCount == 5 && p1 && p2 && p3 && p4 && p5) {
+				// P1
+				bez->p1.x = p1->x;
+				bez->p1.y = p1->y;
+				// P2
+				bez->p2.x = p2->x;
+				bez->p2.y = p2->y;
+				// P3
+				bez->p3.x = p3->x;
+				bez->p3.y = p3->y;
+				// P4
+				bez->p4.x = p4->x;
+				bez->p4.y = p4->y;
+				// P5
+				bez->p5.x = p5->x;
+				bez->p5.y = p5->y;
+				// We're good
+				llSuccess = true;
+			}
+		}
+
+		// Indicate our success or failure
+		return(llSuccess);
+	}
+
+
+
+
+//////////
+//
 // Called to initialize a polygon to the number indicated by poly->lineCount.
 //
 //////
@@ -8634,8 +8740,6 @@ _asm int 3;
 		s8* lcNew;
 
 
-// TODO:  Untested code, breakpoint and examine
-_asm int 3;
 		// Make sure our environment is sane
 		if (buffRoot)
 		{
@@ -8651,6 +8755,8 @@ _asm int 3;
 			//////
 				if (tnBufferLength == 0)
 				{
+// TODO:  Untested code, breakpoint and examine
+_asm int 3;
 					//////////
 					// They are freeing everything
 					//////
@@ -8682,6 +8788,8 @@ _asm int 3;
 
 						} else {
 							// Failure on resize
+// TODO:  Untested code, breakpoint and examine
+_asm int 3;
 						}
 				}
 		}

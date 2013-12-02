@@ -180,6 +180,13 @@
 // Uses the vvm_resourcePrintf() function to direct output made during the tests.
 //
 //////
+	SXYF64* make_SXYF64(SXYF64* p, f64 x, f64 y)
+	{
+		p->x = x;
+		p->y = y;
+		return(p);
+	}
+
 	bool CALLTYPE vvmt_executeTests(u64 lnHandleLog)
 	{
 		bool llResult;
@@ -278,54 +285,97 @@
 		lc = oss_createCanvas(0, 600, 600, white);
 		if (lc)
 		{
-			f64			lfTheta, lfDeltaX, lfDeltaY, lfLineLength, lfHalfLineX, lfHalfLineY, lfStepXM, lfStepYM;
-			u64			lnPixelsDrawn;
-			SPolygon	polygon;
-			SXYF64		p1, p2, p3, p4, gravity;
+			// Draw a bezier-3 curve, a bezier-4 curve, and a bezier-5 curve
+			//////////
+			// Initialize
+			//////
+				SBezier bez3, bez4, bez5;
+				SXYF64 p1, p2, p3, p4, p5;
+				SBGRA black, white;
 
-			// Initialize the polygon
-			memset(&polygon, 0, sizeof(polygon));
-			polygon.line		= (SPolyLine**)NULL;
-			oss_polygon_initialize(&polygon, 4, true);
 
-			lfTheta = 0.0;
-			for (lfTheta = 0.0; lfTheta < _2PI; lfTheta += _2PI / 8.0)
-			{
-				// Set the points
-				// p1
-				p1.x			= 300.0 + (50.0 * cos(lfTheta + _PI / 32.0));
-				p1.y			= 300.0 + (50.0 * sin(lfTheta + _PI / 32.0));
-				// p2
-				p2.x			= 300.0 + (50.0 * cos(lfTheta - _PI / 32.0));
-				p2.y			= 300.0 + (50.0 * sin(lfTheta - _PI / 32.0));
-				// p3
-				p3.x			= 300.0 + (290.0 * cos(lfTheta - _PI / 32.0));
-				p3.y			= 300.0 + (290.0 * sin(lfTheta - _PI / 32.0));
-				// p2
-				p4.x			= 300.0 + (290.0 * cos(lfTheta + _PI / 32.0));
-				p4.y			= 300.0 + (290.0 * sin(lfTheta + _PI / 32.0));
+			//////////
+			// Bezier-3
+			//////
+				black.color = rgba(0,0,0,255);
+				// 100,500 to 300,50 to 500,500
+// 				oss_bezier_initialize(&bez3, 3, 1000, true);
+// 				oss_bezier_setByValues(&bez3, black, make_SXYF64(&p1, 100.0, 500.0), make_SXYF64(&p2, 300.0, 50.0), make_SXYF64(&p3, 500.0, 500.0), NULL, NULL);
+// 				oss_canvasBezier(lc, lc->bd, &bez3);
+// 				oss_bitmapSaveToDisk(lc, lc->bd, "c:\\temp\\bezier3.bmp");
 
-				// Gravity is the center point of the line's 4 point coordinates
-				gravity.x		= (p1.x + p2.x + p3.x + p4.x) / 4.0;
-				gravity.y		= (p1.y + p2.y + p3.y + p4.y) / 4.0;
 
-				// Set the lines
-				oss_polygon_setByValues(&polygon, 0, &p1, &p2, &gravity);		// p1..p2
-				oss_polygon_setByValues(&polygon, 1, &p2, &p3, &gravity);		// p2..p3
-				oss_polygon_setByValues(&polygon, 2, &p3, &p4, &gravity);		// p3..p4
-				oss_polygon_setByValues(&polygon, 3, &p4, &p1, &gravity);		// p4..p1
+			//////////
+			// Bezier-4
+			//////
+				white.color = rgba(255,255,255,255);
+				// 100,500 to 200,50 to 300,300 to 500, 500
+// 				oss_canvasFillRect(lc, lc->bd, 0, 0, lc->width, lc->height, 0, white, white);
+// 				oss_bezier_initialize(&bez4, 4, 1000, true);
+// 				oss_bezier_setByValues(&bez4, black, make_SXYF64(&p1, 100.0, 500.0), make_SXYF64(&p2, 200.0, 50.0), make_SXYF64(&p3, 300.0, 300.0), make_SXYF64(&p4, 500.0, 500.0), NULL);
+// 				oss_canvasBezier(lc, lc->bd, &bez4);
+// 				oss_bitmapSaveToDisk(lc, lc->bd, "c:\\temp\\bezier4.bmp");
 
-				// Draw the polygon
-				lnPixelsDrawn = oss_canvasPolygon(lc, lc->bd, &polygon, black);
 
-				// Reset it for the next go-round
-				oss_polygon_reset(&polygon, true);
+			//////////
+			// Bezier-5
+			//////
+				// 100,500 to 200,50 to 300,300 to 400,100 to 500,300
+// 				oss_canvasFillRect(lc, lc->bd, 0, 0, lc->width, lc->height, 0, white, white);
+// 				oss_bezier_initialize(&bez5, 5, 1000, true);
+// 				oss_bezier_setByValues(&bez5, black, make_SXYF64(&p1, 100.0, 500.0), make_SXYF64(&p2, 200.0, 50.0), make_SXYF64(&p3, 300.0, 300.0), make_SXYF64(&p4, 400.0, 100.0), make_SXYF64(&p5, 500.0, 300.0));
+// 				oss_canvasBezier(lc, lc->bd, &bez5);
+// 				oss_bitmapSaveToDisk(lc, lc->bd, "c:\\temp\\bezier5.bmp");
+// 				_asm nop;
+
+// 			f64			lfTheta, lfDeltaX, lfDeltaY, lfLineLength, lfHalfLineX, lfHalfLineY, lfStepXM, lfStepYM;
+// 			u64			lnPixelsDrawn;
+// 			SPolygon	polygon;
+// 			SXYF64		p1, p2, p3, p4, gravity;
+// 
+// 			// Initialize the polygon
+// 			memset(&polygon, 0, sizeof(polygon));
+// 			polygon.line		= (SPolyLine**)NULL;
+// 			oss_polygon_initialize(&polygon, 4, true);
+// 
+// 			lfTheta = 0.0;
+// 			for (lfTheta = 0.0; lfTheta < _2PI; lfTheta += _2PI / 8.0)
+// 			{
+// 				// Set the points
+// 				// p1
+// 				p1.x			= 300.0 + (50.0 * cos(lfTheta + _PI / 32.0));
+// 				p1.y			= 300.0 + (50.0 * sin(lfTheta + _PI / 32.0));
+// 				// p2
+// 				p2.x			= 300.0 + (50.0 * cos(lfTheta - _PI / 32.0));
+// 				p2.y			= 300.0 + (50.0 * sin(lfTheta - _PI / 32.0));
+// 				// p3
+// 				p3.x			= 300.0 + (290.0 * cos(lfTheta - _PI / 32.0));
+// 				p3.y			= 300.0 + (290.0 * sin(lfTheta - _PI / 32.0));
+// 				// p2
+// 				p4.x			= 300.0 + (290.0 * cos(lfTheta + _PI / 32.0));
+// 				p4.y			= 300.0 + (290.0 * sin(lfTheta + _PI / 32.0));
+// 
+// 				// Gravity is the center point of the line's 4 point coordinates
+// 				gravity.x		= (p1.x + p2.x + p3.x + p4.x) / 4.0;
+// 				gravity.y		= (p1.y + p2.y + p3.y + p4.y) / 4.0;
+// 
+// 				// Set the lines
+// 				oss_polygon_setByValues(&polygon, 0, &p1, &p2, &gravity);		// p1..p2
+// 				oss_polygon_setByValues(&polygon, 1, &p2, &p3, &gravity);		// p2..p3
+// 				oss_polygon_setByValues(&polygon, 2, &p3, &p4, &gravity);		// p3..p4
+// 				oss_polygon_setByValues(&polygon, 3, &p4, &p1, &gravity);		// p4..p1
+// 
+// 				// Draw the polygon
+// 				lnPixelsDrawn = oss_canvasPolygon(lc, lc->bd, &polygon, black);
+// 
+// 				// Reset it for the next go-round
+// 				oss_polygon_reset(&polygon, true);
 
 // 				// Draw this line
 //				SXYF32 p1, p2;
 // 				oss_canvasLine(lc, lc->bd, &p1, &p2, 5.0, black, true);
-			}
-			oss_bitmapSaveToDisk(lc, lc->bd, "c:\\temp\\test.bmp");
+//			}
+//			oss_bitmapSaveToDisk(lc, lc->bd, "c:\\temp\\test.bmp");
 		}
 
 

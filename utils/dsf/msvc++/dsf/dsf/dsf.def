@@ -1,0 +1,6 @@
+LIBRARY	"dsf"
+
+EXPORTS
+
+	dsf_get_character_bitmap
+	dsf_scale_and_clip_bitmap

@@ -1109,8 +1109,8 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	{
 		// Beziers are either 3-point, 4-point, or 5-point (so far), and we compute fx,fy floan data
 		// This allows them to be drawn later using applied polygons as per the target resolution.
-		u32				points;					// Number of Pn points comprising the bezier curve
-		u32				pixelFloanPoints;		// Number of pixel floans to generate
+		u32				curveCount;				// Number of control points comprising the bezier curve
+		u32				computePointCount;		// Number of step points to compute/generate for the bezier curve (higher = more round, lower = more jagged)
 		SBGRA			color;					// The color to draw in
 
 		// Based on the number of points, some of these may not be populated or used
@@ -1122,7 +1122,9 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 
 		// Holds each point generated for the Bezier curve
 		bool			wash;					// The bezier drawing algorithm can compute raw points, or it can wash them to be either only the X- and Y-Intercepts for pixel borders, or for drawing onto a canvas.  This is determined by this setting, and whether or not a valid SCanvas and SBGRA were passed to the computation algorithm.
-		SBuilder*		pixelFloans;			// (SBGRACompute) A range of floans which are either raw, or only touch each pixel
+		SBuilder*		pointFloans;			// (SXYF64) The individually generated points
+		SBuilder*		washFloans;				// (SBGRACompute, fx, fy, alpha) The points washed to pixel boundaries
+		SBuilder*		drawFloans;				// (SBGRACompute, offsetDst, alpha) The draw floans for border points
 	};
 
 	struct SLLCallback

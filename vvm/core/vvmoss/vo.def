@@ -237,6 +237,9 @@ EXPORTS
 	oss_math_withinDelta
 	oss_math_washFloans
 
+	oss_bezier_initialize
+	oss_bezier_setByValues
+
 	oss_polygon_initialize
 	oss_polygon_setByPolyLine
 	oss_polygon_setByValues

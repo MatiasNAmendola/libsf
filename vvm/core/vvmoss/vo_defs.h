@@ -345,6 +345,9 @@
 		bool CALLTYPE			oss_math_withinDelta						(f64 tfValue1, f64 tfValue2, s32 tnDeltaDecimals);
 		u64 CALLTYPE			oss_math_washFloans							(SCanvas* tc, SBGRA* bd, SBuilder** pointFloans, SBuilder** washFloans, SBuilder** drawFloans, bool tlIsFilledLeft);
 
+		bool CALLTYPE			oss_bezier_initialize						(SBezier* bez, u32 tnCurveCount, u32 tnComputePointCount, bool tlWash);
+		bool CALLTYPE			oss_bezier_setByValues						(SBezier* bez, SBGRA color, SXYF64* p1, SXYF64* p2, SXYF64* p3, SXYF64* p4, SXYF64* p5);
+
 		bool CALLTYPE			oss_polygon_initialize						(SPolygon* poly, u32 tnLineCount, bool tlAllocatePolyLines);
 		bool CALLTYPE			oss_polygon_setByPolyLine					(SPolygon* poly, u32 tnEntry, SPolyLine* line);
 		bool CALLTYPE			oss_polygon_setByValues						(SPolygon* poly, u32 tnEntry, SXYF64* start, SXYF64* end, SXYF64* gravity);

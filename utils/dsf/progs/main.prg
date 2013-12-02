@@ -58,7 +58,7 @@ SET SAFETY OFF
 **********
 * Set the app paths
 *****
-	SET PROCEDURE	TO utils_dll.prg		ADDITIVE
+	SET PROCEDURE	TO dsf_dll.prg			ADDITIVE
 	SET PROCEDURE	TO main.prg				ADDITIVE
 	SET CLASSLIB	TO helper.vcx			ADDITIVE
 
@@ -73,7 +73,7 @@ SET SAFETY OFF
 **********
 * Declare the extension DLLs
 *****
-	DO declare_utils_dll					&& utils.dll
+	DO declare_dsf_dll					&& dsf.dll
 
 
 **********
