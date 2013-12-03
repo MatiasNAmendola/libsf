@@ -61,6 +61,7 @@ SET SAFETY OFF
 	SET PROCEDURE	TO dsf_dll.prg			ADDITIVE
 	SET PROCEDURE	TO main.prg				ADDITIVE
 	SET CLASSLIB	TO helper.vcx			ADDITIVE
+	SET CLASSLIB	TO fontPick.vcx			ADDITIVE
 
 
 **********

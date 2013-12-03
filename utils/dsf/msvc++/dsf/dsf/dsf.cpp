@@ -105,7 +105,7 @@
 		// If they want the floan data, generate it
 		//////
 			if (lnResult == 0 && tcFloanFilename)
-				lnResult = iGetFloanFromBitmap(tcBitmapFilename, tcFloanFilename);
+				lnResult = iGetFloanFromBitmap(tnAscii, tcBitmapFilename, tcFloanFilename);
 
 
 		//////////
@@ -132,9 +132,234 @@
 // target font.
 //
 //////
-	int dsf_scale_and_clip_bitmap(char* tcBitmapFilenameIn, char* tcBitmapFilenameOut, float tfWidth, float tfHeight, int tnClipLeft, int tnClipTop, int tnNewWidth, int tnNewHeight)
+	int dsf_scale_and_clip_bitmap(char* tcBitmapFilenameIn, char* tcBitmapFilenameOut, f32 tfWidth, f32 tfHeight, int tnClipLeft, int tnClipTop, int tnNewWidth, int tnNewHeight)
 	{
 		return(0);
+	}
+
+
+
+
+//////////
+//
+//  Called to initiate a new session of editing.
+//
+//////
+	int dsf_create_new_instance(void)
+	{
+		union {
+			SInstance*	p;
+			u32			value;
+		};
+
+
+		//////////
+		// Allocate our instance
+		//////
+			p = (SInstance*)malloc(sizeof(SInstance));
+
+
+		//////////
+		// Initialize it
+		//////
+			memset(p, 0, sizeof(SInstance));
+
+
+		//////////
+		// Brand it
+		//////
+			memcpy(&p->id, cgcDsfBrand, sizeof(p->id));
+			p->id_size = sizeof(SInstance);
+
+
+		//////////
+		// Return the address as its handle
+		//////
+			return(value);
+	}
+
+
+
+
+//////////
+//
+// Called to set the data for the font instance
+//
+//////
+	int dsf_set_font_data(u32 tnInstance,	f32 tfAscent,	f32 tfUpper,	f32 tfLower,		f32 tfLeft,			f32 tfRight,
+											f32 tfBase,		f32 tfDescent,	f32 tfWidth,
+											f32 tfItalics,	f32 tfBold,		f32 tfUnderTop,		f32 tfUnderBot,		f32 tfStrikeTop,	f32 tfStrikeBot)
+	{
+		SInstance*	p;
+		bool		llValid;
+
+
+		//////////
+		// Make sure our environment is sane
+		//////
+			p = iGetDsfInstance(tnInstance, &llValid);
+			if (!llValid)
+				return(-1);
+
+		//////////
+		// Store the indicated data
+		//////
+			p->font.fAscent		= tfAscent;				// See the explanations in the VFP DSF project, frmEdit::create_tables()
+			p->font.fUpper		= tfUpper;
+			p->font.fLower		= tfLower;
+			p->font.fLeft		= tfLeft;
+			p->font.fRight		= tfRight;
+			p->font.fBase		= tfBase;
+			p->font.fDescent	= tfDescent;
+			p->font.fWidth		= tfWidth;
+			p->font.fItalics	= tfItalics;
+			p->font.fBold		= tfBold;
+			p->font.fUnderTop	= tfUnderTop;
+			p->font.fUnderBot	= tfUnderBot;
+			p->font.fStrikeTop	= tfStrikeTop;
+			p->font.fStrikeBot	= tfStrikeBot;
+
+
+		//////////
+		// Indicate success
+		//////
+			return(0);
+	}
+
+
+
+
+//////////
+//
+// Called to load a character with its data based on (u8)tnType (S=Spline, D=Definition,
+// R=Reference, L=Link). For Definition entries, tiid must be above the standard 0..255 ASCII
+// character range.  Reference entries will be in the 0..255 range, but tiLnkId must refer to
+// an entry 256 or above.  Link entries can refer to any item, but must also include tiLnkOrder
+// to indicate what explicit item they want to modify.
+//
+//////
+	int dsf_load_character(u32 tnInstance,	u32 tnType, u32 tiid, u32 tiOrder, s8* tcDesc10, u32 tlNewStroke, u32 tlSelected,
+											f32 tfOx, f32 tfOy, f32 tfOt, f32 tfLr, f32 tfLt, f32 tfRr, f32 tfRt, 
+											u32 tiSubdivs, u32 tiLnkId, u32 tiLnkOrder)
+	{
+		SInstance*	p;
+		SChar*		c;
+		bool		llValid;
+
+
+		//////////
+		// Make sure our environment is sane
+		//////
+			p = iGetDsfInstance(tnInstance, &llValid);
+			if (!llValid)
+				return(-1);
+
+
+		//////////
+		// Try to find the indicated data
+		//////
+			c = iFindCharInstance(p->chars, tiid, (u8)tnType, tiOrder, tiLnkId, tiLnkOrder);
+
+			if (!c)
+			{
+				// It's a new entry
+				c = (SChar*)builder_allocateBytes(p->refs, sizeof(SChar));
+				if (!c)
+					return(-2);		// Error allocating
+
+				// Initialize it
+				memset(c, 0, sizeof(SChar));
+			}
+
+
+		//////////
+		// Populate the data
+		//////
+
+	}
+
+
+
+
+//////////
+//
+// Called to load the indicated instance.  We search to see if a previous entry has been added
+// with this information.  If so, it's updated.  If not, it's appended.
+//
+//////
+	int dsf_load_reference(u32 tnInstance,	u32 tnType, s8* tcDesc40,
+											f32 tfRef1X, f32 tfRef1Y,
+											f32 tfRef2X, f32 tfRef2Y,
+											f32 tfRef3X, f32 tfRef3Y,
+											f32 tfRef4X, f32 tfRef4Y,
+											f32 tfRef5X, f32 tfRef5Y,
+											bool tlVisible, s8* tcChars1_128, s8* tcChars2_128)
+	{
+		SInstance*	p;
+		SRefs*		r;
+		bool		llValid;
+
+
+		//////////
+		// Make sure our environment is sane
+		//////
+			p = iGetDsfInstance(tnInstance, &llValid);
+			if (!llValid)
+				return(-1);
+
+
+		//////////
+		// Try to find the indicated data
+		//////
+			r = iFindRefsInstance(p->refs, (u8)tnType, tcDesc40);
+			if (!r)
+			{
+				// It's a new entry
+				r = (SRefs*)builder_allocateBytes(p->refs, sizeof(SRefs));
+				if (!r)
+					return(-2);		// Error allocating
+
+				// Initialize it
+				memset(r, 0, sizeof(SRefs));
+			}
+
+
+		//////////
+		// Populate the data
+		//////
+			r->cType		= (u8)tnType;
+			memcpy(&r->cDesc[0], tcDesc40, 40);
+
+			r->fref1x		= tfRef1X;
+			r->fref1y		= tfRef1Y;
+
+			r->fref2x		= tfRef2X;
+			r->fref2y		= tfRef2Y;
+
+			r->fref3x		= tfRef3X;
+			r->fref3y		= tfRef3Y;
+
+			r->fref4x		= tfRef4X;
+			r->fref4y		= tfRef4Y;
+
+			r->fref5x		= tfRef5X;
+			r->fref5y		= tfRef5Y;
+
+			r->lVisible		= tlVisible;
+			memcpy(&r->cChars1[0], tcChars1_128, 128);
+			memcpy(&r->cChars2[0], tcChars2_128, 128);
+
+
+		//////////
+		// Release the floan data.  It will be re-populated later if this ref is ever referenced
+		//////
+			builder_FreeAndRelease(&r->floans);
+
+
+		//////////
+		// Indicate success
+		//////
+			return(0);
 	}
 
 
@@ -157,7 +382,7 @@
 	int iGetCharacterBitmap(int tnAscii, char* tcBitmapFilename, char* tcFontName, int tnHeight, int tnWidth)
 	{
 		int			lnWidth, lnHeight, lnMakeWidth;
-		float		lfH, lfV;
+		f32			lfH, lfV;
 		HFONT		hfont;
 		HDC			lhdc;
 		HBITMAP		lhbmp2;
@@ -173,7 +398,7 @@
 		// Create the font
 		//////
 			lnHeight = -MulDiv(tnHeight, GetDeviceCaps(GetDC(GetDesktopWindow()), LOGPIXELSY), 72);
-			hfont = CreateFontA(lnHeight, 0, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, FF_DONTCARE, tcFontName);
+			hfont = CreateFontA(lnHeight, 0, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, FF_DONTCARE, tcFontName);
 			if (!hfont)
 				return(-1);
 
@@ -241,8 +466,8 @@
 		//////////
 		// Scale the generated image up to the indicated size
 		//////
-			lfH = (float)tnWidth	/ (float)lnMakeWidth;
-			lfV = (float)tnHeight	/ (float)lnHeight;
+			lfH = (f32)tnWidth	/ (f32)lnMakeWidth;
+			lfV = (f32)tnHeight	/ (f32)lnHeight;
 			iScaleImage(rawBuffer, tcBitmapFilename, lfH, lfV);
 			DeleteFileA(rawBuffer);
 
@@ -343,6 +568,7 @@
 	{
 		int lnWidth;
 
+
 		lnWidth = tnWidth * 3;
 		if (lnWidth % 4 == 0)
 			return(lnWidth);
@@ -384,14 +610,14 @@
 //////
 	struct SFloanPoint
 	{
-		float	x;			// X coordinate of an X,Y pair
-		float	y;			// Y coordinate of an X,Y pair
+		f64	x;			// X coordinate of an X,Y pair
+		f64	y;			// Y coordinate of an X,Y pair
 	};
 
-	int iGetFloanFromBitmap(char* tcBitmapFilename, char* tcFloanFilename)
+	int iGetFloanFromBitmap(u32 tnAscii, char* tcBitmapFilename, char* tcFloanFilename)
 	{
 		int					lnI, lnY, lnX, lnRowWidth, lnOldFloanCount, lnNewFloanCount;
-		float				lfGray, lfLastGray;
+		f32					lfGray, lfLastGray;
 		SBGR*				lbgr;
 		SBGR*				lbgrBuffer;
 		BITMAPFILEHEADER	lbh;
@@ -455,8 +681,40 @@
 				fclose(lfh);
 				return(-6);				// Out of memory
 			}
-			fread(lbgrBuffer, 1, lbi.biSize, lfh);
+			fread(lbgrBuffer, 1, lbi.biSizeImage, lfh);
 			fclose(lfh);
+
+
+		//////////
+		// Increase contrast to full
+		//////
+			for (lnY = 0; lnY < lbi.biHeight; lnY++)
+			{
+				// Iterate all the way across
+				lbgr = (SBGR*)((char*)lbgrBuffer + (lnY * lnRowWidth));
+
+				// Look for where things start or stop
+				for (lnX = 0; lnX < lbi.biWidth; lnX++, lbgr++)
+				{
+					// Determine the grayscale value of this pixel
+					lfGray = (((f32)lbgr->red * 0.35f) + ((f32)lbgr->grn * 0.54f) + ((f32)lbgr->blu * 0.11f)) / 255.0f;
+
+					// Is it visibly darkened?
+					if (lfGray < 0.7f)
+					{
+						// Make it black
+						lbgr->red = 0;
+						lbgr->grn = 0;
+						lbgr->blu = 0;
+
+					} else {
+						// Make it white
+						lbgr->red = 255;
+						lbgr->grn = 255;
+						lbgr->blu = 255;
+					}
+				}
+			}
 
 
 		//////////
@@ -479,14 +737,14 @@
 				for (lnX = 0; lnX < lbi.biWidth; lnX++, lbgr++)
 				{
 					// Determine the grayscale value of this pixel
-					lfGray = (float)(((lbgr->red * 0.35) + (lbgr->grn * 0.54) + (lbgr->blu * 0.11)) / 255.0);
+					lfGray = (((f32)lbgr->red * 0.35f) + ((f32)lbgr->grn * 0.54f) + ((f32)lbgr->blu * 0.11f)) / 255.0f;
 
 					// Has something changed?
-					if (max(lfGray, lfLastGray) - min(lfGray, lfLastGray) > 0.001)
+					if (fabs(lfGray - lfLastGray) > 0.9f)
 					{
 						// Store the position
-						point.x = ((float)lnX + lfGray)	/ (float)lbi.biWidth;
-						point.y = ((float)lnY			/ (float)lbi.biHeight);
+						point.x = (f64)lnX	/ (f64)lbi.biWidth;
+						point.y = (f64)lnY	/ (f64)lbi.biHeight;
 
 						// Make sure it's on the reservation :-)
 						if (point.x >= 0.0f && point.y >= 0.0f)
@@ -512,14 +770,14 @@
 				for (lnY = 0; lnY < lbi.biHeight; lnY++)
 				{
 					// Determine the grayscale value of this pixel
-					lfGray = (float)(((lbgr->red * 0.35) + (lbgr->grn * 0.54) + (lbgr->blu * 0.11)) / 255.0);
+					lfGray = (((f32)lbgr->red * 0.35f) + ((f32)lbgr->grn * 0.54f) + ((f32)lbgr->blu * 0.11f)) / 255.0f;
 
 					// Has something changed?
-					if (max(lfGray, lfLastGray) - min(lfGray, lfLastGray) > 0.001)
+					if (fabs(lfGray - lfLastGray) > 0.9f)
 					{
 						// Store the position
-						point.x = ((float)lnX				/ (float)lbi.biWidth);
-						point.y = (((float)lnY + lfGray)	/ (float)lbi.biHeight);
+						point.x = (f64)lnX	/ (f64)lbi.biWidth;
+						point.y = (f64)lnY	/ (f64)lbi.biHeight;
 
 						// Make sure it's on the reservation :-)
 						if (point.x >= 0.0f && point.y >= 0.0f)
@@ -536,11 +794,21 @@
 
 
 		//////////
-		// Remove duplicates
+		// Sort the data in Y order ascending, then X ascending
 		//////
 			lnOldFloanCount = floans->populatedLength / sizeof(SFloanPoint);
 			qsort(floans->data, lnOldFloanCount, sizeof(SFloanPoint), iiGetFloanFromBitmap_qsortCallback);
 
+
+		//////////
+		// Wash disparate data points
+		//////
+// TODO: The idea is to grab the points closest to each point, and then average to use the middle, rather than the integer alias
+
+
+		//////////
+		// Remove duplicates
+		//////
 			// Begin at the beginning
 			pDst = (SFloanPoint*)floans->data;
 			pSrc = pDst + 1;
@@ -577,12 +845,58 @@
 			for (lnI = 0; lnI < lnNewFloanCount; lnI++, pSrc++)
 			{
 				// Store the output
-				sprintf(buffer, "%8.4f, %8.4f\n\0", pSrc->x, pSrc->y);
+				sprintf(buffer, "%15.12f, %15.12f\n\0", pSrc->x, pSrc->y);
 
 				// Append it to the builder
 				builder_appendData(floansCsv, buffer, strlen(buffer));
 			}
 			builder_asciiWriteOutFile(floansCsv, tcFloanFilename);
+
+
+		//////////
+		// For debugging, populate the individual found points within the bitmap in green, and write it back out
+		//////
+			int					lnRowWidth_debug;
+			SBGR*				lbgrBuffer_debug;
+			BITMAPFILEHEADER	lbh_debug;
+			BITMAPINFOHEADER	lbi_debug;
+			FILE*				lfh_debug;
+
+			memcpy(&lbh_debug, &lbh, sizeof(lbh));
+			memcpy(&lbi_debug, &lbi, sizeof(lbi));
+
+			lbi_debug.biWidth		= 400;
+			lbi_debug.biHeight		= 400;
+			lnRowWidth_debug		= iComputeRowWidth(lbi_debug.biWidth);
+			lbi_debug.biSizeImage	= lnRowWidth_debug * lbi_debug.biHeight;
+			lbh_debug.bfSize		= sizeof(lbh_debug) + sizeof(lbi_debug) + lbi_debug.biSizeImage;
+			lbgrBuffer_debug		= (SBGR*)malloc(lbi_debug.biSizeImage);
+			memset(lbgrBuffer_debug, 255, lbi_debug.biSizeImage);
+
+			pSrc = (SFloanPoint*)floans->data;
+			for (lnI = 0; lnI < lnNewFloanCount; lnI++, pSrc++)
+			{
+				// Re-acquire our position
+				lnX = (s32)(pSrc->x * (f32)lbi_debug.biWidth);
+				lnY = (s32)(pSrc->y * (f32)lbi_debug.biHeight);
+
+				// Store it
+				lbgr = (SBGR*)((s8*)lbgrBuffer_debug + (lnY * lnRowWidth_debug) + (lnX * 3));
+
+				// Make it black
+				lbgr->red	= 0;
+				lbgr->grn	= 0;
+				lbgr->blu	= 0;
+			}
+			char filename[_MAX_FNAME];
+			sprintf(filename, "ascii_%03u.bmp\0", tnAscii);
+			lfh_debug = fopen(filename, "wb+");
+			fwrite(&lbh_debug, 1, sizeof(lbh_debug), lfh_debug);
+			fwrite(&lbi_debug, 1, sizeof(lbi_debug), lfh_debug);
+			fwrite(lbgrBuffer_debug, 1, lbi_debug.biSizeImage, lfh_debug);
+			fclose(lfh_debug);
+//			_asm nop;
+//			DeleteFileA(filename);
 
 
 		//////////
@@ -622,4 +936,149 @@
 		else if (left->x < right->x)		return(-1);		// Left is less than right
 		else if (left->x > right->x)		return(1);		// Left is greater than right
 		else								return(0);		// They're equal
+	}
+
+
+
+
+//////////
+//
+// Called to verify if the indicated handle is valid
+//
+//////
+	SInstance* iGetDsfInstance(u32 tnHandle, bool* tlValid)
+	{
+		union {
+			SInstance*	p;
+			u32			lnHandle;
+		};
+
+
+		//////////
+		// Make sure our environment is sane, and if so that the handle is valid
+		//////
+			lnHandle = tnHandle;
+			if (p && _memicmp(p->id, cgcDsfBrand, sizeof(p->id)) == 0 && p->id_size == sizeof(SInstance))
+			{
+				// Valid
+				*tlValid = true;
+				return(p);
+
+			} else {
+				// Invalid
+				*tlValid = false;
+				return(NULL);
+			}
+	}
+
+
+
+
+//////////
+//
+// Called to search through the character splines, definition entries, links, etc., to find the
+// matching character reference.
+//
+//////
+	SChar* iFindCharInstance(SBuilder* chars, u32 tnIid, u8 tcType, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder)
+	{
+		s32			lnI, lnMaxCount;
+		SBuilder*	builder;
+		SChar*		c;
+
+
+		//////////
+		// Make sure our environment is sane
+		//////
+			if (chars && chars->data)
+			{
+				// See if there is room for this item
+// TODO:  Working here
+				if (chars->populatedLength < tnIid * sizeof(SChar))
+				{
+					// We have to add it
+				}
+
+				// Grab that builder
+				builder = (SBuilder*)(chars->data + tnIid * sizeof(SChar));
+
+				// Find out what type this one is
+				switch (tcType)
+				{
+					case 'S':
+					case 's':
+						// It's a spline, which is part of the indicated item
+						// We search by tnIid and tiOrder
+
+					case 'D':
+					case 'd':
+						// It's the same as a spline, but the definition must be an item above 255, and it's
+						// not part of a character, but rather just a segment to be used by characters.
+						// We search by tnIid and tiOrder
+						if (tnIid < 256)
+							return(NULL);		// Error
+
+						// Search for it
+						break;
+
+					case 'R':
+					case 'r':
+						// It's a reference. The reference must refer to an item above 255, per tiLnkId
+						// We search by tnIid, tiOrder, and tiLnkId
+						if (tnIid < 256)
+							return(NULL);		// Error
+
+						// Search for it
+						break;
+
+					case 'L':
+					case 'l':
+						// It's a link. The reference can refer to any item, but must include the tiLnkId and tiLnkOrder
+						// We search by tnIid, tiOrder, tiLnkId, and tiLnkOrder
+						// Search for it
+						break;
+				}
+			}
+
+
+		// If we get here, not found
+		return(NULL);
+	}
+
+
+
+
+//////////
+//
+// Called to search through the existing refs entry to see if the indicated reference is found
+//
+//////
+	SRefs* iFindRefsInstance(SBuilder* refs, u8 tcType, s8* tcDesc40)
+	{
+		s32		lnI, lnMaxCount;
+		SRefs*	r;
+
+
+		//////////
+		// Make sure our environment is sane
+		//////
+			if (refs && refs->data && refs->populatedLength >= sizeof(SRefs))
+			{
+				// Get our starting and ending points
+				lnMaxCount	= refs->populatedLength / sizeof(SRefs);
+				r			= (SRefs*)refs->data;
+
+				// Iterate through every ref
+				for (lnI = 0; lnI < lnMaxCount; lnI++, r++)
+				{
+					// Is this it?
+					if (r->cType == tcType && _memicmp(r->cDesc, tcDesc40, 40) == 0)
+						return(r);		// Found it
+				}
+				// If we get here, not found
+			}
+
+
+		// If we get here, not found
+		return(NULL);
 	}

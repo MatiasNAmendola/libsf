@@ -109,11 +109,97 @@ typedef		const f32			cf32;
 typedef		const f64			cf64;
 
 
+//////////
+// Source code files to include
+//////
+	#include "scale.cpp"
+	#include "builder.cpp"
+
+
 
 
 //////////
 // Structures used by DSF
 //////
+	struct SFont
+	{
+		f32			fAscent;						// Maximum ascent within the 0..1 range
+		f32			fUpper;							// Horizontal line of the top of the upper-case letters, and letters like h, l, k, etc
+		f32			fLower;							// Horizontal line of the top of the lower-case letters, such as top of c, e, o, etc.
+		f32			fLeft;							// Vertical line of the left-side of the characters
+		f32			fRight;							// Vertical line of the right-side of the characters
+		f32			fBase;							// Horizontal line of the base of all characters
+		f32			fDescent;						// Horizontal line for the bottom of the descending characters, like y, g, q, etc.
+		f32			fWidth;							// Horizontal width of the average stroke (couples with fLeft and fRight for guides)
+		f32			fItalics;						// Radians to slant from PI/2 toward 0 (use negative values for reverse slant)
+		f32			fBold;							// Standard percentage to add for standard bold setting
+		f32			fUnderTop;						// Horizontal line for the top of the underline
+		f32			fUnderBot;						// Horizontal line for the bottom of the underline
+		f32			fStrikeTop;						// Horizontal line for the top of the strikethrough location
+		f32			fStrikeBot;						// Horizontal line for the bottom of the strikethrough location
+	};
+
+	struct SChar
+	{
+		s8			cType;							// S=Spline, D=Definition, R=Reference, L=Link
+		u32			iid;							// Character number (ASCII character)
+		u32			iOrder;							// Stroke order within the character
+		s8			cDesc[10];						// A brief description of this section, usually used with lNewStroke for a new pen stroke
+		bool		lNewStroke;						// Used for an "i", for example, when the dot is a different stroke than the lower stock
+		bool		lSelected;						// Is this item selected?
+		f32			ox;								// Origin-X
+		f32			oy;								// Origin-Y
+		f32			ot;								// Origin-Theta (rotation)
+		f32			lr;								// Left-Radius
+		f32			lt;								// Left-Theta
+		f32			rr;								// Right-Radius
+		f32			rt;								// Right-Theta
+		u32			iSubdivs;						// Automatic sub-divisions between this spline and the next one
+		u32			iLnkId;							// If cType=R, the iid of the definition object; If cType=L, the iid of the link object (used with iLnkOrder to indicate which linked item this one modifies)
+		u32			iLnkOrder;						// If cType=L, the item within the link object that this entry modifies
+
+		SBuilder*	tems;							// (STems) Character template information for this character
+	};
+
+	struct SRefs
+	{
+		s8			cType;							// Line types supported:  H=Horizontal, V=Vertical, 2=Two point, 3=Three point, 5=Five point
+		s8			cDesc[40];						// Description of this reference
+		f32			fref1x;							// Used for H,V,2,3,5
+		f32			fref1y;							// Used for H,V,2,3,5
+		f32			fref2x;							// Used for 2,3,5
+		f32			fref2y;							// Used for 2,3,5
+		f32			fref3x;							// Used for 3,5
+		f32			fref3y;							// Used for 3,5
+		f32			fref4x;							// Used for 5
+		f32			fref4y;							// Used for 5
+		f32			fref5x;							// Used for 5
+		f32			fref5y;							// Used for 5
+		bool		lVisible;						// Should this item be used
+		s8			cChars1[128];					// Characters this item should be displayed on #1
+		s8			cChars2[128];					// Characters this item should be displayed on #2
+
+		SBuilder*	floans;							// Floan data for this particular entry
+	};
+
+	struct STems
+	{
+		f32		fx;									// X of X,Y coordinate for this outline point
+		f32		fy;									// Y of X,Y coordinate for this outline point
+	};
+
+	// SInstance structures are always branded with DSF! as first four bytes, and then length of the structure after
+	const s8 cgcDsfBrand[] = "DSF!";
+	struct SInstance
+	{
+		s8				id[4];						// Always 'DSF!' (used to identify the handle)
+		u32				id_size;					// sizeof(SInstance)
+
+		SFont			font;						// Font information for this instance
+		SBuilder*		chars;						// (SBuilder) Characters, one SBuilder for every character, with each character SBuilder pointing to its many SChar entries
+		SBuilder*		refs;						// (SRefs) References
+	};
+
 	struct SBGR
 	{
 		unsigned char	blu;
@@ -131,12 +217,9 @@ typedef		const f64			cf64;
 	int				iComputeRowWidth						(int tnWidth);
 	HBITMAP			iCreateBitmap							(HDC thdc, int tnWidth, int tnHeight, int tnPlanes, int tnBits, void**tbd);
 	// Floans
-	int				iGetFloanFromBitmap						(char* tcBitmapFilename, char* tcFloanFilename);
+	int				iGetFloanFromBitmap						(u32 tnAscii, char* tcBitmapFilename, char* tcFloanFilename);
 	int				iiGetFloanFromBitmap_qsortCallback		(const void* l, const void* r);
-
-
-//////////
-// Source code files to include
-//////
-	#include "scale.cpp"
-	#include "builder.cpp"
+	// General purpose
+	SInstance*		iGetDsfInstance							(u32 tnHandle, bool* tlValid);
+	SChar*			iFindCharInstance						(SBuilder* chars, u32 tnIid, u8 tcType, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder);
+	SRefs*			iFindRefsInstance						(SBuilder* refs, u8 tcType, s8* tcDesc40);
