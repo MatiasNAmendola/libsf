@@ -106,6 +106,10 @@ struct SBuilder
 		SBuilder*	buffNew;
 
 
+		// See if they want to use the default size
+		if (tnAllocationBlockSize == -1)
+			tnAllocationBlockSize = 16384;
+
 		// Make sure our environment is sane
 		if (buffRoot && tnAllocationBlockSize != 0)
 		{

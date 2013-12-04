@@ -134,6 +134,9 @@
 //////
 	int dsf_scale_and_clip_bitmap(char* tcBitmapFilenameIn, char* tcBitmapFilenameOut, f32 tfWidth, f32 tfHeight, int tnClipLeft, int tnClipTop, int tnNewWidth, int tnNewHeight)
 	{
+// TODO:  This feature may be supplanted by using the templates point system, whereby points are simply manipulated rather than a physical bitmap being scaled.
+// TODO:  However, "We shall see, Xur.  We shall see."  Can you name that quote? :-)  Here's another clue:  "It takes more than a sceptor to rule, Xur, even on Rylos."
+// TODO:  https://www.youtube.com/watch?v=JwaRQ-_kgy8
 		return(0);
 	}
 
@@ -256,11 +259,11 @@
 
 
 		//////////
-		// Find or create the indicated character
+		// Find or create the indicated character instance
 		//////
 			c = iFindCharInstance(p->chars, tiid, (u8)tnType, tiOrder, tiLnkId, tiLnkOrder);
 			if (!c)
-				return(-2);		// Error finding or creating
+				return(-2);		// Error finding (an invalid combination was provided)
 
 
 		//////////
@@ -342,7 +345,6 @@
 		// Populate the data
 		//////
 			r->cType		= (u8)tnType;
-			memcpy(&r->cDesc[0], tcDesc40, 40);
 
 			r->fref1x		= tfRef1X;
 			r->fref1y		= tfRef1Y;
@@ -360,6 +362,8 @@
 			r->fref5y		= tfRef5Y;
 
 			r->lVisible		= tlVisible;
+
+			memcpy(&r->cDesc[0], tcDesc40, 40);
 			memcpy(&r->cChars1[0], tcChars1_128, 128);
 			memcpy(&r->cChars2[0], tcChars2_128, 128);
 
@@ -368,6 +372,52 @@
 		// Release the floan data.  It will be re-populated later if this ref is ever referenced
 		//////
 			builder_FreeAndRelease(&r->floans);
+
+
+		//////////
+		// Indicate success
+		//////
+			return(0);
+	}
+
+
+
+
+//////////
+//
+// Called to load the indicated instance.  We search to see if a previous entry has been added
+// with this information.  If so, it's updated.  If not, it's appended.
+//
+//////
+	int dsf_load_template(u32 tnInstance, u32 tiid, f32 tfX, f32 tfY, u32 tnRecno)
+	{
+		SInstance*	p;
+		STems*		t;
+		bool		llValid;
+
+
+		//////////
+		// Make sure our environment is sane
+		//////
+			p = iGetDsfInstance(tnInstance, &llValid);
+			if (!llValid)
+				return(-1);
+
+
+		//////////
+		// Try to find the indicated data
+		//////
+			t = iFindTemsInstance(p->chars, tiid);
+			if (!t)
+				return(-2);		// Error allocating
+
+
+		//////////
+		// Populate the data
+		//////
+			t->fx		= tfX;
+			t->fy		= tfY;
+			t->recno	= tnRecno;
 
 
 		//////////
@@ -996,7 +1046,8 @@
 //////
 	SChar* iFindCharInstance(SBuilder* charsBuilder, u32 tnIid, u8 tcType, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder)
 	{
-		SBuilder* thisCharBuilder;
+		SChars*		thisChars;
+		SBuilder*	thisSplineBuilder;
 
 
 		//////////
@@ -1005,7 +1056,12 @@
 			if (charsBuilder && charsBuilder->data)
 			{
 				// Grab that builder
-				thisCharBuilder = iiGetThisCharBuilder(charsBuilder, tnIid);
+				thisChars = iiGetThisChars(charsBuilder, tnIid);
+				if (!thisChars)
+					return(NULL);
+
+				// Grab this character's builder for splines/definitions
+				thisSplineBuilder = thisChars->splines;
 
 				// Find out what type this one is
 				switch (tcType)
@@ -1018,7 +1074,7 @@
 							return(NULL);		// Invalid spline reference
 
 						// Search for (and add it if need be)
-						return(iFindCharInstance_SD(thisCharBuilder, tnIid, tiOrder, true));
+						return(iFindSplineInstance_SD(thisSplineBuilder, tnIid, tiOrder, true));
 
 
 					case 'D':
@@ -1030,7 +1086,7 @@
 							return(NULL);		// Error
 
 						// Search for (and add it if need be)
-						return(iFindCharInstance_SD(thisCharBuilder, tnIid, tiOrder, true));
+						return(iFindSplineInstance_SD(thisSplineBuilder, tnIid, tiOrder, true));
 
 
 					case 'R':
@@ -1041,7 +1097,7 @@
 							return(NULL);		// Error
 
 						// Search for (and add it if need be)
-						return(iFindCharInstance_R(thisCharBuilder, tnIid, tiOrder, tiLnkId, true));
+						return(iFindSplineInstance_R(thisSplineBuilder, tnIid, tiOrder, tiLnkId, true));
 
 
 					case 'L':
@@ -1050,7 +1106,7 @@
 						// We search by tnIid, tiOrder, tiLnkId, and tiLnkOrder
 
 						// Search for (and add it if need be)
-						return(iFindCharInstance_L(thisCharBuilder, tnIid, tiOrder, tiLnkId, tiLnkOrder, true));
+						return(iFindSplineInstance_L(thisSplineBuilder, tnIid, tiOrder, tiLnkId, tiLnkOrder, true));
 
 				}
 			}
@@ -1060,25 +1116,29 @@
 		return(NULL);
 	}
 
-	SBuilder* iiGetThisCharBuilder(SBuilder* charsBuilder, u32 tnIid)
+	SChars* iiGetThisChars(SBuilder* charsBuilder, u32 tnIid)
 	{
 		u32			lnI, lnStart, lnEnd;
-		SBuilder*	thisCharBuilder;
+		SChars*		thisSpline;
 
 
 		// See if there's already room for this item
-		if (charsBuilder->populatedLength < tnIid * sizeof(SChar))
+		if (charsBuilder->populatedLength < tnIid * sizeof(SChars))
 		{
 			// We have to make room for it
-			lnStart = (charsBuilder->populatedLength / sizeof(SChar));
-			lnEnd	= tnIid * sizeof(SChar);
-			for (lnI = lnStart; lnI < lnEnd; lnI += sizeof(SChar))
+			lnStart = (charsBuilder->populatedLength / sizeof(SChars));
+			lnEnd	= tnIid * sizeof(SChars);
+			for (lnI = lnStart; lnI < lnEnd; lnI += sizeof(SChars))
 			{
 				// Grab the pointer
-				thisCharBuilder = (SBuilder*)builder_allocateBytes(charsBuilder, sizeof(SChar));
+				thisSpline = (SChars*)builder_allocateBytes(charsBuilder, sizeof(SChars));
 
 				// Initialize it
-				memset(thisCharBuilder, 0, sizeof(SChar));
+				memset(thisSpline, 0, sizeof(SChars));
+
+				// Create new builders for it
+				builder_createAndInitialize(&thisSpline->splines,	-1);
+				builder_createAndInitialize(&thisSpline->tems,		-1);
 			}
 		}
 
@@ -1086,10 +1146,10 @@
 		//////////
 		// Return the builder
 		//////
-			return((SBuilder*)(charsBuilder->data + (tnIid * sizeof(SChar))));
+			return((SChars*)(charsBuilder->data + ((tnIid - 1) * sizeof(SChars))));
 	}
 
-	SChar* iFindCharInstance_SD(SBuilder* thisCharBuilder, u32 tnIid, u32 tiOrder, bool tlAddIfNotFound)
+	SChar* iFindSplineInstance_SD(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, bool tlAddIfNotFound)
 	{
 		u32		lnI;
 		SChar*	c;
@@ -1098,17 +1158,17 @@
 		//////////
 		// Make sure our environment is sane
 		//////
-			if (thisCharBuilder)
+			if (thisSplineBuilder)
 				return(NULL);
 
 
 		//////////
 		// Search for it
 		//////
-			for (lnI = 0; lnI < thisCharBuilder->populatedLength; lnI += sizeof(SChar))
+			for (lnI = 0; lnI < thisSplineBuilder->populatedLength; lnI += sizeof(SChar))
 			{
 				// Grab the pointer
-				c = (SChar*)(thisCharBuilder->data + lnI);
+				c = (SChar*)(thisSplineBuilder->data + lnI);
 
 				// See if this is it
 				if (c->iid == tnIid && c->iOrder == tiOrder)
@@ -1122,7 +1182,7 @@
 			if (tlAddIfNotFound)
 			{
 				// Create a new entry
-				return((SChar*)builder_allocateBytes(thisCharBuilder, sizeof(SChar)));
+				return((SChar*)builder_allocateBytes(thisSplineBuilder, sizeof(SChar)));
 
 			} else {
 				// 
@@ -1130,7 +1190,7 @@
 			}
 	}
 
-	SChar* iFindCharInstance_R(SBuilder* thisCharBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, bool tlAddIfNotFound)
+	SChar* iFindSplineInstance_R(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, bool tlAddIfNotFound)
 	{
 		u32		lnI;
 		SChar*	c;
@@ -1139,17 +1199,17 @@
 		//////////
 		// Make sure our environment is sane
 		//////
-			if (thisCharBuilder)
+			if (thisSplineBuilder)
 				return(NULL);
 
 
 		//////////
 		// Search for it
 		//////
-			for (lnI = 0; lnI < thisCharBuilder->populatedLength; lnI += sizeof(SChar))
+			for (lnI = 0; lnI < thisSplineBuilder->populatedLength; lnI += sizeof(SChar))
 			{
 				// Grab the pointer
-				c = (SChar*)(thisCharBuilder->data + lnI);
+				c = (SChar*)(thisSplineBuilder->data + lnI);
 
 				// See if this is it
 				if (c->iid == tnIid && c->iOrder == tiOrder && c->iLnkId == tiLnkId)
@@ -1163,7 +1223,7 @@
 			if (tlAddIfNotFound)
 			{
 				// Create a new entry
-				return((SChar*)builder_allocateBytes(thisCharBuilder, sizeof(SChar)));
+				return((SChar*)builder_allocateBytes(thisSplineBuilder, sizeof(SChar)));
 
 			} else {
 				// 
@@ -1171,7 +1231,7 @@
 			}
 	}
 
-	SChar* iFindCharInstance_L(SBuilder* thisCharBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder, bool tlAddIfNotFound)
+	SChar* iFindSplineInstance_L(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder, bool tlAddIfNotFound)
 	{
 		u32		lnI;
 		SChar*	c;
@@ -1180,17 +1240,17 @@
 		//////////
 		// Make sure our environment is sane
 		//////
-			if (thisCharBuilder)
+			if (thisSplineBuilder)
 				return(NULL);
 
 
 		//////////
 		// Search for it
 		//////
-			for (lnI = 0; lnI < thisCharBuilder->populatedLength; lnI += sizeof(SChar))
+			for (lnI = 0; lnI < thisSplineBuilder->populatedLength; lnI += sizeof(SChar))
 			{
 				// Grab the pointer
-				c = (SChar*)(thisCharBuilder->data + lnI);
+				c = (SChar*)(thisSplineBuilder->data + lnI);
 
 				// See if this is it
 				if (c->iid == tnIid && c->iOrder == tiOrder && c->iLnkId == tiLnkId && c->iLnkOrder == tiLnkOrder)
@@ -1204,7 +1264,7 @@
 			if (tlAddIfNotFound)
 			{
 				// Create a new entry
-				return((SChar*)builder_allocateBytes(thisCharBuilder, sizeof(SChar)));
+				return((SChar*)builder_allocateBytes(thisSplineBuilder, sizeof(SChar)));
 
 			} else {
 				// 
@@ -1248,4 +1308,32 @@
 
 		// If we get here, not found
 		return(NULL);
+	}
+
+
+
+
+//////////
+//
+// Called to search through the existing refs entry to see if the indicated reference is found
+//
+//////
+	STems* iFindTemsInstance(SBuilder* charsBuilder, u32 tnIid)
+	{
+		SChars*		thisChars;
+
+
+		//////////
+		// Grab the thisChars parent
+		//////
+			thisChars = iiGetThisChars(charsBuilder, tnIid);
+			if (thisChars)
+			{
+				// Return the template
+				return((STems*)builder_allocateBytes(thisChars->tems, sizeof(STems)));
+
+			} else {
+				// Failure
+				return(NULL);
+			}
 	}

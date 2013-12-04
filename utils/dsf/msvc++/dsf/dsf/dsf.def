@@ -5,4 +5,9 @@ EXPORTS
 	dsf_get_character_bitmap
 	dsf_scale_and_clip_bitmap
 	dsf_create_new_instance
+	
+	dsf_set_font_data
+	dsf_load_character
 	dsf_load_reference
+	dsf_load_template
+

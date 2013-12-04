@@ -139,6 +139,12 @@ typedef		const f64			cf64;
 		f32			fStrikeBot;						// Horizontal line for the bottom of the strikethrough location
 	};
 
+	struct SChars
+	{
+		SBuilder*	splines;						// (SChar) Holds full char records
+		SBuilder*	tems;							// (STems) Holds all template points for this character
+	};
+
 	struct SChar
 	{
 		s8			cType;							// S=Spline, D=Definition, R=Reference, L=Link
@@ -182,10 +188,13 @@ typedef		const f64			cf64;
 		SBuilder*	floans;							// Floan data for this particular entry
 	};
 
+	// Template point -- is an X,Y coordinate for part of an outline or line that was created as a template for the font.
+	// Certain mathematical operations for spline placement use these for reference
 	struct STems
 	{
 		f32		fx;									// X of X,Y coordinate for this outline point
 		f32		fy;									// Y of X,Y coordinate for this outline point
+		u32		recno;								// Original record number this item came from
 	};
 
 	// SInstance structures are always branded with DSF! as first four bytes, and then length of the structure after
@@ -222,8 +231,9 @@ typedef		const f64			cf64;
 	// General purpose
 	SInstance*		iGetDsfInstance							(u32 tnHandle, bool* tlValid);
 	SChar*			iFindCharInstance						(SBuilder* charsBuilder, u32 tnIid, u8 tcType, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder);
-	SBuilder*		iiGetThisCharBuilder					(SBuilder* thisCharBuilder, u32 tnIid);
-	SChar*			iFindCharInstance_SD					(SBuilder* thisCharBuilder, u32 tnIid, u32 tiOrder, bool tlAddIfNotFound);
-	SChar*			iFindCharInstance_R						(SBuilder* thisCharBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, bool tlAddIfNotFound);
-	SChar*			iFindCharInstance_L						(SBuilder* thisCharBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder, bool tlAddIfNotFound);
+	SChars*			iiGetThisChars							(SBuilder* charsBuilder, u32 tnIid);
+	SChar*			iFindSplineInstance_SD					(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, bool tlAddIfNotFound);
+	SChar*			iFindSplineInstance_R					(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, bool tlAddIfNotFound);
+	SChar*			iFindSplineInstance_L					(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder, bool tlAddIfNotFound);
 	SRefs*			iFindRefsInstance						(SBuilder* refs, u8 tcType, s8* tcDesc40);
+	STems*			iFindTemsInstance						(SBuilder* charsBuilder, u32 tnIid);

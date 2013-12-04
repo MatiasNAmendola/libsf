@@ -132,3 +132,11 @@ FUNCTION declare_dsf_dll
 							INTEGER		tlVisible, ;
 							STRING		tcChars1_128, ;
 							STRING		tcChars2_128
+
+	* Called to load template point data
+	DECLARE INTEGER		dsf_load_template		IN exe\dsf.dll ;
+							INTEGER		tnInstance,	;			&& Instance handle returned by dsf_create_new_instance()
+							INTEGER		tiid, ;					&& See explanation of these in frmNew::create_tables()
+							SINGLE		tfX, ;					&& as well as the function in the DSF.DLL.
+							SINGLE		tfY, ;
+							INTEGER		tnRecno					&& The original record number used to reference this item
