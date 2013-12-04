@@ -256,26 +256,40 @@
 
 
 		//////////
-		// Try to find the indicated data
+		// Find or create the indicated character
 		//////
 			c = iFindCharInstance(p->chars, tiid, (u8)tnType, tiOrder, tiLnkId, tiLnkOrder);
-
 			if (!c)
-			{
-				// It's a new entry
-				c = (SChar*)builder_allocateBytes(p->refs, sizeof(SChar));
-				if (!c)
-					return(-2);		// Error allocating
-
-				// Initialize it
-				memset(c, 0, sizeof(SChar));
-			}
+				return(-2);		// Error finding or creating
 
 
 		//////////
 		// Populate the data
 		//////
+			c->cType		= (u8)tnType;
+			c->iid			= tiid;
+			c->iOrder		= tiOrder;
+			c->lNewStroke	= ((tlNewStroke == 0) ? false : true);
+			c->lSelected	= ((tlSelected == 0) ? false : true);
+			c->ox			= tfOx;
+			c->oy			= tfOy;
+			c->ot			= tfOt;
+			c->lr			= tfLr;
+			c->lt			= tfLt;
+			c->rr			= tfRr;
+			c->rt			= tfRt;
+			c->iSubdivs		= tiSubdivs;
+			c->iLnkId		= tiLnkId;
+			c->iLnkOrder	= tiLnkOrder;
 
+			// Store the description
+			memcpy(&c->cDesc[0], tcDesc10, 10);
+		
+
+		//////////
+		// Indicate success
+		//////
+			return(0);
 	}
 
 
@@ -980,27 +994,18 @@
 // matching character reference.
 //
 //////
-	SChar* iFindCharInstance(SBuilder* chars, u32 tnIid, u8 tcType, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder)
+	SChar* iFindCharInstance(SBuilder* charsBuilder, u32 tnIid, u8 tcType, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder)
 	{
-		s32			lnI, lnMaxCount;
-		SBuilder*	builder;
-		SChar*		c;
+		SBuilder* thisCharBuilder;
 
 
 		//////////
 		// Make sure our environment is sane
 		//////
-			if (chars && chars->data)
+			if (charsBuilder && charsBuilder->data)
 			{
-				// See if there is room for this item
-// TODO:  Working here
-				if (chars->populatedLength < tnIid * sizeof(SChar))
-				{
-					// We have to add it
-				}
-
 				// Grab that builder
-				builder = (SBuilder*)(chars->data + tnIid * sizeof(SChar));
+				thisCharBuilder = iiGetThisCharBuilder(charsBuilder, tnIid);
 
 				// Find out what type this one is
 				switch (tcType)
@@ -1009,17 +1014,24 @@
 					case 's':
 						// It's a spline, which is part of the indicated item
 						// We search by tnIid and tiOrder
+						if (tnIid > 255)
+							return(NULL);		// Invalid spline reference
+
+						// Search for (and add it if need be)
+						return(iFindCharInstance_SD(thisCharBuilder, tnIid, tiOrder, true));
+
 
 					case 'D':
 					case 'd':
 						// It's the same as a spline, but the definition must be an item above 255, and it's
 						// not part of a character, but rather just a segment to be used by characters.
 						// We search by tnIid and tiOrder
-						if (tnIid < 256)
+						if (tnIid <= 255)
 							return(NULL);		// Error
 
-						// Search for it
-						break;
+						// Search for (and add it if need be)
+						return(iFindCharInstance_SD(thisCharBuilder, tnIid, tiOrder, true));
+
 
 					case 'R':
 					case 'r':
@@ -1028,21 +1040,176 @@
 						if (tnIid < 256)
 							return(NULL);		// Error
 
-						// Search for it
-						break;
+						// Search for (and add it if need be)
+						return(iFindCharInstance_R(thisCharBuilder, tnIid, tiOrder, tiLnkId, true));
+
 
 					case 'L':
 					case 'l':
 						// It's a link. The reference can refer to any item, but must include the tiLnkId and tiLnkOrder
 						// We search by tnIid, tiOrder, tiLnkId, and tiLnkOrder
-						// Search for it
-						break;
+
+						// Search for (and add it if need be)
+						return(iFindCharInstance_L(thisCharBuilder, tnIid, tiOrder, tiLnkId, tiLnkOrder, true));
+
 				}
 			}
 
 
 		// If we get here, not found
 		return(NULL);
+	}
+
+	SBuilder* iiGetThisCharBuilder(SBuilder* charsBuilder, u32 tnIid)
+	{
+		u32			lnI, lnStart, lnEnd;
+		SBuilder*	thisCharBuilder;
+
+
+		// See if there's already room for this item
+		if (charsBuilder->populatedLength < tnIid * sizeof(SChar))
+		{
+			// We have to make room for it
+			lnStart = (charsBuilder->populatedLength / sizeof(SChar));
+			lnEnd	= tnIid * sizeof(SChar);
+			for (lnI = lnStart; lnI < lnEnd; lnI += sizeof(SChar))
+			{
+				// Grab the pointer
+				thisCharBuilder = (SBuilder*)builder_allocateBytes(charsBuilder, sizeof(SChar));
+
+				// Initialize it
+				memset(thisCharBuilder, 0, sizeof(SChar));
+			}
+		}
+
+
+		//////////
+		// Return the builder
+		//////
+			return((SBuilder*)(charsBuilder->data + (tnIid * sizeof(SChar))));
+	}
+
+	SChar* iFindCharInstance_SD(SBuilder* thisCharBuilder, u32 tnIid, u32 tiOrder, bool tlAddIfNotFound)
+	{
+		u32		lnI;
+		SChar*	c;
+
+
+		//////////
+		// Make sure our environment is sane
+		//////
+			if (thisCharBuilder)
+				return(NULL);
+
+
+		//////////
+		// Search for it
+		//////
+			for (lnI = 0; lnI < thisCharBuilder->populatedLength; lnI += sizeof(SChar))
+			{
+				// Grab the pointer
+				c = (SChar*)(thisCharBuilder->data + lnI);
+
+				// See if this is it
+				if (c->iid == tnIid && c->iOrder == tiOrder)
+					return(c);
+			}
+
+
+		//////////
+		// If we get here, it wasn't found
+		//////
+			if (tlAddIfNotFound)
+			{
+				// Create a new entry
+				return((SChar*)builder_allocateBytes(thisCharBuilder, sizeof(SChar)));
+
+			} else {
+				// 
+				return(NULL);
+			}
+	}
+
+	SChar* iFindCharInstance_R(SBuilder* thisCharBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, bool tlAddIfNotFound)
+	{
+		u32		lnI;
+		SChar*	c;
+
+
+		//////////
+		// Make sure our environment is sane
+		//////
+			if (thisCharBuilder)
+				return(NULL);
+
+
+		//////////
+		// Search for it
+		//////
+			for (lnI = 0; lnI < thisCharBuilder->populatedLength; lnI += sizeof(SChar))
+			{
+				// Grab the pointer
+				c = (SChar*)(thisCharBuilder->data + lnI);
+
+				// See if this is it
+				if (c->iid == tnIid && c->iOrder == tiOrder && c->iLnkId == tiLnkId)
+					return(c);
+			}
+
+
+		//////////
+		// If we get here, it wasn't found
+		//////
+			if (tlAddIfNotFound)
+			{
+				// Create a new entry
+				return((SChar*)builder_allocateBytes(thisCharBuilder, sizeof(SChar)));
+
+			} else {
+				// 
+				return(NULL);
+			}
+	}
+
+	SChar* iFindCharInstance_L(SBuilder* thisCharBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder, bool tlAddIfNotFound)
+	{
+		u32		lnI;
+		SChar*	c;
+
+
+		//////////
+		// Make sure our environment is sane
+		//////
+			if (thisCharBuilder)
+				return(NULL);
+
+
+		//////////
+		// Search for it
+		//////
+			for (lnI = 0; lnI < thisCharBuilder->populatedLength; lnI += sizeof(SChar))
+			{
+				// Grab the pointer
+				c = (SChar*)(thisCharBuilder->data + lnI);
+
+				// See if this is it
+				if (c->iid == tnIid && c->iOrder == tiOrder && c->iLnkId == tiLnkId && c->iLnkOrder == tiLnkOrder)
+					return(c);
+			}
+
+
+		//////////
+		// If we get here, it wasn't found
+		//////
+			if (tlAddIfNotFound)
+			{
+				// Create a new entry
+				return((SChar*)builder_allocateBytes(thisCharBuilder, sizeof(SChar)));
+
+			} else {
+				// 
+				return(NULL);
+			}
 	}
 
 

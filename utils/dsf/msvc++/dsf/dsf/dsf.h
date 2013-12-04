@@ -221,5 +221,9 @@ typedef		const f64			cf64;
 	int				iiGetFloanFromBitmap_qsortCallback		(const void* l, const void* r);
 	// General purpose
 	SInstance*		iGetDsfInstance							(u32 tnHandle, bool* tlValid);
-	SChar*			iFindCharInstance						(SBuilder* chars, u32 tnIid, u8 tcType, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder);
+	SChar*			iFindCharInstance						(SBuilder* charsBuilder, u32 tnIid, u8 tcType, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder);
+	SBuilder*		iiGetThisCharBuilder					(SBuilder* thisCharBuilder, u32 tnIid);
+	SChar*			iFindCharInstance_SD					(SBuilder* thisCharBuilder, u32 tnIid, u32 tiOrder, bool tlAddIfNotFound);
+	SChar*			iFindCharInstance_R						(SBuilder* thisCharBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, bool tlAddIfNotFound);
+	SChar*			iFindCharInstance_L						(SBuilder* thisCharBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder, bool tlAddIfNotFound);
 	SRefs*			iFindRefsInstance						(SBuilder* refs, u8 tcType, s8* tcDesc40);
