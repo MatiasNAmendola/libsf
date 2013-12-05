@@ -140,3 +140,37 @@ FUNCTION declare_dsf_dll
 							SINGLE		tfX, ;					&& as well as the function in the DSF.DLL.
 							SINGLE		tfY, ;
 							INTEGER		tnRecno					&& The original record number used to reference this item
+	
+	* Called to indicate what character is being referenced
+	DECLARE INTEGER		dsf_set_active_character		IN exe\dsf.dll ;
+							INTEGER		tnInstance,	;			&& Instance handle returned by dsf_create_new_instance()
+							INTEGER		tiId, ;					&& Character or definition component to render
+
+	* Called to render a markup version (for editing)
+	DECLARE INTEGER		dsf_render_markup		IN exe\dsf.dll ;
+							INTEGER		tnInstance,	;			&& Instance handle returned by dsf_create_new_instance()
+							INTEGER		tnWidth, ;				&& Width to render
+							INTEGER		tnHeight, ;				&& Height to render
+							INTEGER		tlBold, ;				&& Should it be rendered in bold?
+							INTEGER		tlItalic, ;				&& Should it be rendered in italic?
+							INTEGER		tlUnderline, ;			&& Should it be rendered with underline?
+							INTEGER		tlStrikethrough, ;		&& Should it be rendered with strikethrough?
+							STRING		tcBitmapPathname, ;		&& Either the pathname, or NULL if not file should be generated
+							INTEGER		tnHwnd, ;				&& Either NULL or the form's HWND if you want it drawn directly to the form
+							INTEGER		tnX, ;					&& If tnHwnd is not NULL, then the X coordinate of the client area to render at
+							INTEGER		tnY						&& If tnHwnd is not NULL, then the Y coordinate of the client area to render at
+
+	* Called to render a final version (as would be used for rendering fonts)
+	DECLARE INTEGER		dsf_render_final		IN exe\dsf.dll ;
+							INTEGER		tnInstance,	;			&& Instance handle returned by dsf_create_new_instance()
+							INTEGER		tnWidth, ;				&& Width to render
+							INTEGER		tnHeight, ;				&& Height to render
+							INTEGER		tlBold, ;				&& Should it be rendered in bold?
+							INTEGER		tlItalic, ;				&& Should it be rendered in italic?
+							INTEGER		tlUnderline, ;			&& Should it be rendered with underline?
+							INTEGER		tlStrikethrough, ;		&& Should it be rendered with strikethrough?
+							STRING		tcBitmapPathname, ;		&& Either the pathname, or NULL if not file should be generated
+							INTEGER		tnHwnd, ;				&& Either NULL or the form's HWND if you want it drawn directly to the form
+							INTEGER		tnX, ;					&& If tnHwnd is not NULL, then the X coordinate of the client area to render at
+							INTEGER		tnY						&& If tnHwnd is not NULL, then the Y coordinate of the client area to render at
+	

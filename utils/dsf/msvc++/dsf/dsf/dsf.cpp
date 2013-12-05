@@ -166,6 +166,8 @@
 		// Initialize it
 		//////
 			memset(p, 0, sizeof(SInstance));
+			builder_createAndInitialize(&p->chars, -1);
+			builder_createAndInitialize(&p->refs, -1);
 
 
 		//////////
@@ -246,7 +248,7 @@
 											u32 tiSubdivs, u32 tiLnkId, u32 tiLnkOrder)
 	{
 		SInstance*	p;
-		SChar*		c;
+		SSpline*	s;
 		bool		llValid;
 
 
@@ -261,32 +263,32 @@
 		//////////
 		// Find or create the indicated character instance
 		//////
-			c = iFindCharInstance(p->chars, tiid, (u8)tnType, tiOrder, tiLnkId, tiLnkOrder);
-			if (!c)
+			s = iFindSplineInstance(p->chars, tiid, (u8)tnType, tiOrder, tiLnkId, tiLnkOrder);
+			if (!s)
 				return(-2);		// Error finding (an invalid combination was provided)
 
 
 		//////////
 		// Populate the data
 		//////
-			c->cType		= (u8)tnType;
-			c->iid			= tiid;
-			c->iOrder		= tiOrder;
-			c->lNewStroke	= ((tlNewStroke == 0) ? false : true);
-			c->lSelected	= ((tlSelected == 0) ? false : true);
-			c->ox			= tfOx;
-			c->oy			= tfOy;
-			c->ot			= tfOt;
-			c->lr			= tfLr;
-			c->lt			= tfLt;
-			c->rr			= tfRr;
-			c->rt			= tfRt;
-			c->iSubdivs		= tiSubdivs;
-			c->iLnkId		= tiLnkId;
-			c->iLnkOrder	= tiLnkOrder;
+			s->cType		= (u8)tnType;
+			s->iid			= tiid;
+			s->iOrder		= tiOrder;
+			s->lNewStroke	= ((tlNewStroke == 0) ? false : true);
+			s->lSelected	= ((tlSelected == 0) ? false : true);
+			s->ox			= tfOx;
+			s->oy			= tfOy;
+			s->ot			= tfOt;
+			s->lr			= tfLr;
+			s->lt			= tfLt;
+			s->rr			= tfRr;
+			s->rt			= tfRt;
+			s->iSubdivs		= tiSubdivs;
+			s->iLnkId		= tiLnkId;
+			s->iLnkOrder	= tiLnkOrder;
 
 			// Store the description
-			memcpy(&c->cDesc[0], tcDesc10, 10);
+			memcpy(&s->cDesc[0], tcDesc10, 10);
 		
 
 		//////////
@@ -389,7 +391,7 @@
 // with this information.  If so, it's updated.  If not, it's appended.
 //
 //////
-	int dsf_load_template(u32 tnInstance, u32 tiid, f32 tfX, f32 tfY, u32 tnRecno)
+	int dsf_load_template(u32 tnInstance, u32 tipid, f32 tfX, f32 tfY, u32 tnRecno)
 	{
 		SInstance*	p;
 		STems*		t;
@@ -407,7 +409,7 @@
 		//////////
 		// Try to find the indicated data
 		//////
-			t = iFindTemsInstance(p->chars, tiid);
+			t = iFindTemsInstance(p->chars, tipid);
 			if (!t)
 				return(-2);		// Error allocating
 
@@ -424,6 +426,119 @@
 		// Indicate success
 		//////
 			return(0);
+	}
+
+
+
+
+//////////
+//
+// Called to indicate the user wants to make active another character for editing
+//
+//////
+	int dsf_set_active_character(u32 tnInstance, u32 tiid)
+	{
+		SInstance*	p;
+		bool		llValid;
+
+
+		//////////
+		// Make sure our environment is sane
+		//////
+			p = iGetDsfInstance(tnInstance, &llValid);
+			if (!llValid)
+				return(-1);
+
+
+		//////////
+		// Make sure that character is defined
+		/////
+			if (tiid * sizeof(SChars) < p->chars->populatedLength)
+			{
+				// It exists
+				p->activeChar = tiid;
+				return(0);
+
+			} else {
+				// Invalid character range
+				return(-2);
+			}
+	}
+
+
+
+
+//////////
+//
+// Called to render a markup form used for editing, or for debugging, at the indicated size.  This
+// is what the font looks like in the edit window of the DSF Font Editor.
+//
+//////
+	int dsf_render_markup(u32 tnInstance, s32 tnWidth, s32 tnHeight, u32 tlBold, u32 tlItalic, u32 tlUnderline, s8* tcBitmapPathname, u32 tnHwnd, s32 tnX, s32 tnY)
+	{
+		SInstance*	p;
+		SChars*		thisChar;
+		bool		llValid;
+
+
+		//////////
+		// Make sure our environment is sane
+		//////
+			p = iGetDsfInstance(tnInstance, &llValid);
+			if (!llValid)
+				return(-1);
+
+
+		//////////
+		// Find the active character instance
+		//////
+			thisChar = iiFindOnlyThisChars(p->chars, p->activeChar);
+			if (!thisChar)
+				return(-2);		// Error finding (an invalid combination was provided)
+
+
+		//////////
+		// Render it
+		//////
+			return(iRender(thisChar, tnWidth, tnHeight, true, tlBold, tlItalic, tlUnderline, tcBitmapPathname, tnHwnd, tnX, tnY));
+	}
+
+
+
+
+//////////
+//
+// Called to render a final form at the indicated size.  This is what the font will look like when
+// generated for regular use by the system.
+//
+//////
+	int dsf_render_final(u32 tnInstance, s32 tnWidth, s32 tnHeight, u32 tlBold, u32 tlItalic, u32 tlUnderline, s8* tcBitmapPathname, u32 tnHwnd, s32 tnX, s32 tnY)
+	{
+		SInstance*	p;
+		SChars*		thisChar;
+		bool		llValid;
+
+
+		//////////
+		// Make sure our environment is sane
+		//////
+			p = iGetDsfInstance(tnInstance, &llValid);
+			if (!llValid)
+				return(-1);
+
+
+		//////////
+		// Find the active character instance
+		//////
+			thisChar = iiFindOnlyThisChars(p->chars, p->activeChar);
+			if (!thisChar)
+				return(-2);		// Error finding (an invalid combination was provided)
+
+
+		//////////
+		// Render it
+		//////
+			return(iRender(thisChar, tnWidth, tnHeight, false, tlBold, tlItalic, tlUnderline, tcBitmapPathname, tnHwnd, tnX, tnY));
 	}
 
 
@@ -1044,9 +1159,9 @@
 // matching character reference.
 //
 //////
-	SChar* iFindCharInstance(SBuilder* charsBuilder, u32 tnIid, u8 tcType, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder)
+	SSpline* iFindSplineInstance(SBuilder* charsBuilder, u32 tnIid, u8 tcType, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder)
 	{
-		SChars*		thisChars;
+		SChars*		thisChar;
 		SBuilder*	thisSplineBuilder;
 
 
@@ -1056,12 +1171,12 @@
 			if (charsBuilder && charsBuilder->data)
 			{
 				// Grab that builder
-				thisChars = iiGetThisChars(charsBuilder, tnIid);
-				if (!thisChars)
+				thisChar = iiFindOrCreateThisChars(charsBuilder, tnIid);
+				if (!thisChar)
 					return(NULL);
 
 				// Grab this character's builder for splines/definitions
-				thisSplineBuilder = thisChars->splines;
+				thisSplineBuilder = thisChar->splines;
 
 				// Find out what type this one is
 				switch (tcType)
@@ -1116,7 +1231,7 @@
 		return(NULL);
 	}
 
-	SChars* iiGetThisChars(SBuilder* charsBuilder, u32 tnIid)
+	SChars* iiFindOrCreateThisChars(SBuilder* charsBuilder, u32 tnIid)
 	{
 		u32			lnI, lnStart, lnEnd;
 		SChars*		thisSpline;
@@ -1128,7 +1243,7 @@
 			// We have to make room for it
 			lnStart = (charsBuilder->populatedLength / sizeof(SChars));
 			lnEnd	= tnIid * sizeof(SChars);
-			for (lnI = lnStart; lnI < lnEnd; lnI += sizeof(SChars))
+			for (lnI = lnStart; lnI <= lnEnd; lnI += sizeof(SChars))
 			{
 				// Grab the pointer
 				thisSpline = (SChars*)builder_allocateBytes(charsBuilder, sizeof(SChars));
@@ -1146,33 +1261,46 @@
 		//////////
 		// Return the builder
 		//////
-			return((SChars*)(charsBuilder->data + ((tnIid - 1) * sizeof(SChars))));
+			return(iiFindOnlyThisChars(charsBuilder, tnIid));
 	}
 
-	SChar* iFindSplineInstance_SD(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, bool tlAddIfNotFound)
+	SChars* iiFindOnlyThisChars(SBuilder* charsBuilder, u32 tnIid)
 	{
-		u32		lnI;
-		SChar*	c;
+		if (charsBuilder->populatedLength >= tnIid * sizeof(SChars))
+		{
+			// There is enough room for this character to exist
+			return((SChars*)(charsBuilder->data + (tnIid * sizeof(SChars))));
+
+		} else {
+			// Something's awry
+			return(NULL);
+		}
+	}
+
+	SSpline* iFindSplineInstance_SD(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, bool tlAddIfNotFound)
+	{
+		u32			lnI;
+		SSpline*	s;
 
 
 		//////////
 		// Make sure our environment is sane
 		//////
-			if (thisSplineBuilder)
+			if (!thisSplineBuilder)
 				return(NULL);
 
 
 		//////////
 		// Search for it
 		//////
-			for (lnI = 0; lnI < thisSplineBuilder->populatedLength; lnI += sizeof(SChar))
+			for (lnI = 0; lnI < thisSplineBuilder->populatedLength; lnI += sizeof(SSpline))
 			{
 				// Grab the pointer
-				c = (SChar*)(thisSplineBuilder->data + lnI);
+				s = (SSpline*)(thisSplineBuilder->data + lnI);
 
 				// See if this is it
-				if (c->iid == tnIid && c->iOrder == tiOrder)
-					return(c);
+				if (s->iid == tnIid && s->iOrder == tiOrder)
+					return(s);
 			}
 
 
@@ -1182,7 +1310,7 @@
 			if (tlAddIfNotFound)
 			{
 				// Create a new entry
-				return((SChar*)builder_allocateBytes(thisSplineBuilder, sizeof(SChar)));
+				return((SSpline*)builder_allocateBytes(thisSplineBuilder, sizeof(SSpline)));
 
 			} else {
 				// 
@@ -1190,10 +1318,10 @@
 			}
 	}
 
-	SChar* iFindSplineInstance_R(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, bool tlAddIfNotFound)
+	SSpline* iFindSplineInstance_R(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, bool tlAddIfNotFound)
 	{
-		u32		lnI;
-		SChar*	c;
+		u32			lnI;
+		SSpline*	s;
 
 
 		//////////
@@ -1206,14 +1334,14 @@
 		//////////
 		// Search for it
 		//////
-			for (lnI = 0; lnI < thisSplineBuilder->populatedLength; lnI += sizeof(SChar))
+			for (lnI = 0; lnI < thisSplineBuilder->populatedLength; lnI += sizeof(SSpline))
 			{
 				// Grab the pointer
-				c = (SChar*)(thisSplineBuilder->data + lnI);
+				s = (SSpline*)(thisSplineBuilder->data + lnI);
 
 				// See if this is it
-				if (c->iid == tnIid && c->iOrder == tiOrder && c->iLnkId == tiLnkId)
-					return(c);
+				if (s->iid == tnIid && s->iOrder == tiOrder && s->iLnkId == tiLnkId)
+					return(s);
 			}
 
 
@@ -1223,7 +1351,7 @@
 			if (tlAddIfNotFound)
 			{
 				// Create a new entry
-				return((SChar*)builder_allocateBytes(thisSplineBuilder, sizeof(SChar)));
+				return((SSpline*)builder_allocateBytes(thisSplineBuilder, sizeof(SSpline)));
 
 			} else {
 				// 
@@ -1231,10 +1359,10 @@
 			}
 	}
 
-	SChar* iFindSplineInstance_L(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder, bool tlAddIfNotFound)
+	SSpline* iFindSplineInstance_L(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder, bool tlAddIfNotFound)
 	{
-		u32		lnI;
-		SChar*	c;
+		u32			lnI;
+		SSpline*	s;
 
 
 		//////////
@@ -1247,14 +1375,14 @@
 		//////////
 		// Search for it
 		//////
-			for (lnI = 0; lnI < thisSplineBuilder->populatedLength; lnI += sizeof(SChar))
+			for (lnI = 0; lnI < thisSplineBuilder->populatedLength; lnI += sizeof(SSpline))
 			{
 				// Grab the pointer
-				c = (SChar*)(thisSplineBuilder->data + lnI);
+				s = (SSpline*)(thisSplineBuilder->data + lnI);
 
 				// See if this is it
-				if (c->iid == tnIid && c->iOrder == tiOrder && c->iLnkId == tiLnkId && c->iLnkOrder == tiLnkOrder)
-					return(c);
+				if (s->iid == tnIid && s->iOrder == tiOrder && s->iLnkId == tiLnkId && s->iLnkOrder == tiLnkOrder)
+					return(s);
 			}
 
 
@@ -1264,7 +1392,7 @@
 			if (tlAddIfNotFound)
 			{
 				// Create a new entry
-				return((SChar*)builder_allocateBytes(thisSplineBuilder, sizeof(SChar)));
+				return((SSpline*)builder_allocateBytes(thisSplineBuilder, sizeof(SSpline)));
 
 			} else {
 				// 
@@ -1326,7 +1454,7 @@
 		//////////
 		// Grab the thisChars parent
 		//////
-			thisChars = iiGetThisChars(charsBuilder, tnIid);
+			thisChars = iiFindOrCreateThisChars(charsBuilder, tnIid);
 			if (thisChars)
 			{
 				// Return the template
@@ -1336,4 +1464,17 @@
 				// Failure
 				return(NULL);
 			}
+	}
+
+
+
+
+//////////
+//
+// Called to render the indicated character
+//
+//////
+	int iRender(SChars* c, s32 tnWidth, s32 tnHeight, u32 tlMarkup, u32 tlBold, u32 tlItalic, u32 tlUnderline, s8* tcBitmapPathname, u32 tnHwnd, s32 tnX, s32 tnY)
+	{
+		return(-1);
 	}

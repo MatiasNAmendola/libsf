@@ -145,11 +145,11 @@ typedef		const f64			cf64;
 		SBuilder*	tems;							// (STems) Holds all template points for this character
 	};
 
-	struct SChar
+	struct SSpline
 	{
 		s8			cType;							// S=Spline, D=Definition, R=Reference, L=Link
 		u32			iid;							// Character number (ASCII character)
-		u32			iOrder;							// Stroke order within the character
+		s32			iOrder;							// Stroke order within the character
 		s8			cDesc[10];						// A brief description of this section, usually used with lNewStroke for a new pen stroke
 		bool		lNewStroke;						// Used for an "i", for example, when the dot is a different stroke than the lower stock
 		bool		lSelected;						// Is this item selected?
@@ -162,7 +162,7 @@ typedef		const f64			cf64;
 		f32			rt;								// Right-Theta
 		u32			iSubdivs;						// Automatic sub-divisions between this spline and the next one
 		u32			iLnkId;							// If cType=R, the iid of the definition object; If cType=L, the iid of the link object (used with iLnkOrder to indicate which linked item this one modifies)
-		u32			iLnkOrder;						// If cType=L, the item within the link object that this entry modifies
+		s32			iLnkOrder;						// If cType=L, the item within the link object that this entry modifies
 
 		SBuilder*	tems;							// (STems) Character template information for this character
 	};
@@ -204,6 +204,8 @@ typedef		const f64			cf64;
 		s8				id[4];						// Always 'DSF!' (used to identify the handle)
 		u32				id_size;					// sizeof(SInstance)
 
+		u32				activeChar;					// The character currently being edited / displayed
+
 		SFont			font;						// Font information for this instance
 		SBuilder*		chars;						// (SBuilder) Characters, one SBuilder for every character, with each character SBuilder pointing to its many SChar entries
 		SBuilder*		refs;						// (SRefs) References
@@ -230,10 +232,13 @@ typedef		const f64			cf64;
 	int				iiGetFloanFromBitmap_qsortCallback		(const void* l, const void* r);
 	// General purpose
 	SInstance*		iGetDsfInstance							(u32 tnHandle, bool* tlValid);
-	SChar*			iFindCharInstance						(SBuilder* charsBuilder, u32 tnIid, u8 tcType, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder);
-	SChars*			iiGetThisChars							(SBuilder* charsBuilder, u32 tnIid);
-	SChar*			iFindSplineInstance_SD					(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, bool tlAddIfNotFound);
-	SChar*			iFindSplineInstance_R					(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, bool tlAddIfNotFound);
-	SChar*			iFindSplineInstance_L					(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder, bool tlAddIfNotFound);
+	SSpline*		iFindSplineInstance						(SBuilder* charsBuilder, u32 tnIid, u8 tcType, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder);
+	SChars*			iiFindOrCreateThisChars					(SBuilder* charsBuilder, u32 tnIid);
+	SChars*			iiFindOnlyThisChars						(SBuilder* charsBuilder, u32 tnIid);
+	SSpline*		iFindSplineInstance_SD					(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, bool tlAddIfNotFound);
+	SSpline*		iFindSplineInstance_R					(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, bool tlAddIfNotFound);
+	SSpline*		iFindSplineInstance_L					(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder, bool tlAddIfNotFound);
 	SRefs*			iFindRefsInstance						(SBuilder* refs, u8 tcType, s8* tcDesc40);
 	STems*			iFindTemsInstance						(SBuilder* charsBuilder, u32 tnIid);
+
+	int				iRender									(SChars* c, s32 tnWidth, s32 tnHeight, u32 tlMarkup, u32 tlBold, u32 tlItalic, u32 tlUnderline, s8* tcBitmapPathname, u32 tnHwnd, s32 tnX, s32 tnY);
