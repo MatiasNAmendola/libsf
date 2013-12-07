@@ -59,9 +59,12 @@
 //////
 	BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 	{
+		ghInstance = hModule;
 		switch (ul_reason_for_call)
 		{
 			case DLL_PROCESS_ATTACH:
+				builder_createAndInitialize(&instances, -1);
+				break;
 			case DLL_THREAD_ATTACH:
 			case DLL_THREAD_DETACH:
 			case DLL_PROCESS_DETACH:
@@ -159,22 +162,24 @@
 		//////////
 		// Allocate our instance
 		//////
-			p = (SInstance*)malloc(sizeof(SInstance));
+			p = (SInstance*)builder_allocateBytes(instances, sizeof(SInstance));
 
 
 		//////////
 		// Initialize it
 		//////
 			memset(p, 0, sizeof(SInstance));
-			builder_createAndInitialize(&p->chars, -1);
-			builder_createAndInitialize(&p->refs, -1);
+			builder_createAndInitialize(&p->chars,	-1);
+			builder_createAndInitialize(&p->refs,	-1);
+			builder_createAndInitialize(&p->hwnds,	-1);
 
 
 		//////////
 		// Brand it
 		//////
 			memcpy(&p->id, cgcDsfBrand, sizeof(p->id));
-			p->id_size = sizeof(SInstance);
+			p->id_size		= sizeof(SInstance);
+			p->activeChar	= 65;				// Default to "A"
 
 
 		//////////
@@ -409,7 +414,7 @@
 		//////////
 		// Try to find the indicated data
 		//////
-			t = iFindTemsInstance(p->chars, tipid);
+			t = iCreateNewTemsEntry(p->chars, tipid);
 			if (!t)
 				return(-2);		// Error allocating
 
@@ -426,6 +431,136 @@
 		// Indicate success
 		//////
 			return(0);
+	}
+
+
+
+
+//////////
+//
+// Called to load the indicated instance.  We search to see if a previous entry has been added
+// with this information.  If so, it's updated.  If not, it's appended.
+//
+//////
+	int dsf_get_changed_template(u32 tnInstance, u32 tipid, s8* tcY12, s8* tcX12, s8* tcRecno12, u32 tnNextNewRecno)
+	{
+		u32			lnI;
+		SInstance*	p;
+		SBuilder*	tems;
+		STems*		t;
+		bool		llValid;
+
+
+		//////////
+		// Make sure our environment is sane
+		//////
+			p = iGetDsfInstance(tnInstance, &llValid);
+			if (!llValid)
+				return(-1);
+
+
+		//////////
+		// Try to find the indicated data
+		//////
+			tems = iGetTemsBuilder(p->chars, tipid);
+			if (!tems)
+				return(-2);		// Error accessing this pid
+
+
+		//////////
+		// Find the first changed entry
+		//////
+			for (lnI = 0; lnI < tems->populatedLength; lnI += sizeof(STems))
+			{
+				// Grab the pointer
+				t = (STems*)(tems->data + lnI);
+
+				// If it's changed, but not deleted
+				if (t->changed && !t->deleted)
+				{
+					// Update the recno() if it's a new item
+					if (t->recno == -1)
+						t->recno = tnNextNewRecno;
+
+					// Store each item
+					sprintf(tcX12,		"%7.5f",	t->fx);
+					sprintf(tcY12,		"%7.5f",	t->fy);
+					sprintf(tcRecno12,	"%u",		t->recno);
+
+					// Mark it no longer changed
+					t->changed = false;
+
+					// Indicate success
+					return(0);
+				}
+			}
+
+
+		//////////
+		// Indicate that there are no more items
+		//////
+			return(-3);
+	}
+
+
+
+
+//////////
+//
+// Called to load the indicated instance.  We search to see if a previous entry has been added
+// with this information.  If so, it's updated.  If not, it's appended.
+//
+//////
+	int dsf_get_deleted_template(u32 tnInstance, u32 tipid, s8* tcRecno12)
+	{
+		u32			lnI;
+		SInstance*	p;
+		SBuilder*	tems;
+		STems*		t;
+		bool		llValid;
+
+
+		//////////
+		// Make sure our environment is sane
+		//////
+			p = iGetDsfInstance(tnInstance, &llValid);
+			if (!llValid)
+				return(-1);
+
+
+		//////////
+		// Try to find the indicated data
+		//////
+			tems = iGetTemsBuilder(p->chars, tipid);
+			if (!tems)
+				return(-2);		// Error accessing this pid
+
+
+		//////////
+		// Find the first changed entry
+		//////
+			for (lnI = 0; lnI < tems->populatedLength; lnI += sizeof(STems))
+			{
+				// Grab the pointer
+				t = (STems*)(tems->data + lnI);
+
+				// Report on previously existing deleted items.  If the user adds an item, then
+				// deletes it before saving it is simply an orphan record that will be freed at exit.
+				if (t->deleted && t->recno != -1)
+				{
+					// Store the record number
+					sprintf(tcRecno12, "%u", t->recno);
+
+					// Indicate success
+					return(0);
+				}
+			}
+
+
+		//////////
+		// Indicate that there are no more items
+		//////
+			return(-3);
 	}
 
 
@@ -474,7 +609,7 @@
 // is what the font looks like in the edit window of the DSF Font Editor.
 //
 //////
-	int dsf_render_markup(u32 tnInstance, s32 tnWidth, s32 tnHeight, u32 tlBold, u32 tlItalic, u32 tlUnderline, s8* tcBitmapPathname, u32 tnHwnd, s32 tnX, s32 tnY)
+	int dsf_render_markup(u32 tnInstance, s32 tnWidth, s32 tnHeight, u32 tlBold, u32 tlItalic, u32 tlUnderline, u32 tlStrikethrough, s8* tcBitmapPathname, u32 tnHwnd, s32 tnX, s32 tnY)
 	{
 		SInstance*	p;
 		SChars*		thisChar;
@@ -500,7 +635,7 @@
 		//////////
 		// Render it
 		//////
-			return(iRender(thisChar, tnWidth, tnHeight, true, tlBold, tlItalic, tlUnderline, tcBitmapPathname, tnHwnd, tnX, tnY));
+			return(iRender(p, thisChar, tnWidth, tnHeight, true, tlBold, tlItalic, tlUnderline, tlStrikethrough, tcBitmapPathname, tnHwnd, tnX, tnY));
 	}
 
 
@@ -512,7 +647,7 @@
 // generated for regular use by the system.
 //
 //////
-	int dsf_render_final(u32 tnInstance, s32 tnWidth, s32 tnHeight, u32 tlBold, u32 tlItalic, u32 tlUnderline, s8* tcBitmapPathname, u32 tnHwnd, s32 tnX, s32 tnY)
+	int dsf_render_final(u32 tnInstance, s32 tnWidth, s32 tnHeight, u32 tlBold, u32 tlItalic, u32 tlUnderline, u32 tlStrikethrough, s8* tcBitmapPathname, u32 tnHwnd, s32 tnX, s32 tnY)
 	{
 		SInstance*	p;
 		SChars*		thisChar;
@@ -538,7 +673,7 @@
 		//////////
 		// Render it
 		//////
-			return(iRender(thisChar, tnWidth, tnHeight, false, tlBold, tlItalic, tlUnderline, tcBitmapPathname, tnHwnd, tnX, tnY));
+			return(iRender(p, thisChar, tnWidth, tnHeight, false, tlBold, tlItalic, tlUnderline, tlStrikethrough, tcBitmapPathname, tnHwnd, tnX, tnY));
 	}
 
 
@@ -1129,25 +1264,34 @@
 	{
 		union {
 			SInstance*	p;
-			u32			lnHandle;
+			u32			_p;
 		};
 
 
 		//////////
 		// Make sure our environment is sane, and if so that the handle is valid
 		//////
-			lnHandle = tnHandle;
-			if (p && _memicmp(p->id, cgcDsfBrand, sizeof(p->id)) == 0 && p->id_size == sizeof(SInstance))
-			{
-				// Valid
-				*tlValid = true;
-				return(p);
+			_p = tnHandle;
 
-			} else {
-				// Invalid
-				*tlValid = false;
-				return(NULL);
+			// Is it a pointer?
+			if (p)
+			{
+				// Is it in range?
+				if (_p >= instances->_data && _p <= instances->_data + instances->populatedLength)
+				{
+					// Is it identical?
+					if (_memicmp(p->id, cgcDsfBrand, sizeof(p->id)) == 0 && p->id_size == sizeof(SInstance))
+					{
+						// Valid
+						*tlValid = true;
+						return(p);
+					}
+				}
 			}
+
+			// Invalid
+			*tlValid = false;
+			return(NULL);
 	}
 
 
@@ -1234,7 +1378,7 @@
 	SChars* iiFindOrCreateThisChars(SBuilder* charsBuilder, u32 tnIid)
 	{
 		u32			lnI, lnStart, lnEnd;
-		SChars*		thisSpline;
+		SChars*		thisChar;
 
 
 		// See if there's already room for this item
@@ -1246,14 +1390,14 @@
 			for (lnI = lnStart; lnI <= lnEnd; lnI += sizeof(SChars))
 			{
 				// Grab the pointer
-				thisSpline = (SChars*)builder_allocateBytes(charsBuilder, sizeof(SChars));
+				thisChar = (SChars*)builder_allocateBytes(charsBuilder, sizeof(SChars));
 
 				// Initialize it
-				memset(thisSpline, 0, sizeof(SChars));
+				memset(thisChar, 0, sizeof(SChars));
 
 				// Create new builders for it
-				builder_createAndInitialize(&thisSpline->splines,	-1);
-				builder_createAndInitialize(&thisSpline->tems,		-1);
+				builder_createAndInitialize(&thisChar->splines,		-1);
+				builder_createAndInitialize(&thisChar->tems,		-1);
 			}
 		}
 
@@ -1443,10 +1587,46 @@
 
 //////////
 //
-// Called to search through the existing refs entry to see if the indicated reference is found
+// Called to create a new templates entry as template data is being initially loaded
 //
 //////
-	STems* iFindTemsInstance(SBuilder* charsBuilder, u32 tnIid)
+	STems* iCreateNewTemsEntry(SBuilder* charsBuilder, u32 tipid)
+	{
+		SChars*		thisChars;
+		STems*		t;
+
+
+		//////////
+		// Grab the thisChars parent
+		//////
+			thisChars = iiFindOrCreateThisChars(charsBuilder, tipid);
+			if (thisChars)
+			{
+				// Allocate and return the new template
+				t = (STems*)builder_allocateBytes(thisChars->tems, sizeof(STems));
+
+				// Initialize the memory
+				if (t)
+					memset(t, 0, sizeof(STems));
+
+				// Indicate our pointer
+				return(t);
+
+			} else {
+				// Failure
+				return(NULL);
+			}
+	}
+
+
+
+
+//////////
+//
+// Locate the indicated tems for the associated thisChars
+//
+//////
+	SBuilder* iGetTemsBuilder(SBuilder* charsBuilder,u32 tipid)
 	{
 		SChars*		thisChars;
 
@@ -1454,11 +1634,11 @@
 		//////////
 		// Grab the thisChars parent
 		//////
-			thisChars = iiFindOrCreateThisChars(charsBuilder, tnIid);
+			thisChars = iiFindOnlyThisChars(charsBuilder, tipid);
 			if (thisChars)
 			{
 				// Return the template
-				return((STems*)builder_allocateBytes(thisChars->tems, sizeof(STems)));
+				return(thisChars->tems);
 
 			} else {
 				// Failure
@@ -1474,7 +1654,375 @@
 // Called to render the indicated character
 //
 //////
-	int iRender(SChars* c, s32 tnWidth, s32 tnHeight, u32 tlMarkup, u32 tlBold, u32 tlItalic, u32 tlUnderline, s8* tcBitmapPathname, u32 tnHwnd, s32 tnX, s32 tnY)
+	int iRender(SInstance* p, SChars* c, s32 tnWidth, s32 tnHeight, u32 tlMarkup, u32 tlBold, u32 tlItalic, u32 tlUnderline, u32 tlStrikethrough, s8* tcBitmapPathname, u32 tnHwndParent, s32 tnX, s32 tnY)
 	{
+		SHwnd*	h;
+		SHwnd	hData;
+		RECT	lrc;
+
+
+		//////////
+		// Determine where we will update our bitmap
+		//////
+			if (tnHwndParent != 0)
+			{
+				// Find the existing hwnd, or create a new one
+				h = iFindOrCreateHwnd(p->hwnds, tnHwndParent, tnX, tnY, tnWidth, tnHeight);
+
+			} else {
+				// Create a pseudo one
+				h = &hData;
+
+				// Initialize it
+				memset(&hData, 0, sizeof(hData));
+
+				// Populate it manually
+				hData.rowWidth				= iComputeRowWidth(tnWidth);
+
+				hData.bi.biSize				= sizeof(hData.bi);
+				hData.bi.biWidth			= tnWidth;
+				hData.bi.biHeight			= tnHeight;
+				hData.bi.biPlanes			= 1;
+				hData.bi.biBitCount			= 24;
+				hData.bi.biXPelsPerMeter	= 3270;
+				hData.bi.biYPelsPerMeter	= 3270;
+				hData.bi.biSizeImage		= hData.rowWidth * tnHeight;
+
+				hData.bh.bfType				= 'MB';
+				hData.bh.bfOffBits			= sizeof(hData.bh) + sizeof(hData.bi);
+				hData.bh.bfSize				= hData.bh.bfOffBits + hData.bi.biSizeImage;
+
+				// Now the character can be rendered with this information
+				hData.bd					= (SBGR*)malloc(hData.bi.biSizeImage);
+			}
+
+
+		//////////
+		// Render the character
+		//////
+			SetRect(&lrc, 0, 0, h->w, h->h);
+			if (p->activeChar < 0)
+			{
+				// No valid character has been specified
+				FillRect(h->hdc, &lrc, (HBRUSH)GetStockObject(GRAY_BRUSH));
+
+			} else {
+				// An active character exists, render it
+				FillRect(h->hdc, &lrc, (HBRUSH)GetStockObject(WHITE_BRUSH));
+				iRenderSplines(p, h, c, tlBold, tlItalic, tlUnderline, tlStrikethrough);
+//				if (tlMarkup != 0)
+					iRenderMarkup(p, h, c);
+			}
+
+
+		// Indicate failure
 		return(-1);
+	}
+
+
+
+
+//////////
+//
+// Called to render the indicated splines onto the character
+//
+//////
+	void iRenderSplines(SInstance* p, SHwnd* h, SChars* c, u32 tlBold, u32 tlItalic, u32 tlUnderline, u32 tlStrikethrough)
+	{
+		u32			lnI;
+		SSpline*	s;
+
+
+		//////////
+		// Iterate through each spline
+		//////
+			for (lnI = 0; lnI < c->splines->populatedLength; lnI += sizeof(SSpline))
+			{
+				// Grab the pointer
+				s = (SSpline*)(c->splines->data + lnI);
+
+				// Render this spline onto the bitmap
+// TODO: Working here
+			}
+	}
+
+
+
+
+//////////
+//
+// Called to render the markup data onto the character
+//
+//////
+	void iRenderMarkup(SInstance* p, SHwnd* h, SChars* c)
+	{
+		s32			lnX, lnY;
+		u32			lnI;
+		STems*		t;
+		SBGR*		lbgr;
+
+
+		//////////
+		// Iterate through each spline
+		//////
+			_asm nop;
+			for (lnI = 0; lnI < c->tems->populatedLength; lnI += sizeof(STems))
+			{
+				// Grab the pointer
+				t = (STems*)(c->tems->data + lnI);
+
+				// Render this template onto the bitmap
+				lnX = (s32)(t->fx * (f32)h->w);
+				lnY = (s32)(t->fy * (f32)h->h);
+
+				// Determine the offset
+				if (lnX < h->w && lnY < h->h)
+				{
+					// Get the pointer
+					lbgr = (SBGR*)((s8*)h->bd + (lnY * h->rowWidth) + (lnX * 3));
+
+					// Render the pixel
+					lbgr->red	= 0;
+					lbgr->grn	= 0;
+					lbgr->blu	= 0;
+				}
+			}
+	}
+
+
+
+
+//////////
+//
+// Called to create a new window, or to reuse an existing window, which is for rendering displayed
+// items for preview or examination.
+//
+//////
+	SHwnd* iFindOnlyHwndByHwnd(SBuilder* hwnds, u32 tnHwndParent, u32 tnHwnd)
+	{
+		u32		lnI;
+		SHwnd*	h;
+
+
+		//////////
+		// See if the existing item exists
+		//////
+			for (lnI = 0; lnI < hwnds->populatedLength; lnI += sizeof(SHwnd))
+			{
+				// Grab this pointer
+				h = (SHwnd*)(hwnds->data + lnI);
+
+				// See if it's a match
+				if (h->_hwndParent == tnHwndParent && h->_hwnd == tnHwnd)
+				{
+					// It's a match
+					return(h);
+				}
+			}
+			// If we get here, it wasn't found
+			return(NULL);
+	}
+
+	SHwnd* iFindOnlyHwnd(SBuilder* hwnds, u32 tnHwndParent, s32 tnX, s32 tnY, s32 tnWidth, s32 tnHeight)
+	{
+		u32		lnI;
+		SHwnd*	h;
+
+
+		//////////
+		// See if the existing item exists
+		//////
+			for (lnI = 0; lnI < hwnds->populatedLength; lnI += sizeof(SHwnd))
+			{
+				// Grab this pointer
+				h = (SHwnd*)(hwnds->data + lnI);
+
+				// See if it's a match
+				if (	h->_hwndParent == tnHwndParent
+					&&	h->x == tnX
+					&&	h->y == tnY
+					&&	h->w == tnWidth
+					&&	h->h == tnHeight)
+				{
+					// It's a match
+					return(h);
+				}
+			}
+			// If we get here, it wasn't found
+			return(NULL);
+	}
+
+	SHwnd* iFindOrCreateHwnd(SBuilder* hwnds, u32 tnHwndParent, s32 tnX, s32 tnY, s32 tnWidth, s32 tnHeight)
+	{
+		SHwnd*	h;
+
+
+		//////////
+		// See if it already exists
+		//////
+			h = iFindOnlyHwnd(hwnds, tnHwndParent, tnX, tnY, tnWidth, tnHeight);
+			if (h)
+				return(h);
+
+		//////////
+		// Add it
+		//////
+			h = (SHwnd*)builder_allocateBytes(hwnds, sizeof(SHwnd));
+			if (h)
+			{
+				// Initialize it
+				memset(h, 0, sizeof(SHwnd));
+
+				// Populate it
+				h->_hwndParent			= tnHwndParent;
+				h->x					= tnX;
+				h->y					= tnY;
+				h->w					= tnWidth;
+				h->h					= tnHeight;
+				h->rowWidth				= iComputeRowWidth(tnWidth);
+
+				// Bitmap info
+				h->bi.biSize			= sizeof(h->bi);
+				h->bi.biWidth			= tnWidth;
+				h->bi.biHeight			= tnHeight;
+				h->bi.biPlanes			= 1;
+				h->bi.biBitCount		= 24;
+				h->bi.biXPelsPerMeter	= 3270;
+				h->bi.biYPelsPerMeter	= 3270;
+				h->bi.biSizeImage		= h->rowWidth * tnHeight;
+
+				// Bitmap header
+				h->bh.bfType			= 'MB';
+				h->bh.bfOffBits			= sizeof(h->bh) + sizeof(h->bi);
+				h->bh.bfSize			= h->bh.bfOffBits + h->bi.biSizeImage;
+
+				// Create the window
+				h->_hwnd				= iCreateWindow(h);
+			}
+			// Return our pointer
+			return(h);
+	}
+
+
+
+
+//////////
+//
+// Called to create a window of the indicated size, and setup the bitmap and DibSection bd bits.
+//
+//////
+	u32 iCreateWindow(SHwnd* h)
+	{
+		ATOM			atom;
+		WNDCLASSEXA		classa;
+		RECT			lrc;
+
+
+		//////////
+		// Register the class if need be
+		//////
+			if (!GetClassInfoExA(ghInstance, cgcPreviewWindowClass, &classa))
+			{
+				// Initialize
+				memset(&classa, 0, sizeof(classa));
+
+				// Populate
+				classa.cbSize				= sizeof(WNDCLASSEXA);
+				classa.hInstance			= ghInstance;
+				classa.style				= CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
+				classa.lpszClassName		= cgcPreviewWindowClass;
+				classa.lpfnWndProc			= &iWindowProcCallback;
+
+				// Register
+				atom = RegisterClassExA(&classa);
+				if (!atom)
+					return(0);		// Failure
+			}
+		
+
+
+		//////////
+		// Create the window
+		//////
+			h->hwnd = CreateWindowA(cgcPreviewWindowClass, NULL, WS_CHILD, h->x, h->y, h->w, h->h, h->hwndParent, NULL, ghInstance, (LPVOID)h);
+			if (h->_hwnd)
+			{
+				// Create a DIB Section for accessing this window's bits
+				SetRect(&h->rc, h->x, h->y, (h->x + h->w), (h->y + h->h));
+				h->hdc	= CreateCompatibleDC(GetDC(h->hwnd));
+				h->hbmp	= CreateDIBSection(h->hdc, (BITMAPINFO*)&h->bi, DIB_RGB_COLORS, (void**)&h->bd, NULL, 0);
+				SelectObject(h->hdc, h->hbmp);
+
+				// Make it initially gray
+				SetRect(&lrc, 0, 0, h->w, h->h);
+				FillRect(h->hdc, &lrc, (HBRUSH)GetStockObject(GRAY_BRUSH));
+				InvalidateRect(h->hwnd, NULL, FALSE);
+
+				// Make it visible
+				ShowWindow(h->hwnd, SW_SHOW);
+
+			} else {
+				int error = GetLastError();
+				_asm int 3;
+			}
+			return(h->_hwnd);
+	}
+
+
+
+
+//////////
+//
+// Callback for the window
+//
+//////
+	LRESULT CALLBACK iWindowProcCallback(HWND hwnd, UINT m, WPARAM w, LPARAM l)
+	{
+		u32				lnI;
+		PAINTSTRUCT		ps;
+		HDC				lhdc;
+		union {
+			HWND		thisHwnd;
+			u32			_thisHwnd;
+		};
+		union {
+			HWND		hwndParent;
+			u32			_hwndParent;
+		};
+		SHwnd*			h;
+		SInstance*		s;
+
+
+		thisHwnd = hwnd;
+		switch (m)
+		{
+			// Redraw the window
+			case WM_PAINT:
+				// Iterate through each window to see which one this is
+				hwndParent	= GetParent(hwnd);
+				for (lnI = 0; lnI < instances->populatedLength; lnI += sizeof(SInstance))
+				{
+					// Grab the pointer
+					s = (SInstance*)(instances->data + lnI);
+
+					// See if we're found on this instance
+					h = iFindOnlyHwndByHwnd(s->hwnds, _hwndParent, _thisHwnd);
+					if (h)
+					{
+						// Paint it
+						lhdc = BeginPaint(hwnd, &ps);
+						BitBlt(lhdc, 0, 0, h->w, h->h, h->hdc, 0, 0, SRCCOPY);
+						EndPaint(hwnd, &ps);
+						// All done
+
+						// Indicate to Windows that we processed it
+						return 0;
+					}
+				}
+				// If we get here, we are not processing this message any longer
+				break;
+		}
+
+		// Call Windows' default procedure handler
+		return(DefWindowProc(hwnd, m, w, l));
 	}

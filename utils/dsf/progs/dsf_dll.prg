@@ -136,10 +136,27 @@ FUNCTION declare_dsf_dll
 	* Called to load template point data
 	DECLARE INTEGER		dsf_load_template		IN exe\dsf.dll ;
 							INTEGER		tnInstance,	;			&& Instance handle returned by dsf_create_new_instance()
-							INTEGER		tiid, ;					&& See explanation of these in frmNew::create_tables()
-							SINGLE		tfX, ;					&& as well as the function in the DSF.DLL.
-							SINGLE		tfY, ;
+							INTEGER		tipid, ;				&& iid of the character this template relates to (parent id)
+							SINGLE		tfX, ;					&& X coordinate of this template
+							SINGLE		tfY, ;					&& Y coordinate of this template
 							INTEGER		tnRecno					&& The original record number used to reference this item
+	
+	* Called during the save operations to save any changed template data (template data is maintained by the DLL due to its high number of items)
+	* Returns 0 if valid, -2 if the indicated tipid is invalid, -3 if there are no more new items for a valid tipid
+	DECLARE INTEGER		dsf_get_changed_template		IN exe\dsf.dll ;
+							INTEGER		tnInstance,	;			&& Instance handle returned by dsf_create_new_instance()
+							INTEGER		tipid, ;				&& iid of the character this template relates to (parent id)
+							STRING		@tcX12, ;				&& SPACE(12) area for the X coordinate in #.###### form
+							STRING		@tcY12, ;				&& SPACE(12) area for the Y coordinate in #.###### form
+							STRING		@tcRecno12,	;			&& The record number used to reference this item. If it's set to tnNextNewRecno, then it is a newly added record which has now acquired this recno()
+							INTEGER		tnNextNewRecno			&& If we need to add a new record, this will be its recno().
+	
+	* Called during the save operations to delete any template data the user has deleted
+	* Returns 0 if valid, -2 if the indicated tipid is invalid, -3 if there are no more deleted items for a valid tipid
+	DECLARE INTEGER		dsf_get_deleted_template		IN exe\dsf.dll ;
+							INTEGER		tnInstance,	;			&& Instance handle returned by dsf_create_new_instance()
+							INTEGER		tipid, ;				&& iid of the character this template relates to (parent id)
+							STRING		@tcRecno12				&& The record number used to reference this item.
 	
 	* Called to indicate what character is being referenced
 	DECLARE INTEGER		dsf_set_active_character		IN exe\dsf.dll ;
@@ -173,4 +190,3 @@ FUNCTION declare_dsf_dll
 							INTEGER		tnHwnd, ;				&& Either NULL or the form's HWND if you want it drawn directly to the form
 							INTEGER		tnX, ;					&& If tnHwnd is not NULL, then the X coordinate of the client area to render at
 							INTEGER		tnY						&& If tnHwnd is not NULL, then the Y coordinate of the client area to render at
-	

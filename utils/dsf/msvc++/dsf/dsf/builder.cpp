@@ -50,7 +50,10 @@
 // A builder is a buffer accumulator
 struct SBuilder
 {
-	s8*			data;												// Pointer to a buffer allocated in blocks
+	union {
+		s8*		data;												// Pointer to a buffer allocated in blocks
+		u32		_data;
+	};
 	u32			allocatedLength;									// How much of space has been allocated for the buffer
 	u32			populatedLength;									// How much of the allocated buffer is actually populated with data
 	u32			allocateBlockSize;									// Typically 16KB, the larger the size the fewer reallocs() are required

@@ -118,6 +118,13 @@ typedef		const f64			cf64;
 
 
 
+struct SBGR
+{
+	unsigned char	blu;
+	unsigned char	grn;
+	unsigned char	red;
+};
+
 //////////
 // Structures used by DSF
 //////
@@ -195,6 +202,37 @@ typedef		const f64			cf64;
 		f32		fx;									// X of X,Y coordinate for this outline point
 		f32		fy;									// Y of X,Y coordinate for this outline point
 		u32		recno;								// Original record number this item came from
+
+		bool	changed;							// Set each time this tems entry is changed
+		bool	deleted;							// Set when items are deleted
+	};
+
+	// Windows used for rendering previews atop VFP forms
+	struct SHwnd
+	{
+		union {
+			HWND	hwndParent;						// The parent HWND to which this hwnd is a child
+			u32		_hwndParent;					// Accessible value of the parent window
+		};
+		bool		isValid;						// When a window is no longer a window, it is marked isValid=false
+
+		s32			x;								// X position on the parent hwnd's client area
+		s32			y;								// Y position on the parent hwnd's client area
+		s32			w;								// Window width
+		s32			h;								// Window height
+
+		// Data expressly for the generated bitmap
+		union {
+			HWND			hwnd;					// The HWND handle
+			u32				_hwnd;					// hwnd of the render window
+		};
+		BITMAPFILEHEADER	bh;						// Bitmap header if this bitmap is written to disk
+		BITMAPINFOHEADER	bi;						// Bitmap info
+		RECT				rc;						// Same as SetRect(&rc, 0, 0, w, h)
+		HDC					hdc;					// Device context when window was created
+		HBITMAP				hbmp;					// Handle to DIBSection
+		SBGR*				bd;						// Pointer to literal bit data
+		s32					rowWidth;				// How wide is each row (rounded up to nearest 32-bit boundary)
 	};
 
 	// SInstance structures are always branded with DSF! as first four bytes, and then length of the structure after
@@ -204,41 +242,60 @@ typedef		const f64			cf64;
 		s8				id[4];						// Always 'DSF!' (used to identify the handle)
 		u32				id_size;					// sizeof(SInstance)
 
+		SFont			font;						// Font information for this instance
 		u32				activeChar;					// The character currently being edited / displayed
 
-		SFont			font;						// Font information for this instance
 		SBuilder*		chars;						// (SBuilder) Characters, one SBuilder for every character, with each character SBuilder pointing to its many SChar entries
 		SBuilder*		refs;						// (SRefs) References
+		SBuilder*		hwnds;						// Child window references for this instance
 	};
 
-	struct SBGR
-	{
-		unsigned char	blu;
-		unsigned char	grn;
-		unsigned char	red;
-	};
+
+	
+
+//////////
+// Constants
+//////
+	const s8	cgcPreviewWindowClass[] = "DSF-Preview-Window-Class";
+
+
+
+//////////
+// Global variables
+//////
+	HINSTANCE	ghInstance;
+	SBuilder*	instances;
+
 
 
 //////////
 // Forward declarations
 //////
 	// Bitmaps
-	int				iGetCharacterBitmap						(int tnAscii, char* tcBitmapFilename, char* tcFontName, int tnHeight, int tnWidth);
-	int				iSaveBitmap								(SBGR* bgr, int tnWidth, int tnHeight, int tnLeft, char* tcBitmapFilename, int tnMakeWidth);
-	int				iComputeRowWidth						(int tnWidth);
-	HBITMAP			iCreateBitmap							(HDC thdc, int tnWidth, int tnHeight, int tnPlanes, int tnBits, void**tbd);
+	int					iGetCharacterBitmap						(int tnAscii, char* tcBitmapFilename, char* tcFontName, int tnHeight, int tnWidth);
+	int					iSaveBitmap								(SBGR* bgr, int tnWidth, int tnHeight, int tnLeft, char* tcBitmapFilename, int tnMakeWidth);
+	int					iComputeRowWidth						(int tnWidth);
+	HBITMAP				iCreateBitmap							(HDC thdc, int tnWidth, int tnHeight, int tnPlanes, int tnBits, void**tbd);
 	// Floans
-	int				iGetFloanFromBitmap						(u32 tnAscii, char* tcBitmapFilename, char* tcFloanFilename);
-	int				iiGetFloanFromBitmap_qsortCallback		(const void* l, const void* r);
+	int					iGetFloanFromBitmap						(u32 tnAscii, char* tcBitmapFilename, char* tcFloanFilename);
+	int					iiGetFloanFromBitmap_qsortCallback		(const void* l, const void* r);
 	// General purpose
-	SInstance*		iGetDsfInstance							(u32 tnHandle, bool* tlValid);
-	SSpline*		iFindSplineInstance						(SBuilder* charsBuilder, u32 tnIid, u8 tcType, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder);
-	SChars*			iiFindOrCreateThisChars					(SBuilder* charsBuilder, u32 tnIid);
-	SChars*			iiFindOnlyThisChars						(SBuilder* charsBuilder, u32 tnIid);
-	SSpline*		iFindSplineInstance_SD					(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, bool tlAddIfNotFound);
-	SSpline*		iFindSplineInstance_R					(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, bool tlAddIfNotFound);
-	SSpline*		iFindSplineInstance_L					(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder, bool tlAddIfNotFound);
-	SRefs*			iFindRefsInstance						(SBuilder* refs, u8 tcType, s8* tcDesc40);
-	STems*			iFindTemsInstance						(SBuilder* charsBuilder, u32 tnIid);
+	SInstance*			iGetDsfInstance							(u32 tnHandle, bool* tlValid);
+	SSpline*			iFindSplineInstance						(SBuilder* charsBuilder, u32 tnIid, u8 tcType, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder);
+	SChars*				iiFindOrCreateThisChars					(SBuilder* charsBuilder, u32 tnIid);
+	SChars*				iiFindOnlyThisChars						(SBuilder* charsBuilder, u32 tnIid);
+	SSpline*			iFindSplineInstance_SD					(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, bool tlAddIfNotFound);
+	SSpline*			iFindSplineInstance_R					(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, bool tlAddIfNotFound);
+	SSpline*			iFindSplineInstance_L					(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder, bool tlAddIfNotFound);
+	SRefs*				iFindRefsInstance						(SBuilder* refs, u8 tcType, s8* tcDesc40);
+	STems*				iCreateNewTemsEntry						(SBuilder* charsBuilder, u32 tipid);
+	SBuilder*			iGetTemsBuilder							(SBuilder* charsBuilder, u32 tipid);
 
-	int				iRender									(SChars* c, s32 tnWidth, s32 tnHeight, u32 tlMarkup, u32 tlBold, u32 tlItalic, u32 tlUnderline, s8* tcBitmapPathname, u32 tnHwnd, s32 tnX, s32 tnY);
+	int					iRender									(SInstance* p, SChars* c, s32 tnWidth, s32 tnHeight, u32 tlMarkup, u32 tlBold, u32 tlItalic, u32 tlUnderline, u32 tlStrikethrough, s8* tcBitmapPathname, u32 tnHwndParent, s32 tnX, s32 tnY);
+	void				iRenderSplines							(SInstance* p, SHwnd* h, SChars* c, u32 tlBold, u32 tlItalic, u32 tlUnderline, u32 tlStrikethrough);
+	void				iRenderMarkup							(SInstance* p, SHwnd* h, SChars* c);
+	SHwnd*				iFindOnlyHwndByHwnd						(SBuilder* hwnds, u32 tnHwndParent, u32 tnHwnd);
+	SHwnd*				iFindOnlyHwnd							(SBuilder* hwnds, u32 tnHwndParent, s32 tnX, s32 tnY, s32 tnWidth, s32 tnHeight);
+	SHwnd*				iFindOrCreateHwnd						(SBuilder* hwnds, u32 tnHwndParent, s32 tnX, s32 tnY, s32 tnWidth, s32 tnHeight);
+	u32					iCreateWindow							(SHwnd* h);
+	LRESULT CALLBACK	iWindowProcCallback						(HWND hwnd, UINT m, WPARAM w, LPARAM l);
