@@ -5900,7 +5900,7 @@ continueToNextAttribute:
 		line->m				= line->delta.y / ((line->delta.x == 0.0) ? 0.00000000000001 : line->delta.x);
 
 		// Perpendicular slope = -1/m
-		line->mp			= -1.0 / line->m;
+		line->mp			= -1.0 / ((line->m == 0.0) ? 0.00000000000001 : line->m);
 
 
 		//////////

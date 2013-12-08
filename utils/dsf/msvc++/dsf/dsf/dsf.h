@@ -158,7 +158,7 @@ struct SBGR
 		u32			iid;							// Character number (ASCII character)
 		s32			iOrder;							// Stroke order within the character
 		s8			cDesc[10];						// A brief description of this section, usually used with lNewStroke for a new pen stroke
-		bool		lNewStroke;						// Used for an "i", for example, when the dot is a different stroke than the lower stock
+		bool		lPenDown;						// Used for an "i", for example, when the dot is a different stroke than the lower stock, each time the pen goes down it's a new stroke
 		bool		lSelected;						// Is this item selected?
 		f32			ox;								// Origin-X
 		f32			oy;								// Origin-Y
@@ -170,8 +170,6 @@ struct SBGR
 		u32			iSubdivs;						// Automatic sub-divisions between this spline and the next one
 		u32			iLnkId;							// If cType=R, the iid of the definition object; If cType=L, the iid of the link object (used with iLnkOrder to indicate which linked item this one modifies)
 		s32			iLnkOrder;						// If cType=L, the item within the link object that this entry modifies
-
-		SBuilder*	tems;							// (STems) Character template information for this character
 	};
 
 	struct SRefs
@@ -250,13 +248,49 @@ struct SBGR
 		SBuilder*		hwnds;						// Child window references for this instance
 	};
 
+	struct SXYF32
+	{
+		f32			x;
+		f32			y;
+	};
+
+	struct SXYS32
+	{
+		s32			xi;
+		s32			yi;
+	};
+
+	struct SLineF32
+	{
+		// These are the two input points
+		SXYF32		p1;
+		SXYF32		p2;
+
+		// These are computed with iComputeLine()
+		SXYF32		delta;
+		SXYF32		mid;
+		f32			length;
+		f32			m;							// Slope
+		f32			mp;							// Perpendicular slope
+		f32			theta;						// Theta (from p1 to p2, note: add _PI to reverse the angle from p2 to p1)
+		SXYS32		p1i;
+		SXYS32		p2i;
+		s32			p1_quad;
+		s32			p2_quad;
+	};
+
 
 	
 
 //////////
 // Constants
 //////
+	const f32	_PI2					= 1.5707963268f;
+	const f32	_PI						= 3.1415926536f;
+	const f32	_2PI					= 6.2831853072f;
+	const f32	_SQRT2					= 1.4142135624f;
 	const s8	cgcPreviewWindowClass[] = "DSF-Preview-Window-Class";
+
 
 
 
@@ -265,20 +299,29 @@ struct SBGR
 //////
 	HINSTANCE	ghInstance;
 	SBuilder*	instances;
+	SBuilder*	placeholder;
+
 
 
 
 //////////
 // Forward declarations
 //////
+	// From DllMain
+	void				initialize								(void);
+	void				iAddSplineFromToLR						(SBuilder* b, bool tlPenDown, f32 tfXL, f32 tfYL, f32 tfXR, f32 tfYR);
+	void				iAddSplineCenterThetaRadiusLR			(SBuilder* b, bool tlPenDown, f32 tfX, f32 tfY, f32 tfRadius, f32 tfThetaL, f32 tfThetaR);
+
 	// Bitmaps
 	int					iGetCharacterBitmap						(int tnAscii, char* tcBitmapFilename, char* tcFontName, int tnHeight, int tnWidth);
 	int					iSaveBitmap								(SBGR* bgr, int tnWidth, int tnHeight, int tnLeft, char* tcBitmapFilename, int tnMakeWidth);
 	int					iComputeRowWidth						(int tnWidth);
 	HBITMAP				iCreateBitmap							(HDC thdc, int tnWidth, int tnHeight, int tnPlanes, int tnBits, void**tbd);
+
 	// Floans
 	int					iGetFloanFromBitmap						(u32 tnAscii, char* tcBitmapFilename, char* tcFloanFilename);
 	int					iiGetFloanFromBitmap_qsortCallback		(const void* l, const void* r);
+
 	// General purpose
 	SInstance*			iGetDsfInstance							(u32 tnHandle, bool* tlValid);
 	SSpline*			iFindSplineInstance						(SBuilder* charsBuilder, u32 tnIid, u8 tcType, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder);
@@ -292,10 +335,20 @@ struct SBGR
 	SBuilder*			iGetTemsBuilder							(SBuilder* charsBuilder, u32 tipid);
 
 	int					iRender									(SInstance* p, SChars* c, s32 tnWidth, s32 tnHeight, u32 tlMarkup, u32 tlBold, u32 tlItalic, u32 tlUnderline, u32 tlStrikethrough, s8* tcBitmapPathname, u32 tnHwndParent, s32 tnX, s32 tnY);
-	void				iRenderSplines							(SInstance* p, SHwnd* h, SChars* c, u32 tlBold, u32 tlItalic, u32 tlUnderline, u32 tlStrikethrough);
+	void				iRenderSplines							(SInstance* p, SHwnd* h, SChars* c, u32 tlMarkup, u32 tlBold, u32 tlItalic, u32 tlUnderline, u32 tlStrikethrough);
+	void				iDrawLine								(SHwnd* h, SXYF32* p1, SXYF32* p2, SBGR color);
+	void				iDrawPoint								(SHwnd* h, SXYF32* p1, SBGR color);
+	void				iDrawHorizontalLineByPixels				(SHwnd* h, s32 x1, s32 x2, s32 y, SBGR color);
+	void				iFillQuad								(SHwnd* h, SXYF32* p1, SXYF32* p2, SXYF32* p3, SXYF32* p4, SBGR color);
+	void				iSetPoint								(SXYF32* p, f32 x, f32 y);
+	void				iCopyPoint								(SXYF32* pDst, SXYF32* pSrc);
 	void				iRenderMarkup							(SInstance* p, SHwnd* h, SChars* c);
 	SHwnd*				iFindOnlyHwndByHwnd						(SBuilder* hwnds, u32 tnHwndParent, u32 tnHwnd);
 	SHwnd*				iFindOnlyHwnd							(SBuilder* hwnds, u32 tnHwndParent, s32 tnX, s32 tnY, s32 tnWidth, s32 tnHeight);
 	SHwnd*				iFindOrCreateHwnd						(SBuilder* hwnds, u32 tnHwndParent, s32 tnX, s32 tnY, s32 tnWidth, s32 tnHeight);
 	u32					iCreateWindow							(SHwnd* h);
 	LRESULT CALLBACK	iWindowProcCallback						(HWND hwnd, UINT m, WPARAM w, LPARAM l);
+
+	void				iComputeLine							(SLineF32* line);
+	f32					iAdjustTheta							(f32 tfTheta);
+	s32					iComputeQuad							(SXYF32* p);

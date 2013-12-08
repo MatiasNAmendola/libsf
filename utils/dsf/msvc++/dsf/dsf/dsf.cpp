@@ -59,18 +59,26 @@
 //////
 	BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
 	{
-		ghInstance = hModule;
-		switch (ul_reason_for_call)
-		{
-			case DLL_PROCESS_ATTACH:
-				builder_createAndInitialize(&instances, -1);
-				break;
-			case DLL_THREAD_ATTACH:
-			case DLL_THREAD_DETACH:
-			case DLL_PROCESS_DETACH:
-				break;
-		}
-		return TRUE;
+		//////////
+		// Store the instance for global use
+		//////
+			ghInstance = hModule;
+
+
+		//////////
+		// Windows tells us why we're being invoked
+		//////
+			switch (ul_reason_for_call)
+			{
+				case DLL_PROCESS_ATTACH:
+					initialize();
+					break;
+				case DLL_THREAD_ATTACH:
+				case DLL_THREAD_DETACH:
+				case DLL_PROCESS_DETACH:
+					break;
+			}
+			return TRUE;
 	}
 
 
@@ -279,7 +287,7 @@
 			s->cType		= (u8)tnType;
 			s->iid			= tiid;
 			s->iOrder		= tiOrder;
-			s->lNewStroke	= ((tlNewStroke == 0) ? false : true);
+			s->lPenDown	= ((tlNewStroke == 0) ? false : true);
 			s->lSelected	= ((tlSelected == 0) ? false : true);
 			s->ox			= tfOx;
 			s->oy			= tfOy;
@@ -674,6 +682,155 @@
 		// Render it
 		//////
 			return(iRender(p, thisChar, tnWidth, tnHeight, false, tlBold, tlItalic, tlUnderline, tlStrikethrough, tcBitmapPathname, tnHwnd, tnX, tnY));
+	}
+
+
+
+
+/////////
+//
+// Called from DllMain() one time to initialize the DSF DLL.
+//
+//////
+	void initialize(void)
+	{
+//		f32		lfX, lfY, lfTheta, lfRadius, lfA, lfB, lfV1, lfV2;
+//		bool	llPenDown;
+
+
+		//////////
+		// Initialize our global buffers
+		/////
+			builder_createAndInitialize(&instances, -1);
+			builder_createAndInitialize(&placeholder, -1);
+
+
+		//////////
+		// Build an "i at the cross" for the placeholder (meaning " 'me' at the cross")
+		//////
+			// Cross
+			iAddSplineFromToLR(placeholder, true,		0.4075f,	0.975f,		0.59f,		0.975f);
+			iAddSplineFromToLR(placeholder, false,		0.4075f,	0.05f,		0.59f,		0.05f);
+			iAddSplineFromToLR(placeholder, true,		0.045f,		0.74f,		0.94f,		0.74f);
+			iAddSplineFromToLR(placeholder, false,		0.045f,		0.62f,		0.94f,		0.62f);
+
+// 			// "i" leg
+// 			iAddSplineFromToLR(placeholder, true,		0.775f,		0.435f,		0.85f,		0.485f);
+// 			iAddSplineFromToLR(placeholder, false,		0.7825f,	0.425f,		0.865f,		0.47f);
+// 			iAddSplineFromToLR(placeholder, false,		0.7875f,	0.415f,		0.8775f,	0.45f);
+// 			iAddSplineFromToLR(placeholder, false,		0.79f,		0.405f,		0.8875f,	0.425f);
+// 			iAddSplineFromToLR(placeholder, false,		0.7925f,	0.3975f,	0.8925f,	0.405f);
+// 			iAddSplineFromToLR(placeholder, false,		0.7925f,	0.39f,		0.895f,		0.39f);
+// 			iAddSplineFromToLR(placeholder, false,		0.7925f,	0.14f,		0.895f,		0.14f);
+// 			iAddSplineFromToLR(placeholder, false,		0.795f,		0.125f,		0.895f,		0.13f);
+// 			iAddSplineFromToLR(placeholder, false,		0.80f,		0.105f,		0.8975f,	0.12f);
+// 			iAddSplineFromToLR(placeholder, false,		0.81f,		0.08f,		0.90f,		0.1125f);
+// 			iAddSplineFromToLR(placeholder, false,		0.825f,		0.06f,		0.905f,		0.1f);
+// 			iAddSplineFromToLR(placeholder, false,		0.8375f,	0.0425f,	0.915f,		0.095f);
+// 
+// 			// "i" dot
+// 			lfX			= 0.765f;
+// 			lfY			= 0.5225f;
+// 			lfA			= 0.1325f / 2.0f;
+// 			lfB			= 0.0925f / 2.0f;
+// 			llPenDown	= true;
+// 			for (lfTheta = 0.0f; lfTheta <= _PI + 0.001; lfTheta += _PI / 10.0f)
+// 			{
+// 				// Given:  a=major, b=minor, r=radius
+// 				//         r = (a*b) / sqrt(b*cos(theta)^2 + a*sin(theta)^2)
+// 				lfV1		= lfB * cos(lfTheta);
+// 				lfV2		= lfA * sin(lfTheta);
+// 				lfRadius	= (lfA * lfB) / sqrt(lfV1*lfV1 + lfV2*lfV2);
+// 				iAddSplineCenterThetaRadiusLR(placeholder, llPenDown, lfX, lfY, lfRadius, iAdjustTheta(_2PI - lfTheta), lfTheta);
+// 				llPenDown = false;
+// 			}
+	}
+
+
+
+
+//////////
+//
+// Adds a new spline to the builder, computing its components based on a straight line from L to R.
+//
+//////
+	void iAddSplineFromToLR(SBuilder* b, bool tlPenDown, f32 tfXL, f32 tfYL, f32 tfXR, f32 tfYR)
+	{
+		SLineF32	line;
+		SSpline*	s;
+
+
+		//////////
+		// Compute the line
+		//////
+			line.p1.x	= tfXL;
+			line.p1.y	= tfYL;
+			line.p2.x	= tfXR;
+			line.p2.y	= tfYR;
+			iComputeLine(&line);
+
+
+		//////////
+		// Add the midpoint as the spline, and use the slope of the line to determine the rotation.
+		//////
+			s = (SSpline*)builder_allocateBytes(b, sizeof(SSpline));
+			if (s)
+			{
+				// Initialize everything
+				memset(s, 0, sizeof(SSpline));
+
+				// Populate
+				s->ox	= line.mid.x;
+				s->oy	= line.mid.y;
+				s->ot	= line.theta;
+
+				// Indicate the right and left side length (left and right theta is 0)
+				s->lr	= line.length / 2.0f;
+				s->lt	= _PI;
+				s->rr	= s->lr;
+
+				// Does this start a new pen stroke?
+				s->lPenDown = tlPenDown;
+			}
+	}
+
+
+
+
+//////////
+//
+// Adds a new spline to the builder, computing from the indicated x,y center, given a radius and
+// two angles, first for L, then for R.  The line runs horizontally, which means from 0..1, which
+// is from left to right in our system, as per the standard Quad 1 X,Y coordinate system.
+//
+//////
+	void iAddSplineCenterThetaRadiusLR(SBuilder* b, bool tlPenDown, f32 tfX, f32 tfY, f32 tfRadius, f32 tfThetaL, f32 tfThetaR)
+	{
+		SSpline* s;
+
+
+		//////////
+		// Add the midpoint as the spline, and use the slope of the line to determine the rotation.
+		//////
+			s = (SSpline*)builder_allocateBytes(b, sizeof(SSpline));
+			if (s)
+			{
+				// Initialize everything
+				memset(s, 0, sizeof(SSpline));
+
+				// Populate
+				s->ox	= tfX;
+				s->oy	= tfY;
+
+				// Indicate the right and left side length (left and right theta is 0)
+				s->lr	= tfRadius;
+				s->lt	= tfThetaL;
+				s->rr	= tfRadius;
+				s->rt	= tfThetaR;
+
+				// Does this start a new pen stroke?
+				s->lPenDown = tlPenDown;
+			}
 	}
 
 
@@ -1708,10 +1865,25 @@
 
 			} else {
 				// An active character exists, render it
-				FillRect(h->hdc, &lrc, (HBRUSH)GetStockObject(WHITE_BRUSH));
-				iRenderSplines(p, h, c, tlBold, tlItalic, tlUnderline, tlStrikethrough);
-//				if (tlMarkup != 0)
+				if (tlMarkup != 0)		FillRect(h->hdc, &lrc, (HBRUSH)GetStockObject(DKGRAY_BRUSH));
+				else					FillRect(h->hdc, &lrc, (HBRUSH)GetStockObject(WHITE_BRUSH));
+
+				// Render the splines with markup lines
+				iRenderSplines(p, h, c, tlMarkup, tlBold, tlItalic, tlUnderline, tlStrikethrough);
+
+				// Render the markup
+				if (tlMarkup != 0)
 					iRenderMarkup(p, h, c);
+			}
+
+			// Redraw after the rendering
+			if (h->_hwnd)
+			{
+				SetRect(&lrc, 0, 0, 10000, 10000);
+				InvalidateRect(h->hwndParent, &lrc, TRUE);
+
+				SetRect(&lrc, 0, 0, h->w, h->h);
+				InvalidateRect(h->hwnd, &lrc, TRUE);	
 			}
 
 
@@ -1727,23 +1899,279 @@
 // Called to render the indicated splines onto the character
 //
 //////
-	void iRenderSplines(SInstance* p, SHwnd* h, SChars* c, u32 tlBold, u32 tlItalic, u32 tlUnderline, u32 tlStrikethrough)
+	void iRenderSplines(SInstance* p, SHwnd* h, SChars* c, u32 tlMarkup, u32 tlBold, u32 tlItalic, u32 tlUnderline, u32 tlStrikethrough)
 	{
 		u32			lnI;
+		SXYF32		p1Last, p2Last, p3Last;
+		SXYF32		p1, p2, p3;
 		SSpline*	s;
+		SBuilder*	b;
+		SBGR		spline;
+		SBGR		markup = { 255, 255, 255 };
+
+
+		//////////
+		// For new characters or definitions there may not yet be any splines.  We use a placeholder
+		// drawn onto the character until such time
+		/////
+			if (c->splines->populatedLength <= sizeof(SSpline))		b = placeholder;		// Draw the placeholder
+			else													b = c->splines;			// Draw the character splines
+
+			// Determine the color
+			if (tlMarkup == 0)
+			{
+				// It is a final render, black on white
+				spline.red = 0;
+				spline.grn = 0;
+				spline.blu = 0;
+
+			} else {
+				// It is a markup render, light gray on black
+				spline.red = 128;
+				spline.grn = 128;
+				spline.blu = 128;
+			}
 
 
 		//////////
 		// Iterate through each spline
 		//////
-			for (lnI = 0; lnI < c->splines->populatedLength; lnI += sizeof(SSpline))
+			for (lnI = 0; lnI < b->populatedLength; lnI += sizeof(SSpline))
 			{
 				// Grab the pointer
-				s = (SSpline*)(c->splines->data + lnI);
+				s = (SSpline*)(b->data + lnI);
 
+
+				//////////
 				// Render this spline onto the bitmap
-// TODO: Working here
+				//////
+					// Left, middle, right
+					iSetPoint(&p1,	s->ox + (s->lr * cos(s->ot + s->lt)),	s->oy + (s->lr * sin(s->ot + s->lt)));
+					iSetPoint(&p2,	s->ox,									s->oy);
+					iSetPoint(&p3,	s->ox + (s->rr * cos(s->ot + s->rt)),	s->oy + (s->rr * sin(s->ot + s->rt)));
+
+					// Connect the last points to the new points
+					if (!s->lPenDown)
+					{
+						// Draw each connecting line if it's not the first stroke
+						iFillQuad(h, &p1Last, &p1, &p2, &p2Last, spline);
+						iFillQuad(h, &p2Last, &p2, &p3, &p3Last, spline);
+					}
+
+
+				//////////
+				// Setup for the next stroke
+				//////
+					iCopyPoint(&p1Last, &p1);
+					iCopyPoint(&p2Last, &p2);
+					iCopyPoint(&p3Last, &p3);
 			}
+
+
+		//////////
+		// Overlay markup
+		//////
+			if (tlMarkup != 0)
+			{
+				for (lnI = 0; lnI < b->populatedLength; lnI += sizeof(SSpline))
+				{
+					// Grab the pointer
+					s = (SSpline*)(b->data + lnI);
+
+
+					//////////
+					// Render this spline onto the bitmap
+					//////
+						// Left, middle, right
+						iSetPoint(&p1,	s->ox + (s->lr * cos(s->ot + s->lt)),	s->oy + (s->lr * sin(s->ot + s->lt)));
+						iSetPoint(&p2,	s->ox,									s->oy);
+						iSetPoint(&p3,	s->ox + (s->rr * cos(s->ot + s->rt)),	s->oy + (s->rr * sin(s->ot + s->rt)));
+
+						// Connect the last points to the new points
+						if (!s->lPenDown)
+						{
+							// Connect left, right as markup lines
+							iDrawLine(h, &p1, &p1Last, markup);
+							iDrawLine(h, &p3, &p3Last, markup);
+						}
+
+						// Connect left, middle, right as markup lines
+						iDrawLine(h, &p1, &p2, markup);
+						iDrawLine(h, &p2, &p3, markup);
+						iDrawPoint(h, &p1, markup);
+						iDrawPoint(h, &p2, markup);
+						iDrawPoint(h, &p3, markup);
+
+
+					//////////
+					// Setup for the next stroke
+					//////
+						iCopyPoint(&p1Last, &p1);
+						iCopyPoint(&p2Last, &p2);
+						iCopyPoint(&p3Last, &p3);
+				}
+			}
+	}
+
+	void iDrawLine(SHwnd* h, SXYF32* p1, SXYF32* p2, SBGR color)
+	{
+		f32			lfPercent, lfStep, lfRadius, lfCosTheta, lfSinTheta;
+		s32			lnX, lnY;
+		SLineF32	line;
+		SBGR*		lbgr;
+
+
+		//////////
+		// Make sure we're not in a non-draw position
+		//////
+			if (p1->x == -1.0f && p1->y == -1.0f)
+				return;		// Do not draw this point
+
+
+		//////////
+		// Compute the line we'll draw along
+		//////
+			line.p1.x	= p1->x * (f32)h->w;
+			line.p1.y	= p1->y * (f32)h->h;
+			line.p2.x	= p2->x * (f32)h->w;
+			line.p2.y	= p2->y * (f32)h->h;
+			iComputeLine(&line);
+			lfCosTheta	= cos(line.theta);
+			lfSinTheta	= sin(line.theta);
+
+
+		//////////
+		// Proceed for the number of pixels times sqrt(2)
+		//////
+			lfStep = 1.0f / (line.length * _SQRT2);
+			for (lfPercent = 0.0f; lfPercent < 1.0f; lfPercent += lfStep)
+			{
+				// Compute the radius for this point
+				lfRadius = lfPercent * line.length;
+
+				// Compute this point
+				lnX = (s32)(line.p1.x + (lfRadius * lfCosTheta));
+				lnY = (s32)(line.p1.y + (lfRadius * lfSinTheta));
+
+				// Render it if it's visible
+				if (lnX >= 0 && lnX < h->w && lnY >= 0 && lnY < h->h)
+				{
+					// Get the pointer
+					lbgr = (SBGR*)((s8*)h->bd + (lnY * h->rowWidth) + (lnX * 3));
+
+					// Render it
+					lbgr->red	= color.red;
+					lbgr->grn	= color.grn;
+					lbgr->blu	= color.blu;
+				}
+			}
+	}
+
+	// Draw the point
+	void iDrawPoint(SHwnd* h, SXYF32* p1, SBGR color)
+	{
+		SXYS32	p;
+
+
+		// Determine the center point
+		p.xi = (s32)(p1->x * (f32)h->w);
+		p.yi = (s32)(p1->y * (f32)h->h);
+
+		// Draw the circle there
+		iDrawHorizontalLineByPixels(h, p.xi-1, p.xi+1, p.yi-2, color);		//   * * *
+		iDrawHorizontalLineByPixels(h, p.xi-2, p.xi+2, p.yi-1, color);		// * * * * *
+		iDrawHorizontalLineByPixels(h, p.xi-2, p.xi+2, p.yi-0, color);		// * * * * *
+		iDrawHorizontalLineByPixels(h, p.xi-2, p.xi+2, p.yi+1, color);		// * * * * * 
+		iDrawHorizontalLineByPixels(h, p.xi-1, p.xi+1, p.yi+2, color);		//   * * *
+	}
+
+	void iDrawHorizontalLineByPixels(SHwnd* h, s32 x1, s32 x2, s32 y, SBGR color)
+	{
+		s32		lnX;
+		SBGR*	lbgr;
+
+
+		// Is it out of bounds?
+		if (y < 0 || y > h->h)
+			return;
+
+		// Get the pointer
+		lbgr = (SBGR*)((s8*)h->bd + (y * h->rowWidth) + (x1 * 3));
+
+		// Iterate for every x
+		for (lnX = x1; lnX <= x2; lnX++, lbgr++)
+		{
+			// Is it out of bounds?
+			if (lnX >= 0 && lnX < h->w)
+			{
+				// Render it
+				lbgr->red	= color.red;
+				lbgr->grn	= color.grn;
+				lbgr->blu	= color.blu;
+			}
+		}
+	}
+
+	// Draw p1..p2 along the lines from p1..p4, p2..p3
+	void iFillQuad(SHwnd* h, SXYF32* p1, SXYF32* p2, SXYF32* p3, SXYF32* p4, SBGR color)
+	{
+		f32			lfPercent, lfStep, lfCosThetaP1P4, lfSinThetaP1P4, lfCosThetaP2P3, lfSinThetaP2P3, lfMultiplier;
+		SXYF32		lp1, lp2;
+		SLineF32	p1p4, p2p3;
+
+
+		//////////
+		// Build our lines from p1..p4, p2..p3
+		//////
+			// Get our multiplier based on size
+			lfMultiplier	= sqrt((f32)h->w * (f32)h->w + (f32)h->h * (f32)h->h) * _SQRT2;
+
+			// p1..p4
+			p1p4.p1.x	= p1->x;
+			p1p4.p1.y	= p1->y;
+			p1p4.p2.x	= p4->x;
+			p1p4.p2.y	= p4->y;
+			iComputeLine(&p1p4);
+			lfCosThetaP1P4	= cos(p1p4.theta);
+			lfSinThetaP1P4	= sin(p1p4.theta);
+
+			// p2..p3
+			p2p3.p1.x	= p2->x;
+			p2p3.p1.y	= p2->y;
+			p2p3.p2.x	= p3->x;
+			p2p3.p2.y	= p3->y;
+			iComputeLine(&p2p3);
+			lfCosThetaP2P3		= cos(p2p3.theta);
+			lfSinThetaP2P3		= sin(p2p3.theta);
+
+
+		//////////
+		// Iterate by sqrt(2) times the maximum line length
+		//////
+			lfStep = 1.0f / max(p1p4.length * lfMultiplier, p2p3.length * lfMultiplier);
+			for (lfPercent = 0.0; lfPercent < 1.0f; lfPercent += lfStep)
+			{
+				// Compute the points
+				lp1.x	= p1p4.p1.x + (lfPercent * p1p4.length * lfCosThetaP1P4);
+				lp1.y	= p1p4.p1.y + (lfPercent * p1p4.length * lfSinThetaP1P4);
+				lp2.x	= p2p3.p1.x + (lfPercent * p2p3.length * lfCosThetaP2P3);
+				lp2.y	= p2p3.p1.y + (lfPercent * p2p3.length * lfSinThetaP2P3);
+
+				// Draw this line
+				iDrawLine(h, &lp1, &lp2, color);
+			}
+	}
+
+	void iSetPoint(SXYF32* p, f32 x, f32 y)
+	{
+		p->x = x;
+		p->y = y;
+	}
+
+	void iCopyPoint(SXYF32* pDst, SXYF32* pSrc)
+	{
+		pDst->x = pSrc->x;
+		pDst->y = pSrc->y;
 	}
 
 
@@ -1760,12 +2188,12 @@
 		u32			lnI;
 		STems*		t;
 		SBGR*		lbgr;
+		SBGR		color = { 22, 222, 22 };
 
 
 		//////////
 		// Iterate through each spline
 		//////
-			_asm nop;
 			for (lnI = 0; lnI < c->tems->populatedLength; lnI += sizeof(STems))
 			{
 				// Grab the pointer
@@ -1776,15 +2204,15 @@
 				lnY = (s32)(t->fy * (f32)h->h);
 
 				// Determine the offset
-				if (lnX < h->w && lnY < h->h)
+				if (lnX >= 0 && lnX < h->w && lnY >= 0 && lnY < h->h)
 				{
 					// Get the pointer
 					lbgr = (SBGR*)((s8*)h->bd + (lnY * h->rowWidth) + (lnX * 3));
 
-					// Render the pixel
-					lbgr->red	= 0;
-					lbgr->grn	= 0;
-					lbgr->blu	= 0;
+					// Render it
+					lbgr->red	= color.red;
+					lbgr->grn	= color.grn;
+					lbgr->blu	= color.blu;
 				}
 			}
 	}
@@ -2025,4 +2453,85 @@
 
 		// Call Windows' default procedure handler
 		return(DefWindowProc(hwnd, m, w, l));
+	}
+
+
+
+
+//////////
+//
+// Called to compute the midpoint, slope, and perpendicular slope of a line
+//
+//////
+	void iComputeLine(SLineF32* line)
+	{
+		// Midpoint = (x2-x1)/2, (y2-y1)/2
+		line->mid.x			= (line->p1.x + line->p2.x) / 2.0f;
+		line->mid.y			= (line->p1.y + line->p2.y) / 2.0f;
+		line->delta.x		= line->p2.x - line->p1.x;
+		line->delta.y		= line->p2.y - line->p1.y;
+		line->theta			= iAdjustTheta(atan2(line->delta.y, line->delta.x));
+		line->length		= sqrt(line->delta.x*line->delta.x + line->delta.y*line->delta.y);
+
+		// Slope = rise over run
+		line->m				= line->delta.y / ((line->delta.x == 0.0f) ? 0.000001f : line->delta.x);
+		// Perpendicular slope = -1/m
+		line->mp			= -1.0f / ((line->m == 0.0f) ? 0.000001f : line->m);
+
+		// Integer roundings if need be
+		// Start
+		line->p1i.xi	= (s32)line->p1.x;
+		line->p1i.yi	= (s32)line->p1.y;
+		// End
+		line->p2i.xi	= (s32)line->p2.x;
+		line->p2i.yi	= (s32)line->p2.y;
+
+		// Compute the quadrants if need be
+		// Quads 1..4
+		line->p1_quad	= iComputeQuad(&line->p1);
+		line->p2_quad	= iComputeQuad(&line->p2);
+	}
+
+
+
+
+//////////
+//
+// Called to adjust theta into the range 0..2pi
+//
+//////
+	f32 iAdjustTheta(f32 tfTheta)
+	{
+		// Validate theta is positive
+		while (tfTheta < 0.0f)
+			tfTheta += _2PI;
+
+		// Validate theta is 0..2pi
+		while (tfTheta > _2PI)
+			tfTheta -= _2PI;
+
+		return(tfTheta);
+	}
+
+
+
+
+//////////
+//
+// Returns the quadrant for the indicated point
+//
+//////
+	s32 iComputeQuad(SXYF32* p)
+	{
+		if (p->x >= 0.0)
+		{
+			// Either 1 or 4
+			if (p->y >= 0.0)		return(1);		// X is positive, Y is positive
+			else					return(4);		// X is positive, Y is negative
+
+		} else {
+			// Either 2 or 3
+			if (p->y >= 0.0)		return(2);		// X is negative, Y is positive
+			else					return(3);		// X is negative, Y is negative
+		}
 	}
