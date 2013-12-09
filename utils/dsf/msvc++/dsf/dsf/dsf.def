@@ -10,9 +10,11 @@ EXPORTS
 	dsf_load_character
 	dsf_load_reference
 	dsf_load_template
+	dsf_initial_load_complete
 	dsf_get_changed_template
 	dsf_get_deleted_template
 
 	dsf_set_active_character
 	dsf_render_markup
 	dsf_render_final
+	dsf_re_render

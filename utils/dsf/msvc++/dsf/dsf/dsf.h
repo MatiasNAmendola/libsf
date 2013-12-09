@@ -105,7 +105,7 @@ typedef		const u32			cu32;
 typedef		const u64			cu64;
 
 // Constant floating point
-typedef		const f32			cf32;
+typedef		const f64			cf64;
 typedef		const f64			cf64;
 
 
@@ -125,31 +125,74 @@ struct SBGR
 	unsigned char	red;
 };
 
+
+struct SXYF64
+{
+	f64			x;
+	f64			y;
+};
+
+struct SXYS32
+{
+	s32			xi;
+	s32			yi;
+};
+
+struct SLineS32
+{
+	// This line is not computed, but holds two points for easy reference
+	SXYS32		p1i;
+	SXYS32		p2i;
+};
+
+struct SLinef64
+{
+	// These are the two input points
+	SXYF64		p1;
+	SXYF64		p2;
+
+	// These are computed with iComputeLine()
+	SXYF64		delta;
+	SXYF64		mid;
+	f64			length;
+	f64			m;							// Slope
+	f64			mp;							// Perpendicular slope
+	f64			theta;						// Theta (from p1 to p2, note: add _PI to reverse the angle from p2 to p1)
+	SXYS32		p1i;
+	SXYS32		p2i;
+	s32			p1_quad;
+	s32			p2_quad;
+};
+
 //////////
 // Structures used by DSF
 //////
 	struct SFont
 	{
-		f32			fAscent;						// Maximum ascent within the 0..1 range
-		f32			fUpper;							// Horizontal line of the top of the upper-case letters, and letters like h, l, k, etc
-		f32			fLower;							// Horizontal line of the top of the lower-case letters, such as top of c, e, o, etc.
-		f32			fLeft;							// Vertical line of the left-side of the characters
-		f32			fRight;							// Vertical line of the right-side of the characters
-		f32			fBase;							// Horizontal line of the base of all characters
-		f32			fDescent;						// Horizontal line for the bottom of the descending characters, like y, g, q, etc.
-		f32			fWidth;							// Horizontal width of the average stroke (couples with fLeft and fRight for guides)
-		f32			fItalics;						// Radians to slant from PI/2 toward 0 (use negative values for reverse slant)
-		f32			fBold;							// Standard percentage to add for standard bold setting
-		f32			fUnderTop;						// Horizontal line for the top of the underline
-		f32			fUnderBot;						// Horizontal line for the bottom of the underline
-		f32			fStrikeTop;						// Horizontal line for the top of the strikethrough location
-		f32			fStrikeBot;						// Horizontal line for the bottom of the strikethrough location
+		f64			fAscent;						// Maximum ascent within the 0..1 range
+		f64			fUpper;							// Horizontal line of the top of the upper-case letters, and letters like h, l, k, etc
+		f64			fLower;							// Horizontal line of the top of the lower-case letters, such as top of c, e, o, etc.
+		f64			fLeft;							// Vertical line of the left-side of the characters
+		f64			fRight;							// Vertical line of the right-side of the characters
+		f64			fBase;							// Horizontal line of the base of all characters
+		f64			fDescent;						// Horizontal line for the bottom of the descending characters, like y, g, q, etc.
+		f64			fWidth;							// Horizontal width of the average stroke (couples with fLeft and fRight for guides)
+		f64			fItalics;						// Radians to slant from PI/2 toward 0 (use negative values for reverse slant)
+		f64			fBold;							// Standard percentage to add for standard bold setting
+		f64			fUnderTop;						// Horizontal line for the top of the underline
+		f64			fUnderBot;						// Horizontal line for the bottom of the underline
+		f64			fStrikeTop;						// Horizontal line for the top of the strikethrough location
+		f64			fStrikeBot;						// Horizontal line for the bottom of the strikethrough location
 	};
 
 	struct SChars
 	{
 		SBuilder*	splines;						// (SChar) Holds full char records
-		SBuilder*	tems;							// (STems) Holds all template points for this character
+		SBuilder*	temsRaw;						// (STems) Holds all raw template points for this character (those sent from the calling app)
+
+		// After the intial load is completed, (or in future upon resize), the temsRaw are aliased down to single instances for the visible size of the edit character window
+		SBuilder*	tems;							// (STems) Holds aliased template points, one per pixel, as per temsRaw and the size of the edit character window (see dsf_initial_load_complete())
+		SBuilder*	temsLines;						// (STemsLines) Holds all alpha layer rendering data for the comprising
 	};
 
 	struct SSpline
@@ -160,32 +203,37 @@ struct SBGR
 		s8			cDesc[10];						// A brief description of this section, usually used with lNewStroke for a new pen stroke
 		bool		lPenDown;						// Used for an "i", for example, when the dot is a different stroke than the lower stock, each time the pen goes down it's a new stroke
 		bool		lSelected;						// Is this item selected?
-		f32			ox;								// Origin-X
-		f32			oy;								// Origin-Y
-		f32			ot;								// Origin-Theta (rotation)
-		f32			lr;								// Left-Radius
-		f32			lt;								// Left-Theta
-		f32			rr;								// Right-Radius
-		f32			rt;								// Right-Theta
+		f64			ox;								// Origin-X
+		f64			oy;								// Origin-Y
+		f64			ot;								// Origin-Theta (rotation)
+		f64			lr;								// Left-Radius
+		f64			lt;								// Left-Theta
+		f64			rr;								// Right-Radius
+		f64			rt;								// Right-Theta
 		u32			iSubdivs;						// Automatic sub-divisions between this spline and the next one
 		u32			iLnkId;							// If cType=R, the iid of the definition object; If cType=L, the iid of the link object (used with iLnkOrder to indicate which linked item this one modifies)
 		s32			iLnkOrder;						// If cType=L, the item within the link object that this entry modifies
+
+		// Used internally for editing
+		bool		tlOSelected;					// Is the original selected?
+		bool		tlRSelected;					// Is the left-side selected?
+		bool		tlLSelected;					// Is the right-side selected?
 	};
 
 	struct SRefs
 	{
 		s8			cType;							// Line types supported:  H=Horizontal, V=Vertical, 2=Two point, 3=Three point, 5=Five point
 		s8			cDesc[40];						// Description of this reference
-		f32			fref1x;							// Used for H,V,2,3,5
-		f32			fref1y;							// Used for H,V,2,3,5
-		f32			fref2x;							// Used for 2,3,5
-		f32			fref2y;							// Used for 2,3,5
-		f32			fref3x;							// Used for 3,5
-		f32			fref3y;							// Used for 3,5
-		f32			fref4x;							// Used for 5
-		f32			fref4y;							// Used for 5
-		f32			fref5x;							// Used for 5
-		f32			fref5y;							// Used for 5
+		f64			fref1x;							// Used for H,V,2,3,5
+		f64			fref1y;							// Used for H,V,2,3,5
+		f64			fref2x;							// Used for 2,3,5
+		f64			fref2y;							// Used for 2,3,5
+		f64			fref3x;							// Used for 3,5
+		f64			fref3y;							// Used for 3,5
+		f64			fref4x;							// Used for 5
+		f64			fref4y;							// Used for 5
+		f64			fref5x;							// Used for 5
+		f64			fref5y;							// Used for 5
 		bool		lVisible;						// Should this item be used
 		s8			cChars1[128];					// Characters this item should be displayed on #1
 		s8			cChars2[128];					// Characters this item should be displayed on #2
@@ -197,12 +245,18 @@ struct SBGR
 	// Certain mathematical operations for spline placement use these for reference
 	struct STems
 	{
-		f32		fx;									// X of X,Y coordinate for this outline point
-		f32		fy;									// Y of X,Y coordinate for this outline point
+		f64		fx;									// X of X,Y coordinate for this outline point
+		f64		fy;									// Y of X,Y coordinate for this outline point
 		u32		recno;								// Original record number this item came from
 
-		bool	changed;							// Set each time this tems entry is changed
-		bool	deleted;							// Set when items are deleted
+		u8		changed;							// Set each time this tems entry is changed
+		u8		deleted;							// Set when items are deleted
+	};
+
+	struct STemsLines
+	{
+		SXYF64	p1;									// P1 is from location
+		SXYF64	p2;									// P2 is to location
 	};
 
 	// Windows used for rendering previews atop VFP forms
@@ -214,6 +268,14 @@ struct SBGR
 		};
 		bool		isValid;						// When a window is no longer a window, it is marked isValid=false
 
+		// The last settings
+		u32			markup;							// The last setting passed for the markup condition for rendering
+		u32			bold;							// The last bold setting
+		u32			italic;							// The last italic setting
+		u32			underline;						// The last underline setting
+		u32			strikethrough;					// The last strikethrough setting
+
+		// Coordinates
 		s32			x;								// X position on the parent hwnd's client area
 		s32			y;								// Y position on the parent hwnd's client area
 		s32			w;								// Window width
@@ -227,10 +289,17 @@ struct SBGR
 		BITMAPFILEHEADER	bh;						// Bitmap header if this bitmap is written to disk
 		BITMAPINFOHEADER	bi;						// Bitmap info
 		RECT				rc;						// Same as SetRect(&rc, 0, 0, w, h)
+		s32					rowWidth;				// How wide is each row (rounded up to nearest 32-bit boundary)
 		HDC					hdc;					// Device context when window was created
 		HBITMAP				hbmp;					// Handle to DIBSection
-		SBGR*				bd;						// Pointer to literal bit data
-		s32					rowWidth;				// How wide is each row (rounded up to nearest 32-bit boundary)
+		SBGR*				bd;						// Pointer to literal bit data for the active window buffer
+		HBRUSH				backDarkGrayBrush;		// Color used for dark gray background brush
+
+		// Used for real-time mouse drawing
+		HDC					hdc2;					// Device context when window was created
+		HBITMAP				hbmp2;					// Handle to DIBSection
+		SBGR*				bd2;					// Copy of bd used for rendering real-time mouse data
+
 	};
 
 	// SInstance structures are always branded with DSF! as first four bytes, and then length of the structure after
@@ -242,41 +311,11 @@ struct SBGR
 
 		SFont			font;						// Font information for this instance
 		u32				activeChar;					// The character currently being edited / displayed
+		u32				maxChar;					// The maximum character 
 
 		SBuilder*		chars;						// (SBuilder) Characters, one SBuilder for every character, with each character SBuilder pointing to its many SChar entries
 		SBuilder*		refs;						// (SRefs) References
 		SBuilder*		hwnds;						// Child window references for this instance
-	};
-
-	struct SXYF32
-	{
-		f32			x;
-		f32			y;
-	};
-
-	struct SXYS32
-	{
-		s32			xi;
-		s32			yi;
-	};
-
-	struct SLineF32
-	{
-		// These are the two input points
-		SXYF32		p1;
-		SXYF32		p2;
-
-		// These are computed with iComputeLine()
-		SXYF32		delta;
-		SXYF32		mid;
-		f32			length;
-		f32			m;							// Slope
-		f32			mp;							// Perpendicular slope
-		f32			theta;						// Theta (from p1 to p2, note: add _PI to reverse the angle from p2 to p1)
-		SXYS32		p1i;
-		SXYS32		p2i;
-		s32			p1_quad;
-		s32			p2_quad;
 	};
 
 
@@ -285,11 +324,19 @@ struct SBGR
 //////////
 // Constants
 //////
-	const f32	_PI2					= 1.5707963268f;
-	const f32	_PI						= 3.1415926536f;
-	const f32	_2PI					= 6.2831853072f;
-	const f32	_SQRT2					= 1.4142135624f;
+	const f64	_2PI					= 6.28318530717959;		// 2*pi
+	const f64	_3PI_2					= 4.71238898038469;		// 3*pi/2
+	const f64	_4PI_3					= 4.18879020478639;		// 4*pi/3
+	const f64	_PI						= 3.14159265358979;		// pi
+	const f64	_2PI_3					= 2.09439510239320;		// 2*pi/3
+	const f64	_PI_2					= 1.57079632679490;		// pi/2
+	const f64	_PI_3					= 1.04719755119660;		// pi/3
+	const f64	_PI_4					= 0.78539816339745;		// pi/4
+	const f64	_PI_6					= 0.52359877559830;		// pi/6
+	const f64	_SQRT2					= 1.4142135624;
 	const s8	cgcPreviewWindowClass[] = "DSF-Preview-Window-Class";
+
+	const u32	WM_REDRAW_WINDOW		= WM_USER + 1;
 
 
 
@@ -300,6 +347,7 @@ struct SBGR
 	HINSTANCE	ghInstance;
 	SBuilder*	instances;
 	SBuilder*	placeholder;
+	SXYS32		gMouse = { 0, 0 };
 
 
 
@@ -309,8 +357,8 @@ struct SBGR
 //////
 	// From DllMain
 	void				initialize								(void);
-	void				iAddSplineFromToLR						(SBuilder* b, bool tlPenDown, f32 tfXL, f32 tfYL, f32 tfXR, f32 tfYR);
-	void				iAddSplineCenterThetaRadiusLR			(SBuilder* b, bool tlPenDown, f32 tfX, f32 tfY, f32 tfRadius, f32 tfThetaL, f32 tfThetaR);
+	void				iAddSplineFromToLR						(SBuilder* b, bool tlPenDown, f64 tfXL, f64 tfYL, f64 tfXR, f64 tfYR);
+	void				iAddSplineCenterThetaRadiusLR			(SBuilder* b, bool tlPenDown, f64 tfX, f64 tfY, f64 tfRadius, f64 tfThetaL, f64 tfThetaR);
 
 	// Bitmaps
 	int					iGetCharacterBitmap						(int tnAscii, char* tcBitmapFilename, char* tcFontName, int tnHeight, int tnWidth);
@@ -332,23 +380,32 @@ struct SBGR
 	SSpline*			iFindSplineInstance_L					(SBuilder* thisSplineBuilder, u32 tnIid, u32 tiOrder, u32 tiLnkId, u32 tiLnkOrder, bool tlAddIfNotFound);
 	SRefs*				iFindRefsInstance						(SBuilder* refs, u8 tcType, s8* tcDesc40);
 	STems*				iCreateNewTemsEntry						(SBuilder* charsBuilder, u32 tipid);
-	SBuilder*			iGetTemsBuilder							(SBuilder* charsBuilder, u32 tipid);
+	SBuilder*			iGetTemsRawBuilder						(SBuilder* charsBuilder, u32 tipid);
 
-	int					iRender									(SInstance* p, SChars* c, s32 tnWidth, s32 tnHeight, u32 tlMarkup, u32 tlBold, u32 tlItalic, u32 tlUnderline, u32 tlStrikethrough, s8* tcBitmapPathname, u32 tnHwndParent, s32 tnX, s32 tnY);
+	int					iRender									(SInstance* p, SHwnd* h, SChars* c, s32 tnWidth, s32 tnHeight, u32 tnHwndParent, s32 tnX, s32 tnY);
 	void				iRenderSplines							(SInstance* p, SHwnd* h, SChars* c, u32 tlMarkup, u32 tlBold, u32 tlItalic, u32 tlUnderline, u32 tlStrikethrough);
-	void				iDrawLine								(SHwnd* h, SXYF32* p1, SXYF32* p2, SBGR color);
-	void				iDrawPoint								(SHwnd* h, SXYF32* p1, SBGR color);
+	void				iDrawPoints								(SHwnd* h, SXYF64* pr, SXYF64* po, SXYF64* pl, SSpline* s, SBGR colorSelected, SBGR colorR, SBGR colorO, SBGR colorL);
+	void				iDrawLine								(SHwnd* h, SXYF64* p1, SXYF64* p2, SBGR colorStart, SBGR colorEnd);
+	void				iDrawPoint								(SHwnd* h, SXYF64* p1, SBGR color);
+	void				iDrawPointSmall							(SHwnd* h, SXYF64* p1, SBGR color);
+	void				iDrawPointLarge							(SHwnd* h, SXYF64* p1, SBGR color);
 	void				iDrawHorizontalLineByPixels				(SHwnd* h, s32 x1, s32 x2, s32 y, SBGR color);
-	void				iFillQuad								(SHwnd* h, SXYF32* p1, SXYF32* p2, SXYF32* p3, SXYF32* p4, SBGR color);
-	void				iSetPoint								(SXYF32* p, f32 x, f32 y);
-	void				iCopyPoint								(SXYF32* pDst, SXYF32* pSrc);
+	void				iFillQuad								(SHwnd* h, SXYF64* p1, SXYF64* p2, SXYF64* p3, SXYF64* p4, SBGR color);
+	void				iSetPoint								(SXYF64* p, f64 x, f64 y);
+	void				iCopyPoint								(SXYF64* pDst, SXYF64* pSrc);
 	void				iRenderMarkup							(SInstance* p, SHwnd* h, SChars* c);
+	u32					iScaleIntoRange							(s32 tnValue, s32 tnValueMax, s32 tnMinRange, s32 tnMaxRange);
+	int					iiTems_qsortCallback					(const void* l, const void* r);
+	int					iiSXyS32_qsortCallback					(const void* l, const void* r);
+	u32					iiRenderMarkup_getNextLineSegment		(u32 tnIndex, u32 tnMaxCount, SHwnd* h, STems* root, STems** p1, STems** p2);
+	s32					iiGetPoint								(f64 tfValue01, s32 tnMultiplier);
 	SHwnd*				iFindOnlyHwndByHwnd						(SBuilder* hwnds, u32 tnHwndParent, u32 tnHwnd);
 	SHwnd*				iFindOnlyHwnd							(SBuilder* hwnds, u32 tnHwndParent, s32 tnX, s32 tnY, s32 tnWidth, s32 tnHeight);
 	SHwnd*				iFindOrCreateHwnd						(SBuilder* hwnds, u32 tnHwndParent, s32 tnX, s32 tnY, s32 tnWidth, s32 tnHeight);
 	u32					iCreateWindow							(SHwnd* h);
+	void				iRenderMouse							(SHwnd* h, SXYS32 tnMouse);
 	LRESULT CALLBACK	iWindowProcCallback						(HWND hwnd, UINT m, WPARAM w, LPARAM l);
 
-	void				iComputeLine							(SLineF32* line);
-	f32					iAdjustTheta							(f32 tfTheta);
-	s32					iComputeQuad							(SXYF32* p);
+	void				iComputeLine							(SLinef64* line);
+	f64					iAdjustTheta							(f64 tfTheta);
+	s32					iComputeQuad							(SXYF64* p);

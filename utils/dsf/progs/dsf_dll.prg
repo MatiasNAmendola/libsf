@@ -141,6 +141,13 @@ FUNCTION declare_dsf_dll
 							SINGLE		tfY, ;					&& Y coordinate of this template
 							INTEGER		tnRecno					&& The original record number used to reference this item
 	
+	* Called when all data has been loaded.  Used to allow the DLL to build any
+	* speedups or shortcuts it needs for more rapid GUI processing.
+	DECLARE INTEGER		dsf_initial_load_complete		IN exe\dsf.dll ;
+							INTEGER		tnInstance, ;			&& Instance handle returned by dsf_create_new_instance()
+							INTEGER		tnWidth, ;				&& Width of the primary edit window
+							INTEGER		tnHeight				&& Height of the primary edit window
+	
 	* Called during the save operations to save any changed template data (template data is maintained by the DLL due to its high number of items)
 	* Returns 0 if valid, -2 if the indicated tipid is invalid, -3 if there are no more new items for a valid tipid
 	DECLARE INTEGER		dsf_get_changed_template		IN exe\dsf.dll ;
@@ -190,3 +197,8 @@ FUNCTION declare_dsf_dll
 							INTEGER		tnHwnd, ;				&& Either NULL or the form's HWND if you want it drawn directly to the form
 							INTEGER		tnX, ;					&& If tnHwnd is not NULL, then the X coordinate of the client area to render at
 							INTEGER		tnY						&& If tnHwnd is not NULL, then the Y coordinate of the client area to render at
+
+	* Called to re-render a previously rendered window.  This is typically done as mouse movement occurs, etc.
+	DECLARE INTEGER		dsf_re_render		IN exe\dsf.dll ;
+							INTEGER		tnInstance,	;			&& Instance handle returned by dsf_create_new_instance()
+							INTEGER		tnWindow				&& The return value given by the last call to dsf_render_markup() or dsf_render_final()
