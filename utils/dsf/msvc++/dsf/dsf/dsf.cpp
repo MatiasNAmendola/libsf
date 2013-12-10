@@ -700,6 +700,40 @@
 
 //////////
 //
+// Called to convey user settings
+//
+//////
+	int dsf_user_settings(u32 tnInstance, u32 tnDisposition, u32 tnMode, u32 tnMethod, u32 tnRange)
+	{
+		SInstance*	p;
+		bool		llValid;
+
+
+		//////////
+		// Make sure our environment is sane
+		//////
+			p = iGetDsfInstance(tnInstance, &llValid);
+			if (!llValid)
+				return(-1);
+
+
+		//////////
+		// Set the values, and trigger a refresh on any markup windows
+		//////
+			p->disposition		= iValidateRange(tnDisposition,	_DISPOSITION_SELECT,	_DISPOSITION_FLIP_LM_RM,	_DISPOSITION_SELECT);
+			p->mode				= iValidateRange(tnMode,		_MODE_POINT,			_MODE_AFTER,				_MODE_POINT);
+			p->method			= iValidateRange(tnMethod,		_METHOD_LEFT,			_METHOD_POINT,				_METHOD_POINT);
+			p->range			= iValidateRange(tnRange,		_RANGE_ACTIVE_CHAR,		_RANGE_ALL,					_RANGE_ACTIVE_CHAR);
+
+			// Indicate success
+			return(0);
+	}
+
+
+
+
+//////////
+//
 // Called to indicate the user wants to make active another character for editing
 //
 //////
@@ -2432,15 +2466,21 @@
 		SXYS32	p1;
 		s32		lnX, lnY, lnYLast;
 		f64		lfTheta, lfThetaStep, lfA, lfB, lfV1, lfV2, lfX, lfY, lfRadius;
+		SBGR	color;
 
 
-		// Can we render it?
-		if (gMouse.xi >= 0 && gMouse.xi < h->w && gMouse.yi >= 0 && gMouse.yi < h->h)
+		// Invert the Y mouse coordinates for rendering
+		p1.xi = gMouse.xi;
+		p1.yi = h->h - gMouse.yi;
+
+		// Do we need to render the select area?
+		if (glCtrlKeyDown && !(glMouseLeft || glMouseRight))		color = mousePeeakaheadColor;
+		else														color = mouseColor;
+
+		// Is there a reason to render the rectangles?
+		if (glMouseLeft || glMouseRight || glCtrlKeyDown)
 		{
-			// Invert the Y mouse coordinates for rendering
-			p1.xi = gMouse.xi;
-			p1.yi = h->h - gMouse.yi;
-
+			// The mouse is pressed down, render the select area
 			// Render it (we're basically drawing an oval area the mouse will interact with)
 			lfRadius	= (f64)min(max(gMouseType, _MOUSE_TYPE_SMALL), _MOUSE_TYPE_LARGE);
 			lnYLast		= -1;
@@ -2466,25 +2506,32 @@
 				if (lnY != lnYLast)
 				{
 					// Draw the mouse indicator there, and perform any operations
-					iColorizeAndProcessHorizontalLineByPixels(p, h, c, p1.xi - lnX, p1.xi + lnX, p1.yi + lnY, mouseColor);		// Above
+					iColorizeAndProcessHorizontalLineByPixels(p, h, c, p1.xi - lnX, p1.xi + lnX, p1.yi + lnY, color);		// Above
 					if (lnY != 0)
-						iColorizeAndProcessHorizontalLineByPixels(p, h, c, p1.xi - lnX, p1.xi + lnX, p1.yi - lnY, mouseColor);	// Below
+						iColorizeAndProcessHorizontalLineByPixels(p, h, c, p1.xi - lnX, p1.xi + lnX, p1.yi - lnY, color);	// Below
 
 					lnYLast = lnY;
 				}
 			}
+		}
+
+		if (p1.xi >= 0 && p1.xi < h->w && p1.yi >= 0 && p1.yi < h->h)
+		{
+			// Render the horizontal and vertical lines
+			iColorizeAndProcessHorizontalLineByPixels(p, h, c, 0, h->w - 1, p1.yi, mouseColor);		// Horizontal
+			iColorizeAndProcessVerticalLineByPixels(  p, h, c, 0, h->h - 1, p1.xi, mouseColor);		// Vertical
 		}
 	}
 
 	void iColorizeAndProcessHorizontalLineByPixels(SInstance* p, SHwnd* h, SChars* c, s32 x1, s32 x2, s32 y, SBGR color)
 	{
 		s32		lnX;
-		f64		lfAlp, lfMalp, lfGray, lfRed, lfGrn, lfBlu;
+		f64		lfAlp, lfMalp, lfRed, lfGrn, lfBlu;
 		SBGR*	lbgr;
 
 
 		// Is it out of bounds?
-		if (y < 0 || y > h->h)
+		if (y < 0 || y >= h->h)
 			return;
 
 		// Get the pointer
@@ -2503,9 +2550,43 @@
 			// Is it out of bounds?
 			if (lnX >= 0 && lnX < h->w)
 			{
-// 				// Grayscale the color
-// 				lfGray = (((f64)lbgr->red * 0.35) + (f64)lbgr->grn * 0.54 + (f64)lbgr->blu * 0.11) / 255.0;
+				// Colorize it
+				lbgr->red	= (u8)iScaleIntoRange((s32)((lfAlp * lfRed) + (lfMalp * (f64)lbgr->red)), 255, 92, 255);
+				lbgr->grn	= (u8)iScaleIntoRange((s32)((lfAlp * lfGrn) + (lfMalp * (f64)lbgr->grn)), 255, 92, 255);
+				lbgr->blu	= (u8)iScaleIntoRange((s32)((lfAlp * lfBlu) + (lfMalp * (f64)lbgr->red)), 255, 92, 255);
+			}
+		}
 
+		// Scan through this character's splines and see what the operation is
+	}
+
+	void iColorizeAndProcessVerticalLineByPixels(SInstance* p, SHwnd* h, SChars* c, s32 y1, s32 y2, s32 x, SBGR color)
+	{
+		s32		lnY;
+		f64		lfAlp, lfMalp, lfRed, lfGrn, lfBlu;
+		SBGR*	lbgr;
+
+
+		// Is it out of bounds?
+		if (x < 0 || x >= h->w)
+			return;
+
+		// Get the pointer
+		lbgr = (SBGR*)((s8*)h->bd + (y1 * h->rowWidth) + (x * 3));
+
+		// Get the colors
+		lfRed	= (f64)color.red;
+		lfGrn	= (f64)color.grn;
+		lfBlu	= (f64)color.blu;
+		lfAlp	= 0.5;
+		lfMalp	= 1.0 - lfAlp;
+
+		// Iterate for every x
+		for (lnY = y1; lnY <= y2; lnY++, lbgr = (SBGR*)((s8*)lbgr + h->rowWidth))
+		{
+			// Is it out of bounds?
+			if (lnY >= 0 && lnY < h->h)
+			{
 				// Colorize it
 				lbgr->red	= (u8)iScaleIntoRange((s32)((lfAlp * lfRed) + (lfMalp * (f64)lbgr->red)), 255, 92, 255);
 				lbgr->grn	= (u8)iScaleIntoRange((s32)((lfAlp * lfGrn) + (lfMalp * (f64)lbgr->grn)), 255, 92, 255);
@@ -2659,6 +2740,12 @@
 			tnValue = tnValueMax;
 
 		return(tnMinRange + (s32)(((f64)tnValue / (f64)tnValueMax) * (f64)(tnMaxRange - tnMinRange)));
+	}
+
+	u32 iValidateRange(s32 tnValue, s32 tnValueMin, s32 tnValueMax, s32 tnDefaultValue)
+	{
+		if (tnValue >= tnValueMin && tnValue <= tnValueMax)		return(tnValue);
+		else													return(tnDefaultValue);
 	}
 
 	// Sort by Y, then X, ascending in both directions
@@ -2815,7 +2902,7 @@
 				h = (SHwnd*)(hwnds->data + lnI);
 
 				// See if it's a match
-				if (h->_hwndParent == tnHwndParent && h->oldWndParentProcAddress != 0)
+				if (h->_hwndParent == tnHwndParent && h->markup)
 				{
 					// It's a match
 					return(h);
@@ -2957,6 +3044,8 @@
 					SetWindowLong(h->hwnd, GWL_WNDPROC, (long)&iWindowProcCallback);
 					h->oldWndParentProcAddress = (WNDPROC)GetWindowLong(h->hwndParent, GWL_WNDPROC);
 					SetWindowLong(h->hwndParent, GWL_WNDPROC, (long)&iWindowProcCallback);
+					// Create a timer to read the mouse 30 times per second
+					SetTimer(h->hwnd, (u32)h, 33, NULL);
 				}
 
 				// Create a DIB Section for accessing this window's bits
@@ -3075,13 +3164,86 @@
 
 //////////
 //
+// Read the mouse position asynchronously
+//
+//////
+	void iReadMousePosition(SInstance* p, SHwnd* h)
+	{
+		bool		llLastMouseLeft, llLastMouseRight, llLastCtrl, llLastShift, llLastAlt, llMoved, llWasOnTheReservation;
+		POINT		pt;
+
+
+		//////////
+		// Grab the cursor position
+		//////
+			llLastMouseLeft		= glMouseLeft;
+			llLastMouseRight	= glMouseRight;
+			glMouseLeft			= (GetAsyncKeyState(VK_LBUTTON) != 0);
+			glMouseRight		= (GetAsyncKeyState(VK_RBUTTON) != 0);
+			GetCursorPos(&pt);
+			ScreenToClient(h->hwnd, &pt);
+
+
+		//////////
+		// Grab the key states
+		//////
+			llLastCtrl			= glCtrlKeyDown;
+			llLastShift			= glShiftKeyDown;
+			llLastAlt			= glAltKeyDown;
+			glCtrlKeyDown		= (GetAsyncKeyState(VK_CONTROL) != 0);
+			glShiftKeyDown		= (GetAsyncKeyState(VK_SHIFT) != 0);
+			glAltKeyDown		= (GetAsyncKeyState(VK_MENU) != 0);
+
+		
+		//////////
+		// Adjust for the window
+		//////
+			// Adjust for our window
+			pt.y		-= h->y;
+
+			// See if it's moved, and if so if it's moved off the reservation
+			llMoved					= !(gMouse.xi == pt.x && gMouse.yi == pt.y);
+			llWasOnTheReservation	= (gMouse.xi >= 0 && gMouse.xi < h->w && gMouse.yi >= 0 && gMouse.yi < h->h);
+
+			// Store the new value
+			gMouse.xi	= pt.x;
+			gMouse.yi	= pt.y;
+
+			// If we are now off the reservation, then ignore the mouse clicks
+			if (!(gMouse.xi >= 0 && gMouse.xi < h->w && gMouse.yi >= 0 && gMouse.yi < h->h))
+			{
+				// We are no longer on the reservation, ignore mouse clicks and key shift changes
+				llLastMouseLeft		= glMouseLeft;
+				llLastMouseRight	= glMouseRight;
+				llLastCtrl			= glCtrlKeyDown;
+				llLastShift			= glShiftKeyDown;
+				llLastAlt			= glAltKeyDown;
+			}
+
+
+		//////////
+		// Has the mouse moved?
+		//////
+			if (llWasOnTheReservation || (llMoved && gMouse.xi >= 0 && gMouse.xi < h->w && gMouse.yi >= 0 && gMouse.yi < h->h) ||
+				llLastMouseLeft != glMouseLeft || llLastMouseRight != glMouseRight || 
+				llLastCtrl != glCtrlKeyDown || llLastShift != glShiftKeyDown || llLastAlt != glAltKeyDown)
+			{
+				// Post a message back to the parent to indicate this child needs to be redrawn
+				PostMessage(h->hwndParent, WM_REDRAW_WINDOW, (u32)p, h->_hwnd);
+			}
+	}
+
+
+
+
+//////////
+//
 // Callback for the window
 //
 //////
 	LRESULT CALLBACK iWindowProcCallback(HWND hwnd, UINT m, WPARAM w, LPARAM l)
 	{
 		u32				lnI;
-		POINTS			p;
 		PAINTSTRUCT		ps;
 		HDC				lhdc;
 		union {
@@ -3096,10 +3258,7 @@
 		SInstance*		s;
 
 
-		// Iterate through each window to see which one this is
-		if (m == WM_MOUSEMOVE)
-			_asm nop;
-
+		// See if we know this hwnd
 		thisHwnd	= hwnd;
 		hwndParent	= GetParent(hwnd);
 		for (lnI = 0; lnI < instances->populatedLength; lnI += sizeof(SInstance))
@@ -3114,6 +3273,16 @@
 				// It was one of our windows
 				switch (m)
 				{
+					// Create a timer for reading the mouse position because as of yet I have not figured out how to get this child window attached to a VFP form to reliably send over WM_MOUSEMOVE messages unless the mouse is physically depressed
+					case WM_DESTROY:
+						KillTimer(hwnd, (u32)h);
+						break;
+
+					// Get the mouse and keyboard state
+					case WM_TIMER:
+						iReadMousePosition(s, h);
+						break;
+
 					// Redraw the window
 					case WM_PAINT:
 						// Paint it
@@ -3135,6 +3304,13 @@
 			h = iFindOnlyHwndByHwndParent(s->hwnds, _thisHwnd);
 			if (h)
 			{
+// 				//////////
+// 				// Make sure we have the keyboard/mouse capture
+// 				//////
+// 					if (GetCapture() != h->hwnd)
+// 						SetCapture(h->hwnd);
+
+				// What do they want? :-)
 				switch (m)
 				{
 					case WM_LBUTTONDBLCLK:
@@ -3143,42 +3319,19 @@
 						break;
 
 					case WM_MOUSEMOVE:
-						p = MAKEPOINTS(l);
-						if (p.x >= h->x && p.x < h->x + h->w)
-						{
-							if (p.y >= h->y && p.y < h->y + h->h)
-							{
-								gMouse.xi = p.x - h->x;
-								gMouse.yi = p.y - h->y;
-								// Send a message back to the parent to indicate this child needs to be redrawn
-								SendMessage(h->hwndParent, WM_REDRAW_WINDOW, (u32)s, h->_hwnd);
-							}
-						}
+						iReadMousePosition(s, h);
 						break;
 
 					case WM_LBUTTONDOWN:
 					case WM_RBUTTONDOWN:
 					case WM_MBUTTONDOWN:
-						p = MAKEPOINTS(l);
-						if (p.x >= h->x && p.x < h->x + h->w)
-						{
-							if (p.y >= h->y && p.y < h->y + h->h)
-							{
-								gMouse.xi = p.x - h->x;
-								gMouse.yi = p.y - h->y;
-								// Send a message back to the parent to indicate this child needs to be redrawn
-								SendMessage(h->hwndParent, WM_REDRAW_WINDOW, (u32)s, h->_hwnd);
-							}
-						}
+						iReadMousePosition(s, h);
 						break;
 
 					case WM_LBUTTONUP:
 					case WM_RBUTTONUP:
 					case WM_MBUTTONUP:
-						gMouse.xi = -1;
-						gMouse.yi = -1;
-						// Send a message back to the parent to indicate this child needs to be redrawn
-						SendMessage(h->hwndParent, WM_REDRAW_WINDOW, (u32)s, h->_hwnd);
+						iReadMousePosition(s, h);
 						break;
 						break;
 				}

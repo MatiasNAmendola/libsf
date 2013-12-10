@@ -313,7 +313,11 @@ struct SLinef64
 
 		SFont			font;						// Font information for this instance
 		u32				activeChar;					// The character currently being edited / displayed
-		u32				maxChar;					// The maximum character 
+		u32				maxChar;					// The maximum character found during the initial load, or created later
+		u32				disposition;				// 0=select, 1=unselect, 2=toggle, 3=flip left to right, right to left, 4=flip left/middle to right/middle, and right/middle to left/middle
+		u32				mode;						// 0=point, 1=spline, 2=stroke, 3=before and current, 4=current and after
+		u32				method;						// 0=left, 1=middle, 2=right, 3=left+middle, 4=middle+right, 5=left+right, 6=spline, 7=point
+		u32				range;						// 0=active character, 1=AZ, 2=az, 3=AZaz, 4=09, 5=AZaz09, 6=AZaz09!@.., 7=all
 
 		SBuilder*		chars;						// (SBuilder) Characters, one SBuilder for every character, with each character SBuilder pointing to its many SChar entries
 		SBuilder*		refs;						// (SRefs) References
@@ -326,23 +330,53 @@ struct SLinef64
 //////////
 // Constants
 //////
-	const f64	_2PI					= 6.28318530717959;		// 2*pi
-	const f64	_3PI_2					= 4.71238898038469;		// 3*pi/2
-	const f64	_4PI_3					= 4.18879020478639;		// 4*pi/3
-	const f64	_PI						= 3.14159265358979;		// pi
-	const f64	_2PI_3					= 2.09439510239320;		// 2*pi/3
-	const f64	_PI_2					= 1.57079632679490;		// pi/2
-	const f64	_PI_3					= 1.04719755119660;		// pi/3
-	const f64	_PI_4					= 0.78539816339745;		// pi/4
-	const f64	_PI_6					= 0.52359877559830;		// pi/6
-	const f64	_SQRT2					= 1.4142135624;
-	const s8	cgcPreviewWindowClass[] = "DSF-Preview-Window-Class";
+	const f64	_2PI						= 6.28318530717959;		// 2*pi
+	const f64	_3PI_2						= 4.71238898038469;		// 3*pi/2
+	const f64	_4PI_3						= 4.18879020478639;		// 4*pi/3
+	const f64	_PI							= 3.14159265358979;		// pi
+	const f64	_2PI_3						= 2.09439510239320;		// 2*pi/3
+	const f64	_PI_2						= 1.57079632679490;		// pi/2
+	const f64	_PI_3						= 1.04719755119660;		// pi/3
+	const f64	_PI_4						= 0.78539816339745;		// pi/4
+	const f64	_PI_6						= 0.52359877559830;		// pi/6
+	const f64	_SQRT2						= 1.4142135624;
+	const s8	cgcPreviewWindowClass[]	 = "DSF-Preview-Window-Class";
 
-	const u32	_MOUSE_TYPE_SMALL		= 10;
-	const u32	_MOUSE_TYPE_MEDIUM		= 20;
-	const u32	_MOUSE_TYPE_LARGE		= 30;
+	const u32	_MOUSE_TYPE_SMALL			= 10;
+	const u32	_MOUSE_TYPE_MEDIUM			= 20;
+	const u32	_MOUSE_TYPE_LARGE			= 30;
 
-	const u32	WM_REDRAW_WINDOW		= WM_USER + 1;
+	const u32	_DISPOSITION_SELECT			= 0;
+	const u32	_DISPOSITION_UNSELECT		= 1;
+	const u32	_DISPOSITION_TOGGLE			= 2;
+	const u32	_DISPOSITION_FLIP_LR		= 3;
+	const u32	_DISPOSITION_FLIP_LM_RM		= 4;
+	
+	const u32	_MODE_POINT					= 0;
+	const u32	_MODE_SPLINE				= 1;
+	const u32	_MODE_STROKE				= 2;
+	const u32	_MODE_BEFORE				= 3;
+	const u32	_MODE_AFTER					= 4;
+	
+	const u32	_METHOD_LEFT				= 0;
+	const u32	_METHOD_MIDDLE				= 1;
+	const u32	_METHOD_RIGHT				= 2;
+	const u32	_METHOD_LEFT_MIDDLE			= 3;
+	const u32	_METHOD_MIDDLE_RIGHT		= 4;
+	const u32	_METHOD_LEFT_RIGHT			= 5;
+	const u32	_METHOD_SPLINE				= 6;
+	const u32	_METHOD_POINT				= 7;
+	
+	const u32	_RANGE_ACTIVE_CHAR			= 0;
+	const u32	_RANGE_AZ					= 1;
+	const u32	_RANGE_az					= 2;
+	const u32	_RANGE_AZ_az				= 3;
+	const u32	_RANGE_09					= 4;
+	const u32	_RANGE_AZ_az_09				= 5;
+	const u32	_RANGE_AZ_az_09_PLUS		= 6;
+	const u32	_RANGE_ALL					= 7;
+
+	const u32	WM_REDRAW_WINDOW			= WM_USER + 1;
 
 
 
@@ -355,12 +389,19 @@ struct SLinef64
 	SBuilder*	placeholder;
 	SXYS32		gMouse					= { -1, -1 };
 	u32			gMouseType				= _MOUSE_TYPE_SMALL;
+	bool		glMouseLeft;
+	bool		glMouseRight;
+	bool		glCtrlKeyDown			= false;
+	bool		glShiftKeyDown			= false;
+	bool		glAltKeyDown			= false;
+	// Common color
 	SBGR		spline;
 	SBGR		black					= { 0, 0, 0 };
 	SBGR		colorSelected			= { 64, 128, 255 };
 	SBGR		colorR					= { 64, 64, 215 };
 	SBGR		colorO					= { 255, 64, 64 };
 	SBGR		colorL					= { 64, 215, 64 };
+	SBGR		mousePeeakaheadColor	= { 255, 255, 0 };
 	SBGR		mouseColor				= { 0, 255, 255 };
 
 
@@ -410,8 +451,10 @@ struct SLinef64
 	void				iCopyPoint								(SXYF64* pDst, SXYF64* pSrc);
 	void				iRenderMouseOverlay						(SInstance* p, SHwnd* h, SChars* c);
 	void				iColorizeAndProcessHorizontalLineByPixels(SInstance* p, SHwnd* h, SChars* c, s32 x1, s32 x2, s32 y, SBGR color);
+	void				iColorizeAndProcessVerticalLineByPixels	(SInstance* p, SHwnd* h, SChars* c, s32 y1, s32 y2, s32 x, SBGR color);
 	void				iRenderMarkup							(SInstance* p, SHwnd* h, SChars* c);
 	u32					iScaleIntoRange							(s32 tnValue, s32 tnValueMax, s32 tnMinRange, s32 tnMaxRange);
+	u32					iValidateRange							(s32 tnValue, s32 tnValueMin, s32 tnValueMax, s32 tnDefaultValue);
 	int					iiTems_qsortCallback					(const void* l, const void* r);
 	int					iiSXyS32_qsortCallback					(const void* l, const void* r);
 	u32					iiRenderMarkup_getNextLineSegment		(u32 tnIndex, u32 tnMaxCount, SHwnd* h, STems* root, STems** p1, STems** p2);
@@ -424,5 +467,5 @@ struct SLinef64
 	void				iComputeLine							(SLinef64* line);
 	f64					iAdjustTheta							(f64 tfTheta);
 	s32					iComputeQuad							(SXYF64* p);
-	void				iRenderMouse							(SHwnd* h, SXYS32 tnMouse);
+	void				iReadMousePosition						(SInstance* p, SHwnd* h);
 	LRESULT CALLBACK	iWindowProcCallback						(HWND hwnd, UINT m, WPARAM w, LPARAM l);
