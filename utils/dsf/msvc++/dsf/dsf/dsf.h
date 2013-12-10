@@ -214,6 +214,11 @@ struct SLinef64
 		u32			iLnkId;							// If cType=R, the iid of the definition object; If cType=L, the iid of the link object (used with iLnkOrder to indicate which linked item this one modifies)
 		s32			iLnkOrder;						// If cType=L, the item within the link object that this entry modifies
 
+		// Used to determine if this spline has already been processed this go around
+		bool		tlLProcessed;					// When the mouse goes down, these are set to false
+		bool		tlOProcessed;					// As they are changed, they are raised.
+		bool		tlRProcessed;					// This will prevent them from being double-processed during a single select/unselect/toggle operation
+
 		// Used internally for editing
 		bool		tlOSelected;					// Is the original selected?
 		bool		tlRSelected;					// Is the left-side selected?
@@ -405,6 +410,7 @@ struct SLinef64
 	SBGR		colorL					= { 64, 215, 64 };
 	SBGR		mousePeeakaheadColor	= { 255, 255, 0 };
 	SBGR		mouseColor				= { 0, 255, 255 };
+	SBGR		colorMarkup				= { 22, 222, 22 };
 
 
 
@@ -440,6 +446,7 @@ struct SLinef64
 	SBuilder*			iGetTemsRawBuilder						(SBuilder* charsBuilder, u32 tipid);
 
 	int					iRender									(SInstance* p, SHwnd* h, SChars* c, s32 tnWidth, s32 tnHeight, u32 tnHwndParent, s32 tnX, s32 tnY);
+	void				iRenderMouseCoordinates					(SInstance* p, SHwnd* h);
 	void				iRenderSplines							(SInstance* p, SHwnd* h, SChars* c, u32 tlMarkup, u32 tlBold, u32 tlItalic, u32 tlUnderline, u32 tlStrikethrough);
 	void				iDrawPoints								(SHwnd* h, SXYF64* pr, SXYF64* po, SXYF64* pl, SSpline* s, SBGR colorSelected, SBGR colorR, SBGR colorO, SBGR colorL);
 	void				iDrawLine								(SHwnd* h, SXYF64* p1, SXYF64* p2, SBGR colorStart, SBGR colorEnd);
@@ -453,10 +460,15 @@ struct SLinef64
 	void				iCopyPoint								(SXYF64* pDst, SXYF64* pSrc);
 	void				iRenderMouseOverlay						(SInstance* p, SHwnd* h, SChars* c);
 	void				iColorizeAndProcessHorizontalLineByPixels(SInstance* p, SHwnd* h, SChars* c, s32 x1, s32 x2, s32 y, SBGR color);
+	void				iColorizeHorizontalLineByPixels			(SInstance* p, SHwnd* h, SChars* c, s32 x1, s32 x2, s32 y, SBGR color);
 	void				iColorizeAndProcessVerticalLineByPixels	(SInstance* p, SHwnd* h, SChars* c, s32 y1, s32 y2, s32 x, SBGR color);
-	void				iRenderMarkup							(SInstance* p, SHwnd* h, SChars* c);
+	void				iColorizeVerticalLineByPixels			(SInstance* p, SHwnd* h, SChars* c, s32 y1, s32 y2, s32 x, SBGR color);
+	void				iRenderTems								(SInstance* p, SHwnd* h, SChars* c);
 	u32					iScaleIntoRange							(s32 tnValue, s32 tnValueMax, s32 tnMinRange, s32 tnMaxRange);
 	u32					iValidateRange							(s32 tnValue, s32 tnValueMin, s32 tnValueMax, s32 tnDefaultValue);
+	void				iMakeSureLowToHighU32					(u32* p1, u32* p2);
+	void				iMakeSureLowToHighS32					(s32* p1, s32* p2);
+	void				iMakeSureLowToHighF64					(f64* p1, f64* p2);
 	int					iiTems_qsortCallback					(const void* l, const void* r);
 	int					iiSXyS32_qsortCallback					(const void* l, const void* r);
 	u32					iiRenderMarkup_getNextLineSegment		(u32 tnIndex, u32 tnMaxCount, SHwnd* h, STems* root, STems** p1, STems** p2);
@@ -469,5 +481,13 @@ struct SLinef64
 	void				iComputeLine							(SLinef64* line);
 	f64					iAdjustTheta							(f64 tfTheta);
 	s32					iComputeQuad							(SXYF64* p);
+	void				iSelectRange							(SInstance* p, SHwnd* h, SChars* c, SXYF64* p1, SXYF64* p2);
+	void				iSelectPoint							(SInstance* p, SSpline* spline, bool* tlSelected);
+	void				iSelectSpline							(SInstance* p, SSpline* spline);
+	void				iSelectStroke							(SInstance* p, SSpline* splineStrokeStart);
+	void				iSelectStrokeBefore						(SInstance* p, SSpline* splineStrokeStart, SSpline* splineStrokeEnd);
+	void				iSelectStrokeAfter						(SInstance* p, SSpline* splineStrokeStart);
+	void				iSplineCompute							(SSpline* spline, SXYF64* pl, SXYF64* po, SXYF64* pr);
+	bool				iIsPointInRange							(SXYF64* pTest, SXYF64* ul, SXYF64* lr);
 	void				iReadMousePosition						(SInstance* p, SHwnd* h);
 	LRESULT CALLBACK	iWindowProcCallback						(HWND hwnd, UINT m, WPARAM w, LPARAM l);

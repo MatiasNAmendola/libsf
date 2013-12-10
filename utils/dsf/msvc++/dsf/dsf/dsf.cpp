@@ -2082,26 +2082,32 @@
 
 			} else {
 				// An active character exists, render it
-				if (h->markup != 0)		FillRect(h->hdc, &lrc, h->backDarkGrayBrush);
-				else					FillRect(h->hdc, &lrc, (HBRUSH)GetStockObject(WHITE_BRUSH));
-
-				// Render the splines with markup lines
-				iRenderSplines(p, h, c, h->markup, h->bold, h->italic, h->underline, h->strikethrough);
-
-				// Render the markup
 				if (h->markup != 0)
 				{
-					iRenderMarkup(p, h, c);
+					// Fill with the dark background for markup editing
+					FillRect(h->hdc, &lrc, h->backDarkGrayBrush);
+
+					// Render the splines withmarkup
+					iRenderSplines(p, h, c, h->markup, h->bold, h->italic, h->underline, h->strikethrough);
+
+					// Render the mouse coordinates, tems, and mouse overlay info
+					iRenderMouseCoordinates(p, h);
+					iRenderTems(p, h, c);
 					iRenderMouseOverlay(p, h, c);
+
+				} else {
+					// Render final as black text on a white background
+					FillRect(h->hdc, &lrc, (HBRUSH)GetStockObject(WHITE_BRUSH));
+					iRenderSplines(p, h, c, h->markup, h->bold, h->italic, h->underline, h->strikethrough);
 				}
 			}
 
 			// Redraw after the rendering
 			if (h->_hwnd)
 			{
-				SetRect(&lrc, 0, 0, 10000, 10000);
-				if (IsWindow(h->hwndParent))
-					InvalidateRect(h->hwndParent, &lrc, TRUE);
+// 				SetRect(&lrc, 0, 0, 10000, 10000);
+// 				if (IsWindow(h->hwndParent))
+// 					InvalidateRect(h->hwndParent, &lrc, TRUE);
 
 				SetRect(&lrc, 0, 0, h->w, h->h);
 				if (IsWindow(h->hwnd))
@@ -2111,6 +2117,45 @@
 
 		// Indicate the hwnd handle we rendered
 		return(h->_hwnd);
+	}
+
+
+
+
+//////////
+//
+// Called to put the mouse coordinates in the lower-right
+//
+//////
+	void iRenderMouseCoordinates(SInstance* p, SHwnd* h)
+	{
+		RECT	lrcX, lrcY;
+		s8		bufferX[32];
+		s8		bufferY[32];
+
+
+		// Setup the font
+		SelectObject(h->hdc, h->fontXY);
+		SetBkMode(h->hdc, TRANSPARENT);
+		SetTextColor(h->hdc, RGB(255,255,255));
+
+		// Get our coordinates
+		sprintf(bufferX, "X:%6.4lf\0", ((f32)gMouse.xi / (f32)h->w));
+		sprintf(bufferY, "Y:%6.4lf\0", ((f32)(h->h - gMouse.yi) / (f32)h->h));		// Invert mouse Y coordinate for the calculation
+
+		// Find out how big it is
+		SetRect(&lrcX, 0, 0, 0, 0);
+		SetRect(&lrcY, 0, 0, 0, 0);
+		DrawTextA(h->hdc, bufferX, strlen(bufferX), &lrcX, DT_CALCRECT);
+		DrawTextA(h->hdc, bufferY, strlen(bufferY), &lrcY, DT_CALCRECT);
+
+		// Determine the actual rendering coordinates
+		SetRect(&lrcY, h->w - 3 - (lrcY.right - lrcY.left), h->h - 3 - (lrcY.bottom - lrcY.top), h->w - 3, h->h - 3);
+		SetRect(&lrcX, h->w - 3 - (lrcY.right - lrcY.left) - 3 - (lrcX.right - lrcX.left), h->h - 3 - (lrcX.bottom - lrcX.top), lrcY.left - 3, lrcY.bottom);
+
+		// Render
+		DrawTextA(h->hdc, bufferX, strlen(bufferX), &lrcX, DT_CENTER | DT_VCENTER | DT_END_ELLIPSIS);
+		DrawTextA(h->hdc, bufferY, strlen(bufferY), &lrcY, DT_CENTER | DT_VCENTER | DT_END_ELLIPSIS);
 	}
 
 
@@ -2538,12 +2583,42 @@
 		if (p1.xi >= 0 && p1.xi < h->w && p1.yi >= 0 && p1.yi < h->h)
 		{
 			// Render the horizontal and vertical lines
-			iColorizeAndProcessHorizontalLineByPixels(p, h, c, 0, h->w - 1, p1.yi, mouseColor);		// Horizontal
-			iColorizeAndProcessVerticalLineByPixels(  p, h, c, 0, h->h - 1, p1.xi, mouseColor);		// Vertical
+			iColorizeHorizontalLineByPixels(p, h, c, 0, h->w - 1, p1.yi, mouseColor);		// Horizontal
+			iColorizeVerticalLineByPixels(  p, h, c, 0, h->h - 1, p1.xi, mouseColor);		// Vertical
 		}
 	}
 
 	void iColorizeAndProcessHorizontalLineByPixels(SInstance* p, SHwnd* h, SChars* c, s32 x1, s32 x2, s32 y, SBGR color)
+	{
+		SXYF64 ul, lr;
+
+
+		//////////
+		// Make sure the values are in the correct order
+		/////
+			iMakeSureLowToHighS32(&x1, &x2);
+
+
+		//////////
+		// Colorize it
+		//////
+			iColorizeHorizontalLineByPixels(p, h, c, x1, x2, y, color);
+
+		//////
+		// Process it
+		// Scan through this range and see if there are any splines, points, or strokes which need selected
+		//////
+			// Compute upper-left and lower-right range
+			ul.x = (f64)x1                    / (f64)h->w;
+			ul.y = ((f64)y  + 0.999999999999) / (f64)h->h;
+			lr.x = ((f64)x2 + 0.999999999999) / (f64)h->w;
+			lr.y = (f64)y                     / (f64)h->h;
+
+			// Process the selection operation on this range
+			iSelectRange(p, h, c, &lr, &lr);
+	}
+
+	void iColorizeHorizontalLineByPixels(SInstance* p, SHwnd* h, SChars* c, s32 x1, s32 x2, s32 y, SBGR color)
 	{
 		s32		lnX;
 		f64		lfAlp, lfMalp, lfRed, lfGrn, lfBlu;
@@ -2577,10 +2652,38 @@
 			}
 		}
 
-		// Scan through this character's splines and see what the operation is
 	}
 
 	void iColorizeAndProcessVerticalLineByPixels(SInstance* p, SHwnd* h, SChars* c, s32 y1, s32 y2, s32 x, SBGR color)
+	{
+		SXYF64 ul, lr;
+
+
+		//////////
+		// Make sure the values are in the correct order
+		/////
+			iMakeSureLowToHighS32(&y1, &y2);
+
+
+		//////////
+		// Colorize it
+		//////
+			iColorizeVerticalLineByPixels(p, h, c, y1, y2, x, color);
+
+
+		//////
+		// Process it
+		// Scan through this range and see if there are any splines, points, or strokes which need selected
+		//////
+			// Compute upper-left and lower-right range
+			ul.x = (f64)x                     / (f64)h->w;
+			ul.y = ((f64)y1 + 0.999999999999) / (f64)h->h;
+			lr.x = ((f64)x  + 0.999999999999) / (f64)h->w;
+			lr.y = (f64)y2                    / (f64)h->h;
+			iSelectRange(p, h, c, &lr, &lr);
+	}
+
+	void iColorizeVerticalLineByPixels(SInstance* p, SHwnd* h, SChars* c, s32 y1, s32 y2, s32 x, SBGR color)
 	{
 		s32		lnY;
 		f64		lfAlp, lfMalp, lfRed, lfGrn, lfBlu;
@@ -2623,7 +2726,7 @@
 // Called to render the markup data onto the character
 //
 //////
-	void iRenderMarkup(SInstance* p, SHwnd* h, SChars* c)
+	void iRenderTems(SInstance* p, SHwnd* h, SChars* c)
 	{
 // 		s32			lnX;
 // 		u32			lnI, lnINext, lnTemsCount;
@@ -2636,9 +2739,11 @@
 		SXYS32		point;
 		STems*		t;
 		SBGR*		lbgr;
-		SBGR		color = { 22, 222, 22 };
 
 
+// Note:  This commented code block was an attempt to overlay using solid areas rather than an outline.
+// Note:  It didn't always work correctly due to noise in the incoming outline data.  At some point I'll
+//        add smoothing algorithms which correct the noise.  Until then, we'll just use the outline.
 // 		//////////
 // 		// Do we need to rebuild the overlay information?
 // 		//////
@@ -2724,9 +2829,9 @@
 		//////////
 		// Iterate through each tems entries and draw the outline
 		//////
-			lfRed = (f64)color.red;
-			lfGrn = (f64)color.grn;
-			lfBlu = (f64)color.blu;
+			lfRed = (f64)colorMarkup.red;
+			lfGrn = (f64)colorMarkup.grn;
+			lfBlu = (f64)colorMarkup.blu;
 			for (lnI = 0; lnI < c->tems->populatedLength; lnI += sizeof(STems))
 			{
 				// Grab the pointer
@@ -2752,28 +2857,6 @@
 					lbgr->blu	= (u8)iScaleIntoRange(min((u32)((lfGray * lfBlu) + (lfMGray * (f64)lbgr->blu)), 255), 255, 32, 64);
 				}
 			}
-
-
-		//////////
-		// Display the mouse coordinates in the lower-left
-		//////
-			s8 bufferX[32];
-			s8 bufferY[32];
-			RECT lrcX, lrcY;
-			sprintf(bufferX, "X:%6.4lf\0", ((f32)gMouse.xi / (f32)h->w));
-			sprintf(bufferY, "Y:%6.4lf\0", ((f32)(h->h - gMouse.yi) / (f32)h->h));		// Invert mouse Y coordinate for the calculation
-			SetRect(&lrcX, 0, 0, 0, 0);
-			SetRect(&lrcY, 0, 0, 0, 0);
-			DrawTextA(h->hdc, bufferX, strlen(bufferX), &lrcX, DT_CALCRECT);
-			DrawTextA(h->hdc, bufferY, strlen(bufferY), &lrcY, DT_CALCRECT);
-
-			// Determine the coordinates
-			SetRect(&lrcY, h->w - 3 - (lrcY.right - lrcY.left), h->h - 3 - (lrcY.bottom - lrcY.top), h->w - 3, h->h - 3);
-			SetRect(&lrcX, h->w - 3 - (lrcY.right - lrcY.left) - 3 - (lrcX.right - lrcX.left), h->h - 3 - (lrcX.bottom - lrcX.top), lrcY.left - 3, lrcY.bottom);
-
-			// Render
-			DrawTextA(h->hdc, bufferX, strlen(bufferX), &lrcX, DT_CENTER | DT_VCENTER | DT_END_ELLIPSIS);
-			DrawTextA(h->hdc, bufferY, strlen(bufferY), &lrcY, DT_CENTER | DT_VCENTER | DT_END_ELLIPSIS);
 	}
 
 	u32 iScaleIntoRange(s32 tnValue, s32 tnValueMax, s32 tnMinRange, s32 tnMaxRange)
@@ -2788,6 +2871,51 @@
 	{
 		if (tnValue >= tnValueMin && tnValue <= tnValueMax)		return(tnValue);
 		else													return(tnDefaultValue);
+	}
+
+	void iMakeSureLowToHighU32(u32* p1, u32* p2)
+	{
+		u32 lp;
+
+
+		// Are they already sorted
+		if (*p1 <= *p2)
+			return;
+
+		// Reverse them
+		lp	= *p2;
+		*p2	= *p1;
+		*p1	= lp;
+	}
+
+	void iMakeSureLowToHighS32(s32* p1, s32* p2)
+	{
+		s32 lp;
+
+
+		// Are they already sorted
+		if (*p1 <= *p2)
+			return;
+
+		// Reverse them
+		lp	= *p2;
+		*p2	= *p1;
+		*p1	= lp;
+	}
+
+	void iMakeSureLowToHighF64(f64* p1, f64* p2)
+	{
+		f64 lp;
+
+
+		// Are they already sorted
+		if (*p1 <= *p2)
+			return;
+
+		// Reverse them
+		lp	= *p2;
+		*p2	= *p1;
+		*p1	= lp;
 	}
 
 	// Sort by Y, then X, ascending in both directions
@@ -3112,9 +3240,6 @@
 				// Create a font for rendering the X,Y coordinate in the lower-right
 				s32 lnHeight = -MulDiv(8, GetDeviceCaps(GetDC(GetDesktopWindow()), LOGPIXELSY), 72);
 				h->fontXY = CreateFontA(lnHeight, 0, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, FF_DONTCARE, "Tahoma");
-				SelectObject(h->hdc, h->fontXY);
-				SetBkMode(h->hdc, TRANSPARENT);
-				SetTextColor(h->hdc, RGB(255,255,255));
 
 				// Make it initially gray
 				SetRect(&lrc, 0, 0, h->w, h->h);
@@ -3218,12 +3343,480 @@
 
 //////////
 //
+// Called when the mouse is selected on this area.  Based on the selection criteria, what is
+// needing to be processed will be processed.
+//
+//////
+	void iSelectRange(SInstance* p, SHwnd* h, SChars* c, SXYF64* ul, SXYF64* lr)
+	{
+		u32			lnI;
+		bool		llL, llO, llR, llSkipToNextStroke;
+		SXYF64		pl, po, pr;
+		SSpline*	spline;
+		SSpline*	splineStrokeStart;
+
+
+		// Iterate through each item
+		llSkipToNextStroke	= false;
+		splineStrokeStart	= (SSpline*)c->splines->data;
+		for (lnI = 0; lnI < c->splines->populatedLength; lnI += sizeof(SSpline))
+		{
+			// Grab the pointer
+			spline = (SSpline*)(c->splines->data + lnI);
+
+			// We only process iOrder records above 0
+			if (spline->iOrder > 0)
+			{
+				// See if this is the start of a new stroke
+				if (spline->lPenDown)
+				{
+					// It is
+					llSkipToNextStroke	= false;
+					splineStrokeStart	= spline;
+				}
+
+				// Are supposed to skip to the start of the next stroke?
+				if (!llSkipToNextStroke)
+				{
+					// Compute the three points
+					iSplineCompute(spline, &pl, &po, &pr);
+
+					// If any of the points are in range, then we operate appropriately
+					llL		= iIsPointInRange(&pl, ul, lr);
+					llO		= iIsPointInRange(&po, ul, lr);
+					llR		= iIsPointInRange(&pr, ul, lr);
+					if (llL || llO || llR)
+					{
+						// At least one of these points is in line
+						switch (p->mode)
+						{
+							case _MODE_POINT:
+								// We are selecting any matching points only
+								if (llL)		iSelectPoint(p, spline, &spline->tlLSelected);
+								if (llO)		iSelectPoint(p, spline, &spline->tlOSelected);
+								if (llR)		iSelectPoint(p, spline, &spline->tlRSelected);
+								break;
+
+							case _MODE_SPLINE:
+								// We are selecting the entire spline
+								iSelectSpline(p, spline);
+								break;
+
+							case _MODE_STROKE:
+								// We are selecting the entire stroke
+								iSelectStroke(p, splineStrokeStart);
+								llSkipToNextStroke = true;
+								break;
+
+							case _MODE_BEFORE:
+								// We are selecting everything up to and including this spline on the stroke
+								iSelectStrokeBefore(p, splineStrokeStart, spline);
+								break;
+
+							case _MODE_AFTER:
+								// We are selecting everything from this spline and beyond on this stroke
+								iSelectStrokeAfter(p, spline);
+								llSkipToNextStroke = true;
+								break;
+
+							default:
+								// A settings error
+								_asm int 3;
+								return;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	void iSelectPoint(SInstance* p, SSpline* spline, bool* tlSelected)
+	{
+		if (p->disposition == _DISPOSITION_FLIP_LR || p->disposition == _DISPOSITION_FLIP_LM_RM)
+		{
+			// This is an entire spline operation
+			iSelectSpline(p, spline);
+			return;
+		}
+
+		// If we get here, it's some other disposition
+		switch (p->method)
+		{
+			case _METHOD_LEFT:
+				// They want the left point selected, and the middle and right points not selected
+				switch (p->disposition)
+				{
+					case _DISPOSITION_SELECT:
+						// They are selecting
+						if (!spline->tlLProcessed)		spline->tlLSelected = true;
+						spline->tlLProcessed = true;
+						break;
+
+					case _DISPOSITION_UNSELECT:
+						// They are un-selecting
+						if (!spline->tlLProcessed)		spline->tlLSelected = false;
+						spline->tlLProcessed = true;
+						break;
+
+					case _DISPOSITION_TOGGLE:
+						// We are toggling
+						if (!spline->tlLProcessed)		spline->tlLSelected = !spline->tlLSelected;
+						spline->tlLProcessed = true;
+						break;
+				}
+				break;
+
+			case _METHOD_MIDDLE:
+				// They want the middle point selected, and the left and right points not selected
+				switch (p->disposition)
+				{
+					case _DISPOSITION_SELECT:
+						// They are selecting
+						if (!spline->tlOProcessed)		spline->tlOSelected = true;
+						spline->tlOProcessed = true;
+						break;
+
+					case _DISPOSITION_UNSELECT:
+						// They are un-selecting
+						if (!spline->tlOProcessed)		spline->tlOSelected = false;
+						spline->tlOProcessed = true;
+						break;
+
+					case _DISPOSITION_TOGGLE:
+						// We are toggling
+						if (!spline->tlOProcessed)		spline->tlOSelected = !spline->tlOSelected;
+						spline->tlOProcessed = true;
+						break;
+				}
+				break;
+
+			case _METHOD_RIGHT:
+				// They want the right point selected, and the left and middle points not selected
+				switch (p->disposition)
+				{
+					case _DISPOSITION_SELECT:
+						// They are selecting
+						if (!spline->tlRProcessed)		spline->tlRSelected = true;
+						spline->tlRProcessed = true;
+						break;
+
+					case _DISPOSITION_UNSELECT:
+						// They are un-selecting
+						if (!spline->tlRProcessed)		spline->tlRSelected = false;
+						spline->tlRProcessed = true;
+						break;
+
+					case _DISPOSITION_TOGGLE:
+						// We are toggling
+						if (!spline->tlRProcessed)		spline->tlRSelected = !spline->tlRSelected;
+						spline->tlRProcessed = true;
+						break;
+				}
+				break;
+
+			case _METHOD_LEFT_MIDDLE:
+				// They want the left and middle points selected, and the right point not selected
+				switch (p->disposition)
+				{
+					case _DISPOSITION_SELECT:
+						// They are selecting
+						if (!spline->tlLProcessed)		spline->tlLSelected = true;
+						if (!spline->tlOProcessed)		spline->tlOSelected = true;
+						spline->tlLProcessed = true;
+						spline->tlOProcessed = true;
+						break;
+
+					case _DISPOSITION_UNSELECT:
+						// They are un-selecting
+						if (!spline->tlLProcessed)		spline->tlLSelected = false;
+						if (!spline->tlOProcessed)		spline->tlOSelected = false;
+						spline->tlLProcessed = true;
+						spline->tlOProcessed = true;
+						break;
+
+					case _DISPOSITION_TOGGLE:
+						// We are toggling
+						if (!spline->tlLProcessed)		spline->tlLSelected = !spline->tlLSelected;
+						if (!spline->tlOProcessed)		spline->tlOSelected = !spline->tlOSelected;
+						spline->tlLProcessed = true;
+						spline->tlOProcessed = true;
+						break;
+				}
+				break;
+
+			case _METHOD_MIDDLE_RIGHT:
+				// They want the middle and right points selected, and the left point not selected
+				switch (p->disposition)
+				{
+					case _DISPOSITION_SELECT:
+						// They are selecting
+						if (!spline->tlOProcessed)		spline->tlOSelected = true;
+						if (!spline->tlRProcessed)		spline->tlRSelected = true;
+						spline->tlOProcessed = true;
+						spline->tlRProcessed = true;
+						break;
+
+					case _DISPOSITION_UNSELECT:
+						// They are un-selecting
+						if (!spline->tlOProcessed)		spline->tlOSelected = false;
+						if (!spline->tlRProcessed)		spline->tlRSelected = false;
+						spline->tlOProcessed = true;
+						spline->tlRProcessed = true;
+						break;
+
+					case _DISPOSITION_TOGGLE:
+						// We are toggling
+						if (!spline->tlOProcessed)		spline->tlOSelected = !spline->tlOSelected;
+						if (!spline->tlRProcessed)		spline->tlRSelected = !spline->tlRSelected;
+						spline->tlOProcessed = true;
+						spline->tlRProcessed = true;
+						break;
+				}
+				break;
+
+			case _METHOD_LEFT_RIGHT:
+				// They want the left and right points selected, and the middle point not selected
+				switch (p->disposition)
+				{
+					case _DISPOSITION_SELECT:
+						// They are selecting
+						if (!spline->tlLProcessed)		spline->tlLSelected = true;
+						if (!spline->tlRProcessed)		spline->tlRSelected = true;
+						spline->tlLProcessed = true;
+						spline->tlRProcessed = true;
+						break;
+
+					case _DISPOSITION_UNSELECT:
+						// They are un-selecting
+						if (!spline->tlLProcessed)		spline->tlLSelected = false;
+						if (!spline->tlRProcessed)		spline->tlRSelected = false;
+						spline->tlLProcessed = true;
+						spline->tlRProcessed = true;
+						break;
+
+					case _DISPOSITION_TOGGLE:
+						// We are toggling
+						if (!spline->tlLProcessed)		spline->tlLSelected = !spline->tlLSelected;
+						if (!spline->tlRProcessed)		spline->tlRSelected = !spline->tlRSelected;
+						spline->tlLProcessed = true;
+						spline->tlRProcessed = true;
+						break;
+				}
+				break;
+
+			case _METHOD_SPLINE:
+				// They want the all three, left, middle, and right points selected
+				switch (p->disposition)
+				{
+					case _DISPOSITION_SELECT:
+						// They are selecting
+						if (!spline->tlLProcessed)		spline->tlLSelected = true;
+						if (!spline->tlOProcessed)		spline->tlOSelected = true;
+						if (!spline->tlRProcessed)		spline->tlRSelected = true;
+
+						spline->tlLProcessed = true;
+						spline->tlOProcessed = true;
+						spline->tlRProcessed = true;
+						break;
+
+					case _DISPOSITION_UNSELECT:
+						// They are un-selecting
+						if (!spline->tlLProcessed)		spline->tlLSelected = false;
+						if (!spline->tlOProcessed)		spline->tlOSelected = false;
+						if (!spline->tlRProcessed)		spline->tlRSelected = false;
+
+						spline->tlLProcessed = true;
+						spline->tlOProcessed = true;
+						spline->tlRProcessed = true;
+						break;
+
+					case _DISPOSITION_TOGGLE:
+						// We are toggling
+						if (!spline->tlLProcessed)		spline->tlLSelected = !spline->tlLSelected;
+						if (!spline->tlOProcessed)		spline->tlOSelected = !spline->tlOSelected;
+						if (!spline->tlRProcessed)		spline->tlRSelected = !spline->tlRSelected;
+
+						spline->tlLProcessed = true;
+						spline->tlOProcessed = true;
+						spline->tlRProcessed = true;
+						break;
+				}
+				break;
+
+			case _METHOD_POINT:
+				switch (p->disposition)
+				{
+					case _DISPOSITION_SELECT:
+						// We are simply selecting
+						if (!spline->tlLProcessed)		*tlSelected = true;
+						spline->tlLProcessed = true;
+						break;
+
+					case _DISPOSITION_UNSELECT:
+						// We are simply unselecting
+						if (!spline->tlLProcessed)		*tlSelected = false;
+						spline->tlLProcessed = true;
+						break;
+
+					case _DISPOSITION_TOGGLE:
+						// We are toggling
+						if (!spline->tlLProcessed)		*tlSelected = !*tlSelected;
+						spline->tlLProcessed = true;
+						break;
+				}
+				break;
+		}
+	}
+
+	void iSelectSpline(SInstance* p, SSpline* spline)
+	{
+		switch (p->disposition)
+		{
+			case _DISPOSITION_SELECT:
+				// They are selecting
+				if (!spline->tlLProcessed)		spline->tlLSelected = true;
+				if (!spline->tlOProcessed)		spline->tlOSelected = true;
+				if (!spline->tlRProcessed)		spline->tlRSelected = true;
+
+				spline->tlLProcessed = true;
+				spline->tlOProcessed = true;
+				spline->tlRProcessed = true;
+				break;
+
+			case _DISPOSITION_UNSELECT:
+				// They are un-selecting
+				if (!spline->tlLProcessed)		spline->tlLSelected = false;
+				if (!spline->tlOProcessed)		spline->tlOSelected = false;
+				if (!spline->tlRProcessed)		spline->tlRSelected = false;
+
+				spline->tlLProcessed = true;
+				spline->tlOProcessed = true;
+				spline->tlRProcessed = true;
+				break;
+
+			case _DISPOSITION_TOGGLE:
+				// We are toggling
+				if (!spline->tlLProcessed)		spline->tlLSelected = !spline->tlLSelected;
+				if (!spline->tlOProcessed)		spline->tlOSelected = !spline->tlOSelected;
+				if (!spline->tlRProcessed)		spline->tlRSelected = !spline->tlRSelected;
+
+				spline->tlLProcessed = true;
+				spline->tlOProcessed = true;
+				spline->tlRProcessed = true;
+				break;
+
+			case _DISPOSITION_FLIP_LR:
+				// We are toggling left right, or right left
+				if (spline->tlLSelected)
+				{
+					// Switch to right
+					if (!spline->tlLProcessed)		spline->tlLSelected = false;
+					if (!spline->tlOProcessed)		spline->tlOSelected = false;
+					if (!spline->tlRProcessed)		spline->tlRSelected = true;
+
+				} else if (spline->tlRSelected) {
+					// Switch to left
+					if (!spline->tlLProcessed)		spline->tlLSelected = true;
+					if (!spline->tlOProcessed)		spline->tlOSelected = false;
+					if (!spline->tlRProcessed)		spline->tlRSelected = false;
+				}
+
+				spline->tlLProcessed = true;
+				spline->tlOProcessed = true;
+				spline->tlRProcessed = true;
+				break;
+
+			case _DISPOSITION_FLIP_LM_RM:
+				// We are toggling left+middle to middle+right, or middle+right to middle+left
+				if (spline->tlLSelected)
+				{
+					// Switch to right
+					if (!spline->tlLProcessed)		spline->tlLSelected = false;
+					if (!spline->tlOProcessed)		spline->tlOSelected = true;
+					if (!spline->tlRProcessed)		spline->tlRSelected = true;
+
+				} else if (spline->tlRSelected) {
+					// Switch to left
+					if (!spline->tlLProcessed)		spline->tlLSelected = true;
+					if (!spline->tlOProcessed)		spline->tlOSelected = true;
+					if (!spline->tlRProcessed)		spline->tlRSelected = false;
+				}
+
+				spline->tlLProcessed = true;
+				spline->tlOProcessed = true;
+				spline->tlRProcessed = true;
+				break;
+		}
+	}
+
+	void iSelectStroke(SInstance* p, SSpline* splineStrokeStart)
+	{
+		// Incomplete feature
+		_asm int 3;
+	}
+
+	void iSelectStrokeBefore(SInstance* p, SSpline* splineStrokeStart, SSpline* splineStrokeEnd)
+	{
+		// Incomplete feature
+		_asm int 3;
+	}
+
+	void iSelectStrokeAfter(SInstance* p, SSpline* splineStrokeStart)
+	{
+		// Incomplete feature
+		_asm int 3;
+	}
+
+	void iSplineCompute(SSpline* spline, SXYF64* pl, SXYF64* po, SXYF64* pr)
+	{
+		//////////
+		// Origin is a simple copy
+		//////
+			po->x = spline->ox;
+			po->y = spline->oy;
+
+
+		//////////
+		// Left and right are computed based on theta and origin
+		//////
+			// Right
+			pr->x = spline->ox + (spline->rr * cos(spline->rt + spline->ot));
+			pr->y = spline->oy + (spline->rr * sin(spline->rt + spline->ot));
+			// Left
+			pl->x = spline->ox + (spline->lr * cos(spline->lt + spline->ot));
+			pl->y = spline->oy + (spline->lr * sin(spline->lt + spline->ot));
+
+	}
+
+	// Test the point against the ul..lr range
+	bool iIsPointInRange(SXYF64* pt, SXYF64* ul, SXYF64* lr)
+	{
+		if (pt->y >= ul->y && pt->y <= lr->y)
+		{
+			if (pt->x >= ul->x && pt->x <= lr->x)
+			{
+				// We're good
+				return(true);
+			}
+		}
+		// Not in range
+		return(false);
+	}
+
+
+
+
+//////////
+//
 // Read the mouse position asynchronously
 //
 //////
 	void iReadMousePosition(SInstance* p, SHwnd* h)
 	{
+		u32			lnI, lnJ;
 		bool		llLastMouseLeft, llLastMouseRight, llLastCtrl, llLastShift, llLastAlt, llMoved, llWasOnTheReservation;
+		SChars*		c;
+		SSpline*	spline;
 		POINT		pt;
 
 
@@ -3278,12 +3871,45 @@
 		//////////
 		// Has the mouse moved?
 		//////
-			if (llWasOnTheReservation || (llMoved && gMouse.xi >= 0 && gMouse.xi < h->w && gMouse.yi >= 0 && gMouse.yi < h->h) ||
+			if (llWasOnTheReservation || 
+				(llMoved && gMouse.xi >= 0 && gMouse.xi < h->w && gMouse.yi >= 0 && gMouse.yi < h->h) ||
 				llLastMouseLeft != glMouseLeft || llLastMouseRight != glMouseRight || 
 				llLastCtrl != glCtrlKeyDown || llLastShift != glShiftKeyDown || llLastAlt != glAltKeyDown)
 			{
+				//////////
+				// Has the left mouse button gone down?
+				//////
+					if (!llLastMouseLeft && glMouseLeft)
+					{
+						// Yes, set everything to being not processed
+						for (lnI = 0; lnI < p->chars->populatedLength; lnI += sizeof(SChars))
+						{
+							// Grab this pointer
+							c = (SChars*)(p->chars->data + lnI);
+
+							// Do every spline within each character
+							for (lnJ = 0; lnJ < c->splines->populatedLength; lnJ += sizeof(SSpline))
+							{
+								// Grab this pointer
+								spline = (SSpline*)(c->splines->data + lnJ);
+
+								// We only process positive orders
+								if (spline->iOrder > 0)
+								{
+									// Set this one to not processed
+									spline->tlLProcessed	= false;
+									spline->tlOProcessed	= false;
+									spline->tlRProcessed	= false;
+								}
+							}
+						}
+					}
+
+
+				//////////
 				// Post a message back to the parent to indicate this child needs to be redrawn
-				PostMessage(h->hwndParent, WM_REDRAW_WINDOW, (u32)p, h->_hwnd);
+				//////
+					PostMessage(h->hwndParent, WM_REDRAW_WINDOW, (u32)p, h->_hwnd);
 			}
 	}
 
