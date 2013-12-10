@@ -768,7 +768,7 @@
 		//////////
 		// Determine where we will update our bitmap
 		//////
-			h = iFindOrCreateHwnd(p->hwnds, tnHwnd, tnX, tnY, tnWidth, tnHeight);
+			h = iFindOrCreateHwnd(p->hwnds, tnHwnd, tnX, tnY, tnWidth, tnHeight, true);
 			if (!h)
 				return(-3);
 
@@ -820,7 +820,7 @@
 		//////////
 		// Determine where we will update our bitmap
 		//////
-			h = iFindOrCreateHwnd(p->hwnds, tnHwnd, tnX, tnY, tnWidth, tnHeight);
+			h = iFindOrCreateHwnd(p->hwnds, tnHwnd, tnX, tnY, tnWidth, tnHeight, false);
 			if (!h)
 				return(-3);
 
@@ -2036,7 +2036,10 @@
 
 				// Render the markup
 				if (h->markup != 0)
+				{
 					iRenderMarkup(p, h, c);
+					iRenderMouseOverlay(p, h, c);
+				}
 			}
 
 			// Redraw after the rendering
@@ -2072,12 +2075,6 @@
 		SSpline*	s;
 		SSpline*	sLast;
 		SBuilder*	b;
-		SBGR		spline;
-		SBGR		black			= { 0, 0, 0 };
-		SBGR		colorSelected	= { 64, 128, 255 };
-		SBGR		colorR			= { 64, 64, 215 };
-		SBGR		colorO			= { 255, 64, 64 };
-		SBGR		colorL			= { 64, 215, 64 };
 
 
 		//////////
@@ -2427,6 +2424,101 @@
 
 //////////
 //
+// Called to render the mouse atop the current image
+//
+//////
+	void iRenderMouseOverlay(SInstance* p, SHwnd* h, SChars* c)
+	{
+		SXYS32	p1;
+		s32		lnX, lnY, lnYLast;
+		f64		lfTheta, lfThetaStep, lfA, lfB, lfV1, lfV2, lfX, lfY, lfRadius;
+
+
+		// Can we render it?
+		if (gMouse.xi >= 0 && gMouse.xi < h->w && gMouse.yi >= 0 && gMouse.yi < h->h)
+		{
+			// Invert the Y mouse coordinates for rendering
+			p1.xi = gMouse.xi;
+			p1.yi = h->h - gMouse.yi;
+
+			// Render it (we're basically drawing an oval area the mouse will interact with)
+			lfRadius	= (f64)min(max(gMouseType, _MOUSE_TYPE_SMALL), _MOUSE_TYPE_LARGE);
+			lnYLast		= -1;
+			lfA			= lfRadius * 1.0;		// A is 100%
+			lfB			= lfRadius * 0.7;		// B is 70%, this gives us a 10:7 oval
+			lfThetaStep	= _PI / ((f64)gMouseType * 8.0);
+			for (lfTheta = 0; lfTheta < _PI_2; lfTheta += lfThetaStep)
+			{
+				// Compute the X,Y for Quad I, then reflect for lines in Quad2..1, and Quad3..4
+				lfV1		= lfB * cos(lfTheta);
+				lfV2		= lfA * sin(lfTheta);
+				lfRadius	= (lfA*lfB) / sqrt(lfV1*lfV1 + lfV2*lfV2);
+
+				// Compute X and Y given this radius
+				lfX			= lfRadius * cos(lfTheta);
+				lfY			= lfRadius * sin(lfTheta);
+
+				// Convert to integer
+				lnY			= (s32)lfY;
+				lnX			= (s32)lfX;
+
+				// If it's changed, draw it
+				if (lnY != lnYLast)
+				{
+					// Draw the mouse indicator there, and perform any operations
+					iColorizeAndProcessHorizontalLineByPixels(p, h, c, p1.xi - lnX, p1.xi + lnX, p1.yi + lnY, mouseColor);		// Above
+					if (lnY != 0)
+						iColorizeAndProcessHorizontalLineByPixels(p, h, c, p1.xi - lnX, p1.xi + lnX, p1.yi - lnY, mouseColor);	// Below
+
+					lnYLast = lnY;
+				}
+			}
+		}
+	}
+
+	void iColorizeAndProcessHorizontalLineByPixels(SInstance* p, SHwnd* h, SChars* c, s32 x1, s32 x2, s32 y, SBGR color)
+	{
+		s32		lnX;
+		f64		lfAlp, lfMalp, lfGray, lfRed, lfGrn, lfBlu;
+		SBGR*	lbgr;
+
+
+		// Is it out of bounds?
+		if (y < 0 || y > h->h)
+			return;
+
+		// Get the pointer
+		lbgr = (SBGR*)((s8*)h->bd + (y * h->rowWidth) + (x1 * 3));
+
+		// Get the colors
+		lfRed	= (f64)color.red;
+		lfGrn	= (f64)color.grn;
+		lfBlu	= (f64)color.blu;
+		lfAlp	= 0.5;
+		lfMalp	= 1.0 - lfAlp;
+
+		// Iterate for every x
+		for (lnX = x1; lnX <= x2; lnX++, lbgr++)
+		{
+			// Is it out of bounds?
+			if (lnX >= 0 && lnX < h->w)
+			{
+// 				// Grayscale the color
+// 				lfGray = (((f64)lbgr->red * 0.35) + (f64)lbgr->grn * 0.54 + (f64)lbgr->blu * 0.11) / 255.0;
+
+				// Colorize it
+				lbgr->red	= (u8)iScaleIntoRange((s32)((lfAlp * lfRed) + (lfMalp * (f64)lbgr->red)), 255, 92, 255);
+				lbgr->grn	= (u8)iScaleIntoRange((s32)((lfAlp * lfGrn) + (lfMalp * (f64)lbgr->grn)), 255, 92, 255);
+				lbgr->blu	= (u8)iScaleIntoRange((s32)((lfAlp * lfBlu) + (lfMalp * (f64)lbgr->red)), 255, 92, 255);
+			}
+		}
+	}
+
+
+
+
+//////////
+//
 // Called to render the markup data onto the character
 //
 //////
@@ -2563,6 +2655,9 @@
 
 	u32 iScaleIntoRange(s32 tnValue, s32 tnValueMax, s32 tnMinRange, s32 tnMaxRange)
 	{
+		if (tnValue > tnValueMax)
+			tnValue = tnValueMax;
+
 		return(tnMinRange + (s32)(((f64)tnValue / (f64)tnValueMax) * (f64)(tnMaxRange - tnMinRange)));
 	}
 
@@ -2705,6 +2800,31 @@
 			return(NULL);
 	}
 
+	SHwnd* iFindOnlyHwndByHwndParent(SBuilder* hwnds, u32 tnHwndParent)
+	{
+		u32		lnI;
+		SHwnd*	h;
+
+
+		//////////
+		// See if the existing item exists
+		//////
+			for (lnI = 0; lnI < hwnds->populatedLength; lnI += sizeof(SHwnd))
+			{
+				// Grab this pointer
+				h = (SHwnd*)(hwnds->data + lnI);
+
+				// See if it's a match
+				if (h->_hwndParent == tnHwndParent && h->oldWndParentProcAddress != 0)
+				{
+					// It's a match
+					return(h);
+				}
+			}
+			// If we get here, it wasn't found
+			return(NULL);
+	}
+
 	SHwnd* iFindOnlyHwnd(SBuilder* hwnds, u32 tnHwndParent, s32 tnX, s32 tnY, s32 tnWidth, s32 tnHeight)
 	{
 		u32		lnI;
@@ -2734,7 +2854,7 @@
 			return(NULL);
 	}
 
-	SHwnd* iFindOrCreateHwnd(SBuilder* hwnds, u32 tnHwndParent, s32 tnX, s32 tnY, s32 tnWidth, s32 tnHeight)
+	SHwnd* iFindOrCreateHwnd(SBuilder* hwnds, u32 tnHwndParent, s32 tnX, s32 tnY, s32 tnWidth, s32 tnHeight, u32 tlMarkup)
 	{
 		SHwnd*	h;
 
@@ -2761,6 +2881,7 @@
 				h->y					= tnY;
 				h->w					= tnWidth;
 				h->h					= tnHeight;
+				h->markup				= tlMarkup;
 				h->rowWidth				= iComputeRowWidth(tnWidth);
 
 				// Bitmap info
@@ -2813,7 +2934,7 @@
 				classa.hInstance			= ghInstance;
 				classa.style				= CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
 				classa.lpszClassName		= cgcPreviewWindowClass;
-				classa.lpfnWndProc			= &iWindowProcCallback;
+				classa.lpfnWndProc			= (WNDPROC)GetWindowLong(h->hwndParent, GWL_WNDPROC);
 
 				// Register
 				atom = RegisterClassExA(&classa);
@@ -2826,9 +2947,18 @@
 		//////////
 		// Create the window
 		//////
-			h->hwnd = CreateWindowA(cgcPreviewWindowClass, NULL, WS_CHILD, h->x, h->y, h->w, h->h, h->hwndParent, NULL, ghInstance, (LPVOID)h);
+			h->hwnd = CreateWindowA(cgcPreviewWindowClass, cgcPreviewWindowClass, WS_CHILD, h->x, h->y, h->w, h->h, h->hwndParent, NULL, ghInstance, (LPVOID)h);
 			if (h->_hwnd)
 			{
+				if (h->markup)
+				{
+					// Update the WNDPROC handler so we receive messages
+					h->oldWndProcAddress = (WNDPROC)GetWindowLong(h->hwnd, GWL_WNDPROC);
+					SetWindowLong(h->hwnd, GWL_WNDPROC, (long)&iWindowProcCallback);
+					h->oldWndParentProcAddress = (WNDPROC)GetWindowLong(h->hwndParent, GWL_WNDPROC);
+					SetWindowLong(h->hwndParent, GWL_WNDPROC, (long)&iWindowProcCallback);
+				}
+
 				// Create a DIB Section for accessing this window's bits
 				SetRect(&h->rc, h->x, h->y, (h->x + h->w), (h->y + h->h));
 				h->hdc	= CreateCompatibleDC(GetDC(h->hwnd));
@@ -2856,86 +2986,6 @@
 				_asm int 3;
 			}
 			return(h->_hwnd);
-	}
-
-
-
-
-//////////
-//
-// Called to render the mouse atop the current image
-//
-//////
-	void iRenderMouse(SHwnd* h, SXYS32 tnMouse)
-	{
-	}
-
-
-
-
-//////////
-//
-// Callback for the window
-//
-//////
-	LRESULT CALLBACK iWindowProcCallback(HWND hwnd, UINT m, WPARAM w, LPARAM l)
-	{
-		u32				lnI;
-		POINTS			p;
-		PAINTSTRUCT		ps;
-		HDC				lhdc;
-		union {
-			HWND		thisHwnd;
-			u32			_thisHwnd;
-		};
-		union {
-			HWND		hwndParent;
-			u32			_hwndParent;
-		};
-		SHwnd*			h;
-		SInstance*		s;
-
-
-		thisHwnd = hwnd;
-		// Iterate through each window to see which one this is
-		hwndParent	= GetParent(hwnd);
-		for (lnI = 0; lnI < instances->populatedLength; lnI += sizeof(SInstance))
-		{
-			// Grab the pointer
-			s = (SInstance*)(instances->data + lnI);
-
-			// See if we're found on this instance
-			h = iFindOnlyHwndByHwnd(s->hwnds, _hwndParent, _thisHwnd);
-			if (h)
-			{
-				switch (m)
-				{
-					// Redraw the window
-					case WM_PAINT:
-						// Paint it
-						lhdc = BeginPaint(hwnd, &ps);
-						BitBlt(lhdc, 0, 0, h->w, h->h, h->hdc, 0, 0, SRCCOPY);
-						EndPaint(hwnd, &ps);
-						// All done
-
-						// Indicate to Windows that we processed it
-						return 0;
-						// If we get here, we are not processing this message any longer
-						break;
-
-					case WM_MOUSEMOVE:
-						p = MAKEPOINTS(l);
-						gMouse.xi = p.x;
-						gMouse.yi = p.y;
-						// Send a message back to the parent to indicate it needs to be redrawn
-						SendMessage(hwndParent, WM_REDRAW_WINDOW, (u32)s, _thisHwnd);
-						break;
-				}
-			}
-		}
-
-		// Call Windows' default procedure handler
-		return(DefWindowProc(hwnd, m, w, l));
 	}
 
 
@@ -3018,4 +3068,124 @@
 			if (p->y >= 0.0)		return(2);		// X is negative, Y is positive
 			else					return(3);		// X is negative, Y is negative
 		}
+	}
+
+
+
+
+//////////
+//
+// Callback for the window
+//
+//////
+	LRESULT CALLBACK iWindowProcCallback(HWND hwnd, UINT m, WPARAM w, LPARAM l)
+	{
+		u32				lnI;
+		POINTS			p;
+		PAINTSTRUCT		ps;
+		HDC				lhdc;
+		union {
+			HWND		thisHwnd;
+			u32			_thisHwnd;
+		};
+		union {
+			HWND		hwndParent;
+			u32			_hwndParent;
+		};
+		SHwnd*			h;
+		SInstance*		s;
+
+
+		// Iterate through each window to see which one this is
+		if (m == WM_MOUSEMOVE)
+			_asm nop;
+
+		thisHwnd	= hwnd;
+		hwndParent	= GetParent(hwnd);
+		for (lnI = 0; lnI < instances->populatedLength; lnI += sizeof(SInstance))
+		{
+			// Grab the pointer
+			s = (SInstance*)(instances->data + lnI);
+
+			// See if we're found on this instance
+			h = iFindOnlyHwndByHwnd(s->hwnds, _hwndParent, _thisHwnd);
+			if (h)
+			{
+				// It was one of our windows
+				switch (m)
+				{
+					// Redraw the window
+					case WM_PAINT:
+						// Paint it
+						lhdc = BeginPaint(hwnd, &ps);
+						BitBlt(lhdc, 0, 0, h->w, h->h, h->hdc, 0, 0, SRCCOPY);
+						EndPaint(hwnd, &ps);
+						// All done
+
+						// Indicate to Windows that we processed it
+						return 0;
+						// If we get here, we are not processing this message any longer
+						break;
+				}
+				// Call Windows' default procedure handler
+				return(DefWindowProc(hwnd, m, w, l));
+			}
+
+			// See if this hwnd is one of our parent hwnd's
+			h = iFindOnlyHwndByHwndParent(s->hwnds, _thisHwnd);
+			if (h)
+			{
+				switch (m)
+				{
+					case WM_LBUTTONDBLCLK:
+					case WM_RBUTTONDBLCLK:
+					case WM_MBUTTONDBLCLK:
+						break;
+
+					case WM_MOUSEMOVE:
+						p = MAKEPOINTS(l);
+						if (p.x >= h->x && p.x < h->x + h->w)
+						{
+							if (p.y >= h->y && p.y < h->y + h->h)
+							{
+								gMouse.xi = p.x - h->x;
+								gMouse.yi = p.y - h->y;
+								// Send a message back to the parent to indicate this child needs to be redrawn
+								SendMessage(h->hwndParent, WM_REDRAW_WINDOW, (u32)s, h->_hwnd);
+							}
+						}
+						break;
+
+					case WM_LBUTTONDOWN:
+					case WM_RBUTTONDOWN:
+					case WM_MBUTTONDOWN:
+						p = MAKEPOINTS(l);
+						if (p.x >= h->x && p.x < h->x + h->w)
+						{
+							if (p.y >= h->y && p.y < h->y + h->h)
+							{
+								gMouse.xi = p.x - h->x;
+								gMouse.yi = p.y - h->y;
+								// Send a message back to the parent to indicate this child needs to be redrawn
+								SendMessage(h->hwndParent, WM_REDRAW_WINDOW, (u32)s, h->_hwnd);
+							}
+						}
+						break;
+
+					case WM_LBUTTONUP:
+					case WM_RBUTTONUP:
+					case WM_MBUTTONUP:
+						gMouse.xi = -1;
+						gMouse.yi = -1;
+						// Send a message back to the parent to indicate this child needs to be redrawn
+						SendMessage(h->hwndParent, WM_REDRAW_WINDOW, (u32)s, h->_hwnd);
+						break;
+						break;
+				}
+				// We found that it's a parent message
+				return(CallWindowProc(h->oldWndParentProcAddress, hwnd, m, w, l));
+			}
+		}
+		// Call Windows' default procedure handler
+		return(DefWindowProc(hwnd, m, w, l));
 	}

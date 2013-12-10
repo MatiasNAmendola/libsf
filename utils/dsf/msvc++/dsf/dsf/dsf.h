@@ -281,11 +281,13 @@ struct SLinef64
 		s32			w;								// Window width
 		s32			h;								// Window height
 
-		// Data expressly for the generated bitmap
+		// Data used expressly for the generated bitmap, and rendering it locally on windows
 		union {
 			HWND			hwnd;					// The HWND handle
 			u32				_hwnd;					// hwnd of the render window
 		};
+		WNDPROC				oldWndProcAddress;		// Used for re-directing window handling through our DLL
+		WNDPROC				oldWndParentProcAddress;// Used for re-directing window handling through our DLL
 		BITMAPFILEHEADER	bh;						// Bitmap header if this bitmap is written to disk
 		BITMAPINFOHEADER	bi;						// Bitmap info
 		RECT				rc;						// Same as SetRect(&rc, 0, 0, w, h)
@@ -336,6 +338,10 @@ struct SLinef64
 	const f64	_SQRT2					= 1.4142135624;
 	const s8	cgcPreviewWindowClass[] = "DSF-Preview-Window-Class";
 
+	const u32	_MOUSE_TYPE_SMALL		= 10;
+	const u32	_MOUSE_TYPE_MEDIUM		= 20;
+	const u32	_MOUSE_TYPE_LARGE		= 30;
+
 	const u32	WM_REDRAW_WINDOW		= WM_USER + 1;
 
 
@@ -347,7 +353,15 @@ struct SLinef64
 	HINSTANCE	ghInstance;
 	SBuilder*	instances;
 	SBuilder*	placeholder;
-	SXYS32		gMouse = { 0, 0 };
+	SXYS32		gMouse					= { -1, -1 };
+	u32			gMouseType				= _MOUSE_TYPE_SMALL;
+	SBGR		spline;
+	SBGR		black					= { 0, 0, 0 };
+	SBGR		colorSelected			= { 64, 128, 255 };
+	SBGR		colorR					= { 64, 64, 215 };
+	SBGR		colorO					= { 255, 64, 64 };
+	SBGR		colorL					= { 64, 215, 64 };
+	SBGR		mouseColor				= { 0, 255, 255 };
 
 
 
@@ -389,10 +403,13 @@ struct SLinef64
 	void				iDrawPoint								(SHwnd* h, SXYF64* p1, SBGR color);
 	void				iDrawPointSmall							(SHwnd* h, SXYF64* p1, SBGR color);
 	void				iDrawPointLarge							(SHwnd* h, SXYF64* p1, SBGR color);
+	void				iDrawMouse								(SHwnd* h, SXYS32* p);
 	void				iDrawHorizontalLineByPixels				(SHwnd* h, s32 x1, s32 x2, s32 y, SBGR color);
 	void				iFillQuad								(SHwnd* h, SXYF64* p1, SXYF64* p2, SXYF64* p3, SXYF64* p4, SBGR color);
 	void				iSetPoint								(SXYF64* p, f64 x, f64 y);
 	void				iCopyPoint								(SXYF64* pDst, SXYF64* pSrc);
+	void				iRenderMouseOverlay						(SInstance* p, SHwnd* h, SChars* c);
+	void				iColorizeAndProcessHorizontalLineByPixels(SInstance* p, SHwnd* h, SChars* c, s32 x1, s32 x2, s32 y, SBGR color);
 	void				iRenderMarkup							(SInstance* p, SHwnd* h, SChars* c);
 	u32					iScaleIntoRange							(s32 tnValue, s32 tnValueMax, s32 tnMinRange, s32 tnMaxRange);
 	int					iiTems_qsortCallback					(const void* l, const void* r);
@@ -400,12 +417,12 @@ struct SLinef64
 	u32					iiRenderMarkup_getNextLineSegment		(u32 tnIndex, u32 tnMaxCount, SHwnd* h, STems* root, STems** p1, STems** p2);
 	s32					iiGetPoint								(f64 tfValue01, s32 tnMultiplier);
 	SHwnd*				iFindOnlyHwndByHwnd						(SBuilder* hwnds, u32 tnHwndParent, u32 tnHwnd);
+	SHwnd*				iFindOnlyHwndByHwndParent				(SBuilder* hwnds, u32 tnHwndParent);
 	SHwnd*				iFindOnlyHwnd							(SBuilder* hwnds, u32 tnHwndParent, s32 tnX, s32 tnY, s32 tnWidth, s32 tnHeight);
-	SHwnd*				iFindOrCreateHwnd						(SBuilder* hwnds, u32 tnHwndParent, s32 tnX, s32 tnY, s32 tnWidth, s32 tnHeight);
+	SHwnd*				iFindOrCreateHwnd						(SBuilder* hwnds, u32 tnHwndParent, s32 tnX, s32 tnY, s32 tnWidth, s32 tnHeight, u32 tlMarkup);
 	u32					iCreateWindow							(SHwnd* h);
-	void				iRenderMouse							(SHwnd* h, SXYS32 tnMouse);
-	LRESULT CALLBACK	iWindowProcCallback						(HWND hwnd, UINT m, WPARAM w, LPARAM l);
-
 	void				iComputeLine							(SLinef64* line);
 	f64					iAdjustTheta							(f64 tfTheta);
 	s32					iComputeQuad							(SXYF64* p);
+	void				iRenderMouse							(SHwnd* h, SXYS32 tnMouse);
+	LRESULT CALLBACK	iWindowProcCallback						(HWND hwnd, UINT m, WPARAM w, LPARAM l);
