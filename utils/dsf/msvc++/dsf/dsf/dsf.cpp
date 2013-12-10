@@ -703,9 +703,11 @@
 // Called to convey user settings
 //
 //////
-	int dsf_user_settings(u32 tnInstance, u32 tnDisposition, u32 tnMode, u32 tnMethod, u32 tnRange)
+	int dsf_user_settings(u32 tnInstance, u32 tnDisposition, u32 tnMode, u32 tnMethod, u32 tnRange, u32 tnSelectArea)
 	{
+		u32			lnI;
 		SInstance*	p;
+		SHwnd*		h;
 		bool		llValid;
 
 
@@ -724,8 +726,26 @@
 			p->mode				= iValidateRange(tnMode,		_MODE_POINT,			_MODE_AFTER,				_MODE_POINT);
 			p->method			= iValidateRange(tnMethod,		_METHOD_LEFT,			_METHOD_POINT,				_METHOD_POINT);
 			p->range			= iValidateRange(tnRange,		_RANGE_ACTIVE_CHAR,		_RANGE_ALL,					_RANGE_ACTIVE_CHAR);
+			p->selectArea		= iValidateRange(tnSelectArea,	_SELECT_AREA_SMALL,		_SELECT_AREA_LARGE,			_SELECT_AREA_SMALL);
 
-			// Indicate success
+
+		//////////
+		// Force a re-render (whether we need one or not. :-))
+		//////
+			for (lnI = 0; lnI < p->hwnds->populatedLength; lnI += sizeof(SHwnd))
+			{
+				// Grab the pointer
+				h = (SHwnd*)(p->hwnds->data + lnI);
+
+				// If it's a markup window, re-render it
+				if (h->markup)
+					PostMessage(h->hwndParent, WM_REDRAW_WINDOW, (u32)p, (u32)h->hwnd);
+			}
+
+
+		//////////
+		// Indicate success
+		//////
 			return(0);
 	}
 
@@ -2482,7 +2502,7 @@
 		{
 			// The mouse is pressed down, render the select area
 			// Render it (we're basically drawing an oval area the mouse will interact with)
-			lfRadius	= (f64)min(max(gMouseType, _MOUSE_TYPE_SMALL), _MOUSE_TYPE_LARGE);
+			lfRadius	= (f64)iValidateRange(p->selectArea, _SELECT_AREA_SMALL, _SELECT_AREA_LARGE, _SELECT_AREA_SMALL);
 			lnYLast		= -1;
 			lfA			= lfRadius * 1.0;		// A is 100%
 			lfB			= lfRadius * 0.7;		// B is 70%, this gives us a 10:7 oval
@@ -2732,6 +2752,28 @@
 					lbgr->blu	= (u8)iScaleIntoRange(min((u32)((lfGray * lfBlu) + (lfMGray * (f64)lbgr->blu)), 255), 255, 32, 64);
 				}
 			}
+
+
+		//////////
+		// Display the mouse coordinates in the lower-left
+		//////
+			s8 bufferX[32];
+			s8 bufferY[32];
+			RECT lrcX, lrcY;
+			sprintf(bufferX, "X:%6.4lf\0", ((f32)gMouse.xi / (f32)h->w));
+			sprintf(bufferY, "Y:%6.4lf\0", ((f32)(h->h - gMouse.yi) / (f32)h->h));		// Invert mouse Y coordinate for the calculation
+			SetRect(&lrcX, 0, 0, 0, 0);
+			SetRect(&lrcY, 0, 0, 0, 0);
+			DrawTextA(h->hdc, bufferX, strlen(bufferX), &lrcX, DT_CALCRECT);
+			DrawTextA(h->hdc, bufferY, strlen(bufferY), &lrcY, DT_CALCRECT);
+
+			// Determine the coordinates
+			SetRect(&lrcY, h->w - 3 - (lrcY.right - lrcY.left), h->h - 3 - (lrcY.bottom - lrcY.top), h->w - 3, h->h - 3);
+			SetRect(&lrcX, h->w - 3 - (lrcY.right - lrcY.left) - 3 - (lrcX.right - lrcX.left), h->h - 3 - (lrcX.bottom - lrcX.top), lrcY.left - 3, lrcY.bottom);
+
+			// Render
+			DrawTextA(h->hdc, bufferX, strlen(bufferX), &lrcX, DT_CENTER | DT_VCENTER | DT_END_ELLIPSIS);
+			DrawTextA(h->hdc, bufferY, strlen(bufferY), &lrcY, DT_CENTER | DT_VCENTER | DT_END_ELLIPSIS);
 	}
 
 	u32 iScaleIntoRange(s32 tnValue, s32 tnValueMax, s32 tnMinRange, s32 tnMaxRange)
@@ -3037,13 +3079,18 @@
 			h->hwnd = CreateWindowA(cgcPreviewWindowClass, cgcPreviewWindowClass, WS_CHILD, h->x, h->y, h->w, h->h, h->hwndParent, NULL, ghInstance, (LPVOID)h);
 			if (h->_hwnd)
 			{
+				// Update the WNDPROC handler so we receive messages
+				h->oldWndProcAddress = (WNDPROC)GetWindowLong(h->hwnd, GWL_WNDPROC);
+				SetWindowLong(h->hwnd, GWL_WNDPROC, (long)&iWindowProcCallback);
+
+				// Add a timer for markup windows (there should only be one)
 				if (h->markup)
 				{
-					// Update the WNDPROC handler so we receive messages
-					h->oldWndProcAddress = (WNDPROC)GetWindowLong(h->hwnd, GWL_WNDPROC);
-					SetWindowLong(h->hwnd, GWL_WNDPROC, (long)&iWindowProcCallback);
-					h->oldWndParentProcAddress = (WNDPROC)GetWindowLong(h->hwndParent, GWL_WNDPROC);
-					SetWindowLong(h->hwndParent, GWL_WNDPROC, (long)&iWindowProcCallback);
+// Removed ... probably not necessary any longer 12/10
+// 					// We need the parent's window messages as well
+// 					h->oldWndParentProcAddress = (WNDPROC)GetWindowLong(h->hwndParent, GWL_WNDPROC);
+// 					SetWindowLong(h->hwndParent, GWL_WNDPROC, (long)&iWindowProcCallback);
+
 					// Create a timer to read the mouse 30 times per second
 					SetTimer(h->hwnd, (u32)h, 33, NULL);
 				}
@@ -3061,6 +3108,13 @@
 
 				// Create a gray brush
 				h->backDarkGrayBrush = CreateSolidBrush(RGB(32, 32, 32));
+
+				// Create a font for rendering the X,Y coordinate in the lower-right
+				s32 lnHeight = -MulDiv(8, GetDeviceCaps(GetDC(GetDesktopWindow()), LOGPIXELSY), 72);
+				h->fontXY = CreateFontA(lnHeight, 0, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, FF_DONTCARE, "Tahoma");
+				SelectObject(h->hdc, h->fontXY);
+				SetBkMode(h->hdc, TRANSPARENT);
+				SetTextColor(h->hdc, RGB(255,255,255));
 
 				// Make it initially gray
 				SetRect(&lrc, 0, 0, h->w, h->h);

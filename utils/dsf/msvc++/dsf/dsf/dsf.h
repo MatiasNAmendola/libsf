@@ -296,6 +296,7 @@ struct SLinef64
 		HBITMAP				hbmp;					// Handle to DIBSection
 		SBGR*				bd;						// Pointer to literal bit data for the active window buffer
 		HBRUSH				backDarkGrayBrush;		// Color used for dark gray background brush
+		HFONT				fontXY;					// Font for rendering X,Y coordiantes in the lower-right
 
 		// Used for real-time mouse drawing
 		HDC					hdc2;					// Device context when window was created
@@ -318,6 +319,7 @@ struct SLinef64
 		u32				mode;						// 0=point, 1=spline, 2=stroke, 3=before and current, 4=current and after
 		u32				method;						// 0=left, 1=middle, 2=right, 3=left+middle, 4=middle+right, 5=left+right, 6=spline, 7=point
 		u32				range;						// 0=active character, 1=AZ, 2=az, 3=AZaz, 4=09, 5=AZaz09, 6=AZaz09!@.., 7=all
+		u32				selectArea;					// Some value between 10..30 (how big they want the mouse select area to be)
 
 		SBuilder*		chars;						// (SBuilder) Characters, one SBuilder for every character, with each character SBuilder pointing to its many SChar entries
 		SBuilder*		refs;						// (SRefs) References
@@ -342,9 +344,9 @@ struct SLinef64
 	const f64	_SQRT2						= 1.4142135624;
 	const s8	cgcPreviewWindowClass[]	 = "DSF-Preview-Window-Class";
 
-	const u32	_MOUSE_TYPE_SMALL			= 10;
-	const u32	_MOUSE_TYPE_MEDIUM			= 20;
-	const u32	_MOUSE_TYPE_LARGE			= 30;
+	const u32	_SELECT_AREA_SMALL			= 10;
+	const u32	_SELECT_AREA_MEDIUM			= 20;
+	const u32	_SELECT_AREA_LARGE			= 30;
 
 	const u32	_DISPOSITION_SELECT			= 0;
 	const u32	_DISPOSITION_UNSELECT		= 1;
@@ -388,7 +390,7 @@ struct SLinef64
 	SBuilder*	instances;
 	SBuilder*	placeholder;
 	SXYS32		gMouse					= { -1, -1 };
-	u32			gMouseType				= _MOUSE_TYPE_SMALL;
+	u32			gMouseType				= _SELECT_AREA_SMALL;
 	bool		glMouseLeft;
 	bool		glMouseRight;
 	bool		glCtrlKeyDown			= false;
