@@ -703,7 +703,7 @@
 // Called to convey user settings
 //
 //////
-	int dsf_user_settings(u32 tnInstance, u32 tnDisposition, u32 tnMode, u32 tnMethod, u32 tnRange, u32 tnSelectArea)
+	int dsf_user_settings(u32 tnInstance, u32 tnDisposition, u32 tnMode, u32 tnMethod, u32 tnRange, u32 tlShowTems, u32 tnTemsType, u32 tlShowSplines, u32 tnSplinesType, u32 tnSelectArea)
 	{
 		u32			lnI;
 		SInstance*	p;
@@ -726,6 +726,10 @@
 			p->mode				= iValidateRange(tnMode,		_MODE_POINT,			_MODE_AFTER,				_MODE_POINT);
 			p->method			= iValidateRange(tnMethod,		_METHOD_LEFT,			_METHOD_POINT,				_METHOD_POINT);
 			p->range			= iValidateRange(tnRange,		_RANGE_ACTIVE_CHAR,		_RANGE_ALL,					_RANGE_ACTIVE_CHAR);
+			p->showTems			= iValidateRange(tlShowTems,	_NO,					_YES,						_YES);
+			p->temsType			= iValidateRange(tnTemsType,	_TEMS_TRACK,			_TEMS_DISPLAY,				_TEMS_TRACK);
+			p->showSplines		= iValidateRange(tlShowSplines,	_NO,					_YES,						_YES);
+			p->splinesType		= iValidateRange(tnSplinesType,	_SPLINES_FILL,			_SPLINES_LOR,				_SPLINES_FILL);
 			p->selectArea		= iValidateRange(tnSelectArea,	_SELECT_AREA_SMALL,		_SELECT_AREA_LARGE,			_SELECT_AREA_SMALL);
 
 
@@ -947,8 +951,9 @@
 //////
 	void initialize(void)
 	{
-		f64		lfX, lfY, lfTheta, lfRadius, lfA, lfB, lfV1, lfV2;
-		bool	llPenDown;
+		f64			lfX, lfY, lfTheta, lfRadius, lfA, lfB, lfV1, lfV2;
+		SSpline*	s;
+		bool		llPenDown;
 
 
 		//////////
@@ -971,11 +976,20 @@
 			iAddSplineFromToLR(placeholder, true,		0.775,		0.435,		0.85,		0.485);
 			iAddSplineFromToLR(placeholder, false,		0.7825,		0.425,		0.865,		0.47);
 			iAddSplineFromToLR(placeholder, false,		0.7875,		0.415,		0.8775,		0.45);
-			iAddSplineFromToLR(placeholder, false,		0.79,		0.405,		0.8875,		0.425);
-			iAddSplineFromToLR(placeholder, false,		0.7925,		0.3975,		0.8925,		0.405);
+			s = iAddSplineFromToLR(placeholder, false,		0.79,		0.405,		0.8875,		0.425);
+			s->tlLSelected = true;
+			s->tlOSelected = true;
+			s->tlRSelected = true;
+			s = iAddSplineFromToLR(placeholder, false,		0.7925,		0.3975,		0.8925,		0.405);
+			s->tlLSelected = true;
+			s->tlOSelected = true;
+			s->tlRSelected = true;
 			iAddSplineFromToLR(placeholder, false,		0.7925,		0.39,		0.895,		0.39);
 			iAddSplineFromToLR(placeholder, false,		0.7925,		0.14,		0.895,		0.14);
-			iAddSplineFromToLR(placeholder, false,		0.795,		0.125,		0.895,		0.13);
+			s = iAddSplineFromToLR(placeholder, false,		0.795,		0.125,		0.895,		0.13);
+// 			s->tlLSelected = true;
+// 			s->tlOSelected = true;
+			s->tlRSelected = true;
 			iAddSplineFromToLR(placeholder, false,		0.80,		0.105,		0.8975,		0.12);
 			iAddSplineFromToLR(placeholder, false,		0.81,		0.08,		0.90,		0.1125);
 			iAddSplineFromToLR(placeholder, false,		0.825,		0.06,		0.905,		0.1);
@@ -1007,9 +1021,9 @@
 // Adds a new spline to the builder, computing its components based on a straight line from L to R.
 //
 //////
-	void iAddSplineFromToLR(SBuilder* b, bool tlPenDown, f64 tfXL, f64 tfYL, f64 tfXR, f64 tfYR)
+	SSpline* iAddSplineFromToLR(SBuilder* b, bool tlPenDown, f64 tfXL, f64 tfYL, f64 tfXR, f64 tfYR)
 	{
-		SLinef64	line;
+		SLineF64	line;
 		SSpline*	s;
 
 
@@ -1045,6 +1059,7 @@
 				// Does this start a new pen stroke?
 				s->lPenDown = tlPenDown;
 			}
+			return(s);
 	}
 
 
@@ -1057,7 +1072,7 @@
 // is from left to right in our system, as per the standard Quad 1 X,Y coordinate system.
 //
 //////
-	void iAddSplineCenterThetaRadiusLR(SBuilder* b, bool tlPenDown, f64 tfX, f64 tfY, f64 tfRadius, f64 tfThetaL, f64 tfThetaR)
+	SSpline* iAddSplineCenterThetaRadiusLR(SBuilder* b, bool tlPenDown, f64 tfX, f64 tfY, f64 tfRadius, f64 tfThetaL, f64 tfThetaR)
 	{
 		SSpline* s;
 
@@ -1084,6 +1099,7 @@
 				// Does this start a new pen stroke?
 				s->lPenDown = tlPenDown;
 			}
+			return(s);
 	}
 
 
@@ -2170,35 +2186,49 @@
 	{
 		u32			lnI;
 		SXYF64		prLast, poLast, plLast;
-		SXYF64		pr, po, pl;
+		SXYF64		pr, po, pl, p1, p2, p3, p4;
+		SLineF64	line;
 		SSpline*	s;
 		SSpline*	sLast;
 		SBuilder*	b;
+		SBGR		colorLine;
+		SBGR		quad, quadSelected, p1ColorR, p2ColorR, p3ColorR, p4ColorR, p1ColorL, p2ColorL, p3ColorL, p4ColorL;
 
 
 		//////////
 		// For new characters or definitions there may not yet be any splines.  We use a placeholder
 		// drawn onto the character until such time
 		/////
-			if (c->splines->populatedLength <= sizeof(SSpline))
-				b = placeholder;//	return;					// Return (optionally, the the placeholder could be drawn)
-			else
-				b = c->splines;								// Draw the character splines
+			// Draw a placeholder (used for debugging)
+			if (c->splines->populatedLength <= sizeof(SSpline))		b = placeholder;//	return;		// Return (optionally, the the placeholder could be drawn)
+			else													b = c->splines;					// Draw the character splines
 
-			// Determine the color
+			// Determine the colors
+			// Fill area
 			if (tlMarkup == 0)
 			{
 				// It is a final render, black on white
-				spline.red = 0;
-				spline.grn = 0;
-				spline.blu = 0;
+				quad			= black;
+				quadSelected	= blackSelected;
 
 			} else {
-				// It is a markup render, light gray on black
-				spline.red = 92;
-				spline.grn = 92;
-				spline.blu = 92;
+				// It is a markup render, gray on black
+				if (p->splinesType == _SPLINES_FILL)
+				{
+					// Normal rendering
+					quad			= gray;
+					quadSelected	= graySelected;
+
+				} else {
+					// Outline or LOR rendering
+					quad			= background;
+					quadSelected	= backgroundSelected;
+				}
 			}
+
+			// Splines
+			if (p->splinesType != _SPLINES_FILL)					colorLine = gray;				// They don't want to see it filled in, so make it a little more visible
+			else													colorLine = black;				// They want to see it filled in, so it can be black
 
 
 		//////////
@@ -2214,65 +2244,26 @@
 				if (s->iOrder >= 0)
 				{
 					//////////
-					// Render this spline onto the bitmap
+					// Compute left, origin/middle, right
 					//////
-						// Right, origin/middle, left
-						iSetPoint(&pr,	s->ox + (s->rr * cos(s->ot + s->rt)),	s->oy + (s->rr * sin(s->ot + s->rt)));
-						iSetPoint(&po,	s->ox,									s->oy);
-						iSetPoint(&pl,	s->ox + (s->lr * cos(s->ot + s->lt)),	s->oy + (s->lr * sin(s->ot + s->lt)));
-
-						// Connect the last points to the new points
-						if (!s->lPenDown)
-						{
-							// Draw in filled in final mode
-							iFillQuad(h, &prLast, &pr, &po, &poLast, spline);
-							iFillQuad(h, &poLast, &po, &pl, &plLast, spline);
-						}
+						iComputeLOR(s, &pl, &po, &pr);
 
 
 					//////////
-					// Setup for the next stroke
+					// Connect the last points to the new points
 					//////
-						iCopyPoint(&prLast, &pr);
-						iCopyPoint(&poLast, &po);
-						iCopyPoint(&plLast, &pl);
-				}
-			}
-
-
-		//////////
-		// Overlay markup
-		//////
-			if (tlMarkup != 0)
-			{
-				for (lnI = 0; lnI < b->populatedLength; lnI += sizeof(SSpline))
-				{
-					// Grab the pointer
-					s = (SSpline*)(b->data + lnI);
-
-
-					//////////
-					// Render this spline onto the bitmap
-					//////
-						// Right, origin/middle, left
-						iSetPoint(&pr,	s->ox + (s->rr * cos(s->ot + s->rt)),	s->oy + (s->rr * sin(s->ot + s->rt)));
-						iSetPoint(&po,	s->ox,									s->oy);
-						iSetPoint(&pl,	s->ox + (s->lr * cos(s->ot + s->lt)),	s->oy + (s->lr * sin(s->ot + s->lt)));
-
-						// Connect the last points to the new points
 						if (!s->lPenDown)
 						{
-							// Connect left, right as markup lines
-							iDrawLine(h, &pr, &prLast, sLast->tlRSelected ? colorSelected : black, s->tlRSelected ? colorSelected : black);
-							iDrawLine(h, &po, &poLast, sLast->tlOSelected ? colorSelected : black, s->tlOSelected ? colorSelected : black);
-							iDrawLine(h, &pl, &plLast, sLast->tlLSelected ? colorSelected : black, s->tlLSelected ? colorSelected : black);
-							iDrawPoints(h, &prLast, &poLast, &plLast, sLast, colorSelected, colorR, colorO, colorL);
-						}
+							// Colors are determined by their relative point's selected color
+							iComputeQuadColorsR(s, sLast, quad, quadSelected, &p1ColorR, &p2ColorR, &p3ColorR, &p4ColorR);
+							iComputeQuadColorsL(s, sLast, quad, quadSelected, &p1ColorL, &p2ColorL, &p3ColorL, &p4ColorL);
 
-						// Connect left, middle, right as markup lines
-						iDrawLine(h, &pr, &po, s->tlRSelected ? colorSelected : black, s->tlOSelected ? colorSelected : black);
-						iDrawLine(h, &po, &pl, s->tlOSelected ? colorSelected : black, s->tlLSelected ? colorSelected : black);
-						iDrawPoints(h, &pr, &po, &pl, s, colorSelected, colorR, colorO, colorL);
+							// Draw in filled in final mode, or when the user wants to see it in markup mode
+							// Lines are drawn p1..p4, p2..p3 using the following form:
+							// iFillQuad(h, &p1, &p2, &p3, &p4, p1Color, p2Color, p3Color, p4Color);
+							iFillQuadAlpha(h, /*p1*/&prLast, /*p2*/&pr, /*p3*/&po, /*p4*/&poLast, p1ColorR, p2ColorR, p3ColorR, p4ColorR, 1.0, 1.0, 1.0, 1.0);
+							iFillQuadAlpha(h, /*p1*/&poLast, /*p2*/&po, /*p3*/&pl, /*p4*/&plLast, p1ColorL, p2ColorL, p3ColorL, p4ColorL, 1.0, 1.0, 1.0, 1.0);
+						}
 
 
 					//////////
@@ -2284,29 +2275,215 @@
 						sLast = s;
 				}
 			}
+
+
+		//////////
+		// Overlay markup drawing
+		//////
+			if (tlMarkup != 0)
+			{
+				for (lnI = 0; lnI < b->populatedLength; lnI += sizeof(SSpline))
+				{
+					// Grab the pointer
+					s = (SSpline*)(b->data + lnI);
+
+					// There are negative values which store meta data
+					if (s->iOrder >= 0)
+					{
+						//////////
+						// Compute left, origin/middle, right
+						//////
+							iComputeLOR(s, &pl, &po, &pr);
+
+
+						//////////
+						// If this is the start of a new stroke, render the indicator
+						//////
+							if (s->lPenDown)
+							{
+								//////////
+								// Compute from L to R
+								//////
+									// L
+									line.p1.x	= pl.x;
+									line.p1.y	= pl.y;
+									// R
+									line.p2.x	= pr.x;
+									line.p2.y	= pr.y;
+									iComputeLine(&line);
+
+
+								/////////
+								// Extend out the points by 5 pixels
+								//////
+									// L
+									line.p1.x	= line.p1.x + ((5.0 / (f64)h->w) * cos(line.theta + _PI));
+									line.p1.y	= line.p1.y + ((5.0 / (f64)h->h) * sin(line.theta + _PI));
+									// R
+									line.p2.x	= line.p2.x + ((5.0 / (f64)h->w) * cos(line.theta));
+									line.p2.y	= line.p2.y + ((5.0 / (f64)h->h) * sin(line.theta));
+									iComputeLine(&line);
+
+
+								//////////
+								// Create a quad extending out 5 pixels behind, 40 pixels in front
+								//////
+									// p1..p4
+									p1.x		= line.p1.x + ((40.0 / (f64)h->w) * cos(line.theta - _PI_2));
+									p1.y		= line.p1.y + ((40.0 / (f64)h->h) * sin(line.theta - _PI_2));
+									p4.x		= line.p1.x + ((5.0 / (f64)h->w) * cos(line.theta + _PI_2));
+									p4.y		= line.p1.y + ((5.0 / (f64)h->h) * sin(line.theta + _PI_2));
+									// p2..p3
+									p2.x		= line.p2.x + ((40.0 / (f64)h->w) * cos(line.theta - _PI_2));
+									p2.y		= line.p2.y + ((40.0 / (f64)h->h) * sin(line.theta - _PI_2));
+									p3.x		= line.p2.x + ((5.0 / (f64)h->w) * cos(line.theta + _PI_2));
+									p3.y		= line.p2.y + ((5.0 / (f64)h->h) * sin(line.theta + _PI_2));
+
+
+								//////////
+								// Fill this quad in using a pastel pink cue
+								//////
+									iFillQuadAlpha(h, &p1, &p2, &p3, &p4, stroke, stroke, stroke, stroke, 0.0, 0.0, 0.7, 0.7);
+							}
+
+
+						//////////
+						// Render this spline onto the bitmap
+						//////
+
+							// Connect the last points to the new points
+							if (!s->lPenDown)
+							{
+								// Connect left, right as markup lines
+								if (p->splinesType == _SPLINES_FILL || p->splinesType == _SPLINES_OUTLINE)
+								{
+									iDrawLine(h, &pr, &prLast, s->tlRSelected ? colorSelected : colorLine, sLast->tlRSelected ? colorSelected : colorLine);
+									iDrawLine(h, &po, &poLast, s->tlOSelected ? colorSelected : colorLine, sLast->tlOSelected ? colorSelected : colorLine);
+									iDrawLine(h, &pl, &plLast, s->tlLSelected ? colorSelected : colorLine, sLast->tlLSelected ? colorSelected : colorLine);
+								}
+								iDrawPoints(h, &prLast, &poLast, &plLast, sLast, colorSelected, colorR, colorO, colorL, colorRSelected, colorOSelected, colorLSelected);
+							}
+
+							// Connect left, middle, right as markup lines
+							iDrawLine(h, &pr, &po, s->tlRSelected ? colorSelected : colorLine, s->tlOSelected ? colorSelected : colorLine);
+							iDrawLine(h, &po, &pl, s->tlOSelected ? colorSelected : colorLine, s->tlLSelected ? colorSelected : colorLine);
+							iDrawPoints(h, &pr, &po, &pl, s, colorSelected, colorR, colorO, colorL, colorRSelected, colorOSelected, colorLSelected);
+
+
+						//////////
+						// Setup for the next stroke
+						//////
+							iCopyPoint(&prLast, &pr);
+							iCopyPoint(&poLast, &po);
+							iCopyPoint(&plLast, &pl);
+							sLast = s;
+					}
+				}
+			}
 	}
 
-	void iDrawPoints(SHwnd* h, SXYF64* pr, SXYF64* po, SXYF64* pl, SSpline* s, SBGR colorSelected, SBGR colorR, SBGR colorO, SBGR colorL)
+	void iComputeLOR(SSpline* s, SXYF64* pl, SXYF64* po, SXYF64* pr)
 	{
+		// left, origin/middle, right
+		iSetPoint(pl,	s->ox + (s->lr * cos(s->ot + s->lt)),	s->oy + (s->lr * sin(s->ot + s->lt)));
+		iSetPoint(po,	s->ox,									s->oy);
+		iSetPoint(pr,	s->ox + (s->rr * cos(s->ot + s->rt)),	s->oy + (s->rr * sin(s->ot + s->rt)));
+	}
+
+	// Order is: prLast..poLast, pr..po, which are quad1from, quad1to, quad2from, quad2to
+	// iFillQuad(h, /*p1*/&prLast, /*p2*/&pr, /*p3*/&po, /*p4*/&poLast, p1ColorR, p2ColorR, p3ColorR, p4ColorR);
+	void iComputeQuadColorsR(SSpline* s, SSpline* sLast, SBGR quadNormal, SBGR quadSelected, SBGR* p1ColorR, SBGR* p2ColorR, SBGR* p3ColorR, SBGR* p4ColorR)
+	{
+		*p1ColorR	= ((sLast->tlRSelected)	? quadSelected : quadNormal);
+		*p2ColorR	= ((s->tlRSelected)		? quadSelected : quadNormal);
+		*p3ColorR	= ((s->tlOSelected)		? quadSelected : quadNormal);
+		*p4ColorR	= ((sLast->tlOSelected)	? quadSelected : quadNormal);
+	}
+
+	// Order is: poLast..plLast, po..pl, which are quad1from, quad1to, quad2from, quad2to
+	// iFillQuad(h, /*p1*/&poLast, /*p2*/&po, /*p3*/&pl, /*p4*/&plLast, quad1fromL, p1ColorL, p2ColorL, p3ColorL, p4ColorL);
+	void iComputeQuadColorsL(SSpline* s, SSpline* sLast, SBGR quadNormal, SBGR quadSelected, SBGR* p1ColorL, SBGR* p2ColorL, SBGR* p3ColorL, SBGR* p4ColorL)
+	{
+		*p1ColorL	= ((sLast->tlOSelected)	? quadSelected : quadNormal);
+		*p2ColorL	= ((s->tlOSelected)		? quadSelected : quadNormal);
+		*p3ColorL	= ((s->tlLSelected)		? quadSelected : quadNormal);
+		*p4ColorL	= ((sLast->tlLSelected)	? quadSelected : quadNormal);
+	}
+
+	void iDrawPoints(SHwnd* h, SXYF64* pr, SXYF64* po, SXYF64* pl, SSpline* s, SBGR colorSelected, SBGR colorR, SBGR colorO, SBGR colorL, SBGR colorRSelected, SBGR colorOSelected, SBGR colorLSelected)
+	{
+		//////////
 		// Right
-		if (s->tlRSelected)				iDrawPointLarge(h, pr, colorSelected);
-		iDrawPoint(h, pr, colorR);
+		//////
+			if (s->tlRSelected)
+			{
+				iDrawPointLarge(h, pr, colorSelected);
+				iDrawPoint(h, pr, colorRSelected);
 
+			} else {
+				iDrawPoint(h, pr, colorR);
+			}
+
+
+		//////////
 		// Origin/middle
-		if (s->tlOSelected)				iDrawPointLarge(h, po, colorSelected);
-		iDrawPoint(h, po, colorO);
+		//////
+			if (s->tlOSelected)
+			{
+				iDrawPointLarge(h, po, colorSelected);
+				iDrawPoint(h, po, colorOSelected);
 
+			} else {
+				iDrawPoint(h, po, colorO);
+			}
+
+
+		//////////
 		// Left
-		if (s->tlLSelected)				iDrawPointLarge(h, pl, colorSelected);
-		iDrawPoint(h, pl, colorL);
+		//////
+			if (s->tlLSelected)
+			{
+				iDrawPointLarge(h, pl, colorSelected);
+				iDrawPoint(h, pl, colorLSelected);
+
+			} else {
+				iDrawPoint(h, pl, colorL);
+			}
 	}
 
 	void iDrawLine(SHwnd* h, SXYF64* p1, SXYF64* p2, SBGR colorStart, SBGR colorEnd)
 	{
+		SBGR_AF64	colorStartAlp, colorEndAlp;
+
+
+		//////////
+		// Create our 1.0 alpha pseudo colors
+		//////
+			// start
+			colorStartAlp.red	= colorStart.red;
+			colorStartAlp.grn	= colorStart.grn;
+			colorStartAlp.blu	= colorStart.blu;
+			colorStartAlp.falp	= 1.0;
+
+			// end
+			colorEndAlp.red	= colorEnd.red;
+			colorEndAlp.grn	= colorEnd.grn;
+			colorEndAlp.blu	= colorEnd.blu;
+			colorEndAlp.falp	= 1.0;
+
+
+		//////////
+		// Draw in the alpha algorithm
+		//////
+			iDrawLineAlpha(h, p1, p2, &colorStartAlp, &colorEndAlp);
+	}
+
+	void iDrawLineAlpha(SHwnd* h, SXYF64* p1, SXYF64* p2, SBGR_AF64* colorStart, SBGR_AF64* colorEnd)
+	{
 		f64			lfPercent, lfSteps, lfStepInc, lfRadius, lfCosTheta, lfSinTheta;
-		f64			lfRed, lfGrn, lfBlu, lfRedStep, lfGrnStep, lfBluStep;
-		s32			lnX, lnY;
-		SLinef64	line;
+		f64			lfRed, lfGrn, lfBlu, lfAlp, lfMalp, lfRedStep, lfGrnStep, lfBluStep, lfAlpStep;
+		s32			lnX, lnY, lnXLast, lnYLast;
+		SLineF64	line;
 		SBGR		color;
 		SBGR*		lbgr;
 
@@ -2334,42 +2511,51 @@
 		// Compute colors
 		//////
 			lfSteps		= line.length * _SQRT2;
-			lfRed		= (f64)colorStart.red;
-			lfGrn		= (f64)colorStart.grn;
-			lfBlu		= (f64)colorStart.blu;
-			lfRedStep	= ((f64)colorEnd.red - lfRed) / lfSteps;
-			lfGrnStep	= ((f64)colorEnd.grn - lfGrn) / lfSteps;
-			lfBluStep	= ((f64)colorEnd.blu - lfBlu) / lfSteps;
+			lfRed		= (f64)colorStart->red;
+			lfGrn		= (f64)colorStart->grn;
+			lfBlu		= (f64)colorStart->blu;
+			lfAlp		= colorStart->falp;
+			lfRedStep	= ((f64)colorEnd->red - lfRed) / lfSteps;
+			lfGrnStep	= ((f64)colorEnd->grn - lfGrn) / lfSteps;
+			lfBluStep	= ((f64)colorEnd->blu - lfBlu) / lfSteps;
+			lfAlpStep	= (colorEnd->falp - lfAlp) / lfSteps;
 
 
 		//////////
 		// Proceed for the number of pixels times sqrt(2)
 		//////
 			lfStepInc = 1.0 / lfSteps;
-			for (lfPercent = 0.0f; lfPercent < 1.0f; lfPercent += lfStepInc, lfRed += lfRedStep, lfGrn += lfGrnStep, lfBlu += lfBluStep)
+			lnXLast		= -10000;
+			lnYLast		= -10000;
+			for (lfPercent = 0.0f; lfPercent < 1.0f; lfPercent += lfStepInc, lfRed += lfRedStep, lfGrn += lfGrnStep, lfBlu += lfBluStep, lfAlp += lfAlpStep)
 			{
 				// Compute the radius for this point
 				lfRadius = lfPercent * line.length;
 
 				// Compute the color
-				color.red = (u8)lfRed;
-				color.grn = (u8)lfGrn;
-				color.blu = (u8)lfBlu;
+				color.red	= (u8)lfRed;
+				color.grn	= (u8)lfGrn;
+				color.blu	= (u8)lfBlu;
+				lfMalp		= 1.0 - lfAlp;
 
 				// Compute this point
 				lnX = (s32)(line.p1.x + (lfRadius * lfCosTheta));
 				lnY = (s32)(line.p1.y + (lfRadius * lfSinTheta));
 
 				// Render it if it's visible
-				if (lnX >= 0 && lnX < h->w && lnY >= 0 && lnY < h->h)
+				if (lnX >= 0 && lnX < h->w && lnY >= 0 && lnY < h->h && !(lnX == lnXLast && lnY == lnYLast))
 				{
 					// Get the pointer
 					lbgr = (SBGR*)((s8*)h->bd + (lnY * h->rowWidth) + (lnX * 3));
 
 					// Render it
-					lbgr->red	= color.red;
-					lbgr->grn	= color.grn;
-					lbgr->blu	= color.blu;
+					lbgr->red	= (u8)(((f64)lbgr->red * lfMalp) + (lfRed * lfAlp));
+					lbgr->grn	= (u8)(((f64)lbgr->grn * lfMalp) + (lfGrn * lfAlp));
+					lbgr->blu	= (u8)(((f64)lbgr->blu * lfMalp) + (lfBlu * lfAlp));
+
+					// Store the last point we rendered
+					lnXLast		= lnX;
+					lnYLast		= lnY;
 				}
 			}
 	}
@@ -2457,11 +2643,14 @@
 	}
 
 	// Draw p1..p2 along the lines from p1..p4, p2..p3
-	void iFillQuad(SHwnd* h, SXYF64* p1, SXYF64* p2, SXYF64* p3, SXYF64* p4, SBGR color)
+	void iFillQuadAlpha(SHwnd* h, SXYF64* p1, SXYF64* p2, SXYF64* p3, SXYF64* p4, SBGR p1Color, SBGR p2Color, SBGR p3Color, SBGR p4Color, f64 tfP1Alp, f64 tfP2Alp, f64 tfP3Alp, f64 tfP4Alp)
 	{
-		f64			lfPercent, lfStep, lfCosThetaP1P4, lfSinThetaP1P4, lfCosThetaP2P3, lfSinThetaP2P3, lfMultiplier;
+		f64			lfPercent, lfStep, lfStepCount, lfCosThetaP1P4, lfSinThetaP1P4, lfCosThetaP2P3, lfSinThetaP2P3, lfMultiplier;
 		SXYF64		lp1, lp2;
-		SLinef64	p1p4, p2p3;
+		SLineF64	p1p4, p2p3;
+		f64			lfRedP1P4, lfGrnP1P4, lfBluP1P4, lfAlpP1P4, lfRedP2P3, lfGrnP2P3, lfBluP2P3, lfAlpP2P3;
+		f64			lfRedP1P4Step, lfGrnP1P4Step, lfBluP1P4Step, lfAlpP1P4Step, lfRedP2P3Step, lfGrnP2P3Step, lfBluP2P3Step, lfAlpP2P3Step;
+		SBGR_AF64	colorP1P4, colorP2P3;
 
 
 		//////////
@@ -2488,21 +2677,84 @@
 			lfCosThetaP2P3		= cos(p2p3.theta);
 			lfSinThetaP2P3		= sin(p2p3.theta);
 
+			// Steps
+			lfStepCount	= (max(p1p4.length, p2p3.length) * lfMultiplier);
+			lfStep		= 1.0 / lfStepCount;
+
+
+		//////////
+		// Compute the color steps for this rendering
+		//////
+			// p1..p4
+			lfRedP1P4		= (f64)p1Color.red;
+			lfGrnP1P4		= (f64)p1Color.grn;
+			lfBluP1P4		= (f64)p1Color.blu;
+			lfAlpP1P4		= tfP1Alp;
+			lfRedP1P4Step	= ((f64)p4Color.red - lfRedP1P4) / lfStepCount;
+			lfGrnP1P4Step	= ((f64)p4Color.grn - lfGrnP1P4) / lfStepCount;
+			lfBluP1P4Step	= ((f64)p4Color.blu - lfBluP1P4) / lfStepCount;
+			lfAlpP1P4Step	= (tfP4Alp - tfP1Alp) / lfStepCount;
+
+			// p2..p3
+			lfRedP2P3		= (f64)p2Color.red;
+			lfGrnP2P3		= (f64)p2Color.grn;
+			lfBluP2P3		= (f64)p2Color.blu;
+			lfAlpP2P3		= tfP2Alp;
+			lfRedP2P3Step	= ((f64)p3Color.red - lfRedP2P3) / lfStepCount;
+			lfGrnP2P3Step	= ((f64)p3Color.grn - lfGrnP2P3) / lfStepCount;
+			lfBluP2P3Step	= ((f64)p3Color.blu - lfBluP2P3) / lfStepCount;
+			lfAlpP2P3Step	= (tfP3Alp - tfP2Alp) / lfStepCount;
+
+
 
 		//////////
 		// Iterate by sqrt(2) times the maximum line length
 		//////
-			lfStep = 1.0 / (max(p1p4.length, p2p3.length) * lfMultiplier);
 			for (lfPercent = 0.0; lfPercent < 1.0; lfPercent += lfStep)
 			{
+				//////////
 				// Compute the points
-				lp1.x	= p1p4.p1.x + (lfPercent * p1p4.length * lfCosThetaP1P4);
-				lp1.y	= p1p4.p1.y + (lfPercent * p1p4.length * lfSinThetaP1P4);
-				lp2.x	= p2p3.p1.x + (lfPercent * p2p3.length * lfCosThetaP2P3);
-				lp2.y	= p2p3.p1.y + (lfPercent * p2p3.length * lfSinThetaP2P3);
+				//////
+					lp1.x	= p1p4.p1.x + (lfPercent * p1p4.length * lfCosThetaP1P4);
+					lp1.y	= p1p4.p1.y + (lfPercent * p1p4.length * lfSinThetaP1P4);
+					lp2.x	= p2p3.p1.x + (lfPercent * p2p3.length * lfCosThetaP2P3);
+					lp2.y	= p2p3.p1.y + (lfPercent * p2p3.length * lfSinThetaP2P3);
 
+
+				//////////
+				// Compute the color for this leg
+				//////
+					// p1..p4
+					colorP1P4.red	= (u8)lfRedP1P4;
+					colorP1P4.grn	= (u8)lfGrnP1P4;
+					colorP1P4.blu	= (u8)lfBluP1P4;
+					colorP1P4.falp	= lfAlpP1P4;
+					// p2..p3
+					colorP2P3.red	= (u8)lfRedP2P3;
+					colorP2P3.grn	= (u8)lfGrnP2P3;
+					colorP2P3.blu	= (u8)lfBluP2P3;
+					colorP2P3.falp	= lfAlpP2P3;
+
+
+				//////////
 				// Draw this line
-				iDrawLine(h, &lp1, &lp2, color, color);
+				//////
+					iDrawLineAlpha(h, &lp1, &lp2, &colorP1P4, &colorP2P3);
+
+
+				//////////
+				// Increase the color for the next iteration
+				//////
+					// p1..p4
+					lfRedP1P4	+= lfRedP1P4Step;
+					lfGrnP1P4	+= lfGrnP1P4Step;
+					lfBluP1P4	+= lfBluP1P4Step;
+					lfAlpP1P4	+= lfAlpP1P4Step;
+					// p2..p3
+					lfRedP2P3	+= lfRedP2P3Step;
+					lfGrnP2P3	+= lfGrnP2P3Step;
+					lfBluP2P3	+= lfBluP2P3Step;
+					lfAlpP2P3	+= lfAlpP2P3Step;
 			}
 	}
 
@@ -2528,10 +2780,11 @@
 //////
 	void iRenderMouseOverlay(SInstance* p, SHwnd* h, SChars* c)
 	{
-		SXYS32	p1;
-		s32		lnX, lnY, lnYLast;
-		f64		lfTheta, lfThetaStep, lfA, lfB, lfV1, lfV2, lfX, lfY, lfRadius;
-		SBGR	color;
+		SXYS32		p1;
+		SLineF64	line;
+		s32			lnX, lnY, lnYLast;
+		f64			lfTheta, lfThetaStep, lfA, lfB, lfV1, lfV2, lfX, lfY, lfRadius;
+		SBGR		color;
 
 
 		// Invert the Y mouse coordinates for rendering
@@ -2542,8 +2795,19 @@
 		if (glCtrlKeyDown && !(glMouseLeft || glMouseRight))		color = mousePeeakaheadColor;
 		else														color = mouseColor;
 
+		// If the CTRL key is down, compute what would be the closest point, and render that line
+		if (glCtrlKeyDown)
+		{
+			// Compute the closest line to the mouse, but only within a certain radius
+			if (iComputeClosestMouseLine(&line))
+			{
+				// Draw a point at the center of the indicated line
+				iDrawPointLarge(h, &line.mid, color);
+			}
+		}
+
 		// Is there a reason to render the rectangles?
-		if (glMouseLeft || glMouseRight || glCtrlKeyDown)
+		if (glMouseLeft || glMouseRight)
 		{
 			// The mouse is pressed down, render the select area
 			// Render it (we're basically drawing an oval area the mouse will interact with)
@@ -2586,6 +2850,26 @@
 			iColorizeHorizontalLineByPixels(p, h, c, 0, h->w - 1, p1.yi, mouseColor);		// Horizontal
 			iColorizeVerticalLineByPixels(  p, h, c, 0, h->h - 1, p1.xi, mouseColor);		// Vertical
 		}
+	}
+
+	bool iComputeClosestMouseLine(SLineF64* line)
+	{
+		// Find the closest point to the current mouse coordinates
+
+		// Find the closest 20 points to that
+
+		// Determine the slope of every point to every other point
+
+		// Sort the list by slope order
+
+		// Determine the deltas between each item
+
+		// Sort the list by the deltas
+
+		// Using the top 10 deltas, determine the midpoint and average slope and radius
+
+		// Construct a line with that information
+		return(false);
 	}
 
 	void iColorizeAndProcessHorizontalLineByPixels(SInstance* p, SHwnd* h, SChars* c, s32 x1, s32 x2, s32 y, SBGR color)
@@ -3235,7 +3519,7 @@
 				SelectObject(h->hdc2, h->hbmp2);
 
 				// Create a gray brush
-				h->backDarkGrayBrush = CreateSolidBrush(RGB(32, 32, 32));
+				h->backDarkGrayBrush = CreateSolidBrush(RGB(background.red, background.grn, background.blu));
 
 				// Create a font for rendering the X,Y coordinate in the lower-right
 				s32 lnHeight = -MulDiv(8, GetDeviceCaps(GetDC(GetDesktopWindow()), LOGPIXELSY), 72);
@@ -3264,7 +3548,7 @@
 // Called to compute the midpoint, slope, and perpendicular slope of a line
 //
 //////
-	void iComputeLine(SLinef64* line)
+	void iComputeLine(SLineF64* line)
 	{
 		// Midpoint = (x2-x1)/2, (y2-y1)/2
 		line->mid.x			= (line->p1.x + line->p2.x) / 2.0f;
@@ -3292,6 +3576,47 @@
 		// Quads 1..4
 		line->p1_quad	= iComputeQuad(&line->p1);
 		line->p2_quad	= iComputeQuad(&line->p2);
+	}
+
+
+
+
+//////////
+//
+// Called to constrain a quad around a line.  It is assumed that the quad runs from p1..p4, and
+// p2..p3 around the line with p1..p4 being near line.p1, and p2..p3 being near line.p2.  The
+// constraining distances are maximum radii out from the line to the corner points of the quad.
+// If they exceed then they are reined in.  And if they are less then the flag determines if they
+// are forcibly constrained to that distance.
+//
+//////
+	void iConstrainQuadAroundLine(SLineF64* lineRef, SXYF64* p1, SXYF64* p2, SXYF64* p3, SXYF64* p4, f64 tfp1Max, f64 tfp2Max, f64 tfp3Max, f64 tfp4Max, bool tlForceSize)
+	{
+		iConstrainLineLength(&lineRef->p1, p1, tfp1Max, tlForceSize);
+		iConstrainLineLength(&lineRef->p2, p2, tfp2Max, tlForceSize);
+		iConstrainLineLength(&lineRef->p2, p3, tfp3Max, tlForceSize);
+		iConstrainLineLength(&lineRef->p1, p4, tfp4Max, tlForceSize);
+	}
+
+	void iConstrainLineLength(SXYF64* po, SXYF64* pToConstrain, f64 tfMaxLength, bool tlForceToLength)
+	{
+		SLineF64	line;
+
+
+		//////////
+		// Compute our line
+		//////
+			line.p1.x = po->x;
+			line.p1.y = po->y;
+			line.p2.x = pToConstrain->x;
+			line.p2.y = pToConstrain->y;
+			iComputeLine(&line);
+			if (tlForceToLength || line.length > tfMaxLength)
+			{
+				// Force the point to that length's location
+				pToConstrain->x	= line.p1.x + (tfMaxLength * cos(line.theta));
+				pToConstrain->y	= line.p1.y + (tfMaxLength * sin(line.theta));
+			}
 	}
 
 

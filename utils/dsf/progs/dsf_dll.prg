@@ -172,6 +172,10 @@ FUNCTION declare_dsf_dll
 							INTEGER		tnMode, ;				&& 0=point, 1=spline, 2=stroke, 3=before and current, 4=current and after
 							INTEGER		tnMethod, ;				&& 0=left, 1=middle, 2=right, 3=left+middle, 4=middle+right, 5=left+right, 6=spline, 7=point
 							INTEGER		tnRange, ;				&& 0=active character, 1=AZ, 2=az, 3=AZaz, 4=09, 5=AZaz09, 6=AZaz09!@.., 7=all
+							INTEGER		tlShowTems, ;			&& 0=no, 1=yes
+							INTEGER		tnTemsType, ;			&& 0=Track, 1=Displays
+							INTEGER		tlShowSplines, ;		&& 0=no, 1=yes
+							INTEGER		tnSplinesType, ;		&& 0=Fill, 1=Outline, 2=LOR only
 							INTEGER		tnSelectArea			&& Number of pixels (10..30) for the mouse select area
 	
 	* Called to indicate what character is being referenced
