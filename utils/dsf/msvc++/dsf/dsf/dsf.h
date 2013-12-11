@@ -125,6 +125,14 @@ struct SBGR
 	u8	red;
 };
 
+struct SBGRA
+{
+	u8	alp;
+	u8	blu;
+	u8	grn;
+	u8	red;
+};
+
 struct SBGR_AF64
 {
 	u8	blu;
@@ -143,6 +151,12 @@ struct SXYS32
 {
 	s32			xi;
 	s32			yi;
+};
+
+struct SPointsDrawn
+{
+	SXYS32		pt;
+	SBGRA		color;
 };
 
 struct SLineS32
@@ -335,6 +349,9 @@ struct SLineF64
 		u32				temsType;					// 0=track, 1=display
 		u32				showSplines;				// 0=no, 1=yes
 		u32				splinesType;				// 0=fill, 1=outline, 2=LOR only
+		u32				highlighSectionOnFinal;		// 0=no, 1=yes, should the selection be highlighted on final renderings?
+		u32				showPenDowns;				// 0=no, 1=yes, should the pen/brush strokes be highlighted?
+		u32				showMouseCrosshairs;		// 0=no, 1=yes, should the mouse crosshairs be shown?
 		u32				selectArea;					// Some value between 10..30 (how big they want the mouse select area to be)
 
 		SBuilder*		chars;						// (SBuilder) Characters, one SBuilder for every character, with each character SBuilder pointing to its many SChar entries
@@ -366,6 +383,7 @@ struct SLineF64
 	const u32	_SELECT_AREA_SMALL			= 10;
 	const u32	_SELECT_AREA_MEDIUM			= 20;
 	const u32	_SELECT_AREA_LARGE			= 30;
+	const u32	_SELECT_AREA_EXTRA_LARGE	= 80;
 
 	const u32	_DISPOSITION_SELECT			= 0;
 	const u32	_DISPOSITION_UNSELECT		= 1;
@@ -424,7 +442,7 @@ struct SLineF64
 	bool		glAltKeyDown			= false;
 	// Common color
 	SBGR		black					= { 0, 0, 0 };
-	SBGR		stroke					= { 192, 192, 255 };
+	SBGR		stroke					= { 255, 192, 192 };
 	SBGR		blackSelected			= { 0, 255, 255 };
 	SBGR		darkGray				= { 92, 92, 92 };
 	SBGR		background				= { 32, 32, 32 };
@@ -483,7 +501,8 @@ struct SLineF64
 	void				iComputeQuadColorsL						(SSpline* s, SSpline* sLast, SBGR quadNormal, SBGR quadSelected, SBGR* p1ColorL, SBGR* p2ColorL, SBGR* p3ColorL, SBGR* p4ColorL);
 	void				iDrawPoints								(SHwnd* h, SXYF64* pr, SXYF64* po, SXYF64* pl, SSpline* s, SBGR colorSelected, SBGR colorR, SBGR colorO, SBGR colorL, SBGR colorRSelected, SBGR colorOSelected, SBGR colorLSelected);
 	void				iDrawLine								(SHwnd* h, SXYF64* p1, SXYF64* p2, SBGR colorStart, SBGR colorEnd);
-	void				iDrawLineAlpha							(SHwnd* h, SXYF64* p1, SXYF64* p2, SBGR_AF64* colorStart, SBGR_AF64* colorEnd);
+	void				iDrawLineAlpha							(SHwnd* h, SXYF64* p1, SXYF64* p2, SBGR_AF64* colorStart, SBGR_AF64* colorEnd, SBuilder* pointsDrawn, bool tlNoDuplicates);
+	void				iAddPointToPointsDrawn					(SBuilder* pointsDrawn, s32 tnX, s32 tnY, SBGRA color);
 	void				iDrawPoint								(SHwnd* h, SXYF64* p1, SBGR color);
 	void				iDrawPointSmall							(SHwnd* h, SXYF64* p1, SBGR color);
 	void				iDrawPointLarge							(SHwnd* h, SXYF64* p1, SBGR color);
@@ -506,6 +525,7 @@ struct SLineF64
 	void				iMakeSureLowToHighF64					(f64* p1, f64* p2);
 	int					iiTems_qsortCallback					(const void* l, const void* r);
 	int					iiSXyS32_qsortCallback					(const void* l, const void* r);
+	int					iiSPointsDrawn_qsortCallback			(const void* l, const void* r);
 	u32					iiRenderMarkup_getNextLineSegment		(u32 tnIndex, u32 tnMaxCount, SHwnd* h, STems* root, STems** p1, STems** p2);
 	s32					iiGetPoint								(f64 tfValue01, s32 tnMultiplier);
 	SHwnd*				iFindOnlyHwndByHwnd						(SBuilder* hwnds, u32 tnHwndParent, u32 tnHwnd);

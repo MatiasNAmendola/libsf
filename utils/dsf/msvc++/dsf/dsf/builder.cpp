@@ -285,7 +285,7 @@ struct SBuilder
 // Releases the buffer allocated for the SBuilder structure
 //
 //////
-	void builder_FreeAndRelease(SBuilder** buffRoot)
+	void builder_freeAndRelease(SBuilder** buffRoot)
 	{
 		SBuilder* buffDelete;
 
@@ -350,4 +350,166 @@ struct SBuilder
 		}
 		// If we get here, failure
 		return(-1);
+	}
+
+
+
+
+//////////
+//
+// Called to insert bytes at the indicated location.
+//
+//////
+	s8* builder_insertBytes(SBuilder* buffRoot, u32 tnStart, u32 tnLength)
+	{
+		u32		lnI, lnStop;
+		s8*		buffNew;
+		s8*		lcSrc;
+		s8*		lcDst;
+
+
+		//////////
+		// Make sure our environment is sane
+		//////
+			buffNew = NULL;
+			if (buffRoot && buffRoot->data)
+			{
+				//////////
+				// Are we adding to the end?
+				//////
+					if (buffRoot->populatedLength == tnStart)
+						return(builder_allocateBytes(buffRoot, tnLength));		// We're appending to the end
+
+
+				//////////
+				// If we get here, we're inserting in the middle
+				// We go ahead and allocate the new bytes
+				//////
+					buffNew = builder_allocateBytes(buffRoot, tnLength);
+					if (buffNew)
+					{
+						//////////
+						// Now, we have to copy everything backwards so we don't propagate a portion repeatedly
+						//////
+							lcSrc	= buffRoot->data + buffRoot->populatedLength - tnLength - 1;
+							lcDst	= buffRoot->data + buffRoot->populatedLength - 1;
+							lnStop	= buffRoot->populatedLength - tnStart - tnLength;
+
+
+						//////////
+						// Copy until we're done
+						//////
+							for (lnI = 0; lnI < lnStop; lnI++, lcDst--, lcSrc--)
+								*lcDst = *lcSrc;
+
+
+						//////////
+						// Indicate where our new record is
+						//////
+							buffNew = buffRoot->data + tnStart;
+					}
+			}
+			// Indicate our status
+			return(buffNew);
+	}
+
+
+
+//////////
+//
+// Searching for a needle in a haystack.
+// Called to perform a binary search on the data in a builder.  This is typically used for a fixed
+// structure that is repeatedly stored.  The optional parameter allows the item to be inserted
+// where it should go if it was not found.
+//
+//////
+// TODO:  A speedup for this algorithm would be to test tnDataLength and if it's 32-bit or 64-bit, then do integer searches rather than string compare searches
+	u32 builder_binarySearch(SBuilder* haystack, s8* tcNeedle, u32 tnNeedleLength, bool* tlFound, bool tlInsertIfNotFound)
+	{
+		s32		lnResult;
+		s32		lnTop, lnMid, lnBot;
+		s8*		buffNew;
+
+
+// TODO:  untested, breakpoint and examine
+		_asm int 3;
+		//////////
+		// Make sure our environment is sane
+		//////
+			if (haystack && haystack->data && haystack->populatedLength % tnNeedleLength == 0)
+			{
+				//////////
+				// Perform a binary search
+				//////
+					lnTop = 0;
+					lnBot = (haystack->populatedLength / tnNeedleLength) - 1;
+					lnMid = max((lnTop + lnBot) / 2, lnTop);
+					while (lnTop <= lnBot)
+					{
+						// Position our search pointer
+						lnMid = (lnTop + lnBot) / 2;
+
+						// See if it's above or below this position
+						lnResult = memcmp(haystack->data + (lnMid * tnNeedleLength), tcNeedle, tnNeedleLength);
+						if (lnResult == 0)
+						{
+							// Found, but this may not be the first one, we need to creep backwards to find the first
+							if (lnMid == lnBot)
+							{
+								// Success!
+								if (tlFound)
+									*tlFound = true;
+
+								// Indicate our entry
+								return(lnMid * tnNeedleLength);
+							}
+							// Continue looking in the top half
+							lnBot = lnMid;
+
+						} else if (lnResult < 0) {
+							// Our haystack entry is less than our needle, it's after this in the list
+							lnTop = lnMid + 1;
+
+						} else {
+							// Our haystack entry is greater than our need, it's before this in the list
+							lnBot = lnMid - 1;
+						}
+					}
+					// When we get here, it was not found
+					if (tlFound)
+						*tlFound = false;
+
+
+				//////////
+				// See if they want us to add it
+				//////
+					if (tlInsertIfNotFound)
+					{
+						// We will insert it where lnMid is
+						buffNew = builder_insertBytes(haystack, lnMid * tnNeedleLength, tnNeedleLength);
+						if (buffNew)
+						{
+							// We can copy over and insert it
+							memcpy(buffNew, tcNeedle, tnNeedleLength);
+
+							// Indicate where it exists in the list
+							return(lnMid * tnNeedleLength);
+
+						} else {
+							// Failure adding
+							return(-3);
+						}
+
+					} else {
+						// Indicate no find
+						return(-1);
+					}
+			}
+
+
+		//////////
+		// Was not found, is invalid configuration
+		//////
+			if (tlFound)	*tlFound = false;
+			return(-2);		// Is invalid configuration
 	}

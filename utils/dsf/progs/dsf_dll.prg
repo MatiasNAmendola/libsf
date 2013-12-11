@@ -176,6 +176,9 @@ FUNCTION declare_dsf_dll
 							INTEGER		tnTemsType, ;			&& 0=Track, 1=Displays
 							INTEGER		tlShowSplines, ;		&& 0=no, 1=yes
 							INTEGER		tnSplinesType, ;		&& 0=Fill, 1=Outline, 2=LOR only
+							INTEGER		tlHighlighSectionOnFinal, ;	&& 0=no, 1=yes, should the selection be highlighted on final renderings?
+							INTEGER		tlShowPenDowns, ;		&& 0=no, 1=yes, should the pen/brush strokes be highlighted?
+							INTEGER		tlShowMouseCrosshairs, ;	&& 0=no, 1=yes, should mouse cross-hairs be shown?
 							INTEGER		tnSelectArea			&& Number of pixels (10..30) for the mouse select area
 	
 	* Called to indicate what character is being referenced

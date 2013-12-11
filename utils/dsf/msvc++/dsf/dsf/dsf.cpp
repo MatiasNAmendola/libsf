@@ -390,7 +390,7 @@
 		//////////
 		// Release the floan data.  It will be re-populated later if this ref is ever referenced
 		//////
-			builder_FreeAndRelease(&r->floans);
+			builder_freeAndRelease(&r->floans);
 
 
 		//////////
@@ -560,7 +560,7 @@
 						//////////
 						// Release our builder
 						//////
-							builder_FreeAndRelease(&temsTempBuilder);
+							builder_freeAndRelease(&temsTempBuilder);
 					}
 			}
 	}
@@ -703,7 +703,7 @@
 // Called to convey user settings
 //
 //////
-	int dsf_user_settings(u32 tnInstance, u32 tnDisposition, u32 tnMode, u32 tnMethod, u32 tnRange, u32 tlShowTems, u32 tnTemsType, u32 tlShowSplines, u32 tnSplinesType, u32 tnSelectArea)
+	int dsf_user_settings(u32 tnInstance, u32 tnDisposition, u32 tnMode, u32 tnMethod, u32 tnRange, u32 tlShowTems, u32 tnTemsType, u32 tlShowSplines, u32 tnSplinesType, u32 tlHighlighSectionOnFinal, u32 tlShowPenDowns, u32 tlShowMouseCrosshairs, u32 tnSelectArea)
 	{
 		u32			lnI;
 		SInstance*	p;
@@ -722,15 +722,18 @@
 		//////////
 		// Set the values, and trigger a refresh on any markup windows
 		//////
-			p->disposition		= iValidateRange(tnDisposition,	_DISPOSITION_SELECT,	_DISPOSITION_FLIP_LM_RM,	_DISPOSITION_SELECT);
-			p->mode				= iValidateRange(tnMode,		_MODE_POINT,			_MODE_AFTER,				_MODE_POINT);
-			p->method			= iValidateRange(tnMethod,		_METHOD_LEFT,			_METHOD_POINT,				_METHOD_POINT);
-			p->range			= iValidateRange(tnRange,		_RANGE_ACTIVE_CHAR,		_RANGE_ALL,					_RANGE_ACTIVE_CHAR);
-			p->showTems			= iValidateRange(tlShowTems,	_NO,					_YES,						_YES);
-			p->temsType			= iValidateRange(tnTemsType,	_TEMS_TRACK,			_TEMS_DISPLAY,				_TEMS_TRACK);
-			p->showSplines		= iValidateRange(tlShowSplines,	_NO,					_YES,						_YES);
-			p->splinesType		= iValidateRange(tnSplinesType,	_SPLINES_FILL,			_SPLINES_LOR,				_SPLINES_FILL);
-			p->selectArea		= iValidateRange(tnSelectArea,	_SELECT_AREA_SMALL,		_SELECT_AREA_LARGE,			_SELECT_AREA_SMALL);
+			p->disposition				= iValidateRange(tnDisposition,				_DISPOSITION_SELECT,	_DISPOSITION_FLIP_LM_RM,	_DISPOSITION_SELECT);
+			p->mode						= iValidateRange(tnMode,					_MODE_POINT,			_MODE_AFTER,				_MODE_POINT);
+			p->method					= iValidateRange(tnMethod,					_METHOD_LEFT,			_METHOD_POINT,				_METHOD_POINT);
+			p->range					= iValidateRange(tnRange,					_RANGE_ACTIVE_CHAR,		_RANGE_ALL,					_RANGE_ACTIVE_CHAR);
+			p->showTems					= iValidateRange(tlShowTems,				_NO,					_YES,						_YES);
+			p->temsType					= iValidateRange(tnTemsType,				_TEMS_TRACK,			_TEMS_DISPLAY,				_TEMS_TRACK);
+			p->showSplines				= iValidateRange(tlShowSplines,				_NO,					_YES,						_YES);
+			p->splinesType				= iValidateRange(tnSplinesType,				_SPLINES_FILL,			_SPLINES_LOR,				_SPLINES_FILL);
+			p->highlighSectionOnFinal	= iValidateRange(tlHighlighSectionOnFinal,	_NO,					_YES,						_YES);
+			p->showPenDowns				= iValidateRange(tlShowPenDowns,			_NO,					_YES,						_NO);
+			p->showMouseCrosshairs		= iValidateRange(tlShowMouseCrosshairs,		_NO,					_YES,						_YES);
+			p->selectArea				= iValidateRange(tnSelectArea,				_SELECT_AREA_SMALL,		_SELECT_AREA_EXTRA_LARGE,	_SELECT_AREA_SMALL);
 
 
 		//////////
@@ -742,8 +745,7 @@
 				h = (SHwnd*)(p->hwnds->data + lnI);
 
 				// If it's a markup window, re-render it
-				if (h->markup)
-					PostMessage(h->hwndParent, WM_REDRAW_WINDOW, (u32)p, (u32)h->hwnd);
+				PostMessage(h->hwndParent, WM_REDRAW_WINDOW, (u32)p, (u32)h->hwnd);
 			}
 
 
@@ -969,7 +971,8 @@
 			// Cross
 			iAddSplineFromToLR(placeholder, true,		0.4075,		0.975,		0.59,		0.975);
 			iAddSplineFromToLR(placeholder, false,		0.4075,		0.05,		0.59,		0.05);
-			iAddSplineFromToLR(placeholder, true,		0.045,		0.74,		0.955,		0.74);
+			s = iAddSplineFromToLR(placeholder, true,		0.045,		0.74,		0.955,		0.74);
+			s->tlLSelected = true;
 			iAddSplineFromToLR(placeholder, false,		0.045,		0.62,		0.955,		0.62);
 
 			// "i" leg
@@ -1642,8 +1645,8 @@
 		//////////
 		// Clean house
 		//////
-			builder_FreeAndRelease(&floans);
-			builder_FreeAndRelease(&floansCsv);
+			builder_freeAndRelease(&floans);
+			builder_freeAndRelease(&floansCsv);
 
 
 		//////////
@@ -2104,11 +2107,16 @@
 					FillRect(h->hdc, &lrc, h->backDarkGrayBrush);
 
 					// Render the splines withmarkup
-					iRenderSplines(p, h, c, h->markup, h->bold, h->italic, h->underline, h->strikethrough);
+					if (p->showSplines)
+						iRenderSplines(p, h, c, h->markup, h->bold, h->italic, h->underline, h->strikethrough);
 
 					// Render the mouse coordinates, tems, and mouse overlay info
 					iRenderMouseCoordinates(p, h);
-					iRenderTems(p, h, c);
+
+					if (p->showTems)
+						iRenderTems(p, h, c);
+
+					// Render the mouse overlay for current mouse activity
 					iRenderMouseOverlay(p, h, c);
 
 				} else {
@@ -2150,28 +2158,32 @@
 		s8		bufferY[32];
 
 
-		// Setup the font
-		SelectObject(h->hdc, h->fontXY);
-		SetBkMode(h->hdc, TRANSPARENT);
-		SetTextColor(h->hdc, RGB(255,255,255));
+		// Only draw the coordinates if we're on the area
+		if (gMouse.xi >= 0 && gMouse.xi < h->w && gMouse.yi >= 0 && gMouse.yi < h->h)
+		{
+			// Setup the font
+			SelectObject(h->hdc, h->fontXY);
+			SetBkMode(h->hdc, TRANSPARENT);
+			SetTextColor(h->hdc, RGB(255,255,255));
 
-		// Get our coordinates
-		sprintf(bufferX, "X:%6.4lf\0", ((f32)gMouse.xi / (f32)h->w));
-		sprintf(bufferY, "Y:%6.4lf\0", ((f32)(h->h - gMouse.yi) / (f32)h->h));		// Invert mouse Y coordinate for the calculation
+			// Get our coordinates
+			sprintf(bufferX, "X:%6.4lf\0", (f32)gMouse.xi			/ (f32)h->w);
+			sprintf(bufferY, "Y:%6.4lf\0", ((f32)(h->h - gMouse.yi) / (f32)h->h));		// Invert mouse Y coordinate for the calculation
 
-		// Find out how big it is
-		SetRect(&lrcX, 0, 0, 0, 0);
-		SetRect(&lrcY, 0, 0, 0, 0);
-		DrawTextA(h->hdc, bufferX, strlen(bufferX), &lrcX, DT_CALCRECT);
-		DrawTextA(h->hdc, bufferY, strlen(bufferY), &lrcY, DT_CALCRECT);
+			// Find out how big it is
+			SetRect(&lrcX, 0, 0, 0, 0);
+			SetRect(&lrcY, 0, 0, 0, 0);
+			DrawTextA(h->hdc, bufferX, strlen(bufferX), &lrcX, DT_CALCRECT);
+			DrawTextA(h->hdc, bufferY, strlen(bufferY), &lrcY, DT_CALCRECT);
 
-		// Determine the actual rendering coordinates
-		SetRect(&lrcY, h->w - 3 - (lrcY.right - lrcY.left), h->h - 3 - (lrcY.bottom - lrcY.top), h->w - 3, h->h - 3);
-		SetRect(&lrcX, h->w - 3 - (lrcY.right - lrcY.left) - 3 - (lrcX.right - lrcX.left), h->h - 3 - (lrcX.bottom - lrcX.top), lrcY.left - 3, lrcY.bottom);
+			// Determine the actual rendering coordinates
+			SetRect(&lrcY, h->w - 3 - (lrcY.right - lrcY.left), h->h - 3 - (lrcY.bottom - lrcY.top), h->w - 3, h->h - 3);
+			SetRect(&lrcX, h->w - 3 - (lrcY.right - lrcY.left) - 3 - (lrcX.right - lrcX.left), h->h - 3 - (lrcX.bottom - lrcX.top), lrcY.left - 3, lrcY.bottom);
 
-		// Render
-		DrawTextA(h->hdc, bufferX, strlen(bufferX), &lrcX, DT_CENTER | DT_VCENTER | DT_END_ELLIPSIS);
-		DrawTextA(h->hdc, bufferY, strlen(bufferY), &lrcY, DT_CENTER | DT_VCENTER | DT_END_ELLIPSIS);
+			// Render
+			DrawTextA(h->hdc, bufferX, strlen(bufferX), &lrcX, DT_CENTER | DT_VCENTER | DT_END_ELLIPSIS);
+			DrawTextA(h->hdc, bufferY, strlen(bufferY), &lrcY, DT_CENTER | DT_VCENTER | DT_END_ELLIPSIS);
+		}
 	}
 
 
@@ -2209,7 +2221,8 @@
 			{
 				// It is a final render, black on white
 				quad			= black;
-				quadSelected	= blackSelected;
+				if (p->highlighSectionOnFinal)			quadSelected	= blackSelected;
+				else									quadSelected	= black;
 
 			} else {
 				// It is a markup render, gray on black
@@ -2299,7 +2312,7 @@
 						//////////
 						// If this is the start of a new stroke, render the indicator
 						//////
-							if (s->lPenDown)
+							if (s->lPenDown && p->showPenDowns)
 							{
 								//////////
 								// Compute from L to R
@@ -2326,16 +2339,16 @@
 
 
 								//////////
-								// Create a quad extending out 5 pixels behind, 40 pixels in front
+								// Create a quad extending out 5 pixels behind, 20 pixels in front
 								//////
 									// p1..p4
-									p1.x		= line.p1.x + ((40.0 / (f64)h->w) * cos(line.theta - _PI_2));
-									p1.y		= line.p1.y + ((40.0 / (f64)h->h) * sin(line.theta - _PI_2));
+									p1.x		= line.p1.x + ((20.0 / (f64)h->w) * cos(line.theta - _PI_2));
+									p1.y		= line.p1.y + ((20.0 / (f64)h->h) * sin(line.theta - _PI_2));
 									p4.x		= line.p1.x + ((5.0 / (f64)h->w) * cos(line.theta + _PI_2));
 									p4.y		= line.p1.y + ((5.0 / (f64)h->h) * sin(line.theta + _PI_2));
 									// p2..p3
-									p2.x		= line.p2.x + ((40.0 / (f64)h->w) * cos(line.theta - _PI_2));
-									p2.y		= line.p2.y + ((40.0 / (f64)h->h) * sin(line.theta - _PI_2));
+									p2.x		= line.p2.x + ((20.0 / (f64)h->w) * cos(line.theta - _PI_2));
+									p2.y		= line.p2.y + ((20.0 / (f64)h->h) * sin(line.theta - _PI_2));
 									p3.x		= line.p2.x + ((5.0 / (f64)h->w) * cos(line.theta + _PI_2));
 									p3.y		= line.p2.y + ((5.0 / (f64)h->h) * sin(line.theta + _PI_2));
 
@@ -2343,7 +2356,7 @@
 								//////////
 								// Fill this quad in using a pastel pink cue
 								//////
-									iFillQuadAlpha(h, &p1, &p2, &p3, &p4, stroke, stroke, stroke, stroke, 0.0, 0.0, 0.7, 0.7);
+									iFillQuadAlpha(h, &p1, &p2, &p3, &p4, stroke, stroke, stroke, stroke, 0.0, 0.0, 1.0, 1.0);
 							}
 
 
@@ -2475,16 +2488,16 @@
 		//////////
 		// Draw in the alpha algorithm
 		//////
-			iDrawLineAlpha(h, p1, p2, &colorStartAlp, &colorEndAlp);
+			iDrawLineAlpha(h, p1, p2, &colorStartAlp, &colorEndAlp, NULL, false);
 	}
 
-	void iDrawLineAlpha(SHwnd* h, SXYF64* p1, SXYF64* p2, SBGR_AF64* colorStart, SBGR_AF64* colorEnd)
+	void iDrawLineAlpha(SHwnd* h, SXYF64* p1, SXYF64* p2, SBGR_AF64* colorStart, SBGR_AF64* colorEnd, SBuilder* pointsDrawn, bool tlNoDuplicates)
 	{
 		f64			lfPercent, lfSteps, lfStepInc, lfRadius, lfCosTheta, lfSinTheta;
 		f64			lfRed, lfGrn, lfBlu, lfAlp, lfMalp, lfRedStep, lfGrnStep, lfBluStep, lfAlpStep;
 		s32			lnX, lnY, lnXLast, lnYLast;
 		SLineF64	line;
-		SBGR		color;
+		SBGRA		color;
 		SBGR*		lbgr;
 
 
@@ -2536,6 +2549,7 @@
 				color.red	= (u8)lfRed;
 				color.grn	= (u8)lfGrn;
 				color.blu	= (u8)lfBlu;
+				color.alp	= (u8)(lfAlp * 255.0);
 				lfMalp		= 1.0 - lfAlp;
 
 				// Compute this point
@@ -2545,19 +2559,88 @@
 				// Render it if it's visible
 				if (lnX >= 0 && lnX < h->w && lnY >= 0 && lnY < h->h && !(lnX == lnXLast && lnY == lnYLast))
 				{
-					// Get the pointer
-					lbgr = (SBGR*)((s8*)h->bd + (lnY * h->rowWidth) + (lnX * 3));
+					if (tlNoDuplicates || pointsDrawn)
+					{
+						// Add it to a list to remove duplicates later
+						iAddPointToPointsDrawn(pointsDrawn, lnX, lnY, color);
+
+					} else {
+						// Directly render it
+						lbgr		= (SBGR*)((s8*)h->bd + (lnY * h->rowWidth) + (lnX * 3));
+						lbgr->red	= (u8)(((f64)lbgr->red * lfMalp) + (lfRed * lfAlp));
+						lbgr->grn	= (u8)(((f64)lbgr->grn * lfMalp) + (lfGrn * lfAlp));
+						lbgr->blu	= (u8)(((f64)lbgr->blu * lfMalp) + (lfBlu * lfAlp));
+					}
+				}
+
+				// Store the last point we rendered
+				lnXLast		= lnX;
+				lnYLast		= lnY;
+			}
+	}
+
+	void iDrawLineAlphaNoDuplicates(SHwnd* h, SBuilder* pointsDrawn)
+	{
+		u32				lnI, lnCount;
+		s32				lnXLast, lnYLast;
+		f64				lfAlp, lfMalp;
+		SBGR*			lbgr;
+		SPointsDrawn*	dp;
+
+
+		//////////
+		// Sort the list
+		//////
+			lnCount = pointsDrawn->populatedLength / sizeof(SPointsDrawn);
+			qsort(pointsDrawn->data, lnCount, sizeof(SPointsDrawn), iiSPointsDrawn_qsortCallback);
+
+
+		//////////
+		// Render each point
+		//////
+			lnXLast = -10000;
+			lnYLast = -10000;
+			for (lnI = 0; lnI < pointsDrawn->populatedLength; lnI += sizeof(SPointsDrawn))
+			{
+				// Grab the pointer
+				dp = (SPointsDrawn*)(pointsDrawn->data + lnI);
+
+				// Render this item
+				if (!(dp->pt.xi == lnXLast && dp->pt.yi == lnYLast))
+				{
+					// Grab the alpha
+					lfAlp		= (f64)dp->color.alp / 255.0;
+					lfMalp		= 1.0 - lfAlp;
 
 					// Render it
-					lbgr->red	= (u8)(((f64)lbgr->red * lfMalp) + (lfRed * lfAlp));
-					lbgr->grn	= (u8)(((f64)lbgr->grn * lfMalp) + (lfGrn * lfAlp));
-					lbgr->blu	= (u8)(((f64)lbgr->blu * lfMalp) + (lfBlu * lfAlp));
+					lbgr		= (SBGR*)((s8*)h->bd + (dp->pt.yi * h->rowWidth) + (dp->pt.xi * 3));
+					lbgr->red	= (u8)(((f64)lbgr->red * lfMalp) + ((f64)dp->color.red * lfAlp));
+					lbgr->grn	= (u8)(((f64)lbgr->grn * lfMalp) + ((f64)dp->color.grn * lfAlp));
+					lbgr->blu	= (u8)(((f64)lbgr->blu * lfMalp) + ((f64)dp->color.blu * lfAlp));
 
-					// Store the last point we rendered
-					lnXLast		= lnX;
-					lnYLast		= lnY;
+					// Store for the next go so we don't do this point again
+					lnXLast = dp->pt.xi;
+					lnYLast = dp->pt.yi;
 				}
 			}
+	}
+
+	// For alpha-rendering, we don't want to double-apply an alpha pixel, so this algorithm does
+	// a binary search.  If it finds the point, it returns false because it could not be added.
+	// If it was not found it is added.
+	void iAddPointToPointsDrawn(SBuilder* pointsDrawn, s32 tnX, s32 tnY, SBGRA color)
+	{
+		SPointsDrawn* dp;
+
+
+		// Add a new entry
+		dp = (SPointsDrawn*)builder_allocateBytes(pointsDrawn, sizeof(SPointsDrawn));
+		if (dp)
+		{
+			dp->pt.xi	= tnX;
+			dp->pt.yi	= tnY;
+			dp->color	= color;
+		}
 	}
 
 	// Draw the point
@@ -2648,9 +2731,11 @@
 		f64			lfPercent, lfStep, lfStepCount, lfCosThetaP1P4, lfSinThetaP1P4, lfCosThetaP2P3, lfSinThetaP2P3, lfMultiplier;
 		SXYF64		lp1, lp2;
 		SLineF64	p1p4, p2p3;
+		bool		llNoAlpha;
 		f64			lfRedP1P4, lfGrnP1P4, lfBluP1P4, lfAlpP1P4, lfRedP2P3, lfGrnP2P3, lfBluP2P3, lfAlpP2P3;
 		f64			lfRedP1P4Step, lfGrnP1P4Step, lfBluP1P4Step, lfAlpP1P4Step, lfRedP2P3Step, lfGrnP2P3Step, lfBluP2P3Step, lfAlpP2P3Step;
 		SBGR_AF64	colorP1P4, colorP2P3;
+		SBuilder*	pointsDrawn;
 
 
 		//////////
@@ -2705,6 +2790,20 @@
 			lfBluP2P3Step	= ((f64)p3Color.blu - lfBluP2P3) / lfStepCount;
 			lfAlpP2P3Step	= (tfP3Alp - tfP2Alp) / lfStepCount;
 
+			// Are we rendering any that are alpha?
+// The following does a test to see if we should use the alpha algorithm.  It works, but it is
+// notably slower on large strokes.  So, by default it is shut off.
+//			llNoAlpha = false;
+// 			if (tfP1Alp == 1.0 && tfP2Alp == 1.0 && tfP3Alp == 1.0 && tfP4Alp == 1.0)
+				llNoAlpha = true;
+
+
+		//////////
+		// Create our points drawn buffer so duplicate points are not rendered
+		//////
+			if (!llNoAlpha)
+				builder_createAndInitialize(&pointsDrawn, -1);
+
 
 
 		//////////
@@ -2739,7 +2838,8 @@
 				//////////
 				// Draw this line
 				//////
-					iDrawLineAlpha(h, &lp1, &lp2, &colorP1P4, &colorP2P3);
+					if (llNoAlpha)		iDrawLineAlpha(h, &lp1, &lp2, &colorP1P4, &colorP2P3, NULL,			false);
+					else				iDrawLineAlpha(h, &lp1, &lp2, &colorP1P4, &colorP2P3, pointsDrawn,	true);
 
 
 				//////////
@@ -2755,6 +2855,16 @@
 					lfGrnP2P3	+= lfGrnP2P3Step;
 					lfBluP2P3	+= lfBluP2P3Step;
 					lfAlpP2P3	+= lfAlpP2P3Step;
+			}
+
+
+		//////////
+		// Destroy the points drawn buffer after first rendering it
+		//////
+			if (!llNoAlpha)
+			{
+				iDrawLineAlphaNoDuplicates(h, pointsDrawn);
+				builder_freeAndRelease(&pointsDrawn);
 			}
 	}
 
@@ -2811,11 +2921,11 @@
 		{
 			// The mouse is pressed down, render the select area
 			// Render it (we're basically drawing an oval area the mouse will interact with)
-			lfRadius	= (f64)iValidateRange(p->selectArea, _SELECT_AREA_SMALL, _SELECT_AREA_LARGE, _SELECT_AREA_SMALL);
+			lfRadius	= (f64)iValidateRange(p->selectArea, _SELECT_AREA_SMALL, _SELECT_AREA_EXTRA_LARGE, _SELECT_AREA_SMALL);
 			lnYLast		= -1;
 			lfA			= lfRadius * 1.0;		// A is 100%
 			lfB			= lfRadius * 0.7;		// B is 70%, this gives us a 10:7 oval
-			lfThetaStep	= _PI / ((f64)gMouseType * 8.0);
+			lfThetaStep	= _PI / ((f64)gMouseType * 128.0);
 			for (lfTheta = 0; lfTheta < _PI_2; lfTheta += lfThetaStep)
 			{
 				// Compute the X,Y for Quad I, then reflect for lines in Quad2..1, and Quad3..4
@@ -2844,9 +2954,9 @@
 			}
 		}
 
-		if (p1.xi >= 0 && p1.xi < h->w && p1.yi >= 0 && p1.yi < h->h)
+		if (p->showMouseCrosshairs && p1.xi >= 0 && p1.xi < h->w && p1.yi >= 0 && p1.yi < h->h)
 		{
-			// Render the horizontal and vertical lines
+			// Render the horizontal and vertical crosshair lines
 			iColorizeHorizontalLineByPixels(p, h, c, 0, h->w - 1, p1.yi, mouseColor);		// Horizontal
 			iColorizeVerticalLineByPixels(  p, h, c, 0, h->h - 1, p1.xi, mouseColor);		// Vertical
 		}
@@ -3238,6 +3348,24 @@
 		else if (left->xi < right->xi)		return(-1);		// Left is less than right
 		else if (left->xi > right->xi)		return(1);		// Left is greater than right
 		else								return(0);		// They're equal
+	}
+
+	int iiSPointsDrawn_qsortCallback(const void* l, const void* r)
+	{
+		SPointsDrawn*	left;
+		SPointsDrawn*	right;
+
+
+		// Get our pointers properly
+		left	= (SPointsDrawn*)l;
+		right	= (SPointsDrawn*)r;
+
+		// See how the cookie crumbles
+		     if (left->pt.yi < right->pt.yi)		return(-1);		// Left is less than right
+		else if (left->pt.yi > right->pt.yi)		return(1);		// Left is greater than right
+		else if (left->pt.xi < right->pt.xi)		return(-1);		// Left is less than right
+		else if (left->pt.xi > right->pt.xi)		return(1);		// Left is greater than right
+		else										return(0);		// They're equal
 	}
 
 	// Grabs the next line segment as processing through the floans.
