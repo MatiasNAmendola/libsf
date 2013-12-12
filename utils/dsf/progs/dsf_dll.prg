@@ -164,6 +164,26 @@ FUNCTION declare_dsf_dll
 							INTEGER		tnInstance,	;			&& Instance handle returned by dsf_create_new_instance()
 							INTEGER		tipid, ;				&& iid of the character this template relates to (parent id)
 							STRING		@tcRecno12				&& The record number used to reference this item.
+
+	* User cues are visible 
+	DECLARE INTEGER		dsf_user_cues		IN exe\dsf.dll ;
+							INTEGER		tnInstance,	;			&& Instance handle returned by dsf_create_new_instance()
+							INTEGER		ascent, ;				&& The ascent (highest point of the font, top of umlaut above a capital letter, for example
+							INTEGER		trackAscent, ;			&& Should the mouse track near to ascent strokes?
+							INTEGER		upper, ;				&& The upper (highest point of an upper-case letter, or number)
+							INTEGER		trackUpper, ;			&& Should the mouse track near to the upper-line?
+							INTEGER		lower, ;				&& The lower (highest point of a lower-case letter)
+							INTEGER		trackLower, ;			&& Should the mouse track near to the lower-line?
+							INTEGER		base, ;					&& The base (base of all characters, numbers, everything drawn)
+							INTEGER		trackBase, ;			&& Should the mouse track near to the lower-line?
+							INTEGER		descent, ;				&& The descent (lowest point of a letter, bottom of a y or g, for example)
+							INTEGER		trackDescent, ;			&& Should the mouse track near to the descent-line?
+							INTEGER		strikethrough, ;		&& Strikethrough lines (upper and lower, as per the line thickness)
+							INTEGER		trackStrike, ;			&& Should the mouse track near to the strikethrough lines?
+							INTEGER		underline, ;			&& Underscore lines (upper and lower, as per the line thickness)
+							INTEGER		trackUnderline, ;		&& Should the mouse track near to the underline lines?
+							INTEGER		refs, ;					&& Custom references
+							INTEGER		trackRefs				&& Should the mouse track near to the custom references?
 	
 	* Called to set the user settings
 	DECLARE INTEGER		dsf_user_settings		IN exe\dsf.dll ;

@@ -13,6 +13,7 @@ EXPORTS
 	dsf_initial_load_complete
 	dsf_get_changed_template
 	dsf_get_deleted_template
+	dsf_user_cues
 	dsf_user_settings
 
 	dsf_set_active_character

@@ -700,6 +700,64 @@
 
 //////////
 //
+// Called to set the cues the user wants to see, along with whether or not the mouse should track
+// near to any of the specified cues.
+//
+//////
+	int dsf_user_cues(u32 tnInstance,	u32 tnAscent,			u32 tnTrackAscent, 
+										u32 tnUpper,			u32 tnTrackUpper, 
+										u32 tnLower,			u32 tnTrackLower, 
+										u32 tnBase,				u32 tnTrackBase, 
+										u32 tnDescent,			u32 tnTrackDescent, 
+										u32 tnStrikethrough,	u32 tnTrackStrike, 
+										u32 tnUnderline,		u32 tnTrackUnderline, 
+										u32 tnRefs,				u32 tnTrackRefs)
+	{
+		SInstance*	p;
+		bool		llValid;
+
+
+		//////////
+		// Make sure our environment is sane
+		//////
+			p = iGetDsfInstance(tnInstance, &llValid);
+			if (!llValid)
+				return(-1);
+
+
+		//////////
+		// Set the values, and trigger a refresh on any markup windows
+		//////
+			p->ascent			= iValidateRange(tnAscent,			_NO,	_YES,	_NO);
+			p->trackAscent		= iValidateRange(tnTrackAscent,		_NO,	_YES,	_NO);
+			p->upper			= iValidateRange(tnUpper,			_NO,	_YES,	_NO);
+			p->trackUpper		= iValidateRange(tnTrackUpper,		_NO,	_YES,	_NO);
+			p->lower			= iValidateRange(tnLower,			_NO,	_YES,	_NO);
+			p->trackLower		= iValidateRange(tnTrackLower,		_NO,	_YES,	_NO);
+			p->base				= iValidateRange(tnBase,			_NO,	_YES,	_NO);
+			p->trackBase		= iValidateRange(tnTrackBase,		_NO,	_YES,	_NO);
+			p->descent			= iValidateRange(tnDescent,			_NO,	_YES,	_NO);
+			p->trackDescent		= iValidateRange(tnTrackDescent,	_NO,	_YES,	_NO);
+			p->strikethrough	= iValidateRange(tnStrikethrough,	_NO,	_YES,	_NO);
+			p->trackStrike		= iValidateRange(tnTrackStrike,		_NO,	_YES,	_NO);
+			p->underline		= iValidateRange(tnUnderline,		_NO,	_YES,	_NO);
+			p->trackUnderline	= iValidateRange(tnTrackUnderline,	_NO,	_YES,	_NO);
+			p->showRefs			= iValidateRange(tnRefs,			_NO,	_YES,	_NO);
+			p->trackRefs		= iValidateRange(tnTrackRefs,		_NO,	_YES,	_NO);
+			// Note:  We do not render here because the cues and settings are usually sent one after the other
+
+
+		//////////
+		// Indicate success
+		//////
+			return(0);
+	}
+
+
+
+
+//////////
+//
 // Called to convey user settings
 //
 //////
@@ -954,7 +1012,7 @@
 	void initialize(void)
 	{
 		f64			lfX, lfY, lfTheta, lfRadius, lfA, lfB, lfV1, lfV2;
-		SSpline*	s;
+//		SSpline*	s;
 		bool		llPenDown;
 
 
@@ -971,28 +1029,18 @@
 			// Cross
 			iAddSplineFromToLR(placeholder, true,		0.4075,		0.975,		0.59,		0.975);
 			iAddSplineFromToLR(placeholder, false,		0.4075,		0.05,		0.59,		0.05);
-			s = iAddSplineFromToLR(placeholder, true,		0.045,		0.74,		0.955,		0.74);
-			s->tlLSelected = true;
+			iAddSplineFromToLR(placeholder, true,		0.045,		0.74,		0.955,		0.74);
 			iAddSplineFromToLR(placeholder, false,		0.045,		0.62,		0.955,		0.62);
 
 			// "i" leg
 			iAddSplineFromToLR(placeholder, true,		0.775,		0.435,		0.85,		0.485);
 			iAddSplineFromToLR(placeholder, false,		0.7825,		0.425,		0.865,		0.47);
 			iAddSplineFromToLR(placeholder, false,		0.7875,		0.415,		0.8775,		0.45);
-			s = iAddSplineFromToLR(placeholder, false,		0.79,		0.405,		0.8875,		0.425);
-			s->tlLSelected = true;
-			s->tlOSelected = true;
-			s->tlRSelected = true;
-			s = iAddSplineFromToLR(placeholder, false,		0.7925,		0.3975,		0.8925,		0.405);
-			s->tlLSelected = true;
-			s->tlOSelected = true;
-			s->tlRSelected = true;
+			iAddSplineFromToLR(placeholder, false,		0.79,		0.405,		0.8875,		0.425);
+			iAddSplineFromToLR(placeholder, false,		0.7925,		0.3975,		0.8925,		0.405);
 			iAddSplineFromToLR(placeholder, false,		0.7925,		0.39,		0.895,		0.39);
 			iAddSplineFromToLR(placeholder, false,		0.7925,		0.14,		0.895,		0.14);
-			s = iAddSplineFromToLR(placeholder, false,		0.795,		0.125,		0.895,		0.13);
-// 			s->tlLSelected = true;
-// 			s->tlOSelected = true;
-			s->tlRSelected = true;
+			iAddSplineFromToLR(placeholder, false,		0.795,		0.125,		0.895,		0.13);
 			iAddSplineFromToLR(placeholder, false,		0.80,		0.105,		0.8975,		0.12);
 			iAddSplineFromToLR(placeholder, false,		0.81,		0.08,		0.90,		0.1125);
 			iAddSplineFromToLR(placeholder, false,		0.825,		0.06,		0.905,		0.1);
@@ -2196,10 +2244,10 @@
 //////
 	void iRenderSplines(SInstance* p, SHwnd* h, SChars* c, u32 tlMarkup, u32 tlBold, u32 tlItalic, u32 tlUnderline, u32 tlStrikethrough)
 	{
-		u32			lnI;
+		u32			lnI, lnSplineNumber;
 		SXYF64		prLast, poLast, plLast;
 		SXYF64		pr, po, pl, p1, p2, p3, p4;
-		SLineF64	line;
+		SLineF64	line, lineL, lineR, lineLLast, lineRLast, lineLtoLLast, lineRtoRLast;
 		SSpline*	s;
 		SSpline*	sLast;
 		SBuilder*	b;
@@ -2295,7 +2343,7 @@
 		//////
 			if (tlMarkup != 0)
 			{
-				for (lnI = 0; lnI < b->populatedLength; lnI += sizeof(SSpline))
+				for (lnI = 0, lnSplineNumber = 0; lnI < b->populatedLength; lnI += sizeof(SSpline))
 				{
 					// Grab the pointer
 					s = (SSpline*)(b->data + lnI);
@@ -2310,53 +2358,81 @@
 
 
 						//////////
+						// Indicate the spline number
+						//////
+							if (s->lPenDown)		lnSplineNumber = 0;
+							else					++lnSplineNumber;
+
+
+						//////////
 						// If this is the start of a new stroke, render the indicator
 						//////
-							if (s->lPenDown && p->showPenDowns)
+							if (p->showPenDowns)
 							{
 								//////////
-								// Compute from L to R
+								// For pendown strokes, render the large indicator
 								//////
-									// L
-									line.p1.x	= pl.x;
-									line.p1.y	= pl.y;
-									// R
-									line.p2.x	= pr.x;
-									line.p2.y	= pr.y;
-									iComputeLine(&line);
+									if (s->lPenDown)
+									{
+										// Compute the line from L to R
+										iComputeLineFromTwoPoints(&line, &pl, &pr);
+
+										/////////
+										// Extend out the points by 5 pixels
+										//////
+											// L
+											line.p1.x	= line.p1.x + ((5.0 / (f64)h->w) * cos(line.theta + _PI));
+											line.p1.y	= line.p1.y + ((5.0 / (f64)h->h) * sin(line.theta + _PI));
+											// R
+											line.p2.x	= line.p2.x + ((5.0 / (f64)h->w) * cos(line.theta));
+											line.p2.y	= line.p2.y + ((5.0 / (f64)h->h) * sin(line.theta));
+											iComputeLine(&line);
 
 
-								/////////
-								// Extend out the points by 5 pixels
-								//////
-									// L
-									line.p1.x	= line.p1.x + ((5.0 / (f64)h->w) * cos(line.theta + _PI));
-									line.p1.y	= line.p1.y + ((5.0 / (f64)h->h) * sin(line.theta + _PI));
-									// R
-									line.p2.x	= line.p2.x + ((5.0 / (f64)h->w) * cos(line.theta));
-									line.p2.y	= line.p2.y + ((5.0 / (f64)h->h) * sin(line.theta));
-									iComputeLine(&line);
+										//////////
+										// Create a quad extending out 5 pixels behind, 10 pixels in front
+										//////
+											// p1..p4
+											p1.x		= line.p1.x + ((10.0 / (f64)h->w) * cos(line.theta - _PI_2));
+											p1.y		= line.p1.y + ((10.0 / (f64)h->h) * sin(line.theta - _PI_2));
+											p4.x		= line.p1.x + ((5.0 / (f64)h->w) * cos(line.theta + _PI_2));
+											p4.y		= line.p1.y + ((5.0 / (f64)h->h) * sin(line.theta + _PI_2));
+											// p2..p3
+											p2.x		= line.p2.x + ((10.0 / (f64)h->w) * cos(line.theta - _PI_2));
+											p2.y		= line.p2.y + ((10.0 / (f64)h->h) * sin(line.theta - _PI_2));
+											p3.x		= line.p2.x + ((5.0 / (f64)h->w) * cos(line.theta + _PI_2));
+											p3.y		= line.p2.y + ((5.0 / (f64)h->h) * sin(line.theta + _PI_2));
+
+
+										//////////
+										// Fill this quad in using a pastel pink cue
+										//////
+											iFillQuadAlpha(h, &p1, &p2, &p3, &p4, stroke, stroke, stroke, stroke, 0.0, 0.0, 0.7, 0.7);
+									}
 
 
 								//////////
-								// Create a quad extending out 5 pixels behind, 20 pixels in front
+								// For all splines after the second, render hint arrows
 								//////
-									// p1..p4
-									p1.x		= line.p1.x + ((20.0 / (f64)h->w) * cos(line.theta - _PI_2));
-									p1.y		= line.p1.y + ((20.0 / (f64)h->h) * sin(line.theta - _PI_2));
-									p4.x		= line.p1.x + ((5.0 / (f64)h->w) * cos(line.theta + _PI_2));
-									p4.y		= line.p1.y + ((5.0 / (f64)h->h) * sin(line.theta + _PI_2));
-									// p2..p3
-									p2.x		= line.p2.x + ((20.0 / (f64)h->w) * cos(line.theta - _PI_2));
-									p2.y		= line.p2.y + ((20.0 / (f64)h->h) * sin(line.theta - _PI_2));
-									p3.x		= line.p2.x + ((5.0 / (f64)h->w) * cos(line.theta + _PI_2));
-									p3.y		= line.p2.y + ((5.0 / (f64)h->h) * sin(line.theta + _PI_2));
+									if (lnSplineNumber >= 1)
+									{
+										// Compute the line from L to O and O to R on both the current and the last points
+										iComputeLineFromTwoPoints(&lineL, &pl, &po);
+										iComputeLineFromTwoPoints(&lineR, &po, &pr);
+										iComputeLineFromTwoPoints(&lineLLast, &plLast, &poLast);
+										iComputeLineFromTwoPoints(&lineRLast, &poLast, &prLast);
 
+										// Compute a line from the midpoints forward
+										iComputeLineFromTwoPoints(&lineLtoLLast, &lineLLast.mid, &lineL.mid);
+										iComputeLineFromTwoPoints(&lineRtoRLast, &lineRLast.mid, &lineR.mid);
 
-								//////////
-								// Fill this quad in using a pastel pink cue
-								//////
-									iFillQuadAlpha(h, &p1, &p2, &p3, &p4, stroke, stroke, stroke, stroke, 0.0, 0.0, 1.0, 1.0);
+										// Build quads around the endpoints
+										if (lineL.length * (f64)h->w >= 9.0)
+											iRenderHint(h, &lineLtoLLast, &lineLtoLLast.p1);			// There's enough room to draw a hint on the left side
+
+										if (lineR.length * (f64)h->w >= 9.0)
+											iRenderHint(h, &lineRtoRLast, &lineRtoRLast.p1);			// There's enough room to draw a hint on the right side
+									}
 							}
 
 
@@ -2375,6 +2451,10 @@
 									iDrawLine(h, &pl, &plLast, s->tlLSelected ? colorSelected : colorLine, sLast->tlLSelected ? colorSelected : colorLine);
 								}
 								iDrawPoints(h, &prLast, &poLast, &plLast, sLast, colorSelected, colorR, colorO, colorL, colorRSelected, colorOSelected, colorLSelected);
+
+							} else {
+								// Reset the spline count
+								lnSplineNumber = 0;
 							}
 
 							// Connect left, middle, right as markup lines
@@ -2393,6 +2473,27 @@
 					}
 				}
 			}
+	}
+
+	void iRenderHint(SHwnd* h, SLineF64* line, SXYF64* pt)
+	{
+		SXYF64		pLeft;
+		SXYF64		pForward;
+		SXYF64		pRight;
+
+
+		// Create line moving left, forward, and right from the end of the provided line
+		pLeft.x		= pt->x + ((2.5 / (f64)h->w)  * cos(line->theta - _PI_2));
+		pLeft.y		= pt->y + ((2.5 / (f64)h->w)  * sin(line->theta - _PI_2));
+
+		pForward.x	= pt->x + ((6.0 / (f64)h->w)  * cos(line->theta));
+		pForward.y	= pt->y + ((6.0 / (f64)h->w)  * sin(line->theta));
+
+		pRight.x	= pt->x + ((2.5 / (f64)h->w)  * cos(line->theta + _PI_2));
+		pRight.y	= pt->y + ((2.5 / (f64)h->w)  * sin(line->theta + _PI_2));
+
+		// Draw the quad
+		iFillQuadAlpha(h, &pLeft, &pForward, &pForward, &pRight, stroke, stroke, stroke, stroke, 1.0, 1.0, 1.0, 1.0);
 	}
 
 	void iComputeLOR(SSpline* s, SXYF64* pl, SXYF64* po, SXYF64* pr)
@@ -3704,6 +3805,20 @@
 		// Quads 1..4
 		line->p1_quad	= iComputeQuad(&line->p1);
 		line->p2_quad	= iComputeQuad(&line->p2);
+	}
+
+	void iComputeLineFromTwoPoints(SLineF64* line, SXYF64* p1, SXYF64* p2)
+	{
+		// p1
+		line->p1.x	= p1->x;
+		line->p1.y	= p1->y;
+
+		// p2
+		line->p2.x	= p2->x;
+		line->p2.y	= p2->y;
+
+		// Compute
+		iComputeLine(line);
 	}
 
 

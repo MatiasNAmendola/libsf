@@ -354,6 +354,24 @@ struct SLineF64
 		u32				showMouseCrosshairs;		// 0=no, 1=yes, should the mouse crosshairs be shown?
 		u32				selectArea;					// Some value between 10..30 (how big they want the mouse select area to be)
 
+		// User cues
+		u32				ascent;						// The ascent (highest point of the font, top of umlaut above a capital letter, for example
+		u32				trackAscent;				// Should the mouse track near to ascent strokes?
+		u32				upper;						// The upper (highest point of an upper-case letter, or number)
+		u32				trackUpper;					// Should the mouse track near to the upper-line?
+		u32				lower;						// The lower (highest point of a lower-case letter)
+		u32				trackLower;					// Should the mouse track near to the lower-line?
+		u32				base;						// The base (base of all characters, numbers, everything drawn)
+		u32				trackBase;					// Should the mouse track near to the lower-line?
+		u32				descent;					// The descent (lowest point of a letter, bottom of a y or g, for example)
+		u32				trackDescent;				// Should the mouse track near to the descent-line?
+		u32				strikethrough;				// Strikethrough lines (upper and lower, as per the line thickness)
+		u32				trackStrike;				// Should the mouse track near to the strikethrough lines?
+		u32				underline;					// Underscore lines (upper and lower, as per the line thickness)
+		u32				trackUnderline;				// Should the mouse track near to the underline lines?
+		u32				showRefs;					// Custom references
+		u32				trackRefs;					// Should the mouse track near to the custom references?
+
 		SBuilder*		chars;						// (SBuilder) Characters, one SBuilder for every character, with each character SBuilder pointing to its many SChar entries
 		SBuilder*		refs;						// (SRefs) References
 		SBuilder*		hwnds;						// Child window references for this instance
@@ -496,6 +514,7 @@ struct SLineF64
 	int					iRender									(SInstance* p, SHwnd* h, SChars* c, s32 tnWidth, s32 tnHeight, u32 tnHwndParent, s32 tnX, s32 tnY);
 	void				iRenderMouseCoordinates					(SInstance* p, SHwnd* h);
 	void				iRenderSplines							(SInstance* p, SHwnd* h, SChars* c, u32 tlMarkup, u32 tlBold, u32 tlItalic, u32 tlUnderline, u32 tlStrikethrough);
+	void				iRenderHint								(SHwnd* h, SLineF64* line, SXYF64* pt);
 	void				iComputeLOR								(SSpline* s, SXYF64* pl, SXYF64* po, SXYF64* pr);
 	void				iComputeQuadColorsR						(SSpline* s, SSpline* sLast, SBGR quadNormal, SBGR quadSelected, SBGR* p1ColorR, SBGR* p2ColorR, SBGR* p3ColorR, SBGR* p4ColorR);
 	void				iComputeQuadColorsL						(SSpline* s, SSpline* sLast, SBGR quadNormal, SBGR quadSelected, SBGR* p1ColorL, SBGR* p2ColorL, SBGR* p3ColorL, SBGR* p4ColorL);
@@ -534,6 +553,7 @@ struct SLineF64
 	SHwnd*				iFindOrCreateHwnd						(SBuilder* hwnds, u32 tnHwndParent, s32 tnX, s32 tnY, s32 tnWidth, s32 tnHeight, u32 tlMarkup);
 	u32					iCreateWindow							(SHwnd* h);
 	void				iComputeLine							(SLineF64* line);
+	void				iComputeLineFromTwoPoints				(SLineF64* line, SXYF64* p1, SXYF64* p2);
 	void				iConstrainQuadAroundLine				(SLineF64* lineRef, SXYF64* p1, SXYF64* p2, SXYF64* p3, SXYF64* p4, f64 tfp1Max, f64 tfp2Max, f64 tfp3Max, f64 tfp4Max, bool tlForceSize);
 	void				iConstrainLineLength					(SXYF64* po, SXYF64* pToConstrain, f64 tfMaxLength, bool tlForceToLength);
 	f64					iAdjustTheta							(f64 tfTheta);
