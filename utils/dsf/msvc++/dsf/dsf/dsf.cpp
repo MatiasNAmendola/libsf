@@ -728,22 +728,22 @@
 		//////////
 		// Set the values, and trigger a refresh on any markup windows
 		//////
-			p->ascent			= iValidateRange(tnAscent,			_NO,	_YES,	_NO);
-			p->trackAscent		= iValidateRange(tnTrackAscent,		_NO,	_YES,	_NO);
-			p->upper			= iValidateRange(tnUpper,			_NO,	_YES,	_NO);
-			p->trackUpper		= iValidateRange(tnTrackUpper,		_NO,	_YES,	_NO);
-			p->lower			= iValidateRange(tnLower,			_NO,	_YES,	_NO);
-			p->trackLower		= iValidateRange(tnTrackLower,		_NO,	_YES,	_NO);
-			p->base				= iValidateRange(tnBase,			_NO,	_YES,	_NO);
-			p->trackBase		= iValidateRange(tnTrackBase,		_NO,	_YES,	_NO);
-			p->descent			= iValidateRange(tnDescent,			_NO,	_YES,	_NO);
-			p->trackDescent		= iValidateRange(tnTrackDescent,	_NO,	_YES,	_NO);
-			p->strikethrough	= iValidateRange(tnStrikethrough,	_NO,	_YES,	_NO);
-			p->trackStrike		= iValidateRange(tnTrackStrike,		_NO,	_YES,	_NO);
-			p->underline		= iValidateRange(tnUnderline,		_NO,	_YES,	_NO);
-			p->trackUnderline	= iValidateRange(tnTrackUnderline,	_NO,	_YES,	_NO);
-			p->showRefs			= iValidateRange(tnRefs,			_NO,	_YES,	_NO);
-			p->trackRefs		= iValidateRange(tnTrackRefs,		_NO,	_YES,	_NO);
+			p->ascent			= iValidateRange(tnAscent,			 	_NO, 	_YES,	_NO);
+			p->trackAscent		= iValidateRange(tnTrackAscent,			_NO,	_YES,	_NO);
+			p->upper			= iValidateRange(tnUpper,				_NO,	_YES,	_NO);
+			p->trackUpper		= iValidateRange(tnTrackUpper,			_NO,	_YES,	_NO);
+			p->lower			= iValidateRange(tnLower,				_NO,	_YES,	_NO);
+			p->trackLower		= iValidateRange(tnTrackLower,			_NO,	_YES,	_NO);
+			p->base				= iValidateRange(tnBase,				_NO,	_YES,	_NO);
+			p->trackBase		= iValidateRange(tnTrackBase,			_NO,	_YES,	_NO);
+			p->descent			= iValidateRange(tnDescent,				_NO,	_YES,	_NO);
+			p->trackDescent		= iValidateRange(tnTrackDescent,		_NO,	_YES,	_NO);
+			p->strikethrough	= iValidateRange(tnStrikethrough,		_NO,	_YES,	_NO);
+			p->trackStrike		= iValidateRange(tnTrackStrike,			_NO,	_YES,	_NO);
+			p->underline		= iValidateRange(tnUnderline,			_NO,	_YES,	_NO);
+			p->trackUnderline	= iValidateRange(tnTrackUnderline,		_NO,	_YES,	_NO);
+			p->showRefs			= iValidateRange(tnRefs,				_NO,	_YES,	_NO);
+			p->trackRefs		= iValidateRange(tnTrackRefs,			_NO,	_YES,	_NO);
 			// Note:  We do not render here because the cues and settings are usually sent one after the other
 
 
@@ -761,7 +761,13 @@
 // Called to convey user settings
 //
 //////
-	int dsf_user_settings(u32 tnInstance, u32 tnDisposition, u32 tnMode, u32 tnMethod, u32 tnRange, u32 tlShowTems, u32 tnTemsType, u32 tlShowSplines, u32 tnSplinesType, u32 tlHighlighSectionOnFinal, u32 tlShowPenDowns, u32 tlShowMouseCrosshairs, u32 tnSelectArea)
+	int dsf_user_settings(u32 tnInstance,
+							u32 tnDisposition, u32 tnMode, u32 tnMethod, u32 tnRange,
+							u32 tlShowTems, u32 tnTemsType,
+							u32 tlShowSplines, u32 tnSplinesType,
+							u32 tlHighlighSectionOnFinal, u32 tlShowPenDowns, u32 tlShowMouseCrosshairs,
+							u32 tlInvert, u32 tlZoomLens,
+							u32 tnSelectArea)
 	{
 		u32			lnI;
 		SInstance*	p;
@@ -791,6 +797,8 @@
 			p->highlighSectionOnFinal	= iValidateRange(tlHighlighSectionOnFinal,	_NO,					_YES,						_YES);
 			p->showPenDowns				= iValidateRange(tlShowPenDowns,			_NO,					_YES,						_NO);
 			p->showMouseCrosshairs		= iValidateRange(tlShowMouseCrosshairs,		_NO,					_YES,						_YES);
+			p->invert					= iValidateRange(tlInvert,					_NO,					_YES,						_NO);
+			p->zoomLens					= iValidateRange(tlZoomLens,				_NO,					_YES,						_NO);
 			p->selectArea				= iValidateRange(tnSelectArea,				_SELECT_AREA_SMALL,		_SELECT_AREA_EXTRA_LARGE,	_SELECT_AREA_SMALL);
 
 
@@ -2174,7 +2182,24 @@
 				}
 			}
 
-			// Redraw after the rendering
+
+		//////////
+		// 
+		//////
+			if (p->zoomLens)
+				iRenderZoomLens(h);
+
+
+		//////////
+		// Invert
+		//////
+			if (p->invert)
+				iInvertImage(h);	// Invert the colors
+
+
+		//////////
+		// Redraw after the rendering
+		//////
 			if (h->_hwnd)
 			{
 // 				SetRect(&lrc, 0, 0, 10000, 10000);
@@ -3350,6 +3375,88 @@
 					lbgr->red	= (u8)iScaleIntoRange(min((u32)((lfGray * lfRed) + (lfMGray * (f64)lbgr->red)), 255), 255, 32, 64);
 					lbgr->grn	= (u8)iScaleIntoRange(min((u32)((lfGray * lfGrn) + (lfMGray * (f64)lbgr->grn)), 255), 255, 128, 255);
 					lbgr->blu	= (u8)iScaleIntoRange(min((u32)((lfGray * lfBlu) + (lfMGray * (f64)lbgr->blu)), 255), 255, 32, 64);
+				}
+			}
+	}
+
+	void iInvertImage(SHwnd* h)
+	{
+		s32		lnX, lnY;
+		SBGR*	lbgr;
+
+
+		//////////
+		// Iterate through every pixel
+		//////
+			for (lnY = 0; lnY < h->h; lnY++)
+			{
+				// Begin on this row
+				lbgr = (SBGR*)((s8*)h->bd + (lnY * h->rowWidth));
+				for (lnX = 0; lnX < h->w; lnX++, lbgr++)
+				{
+					// Invert the pixel
+					lbgr->red = 255 - lbgr->red;
+					lbgr->grn = 255 - lbgr->grn;
+					lbgr->blu = 255 - lbgr->blu;
+				}
+			}
+	}
+
+	// Zoom the 32x32 box around the mouse coordinates into a zoom lens overlain either on the
+	// upper-left or lower-left (depending on whether or not the mouse is over the default upper-
+	// left display area
+	void iRenderZoomLens(SHwnd* h)
+	{
+		s32		lnX, lnY, lnX2, lnY2, lnXSrc, lnYSrc, lnXDst, lnYDst;
+		RECT	lrc;
+		SBGR*	lbgrSrc;
+		SBGR*	lbgrDst;
+
+
+		//////////
+		// See if the mouse is in this default upper-left area
+		//////
+			SetRect(&lrc, 0, 0, 128 + 16, 128 + 16);
+			if (gMouse.xi >= lrc.left && gMouse.xi < lrc.right && gMouse.yi >= lrc.top && gMouse.yi < lrc.bottom)
+				SetRect(&lrc, 0, h->h - 128, 128, h->h);
+
+
+		//////////
+		// Copy the image into the area
+		//////
+			for (lnY = 0, lnYSrc = gMouse.yi - 16, lnYDst = lrc.top; lnY < 32; lnY++, lnYSrc++, lnYDst += 4)
+			{
+				// Compute the source pointer for the row
+				lbgrSrc = (SBGR*)((s8*)h->bd + ((h->h - lnYSrc - 1) * h->rowWidth) + ((gMouse.xi - 16) * 3));
+
+				// Copy the columns
+				for (lnX = 0, lnXSrc = gMouse.xi - 16, lnXDst = lrc.left; lnX < 32; lnX++, lnXSrc++, lnXDst += 4, lbgrSrc++)
+				{
+					// Repeat for a 4x zoom
+					for (lnY2 = 0; lnY2 < 4; lnY2++)
+					{
+						// Compute the destination for this row
+						lbgrDst = (SBGR*)((s8*)h->bd + ((h->h - (lnYDst + lnY2)) * h->rowWidth) + (lnXDst * 3));
+
+						// Repeat 4x for the column
+						for (lnX2 = 0; lnX2 < 4; lnX2++, lbgrDst++)
+						{
+							// See if this is a pixel we can copy
+							if (lnXSrc >= 0 && lnXSrc < h->w && lnYSrc >= 0 && lnYSrc < h->h)
+							{
+								// Copy this pixel
+								lbgrDst->red	= (u8)min((u32)lbgrSrc->red + 32, 255);
+								lbgrDst->grn	= (u8)min((u32)lbgrSrc->grn + 32, 255);
+								lbgrDst->blu	= (u8)min((u32)lbgrSrc->blu + 32, 255);
+
+							} else {
+								// Render the background color
+								lbgrDst->red	= (u8)min((u32)background.red + 32, 255);
+								lbgrDst->grn	= (u8)min((u32)background.grn + 32, 255);
+								lbgrDst->blu	= (u8)min((u32)background.blu + 32, 255);
+							}
+						}
+					}
 				}
 			}
 	}

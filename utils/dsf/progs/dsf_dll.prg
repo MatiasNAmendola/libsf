@@ -199,6 +199,8 @@ FUNCTION declare_dsf_dll
 							INTEGER		tlHighlighSectionOnFinal, ;	&& 0=no, 1=yes, should the selection be highlighted on final renderings?
 							INTEGER		tlShowPenDowns, ;		&& 0=no, 1=yes, should the pen/brush strokes be highlighted?
 							INTEGER		tlShowMouseCrosshairs, ;	&& 0=no, 1=yes, should mouse cross-hairs be shown?
+							INTEGER		tlInvert, ;				&& 0=no, 1=yes, should the display be inverted (negative image)
+							INTEGER		tlZoomLens, ;			&& 0=no, 1=yes, should a zoom lense be displayed
 							INTEGER		tnSelectArea			&& Number of pixels (10..30) for the mouse select area
 	
 	* Called to indicate what character is being referenced

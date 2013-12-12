@@ -352,6 +352,8 @@ struct SLineF64
 		u32				highlighSectionOnFinal;		// 0=no, 1=yes, should the selection be highlighted on final renderings?
 		u32				showPenDowns;				// 0=no, 1=yes, should the pen/brush strokes be highlighted?
 		u32				showMouseCrosshairs;		// 0=no, 1=yes, should the mouse crosshairs be shown?
+		u32				invert;						// 0=no, 1=yes, should the image be inverted (negative image)?
+		u32				zoomLens;					// 0=no, 1=yes, should a zoom lens be shown on the image?
 		u32				selectArea;					// Some value between 10..30 (how big they want the mouse select area to be)
 
 		// User cues
@@ -537,6 +539,8 @@ struct SLineF64
 	void				iColorizeAndProcessVerticalLineByPixels	(SInstance* p, SHwnd* h, SChars* c, s32 y1, s32 y2, s32 x, SBGR color);
 	void				iColorizeVerticalLineByPixels			(SInstance* p, SHwnd* h, SChars* c, s32 y1, s32 y2, s32 x, SBGR color);
 	void				iRenderTems								(SInstance* p, SHwnd* h, SChars* c);
+	void				iInvertImage							(SHwnd* h);
+	void				iRenderZoomLens							(SHwnd* h);
 	u32					iScaleIntoRange							(s32 tnValue, s32 tnValueMax, s32 tnMinRange, s32 tnMaxRange);
 	u32					iValidateRange							(s32 tnValue, s32 tnValueMin, s32 tnValueMax, s32 tnDefaultValue);
 	void				iMakeSureLowToHighU32					(u32* p1, u32* p2);
