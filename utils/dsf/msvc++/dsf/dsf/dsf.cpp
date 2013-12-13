@@ -1063,7 +1063,6 @@
 	void initialize(void)
 	{
 		f64			lfX, lfY, lfTheta, lfRadius, lfA, lfB, lfV1, lfV2;
-//		SSpline*	s;
 		bool		llPenDown;
 
 
@@ -1103,7 +1102,7 @@
 			lfA			= 0.1325 / 2.0;
 			lfB			= 0.0925 / 2.0;
 			llPenDown	= true;
-			for (lfTheta = _PI / 2000.0; lfTheta < _PI; lfTheta += _PI / 10.0)
+			for (lfTheta = _PI / 2000.0; lfTheta < _PI; lfTheta += _PI / 8.0)
 			{
 				// Given:  a=major, b=minor, r=radius
 				//         r = (a*b) / sqrt(b*cos(theta)^2 + a*sin(theta)^2)
@@ -1164,8 +1163,8 @@
 				s->lt	= _PI;
 				s->rr	= s->lr;
 
-// 				s->tlLSelected	= true;
-				s->tlOSelected	= true;
+//				s->tlLSelected	= true;
+//				s->tlOSelected	= true;
 				s->tlRSelected	= true;
 
 				// Does this start a new pen stroke?
@@ -1207,6 +1206,10 @@
 				s->lt	= tfThetaL;
 				s->rr	= tfRadius;
 				s->rt	= tfThetaR;
+
+// 				s->tlLSelected	= true;
+// 				s->tlOSelected	= true;
+				s->tlRSelected	= true;
 
 				// Does this start a new pen stroke?
 				s->lPenDown = tlPenDown;
@@ -2379,7 +2382,7 @@
 		//////////
 		// Rendered p1..p4, p2..p3
 		//////
-			iFillQuadAlpha(h, &p1, &p2, &p3, &p4, color, color, color, color, 0.5, 0.5, 0.5, 0.5);
+			iFillQuadAlpha(h, &p1, &p2, &p3, &p4, color, color, color, color, 0.5, 0.5, 0.5, 0.5, gfLinePower);
 	}
 
 	void iRenderRefs(SInstance* p, SHwnd* h, SChars* c)
@@ -2538,8 +2541,11 @@
 							// Draw in filled in final mode, or when the user wants to see it in markup mode
 							// Lines are drawn p1..p4, p2..p3 using the following form:
 							// iFillQuad(h, &p1, &p2, &p3, &p4, p1Color, p2Color, p3Color, p4Color);
-							iFillQuadAlpha(h, /*p1*/&prLast, /*p2*/&pr, /*p3*/&po, /*p4*/&poLast, p1ColorR, p2ColorR, p3ColorR, p4ColorR, 1.0, 1.0, 1.0, 1.0);
-							iFillQuadAlpha(h, /*p1*/&poLast, /*p2*/&po, /*p3*/&pl, /*p4*/&plLast, p1ColorL, p2ColorL, p3ColorL, p4ColorL, 1.0, 1.0, 1.0, 1.0);
+							if (tlMarkup == 0 || p->splinesType == _SPLINES_FILL)
+							{
+								iFillQuadAlpha(h, /*p1*/&poLast, /*p2*/&po, /*p3*/&pr, /*p4*/&prLast, p4ColorR, p3ColorR, p2ColorR, p1ColorR, 1.0, 1.0, 1.0, 1.0, gfLinePower);
+								iFillQuadAlpha(h, /*p1*/&poLast, /*p2*/&po, /*p3*/&pl, /*p4*/&plLast, p1ColorL, p2ColorL, p3ColorL, p4ColorL, 1.0, 1.0, 1.0, 1.0, gfLinePower);
+							}
 						}
 
 
@@ -2641,11 +2647,11 @@
 								// Connect left, right as markup lines
 								if (p->splinesType == _SPLINES_FILL || p->splinesType == _SPLINES_OUTLINE)
 								{
-									iDrawLine(h, &pr, &prLast, s->tlRSelected ? colorSelected : colorLine, sLast->tlRSelected ? colorSelected : colorLine);
-									iDrawLine(h, &po, &poLast, s->tlOSelected ? colorSelected : colorLine, sLast->tlOSelected ? colorSelected : colorLine);
-									iDrawLine(h, &pl, &plLast, s->tlLSelected ? colorSelected : colorLine, sLast->tlLSelected ? colorSelected : colorLine);
+									iDrawLine(h, &pr, &prLast, s->tlRSelected ? colorSelected : colorLine, sLast->tlRSelected ? colorSelected : colorLine, 6.0);
+									iDrawLine(h, &po, &poLast, s->tlOSelected ? colorSelected : colorLine, sLast->tlOSelected ? colorSelected : colorLine, 6.0);
+									iDrawLine(h, &pl, &plLast, s->tlLSelected ? colorSelected : colorLine, sLast->tlLSelected ? colorSelected : colorLine, 6.0);
 								}
-								iDrawPoints(h, &prLast, &poLast, &plLast, sLast, colorSelected, colorR, colorO, colorL, colorRSelected, colorOSelected, colorLSelected);
+								iDrawPoints(p, h, &prLast, &poLast, &plLast, sLast, colorSelected, colorR, colorO, colorL, colorRSelected, colorOSelected, colorLSelected);
 
 							} else {
 								// Reset the spline count
@@ -2653,9 +2659,9 @@
 							}
 
 							// Connect left, middle, right as markup lines
-							iDrawLine(h, &pr, &po, s->tlRSelected ? colorSelected : colorLine, s->tlOSelected ? colorSelected : colorLine);
-							iDrawLine(h, &po, &pl, s->tlOSelected ? colorSelected : colorLine, s->tlLSelected ? colorSelected : colorLine);
-							iDrawPoints(h, &pr, &po, &pl, s, colorSelected, colorR, colorO, colorL, colorRSelected, colorOSelected, colorLSelected);
+							iDrawLine(h, &po, &pr, s->tlOSelected ? colorSelected : colorLine, s->tlRSelected ? colorSelected : colorLine, 6.0);
+							iDrawLine(h, &po, &pl, s->tlOSelected ? colorSelected : colorLine, s->tlLSelected ? colorSelected : colorLine, 6.0);
+							iDrawPoints(p, h, &pr, &po, &pl, s, colorSelected, colorR, colorO, colorL, colorRSelected, colorOSelected, colorLSelected);
 
 
 						//////////
@@ -2705,7 +2711,7 @@
 		//////////
 		// Fill this quad in using a bluish cue
 		//////
-			iFillQuadAlpha(h, &p1, &p2, &p3, &p4, strokeDown, strokeDown, strokeDown, strokeDown, 0.0, 0.0, 1.0, 1.0);
+			iFillQuadAlpha(h, &p1, &p2, &p3, &p4, strokeDown, strokeDown, strokeDown, strokeDown, 0.0, 0.0, 1.0, 1.0, 2.0);
 	}
 
 	void iDrawPenUp(SHwnd* h, SLineF64* line)
@@ -2729,21 +2735,21 @@
 		// Create a quad extending 10 pixels back
 		//////
 			// p1..p4
-			p1.x		= line->p1.x + ((5.0  / (f64)h->w) * cos(line->theta - _PI_2));
-			p1.y		= line->p1.y + ((5.0  / (f64)h->h) * sin(line->theta - _PI_2));
- 			p4.x		= line->p1.x + ((10.0 / (f64)h->w) * cos(line->theta + _PI_2));
- 			p4.y		= line->p1.y + ((10.0 / (f64)h->h) * sin(line->theta + _PI_2));
+ 			p1.x		= line->p1.x + ((10.0 / (f64)h->w) * cos(line->theta + _PI_2));
+ 			p1.y		= line->p1.y + ((10.0 / (f64)h->h) * sin(line->theta + _PI_2));
+			p4.x		= line->p1.x + ((5.0  / (f64)h->w) * cos(line->theta - _PI_2));
+			p4.y		= line->p1.y + ((5.0  / (f64)h->h) * sin(line->theta - _PI_2));
 			// p2..p3
-			p2.x		= line->p2.x + ((5.0  / (f64)h->w) * cos(line->theta - _PI_2));
-			p2.y		= line->p2.y + ((5.0  / (f64)h->h) * sin(line->theta - _PI_2));
- 			p3.x		= line->p2.x + ((10.0 / (f64)h->w) * cos(line->theta + _PI_2));
- 			p3.y		= line->p2.y + ((10.0 / (f64)h->h) * sin(line->theta + _PI_2));
+			p2.x		= line->p2.x + ((10.0 / (f64)h->w) * cos(line->theta + _PI_2));
+			p2.y		= line->p2.y + ((10.0 / (f64)h->h) * sin(line->theta + _PI_2));
+			p3.x		= line->p2.x + ((5.0  / (f64)h->w) * cos(line->theta - _PI_2));
+			p3.y		= line->p2.y + ((5.0  / (f64)h->h) * sin(line->theta - _PI_2));
 
 
 		//////////
 		// Fill this quad in using an orangish cue
 		//////
-			iFillQuadAlpha(h, &p1, &p2, &p3, &p4, strokeUp, strokeUp, strokeUp, strokeUp, 1.0, 1.0, 0.0, 0.0);
+			iFillQuadAlpha(h, &p1, &p2, &p3, &p4, strokeUp, strokeUp, strokeUp, strokeUp, 0.0, 0.0, 1.0, 1.0, 2.0);
 	}
 
 	void iRenderHint(SHwnd* h, SLineF64* line, SXYF64* pt)
@@ -2776,7 +2782,7 @@
 		//////////
 		// Draw the quad (which is really a triangle. :-))
 		//////
-			iFillQuadAlpha(h, &pLeft, &pForward, &pForward, &pRight, strokeDown, strokeDown, strokeDown, strokeDown, 1.0, 1.0, 1.0, 1.0);
+			iFillQuadAlpha(h, &pLeft, &pForward, &pForward, &pRight, strokeDown, strokeDown, strokeDown, strokeDown, 1.0, 1.0, 1.0, 1.0, 2.0);
 	}
 
 	void iComputeLOR(SSpline* s, SXYF64* pl, SXYF64* po, SXYF64* pr)
@@ -2807,8 +2813,17 @@
 		*p4ColorL	= ((sLast->tlLSelected)	? quadSelected : quadNormal);
 	}
 
-	void iDrawPoints(SHwnd* h, SXYF64* pr, SXYF64* po, SXYF64* pl, SSpline* s, SBGR colorSelected, SBGR colorR, SBGR colorO, SBGR colorL, SBGR colorRSelected, SBGR colorOSelected, SBGR colorLSelected)
+	void iDrawPoints(SInstance* p, SHwnd* h, SXYF64* pr, SXYF64* po, SXYF64* pl, SSpline* s, SBGR colorSelected, SBGR colorR, SBGR colorO, SBGR colorL, SBGR colorRSelected, SBGR colorOSelected, SBGR colorLSelected)
 	{
+		SBGR colorLine;
+
+
+		//////////
+		// Set the color
+		//////
+			if (p->splinesType != _SPLINES_FILL)		colorLine = gray;			// They don't want to see it filled in, so make it a little more visible
+			else										colorLine = black;			// They want to see it filled in, so it can be black
+
 		//////////
 		// Right
 		//////
@@ -2818,6 +2833,7 @@
 				iDrawPoint(h, pr, colorRSelected);
 
 			} else {
+				iDrawPointLarge(h, pr, colorLine);
 				iDrawPoint(h, pr, colorR);
 			}
 
@@ -2831,6 +2847,7 @@
 				iDrawPoint(h, po, colorOSelected);
 
 			} else {
+				iDrawPointLarge(h, po, colorLine);
 				iDrawPoint(h, po, colorO);
 			}
 
@@ -2844,11 +2861,12 @@
 				iDrawPoint(h, pl, colorLSelected);
 
 			} else {
+				iDrawPointLarge(h, pl, colorLine);
 				iDrawPoint(h, pl, colorL);
 			}
 	}
 
-	void iDrawLine(SHwnd* h, SXYF64* p1, SXYF64* p2, SBGR colorStart, SBGR colorEnd)
+	void iDrawLine(SHwnd* h, SXYF64* p1, SXYF64* p2, SBGR colorStart, SBGR colorEnd, f64 tfPower)
 	{
 		SBGR_AF64	colorStartAlp, colorEndAlp;
 
@@ -2872,16 +2890,15 @@
 		//////////
 		// Draw in the alpha algorithm
 		//////
-			iDrawLineAlpha(h, p1, p2, &colorStartAlp, &colorEndAlp, NULL, false);
+			iDrawLineAlpha(h, p1, p2, &colorStartAlp, &colorEndAlp, NULL, false, tfPower);
 	}
 
-	void iDrawLineAlpha(SHwnd* h, SXYF64* p1, SXYF64* p2, SBGR_AF64* colorStart, SBGR_AF64* colorEnd, SBuilder* pointsDrawn, bool tlNoDuplicates)
+	void iDrawLineAlpha(SHwnd* h, SXYF64* p1, SXYF64* p2, SBGR_AF64* colorStart, SBGR_AF64* colorEnd, SBuilder* pointsDrawn, bool tlNoDuplicates, f64 tfPower)
 	{
 		f64			lfPercent, lfSteps, lfStepInc, lfRadius, lfCosTheta, lfSinTheta;
-		f64			lfRed, lfGrn, lfBlu, lfAlp, lfMalp, lfRedStep, lfGrnStep, lfBluStep, lfAlpStep;
+		f64			lfRed, lfGrn, lfBlu, lfAlp, lfMalp, lfCos4, lfRedDelta, lfGrnDelta,lfBluDelta, lfAlpDelta;
 		s32			lnX, lnY, lnXLast, lnYLast;
 		SLineF64	line;
-		SBGRA		color;
 		SBGR*		lbgr;
 		u8*			lMastPtr;
 
@@ -2909,14 +2926,10 @@
 		// Compute colors
 		//////
 			lfSteps		= line.length * _SQRT2;
-			lfRed		= (f64)colorStart->red;
-			lfGrn		= (f64)colorStart->grn;
-			lfBlu		= (f64)colorStart->blu;
-			lfAlp		= colorStart->falp;
-			lfRedStep	= ((f64)colorEnd->red - lfRed) / lfSteps;
-			lfGrnStep	= ((f64)colorEnd->grn - lfGrn) / lfSteps;
-			lfBluStep	= ((f64)colorEnd->blu - lfBlu) / lfSteps;
-			lfAlpStep	= (colorEnd->falp - lfAlp) / lfSteps;
+			lfRedDelta	= (f64)colorEnd->red - (f64)colorStart->red;
+			lfGrnDelta	= (f64)colorEnd->grn - (f64)colorStart->grn;
+			lfBluDelta	= (f64)colorEnd->blu - (f64)colorStart->blu;
+			lfAlpDelta	= colorEnd->falp - colorStart->falp;
 
 
 		//////////
@@ -2925,17 +2938,18 @@
 			lfStepInc = 1.0 / lfSteps;
 			lnXLast		= -10000;
 			lnYLast		= -10000;
-			for (lfPercent = 0.0f; lfPercent < 1.0f; lfPercent += lfStepInc, lfRed += lfRedStep, lfGrn += lfGrnStep, lfBlu += lfBluStep, lfAlp += lfAlpStep)
+			for (lfPercent = 0.0f; lfPercent < 1.0f; lfPercent += lfStepInc)
 			{
 				// Compute the radius for this point
 				lfRadius = lfPercent * line.length;
 
 				// Compute the color
-				color.red	= (u8)lfRed;
-				color.grn	= (u8)lfGrn;
-				color.blu	= (u8)lfBlu;
-				color.alp	= (u8)(lfAlp * 255.0);
-				lfMalp		= 1.0 - lfAlp;
+				lfCos4	= 1.0 - pow(cos(lfPercent * _PI_2), tfPower);
+				lfRed	= colorStart->red  + (lfRedDelta * lfCos4);
+				lfGrn	= colorStart->grn  + (lfGrnDelta * lfCos4);
+				lfBlu	= colorStart->blu  + (lfBluDelta * lfCos4);
+				lfAlp	= colorStart->falp + (lfAlpDelta * lfCos4);
+				lfMalp	= 1.0 - lfAlp;
 
 				// Compute this point
 				lnX = (s32)(line.p1.x + (lfRadius * lfCosTheta));
@@ -3106,14 +3120,13 @@
 	}
 
 	// Draw p1..p2 along the lines from p1..p4, p2..p3
-	void iFillQuadAlpha(SHwnd* h, SXYF64* p1, SXYF64* p2, SXYF64* p3, SXYF64* p4, SBGR p1Color, SBGR p2Color, SBGR p3Color, SBGR p4Color, f64 tfP1Alp, f64 tfP2Alp, f64 tfP3Alp, f64 tfP4Alp)
+	void iFillQuadAlpha(SHwnd* h, SXYF64* p1, SXYF64* p2, SXYF64* p3, SXYF64* p4, SBGR p1Color, SBGR p2Color, SBGR p3Color, SBGR p4Color, f64 tfP1Alp, f64 tfP2Alp, f64 tfP3Alp, f64 tfP4Alp, f64 tfPower)
 	{
 		f64			lfPercent, lfStep, lfStepCount, lfCosThetaP1P4, lfSinThetaP1P4, lfCosThetaP2P3, lfSinThetaP2P3, lfMultiplier;
 		SXYF64		lp1, lp2;
 		SLineF64	p1p4, p2p3;
 		bool		llNoAlpha;
-		f64			lfRedP1P4, lfGrnP1P4, lfBluP1P4, lfAlpP1P4, lfRedP2P3, lfGrnP2P3, lfBluP2P3, lfAlpP2P3;
-		f64			lfRedP1P4Step, lfGrnP1P4Step, lfBluP1P4Step, lfAlpP1P4Step, lfRedP2P3Step, lfGrnP2P3Step, lfBluP2P3Step, lfAlpP2P3Step;
+		f64			lfRedP1P4Delta, lfGrnP1P4Delta, lfBluP1P4Delta, lfAlpP1P4Delta, lfRedP2P3Delta, lfGrnP2P3Delta, lfBluP2P3Delta, lfAlpP2P3Delta, lfCos4;
 		SBGR_AF64	colorP1P4, colorP2P3;
 		SBuilder*	pointsDrawn;
 		s8*			lptr;
@@ -3157,24 +3170,16 @@
 		// Compute the color steps for this rendering
 		//////
 			// p1..p4
-			lfRedP1P4		= (f64)p1Color.red;
-			lfGrnP1P4		= (f64)p1Color.grn;
-			lfBluP1P4		= (f64)p1Color.blu;
-			lfAlpP1P4		= tfP1Alp;
-			lfRedP1P4Step	= ((f64)p4Color.red - lfRedP1P4) / lfStepCount;
-			lfGrnP1P4Step	= ((f64)p4Color.grn - lfGrnP1P4) / lfStepCount;
-			lfBluP1P4Step	= ((f64)p4Color.blu - lfBluP1P4) / lfStepCount;
-			lfAlpP1P4Step	= (tfP4Alp - tfP1Alp) / lfStepCount;
+			lfRedP1P4Delta	= (f64)p4Color.red - (f64)p1Color.red;
+			lfGrnP1P4Delta	= (f64)p4Color.grn - (f64)p1Color.grn;
+			lfBluP1P4Delta	= (f64)p4Color.blu - (f64)p1Color.blu;
+			lfAlpP1P4Delta	= tfP4Alp - tfP1Alp;
 
 			// p2..p3
-			lfRedP2P3		= (f64)p2Color.red;
-			lfGrnP2P3		= (f64)p2Color.grn;
-			lfBluP2P3		= (f64)p2Color.blu;
-			lfAlpP2P3		= tfP2Alp;
-			lfRedP2P3Step	= ((f64)p3Color.red - lfRedP2P3) / lfStepCount;
-			lfGrnP2P3Step	= ((f64)p3Color.grn - lfGrnP2P3) / lfStepCount;
-			lfBluP2P3Step	= ((f64)p3Color.blu - lfBluP2P3) / lfStepCount;
-			lfAlpP2P3Step	= (tfP3Alp - tfP2Alp) / lfStepCount;
+			lfRedP2P3Delta	= (f64)p3Color.red - (f64)p2Color.red;
+			lfGrnP2P3Delta	= (f64)p3Color.grn - (f64)p2Color.grn;
+			lfBluP2P3Delta	= (f64)p3Color.blu - (f64)p2Color.blu;
+			lfAlpP2P3Delta	= tfP3Alp - tfP2Alp;
 
 
 		//////////
@@ -3207,38 +3212,26 @@
 				//////////
 				// Compute the color for this leg
 				//////
+					// Compute the color
+					lfCos4	= 1.0 - pow(cos(lfPercent * _PI_2), tfPower);
+
 					// p1..p4
-					colorP1P4.red	= (u8)lfRedP1P4;
-					colorP1P4.grn	= (u8)lfGrnP1P4;
-					colorP1P4.blu	= (u8)lfBluP1P4;
-					colorP1P4.falp	= lfAlpP1P4;
+					colorP1P4.red	= p1Color.red  + (u8)(lfRedP1P4Delta * lfCos4);
+					colorP1P4.grn	= p1Color.grn  + (u8)(lfGrnP1P4Delta * lfCos4);
+					colorP1P4.blu	= p1Color.blu  + (u8)(lfBluP1P4Delta * lfCos4);
+					colorP1P4.falp	= tfP1Alp + (lfAlpP1P4Delta * lfCos4);
 					// p2..p3
-					colorP2P3.red	= (u8)lfRedP2P3;
-					colorP2P3.grn	= (u8)lfGrnP2P3;
-					colorP2P3.blu	= (u8)lfBluP2P3;
-					colorP2P3.falp	= lfAlpP2P3;
+					colorP2P3.red	= p2Color.red  + (u8)(lfRedP2P3Delta * lfCos4);
+					colorP2P3.grn	= p2Color.grn  + (u8)(lfGrnP2P3Delta * lfCos4);
+					colorP2P3.blu	= p2Color.blu  + (u8)(lfBluP2P3Delta * lfCos4);
+					colorP2P3.falp	= tfP2Alp + (lfAlpP2P3Delta * lfCos4);
 
 
 				//////////
 				// Draw this line
 				//////
-					if (llNoAlpha)		iDrawLineAlpha(h, &lp1, &lp2, &colorP1P4, &colorP2P3, NULL,			false);
-					else				iDrawLineAlpha(h, &lp1, &lp2, &colorP1P4, &colorP2P3, pointsDrawn,	true);
-
-
-				//////////
-				// Increase the color for the next iteration
-				//////
-					// p1..p4
-					lfRedP1P4	+= lfRedP1P4Step;
-					lfGrnP1P4	+= lfGrnP1P4Step;
-					lfBluP1P4	+= lfBluP1P4Step;
-					lfAlpP1P4	+= lfAlpP1P4Step;
-					// p2..p3
-					lfRedP2P3	+= lfRedP2P3Step;
-					lfGrnP2P3	+= lfGrnP2P3Step;
-					lfBluP2P3	+= lfBluP2P3Step;
-					lfAlpP2P3	+= lfAlpP2P3Step;
+					if (llNoAlpha)		iDrawLineAlpha(h, &lp1, &lp2, &colorP1P4, &colorP2P3, NULL,			false,	4.0);
+					else				iDrawLineAlpha(h, &lp1, &lp2, &colorP1P4, &colorP2P3, pointsDrawn,	true,	4.0);
 			}
 
 
@@ -4743,10 +4736,19 @@
 	void iReadMousePosition(SInstance* p, SHwnd* h)
 	{
 		u32			lnI, lnJ;
-		bool		llLastMouseLeft, llLastMouseRight, llLastCtrl, llLastShift, llLastAlt, llMoved, llWasOnTheReservation;
+		bool		llLastMouseLeft, llLastMouseRight, llLastCtrl, llLastShift, llLastAlt, llMoved, llWasOnTheReservation, llOnTheReservation, llSomethingClicked;
+		HWND		hwndFocus;
 		SChars*		c;
 		SSpline*	spline;
 		POINT		pt;
+
+
+		//////////
+		// Does our window have the focus?
+		//////
+			hwndFocus = GetFocus();
+			if (hwndFocus != h->hwnd && hwndFocus != h->hwndParent)
+				return;		// No
 
 
 		//////////
@@ -4754,17 +4756,6 @@
 		//////
 			GetCursorPos(&pt);
 			ScreenToClient(h->hwnd, &pt);
-
-
-		//////////
-		// Grab the key states
-		//////
-			llLastCtrl			= glCtrlKeyDown;
-			llLastShift			= glShiftKeyDown;
-			llLastAlt			= glAltKeyDown;
-			glCtrlKeyDown		= (GetAsyncKeyState(VK_CONTROL) != 0);
-			glShiftKeyDown		= (GetAsyncKeyState(VK_SHIFT) != 0);
-			glAltKeyDown		= (GetAsyncKeyState(VK_MENU) != 0);
 
 		
 		//////////
@@ -4780,33 +4771,44 @@
 			// Store the new value
 			gMouse.xi	= pt.x;
 			gMouse.yi	= pt.y;
+			// See if it's on the reservation
+			llOnTheReservation	= (gMouse.xi >= 0 && gMouse.xi < h->w && gMouse.yi >= 0 && gMouse.yi < h->h);
+
+
+		//////////
+		// Grab the key states
+		//////
+			llLastCtrl			= glCtrlKeyDown;
+			llLastShift			= glShiftKeyDown;
+			llLastAlt			= glAltKeyDown;
+			llLastMouseLeft		= glMouseLeft;
+			llLastMouseRight	= glMouseRight;
+			glCtrlKeyDown		= (GetAsyncKeyState(VK_CONTROL) != 0);
+			glShiftKeyDown		= (GetAsyncKeyState(VK_SHIFT) != 0);
+			glAltKeyDown		= (GetAsyncKeyState(VK_MENU) != 0);
+			glMouseLeft			= (GetAsyncKeyState(VK_LBUTTON) != 0);
+			glMouseRight		= (GetAsyncKeyState(VK_RBUTTON) != 0);
 
 			// If we are now off the reservation, then ignore the mouse clicks
-			if (!(gMouse.xi >= 0 && gMouse.xi < h->w && gMouse.yi >= 0 && gMouse.yi < h->h))
+			if (!llOnTheReservation)
 			{
-				// We are no longer on the reservation, ignore mouse clicks and key shift changes
-				llLastMouseLeft		= glMouseLeft;
-				llLastMouseRight	= glMouseRight;
-				llLastCtrl			= glCtrlKeyDown;
-				llLastShift			= glShiftKeyDown;
-				llLastAlt			= glAltKeyDown;
-
-			} else {
-				// We are on the reservation, check the key states
-				llLastMouseLeft		= glMouseLeft;
-				llLastMouseRight	= glMouseRight;
-				glMouseLeft			= (GetAsyncKeyState(VK_LBUTTON) != 0);
-				glMouseRight		= (GetAsyncKeyState(VK_RBUTTON) != 0);
+				// We are no longer on the reservation, ignore mouse activity
+				llMoved				= false;
+				glMouseLeft			= llLastMouseLeft;
+				glMouseRight		= llLastMouseRight;
+				glCtrlKeyDown		= llLastCtrl;
+				glShiftKeyDown		= llLastShift;
+				glAltKeyDown		= llLastAlt;
 			}
+
+			// See if a key our button has been pressed
+			llSomethingClicked = (llLastMouseLeft != glMouseLeft || llLastMouseRight != glMouseRight || llLastCtrl != glCtrlKeyDown || llLastShift != glShiftKeyDown || llLastAlt != glAltKeyDown);
 
 
 		//////////
 		// Has the mouse moved?
 		//////
-			if (llWasOnTheReservation || 
-				(llMoved && gMouse.xi >= 0 && gMouse.xi < h->w && gMouse.yi >= 0 && gMouse.yi < h->h) ||
-				llLastMouseLeft != glMouseLeft || llLastMouseRight != glMouseRight || 
-				llLastCtrl != glCtrlKeyDown || llLastShift != glShiftKeyDown || llLastAlt != glAltKeyDown)
+			if ((llWasOnTheReservation && !llOnTheReservation) || (llOnTheReservation && (llMoved || llSomethingClicked)))
 			{
 				//////////
 				// Has the left mouse button gone down?
@@ -4902,53 +4904,11 @@
 						BitBlt(lhdc, 0, 0, h->w, h->h, h->hdc, 0, 0, SRCCOPY);
 						EndPaint(hwnd, &ps);
 						// All done
-
 						// Indicate to Windows that we processed it
 						return 0;
-						// If we get here, we are not processing this message any longer
-						break;
 				}
 				// Call Windows' default procedure handler
 				return(DefWindowProc(hwnd, m, w, l));
-			}
-
-			// See if this hwnd is one of our parent hwnd's
-			h = iFindOnlyHwndByHwndParent(s->hwnds, _thisHwnd);
-			if (h)
-			{
-// 				//////////
-// 				// Make sure we have the keyboard/mouse capture
-// 				//////
-// 					if (GetCapture() != h->hwnd)
-// 						SetCapture(h->hwnd);
-
-				// What do they want? :-)
-				switch (m)
-				{
-					case WM_LBUTTONDBLCLK:
-					case WM_RBUTTONDBLCLK:
-					case WM_MBUTTONDBLCLK:
-						break;
-
-					case WM_MOUSEMOVE:
-						iReadMousePosition(s, h);
-						break;
-
-					case WM_LBUTTONDOWN:
-					case WM_RBUTTONDOWN:
-					case WM_MBUTTONDOWN:
-						iReadMousePosition(s, h);
-						break;
-
-					case WM_LBUTTONUP:
-					case WM_RBUTTONUP:
-					case WM_MBUTTONUP:
-						iReadMousePosition(s, h);
-						break;
-						break;
-				}
-				// We found that it's a parent message
-				return(CallWindowProc(h->oldWndParentProcAddress, hwnd, m, w, l));
 			}
 		}
 		// Call Windows' default procedure handler

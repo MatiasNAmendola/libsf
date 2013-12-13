@@ -475,6 +475,7 @@ struct SLineF64
 //////////
 // Common colors
 //////
+	f64			gfLinePower				= 2.0;
 	SBGR		white					= { 255, 255, 255 };
 	SBGR		black					= { 0, 0, 0 };
 	SBGR		blackSelected			= { 0, 92, 192 };
@@ -492,9 +493,9 @@ struct SLineF64
 	SBGR		colorR					= { 64, 64, 215 };
 	SBGR		colorO					= { 255, 64, 64 };
 	SBGR		colorL					= { 64, 215, 64 };
-	SBGR		colorRSelected			= { 32, 112, 235 };
+	SBGR		colorRSelected			= { 32, 64, 215 };
 	SBGR		colorOSelected			= { 128, 160, 160 };
-	SBGR		colorLSelected			= { 32, 235, 160 };
+	SBGR		colorLSelected			= { 32, 215, 160 };
 	SBGR		colorSelected			= { 0, 128, 255 };
 	SBGR		colorAscent				= { 192, 192, 255 };
 	SBGR		colorUpper				= { 0, 255, 255 };
@@ -555,15 +556,15 @@ struct SLineF64
 	void				iComputeLOR								(SSpline* s, SXYF64* pl, SXYF64* po, SXYF64* pr);
 	void				iComputeQuadColorsR						(SSpline* s, SSpline* sLast, SBGR quadNormal, SBGR quadSelected, SBGR* p1ColorR, SBGR* p2ColorR, SBGR* p3ColorR, SBGR* p4ColorR);
 	void				iComputeQuadColorsL						(SSpline* s, SSpline* sLast, SBGR quadNormal, SBGR quadSelected, SBGR* p1ColorL, SBGR* p2ColorL, SBGR* p3ColorL, SBGR* p4ColorL);
-	void				iDrawPoints								(SHwnd* h, SXYF64* pr, SXYF64* po, SXYF64* pl, SSpline* s, SBGR colorSelected, SBGR colorR, SBGR colorO, SBGR colorL, SBGR colorRSelected, SBGR colorOSelected, SBGR colorLSelected);
-	void				iDrawLine								(SHwnd* h, SXYF64* p1, SXYF64* p2, SBGR colorStart, SBGR colorEnd);
-	void				iDrawLineAlpha							(SHwnd* h, SXYF64* p1, SXYF64* p2, SBGR_AF64* colorStart, SBGR_AF64* colorEnd, SBuilder* pointsDrawn, bool tlNoDuplicates);
+	void				iDrawPoints								(SInstance* p, SHwnd* h, SXYF64* pr, SXYF64* po, SXYF64* pl, SSpline* s, SBGR colorSelected, SBGR colorR, SBGR colorO, SBGR colorL, SBGR colorRSelected, SBGR colorOSelected, SBGR colorLSelected);
+	void				iDrawLine								(SHwnd* h, SXYF64* p1, SXYF64* p2, SBGR colorStart, SBGR colorEnd, f64 tfPower);
+	void				iDrawLineAlpha							(SHwnd* h, SXYF64* p1, SXYF64* p2, SBGR_AF64* colorStart, SBGR_AF64* colorEnd, SBuilder* pointsDrawn, bool tlNoDuplicates, f64 tfPower);
 	void				iDrawPoint								(SHwnd* h, SXYF64* p1, SBGR color);
 	void				iDrawPointSmall							(SHwnd* h, SXYF64* p1, SBGR color);
 	void				iDrawPointLarge							(SHwnd* h, SXYF64* p1, SBGR color);
 	void				iDrawMouse								(SHwnd* h, SXYS32* p);
 	void				iDrawHorizontalLineByPixels				(SHwnd* h, s32 x1, s32 x2, s32 y, SBGR color);
-	void				iFillQuadAlpha							(SHwnd* h, SXYF64* p1, SXYF64* p2, SXYF64* p3, SXYF64* p4, SBGR p1Color, SBGR p2Color, SBGR p3Color, SBGR p4Color, f64 tfP1Alp, f64 tfP2Alp, f64 tfP3Alp, f64 tfP4Alp);
+	void				iFillQuadAlpha							(SHwnd* h, SXYF64* p1, SXYF64* p2, SXYF64* p3, SXYF64* p4, SBGR p1Color, SBGR p2Color, SBGR p3Color, SBGR p4Color, f64 tfP1Alp, f64 tfP2Alp, f64 tfP3Alp, f64 tfP4Alp, f64 tfPower);
 	void				iSetPoint								(SXYF64* p, f64 x, f64 y);
 	void				iCopyPoint								(SXYF64* pDst, SXYF64* pSrc);
 	void				iRenderMouseOverlay						(SInstance* p, SHwnd* h, SChars* c);
