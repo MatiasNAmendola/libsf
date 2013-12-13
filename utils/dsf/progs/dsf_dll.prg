@@ -77,7 +77,7 @@ FUNCTION declare_dsf_dll
 	
 	* Sets the font data
 	* Returns 0=ok, others error code
-	DECLARE INTEGER		dsf_set_font_data	IN exe\dsf.dll ;
+	DECLARE INTEGER		dsf_load_font		IN exe\dsf.dll ;
 							INTEGER		tnInstance,	;			&& Instance handle returned by dsf_create_new_instance()
 							SINGLE		tfAscent, ;				&& See explanation of these in frmNew::create_tables()
 							SINGLE		tfUpper, ;				&& These must be in synchronization with those fields,
@@ -165,7 +165,9 @@ FUNCTION declare_dsf_dll
 							INTEGER		tipid, ;				&& iid of the character this template relates to (parent id)
 							STRING		@tcRecno12				&& The record number used to reference this item.
 
-	* User cues are visible 
+	* User cues are visible on the display if set to 1, 0 if hidden.
+	* Note:  Setting the cues does not trigger a refresh.  Only dsf_user_settings() triggers a refresh.
+	* Note:  This allows the cues to be setup in stages, followed by the settings, to only have one refresh, rather than several.
 	DECLARE INTEGER		dsf_user_cues		IN exe\dsf.dll ;
 							INTEGER		tnInstance,	;			&& Instance handle returned by dsf_create_new_instance()
 							INTEGER		ascent, ;				&& The ascent (highest point of the font, top of umlaut above a capital letter, for example
@@ -184,6 +186,20 @@ FUNCTION declare_dsf_dll
 							INTEGER		trackUnderline, ;		&& Should the mouse track near to the underline lines?
 							INTEGER		refs, ;					&& Custom references
 							INTEGER		trackRefs				&& Should the mouse track near to the custom references?
+
+	* A continuation for additional settings
+	DECLARE INTEGER		dsf_user_cues2		IN exe\dsf.dll ;
+							INTEGER		tnInstance,	;			&& Instance handle returned by dsf_create_new_instance()
+							INTEGER		left, ;					&& Should the left items be displayed?
+							INTEGER		trackLeft, ;			&& Should the mouse track near to the left items?
+							INTEGER		right, ;				&& Should the right items be displayed?
+							INTEGER		trackRight, ;			&& Should the mouse track near to the right items?
+							INTEGER		width, ;				&& Should the width be displayed?
+							INTEGER		trackWidth, ;			&& Should the mouse track near to the width items?
+							INTEGER		tems, ;					&& Should the tems be displayed?
+							INTEGER		trackTems, ;			&& Should the mouse track near to the tems items?
+							INTEGER		grid, ;					&& Should the grid be displayed?
+							INTEGER		trackGrid				&& Should the mouse track near tot he grid lines?
 	
 	* Called to set the user settings
 	DECLARE INTEGER		dsf_user_settings		IN exe\dsf.dll ;
@@ -192,15 +208,15 @@ FUNCTION declare_dsf_dll
 							INTEGER		tnMode, ;				&& 0=point, 1=spline, 2=stroke, 3=before and current, 4=current and after
 							INTEGER		tnMethod, ;				&& 0=left, 1=middle, 2=right, 3=left+middle, 4=middle+right, 5=left+right, 6=spline, 7=point
 							INTEGER		tnRange, ;				&& 0=active character, 1=AZ, 2=az, 3=AZaz, 4=09, 5=AZaz09, 6=AZaz09!@.., 7=all
-							INTEGER		tlShowTems, ;			&& 0=no, 1=yes
-							INTEGER		tnTemsType, ;			&& 0=Track, 1=Displays
 							INTEGER		tlShowSplines, ;		&& 0=no, 1=yes
 							INTEGER		tnSplinesType, ;		&& 0=Fill, 1=Outline, 2=LOR only
-							INTEGER		tlHighlighSectionOnFinal, ;	&& 0=no, 1=yes, should the selection be highlighted on final renderings?
+							INTEGER		tlHighlighSelection, ;	&& 0=no, 1=yes, should the selection be highlighted on renderings?
 							INTEGER		tlShowPenDowns, ;		&& 0=no, 1=yes, should the pen/brush strokes be highlighted?
-							INTEGER		tlShowMouseCrosshairs, ;	&& 0=no, 1=yes, should mouse cross-hairs be shown?
+							INTEGER		tlShowCrosshairX, ;		&& 0=no, 1=yes, should mouse X-axis crosshair be shown?
+							INTEGER		tlShowCrosshairY, ;		&& 0=no, 1=yes, should mouse Y-axis crosshair be shown?
 							INTEGER		tlInvert, ;				&& 0=no, 1=yes, should the display be inverted (negative image)
 							INTEGER		tlZoomLens, ;			&& 0=no, 1=yes, should a zoom lense be displayed
+							INTEGER		tlCuesUnder, ;			&& 0=on top, 1=under, should cues be rendered above or below the splines?
 							INTEGER		tnSelectArea			&& Number of pixels (10..30) for the mouse select area
 	
 	* Called to indicate what character is being referenced

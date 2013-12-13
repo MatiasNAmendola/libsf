@@ -345,15 +345,15 @@ struct SLineF64
 		u32				mode;						// 0=point, 1=spline, 2=stroke, 3=before and current, 4=current and after
 		u32				method;						// 0=left, 1=middle, 2=right, 3=left+middle, 4=middle+right, 5=left+right, 6=spline, 7=point
 		u32				range;						// 0=active character, 1=AZ, 2=az, 3=AZaz, 4=09, 5=AZaz09, 6=AZaz09!@.., 7=all
-		u32				showTems;					// 0=no, 1=yes
-		u32				temsType;					// 0=track, 1=display
 		u32				showSplines;				// 0=no, 1=yes
 		u32				splinesType;				// 0=fill, 1=outline, 2=LOR only
-		u32				highlighSectionOnFinal;		// 0=no, 1=yes, should the selection be highlighted on final renderings?
+		u32				highlighSelection;			// 0=no, 1=yes, should the selection be highlighted on renderings?
 		u32				showPenDowns;				// 0=no, 1=yes, should the pen/brush strokes be highlighted?
-		u32				showMouseCrosshairs;		// 0=no, 1=yes, should the mouse crosshairs be shown?
+		u32				mouseCrosshairX;			// 0=no, 1=yes, should the mouse X-axis crosshair be shown?
+		u32				mouseCrosshairY;			// 0=no, 1=yes, should the mouse Y-axis crosshair be shown?
 		u32				invert;						// 0=no, 1=yes, should the image be inverted (negative image)?
 		u32				zoomLens;					// 0=no, 1=yes, should a zoom lens be shown on the image?
+		u32				cuesUnder;					// 0=on top, 1=under, should the cues be rendered above or below the splines?
 		u32				selectArea;					// Some value between 10..30 (how big they want the mouse select area to be)
 
 		// User cues
@@ -373,6 +373,16 @@ struct SLineF64
 		u32				trackUnderline;				// Should the mouse track near to the underline lines?
 		u32				showRefs;					// Custom references
 		u32				trackRefs;					// Should the mouse track near to the custom references?
+		u32				left;						// Should the left cues by visible?
+		u32				trackLeft;					// Should the mouse track the left cues?
+		u32				right;						// Should the right cues be visible?
+		u32				trackRight;					// Should the mouse track the right cues?
+		u32				width;						// Should the width be used?
+		u32				trackWidth;					// Should the mouse track to the width cues?
+		u32				tems;						// Should the tems be visible?
+		u32				trackTems;					// Should the mouse track to the tems?
+		u32				grid;						// 0=no, 1=yes, should the grid be shown?
+		u32				trackGrid;					// Should the mouse track to the grid?
 
 		SBuilder*		chars;						// (SBuilder) Characters, one SBuilder for every character, with each character SBuilder pointing to its many SChar entries
 		SBuilder*		refs;						// (SRefs) References
@@ -460,25 +470,42 @@ struct SLineF64
 	bool		glCtrlKeyDown			= false;
 	bool		glShiftKeyDown			= false;
 	bool		glAltKeyDown			= false;
-	// Common color
+
+
+//////////
+// Common colors
+//////
+	SBGR		white					= { 255, 255, 255 };
 	SBGR		black					= { 0, 0, 0 };
-	SBGR		stroke					= { 255, 192, 192 };
-	SBGR		blackSelected			= { 0, 255, 255 };
+	SBGR		blackSelected			= { 0, 92, 192 };
+	SBGR		gray					= { 128, 128, 128 };
+	SBGR		graySelected			= { 64, 128, 192 };
 	SBGR		darkGray				= { 92, 92, 92 };
 	SBGR		background				= { 32, 32, 32 };
-	SBGR		backgroundSelected		= { 0, 255, 255 };
-	SBGR		colorSelected			= { 64, 128, 255 };
+	SBGR		backgroundSelected		= { 32, 64, 96 };
+	SBGR		grid					= { 92, 92, 92 };
+	SBGR		gridTrack				= { 192, 192, 192 };
+	SBGR		mouseColor				= { 0, 255, 255 };
+	SBGR		mousePeeakaheadColor	= { 255, 255, 0 };
+	SBGR		strokeUp				= { 255, 192, 192 };
+	SBGR		strokeDown				= { 128, 192, 255 };
 	SBGR		colorR					= { 64, 64, 215 };
 	SBGR		colorO					= { 255, 64, 64 };
 	SBGR		colorL					= { 64, 215, 64 };
 	SBGR		colorRSelected			= { 32, 112, 235 };
 	SBGR		colorOSelected			= { 128, 160, 160 };
 	SBGR		colorLSelected			= { 32, 235, 160 };
-	SBGR		mousePeeakaheadColor	= { 255, 255, 0 };
-	SBGR		mouseColor				= { 0, 255, 255 };
-	SBGR		colorMarkup				= { 22, 222, 22 };
-	SBGR		gray					= { 128, 128, 128 };
-	SBGR		graySelected			= { 0, 255, 255 };
+	SBGR		colorSelected			= { 0, 128, 255 };
+	SBGR		colorAscent				= { 192, 192, 255 };
+	SBGR		colorUpper				= { 0, 255, 255 };
+	SBGR		colorLower				= { 0, 255, 255 };
+	SBGR		colorBase				= { 255, 255, 255 };
+	SBGR		colorDescent			= { 192, 192, 255 };
+	SBGR		colorStrikethrough		= { 255, 0, 255};
+	SBGR		colorUnderline			= { 255, 255, 0 };
+	SBGR		colorLeft				= { 255, 255, 255 };
+	SBGR		colorRight				= { 255, 255, 255 };
+	SBGR		colorTems				= { 22, 222, 22 };
 
 
 
@@ -515,7 +542,15 @@ struct SLineF64
 
 	int					iRender									(SInstance* p, SHwnd* h, SChars* c, s32 tnWidth, s32 tnHeight, u32 tnHwndParent, s32 tnX, s32 tnY);
 	void				iRenderMouseCoordinates					(SInstance* p, SHwnd* h);
+	void				iRenderCues								(SInstance* p, SHwnd* h, SChars* c);
+	void				iRenderCueLineH							(SInstance* p, SHwnd* h, SChars* c, f64 tfPosition, SBGR color);
+	void				iRenderCueLineV							(SInstance* p, SHwnd* h, SChars* c, f64 tfPosition, SBGR color);
+	void				iRenderQuadH							(SInstance* p, SHwnd* h, SChars* c, f64 tfTop, f64 tfBottom, SBGR color);
+	void				iRenderRefs								(SInstance* p, SHwnd* h, SChars* c);
+	void				iRenderGrid								(SInstance* p, SHwnd* h);
 	void				iRenderSplines							(SInstance* p, SHwnd* h, SChars* c, u32 tlMarkup, u32 tlBold, u32 tlItalic, u32 tlUnderline, u32 tlStrikethrough);
+	void				iDrawPenDown							(SHwnd* h, SLineF64* line);
+	void				iDrawPenUp								(SHwnd* h, SLineF64* line);
 	void				iRenderHint								(SHwnd* h, SLineF64* line, SXYF64* pt);
 	void				iComputeLOR								(SSpline* s, SXYF64* pl, SXYF64* po, SXYF64* pr);
 	void				iComputeQuadColorsR						(SSpline* s, SSpline* sLast, SBGR quadNormal, SBGR quadSelected, SBGR* p1ColorR, SBGR* p2ColorR, SBGR* p3ColorR, SBGR* p4ColorR);
@@ -523,7 +558,6 @@ struct SLineF64
 	void				iDrawPoints								(SHwnd* h, SXYF64* pr, SXYF64* po, SXYF64* pl, SSpline* s, SBGR colorSelected, SBGR colorR, SBGR colorO, SBGR colorL, SBGR colorRSelected, SBGR colorOSelected, SBGR colorLSelected);
 	void				iDrawLine								(SHwnd* h, SXYF64* p1, SXYF64* p2, SBGR colorStart, SBGR colorEnd);
 	void				iDrawLineAlpha							(SHwnd* h, SXYF64* p1, SXYF64* p2, SBGR_AF64* colorStart, SBGR_AF64* colorEnd, SBuilder* pointsDrawn, bool tlNoDuplicates);
-	void				iAddPointToPointsDrawn					(SBuilder* pointsDrawn, s32 tnX, s32 tnY, SBGRA color);
 	void				iDrawPoint								(SHwnd* h, SXYF64* p1, SBGR color);
 	void				iDrawPointSmall							(SHwnd* h, SXYF64* p1, SBGR color);
 	void				iDrawPointLarge							(SHwnd* h, SXYF64* p1, SBGR color);

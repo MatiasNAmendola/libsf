@@ -6,7 +6,7 @@ EXPORTS
 	dsf_scale_and_clip_bitmap
 	dsf_create_new_instance
 	
-	dsf_set_font_data
+	dsf_load_font
 	dsf_load_character
 	dsf_load_reference
 	dsf_load_template
@@ -14,6 +14,7 @@ EXPORTS
 	dsf_get_changed_template
 	dsf_get_deleted_template
 	dsf_user_cues
+	dsf_user_cues2
 	dsf_user_settings
 
 	dsf_set_active_character

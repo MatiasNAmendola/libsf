@@ -204,9 +204,9 @@
 // Called to set the data for the font instance
 //
 //////
-	int dsf_set_font_data(u32 tnInstance,	f64 tfAscent,	f64 tfUpper,	f64 tfLower,		f64 tfLeft,			f64 tfRight,
-											f64 tfBase,		f64 tfDescent,	f64 tfWidth,
-											f64 tfItalics,	f64 tfBold,		f64 tfUnderTop,		f64 tfUnderBot,		f64 tfStrikeTop,	f64 tfStrikeBot)
+	int dsf_load_font(u32 tnInstance,	f32 tfAscent,	f32 tfUpper,	f32 tfLower,		f32 tfLeft,			f32 tfRight,
+										f32 tfBase,		f32 tfDescent,	f32 tfWidth,
+										f32 tfItalics,	f32 tfBold,		f32 tfUnderTop,		f32 tfUnderBot,		f32 tfStrikeTop,	f32 tfStrikeBot)
 	{
 		SInstance*	p;
 		bool		llValid;
@@ -744,13 +744,54 @@
 			p->trackUnderline	= iValidateRange(tnTrackUnderline,		_NO,	_YES,	_NO);
 			p->showRefs			= iValidateRange(tnRefs,				_NO,	_YES,	_NO);
 			p->trackRefs		= iValidateRange(tnTrackRefs,			_NO,	_YES,	_NO);
-			// Note:  We do not render here because the cues and settings are usually sent one after the other
+			// Note:  We do not render here because the cues and settings are usually sent sequentially, and it only triggers the render on the settings
 
 
 		//////////
 		// Indicate success
 		//////
 			return(0);
+	}
+
+	int dsf_user_cues2(u32 tnInstance,	u32 tlLeft,		u32 tnTrackLeft, 
+										u32 tlRight,	u32 tnTrackRight, 
+										u32 tlWidth,	u32 tnTrackWidth, 
+										u32 tlTems,		u32 tnTrackTems,
+										u32 tlGrid,		u32 tnTrackGrid)
+	{
+		SInstance*	p;
+		bool		llValid;
+
+
+		//////////
+		// Make sure our environment is sane
+		//////
+			p = iGetDsfInstance(tnInstance, &llValid);
+			if (!llValid)
+				return(-1);
+
+
+		//////////
+		// Set the values, and trigger a refresh on any markup windows
+		//////
+			p->left				= iValidateRange(tlLeft,		 	_NO, 	_YES,	_NO);
+			p->trackLeft		= iValidateRange(tnTrackLeft,	 	_NO, 	_YES,	_NO);
+			p->right			= iValidateRange(tlRight,		 	_NO, 	_YES,	_NO);
+			p->trackRight		= iValidateRange(tnTrackRight,	 	_NO, 	_YES,	_NO);
+			p->width			= iValidateRange(tlWidth,		 	_NO, 	_YES,	_NO);
+			p->trackWidth		= iValidateRange(tnTrackWidth,	 	_NO, 	_YES,	_NO);
+			p->tems				= iValidateRange(tlTems,		 	_NO, 	_YES,	_NO);
+			p->trackTems		= iValidateRange(tnTrackTems,	 	_NO, 	_YES,	_NO);
+			p->grid				= iValidateRange(tlGrid,			_NO,	_YES,	_NO);
+			p->trackGrid		= iValidateRange(tnTrackGrid,		_NO,	_YES,	_NO);
+			// Note:  We do not render here because the cues and settings are usually sent sequentially, and it only triggers the render on the settings
+
+
+		//////////
+		// Indicate success
+		//////
+			return(0);
+
 	}
 
 
@@ -763,10 +804,12 @@
 //////
 	int dsf_user_settings(u32 tnInstance,
 							u32 tnDisposition, u32 tnMode, u32 tnMethod, u32 tnRange,
-							u32 tlShowTems, u32 tnTemsType,
 							u32 tlShowSplines, u32 tnSplinesType,
-							u32 tlHighlighSectionOnFinal, u32 tlShowPenDowns, u32 tlShowMouseCrosshairs,
-							u32 tlInvert, u32 tlZoomLens,
+							u32 tlHighlighSelection, u32 tlShowPenDowns,
+							u32 tlMouseCrosshairX, u32 tlMouseCrosshairY,
+							u32 tlInvert,
+							u32 tlZoomLens,
+							u32 tlCuesUnder, 
 							u32 tnSelectArea)
 	{
 		u32			lnI;
@@ -790,15 +833,15 @@
 			p->mode						= iValidateRange(tnMode,					_MODE_POINT,			_MODE_AFTER,				_MODE_POINT);
 			p->method					= iValidateRange(tnMethod,					_METHOD_LEFT,			_METHOD_POINT,				_METHOD_POINT);
 			p->range					= iValidateRange(tnRange,					_RANGE_ACTIVE_CHAR,		_RANGE_ALL,					_RANGE_ACTIVE_CHAR);
-			p->showTems					= iValidateRange(tlShowTems,				_NO,					_YES,						_YES);
-			p->temsType					= iValidateRange(tnTemsType,				_TEMS_TRACK,			_TEMS_DISPLAY,				_TEMS_TRACK);
 			p->showSplines				= iValidateRange(tlShowSplines,				_NO,					_YES,						_YES);
 			p->splinesType				= iValidateRange(tnSplinesType,				_SPLINES_FILL,			_SPLINES_LOR,				_SPLINES_FILL);
-			p->highlighSectionOnFinal	= iValidateRange(tlHighlighSectionOnFinal,	_NO,					_YES,						_YES);
+			p->highlighSelection		= iValidateRange(tlHighlighSelection,		_NO,					_YES,						_YES);
 			p->showPenDowns				= iValidateRange(tlShowPenDowns,			_NO,					_YES,						_NO);
-			p->showMouseCrosshairs		= iValidateRange(tlShowMouseCrosshairs,		_NO,					_YES,						_YES);
+			p->mouseCrosshairX			= iValidateRange(tlMouseCrosshairX,			_NO,					_YES,						_YES);
+			p->mouseCrosshairY			= iValidateRange(tlMouseCrosshairY,			_NO,					_YES,						_YES);
 			p->invert					= iValidateRange(tlInvert,					_NO,					_YES,						_NO);
 			p->zoomLens					= iValidateRange(tlZoomLens,				_NO,					_YES,						_NO);
+			p->cuesUnder				= iValidateRange(tlCuesUnder,				_NO,					_YES,						_YES);
 			p->selectArea				= iValidateRange(tnSelectArea,				_SELECT_AREA_SMALL,		_SELECT_AREA_EXTRA_LARGE,	_SELECT_AREA_SMALL);
 
 
@@ -1060,16 +1103,22 @@
 			lfA			= 0.1325 / 2.0;
 			lfB			= 0.0925 / 2.0;
 			llPenDown	= true;
-			for (lfTheta = 0.0; lfTheta <= _PI + 0.001; lfTheta += _PI / 10.0)
+			for (lfTheta = _PI / 2000.0; lfTheta < _PI; lfTheta += _PI / 10.0)
 			{
 				// Given:  a=major, b=minor, r=radius
 				//         r = (a*b) / sqrt(b*cos(theta)^2 + a*sin(theta)^2)
 				lfV1		= lfB * cos(lfTheta);
 				lfV2		= lfA * sin(lfTheta);
 				lfRadius	= (lfA * lfB) / sqrt(lfV1*lfV1 + lfV2*lfV2);
-				iAddSplineCenterThetaRadiusLR(placeholder, llPenDown, lfX, lfY, lfRadius, iAdjustTheta(_2PI - lfTheta), lfTheta);
+				iAddSplineCenterThetaRadiusLR(placeholder, llPenDown, lfX, lfY, lfRadius, lfTheta, iAdjustTheta(_2PI - lfTheta));
 				llPenDown = false;
 			}
+			// Add the final spline
+			lfTheta		= _PI - (_PI / 2000.0);
+			lfV1		= lfB * cos(lfTheta);
+			lfV2		= lfA * sin(lfTheta);
+			lfRadius	= (lfA * lfB) / sqrt(lfV1*lfV1 + lfV2*lfV2);
+			iAddSplineCenterThetaRadiusLR(placeholder, llPenDown, lfX, lfY, lfRadius, lfTheta, iAdjustTheta(_2PI - lfTheta));
 	}
 
 
@@ -1114,6 +1163,10 @@
 				s->lr	= line.length / 2.0f;
 				s->lt	= _PI;
 				s->rr	= s->lr;
+
+// 				s->tlLSelected	= true;
+				s->tlOSelected	= true;
+				s->tlRSelected	= true;
 
 				// Does this start a new pen stroke?
 				s->lPenDown = tlPenDown;
@@ -2162,15 +2215,20 @@
 					// Fill with the dark background for markup editing
 					FillRect(h->hdc, &lrc, h->backDarkGrayBrush);
 
-					// Render the splines withmarkup
+					// Render any cues
+					if (p->cuesUnder)
+						iRenderCues(p, h, c);
+
+					// Render the splines with markup
 					if (p->showSplines)
 						iRenderSplines(p, h, c, h->markup, h->bold, h->italic, h->underline, h->strikethrough);
 
-					// Render the mouse coordinates, tems, and mouse overlay info
-					iRenderMouseCoordinates(p, h);
+					// Render any cues
+					if (!p->cuesUnder)
+						iRenderCues(p, h, c);
 
-					if (p->showTems)
-						iRenderTems(p, h, c);
+					// Render the mouse coordinates
+					iRenderMouseCoordinates(p, h);
 
 					// Render the mouse overlay for current mouse activity
 					iRenderMouseOverlay(p, h, c);
@@ -2221,7 +2279,7 @@
 
 //////////
 //
-// Called to put the mouse coordinates in the lower-right
+// Called to put the mouse coordinates in the upper-right, or lower-right, depending on mouse position
 //
 //////
 	void iRenderMouseCoordinates(SInstance* p, SHwnd* h)
@@ -2249,14 +2307,147 @@
 			DrawTextA(h->hdc, bufferX, strlen(bufferX), &lrcX, DT_CALCRECT);
 			DrawTextA(h->hdc, bufferY, strlen(bufferY), &lrcY, DT_CALCRECT);
 
-			// Determine the actual rendering coordinates
-			SetRect(&lrcY, h->w - 3 - (lrcY.right - lrcY.left), h->h - 3 - (lrcY.bottom - lrcY.top), h->w - 3, h->h - 3);
-			SetRect(&lrcX, h->w - 3 - (lrcY.right - lrcY.left) - 3 - (lrcX.right - lrcX.left), h->h - 3 - (lrcX.bottom - lrcX.top), lrcY.left - 3, lrcY.bottom);
+			// Determine the actual rendering coordinates at the top
+			SetRect(&lrcY, h->w - 3 - (lrcY.right - lrcY.left),			3, h->w - 3,		3 + (lrcY.bottom - lrcY.top));
+			SetRect(&lrcX, lrcY.left - 3 - (lrcX.right - lrcX.left),	3, lrcY.left - 3,	3 + (lrcX.bottom - lrcX.top));
+
+			// If the mouse is in this area, move the mouse coordinates
+			if (gMouse.xi >= lrcX.left && gMouse.xi < lrcY.right && gMouse.yi >= lrcX.top && gMouse.yi < lrcX.bottom)
+			{
+				// Move to the bottom
+				SetRect(&lrcY, h->w - 3 - (lrcY.right - lrcY.left), h->h - 3 - (lrcY.bottom - lrcY.top), h->w - 3, h->h - 3);
+				SetRect(&lrcX, h->w - 3 - (lrcY.right - lrcY.left) - 3 - (lrcX.right - lrcX.left), h->h - 3 - (lrcX.bottom - lrcX.top), lrcY.left - 3, lrcY.bottom);
+			}
 
 			// Render
 			DrawTextA(h->hdc, bufferX, strlen(bufferX), &lrcX, DT_CENTER | DT_VCENTER | DT_END_ELLIPSIS);
 			DrawTextA(h->hdc, bufferY, strlen(bufferY), &lrcY, DT_CENTER | DT_VCENTER | DT_END_ELLIPSIS);
 		}
+	}
+
+
+
+
+//////////
+//
+// Called to render any cues
+//
+//////
+	void iRenderCues(SInstance* p, SHwnd* h, SChars* c)
+	{
+		if (p->grid)				iRenderGrid(p, h);						// Render the grid if it's enabled
+		if (p->tems)				iRenderTems(p, h, c);
+
+		if (p->strikethrough)		iRenderQuadH(p, h, c, p->font.fStrikeTop, p->font.fStrikeBot, colorStrikethrough);
+		if (p->underline)			iRenderQuadH(p, h, c, p->font.fUnderTop, p->font.fUnderBot, colorUnderline);
+
+		if (p->ascent)				iRenderCueLineH(p, h, c, p->font.fAscent,	colorAscent);
+		if (p->upper)				iRenderCueLineH(p, h, c, p->font.fUpper,	colorUpper);
+		if (p->lower)				iRenderCueLineH(p, h, c, p->font.fLower,	colorLower);
+		if (p->base)				iRenderCueLineH(p, h, c, p->font.fBase,		colorBase);
+		if (p->descent)				iRenderCueLineH(p, h, c, p->font.fDescent,	colorDescent);
+		if (p->left)				iRenderCueLineV(p, h, c, p->font.fLeft,		colorLeft);
+		if (p->right)				iRenderCueLineV(p, h, c, p->font.fRight,	colorRight);
+
+		if (p->showRefs)			iRenderRefs(p, h, c);
+	}
+
+	void iRenderCueLineH(SInstance* p, SHwnd* h, SChars* c, f64 tfY, SBGR color)
+	{
+		iColorizeHorizontalLineByPixels(p, h, c, 0, h->w - 1, (s32)(tfY * h->h), color);
+	}
+
+	void iRenderCueLineV(SInstance* p, SHwnd* h, SChars* c, f64 tfX, SBGR color)
+	{
+		iColorizeVerticalLineByPixels(p, h, c, 0, h->h - 1, (s32)(tfX * h->w), color);
+	}
+
+	void iRenderQuadH(SInstance* p, SHwnd* h, SChars* c, f64 tfTop, f64 tfBottom, SBGR color)
+	{
+		SXYF64	p1, p2, p3, p4;
+
+
+		//////////
+		// Make a quad of that size
+		//////
+			iSetPoint(&p1,	0.0, tfTop);
+			iSetPoint(&p2,	1.0, tfTop);
+			iSetPoint(&p3,	1.0, tfBottom);
+			iSetPoint(&p4,	0.0, tfBottom);
+
+
+		//////////
+		// Rendered p1..p4, p2..p3
+		//////
+			iFillQuadAlpha(h, &p1, &p2, &p3, &p4, color, color, color, color, 0.5, 0.5, 0.5, 0.5);
+	}
+
+	void iRenderRefs(SInstance* p, SHwnd* h, SChars* c)
+	{
+	}
+
+
+
+
+//////////
+//
+// Called to render a grid
+//
+//////
+	void iRenderGrid(SInstance* p, SHwnd* h)
+	{
+		f64		lfX, lfY;
+		s32		lnX, lnY;
+		SBGR*	lbgr;
+		SBGR	color;
+
+
+		//////////
+		// Depending on whether or not we're tracking to the grid it's rendered in different colors
+		//////
+			if (p->trackGrid && glMouseLeft)			color = gridTrack;		// Only if tracking, and the mouse is down
+			else										color = grid;
+
+
+		//////////
+		// Render a grid line every 5% horizontally
+		//////
+			for (lfY = 0.05; lfY < 0.99; lfY += 0.05)
+			{
+				// Determine where this will go
+				lbgr = (SBGR*)((s8*)h->bd + ((u32)(lfY * h->h) * h->rowWidth));
+
+				// Render at this X coordinate all the way up and down
+				for (lnX = 0; lnX < h->w; lnX++, lbgr++)
+				{
+					// Render this pixel
+					lbgr->red	= color.red;
+					lbgr->grn	= color.grn;
+					lbgr->blu	= color.blu;
+				}
+			}
+
+
+		//////////
+		// Render a grid line every 5% vertically
+		//////
+			for (lfX = 0.05; lfX < 0.99; lfX += 0.05)
+			{
+				// Determine where this will go
+				lbgr = (SBGR*)((s8*)h->bd + ((u32)(lfX * h->w) * 3));
+
+				// Render at this X coordinate all the way up and down
+				for (lnY = 0; lnY < h->h; lnY++)
+				{
+					// Render this pixel
+					lbgr->red	= color.red;
+					lbgr->grn	= color.grn;
+					lbgr->blu	= color.blu;
+
+					// Move for the next row
+					lbgr = (SBGR*)((s8*)lbgr + h->rowWidth);
+				}
+			}
 	}
 
 
@@ -2271,7 +2462,7 @@
 	{
 		u32			lnI, lnSplineNumber;
 		SXYF64		prLast, poLast, plLast;
-		SXYF64		pr, po, pl, p1, p2, p3, p4;
+		SXYF64		pr, po, pl;
 		SLineF64	line, lineL, lineR, lineLLast, lineRLast, lineLtoLLast, lineRtoRLast;
 		SSpline*	s;
 		SSpline*	sLast;
@@ -2294,8 +2485,8 @@
 			{
 				// It is a final render, black on white
 				quad			= black;
-				if (p->highlighSectionOnFinal)			quadSelected	= blackSelected;
-				else									quadSelected	= black;
+				if (p->highlighSelection)		quadSelected	= blackSelected;
+				else							quadSelected	= black;
 
 			} else {
 				// It is a markup render, gray on black
@@ -2303,12 +2494,12 @@
 				{
 					// Normal rendering
 					quad			= gray;
-					quadSelected	= graySelected;
+					quadSelected	= ((p->highlighSelection) ? graySelected : gray);
 
 				} else {
 					// Outline or LOR rendering
 					quad			= background;
-					quadSelected	= backgroundSelected;
+					quadSelected	= ((p->highlighSelection) ? backgroundSelected : background);
 				}
 			}
 
@@ -2399,40 +2590,19 @@
 								//////
 									if (s->lPenDown)
 									{
-										// Compute the line from L to R
-										iComputeLineFromTwoPoints(&line, &pl, &pr);
-
-										/////////
-										// Extend out the points by 5 pixels
-										//////
-											// L
-											line.p1.x	= line.p1.x + ((5.0 / (f64)h->w) * cos(line.theta + _PI));
-											line.p1.y	= line.p1.y + ((5.0 / (f64)h->h) * sin(line.theta + _PI));
-											// R
-											line.p2.x	= line.p2.x + ((5.0 / (f64)h->w) * cos(line.theta));
-											line.p2.y	= line.p2.y + ((5.0 / (f64)h->h) * sin(line.theta));
-											iComputeLine(&line);
-
-
 										//////////
-										// Create a quad extending out 5 pixels behind, 10 pixels in front
+										// Pen down stroke
 										//////
-											// p1..p4
-											p1.x		= line.p1.x + ((10.0 / (f64)h->w) * cos(line.theta - _PI_2));
-											p1.y		= line.p1.y + ((10.0 / (f64)h->h) * sin(line.theta - _PI_2));
-											p4.x		= line.p1.x + ((5.0 / (f64)h->w) * cos(line.theta + _PI_2));
-											p4.y		= line.p1.y + ((5.0 / (f64)h->h) * sin(line.theta + _PI_2));
-											// p2..p3
-											p2.x		= line.p2.x + ((10.0 / (f64)h->w) * cos(line.theta - _PI_2));
-											p2.y		= line.p2.y + ((10.0 / (f64)h->h) * sin(line.theta - _PI_2));
-											p3.x		= line.p2.x + ((5.0 / (f64)h->w) * cos(line.theta + _PI_2));
-											p3.y		= line.p2.y + ((5.0 / (f64)h->h) * sin(line.theta + _PI_2));
+											iComputeLineFromTwoPoints(&line, &pl, &pr);				// Compute the line from L to R
+											iDrawPenDown(h, &line);									// Draw the pen down flow indicator
 
-
-										//////////
-										// Fill this quad in using a pastel pink cue
-										//////
-											iFillQuadAlpha(h, &p1, &p2, &p3, &p4, stroke, stroke, stroke, stroke, 0.0, 0.0, 0.7, 0.7);
+										// For the previous stroke, if any, draw the pen up indicator
+										if (sLast && !sLast->lPenDown)
+										{
+											// Pen up stroke
+											iComputeLineFromTwoPoints(&line, &plLast, &prLast);		// Compute the line from the last L to R
+											iDrawPenUp(h, &line);									// Draw the pen up flow indicator
+										}
 									}
 
 
@@ -2500,6 +2670,82 @@
 			}
 	}
 
+	void iDrawPenDown(SHwnd* h, SLineF64* line)
+	{
+		SXYF64	p1, p2, p3, p4;
+
+
+		/////////
+		// Extend out the points by 5 pixels
+		//////
+			// L
+			line->p1.x        = line->p1.x + ((10.0 / (f64)h->w) * cos(line->theta + _PI));
+			line->p1.y        = line->p1.y + ((10.0 / (f64)h->h) * sin(line->theta + _PI));
+			// R
+			line->p2.x        = line->p2.x + ((10.0 / (f64)h->w) * cos(line->theta));
+			line->p2.y        = line->p2.y + ((10.0 / (f64)h->h) * sin(line->theta));
+			iComputeLine(line);
+
+
+		//////////
+		// Create a quad extending 10 pixels forward, 5 pixels backward
+		//////
+			// p1..p4
+			p1.x		= line->p1.x + ((10.0 / (f64)h->w) * cos(line->theta - _PI_2));
+			p1.y		= line->p1.y + ((10.0 / (f64)h->h) * sin(line->theta - _PI_2));
+			p4.x		= line->p1.x + ((5.0  / (f64)h->w) * cos(line->theta + _PI_2));
+			p4.y		= line->p1.y + ((5.0  / (f64)h->h) * sin(line->theta + _PI_2));
+			// p2..p3
+			p2.x		= line->p2.x + ((10.0 / (f64)h->w) * cos(line->theta - _PI_2));
+			p2.y		= line->p2.y + ((10.0 / (f64)h->h) * sin(line->theta - _PI_2));
+			p3.x		= line->p2.x + ((5.0  / (f64)h->w) * cos(line->theta + _PI_2));
+			p3.y		= line->p2.y + ((5.0  / (f64)h->h) * sin(line->theta + _PI_2));
+
+
+		//////////
+		// Fill this quad in using a bluish cue
+		//////
+			iFillQuadAlpha(h, &p1, &p2, &p3, &p4, strokeDown, strokeDown, strokeDown, strokeDown, 0.0, 0.0, 1.0, 1.0);
+	}
+
+	void iDrawPenUp(SHwnd* h, SLineF64* line)
+	{
+		SXYF64	p1, p2, p3, p4;
+
+
+		/////////
+		// Extend out the points by 5 pixels
+		//////
+			// L
+			line->p1.x        = line->p1.x + ((10.0 / (f64)h->w) * cos(line->theta + _PI));
+			line->p1.y        = line->p1.y + ((10.0 / (f64)h->h) * sin(line->theta + _PI));
+			// R
+			line->p2.x        = line->p2.x + ((10.0 / (f64)h->w) * cos(line->theta));
+			line->p2.y        = line->p2.y + ((10.0 / (f64)h->h) * sin(line->theta));
+			iComputeLine(line);
+
+
+		//////////
+		// Create a quad extending 10 pixels back
+		//////
+			// p1..p4
+			p1.x		= line->p1.x + ((5.0  / (f64)h->w) * cos(line->theta - _PI_2));
+			p1.y		= line->p1.y + ((5.0  / (f64)h->h) * sin(line->theta - _PI_2));
+ 			p4.x		= line->p1.x + ((10.0 / (f64)h->w) * cos(line->theta + _PI_2));
+ 			p4.y		= line->p1.y + ((10.0 / (f64)h->h) * sin(line->theta + _PI_2));
+			// p2..p3
+			p2.x		= line->p2.x + ((5.0  / (f64)h->w) * cos(line->theta - _PI_2));
+			p2.y		= line->p2.y + ((5.0  / (f64)h->h) * sin(line->theta - _PI_2));
+ 			p3.x		= line->p2.x + ((10.0 / (f64)h->w) * cos(line->theta + _PI_2));
+ 			p3.y		= line->p2.y + ((10.0 / (f64)h->h) * sin(line->theta + _PI_2));
+
+
+		//////////
+		// Fill this quad in using an orangish cue
+		//////
+			iFillQuadAlpha(h, &p1, &p2, &p3, &p4, strokeUp, strokeUp, strokeUp, strokeUp, 1.0, 1.0, 0.0, 0.0);
+	}
+
 	void iRenderHint(SHwnd* h, SLineF64* line, SXYF64* pt)
 	{
 		SXYF64		pLeft;
@@ -2507,18 +2753,30 @@
 		SXYF64		pRight;
 
 
+		//////////
+		// Move the point forward one pixel
+		//////
+			pt->x	= pt->x + ((1.0 / (f64)h->w)  * cos(line->theta));
+			pt->y	= pt->y + ((1.0 / (f64)h->w)  * sin(line->theta));
+
+
+		//////////
 		// Create line moving left, forward, and right from the end of the provided line
-		pLeft.x		= pt->x + ((2.5 / (f64)h->w)  * cos(line->theta - _PI_2));
-		pLeft.y		= pt->y + ((2.5 / (f64)h->w)  * sin(line->theta - _PI_2));
+		//////
+			pLeft.x		= pt->x + ((3.0 / (f64)h->w)  * cos(line->theta - _PI_2));
+			pLeft.y		= pt->y + ((3.0 / (f64)h->w)  * sin(line->theta - _PI_2));
 
-		pForward.x	= pt->x + ((6.0 / (f64)h->w)  * cos(line->theta));
-		pForward.y	= pt->y + ((6.0 / (f64)h->w)  * sin(line->theta));
+			pForward.x	= pt->x + ((6.0 / (f64)h->w)  * cos(line->theta));
+			pForward.y	= pt->y + ((6.0 / (f64)h->w)  * sin(line->theta));
 
-		pRight.x	= pt->x + ((2.5 / (f64)h->w)  * cos(line->theta + _PI_2));
-		pRight.y	= pt->y + ((2.5 / (f64)h->w)  * sin(line->theta + _PI_2));
+			pRight.x	= pt->x + ((3.0 / (f64)h->w)  * cos(line->theta + _PI_2));
+			pRight.y	= pt->y + ((3.0 / (f64)h->w)  * sin(line->theta + _PI_2));
 
-		// Draw the quad
-		iFillQuadAlpha(h, &pLeft, &pForward, &pForward, &pRight, stroke, stroke, stroke, stroke, 1.0, 1.0, 1.0, 1.0);
+
+		//////////
+		// Draw the quad (which is really a triangle. :-))
+		//////
+			iFillQuadAlpha(h, &pLeft, &pForward, &pForward, &pRight, strokeDown, strokeDown, strokeDown, strokeDown, 1.0, 1.0, 1.0, 1.0);
 	}
 
 	void iComputeLOR(SSpline* s, SXYF64* pl, SXYF64* po, SXYF64* pr)
@@ -2625,6 +2883,7 @@
 		SLineF64	line;
 		SBGRA		color;
 		SBGR*		lbgr;
+		u8*			lMastPtr;
 
 
 		//////////
@@ -2687,8 +2946,21 @@
 				{
 					if (tlNoDuplicates || pointsDrawn)
 					{
-						// Add it to a list to remove duplicates later
-						iAddPointToPointsDrawn(pointsDrawn, lnX, lnY, color);
+						// Need to see if this has already been drawn first
+						lMastPtr = (u8*)(pointsDrawn->data + (lnY * h->w) + lnX);
+
+						// If it's 0, it has not yet been drawn
+						if (*lMastPtr == 0)
+						{
+							// We can draw it
+							lbgr		= (SBGR*)((s8*)h->bd + (lnY * h->rowWidth) + (lnX * 3));
+							lbgr->red	= (u8)(((f64)lbgr->red * lfMalp) + (lfRed * lfAlp));
+							lbgr->grn	= (u8)(((f64)lbgr->grn * lfMalp) + (lfGrn * lfAlp));
+							lbgr->blu	= (u8)(((f64)lbgr->blu * lfMalp) + (lfBlu * lfAlp));
+
+							// Mark this bit drawn
+							*lMastPtr	= 255;
+						}
 
 					} else {
 						// Directly render it
@@ -2749,24 +3021,6 @@
 					lnYLast = dp->pt.yi;
 				}
 			}
-	}
-
-	// For alpha-rendering, we don't want to double-apply an alpha pixel, so this algorithm does
-	// a binary search.  If it finds the point, it returns false because it could not be added.
-	// If it was not found it is added.
-	void iAddPointToPointsDrawn(SBuilder* pointsDrawn, s32 tnX, s32 tnY, SBGRA color)
-	{
-		SPointsDrawn* dp;
-
-
-		// Add a new entry
-		dp = (SPointsDrawn*)builder_allocateBytes(pointsDrawn, sizeof(SPointsDrawn));
-		if (dp)
-		{
-			dp->pt.xi	= tnX;
-			dp->pt.yi	= tnY;
-			dp->color	= color;
-		}
 	}
 
 	// Draw the point
@@ -2862,13 +3116,19 @@
 		f64			lfRedP1P4Step, lfGrnP1P4Step, lfBluP1P4Step, lfAlpP1P4Step, lfRedP2P3Step, lfGrnP2P3Step, lfBluP2P3Step, lfAlpP2P3Step;
 		SBGR_AF64	colorP1P4, colorP2P3;
 		SBuilder*	pointsDrawn;
+		s8*			lptr;
 
 
 		//////////
 		// Build our lines from p1..p4, p2..p3
 		//////
+			// Are we rendering any that are alpha?
+			llNoAlpha = false;
+			if (tfP1Alp == 1.0 && tfP2Alp == 1.0 && tfP3Alp == 1.0 && tfP4Alp == 1.0)
+				llNoAlpha = true;
+
 			// Get our multiplier based on size
-			lfMultiplier	= sqrt((f64)h->w * (f64)h->w + (f64)h->h * (f64)h->h) * _SQRT2;
+			lfMultiplier	= sqrt((f64)h->w * (f64)h->w + (f64)h->h * (f64)h->h) * (_SQRT2 * ((llNoAlpha) ? 1.0 : 2.0));
 
 			// p1..p4
 			p1p4.p1.x	= p1->x;
@@ -2916,19 +3176,17 @@
 			lfBluP2P3Step	= ((f64)p3Color.blu - lfBluP2P3) / lfStepCount;
 			lfAlpP2P3Step	= (tfP3Alp - tfP2Alp) / lfStepCount;
 
-			// Are we rendering any that are alpha?
-// The following does a test to see if we should use the alpha algorithm.  It works, but it is
-// notably slower on large strokes.  So, by default it is shut off.
-//			llNoAlpha = false;
-// 			if (tfP1Alp == 1.0 && tfP2Alp == 1.0 && tfP3Alp == 1.0 && tfP4Alp == 1.0)
-				llNoAlpha = true;
-
 
 		//////////
 		// Create our points drawn buffer so duplicate points are not rendered
 		//////
 			if (!llNoAlpha)
+			{
+				// Allocate a map buffer to indicate which bits have been drawn already
 				builder_createAndInitialize(&pointsDrawn, -1);
+				lptr = builder_allocateBytes(pointsDrawn, h->w * h->h);
+				memset(lptr, 0, h->w * h->h);
+			}
 
 
 
@@ -2985,13 +3243,10 @@
 
 
 		//////////
-		// Destroy the points drawn buffer after first rendering it
+		// Destroy the points drawn buffer
 		//////
 			if (!llNoAlpha)
-			{
-				iDrawLineAlphaNoDuplicates(h, pointsDrawn);
 				builder_freeAndRelease(&pointsDrawn);
-			}
 	}
 
 	void iSetPoint(SXYF64* p, f64 x, f64 y)
@@ -3080,11 +3335,10 @@
 			}
 		}
 
-		if (p->showMouseCrosshairs && p1.xi >= 0 && p1.xi < h->w && p1.yi >= 0 && p1.yi < h->h)
+		if (p1.xi >= 0 && p1.xi < h->w && p1.yi >= 0 && p1.yi < h->h)
 		{
-			// Render the horizontal and vertical crosshair lines
-			iColorizeHorizontalLineByPixels(p, h, c, 0, h->w - 1, p1.yi, mouseColor);		// Horizontal
-			iColorizeVerticalLineByPixels(  p, h, c, 0, h->h - 1, p1.xi, mouseColor);		// Vertical
+			if (p->mouseCrosshairX)		iColorizeHorizontalLineByPixels(p, h, c, 0, h->w - 1, p1.yi, mouseColor);		// Horizontal
+			if (p->mouseCrosshairY)		iColorizeVerticalLineByPixels(  p, h, c, 0, h->h - 1, p1.xi, mouseColor);		// Vertical
 		}
 	}
 
@@ -3349,9 +3603,9 @@
 		//////////
 		// Iterate through each tems entries and draw the outline
 		//////
-			lfRed = (f64)colorMarkup.red;
-			lfGrn = (f64)colorMarkup.grn;
-			lfBlu = (f64)colorMarkup.blu;
+			lfRed = (f64)colorTems.red;
+			lfGrn = (f64)colorTems.grn;
+			lfBlu = (f64)colorTems.blu;
 			for (lnI = 0; lnI < c->tems->populatedLength; lnI += sizeof(STems))
 			{
 				// Grab the pointer
@@ -3404,7 +3658,7 @@
 
 	// Zoom the 32x32 box around the mouse coordinates into a zoom lens overlain either on the
 	// upper-left or lower-left (depending on whether or not the mouse is over the default upper-
-	// left display area
+	// left display area.  Zoom is fixed at 3x.
 	void iRenderZoomLens(SHwnd* h)
 	{
 		s32		lnX, lnY, lnX2, lnY2, lnXSrc, lnYSrc, lnXDst, lnYDst;
@@ -3416,30 +3670,30 @@
 		//////////
 		// See if the mouse is in this default upper-left area
 		//////
-			SetRect(&lrc, 0, 0, 128 + 16, 128 + 16);
+			SetRect(&lrc, 0, 0, 96 + 16, 96 + 16);
 			if (gMouse.xi >= lrc.left && gMouse.xi < lrc.right && gMouse.yi >= lrc.top && gMouse.yi < lrc.bottom)
-				SetRect(&lrc, 0, h->h - 128, 128, h->h);
+				SetRect(&lrc, 0, h->h - 96, 96, h->h);
 
 
 		//////////
 		// Copy the image into the area
 		//////
-			for (lnY = 0, lnYSrc = gMouse.yi - 16, lnYDst = lrc.top; lnY < 32; lnY++, lnYSrc++, lnYDst += 4)
+			for (lnY = 0, lnYSrc = gMouse.yi - 16, lnYDst = lrc.top; lnY < 32; lnY++, lnYSrc++, lnYDst += 3)
 			{
 				// Compute the source pointer for the row
 				lbgrSrc = (SBGR*)((s8*)h->bd + ((h->h - lnYSrc - 1) * h->rowWidth) + ((gMouse.xi - 16) * 3));
 
 				// Copy the columns
-				for (lnX = 0, lnXSrc = gMouse.xi - 16, lnXDst = lrc.left; lnX < 32; lnX++, lnXSrc++, lnXDst += 4, lbgrSrc++)
+				for (lnX = 0, lnXSrc = gMouse.xi - 16, lnXDst = lrc.left; lnX < 32; lnX++, lnXSrc++, lnXDst += 3, lbgrSrc++)
 				{
-					// Repeat for a 4x zoom
-					for (lnY2 = 0; lnY2 < 4; lnY2++)
+					// Repeat for a 3x zoom
+					for (lnY2 = 0; lnY2 < 3; lnY2++)
 					{
 						// Compute the destination for this row
 						lbgrDst = (SBGR*)((s8*)h->bd + ((h->h - (lnYDst + lnY2)) * h->rowWidth) + (lnXDst * 3));
 
-						// Repeat 4x for the column
-						for (lnX2 = 0; lnX2 < 4; lnX2++, lbgrDst++)
+						// Repeat 3x for the column
+						for (lnX2 = 0; lnX2 < 3; lnX2++, lbgrDst++)
 						{
 							// See if this is a pixel we can copy
 							if (lnXSrc >= 0 && lnXSrc < h->w && lnYSrc >= 0 && lnYSrc < h->h)
@@ -3450,10 +3704,10 @@
 								lbgrDst->blu	= (u8)min((u32)lbgrSrc->blu + 32, 255);
 
 							} else {
-								// Render the background color
-								lbgrDst->red	= (u8)min((u32)background.red + 32, 255);
-								lbgrDst->grn	= (u8)min((u32)background.grn + 32, 255);
-								lbgrDst->blu	= (u8)min((u32)background.blu + 32, 255);
+								// Render the edge
+								lbgrDst->red	= white.red;
+								lbgrDst->grn	= white.grn;
+								lbgrDst->blu	= white.blu;
 							}
 						}
 					}
@@ -4498,10 +4752,6 @@
 		//////////
 		// Grab the cursor position
 		//////
-			llLastMouseLeft		= glMouseLeft;
-			llLastMouseRight	= glMouseRight;
-			glMouseLeft			= (GetAsyncKeyState(VK_LBUTTON) != 0);
-			glMouseRight		= (GetAsyncKeyState(VK_RBUTTON) != 0);
 			GetCursorPos(&pt);
 			ScreenToClient(h->hwnd, &pt);
 
@@ -4540,6 +4790,13 @@
 				llLastCtrl			= glCtrlKeyDown;
 				llLastShift			= glShiftKeyDown;
 				llLastAlt			= glAltKeyDown;
+
+			} else {
+				// We are on the reservation, check the key states
+				llLastMouseLeft		= glMouseLeft;
+				llLastMouseRight	= glMouseRight;
+				glMouseLeft			= (GetAsyncKeyState(VK_LBUTTON) != 0);
+				glMouseRight		= (GetAsyncKeyState(VK_RBUTTON) != 0);
 			}
 
 
