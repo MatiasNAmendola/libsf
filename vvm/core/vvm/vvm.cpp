@@ -46,22 +46,29 @@
 #include <windows.h>
 #include <stdio.h>
 #include <tchar.h>
+#include <math.h>
 
 #define _VVM_COMPILING
 
 #include "\libsf\vvm\core\common\common.h"
+#include "\libsf\utils\sha1\sha1.h"											// SHA-1 hashing algorithm
 #include "\libsf\vvm\core\localization\vvmenu\resource.h"					// Resource constants
 #include "vvm_const.h"
 #include "\libsf\vvm\core\vvmoss\vo_class.h"
 #include "\libsf\vvm\core\vvmoss\vo_structs.h"
 #include "\libsf\vvm\core\vvmmc\vvmmc_structs.h"
+#include "\libsf\vvm\core\common\fonts\font8x6.h"
+#include "\libsf\vvm\core\common\fonts\font8x8.h"
+#include "\libsf\vvm\core\common\fonts\font8x14.h"
+#include "\libsf\vvm\core\common\fonts\font8x16.h"
 #include "vvm_structs.h"
-#include "vvm_defs.h"
 #include "vvm_istructs.h"
+#include "vvm_defs.h"
 #include "\libsf\vvm\core\common\common_vvm.h"
 #include "\libsf\vvm\core\common\common_vvmoss.h"
 #include "\libsf\vvm\core\common\common_vvmmc.h"
 #include "vvm_glob.h"
+#include "vvm_bxml.h"
 
 
 
@@ -189,6 +196,10 @@
 #include "vvm_res.cpp"					// Load resource dll
 #include "vvm_misc.cpp"					// Miscellaneous support functions
 #include "vvm1.cpp"						// Version 1 VVM interface (for the debugger or other apps desiring to use the VVM)
+#include "vvm_bxml.cpp"					// BXML algorithms
 
 // For test cases only
 #include "vvm_tests.cpp"				// Runs test cases on the constructed build, reports any deviations from previously established norms/requirements.
+
+	// THe following are include files of external (non-VVM) LibSF projects
+#include "\libsf\utils\sha1\sha1.cpp"	// SHA-1 hashing algorithm

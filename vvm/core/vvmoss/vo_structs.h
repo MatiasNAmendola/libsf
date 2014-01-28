@@ -43,3 +43,9 @@
 
 
 
+
+struct SOssWindowLL
+{
+	SLL				ll;									// Link list chain
+	SOssWindow		isw;								// Local copy of the window data
+};

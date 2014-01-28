@@ -65,7 +65,7 @@
 				OutputFile="\libsf\vvm\dev\$(ProjectName).dll"
 				LinkIncremental="2"
 				ManifestFile="$(TargetDir)int\$(TargetFileName).intermediate.manifest"
-				ModuleDefinitionFile="whitebox.def"
+				ModuleDefinitionFile="wb.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)pdbs\$(TargetName).pdb"
 				SubSystem="2"
@@ -185,6 +185,14 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\wb.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\wb.def"
+				>
+			</File>
+			<File
 				RelativePath=".\wb_cb.cpp"
 				>
 				<FileConfiguration
@@ -223,14 +231,6 @@
 						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\whitebox.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\whitebox.def"
-				>
 			</File>
 		</Filter>
 		<Filter

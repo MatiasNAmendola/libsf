@@ -73,6 +73,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <Shobjidl.h>
 
 
 // Unsigned
@@ -309,8 +310,8 @@ struct SLineF64
 
 		// Data used expressly for the generated bitmap, and rendering it locally on windows
 		union {
-			HWND			hwnd;					// The HWND handle
-			u32				_hwnd;					// hwnd of the render window
+			HWND			hwnd;					// The HWND handle of the render window
+			u32				_hwnd;					// u32 form
 		};
 		WNDPROC				oldWndProcAddress;		// Used for re-directing window handling through our DLL
 		WNDPROC				oldWndParentProcAddress;// Used for re-directing window handling through our DLL
@@ -324,10 +325,25 @@ struct SLineF64
 		HBRUSH				backDarkGrayBrush;		// Color used for dark gray background brush
 		HFONT				fontXY;					// Font for rendering X,Y coordiantes in the lower-right
 
-		// Used for real-time mouse drawing
+		// Copied out each time something is rendered
 		HDC					hdc2;					// Device context when window was created
 		HBITMAP				hbmp2;					// Handle to DIBSection
 		SBGR*				bd2;					// Copy of bd used for rendering real-time mouse data
+
+		// For editing the markup
+		u32					tool;					// The current tool in use
+
+		// Used for the contextual control window display / input on markup windows
+		BITMAPFILEHEADER	bhControl;				// Bitmap header if this bitmap is written to disk
+		BITMAPINFOHEADER	biControl;				// Bitmap info
+		RECT				rcControl;
+		union {
+			HWND			hwndControl;			// The HWND handle of the control window
+			u32				_hwndControl;			// u32 form
+		};
+		HDC					hdcControl;				// Device context when window was created
+		HBITMAP				hbmpControl;			// Handle to DIBSection
+		SBGR*				bdControl;				// Pointer to literal bit data for the active window buffer
 
 	};
 
@@ -339,6 +355,7 @@ struct SLineF64
 		u32				id_size;					// sizeof(SInstance)
 
 		SFont			font;						// Font information for this instance
+		u32				activeTool;					// The current active tool
 		u32				activeChar;					// The character currently being edited / displayed
 		u32				maxChar;					// The maximum character found during the initial load, or created later
 		u32				disposition;				// 0=select, 1=unselect, 2=toggle, 3=flip left to right, right to left, 4=flip left/middle to right/middle, and right/middle to left/middle
@@ -405,7 +422,8 @@ struct SLineF64
 	const f64	_PI_4						= 0.78539816339745;		// pi/4
 	const f64	_PI_6						= 0.52359877559830;		// pi/6
 	const f64	_SQRT2						= 1.4142135624;
-	const s8	cgcPreviewWindowClass[]	 = "DSF-Preview-Window-Class";
+	const s8	cgcPreviewWindowClass[]		= "DSF-Preview-Window-Class";
+	const s8	cgcControlWindowClass[]		= "DSF-Control-Window-Class";
 
 	const u32	_NO							= 0;
 	const u32	_YES						= 1;
@@ -452,6 +470,12 @@ struct SLineF64
 	const u32	_SPLINES_OUTLINE			= 1;
 	const u32	_SPLINES_LOR				= 2;
 
+	const u32	_TOOL_EDIT					= 1;
+	const u32	_TOOL_MOVE					= 2;
+	const u32	_TOOL_STRETCH				= 3;
+	const u32	_TOOL_ROTATE				= 4;
+	const u32	_TOOL_SCALE					= 5;
+
 	const u32	WM_REDRAW_WINDOW			= WM_USER + 1;
 
 
@@ -460,16 +484,18 @@ struct SLineF64
 //////////
 // Global variables
 //////
-	HINSTANCE	ghInstance;
-	SBuilder*	instances;
-	SBuilder*	placeholder;
-	SXYS32		gMouse					= { -1, -1 };
-	u32			gMouseType				= _SELECT_AREA_SMALL;
-	bool		glMouseLeft;
-	bool		glMouseRight;
-	bool		glCtrlKeyDown			= false;
-	bool		glShiftKeyDown			= false;
-	bool		glAltKeyDown			= false;
+	HINSTANCE		ghInstance;
+	SBuilder*		instances;
+	SBuilder*		placeholder;
+	ITaskbarList*	giTaskbar;
+	UINT_PTR		gnTimer					= 0;						// Used for the markup, to read the keyboard state and mouse position 30 times per second
+	SXYS32			gMouse					= { -1, -1 };
+	u32				gMouseType				= _SELECT_AREA_SMALL;
+	bool			glMouseLeft;
+	bool			glMouseRight;
+	bool			glCtrlKeyDown			= false;
+	bool			glShiftKeyDown			= false;
+	bool			glAltKeyDown			= false;
 
 
 //////////
@@ -490,12 +516,12 @@ struct SLineF64
 	SBGR		mousePeeakaheadColor	= { 255, 255, 0 };
 	SBGR		strokeUp				= { 255, 192, 192 };
 	SBGR		strokeDown				= { 128, 192, 255 };
-	SBGR		colorR					= { 64, 64, 215 };
+	SBGR		colorL					= { 64, 64, 215 };
 	SBGR		colorO					= { 255, 64, 64 };
-	SBGR		colorL					= { 64, 215, 64 };
-	SBGR		colorRSelected			= { 32, 64, 215 };
+	SBGR		colorR					= { 64, 215, 64 };
+	SBGR		colorLSelected			= { 32, 64, 215 };
 	SBGR		colorOSelected			= { 128, 160, 160 };
-	SBGR		colorLSelected			= { 32, 215, 160 };
+	SBGR		colorRSelected			= { 32, 215, 160 };
 	SBGR		colorSelected			= { 0, 128, 255 };
 	SBGR		colorAscent				= { 192, 192, 255 };
 	SBGR		colorUpper				= { 0, 255, 255 };
@@ -520,13 +546,15 @@ struct SLineF64
 	SSpline* 			iAddSplineCenterThetaRadiusLR			(SBuilder* b, bool tlPenDown, f64 tfX, f64 tfY, f64 tfRadius, f64 tfThetaL, f64 tfThetaR);
 
 	// Bitmaps
-	int					iGetCharacterBitmap						(int tnAscii, char* tcBitmapFilename, char* tcFontName, int tnHeight, int tnWidth);
-	int					iSaveBitmap								(SBGR* bgr, int tnWidth, int tnHeight, int tnLeft, char* tcBitmapFilename, int tnMakeWidth);
+	int					iGetCharacterBitmap						(int tnAscii, s8* tcBitmapFilename, s8* tcFontName, int tnHeight, int tnWidth);
+	int					iSaveBitmapByParams						(BITMAPFILEHEADER* tbh, BITMAPINFOHEADER* tbi, SBGR* tbd, s8* tcBitmapFilename);
+	int					iSaveBitmap								(SBGR* tbd, int tnWidth, int tnHeight, int tnLeft, s8* tcBitmapFilename, int tnMakeWidth);
 	int					iComputeRowWidth						(int tnWidth);
-	HBITMAP				iCreateBitmap							(HDC thdc, int tnWidth, int tnHeight, int tnPlanes, int tnBits, void**tbd);
+	HBITMAP				iCreateBitmap							(HDC thdc, int tnWidth, int tnHeight, int tnPlanes, int tnBits, void** tbd, BITMAPFILEHEADER* tbh, BITMAPINFOHEADER* tbi);
+
 
 	// Floans
-	int					iGetFloanFromBitmap						(u32 tnAscii, char* tcBitmapFilename, char* tcFloanFilename);
+	int					iGetFloanFromBitmap						(u32 tnAscii, s8* tcBitmapFilename, s8* tcFloanFilename);
 	int					iiGetFloanFromBitmap_qsortCallback		(const void* l, const void* r);
 
 	// General purpose
@@ -550,13 +578,14 @@ struct SLineF64
 	void				iRenderRefs								(SInstance* p, SHwnd* h, SChars* c);
 	void				iRenderGrid								(SInstance* p, SHwnd* h);
 	void				iRenderSplines							(SInstance* p, SHwnd* h, SChars* c, u32 tlMarkup, u32 tlBold, u32 tlItalic, u32 tlUnderline, u32 tlStrikethrough);
+	SBGR				iSetLineColor							(SInstance* p);
 	void				iDrawPenDown							(SHwnd* h, SLineF64* line);
 	void				iDrawPenUp								(SHwnd* h, SLineF64* line);
 	void				iRenderHint								(SHwnd* h, SLineF64* line, SXYF64* pt);
 	void				iComputeLOR								(SSpline* s, SXYF64* pl, SXYF64* po, SXYF64* pr);
 	void				iComputeQuadColorsR						(SSpline* s, SSpline* sLast, SBGR quadNormal, SBGR quadSelected, SBGR* p1ColorR, SBGR* p2ColorR, SBGR* p3ColorR, SBGR* p4ColorR);
 	void				iComputeQuadColorsL						(SSpline* s, SSpline* sLast, SBGR quadNormal, SBGR quadSelected, SBGR* p1ColorL, SBGR* p2ColorL, SBGR* p3ColorL, SBGR* p4ColorL);
-	void				iDrawPoints								(SInstance* p, SHwnd* h, SXYF64* pr, SXYF64* po, SXYF64* pl, SSpline* s, SBGR colorSelected, SBGR colorR, SBGR colorO, SBGR colorL, SBGR colorRSelected, SBGR colorOSelected, SBGR colorLSelected);
+	void				iDrawPoints								(SInstance* p, SHwnd* h, SXYF64* pr, SXYF64* po, SXYF64* pl, SSpline* s, SBGR colorSelected, SBGR colorR, SBGR colorO, SBGR colorL, SBGR colorRSelected, SBGR colorOSelected, SBGR colorLSelected, SBGR colorLine);
 	void				iDrawLine								(SHwnd* h, SXYF64* p1, SXYF64* p2, SBGR colorStart, SBGR colorEnd, f64 tfPower);
 	void				iDrawLineAlpha							(SHwnd* h, SXYF64* p1, SXYF64* p2, SBGR_AF64* colorStart, SBGR_AF64* colorEnd, SBuilder* pointsDrawn, bool tlNoDuplicates, f64 tfPower);
 	void				iDrawPoint								(SHwnd* h, SXYF64* p1, SBGR color);
@@ -587,10 +616,12 @@ struct SLineF64
 	u32					iiRenderMarkup_getNextLineSegment		(u32 tnIndex, u32 tnMaxCount, SHwnd* h, STems* root, STems** p1, STems** p2);
 	s32					iiGetPoint								(f64 tfValue01, s32 tnMultiplier);
 	SHwnd*				iFindOnlyHwndByHwnd						(SBuilder* hwnds, u32 tnHwndParent, u32 tnHwnd);
+	SHwnd*				iFindOnlyHwndByHwndControl				(SBuilder* hwnds, u32 tnHwndParent, u32 tnHwndControl);
 	SHwnd*				iFindOnlyHwndByHwndParent				(SBuilder* hwnds, u32 tnHwndParent);
 	SHwnd*				iFindOnlyHwnd							(SBuilder* hwnds, u32 tnHwndParent, s32 tnX, s32 tnY, s32 tnWidth, s32 tnHeight);
 	SHwnd*				iFindOrCreateHwnd						(SBuilder* hwnds, u32 tnHwndParent, s32 tnX, s32 tnY, s32 tnWidth, s32 tnHeight, u32 tlMarkup);
 	u32					iCreateWindow							(SHwnd* h);
+	u32					iCreateControlWindow					(SHwnd* h, u32 tnX, u32 tnY, u32 tnW, u32 tnH);
 	void				iComputeLine							(SLineF64* line);
 	void				iComputeLineFromTwoPoints				(SLineF64* line, SXYF64* p1, SXYF64* p2);
 	void				iConstrainQuadAroundLine				(SLineF64* lineRef, SXYF64* p1, SXYF64* p2, SXYF64* p3, SXYF64* p4, f64 tfp1Max, f64 tfp2Max, f64 tfp3Max, f64 tfp4Max, bool tlForceSize);
@@ -606,4 +637,5 @@ struct SLineF64
 	void				iSplineCompute							(SSpline* spline, SXYF64* pl, SXYF64* po, SXYF64* pr);
 	bool				iIsPointInRange							(SXYF64* pTest, SXYF64* ul, SXYF64* lr);
 	void				iReadMousePosition						(SInstance* p, SHwnd* h);
+	LRESULT CALLBACK	iControlWindowProcCallback				(HWND hwnd, UINT m, WPARAM w, LPARAM l);
 	LRESULT CALLBACK	iWindowProcCallback						(HWND hwnd, UINT m, WPARAM w, LPARAM l);

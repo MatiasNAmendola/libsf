@@ -151,14 +151,14 @@
 		//////////
 		// Determine the SHA-1 on that one node
 		//////
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			cb.node = *root;
-			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			oss_sha1Compute64BitFromSha1(sha20Bytes);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			vvm_sha1Compute64BitFromSha1(sha20Bytes);
 
-			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTest1Ll41NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll41NodeSha1As32Bit)
 			{
 				// Failure
@@ -224,22 +224,22 @@
 		//////////
 		// Insert the node to the west
 		//////
-			oss_ll4_insertWestEast(nodeWest2, *root, false);
+			vvm_ll4_insertWestEast(nodeWest2, *root, false);
 
 
 		//////////
 		// Determine the SHA-1 on the two nodes
 		//////
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			cb.node = nodeWest2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_EAST);
 			cb.node = *root;
-			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			oss_sha1Compute64BitFromSha1(sha20Bytes);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			vvm_sha1Compute64BitFromSha1(sha20Bytes);
 
-			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTest1Ll42NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll42NodeSha1As32Bit)
 			{
 				// Failure
@@ -253,22 +253,22 @@
 		//////////
 		// Insert the node to the east
 		//////
-			oss_ll4_insertWestEast(nodeEast2, *root, true);
+			vvm_ll4_insertWestEast(nodeEast2, *root, true);
 
 
 		//////////
 		// Determine the SHA-1 on the three nodes
 		//////
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			cb.node = nodeWest2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_EAST);
 			cb.node = nodeEast2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			oss_sha1Compute64BitFromSha1(sha20Bytes);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			vvm_sha1Compute64BitFromSha1(sha20Bytes);
 
-			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTest1Ll43NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll43NodeSha1As32Bit)
 			{
 				// Failure
@@ -282,26 +282,26 @@
 		//////////
 		// Insert the node to the north
 		//////
-			oss_ll4_insertNorthSouth(nodeNorth2, *root, false);
+			vvm_ll4_insertNorthSouth(nodeNorth2, *root, false);
 
 
 		//////////
 		// Determine the SHA-1 on the two nodes
 		//////
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			cb.node = nodeNorth2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
 			cb.node = *root;
-			oss_ll4_iterateViaCallback(&cb, _LL4_NORTH);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_NORTH);
 			cb.node = nodeWest2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_EAST);
 			cb.node = nodeEast2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			oss_sha1Compute64BitFromSha1(sha20Bytes);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			vvm_sha1Compute64BitFromSha1(sha20Bytes);
 
-			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTest1Ll44NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll44NodeSha1As32Bit)
 			{
 				// Failure
@@ -315,26 +315,26 @@
 		//////////
 		// Insert the node to the south
 		//////
-			oss_ll4_insertNorthSouth(nodeSouth2, *root, true);
+			vvm_ll4_insertNorthSouth(nodeSouth2, *root, true);
 
 
 		//////////
 		// Determine the SHA-1 on the three nodes
 		//////
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			cb.node = nodeNorth2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
 			cb.node = nodeSouth2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_NORTH);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_NORTH);
 			cb.node = nodeWest2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_EAST);
 			cb.node = nodeEast2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			oss_sha1Compute64BitFromSha1(sha20Bytes);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			vvm_sha1Compute64BitFromSha1(sha20Bytes);
 
-			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTest1Ll45NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll45NodeSha1As32Bit)
 			{
 				// Failure
@@ -400,26 +400,26 @@
 		//////////
 		// Insert the node to the west
 		//////
-			oss_ll4_insertWestEast(nodeWest1, *root, false);
+			vvm_ll4_insertWestEast(nodeWest1, *root, false);
 
 
 		//////////
 		// Determine the SHA-1 on the two nodes
 		//////
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			cb.node = nodeNorth2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
 			cb.node = nodeSouth2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_NORTH);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_NORTH);
 			cb.node = nodeWest2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_EAST);
 			cb.node = nodeEast2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			oss_sha1Compute64BitFromSha1(sha20Bytes);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			vvm_sha1Compute64BitFromSha1(sha20Bytes);
 
-			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTest1Ll46NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll46NodeSha1As32Bit)
 			{
 				// Failure
@@ -433,26 +433,26 @@
 		//////////
 		// Insert the node to the east
 		//////
-			oss_ll4_insertWestEast(nodeEast1, *root, true);
+			vvm_ll4_insertWestEast(nodeEast1, *root, true);
 
 
 		//////////
 		// Determine the SHA-1 on the three nodes
 		//////
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			cb.node = nodeNorth2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
 			cb.node = nodeSouth2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_NORTH);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_NORTH);
 			cb.node = nodeWest2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_EAST);
 			cb.node = nodeEast2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			oss_sha1Compute64BitFromSha1(sha20Bytes);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			vvm_sha1Compute64BitFromSha1(sha20Bytes);
 
-			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTest1Ll47NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll47NodeSha1As32Bit)
 			{
 				// Failure
@@ -466,26 +466,26 @@
 		//////////
 		// Insert the node to the north
 		//////
-			oss_ll4_insertNorthSouth(nodeNorth1, *root, false);
+			vvm_ll4_insertNorthSouth(nodeNorth1, *root, false);
 
 
 		//////////
 		// Determine the SHA-1 on the two nodes
 		//////
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			cb.node = nodeNorth2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
 			cb.node = nodeSouth2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_NORTH);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_NORTH);
 			cb.node = nodeWest2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_EAST);
 			cb.node = nodeEast2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			oss_sha1Compute64BitFromSha1(sha20Bytes);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			vvm_sha1Compute64BitFromSha1(sha20Bytes);
 
-			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTest1Ll48NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll48NodeSha1As32Bit)
 			{
 				// Failure
@@ -499,26 +499,26 @@
 		//////////
 		// Insert the node to the south
 		//////
-			oss_ll4_insertNorthSouth(nodeSouth1, *root, true);
+			vvm_ll4_insertNorthSouth(nodeSouth1, *root, true);
 
 
 		//////////
 		// Determine the SHA-1 on the three nodes
 		//////
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			cb.node = nodeNorth2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
 			cb.node = nodeSouth2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_NORTH);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_NORTH);
 			cb.node = nodeWest2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_EAST);
 			cb.node = nodeEast2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			oss_sha1Compute64BitFromSha1(sha20Bytes);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			vvm_sha1Compute64BitFromSha1(sha20Bytes);
 
-			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTest1Ll49NodeSha1As64Bit || lnSha1As32Bit != cgnTest1Ll49NodeSha1As32Bit)
 			{
 				// Failure
@@ -623,7 +623,7 @@
 			}
 
 			// Grab w2 by navigation the chain
-			ll4w2 = oss_ll4_getLastNode(root, _LL4_WEST);
+			ll4w2 = vvm_ll4_getLastNode(root, _LL4_WEST);
 			if (ll4w2 != root->west->west)
 			{
 				// Failure
@@ -643,7 +643,7 @@
 			}
 
 			// Grab e2 by navigation the chain
-			ll4e2 = oss_ll4_getLastNode(root, _LL4_EAST);
+			ll4e2 = vvm_ll4_getLastNode(root, _LL4_EAST);
 			if (ll4e2 != root->east->east)
 			{
 				// Failure
@@ -663,7 +663,7 @@
 			}
 
 			// Grab n2 by navigation the chain
-			ll4n2 = oss_ll4_getLastNode(root, _LL4_NORTH);
+			ll4n2 = vvm_ll4_getLastNode(root, _LL4_NORTH);
 			if (ll4n2 != root->north->north)
 			{
 				// Failure
@@ -683,7 +683,7 @@
 			}
 
 			// Grab s2 by navigation the chain
-			ll4s2 = oss_ll4_getLastNode(root, _LL4_SOUTH);
+			ll4s2 = vvm_ll4_getLastNode(root, _LL4_SOUTH);
 			if (ll4s2 != root->south->south)
 			{
 				// Failure
@@ -707,7 +707,7 @@
 		// Create the chain
 		//////
 			lnCount	= 5;
-			ll4x1	= oss_ll4_createChain(cgnLl4BufferSize, &lnCount, _LL4_SOUTH);
+			ll4x1	= vvm_ll4_createChain(cgnLl4BufferSize, &lnCount, _LL4_SOUTH);
 			if (lnCount != 5 || !ll4x1)
 			{
 				// Failure
@@ -724,21 +724,21 @@
 			cb.node		= ll4x1;
 			cb.extra1	= (u64)&context[0];
 			cb.extra2	= (u64)&sha20Bytes[0];
-			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
 
 
 		//////////
 		// Validate that it was setup and populated correctly
 		//////
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
 			cb.node		= ll4x1;
-			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			oss_sha1Compute64BitFromSha1(sha20Bytes);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			vvm_sha1Compute64BitFromSha1(sha20Bytes);
 
-			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTest2Ll41NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll41NodeSha1As32Bit)
 			{
 				// Failure
@@ -752,19 +752,19 @@
 		//////////
 		// Attach x1 onto w2's west, and validate it's on there good
 		//////
-			oss_ll4_insertWestEast(ll4x1, ll4w2, false);
+			vvm_ll4_insertWestEast(ll4x1, ll4w2, false);
 
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
 			cb.node		= ll4e2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_WEST);
 			cb.node		= ll4x1;
-			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			oss_sha1Compute64BitFromSha1(sha20Bytes);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			vvm_sha1Compute64BitFromSha1(sha20Bytes);
 
-			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTest2Ll42NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll42NodeSha1As32Bit)
 			{
 				// Failure
@@ -853,7 +853,7 @@
 			}
 
 			// Grab w2 by navigation the chain
-			ll4x1 = oss_ll4_getLastNode(*root, _LL4_WEST);
+			ll4x1 = vvm_ll4_getLastNode(*root, _LL4_WEST);
 			if (ll4x1 != (*root)->west->west->west)
 			{
 				// Failure
@@ -883,7 +883,7 @@
 			}
 
 			// Grab e2 by navigation the chain
-			ll4e2 = oss_ll4_getLastNode(*root, _LL4_EAST);
+			ll4e2 = vvm_ll4_getLastNode(*root, _LL4_EAST);
 			if (ll4e2 != (*root)->east->east)
 			{
 				// Failure
@@ -903,7 +903,7 @@
 			}
 
 			// Grab n2 by navigation the chain
-			ll4n2 = oss_ll4_getLastNode(*root, _LL4_NORTH);
+			ll4n2 = vvm_ll4_getLastNode(*root, _LL4_NORTH);
 			if (ll4n2 != (*root)->north->north)
 			{
 				// Failure
@@ -923,7 +923,7 @@
 			}
 
 			// Grab s2 by navigation the chain
-			ll4s2 = oss_ll4_getLastNode(*root, _LL4_SOUTH);
+			ll4s2 = vvm_ll4_getLastNode(*root, _LL4_SOUTH);
 			if (ll4s2 != (*root)->south->south)
 			{
 				// Failure
@@ -959,21 +959,21 @@
 		//////////
 		// Delete x2
 		//////
-			oss_ll4_delete(ll4x2);
+			vvm_ll4_delete(ll4x2);
 
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
 			cb.node		= ll4x1;
 			cb.extra1	= (u64)&context[0];
 			cb.extra2	= (u64)&sha20Bytes[0];
-			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
 			cb.node		= ll4x5;
-			oss_ll4_iterateViaCallback(&cb, _LL4_NORTH);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			oss_sha1Compute64BitFromSha1(sha20Bytes);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_NORTH);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			vvm_sha1Compute64BitFromSha1(sha20Bytes);
 
-			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTest2Ll43NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll43NodeSha1As32Bit)
 			{
 				// Failure
@@ -987,19 +987,19 @@
 		//////////
 		// Delete x5
 		//////
-			oss_ll4_delete(ll4x5);
+			vvm_ll4_delete(ll4x5);
 
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
 			cb.node		= ll4x1;
-			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
 			cb.node		= ll4x4;
-			oss_ll4_iterateViaCallback(&cb, _LL4_NORTH);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			oss_sha1Compute64BitFromSha1(sha20Bytes);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_NORTH);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			vvm_sha1Compute64BitFromSha1(sha20Bytes);
 
-			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTest2Ll44NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll44NodeSha1As32Bit)
 			{
 				// Failure
@@ -1013,19 +1013,19 @@
 		//////////
 		// Delete x3
 		//////
-			oss_ll4_delete(ll4x3);
+			vvm_ll4_delete(ll4x3);
 
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
 			cb.node		= ll4x1;
-			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
 			cb.node		= ll4x4;
-			oss_ll4_iterateViaCallback(&cb, _LL4_NORTH);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			oss_sha1Compute64BitFromSha1(sha20Bytes);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_NORTH);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			vvm_sha1Compute64BitFromSha1(sha20Bytes);
 
-			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTest2Ll45NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll45NodeSha1As32Bit)
 			{
 				// Failure
@@ -1039,17 +1039,17 @@
 		//////////
 		// Delete x4
 		//////
-			oss_ll4_delete(ll4x4);
+			vvm_ll4_delete(ll4x4);
 
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
 			cb.node		= ll4x1;
-			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			oss_sha1Compute64BitFromSha1(sha20Bytes);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			vvm_sha1Compute64BitFromSha1(sha20Bytes);
 
-			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTest2Ll46NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll46NodeSha1As32Bit)
 			{
 				// Failure
@@ -1063,17 +1063,17 @@
 		//////////
 		// Delete x1
 		//////
-			oss_ll4_delete(ll4x1);
+			vvm_ll4_delete(ll4x1);
 
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
 			cb.node		= ll4e2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			oss_sha1Compute64BitFromSha1(sha20Bytes);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			vvm_sha1Compute64BitFromSha1(sha20Bytes);
 
-			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTest2Ll47NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll47NodeSha1As32Bit)
 			{
 				// Failure
@@ -1087,19 +1087,19 @@
 		//////////
 		// Delete e2
 		//////
-			oss_ll4_delete(ll4e2);
+			vvm_ll4_delete(ll4e2);
 
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
 			cb.node		= ll4e1;
-			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_WEST);
 			cb.node		= ll4w2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			oss_sha1Compute64BitFromSha1(sha20Bytes);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			vvm_sha1Compute64BitFromSha1(sha20Bytes);
 
-			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTest2Ll48NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll48NodeSha1As32Bit)
 			{
 				// Failure
@@ -1113,19 +1113,19 @@
 		//////////
 		// Delete w1
 		//////
-			oss_ll4_delete(ll4w1);
+			vvm_ll4_delete(ll4w1);
 
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
 			cb.node		= ll4e1;
-			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_WEST);
 			cb.node		= ll4w2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			oss_sha1Compute64BitFromSha1(sha20Bytes);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			vvm_sha1Compute64BitFromSha1(sha20Bytes);
 
-			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTest2Ll49NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll49NodeSha1As32Bit)
 			{
 				// Failure
@@ -1139,19 +1139,19 @@
 		//////////
 		// Delete e1 and chain east
 		//////
-			oss_ll4_deleteChain(&ll4e1, _LL4_EAST);
+			vvm_ll4_deleteChain(&ll4e1, _LL4_EAST);
 
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
 			cb.node		= *root;
-			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_WEST);
 			cb.node		= ll4w2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			oss_sha1Compute64BitFromSha1(sha20Bytes);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			vvm_sha1Compute64BitFromSha1(sha20Bytes);
 
-			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTest2Ll410NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll410NodeSha1As32Bit)
 			{
 				// Failure
@@ -1165,18 +1165,18 @@
 		//////////
 		// Delete w2 and chain west
 		//////
-			oss_ll4_deleteChain(&ll4w2, _LL4_WEST);
+			vvm_ll4_deleteChain(&ll4w2, _LL4_WEST);
 
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
 			cb.node		= *root;
-			oss_ll4_iterateViaCallback(&cb, _LL4_WEST);
-			oss_ll4_iterateViaCallback(&cb, _LL4_EAST);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			oss_sha1Compute64BitFromSha1(sha20Bytes);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_WEST);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_EAST);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			vvm_sha1Compute64BitFromSha1(sha20Bytes);
 
-			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTest2Ll411NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll411NodeSha1As32Bit)
 			{
 				// Failure
@@ -1190,17 +1190,17 @@
 		//////////
 		// Delete n1 and chain north
 		//////
-			oss_ll4_deleteChain(&ll4n1, _LL4_NORTH);
+			vvm_ll4_deleteChain(&ll4n1, _LL4_NORTH);
 
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
 			cb.node		= ll4s2;
-			oss_ll4_iterateViaCallback(&cb, _LL4_NORTH);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			oss_sha1Compute64BitFromSha1(sha20Bytes);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_NORTH);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			vvm_sha1Compute64BitFromSha1(sha20Bytes);
 
-			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTest2Ll412NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll412NodeSha1As32Bit)
 			{
 				// Failure
@@ -1214,17 +1214,17 @@
 		//////////
 		// Delete s1 and chain south
 		//////
-			oss_ll4_deleteChain(&ll4s1, _LL4_SOUTH);
+			vvm_ll4_deleteChain(&ll4s1, _LL4_SOUTH);
 
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			cb._func	= (u64)&i3vvmt_testSll4_1_sha1Callback;
 			cb.node		= *root;
-			oss_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			oss_sha1Compute64BitFromSha1(sha20Bytes);
+			vvm_ll4_iterateViaCallback(&cb, _LL4_SOUTH);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			vvm_sha1Compute64BitFromSha1(sha20Bytes);
 
-			lnSha1As64Bit	= oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTest2Ll413NodeSha1As64Bit || lnSha1As32Bit != cgnTest2Ll413NodeSha1As32Bit)
 			{
 				// Failure
@@ -1238,7 +1238,7 @@
 		//////////
 		// Delete root and chain south
 		//////
-			oss_ll4_deleteChain(root, _LL4_SOUTH);
+			vvm_ll4_deleteChain(root, _LL4_SOUTH);
 			if (*root)
 			{
 				// Failure
@@ -1280,7 +1280,7 @@
 		//////////
 		// Clean house
 		//////
-			oss_ll4_deleteChain(root, _LL4_ALL);
+			vvm_ll4_deleteChain(root, _LL4_ALL);
 			if (*root)
 			{
 				// Failure
@@ -1306,7 +1306,7 @@
 		//////////
 		// Create the SLL
 		//////
-			ll4 = oss_ll4_create(NULL, NULL, NULL, NULL, oss_getNextUniqueId(), tnSize);
+			ll4 = vvm_ll4_create(NULL, NULL, NULL, NULL, vvm_getNextUniqueId(), tnSize);
 
 
 		//////////
@@ -1343,7 +1343,7 @@
 		// Iterate through every portion to initialize
 		llInit = (u8*)ll4 + sizeof(SLL4);
 		for (lnI = 0; lnI < tnSize; lnI++)
-			llInit[lnI] = oss_getPredictableSequentialPattern(lnI, gnLlInitializerValue++);
+			llInit[lnI] = vvm_getPredictableSequentialPattern(lnI, gnLlInitializerValue++);
 
 	}
 
@@ -1355,6 +1355,6 @@
 		if (cb)
 		{
 			// Conduct our processing
-			oss_sha1ComputeSha1_ProcessThisData((u8*)cb->extra1, (s8*)cb->node + sizeof(SLL4), cgnLlBufferSize);
+			vvm_sha1ComputeSha1_ProcessThisData((u8*)cb->extra1, (s8*)cb->node + sizeof(SLL4), cgnLlBufferSize);
 		}
 	}

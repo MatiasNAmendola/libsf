@@ -167,7 +167,7 @@
 		//////////
 		// Build the media screen
 		//////
-			lnUniqueId = oss_getNextUniqueId();
+			lnUniqueId = vvm_getNextUniqueId();
 			memset(&gswbsMedia, 0, sizeof(gswbsMedia));
 			if (!iwb_buildNewMediaScreen(lnUniqueId, &gswbsMedia))
 				return(-1);		// Error allocating the screen
@@ -176,7 +176,7 @@
 		//////////
 		// Build the channels screen
 		//////
-			lnUniqueId = oss_getNextUniqueId();
+			lnUniqueId = vvm_getNextUniqueId();
 			memset(&gswbsChannel, 0, sizeof(gswbsChannel));
 			if (!iwb_buildNewChannelScreen(lnUniqueId, &gswbsChannel))
 				return(-1);		// Error allocating the screen

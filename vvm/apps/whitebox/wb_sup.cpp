@@ -119,7 +119,7 @@
 		//////////
 		// Update the OS window so it repaints itself
 		//////
-			oss_screenRefresh(tsWbScreen->screen);
+			vvm_screenRefresh(tsWbScreen->screen);
 
 		// We're good
 		return(true);
@@ -152,7 +152,7 @@
 		//////////
 		// Update the OS window
 		//////
-			oss_screenRefresh(tsWbScreen->screen);
+			vvm_screenRefresh(tsWbScreen->screen);
 
 		// We're good
 		return(true);
@@ -185,7 +185,7 @@
 		//////////
 		// Update the OS window
 		//////
-			oss_screenRefresh(tsWbScreen->screen);
+			vvm_screenRefresh(tsWbScreen->screen);
 
 		// We're good
 		return(true);
@@ -346,7 +346,7 @@
 		// Request a screen
 		//////
 			// Allocate a screen
-			lisw = iwb_buildScreenTemplate(	oss_getNextUniqueId(), 
+			lisw = iwb_buildScreenTemplate(	vvm_getNextUniqueId(), 
 											gcWhiteBoxLauncherCaption, sizeof(gcWhiteBoxLauncherCaption),
 											0, 0, tnWidth, tnHeight, 
 											-1, -1, 

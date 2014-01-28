@@ -48,7 +48,6 @@
 //////
 	HINSTANCE			ghInstance				= NULL;					// Instance handle
 	HWND				ghWndMsg				= NULL;					// Message window
-	u64					gnNextUniqueId			= 1000;					// Increments after each reference (see oss_getNextUniqueId() and iGetNextUniqueId())
 	bool				gbBreakpoints			= false;				// Used for debugging, should special breakpoints be enabled?
 	UINT_PTR			ghTimer10ms				= NULL;					// Used for non-message windows to trigger UI events
 	HANDLE				ghTimer1ms				= NULL;					// Used for maintaining a referenceable internal tick
@@ -70,17 +69,6 @@
 	SStartEnd	gseRootCanvas					= { NULL, NULL, NULL, 0 };		// Master canvas list
 	SStartEnd	gseRootRegion					= { NULL, NULL, NULL, 0 };		// Master region list
 
-	// BXML last error
-	u64					gnLastErrorOffset		= -1;					// Initially indicate no prior error offset
-	u64					gnLastErrorCode			= 0;					// Initially indicate no prior error code
-	SBxmlError			gsLastErrorInfo =	{
-												{ NULL, 0 },			// Description (initially set to no error)
-												0,						// Last error offset
-												0,						// Last error code
-												NULL,					// Last BXML in error
-												NULL					// Last BxmlA in error
-											};
-
 	// Start/end structs
 	SStartEnd			gseRootWindows			= { NULL, NULL, NULL, 0 };		// Initially, no windows are defined
 	SStartEnd			gseRootFonts			= { NULL, NULL, NULL, 0 };		// Initially, no fonts are defined
@@ -100,12 +88,6 @@
 														rgba(225,255,225,255),			// Green pastel
 														rgba(225,225,225,255)			// Grey
 													};
-
-
-//////////
-// Critical sections for synchronized access
-//////
-	CRITICAL_SECTION	gcsUniqueIdAccess;							// Next Unique ID access
 
 
 //////////

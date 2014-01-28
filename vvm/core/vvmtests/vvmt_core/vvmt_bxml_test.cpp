@@ -96,7 +96,7 @@
 
 		bxmlList	= (SBxmlList*)cb->ptr;
 		bxml		= bxmlList->bxml;
-		oss_sha1ComputeSha1_ProcessThisData((u8*)cb->extra, bxml->_name.data._s8, (u32)bxml->_name.length);
+		vvm_sha1ComputeSha1_ProcessThisData((u8*)cb->extra, bxml->_name.data._s8, (u32)bxml->_name.length);
 	}
 
 
@@ -115,7 +115,7 @@
 
 		bxmlaList	= (SBxmlaList*)cb->ptr;
 		bxmla		= bxmlaList->bxmla;
-		oss_sha1ComputeSha1_ProcessThisData((u8*)cb->extra, bxmla->_name.data._s8, (u32)bxmla->_name.length);
+		vvm_sha1ComputeSha1_ProcessThisData((u8*)cb->extra, bxmla->_name.data._s8, (u32)bxmla->_name.length);
 	}
 
 
@@ -134,7 +134,7 @@
 
 		bxmlaList	= (SBxmlaList*)cb->ptr;
 		bxmla		= bxmlaList->bxmla;
-		oss_sha1ComputeSha1_ProcessThisData((u8*)cb->extra, bxmla->_data.datum.data._s8, (u32)bxmla->_data.datum.length);
+		vvm_sha1ComputeSha1_ProcessThisData((u8*)cb->extra, bxmla->_data.datum.data._s8, (u32)bxmla->_data.datum.length);
 	}
 
 
@@ -154,9 +154,9 @@
 			vvm_resourcePrintf(IDS_VVM_TEST_BXML_1);
 
 			// Make sure the SHA-1 value matches our expectation
-			oss_sha1ComputeSha1((s8*)cgc_Test_Bxml_1_1, sizeof(cgc_Test_Bxml_1_1), sha20Bytes);
-			lnSha1As64Bit = oss_sha1Compute64BitFromSha1(sha20Bytes);
-			lnSha1As32Bit = oss_sha1Compute32BitFromSha1(sha20Bytes);
+			vvm_sha1ComputeSha1((s8*)cgc_Test_Bxml_1_1, sizeof(cgc_Test_Bxml_1_1), sha20Bytes);
+			lnSha1As64Bit = vvm_sha1Compute64BitFromSha1(sha20Bytes);
+			lnSha1As32Bit = vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgn_Test_Bxml_1_1Sha1As64Bit || lnSha1As32Bit != cgn_Test_Bxml_1_1Sha1As32Bit)
 			{
 				// The file does not match the expected SHA-1 value
@@ -168,12 +168,12 @@
 			// Try to load bxml file
 			lnErrorOffset	= 0;
 			lnErrorCode		= 0;
-			*bxml = oss_bxmlLoadFromBuffer((s8*)cgc_Test_Bxml_1_1, sizeof(cgc_Test_Bxml_1_1) - 1, &lnErrorOffset, &lnErrorCode);
+			*bxml = vvm_bxmlLoadFromBuffer((s8*)cgc_Test_Bxml_1_1, sizeof(cgc_Test_Bxml_1_1) - 1, &lnErrorOffset, &lnErrorCode);
 			if (*bxml && lnErrorOffset == 0 && lnErrorCode == 0)
 			{
 				// Grab the SHA-1 value from the converted file
-				lnSha1As64Bit	= oss_bxmlNodeSha1(*bxml, sha20Bytes);
-				lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+				lnSha1As64Bit	= vvm_bxmlNodeSha1(*bxml, sha20Bytes);
+				lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 				if (lnSha1As64Bit != cgnTestBxmlDotHNodeSha1As64Bit || lnSha1As32Bit != cgnTestBxmlDotHNodeSha1As32Bit)
 				{
 					// The file does not match the expected SHA-1 value
@@ -224,10 +224,10 @@
 			}
 
 			// Save the file to disk
-			oss_bxmlSave(bxml, lcFileOut, sizeof(lcFileOut) - 1, true, true, &lnBytesWritten);
+			vvm_bxmlSave(bxml, lcFileOut, sizeof(lcFileOut) - 1, true, true, &lnBytesWritten);
 
 			// Try to read it back in, and compare the memory
-			bxml2 = oss_bxmlLoad(lcFileOut, strlen(lcFileOut), &lnBytesRead, &lnErrorOffset, &lnErrorCode);
+			bxml2 = vvm_bxmlLoad(lcFileOut, strlen(lcFileOut), &lnBytesRead, &lnErrorOffset, &lnErrorCode);
 
 			// Clean house
 			oss_sharedAsciiDeleteFile(lcFileOut);
@@ -244,8 +244,8 @@
 			// If we get here, file was loaded properly
 
 			// Grab the SHA-1 value from the loaded file
-			lnSha1As64Bit	= oss_bxmlNodeSha1(bxml2, sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_bxmlNodeSha1(bxml2, sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTestBxmlDotHNodeSha1As64Bit || lnSha1As32Bit != cgnTestBxmlDotHNodeSha1As32Bit)
 			{
 				// The file does not match the expected SHA-1 value
@@ -258,7 +258,7 @@
 			// In short, it's time to do a little dance! Woo hoo! :-)
 
 			// Delete the loaded node
-			oss_bxmlNodeDelete(bxml2, true);
+			vvm_bxmlNodeDelete(bxml2, true);
 			bxml2 = NULL;
 
 			// If we get here, we're good
@@ -273,8 +273,8 @@
 	// #03 - Create a bxml duplicate copy of our input.bxml, then delete it
 	//////
 		// For debugging:
-		// oss_bxmlSave(bxml,		"c:\\temp\\bxml.bxml",		18, true, true, &lnSha1As64Bit);
-		// oss_bxmlSave(bxmlCopy,	"c:\\temp\\bxmlCopy.bxml",	18, true, true, &lnSha1As64Bit);
+		// vvm_bxmlSave(bxml,		"c:\\temp\\bxml.bxml",		18, true, true, &lnSha1As64Bit);
+		// vvm_bxmlSave(bxmlCopy,	"c:\\temp\\bxmlCopy.bxml",	18, true, true, &lnSha1As64Bit);
 		bool iivvmt_testBxml_3(u64 lnHandleLog, SBxml* bxml)
 		{
 			u64		lnSha1As64Bit;
@@ -288,7 +288,7 @@
 			vvm_resourcePrintf(IDS_VVM_TEST_BXML_3);
 
 			// Copy the node
-			bxmlCopy = oss_bxmlNodeCopy(bxml, true, true, &llResult);
+			bxmlCopy = vvm_bxmlNodeCopy(bxml, true, true, &llResult);
 			if (!bxmlCopy || !llResult)
 			{
 				// Unable to copy the node
@@ -298,8 +298,8 @@
 			}
 
 			// Make sure it copied correctly
-			lnSha1As64Bit	= oss_bxmlNodeSha1(bxmlCopy, sha20Bytes);
-			lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+			lnSha1As64Bit	= vvm_bxmlNodeSha1(bxmlCopy, sha20Bytes);
+			lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 			if (lnSha1As64Bit != cgnTestBxmlDotHNodeSha1As64Bit || lnSha1As32Bit != cgnTestBxmlDotHNodeSha1As32Bit)
 			{
 				// The file does not match the expected SHA-1 value
@@ -313,7 +313,7 @@
 
 
 			// Delete the duplicate node
-			oss_bxmlNodeDelete(bxmlCopy, true);
+			vvm_bxmlNodeDelete(bxmlCopy, true);
 			bxmlCopy = NULL;
 
 			// If we get here, we're good
@@ -369,15 +369,15 @@
 			//////////
 			// Find our first *child* reference
 			//////
- 				if (!oss_bxmlFindFirst(bxml, &bxmlReference, NULL, &wildcardSearch, true, false, &x))
+ 				if (!vvm_bxmlFindFirst(bxml, &bxmlReference, NULL, &wildcardSearch, true, false, &x))
  				{
  					// Was not found, error
  					vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
  					return(false);
  				}
-				oss_sha1ComputeSha1(bxmlReference->_name.data._s8, (u32)bxmlReference->_name.length, sha20Bytes);
-				lnSha1As64Bit = oss_sha1Compute64BitFromSha1(sha20Bytes);
-				lnSha1As32Bit = oss_sha1Compute32BitFromSha1(sha20Bytes);
+				vvm_sha1ComputeSha1(bxmlReference->_name.data._s8, (u32)bxmlReference->_name.length, sha20Bytes);
+				lnSha1As64Bit = vvm_sha1Compute64BitFromSha1(sha20Bytes);
+				lnSha1As32Bit = vvm_sha1Compute32BitFromSha1(sha20Bytes);
 				if (lnSha1As64Bit != cgnTestBxml41_Sha1As64Bit || lnSha1As32Bit != cgnTestBxml41_Sha1As32Bit)
 				{
 					// The file does not match the expected SHA-1 value
@@ -391,7 +391,7 @@
 			// Get the count of how many items are found in total
 			//////
  				u32 lnFinds = 1;
- 				while (oss_bxmlFindContinue(x))
+ 				while (vvm_bxmlFindContinue(x))
  					++lnFinds;
 
 				// We should've found 13 separate instances throughout looking for "*child*" (includes child, grandchild, ggrandchild, child2, etc.)
@@ -406,26 +406,26 @@
 			//////////
 			// Get the node and attribute name finds as lists, compute their SHA-1 values
 			//////
-				oss_sha1ComputeSha1_Start(context);
-				oss_bxmlFindAllAsStartEndLists(bxml, &bxmlFinds,	NULL,			&wildcardSearch,			&lnCount,			true, true);
-				oss_bxmlFindAllAsStartEndLists(bxml, NULL,			&bxmlaFinds,	&wildcardSearchAttributes,	&lnCountAttributes,	true, true);
+				vvm_sha1ComputeSha1_Start(context);
+				vvm_bxmlFindAllAsStartEndLists(bxml, &bxmlFinds,	NULL,			&wildcardSearch,			&lnCount,			true, true);
+				vvm_bxmlFindAllAsStartEndLists(bxml, NULL,			&bxmlaFinds,	&wildcardSearchAttributes,	&lnCountAttributes,	true, true);
 
 				// Compute SHA-1 of bxml node finds
 				SStartEndCallback cb;
 				cb._func = (u64)&iivvmt_testBxml_computeSha1CallbackBxml;
 				cb.extra = (u64)&context[0];
-				oss_SEChain_iterateThroughForCallback(&bxmlFinds, &cb);
-				oss_SEChain_delete(&bxmlFinds, 0, 0, false);
+				vvm_SEChain_iterateThroughForCallback(&bxmlFinds, &cb);
+				vvm_SEChain_delete(&bxmlFinds, 0, 0, false);
 
 				// And continue by computing SHA-1 of bxmla attribute name finds on top of the just computed SHA-1 from bxml node finds
 				cb._func = (u64)&iivvmt_testBxml_computeSha1CallbackBxmla;
-				oss_SEChain_iterateThroughForCallback(&bxmlaFinds, &cb);
-				oss_SEChain_delete(&bxmlaFinds, 0, 0, false);
+				vvm_SEChain_iterateThroughForCallback(&bxmlaFinds, &cb);
+				vvm_SEChain_delete(&bxmlaFinds, 0, 0, false);
 
 				// Determine the SHA-1 based on the finds
-				oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, true);
-				lnSha1As64Bit = oss_sha1Compute64BitFromSha1(sha20Bytes);
-				lnSha1As32Bit = oss_sha1Compute32BitFromSha1(sha20Bytes);
+				vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, true);
+				lnSha1As64Bit = vvm_sha1Compute64BitFromSha1(sha20Bytes);
+				lnSha1As32Bit = vvm_sha1Compute32BitFromSha1(sha20Bytes);
 				if (lnSha1As64Bit != cgnTestBxml42_Sha1As64Bit || lnSha1As32Bit != cgnTestBxml42_Sha1As32Bit)
 				{
 					// The file does not match the expected SHA-1 value
@@ -438,18 +438,18 @@
 			//////////
 			// Get the attribute data finds as lists, compute their sha1 values
 			//////
-				oss_sha1ComputeSha1_Start(context);
-				oss_bxmlDataFindAllAsStartEndList(bxml, &bxmlaFinds, &wildcardSearchData, &lnDataCount, true);
+				vvm_sha1ComputeSha1_Start(context);
+				vvm_bxmlDataFindAllAsStartEndList(bxml, &bxmlaFinds, &wildcardSearchData, &lnDataCount, true);
 
 				// Compute SHA-1 of bxmla attribute data finds
 				cb._func = (u64)&iivvmt_testBxml_computeSha1CallbackBxmlaData;
-				oss_SEChain_iterateThroughForCallback(&bxmlDataFinds, &cb);
-				oss_SEChain_delete(&bxmlDataFinds,	0, 0, false);
+				vvm_SEChain_iterateThroughForCallback(&bxmlDataFinds, &cb);
+				vvm_SEChain_delete(&bxmlDataFinds,	0, 0, false);
 
 				// Determine the SHA-1 based on the finds
-				oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, true);
-				lnSha1As64Bit = oss_sha1Compute64BitFromSha1(sha20Bytes);
-				lnSha1As32Bit = oss_sha1Compute32BitFromSha1(sha20Bytes);
+				vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, true);
+				lnSha1As64Bit = vvm_sha1Compute64BitFromSha1(sha20Bytes);
+				lnSha1As32Bit = vvm_sha1Compute32BitFromSha1(sha20Bytes);
 				if (lnSha1As64Bit != cgnTestBxml43_Sha1As64Bit || lnSha1As32Bit != cgnTestBxml43_Sha1As32Bit)
 				{
 					// The file does not match the expected SHA-1 value
@@ -490,7 +490,7 @@
 			//////////
 			// Create the prepend node to add
 			//////
-				bxmlPrepend = oss_bxmlNodeCreate((s8*)cgcTestBxml4PrependNodeName,	sizeof(cgcTestBxml4PrependNodeName) - 1);
+				bxmlPrepend = vvm_bxmlNodeCreate((s8*)cgcTestBxml4PrependNodeName,	sizeof(cgcTestBxml4PrependNodeName) - 1);
 				if (!bxmlPrepend)
 				{
 					vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
@@ -501,11 +501,11 @@
 			//////////
 			// Create the append node to add
 			//////
-				bxmlAppend = oss_bxmlNodeCreate((s8*)cgcTestBxml4AppendNodeName,	sizeof(cgcTestBxml4AppendNodeName) - 1);
+				bxmlAppend = vvm_bxmlNodeCreate((s8*)cgcTestBxml4AppendNodeName,	sizeof(cgcTestBxml4AppendNodeName) - 1);
 				if (!bxmlAppend)
 				{
 					// Failure
-					oss_bxmlNodeDelete(bxmlPrepend, true);
+					vvm_bxmlNodeDelete(bxmlPrepend, true);
 					vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
 					return(false);
 				}
@@ -516,22 +516,22 @@
 			//////
 				wildcardSearch.data._cs8	= cgcTestBxml4FindChildNode;
 				wildcardSearch.length		= sizeof(cgcTestBxml4FindChildNode) - 1;
-				oss_bxmlFindFirst(bxml, &bxmlReference, NULL, &wildcardSearch, true, false, NULL);
+				vvm_bxmlFindFirst(bxml, &bxmlReference, NULL, &wildcardSearch, true, false, NULL);
 				// Note:  We know from iivvmt_testBxml_4 that this node will be found at this point
 
 				// Insert one before and after that node
-				oss_bxmlNodeInsert(bxmlPrepend,	bxmlReference, false);
-// oss_bxmlSave(bxml, "c:\\temp\\bxml_prepend.bxml", -1, true, true, NULL);
-				oss_bxmlNodeInsert(bxmlAppend,	bxmlReference, true);
-// oss_bxmlSave(bxml, "c:\\temp\\bxml_append.bxml", -1, true, true, NULL);
+				vvm_bxmlNodeInsert(bxmlPrepend,	bxmlReference, false);
+// vvm_bxmlSave(bxml, "c:\\temp\\bxml_prepend.bxml", -1, true, true, NULL);
+				vvm_bxmlNodeInsert(bxmlAppend,	bxmlReference, true);
+// vvm_bxmlSave(bxml, "c:\\temp\\bxml_append.bxml", -1, true, true, NULL);
 				// Note, at this point we leave them installed in the original bxml file, where they are
 
 
 			//////////
 			// Compute the SHA-1
 			//////
-				lnSha1As64Bit	= oss_bxmlNodeSha1(bxml, sha20Bytes);
-				lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+				lnSha1As64Bit	= vvm_bxmlNodeSha1(bxml, sha20Bytes);
+				lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 				if (lnSha1As64Bit != cgnTestBxml51_Sha1As64Bit || lnSha1As32Bit != cgnTestBxml51_Sha1As32Bit)
 				{
 					// The file does not match the expected SHA-1 value
@@ -572,7 +572,7 @@
 			//////////
 			// Create the prepend node to add
 			//////
-				bxmlPrepend = oss_bxmlNodeCreate((s8*)cgcTestBxml6PrependNodeName,	sizeof(cgcTestBxml6PrependNodeName) - 1);
+				bxmlPrepend = vvm_bxmlNodeCreate((s8*)cgcTestBxml6PrependNodeName,	sizeof(cgcTestBxml6PrependNodeName) - 1);
 				if (!bxmlPrepend)
 				{
 					vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
@@ -583,11 +583,11 @@
 			//////////
 			// Create the append node to add
 			//////
-				bxmlAppend = oss_bxmlNodeCreate((s8*)cgcTestBxml6AppendNodeName,	sizeof(cgcTestBxml6AppendNodeName) - 1);
+				bxmlAppend = vvm_bxmlNodeCreate((s8*)cgcTestBxml6AppendNodeName,	sizeof(cgcTestBxml6AppendNodeName) - 1);
 				if (!bxmlAppend)
 				{
 					// Failure
-					oss_bxmlNodeDelete(bxmlPrepend, true);
+					vvm_bxmlNodeDelete(bxmlPrepend, true);
 					vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
 					return(false);
 				}
@@ -598,29 +598,29 @@
 			//////
 				wildcardSearch.data._cs8	= cgcTestBxml6FindChildNode;
 				wildcardSearch.length		= sizeof(cgcTestBxml6FindChildNode) - 1;
-				oss_bxmlFindFirst(bxml, &bxmlReference, NULL, &wildcardSearch, true, false, NULL);
+				vvm_bxmlFindFirst(bxml, &bxmlReference, NULL, &wildcardSearch, true, false, NULL);
 				if (!bxmlReference)
 				{
 					// Failure, node wasn't found
-					oss_bxmlNodeDelete(bxmlPrepend,	true);
-					oss_bxmlNodeDelete(bxmlAppend,	true);
+					vvm_bxmlNodeDelete(bxmlPrepend,	true);
+					vvm_bxmlNodeDelete(bxmlAppend,	true);
 					vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
 					return(false);
 				}
 
 				// Insert one before and after that node
-				oss_bxmlNodeInsertAsChild(bxmlPrepend,	bxmlReference, false);
-// oss_bxmlSave(bxml, "c:\\temp\\bxml_cprepend.bxml", -1, true, true, NULL);
-				oss_bxmlNodeInsertAsChild(bxmlAppend,	bxmlReference, true);
-// oss_bxmlSave(bxml, "c:\\temp\\bxml_cappend.bxml", -1, true, true, NULL);
+				vvm_bxmlNodeInsertAsChild(bxmlPrepend,	bxmlReference, false);
+// vvm_bxmlSave(bxml, "c:\\temp\\bxml_cprepend.bxml", -1, true, true, NULL);
+				vvm_bxmlNodeInsertAsChild(bxmlAppend,	bxmlReference, true);
+// vvm_bxmlSave(bxml, "c:\\temp\\bxml_cappend.bxml", -1, true, true, NULL);
 				// Note, at this point we leave them installed in the original bxml file, where they are
 
 
 			//////////
 			// Compute the SHA-1
 			//////
-				lnSha1As64Bit	= oss_bxmlNodeSha1(bxml, sha20Bytes);
-				lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+				lnSha1As64Bit	= vvm_bxmlNodeSha1(bxml, sha20Bytes);
+				lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 				if (lnSha1As64Bit != cgnTestBxml61_Sha1As64Bit || lnSha1As32Bit != cgnTestBxml61_Sha1As32Bit)
 				{
 					// The file does not match the expected SHA-1 value
@@ -661,7 +661,7 @@
 			//////////
 			// Create the prepend node to add
 			//////
-				bxmlaPrepend = oss_bxmlaCreate((s8*)cgcTestBxml7PrependAttributeName,	sizeof(cgcTestBxml7PrependAttributeName) - 1, NULL, 0, 7);
+				bxmlaPrepend = vvm_bxmlaCreate((s8*)cgcTestBxml7PrependAttributeName,	sizeof(cgcTestBxml7PrependAttributeName) - 1, NULL, 0, 7);
 				if (!bxmlaPrepend)
 				{
 					vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
@@ -672,11 +672,11 @@
 			//////////
 			// Create the append node to add
 			//////
-				bxmlaAppend = oss_bxmlaCreate((s8*)cgcTestBxml7AppendAttributeName,	sizeof(cgcTestBxml7AppendAttributeName) - 1, NULL, 0, 7);
+				bxmlaAppend = vvm_bxmlaCreate((s8*)cgcTestBxml7AppendAttributeName,	sizeof(cgcTestBxml7AppendAttributeName) - 1, NULL, 0, 7);
 				if (!bxmlaAppend)
 				{
 					// Failure
-					oss_bxmlaDelete(bxmlaPrepend, true);
+					vvm_bxmlaDelete(bxmlaPrepend, true);
 					vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
 					return(false);
 				}
@@ -687,29 +687,29 @@
 			//////
 				wildcardSearch.data._cs8	= cgcTestBxml7FindChildAttribute;
 				wildcardSearch.length		= sizeof(cgcTestBxml7FindChildAttribute) - 1;
-				oss_bxmlFindFirst(bxml, NULL, &bxmlaReference, &wildcardSearch, true, true, NULL);
+				vvm_bxmlFindFirst(bxml, NULL, &bxmlaReference, &wildcardSearch, true, true, NULL);
 				if (!bxmlaReference)
 				{
 					// Failure, node wasn't found
-					oss_bxmlaDelete(bxmlaPrepend,	true);
-					oss_bxmlaDelete(bxmlaAppend,	true);
+					vvm_bxmlaDelete(bxmlaPrepend,	true);
+					vvm_bxmlaDelete(bxmlaAppend,	true);
 					vvm_resourcePrintf(IDS_VVM_TEST_FAIL);
 					return(false);
 				}
 
 				// Insert one before and after that node
-				oss_bxmlaInsertExisting(bxmlaReference->_parent, bxmlaReference, bxmlaPrepend, false);
-// oss_bxmlSave(bxml, "c:\\temp\\bxml_aprepend.bxml", -1, true, true, NULL);
-				oss_bxmlaInsertExisting(bxmlaReference->_parent, bxmlaReference, bxmlaAppend, true);
-// oss_bxmlSave(bxml, "c:\\temp\\bxml_aappend.bxml", -1, true, true, NULL);
+				vvm_bxmlaInsertExisting(bxmlaReference->_parent, bxmlaReference, bxmlaPrepend, false);
+// vvm_bxmlSave(bxml, "c:\\temp\\bxml_aprepend.bxml", -1, true, true, NULL);
+				vvm_bxmlaInsertExisting(bxmlaReference->_parent, bxmlaReference, bxmlaAppend, true);
+// vvm_bxmlSave(bxml, "c:\\temp\\bxml_aappend.bxml", -1, true, true, NULL);
 				// Note, at this point we leave them installed in the original bxml file, where they are
 
 
 			//////////
 			// Compute the SHA-1
 			//////
-				lnSha1As64Bit	= oss_bxmlNodeSha1(bxml, sha20Bytes);
-				lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+				lnSha1As64Bit	= vvm_bxmlNodeSha1(bxml, sha20Bytes);
+				lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 				if (lnSha1As64Bit != cgnTestBxml71_Sha1As64Bit || lnSha1As32Bit != cgnTestBxml71_Sha1As32Bit)
 				{
 					// The file does not match the expected SHA-1 value
@@ -753,7 +753,7 @@
 				// Grandchild1
 				wildcardSearch1.data._cs8	= cgcTestBxml8FindChildNode1;
 				wildcardSearch1.length		= sizeof(cgcTestBxml8FindChildNode1) - 1;
-				oss_bxmlFindFirst(bxml, &bxmlReference1, NULL, &wildcardSearch1, true, false, NULL);
+				vvm_bxmlFindFirst(bxml, &bxmlReference1, NULL, &wildcardSearch1, true, false, NULL);
 				if (!bxmlReference1)
 				{
 					// Failure, node wasn't found
@@ -764,7 +764,7 @@
 				// Grandchild2
 				wildcardSearch2.data._cs8	= cgcTestBxml8FindChildNode2;
 				wildcardSearch2.length		= sizeof(cgcTestBxml8FindChildNode2) - 1;
-				oss_bxmlFindFirst(bxml, &bxmlReference2, NULL, &wildcardSearch2, true, false, NULL);
+				vvm_bxmlFindFirst(bxml, &bxmlReference2, NULL, &wildcardSearch2, true, false, NULL);
 				if (!bxmlReference1)
 				{
 					// Failure, node wasn't found
@@ -776,15 +776,15 @@
 			//////////
 			// Make grandchild2 an orphan
 			//////
-				oss_bxmlNodeDelete(bxmlReference2, false);
-oss_bxmlSave(bxml, "c:\\temp\\bxml_8delete.bxml", -1, true, true, NULL);
+				vvm_bxmlNodeDelete(bxmlReference2, false);
+vvm_bxmlSave(bxml, "c:\\temp\\bxml_8delete.bxml", -1, true, true, NULL);
 
 
 			//////////
 			// Compute the SHA-1
 			//////
-				lnSha1As64Bit	= oss_bxmlNodeSha1(bxml, sha20Bytes);
-				lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+				lnSha1As64Bit	= vvm_bxmlNodeSha1(bxml, sha20Bytes);
+				lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 				if (lnSha1As64Bit != cgnTestBxml81_Sha1As64Bit || lnSha1As32Bit != cgnTestBxml81_Sha1As32Bit)
 				{
 					// The file does not match the expected SHA-1 value
@@ -798,16 +798,16 @@ oss_bxmlSave(bxml, "c:\\temp\\bxml_8delete.bxml", -1, true, true, NULL);
 			// Insert grandchild2 before grandchild1
 			//////
 // TODO:  Working here.  I think the insert child is not updating the prev links properly, such as on grandchild1->prev pointing back to prependNode6
-				oss_bxmlNodeInsert(bxmlReference2, bxmlReference1, false);
-oss_bxmlSave(bxml, "c:\\temp\\bxml_8insertbefore.bxml", -1, true, true, NULL);
+				vvm_bxmlNodeInsert(bxmlReference2, bxmlReference1, false);
+vvm_bxmlSave(bxml, "c:\\temp\\bxml_8insertbefore.bxml", -1, true, true, NULL);
 				// Note, at this point we leave them installed in the original bxml file, where they are
 
 
 			//////////
 			// Compute the SHA-1
 			//////
-				lnSha1As64Bit	= oss_bxmlNodeSha1(bxml, sha20Bytes);
-				lnSha1As32Bit	= oss_sha1Compute32BitFromSha1(sha20Bytes);
+				lnSha1As64Bit	= vvm_bxmlNodeSha1(bxml, sha20Bytes);
+				lnSha1As32Bit	= vvm_sha1Compute32BitFromSha1(sha20Bytes);
 				if (lnSha1As64Bit != cgnTestBxml82_Sha1As64Bit || lnSha1As32Bit != cgnTestBxml82_Sha1As32Bit)
 				{
 					// The file does not match the expected SHA-1 value

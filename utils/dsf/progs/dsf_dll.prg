@@ -59,8 +59,8 @@ FUNCTION declare_dsf_dll
 	DECLARE INTEGER		dsf_scale_and_clip_bitmap	IN exe\dsf.dll ;
 							STRING		tcBitmapFilenameIn, ;	&& Input bitmap of image already drawn
 							STRING		tcBitmapFilenameOut, ;	&& Output bitmap of image scaled
-							SINGLE		tfWidthAdjust, ;		&& 1.0 leaves it the same horizontally
-							SINGLE		tfHeightAdjust, ;		&& 1.0 leaves it the same vertically
+							DOUBLE		tfWidthAdjust, ;		&& 1.0 leaves it the same horizontally
+							DOUBLE		tfHeightAdjust, ;		&& 1.0 leaves it the same vertically
 							INTEGER		tnClipLeft, ;			&& In pixels, how many to clip/crop at the left after scaling
 							INTEGER		tnClipTop, ;			&& In pixels, how many to clip/crop at the top after scaling
 							INTEGER		tnNewWidth, ;			&& New width after scaling, typically 400
@@ -79,20 +79,20 @@ FUNCTION declare_dsf_dll
 	* Returns 0=ok, others error code
 	DECLARE INTEGER		dsf_load_font		IN exe\dsf.dll ;
 							INTEGER		tnInstance,	;			&& Instance handle returned by dsf_create_new_instance()
-							SINGLE		tfAscent, ;				&& See explanation of these in frmNew::create_tables()
-							SINGLE		tfUpper, ;				&& These must be in synchronization with those fields,
-							SINGLE		tfLower, ;				&& as well as the function in the DSF.DLL.
-							SINGLE		tfLeft, ;
-							SINGLE		tfRight, ;
-							SINGLE		tfBase, ;
-							SINGLE		tfDescent, ;
-							SINGLE		tfWidth, ;
-							SINGLE		tfItalics, ;
-							SINGLE		tfBold, ;
-							SINGLE		tfUnderTop, ;
-							SINGLE		tfUnderBot, ;
-							SINGLE		tfStrikeTop, ;
-							SINGLE		tfStrikeBot
+							DOUBLE		tfAscent, ;				&& See explanation of these in frmNew::create_tables()
+							DOUBLE		tfUpper, ;				&& These must be in synchronization with those fields,
+							DOUBLE		tfLower, ;				&& as well as the function in the DSF.DLL.
+							DOUBLE		tfLeft, ;
+							DOUBLE		tfRight, ;
+							DOUBLE		tfBase, ;
+							DOUBLE		tfDescent, ;
+							DOUBLE		tfWidth, ;
+							DOUBLE		tfItalics, ;
+							DOUBLE		tfBold, ;
+							DOUBLE		tfUnderTop, ;
+							DOUBLE		tfUnderBot, ;
+							DOUBLE		tfStrikeTop, ;
+							DOUBLE		tfStrikeBot
 
 	* Called to load part of a character definition
 	DECLARE INTEGER		dsf_load_character		IN exe\dsf.dll ;
@@ -103,13 +103,13 @@ FUNCTION declare_dsf_dll
 							STRING		tcDesc10, ;
 							INTEGER		tlNewStroke, ;
 							INTEGER		tlSelected, ;
-							SINGLE		tfOx, ;
-							SINGLE		tfOy, ;
-							SINGLE		tfOt, ;
-							SINGLE		tfLr, ;
-							SINGLE		tfLt, ;
-							SINGLE		tfRr, ;
-							SINGLE		tfRt, ;
+							DOUBLE		tfOx, ;
+							DOUBLE		tfOy, ;
+							DOUBLE		tfOt, ;
+							DOUBLE		tfLr, ;
+							DOUBLE		tfLt, ;
+							DOUBLE		tfRr, ;
+							DOUBLE		tfRt, ;
 							INTEGER		tiSubdivs, ;
 							INTEGER		tiLnkId, ;
 							INTEGER		tiLnkOrder
@@ -119,16 +119,16 @@ FUNCTION declare_dsf_dll
 							INTEGER		tnInstance,	;			&& Instance handle returned by dsf_create_new_instance()
 							INTEGER		tnType, ;				&& See explanation of these in frmNew::create_tables()
 							STRING		tcDesc40, ;				&& These must be in synchronization with those fields,
-							SINGLE		tfRef1X, ;				&& as well as the function in the DSF.DLL.
-							SINGLE		tfRef1Y, ;
-							SINGLE		tfRef2X, ;
-							SINGLE		tfRef2Y, ;
-							SINGLE		tfRef3X, ;
-							SINGLE		tfRef3Y, ;
-							SINGLE		tfRef4X, ;
-							SINGLE		tfRef4Y, ;
-							SINGLE		tfRef5X, ;
-							SINGLE		tfRef5Y, ;
+							DOUBLE		tfRef1X, ;				&& as well as the function in the DSF.DLL.
+							DOUBLE		tfRef1Y, ;
+							DOUBLE		tfRef2X, ;
+							DOUBLE		tfRef2Y, ;
+							DOUBLE		tfRef3X, ;
+							DOUBLE		tfRef3Y, ;
+							DOUBLE		tfRef4X, ;
+							DOUBLE		tfRef4Y, ;
+							DOUBLE		tfRef5X, ;
+							DOUBLE		tfRef5Y, ;
 							INTEGER		tlVisible, ;
 							STRING		tcChars1_128, ;
 							STRING		tcChars2_128
@@ -137,8 +137,8 @@ FUNCTION declare_dsf_dll
 	DECLARE INTEGER		dsf_load_template		IN exe\dsf.dll ;
 							INTEGER		tnInstance,	;			&& Instance handle returned by dsf_create_new_instance()
 							INTEGER		tipid, ;				&& iid of the character this template relates to (parent id)
-							SINGLE		tfX, ;					&& X coordinate of this template
-							SINGLE		tfY, ;					&& Y coordinate of this template
+							DOUBLE		tfX, ;					&& X coordinate of this template
+							DOUBLE		tfY, ;					&& Y coordinate of this template
 							INTEGER		tnRecno					&& The original record number used to reference this item
 	
 	* Called when all data has been loaded.  Used to allow the DLL to build any
@@ -224,6 +224,22 @@ FUNCTION declare_dsf_dll
 							INTEGER		tnInstance,	;			&& Instance handle returned by dsf_create_new_instance()
 							INTEGER		tiId, ;					&& Character or definition component to render
 
+	* Called to capture the window contents to the disk file
+	DECLARE INTEGER		dsf_get_hwnd_contents			IN exe\dsf.dll ;
+							INTEGER		tnHwnd, ;				&& The hwnd to capture
+							STRING		tcBitmapFilename		&& Where to capture the bitmap file
+	
+	* Called to create a scaled interface to a Visual FoxPro window
+	DECLARE INTEGER		dsf_scaled_interface_to_hwnd		IN exe\dsf.dll ;
+							INTEGER		tnHwnd, ;				&& The hwnd to capture
+							STRING		tcIdentifer, ;			&& The unique identifier for this window
+							SINGLE		tfInitialScale			&& Initial scale factor.  If it exceeds the monitor space it will be truncated.
+
+	* Called to show or hide the window from the taskbar list
+	DECLARE INTEGER		dsf_window_on_taskbar			IN exe\dsf.dll ;
+							INTEGER		tnHwnd, ;				&& The hwnd to alter
+							INTEGER		tnShow					&& 0=hide, 1=show
+	
 	* Called to render a markup version (for editing)
 	DECLARE INTEGER		dsf_render_markup		IN exe\dsf.dll ;
 							INTEGER		tnInstance,	;			&& Instance handle returned by dsf_create_new_instance()
@@ -236,7 +252,11 @@ FUNCTION declare_dsf_dll
 							STRING		tcBitmapPathname, ;		&& Either the pathname, or NULL if not file should be generated
 							INTEGER		tnHwnd, ;				&& Either NULL or the form's HWND if you want it drawn directly to the form
 							INTEGER		tnX, ;					&& If tnHwnd is not NULL, then the X coordinate of the client area to render at
-							INTEGER		tnY						&& If tnHwnd is not NULL, then the Y coordinate of the client area to render at
+							INTEGER		tnY, ;					&& If tnHwnd is not NULL, then the Y coordinate of the client area to render at
+							INTEGER		tnControlX, ;			&& For the controls window, X coordinate of the client area
+							INTEGER		tnControlY, ;			&& For the controls window, Y coordinate of the client area
+							INTEGER		tnControlWidth, ;		&& For the controls window, width
+							INTEGER		tnControlHeight			&& For the controls window, height
 
 	* Called to render a final version (as would be used for rendering fonts)
 	DECLARE INTEGER		dsf_render_final		IN exe\dsf.dll ;

@@ -78,6 +78,10 @@
 
 		// Semaphores for synchronized access to master lists
 		gsVvm.gsemProgramsAccess				= 0;					// Master program inventory
+
+
+		// Set our initial BXML error condition to a no-error state
+		iibxml_recordLastError(IDS_BXML_NO_ERROR, 0, NULL, NULL, NULL, 0);
 	}
 
 
@@ -166,7 +170,7 @@
 				ivvm_debugBreak();
 			}
 			// Create a copy to be used
-			*tuString = oss_duplicateUnicodeString(luMessage);
+			*tuString = vvm1_duplicateUnicodeString(luMessage);
 		}
 	}
 
@@ -228,10 +232,10 @@
 			{
 				// Find out how long this string portion is
 				lnSkip					= ivvm_scanStringAndNullTerminateAtNextWhitespaceW(tuCmdLine + lnI + 3) + 3;
-				gsVvm.gcVvmResourceLang	= oss_unicodeToAscii(tuCmdLine + lnI + 3, wcslen(tuCmdLine + lnI + 3));
+				gsVvm.gcVvmResourceLang	= vvm1_unicodeToAscii(tuCmdLine + lnI + 3, wcslen(tuCmdLine + lnI + 3));
 
 				// Blank out that portion of the command line
-				oss_unicodeMemset(tuCmdLine + lnI, (w16)' ', lnSkip);
+				vvm1_unicodeMemset(tuCmdLine + lnI, (w16)' ', lnSkip);
 
 				// Move past ti
 				lnI += lnSkip;

@@ -299,34 +299,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\vo_bxml.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="debug_vasm|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\vo_plugins.cpp"
 				>
 				<FileConfiguration
@@ -390,10 +362,6 @@
 			>
 			<File
 				RelativePath="..\..\..\utils\sha1\sha1.h"
-				>
-			</File>
-			<File
-				RelativePath=".\vo_bxml.h"
 				>
 			</File>
 			<File

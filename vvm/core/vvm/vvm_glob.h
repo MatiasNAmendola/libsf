@@ -47,6 +47,24 @@
 //////
 	_isSVvmApp		gsVvm;
 	SSysInfo		gsVvmSysInfo;				// Populated during ivvmtm_initialize(), holds system information
+
+	// BXML last error
+	u64					gnLastErrorOffset		= -1;					// Initially indicate no prior error offset
+	u64					gnLastErrorCode			= 0;					// Initially indicate no prior error code
+	SBxmlError			gsLastErrorInfo =	{
+												{ NULL, 0 },			// Description (initially set to no error)
+												0,						// Last error offset
+												0,						// Last error code
+												NULL,					// Last BXML in error
+												NULL					// Last BxmlA in error
+											};
+
+
+//////////
+// Critical sections for synchronized access
+//////
+	u64					gnNextUniqueId			= 1000;					// Increments after each reference (see vvm_getNextUniqueId() and iGetNextUniqueId())
+	CRITICAL_SECTION	gcsUniqueIdAccess;								// Next Unique ID access
 	
 
 //////////

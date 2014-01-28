@@ -57,10 +57,10 @@ struct SRGB24
 
 struct SRGBF24
 {
-	f32		blu;				// 24-bit RGB values
-	f32		grn;
-	f32		red;
-	f32		area;				// Area of a single pixel accounting for this color component, 1.0 if encompasses entire pixel
+	f64		blu;				// 24-bit RGB values
+	f64		grn;
+	f64		red;
+	f64		area;				// Area of a single pixel accounting for this color component, 1.0 if encompasses entire pixel
 };
 
 struct SBitmapProcess
@@ -85,8 +85,8 @@ struct SBitmapProcess
 	//		tpoints	= (SRGBF24*)malloc(		((u32)(1.0/ratioV) + 3)   *
 	//										((u32)(1.0/ratioH) + 3))
 	//
-	f32					ratioV;			// (f32)bio->biHeight	/ (f32)bii->biHeight;
-	f32					ratioH;			// (f32)bio->biWidth	/ (f32)bii->biWidth;
+	f64					ratioV;			// (f64)bio->biHeight	/ (f64)bii->biHeight;
+	f64					ratioH;			// (f64)bio->biWidth	/ (f64)bii->biWidth;
 	u32					count;			// Number of valid points in tpoints
 	SRGBF24*			pixels;			// Accumulation buffer for point data needed to feed into destination
 
@@ -96,14 +96,14 @@ struct SBitmapProcess
 	SRGB24*				iptr;				// Input pointer to the left-most pixel for this y row
 	u32					x;					// X-coordinate
 	u32					y;					// Y-coordinate
-	f32					ulx;				// Upper-left X
-	f32					uly;				// Upper-left Y
-	f32					lrx;				// Lower-right X
-	f32					lry;				// Lower-right Y
-	f32					widthLeft;			// Width for each left-most pixel
-	f32					widthRight;			// Width for each right-most pixel
-	f32					height;				// Height for a particular pixel portion (upper, lower)
-	f32					area;				// Temporary computed area for various pixels
+	f64					ulx;				// Upper-left X
+	f64					uly;				// Upper-left Y
+	f64					lrx;				// Lower-right X
+	f64					lry;				// Lower-right Y
+	f64					widthLeft;			// Width for each left-most pixel
+	f64					widthRight;			// Width for each right-most pixel
+	f64					height;				// Height for a particular pixel portion (upper, lower)
+	f64					area;				// Temporary computed area for various pixels
 	s32					left;				// Left-side pixel offset into line
 	s32					right;				// Number of pixels to reach the right-most pixel
 	s32					middleStartH;		// Starting pixel offset for middle span
@@ -124,9 +124,9 @@ struct SBitmapProcess
 //////////
 // Forward declarations
 //////
-	u32				iScaleImage										(s8* tcBmp24FilenameIn, s8* tcBmp24FilenameOut, f32 tfHorizontalScaler, f32 tfVerticalScaler);
+	u32				iScaleImage										(s8* tcBmp24FilenameIn, s8* tcBmp24FilenameOut, f64 tfHorizontalScaler, f64 tfVerticalScaler);
 	u32				iComputeActualWidth								(u32 tnWidth);
-	u32				iIntegersBetween								(float p1, float p2);
+	u32				iIntegersBetween								(f64 p1, f64 p2);
 	void			iGetSpannedPixelColors							(SBitmapProcess* bp);
 	void			iGetSpannedPixelColors1							(SBitmapProcess* bp);
 	void			iGetSpannedPixelColors2							(SBitmapProcess* bp);
@@ -155,10 +155,10 @@ struct SBitmapProcess
 //		-7		- Unable to write to output file
 //
 //////
-	u32 iScaleImage(s8* tcBmp24FilenameIn, s8* tcBmp24FilenameOut, f32 tfHorizontalScaler, f32 tfVerticalScaler)
+	u32 iScaleImage(s8* tcBmp24FilenameIn, s8* tcBmp24FilenameOut, f64 tfHorizontalScaler, f64 tfVerticalScaler)
 	{
 		u32					lnY, lnX, lnWidth, lnHeight, lnActualWidth, lnNumread, lnResult;
-		f32					lfWidth, lfHeight;
+		f64					lfWidth, lfHeight;
 		// bh, bi and bd are bitmap header, info and data, abbreviated, and with "i" for input, "o" for output
 		SBitmapProcess		bp;
 		BITMAPFILEHEADER	bhi, bho;
@@ -212,8 +212,8 @@ struct SBitmapProcess
 			return(-4);		// Unable to read bits from file
 
 		// Determine the new size
-		lfWidth			= (f32)bii.biWidth  * fabs(tfHorizontalScaler);
-		lfHeight		= (f32)bii.biHeight * fabs(tfVerticalScaler);
+		lfWidth			= (f64)bii.biWidth  * fabs(tfHorizontalScaler);
+		lfHeight		= (f64)bii.biHeight * fabs(tfVerticalScaler);
 		lnWidth			= (u32)max(lfWidth  + 0.5, 1.0);
 		lnHeight		= (u32)max(lfHeight + 0.5, 1.0);
 		lnActualWidth	= iComputeActualWidth(lnWidth);
@@ -248,8 +248,8 @@ struct SBitmapProcess
 		bp.bio				= &bio;
 		bp.bdo				= bdo;
 		bp.actualWidthO		= lnActualWidth;	// iComputeActualWidth(bio.biWidth);
-		bp.ratioV			= (f32)bii.biHeight		/ (f32)bio.biHeight;
-		bp.ratioH			= (f32)bii.biWidth		/ (f32)bio.biWidth;
+		bp.ratioV			= (f64)bii.biHeight		/ (f64)bio.biHeight;
+		bp.ratioH			= (f64)bii.biWidth		/ (f64)bio.biWidth;
 		bp.pixels			= (SRGBF24*)malloc(((u32)bp.ratioV + 1 + 3) * ((u32)bp.ratioH + 1 + 3) * sizeof(SRGBF24));
 		for (lnY = 0; lnY < lnHeight; lnY++)
 		{
@@ -260,8 +260,8 @@ struct SBitmapProcess
 			for (lnX = 0; lnX < lnWidth; lnX++)
 			{
 				// Compute data for this spanned pixel
-				bp.uly	= min((f32)lnY * bp.ratioV, (f32)bii.biHeight - bp.ratioV);
-				bp.ulx	= min((f32)lnX * bp.ratioH, (f32)bii.biWidth  - bp.ratioH);
+				bp.uly	= min((f64)lnY * bp.ratioV, (f64)bii.biHeight - bp.ratioV);
+				bp.ulx	= min((f64)lnX * bp.ratioH, (f64)bii.biWidth  - bp.ratioH);
 				bp.lry	= bp.uly + bp.ratioV;
 				bp.lrx	= bp.ulx + bp.ratioH;
 
@@ -366,7 +366,7 @@ struct SBitmapProcess
 // 1 and 2.
 //
 //////
-	u32 iIntegersBetween(float p1, float p2)
+	u32 iIntegersBetween(f64 p1, f64 p2)
 	{
 		u32 v1, v2;
 
@@ -413,9 +413,9 @@ struct SBitmapProcess
 //		1	- upper-left	(always,	spans at most one pixel)
 //		2	- upper-middle	(optional,	spans at most multiple partial or full pixels)
 //		3	- upper-right	(optional,	spans at most one pixel)
-//		4	- middle-left	(optional,	spans at most multiple partial or full pixels)
-//		5	- middle-middle	(optional,	can span multiple partial or full pixels)
-//		6	- middle-right	(optional,	spans at most multiple partial or full pixels)
+//		4	- middle-left	(optional,	spans at most one row or more rows of partial or full pixels)
+//		5	- middle-middle	(optional,	can span one or more rows of partial or full pixels)
+//		6	- middle-right	(optional,	spans at most one row or more rows of partial or full pixels)
 //		7	- lower-left	(optional,	spans at most one pixel)
 //		8	- lower-middle	(optional,	spans at most multiple partial or full pixels)
 //		9	- lower-right	(optional,	spans at most one pixel)
@@ -424,7 +424,7 @@ struct SBitmapProcess
 	void iGetSpannedPixelColors(SBitmapProcess* bp)
 	{
 		u32		lnI;
-		f32		lfRed, lfGrn, lfBlu, lfAreaAccumulator;
+		f64		lfRed, lfGrn, lfBlu, lfAreaAccumulator;
 
 
 		// Raise the flags for which portions are valid / required
@@ -556,18 +556,18 @@ struct SBitmapProcess
 
 		// Find out where this upper-left pixel falls
 		if (!bp->spans2H)	bp->widthLeft =      bp->lrx          - bp->ulx;	// Entire width is within this one pixel, so it's only a portion of the pixel's overall width
-		else				bp->widthLeft = (f32)bp->middleStartH - bp->ulx;	// It spans from where it is to the right of the pixel square
+		else				bp->widthLeft = (f64)bp->middleStartH - bp->ulx;	// It spans from where it is to the right of the pixel square
 
 		if (!bp->spans2V)	bp->height =      bp->lry          - bp->uly;		// It's entire height is within this one pixel, so it's only a portion of the pixel's overall height
-		else				bp->height = (f32)bp->middleStartV - bp->uly;		// It spans from where it is to the bottom of the pixel square
+		else				bp->height = (f64)bp->middleStartV - bp->uly;		// It spans from where it is to the bottom of the pixel square
 
 		// Compute the area for this pixel component
 		bp->area = bp->widthLeft * bp->height;
 
 		// Store the colors for this point
-		(bp->pixels[bp->count]).red		= (f32)((bp->iptr + bp->left)->red);
-		(bp->pixels[bp->count]).grn		= (f32)((bp->iptr + bp->left)->grn);
-		(bp->pixels[bp->count]).blu		= (f32)((bp->iptr + bp->left)->blu);
+		(bp->pixels[bp->count]).red		= (f64)((bp->iptr + bp->left)->red);
+		(bp->pixels[bp->count]).grn		= (f64)((bp->iptr + bp->left)->grn);
+		(bp->pixels[bp->count]).blu		= (f64)((bp->iptr + bp->left)->blu);
 		(bp->pixels[bp->count]).area	= bp->area;
 
 		// Move over for the next point
@@ -592,9 +592,9 @@ struct SBitmapProcess
 		for (lnPixel = bp->middleStartH; lnPixel < bp->middleFinishH; lnPixel++)
 		{
 			// Store this pixel data
-			(bp->pixels[bp->count]).red		= (f32)((bp->iptr + lnPixel)->red);
-			(bp->pixels[bp->count]).grn		= (f32)((bp->iptr + lnPixel)->grn);
-			(bp->pixels[bp->count]).blu		= (f32)((bp->iptr + lnPixel)->blu);
+			(bp->pixels[bp->count]).red		= (f64)((bp->iptr + lnPixel)->red);
+			(bp->pixels[bp->count]).grn		= (f64)((bp->iptr + lnPixel)->grn);
+			(bp->pixels[bp->count]).blu		= (f64)((bp->iptr + lnPixel)->blu);
 			(bp->pixels[bp->count]).area	= bp->height;
 
 			// Move over for the next point
@@ -614,15 +614,15 @@ struct SBitmapProcess
 	void iGetSpannedPixelColors3(SBitmapProcess* bp)
 	{
 		// Find out where this upper-left pixel falls
-		bp->widthRight	= bp->lrx - (f32)bp->right;		// It spans from the start of the right-most pixel to wherever it falls therein
+		bp->widthRight	= bp->lrx - (f64)bp->right;		// It spans from the start of the right-most pixel to wherever it falls therein
 
 		// Compute the area for this pixel component
 		bp->area = bp->widthRight * bp->height;
 
 		// Store this pixel data
-		(bp->pixels[bp->count]).red		= (f32)((bp->iptr + bp->right)->red);
-		(bp->pixels[bp->count]).grn		= (f32)((bp->iptr + bp->right)->grn);
-		(bp->pixels[bp->count]).blu		= (f32)((bp->iptr + bp->right)->blu);
+		(bp->pixels[bp->count]).red		= (f64)((bp->iptr + bp->right)->red);
+		(bp->pixels[bp->count]).grn		= (f64)((bp->iptr + bp->right)->grn);
+		(bp->pixels[bp->count]).blu		= (f64)((bp->iptr + bp->right)->blu);
 		(bp->pixels[bp->count]).area	= bp->area;
 
 		// Move over for the next point
@@ -656,9 +656,9 @@ struct SBitmapProcess
 		for (lnPixelY = bp->middleStartV; lnPixelY <= bp->middleFinishV; lnPixelY++)
 		{
 			// Store the colors for this point
-			(bp->pixels[bp->count]).red		= (f32)(((SRGB24*)((s8*)bp->iptra - (lnPixelY * bp->actualWidthI) + (bp->left * 3)))->red);
-			(bp->pixels[bp->count]).grn		= (f32)(((SRGB24*)((s8*)bp->iptra - (lnPixelY * bp->actualWidthI) + (bp->left * 3)))->grn);
-			(bp->pixels[bp->count]).blu		= (f32)(((SRGB24*)((s8*)bp->iptra - (lnPixelY * bp->actualWidthI) + (bp->left * 3)))->blu);
+			(bp->pixels[bp->count]).red		= (f64)(((SRGB24*)((s8*)bp->iptra - (lnPixelY * bp->actualWidthI) + (bp->left * 3)))->red);
+			(bp->pixels[bp->count]).grn		= (f64)(((SRGB24*)((s8*)bp->iptra - (lnPixelY * bp->actualWidthI) + (bp->left * 3)))->grn);
+			(bp->pixels[bp->count]).blu		= (f64)(((SRGB24*)((s8*)bp->iptra - (lnPixelY * bp->actualWidthI) + (bp->left * 3)))->blu);
 			(bp->pixels[bp->count]).area	= bp->widthLeft;
 
 			// Move over for the next point
@@ -688,9 +688,9 @@ struct SBitmapProcess
 			for (lnPixelX = bp->middleStartH; lnPixelX <= bp->middleFinishH; lnPixelX++)
 			{
 				// Store the colors for this point
-				(bp->pixels[bp->count]).red		= (f32)(((SRGB24*)((s8*)bp->iptra - (lnPixelY * bp->actualWidthI) + (lnPixelX * 3)))->red);
-				(bp->pixels[bp->count]).grn		= (f32)(((SRGB24*)((s8*)bp->iptra - (lnPixelY * bp->actualWidthI) + (lnPixelX * 3)))->grn);
-				(bp->pixels[bp->count]).blu		= (f32)(((SRGB24*)((s8*)bp->iptra - (lnPixelY * bp->actualWidthI) + (lnPixelX * 3)))->blu);
+				(bp->pixels[bp->count]).red		= (f64)(((SRGB24*)((s8*)bp->iptra - (lnPixelY * bp->actualWidthI) + (lnPixelX * 3)))->red);
+				(bp->pixels[bp->count]).grn		= (f64)(((SRGB24*)((s8*)bp->iptra - (lnPixelY * bp->actualWidthI) + (lnPixelX * 3)))->grn);
+				(bp->pixels[bp->count]).blu		= (f64)(((SRGB24*)((s8*)bp->iptra - (lnPixelY * bp->actualWidthI) + (lnPixelX * 3)))->blu);
 				(bp->pixels[bp->count]).area	= 1.0;
 
 				// Move over for the next point
@@ -717,9 +717,9 @@ struct SBitmapProcess
 		for (lnPixelY = bp->middleStartV; lnPixelY <= bp->middleFinishV; lnPixelY++)
 		{
 			// Store the colors for this point
-			(bp->pixels[bp->count]).red		= (f32)(((SRGB24*)((s8*)bp->iptra - (lnPixelY * bp->actualWidthI) + (bp->right * 3)))->red);
-			(bp->pixels[bp->count]).grn		= (f32)(((SRGB24*)((s8*)bp->iptra - (lnPixelY * bp->actualWidthI) + (bp->right * 3)))->grn);
-			(bp->pixels[bp->count]).blu		= (f32)(((SRGB24*)((s8*)bp->iptra - (lnPixelY * bp->actualWidthI) + (bp->right * 3)))->blu);
+			(bp->pixels[bp->count]).red		= (f64)(((SRGB24*)((s8*)bp->iptra - (lnPixelY * bp->actualWidthI) + (bp->right * 3)))->red);
+			(bp->pixels[bp->count]).grn		= (f64)(((SRGB24*)((s8*)bp->iptra - (lnPixelY * bp->actualWidthI) + (bp->right * 3)))->grn);
+			(bp->pixels[bp->count]).blu		= (f64)(((SRGB24*)((s8*)bp->iptra - (lnPixelY * bp->actualWidthI) + (bp->right * 3)))->blu);
 			(bp->pixels[bp->count]).area	= bp->widthRight;
 
 			// Move over for the next point
@@ -739,13 +739,13 @@ struct SBitmapProcess
 	void iGetSpannedPixelColors7(SBitmapProcess* bp)
 	{
 		// Compute the area
-		bp->height	= bp->lry - (f32)((s32)bp->lry);
+		bp->height	= bp->lry - (f64)((s32)bp->lry);
 		bp->area	= bp->widthLeft * bp->height;
 
 		// Store the colors for this point
-		(bp->pixels[bp->count]).red		= (f32)(((SRGB24*)((s8*)bp->iptra - (bp->actualWidthI * (bp->middleFinishV + 1)) + (bp->left * 3)))->red);
-		(bp->pixels[bp->count]).grn		= (f32)(((SRGB24*)((s8*)bp->iptra - (bp->actualWidthI * (bp->middleFinishV + 1)) + (bp->left * 3)))->grn);
-		(bp->pixels[bp->count]).blu		= (f32)(((SRGB24*)((s8*)bp->iptra - (bp->actualWidthI * (bp->middleFinishV + 1)) + (bp->left * 3)))->blu);
+		(bp->pixels[bp->count]).red		= (f64)(((SRGB24*)((s8*)bp->iptra - (bp->actualWidthI * (bp->middleFinishV + 1)) + (bp->left * 3)))->red);
+		(bp->pixels[bp->count]).grn		= (f64)(((SRGB24*)((s8*)bp->iptra - (bp->actualWidthI * (bp->middleFinishV + 1)) + (bp->left * 3)))->grn);
+		(bp->pixels[bp->count]).blu		= (f64)(((SRGB24*)((s8*)bp->iptra - (bp->actualWidthI * (bp->middleFinishV + 1)) + (bp->left * 3)))->blu);
 		(bp->pixels[bp->count]).area	= bp->area;
 
 		// Move over for the next point
@@ -771,9 +771,9 @@ struct SBitmapProcess
 		for (lnPixelX = bp->middleStartH; lnPixelX <= bp->middleFinishH; lnPixelX++)
 		{
 			// Store the colors for this point
-			(bp->pixels[bp->count]).red		= (f32)(((SRGB24*)((s8*)bp->iptra - (bp->actualWidthI * (bp->middleFinishV + 1)) + (lnPixelX * 3)))->red);
-			(bp->pixels[bp->count]).grn		= (f32)(((SRGB24*)((s8*)bp->iptra - (bp->actualWidthI * (bp->middleFinishV + 1)) + (lnPixelX * 3)))->grn);
-			(bp->pixels[bp->count]).blu		= (f32)(((SRGB24*)((s8*)bp->iptra - (bp->actualWidthI * (bp->middleFinishV + 1)) + (lnPixelX * 3)))->blu);
+			(bp->pixels[bp->count]).red		= (f64)(((SRGB24*)((s8*)bp->iptra - (bp->actualWidthI * (bp->middleFinishV + 1)) + (lnPixelX * 3)))->red);
+			(bp->pixels[bp->count]).grn		= (f64)(((SRGB24*)((s8*)bp->iptra - (bp->actualWidthI * (bp->middleFinishV + 1)) + (lnPixelX * 3)))->grn);
+			(bp->pixels[bp->count]).blu		= (f64)(((SRGB24*)((s8*)bp->iptra - (bp->actualWidthI * (bp->middleFinishV + 1)) + (lnPixelX * 3)))->blu);
 			(bp->pixels[bp->count]).area	= bp->height;
 
 			// Move over for the next point
@@ -796,9 +796,9 @@ struct SBitmapProcess
 		bp->area = bp->widthRight * bp->height;
 
 		// Store the colors for this point
-		(bp->pixels[bp->count]).red		= (f32)(((SRGB24*)((s8*)bp->iptra - (bp->actualWidthI * (bp->middleFinishV + 1)) + (bp->right * 3)))->red);
-		(bp->pixels[bp->count]).grn		= (f32)(((SRGB24*)((s8*)bp->iptra - (bp->actualWidthI * (bp->middleFinishV + 1)) + (bp->right * 3)))->grn);
-		(bp->pixels[bp->count]).blu		= (f32)(((SRGB24*)((s8*)bp->iptra - (bp->actualWidthI * (bp->middleFinishV + 1)) + (bp->right * 3)))->blu);
+		(bp->pixels[bp->count]).red		= (f64)(((SRGB24*)((s8*)bp->iptra - (bp->actualWidthI * (bp->middleFinishV + 1)) + (bp->right * 3)))->red);
+		(bp->pixels[bp->count]).grn		= (f64)(((SRGB24*)((s8*)bp->iptra - (bp->actualWidthI * (bp->middleFinishV + 1)) + (bp->right * 3)))->grn);
+		(bp->pixels[bp->count]).blu		= (f64)(((SRGB24*)((s8*)bp->iptra - (bp->actualWidthI * (bp->middleFinishV + 1)) + (bp->right * 3)))->blu);
 		(bp->pixels[bp->count]).area	= bp->area;
 
 		// Move over for the next point

@@ -92,8 +92,8 @@
 		// Initialize
 		//////
 			memset(&lff, 0, sizeof(lff));
-			oss_datumSet(&lff.pathnameOfSearch, tcDirectory._u8,	-1, false);
-			oss_datumSet(&lff.filenameSearched, tcFilePattern._u8,	-1, false);
+			vvm1_datumSet(&lff.pathnameOfSearch, tcDirectory._u8,	-1, false);
+			vvm1_datumSet(&lff.filenameSearched, tcFilePattern._u8,	-1, false);
 			lnExclusionListLength	= (u32)oss_strlen(tcExclusionList);
 			llCumulativeResult		= true;
 
@@ -108,7 +108,7 @@
 				while (llMore)
 				{
 					// Make sure it's not a file to exclude
-					if (!oss_isNeedleInHaystack(tcExclusionList, lnExclusionListLength, lff.file.data, (u32)lff.file.length, false, NULL))
+					if (!vvm1_isNeedleInHaystack(tcExclusionList, lnExclusionListLength, lff.file.data, (u32)lff.file.length, false, NULL))
 					{
 						//////////
 						// Run this test

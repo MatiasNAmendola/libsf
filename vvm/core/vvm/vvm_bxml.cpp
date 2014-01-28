@@ -111,7 +111,7 @@
 		// Load it as XML
 //		oss_sharedAsciiWriteOutFile("\\temp\\test_raw.bxml", tptr, lnFileSize);
 		lbxml = ibxml_asciiLoadBuffer(tptr, lnFileSize, tnErrorOffset, tnErrorCode);
-//		oss_bxmlSave(lbxml, "\\temp\\test.bxml", 15, true, true, &lnNumread);
+//		vvm_bxmlSave(lbxml, "\\temp\\test.bxml", 15, true, true, &lnNumread);
 
 		// Note:  ibxml_asciiLoadBuffer() makes copies of every string as needed
 		oss_free(tptr);
@@ -178,7 +178,7 @@
 						++lnLength;
 
 					// Append an attribute which contains the comment data
-					bxmlaNew = (SBxmla*)oss_SEChain_append(&bxml->_attributes, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
+					bxmlaNew = (SBxmla*)vvm_SEChain_append(&bxml->_attributes, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 					if (!bxmlaNew)
 					{
 _asm nop;
@@ -189,8 +189,8 @@ _asm nop;
 					bxmlaNew->_parent = bxml;
 
 					// Store the tag name and allocate space for the data, set it to NULLs
-					oss_datumSet (&bxmlaNew->_name,	(u8*)cgcAutoComment,		sizeof(cgcAutoComment) - 1,					false);
-					oss_datum2Set(&bxmlaNew->_data,	(u8*)buffer + lnOffset,		lnLength + 3,				lnLength + 3,	false);
+					vvm_datumSet (&bxmlaNew->_name,	(u8*)cgcAutoComment,		sizeof(cgcAutoComment) - 1,					false);
+					vvm_datum2Set(&bxmlaNew->_data,	(u8*)buffer + lnOffset,		lnLength + 3,				lnLength + 3,	false);
 
 					// If we're at the end of the input, syntax error
 					if (!ioss_verifyLength(lnOffset + 2, tnMaxLength))
@@ -317,7 +317,7 @@ _asm nop;
 					}
 
 					// Store the tag name
-					oss_datumSet(&bxml->_name, (u8*)buffer + lnOffset, lnLength, false);
+					vvm_datumSet(&bxml->_name, (u8*)buffer + lnOffset, lnLength, false);
 
 					// Skip past the name
 					lnOffset += lnLength;
@@ -327,7 +327,7 @@ _asm nop;
 					while (llProcessingAttributes)
 					{
 						// Next non-whitespace character must be a letter (attribute), "/" closing single tag, or ">" closing first tag
-						lnOffset += ioss_skipWhitespaces(buffer + lnOffset, tnMaxLength - lnOffset);
+						lnOffset += vvm_iSkipWhitespaces(buffer + lnOffset, tnMaxLength - lnOffset);
 						if (lnOffset >= tnMaxLength)
 						{
 _asm nop;
@@ -402,7 +402,7 @@ _asm nop;
 
 											// We're sitting no the closing quote character
 											// Append this attribute
-											bxmlaNew = (SBxmla*)oss_SEChain_append(&bxml->_attributes, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
+											bxmlaNew = (SBxmla*)vvm_SEChain_append(&bxml->_attributes, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 											if (!bxmlaNew)
 											{
 _asm nop;
@@ -413,8 +413,8 @@ _asm nop;
 											bxmlaNew->_parent = bxml;
 
 											// Store the tag name and data
-											oss_datumSet (&bxmlaNew->_name, (u8*)buffer + lnOffset,								lnAttrTagLength,						false);
-											oss_datum2Set(&bxmlaNew->_data, (u8*)buffer + lnOffset + lnAttrTagLength + 1 + 1,	lnAttrDataLength, lnAttrDataLength,		false);
+											vvm_datumSet (&bxmlaNew->_name, (u8*)buffer + lnOffset,								lnAttrTagLength,						false);
+											vvm_datum2Set(&bxmlaNew->_data, (u8*)buffer + lnOffset + lnAttrTagLength + 1 + 1,	lnAttrDataLength, lnAttrDataLength,		false);
 
 											// Move past this attribute
 											lnOffset += lnAttrTagLength + 1 + 1 + lnAttrDataLength + 1;
@@ -457,7 +457,7 @@ _asm nop;
 												lnValue = ioss_convertValidatedNumericStringToU32(buffer + lnOffset + lnAttrTagLength + 2, (u32)lnNumberLength);
 
 												// Append this attribute
-												bxmlaNew = (SBxmla*)oss_SEChain_append(&bxml->_attributes, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
+												bxmlaNew = (SBxmla*)vvm_SEChain_append(&bxml->_attributes, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 												if (!bxmlaNew)
 												{
 _asm nop;
@@ -468,8 +468,8 @@ _asm nop;
 												bxmlaNew->_parent = bxml;
 
 												// Store the tag name and allocate space for the data, set it to NULLs
-												oss_datumSet		  (&bxmlaNew->_name,	(u8*)buffer + lnOffset,		lnAttrTagLength,	false);
-												oss_datum2SetNullString(&bxmlaNew->_data,								 lnValue,			true);
+												vvm_datumSet		  (&bxmlaNew->_name,	(u8*)buffer + lnOffset,		lnAttrTagLength,	false);
+												vvm_datum2SetNullString(&bxmlaNew->_data,								 lnValue,			true);
 
 												// Move past this attribute size allocator
 												lnOffset += lnAttrTagLength + 2 + lnNumberLength;
@@ -533,7 +533,7 @@ _asm nop;
 														}
 
 														// Append this attribute
-														bxmlaNew = (SBxmla*)oss_SEChain_append(&bxml->_attributes, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
+														bxmlaNew = (SBxmla*)vvm_SEChain_append(&bxml->_attributes, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 														if (!bxmlaNew)
 														{
 _asm nop;
@@ -544,8 +544,8 @@ _asm nop;
 														bxmlaNew->_parent = bxml;
 
 														// Store the tag name and allocate space for the data, set it to NULLs
-														oss_datumSet (&bxmlaNew->_name,	(u8*)buffer + lnOffset,																		lnAttrTagLength,				false);
-														oss_datum2Set(&bxmlaNew->_data,	(u8*)buffer + lnOffset + lnAttrTagLength + 1 + lnNumberLength1 + 1 + lnNumberLength2 + 1,	lnValue2,			lnValue1,	false);
+														vvm_datumSet (&bxmlaNew->_name,	(u8*)buffer + lnOffset,																		lnAttrTagLength,				false);
+														vvm_datum2Set(&bxmlaNew->_data,	(u8*)buffer + lnOffset + lnAttrTagLength + 1 + lnNumberLength1 + 1 + lnNumberLength2 + 1,	lnValue2,			lnValue1,	false);
 
 														// Move past this attribute size allocator
 														lnOffset += lnAttrTagLength + 1 + lnNumberLength1 + 1 + lnNumberLength2 + 1 + lnValue2;
@@ -563,7 +563,7 @@ _asm nop;
 														lnValue = ioss_convertValidatedNumericStringToU32(buffer + lnOffset + lnAttrTagLength + 1, (u32)lnNumberLength1);
 
 														// Append this attribute
-														bxmlaNew = (SBxmla*)oss_SEChain_append(&bxml->_attributes, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
+														bxmlaNew = (SBxmla*)vvm_SEChain_append(&bxml->_attributes, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 														if (!bxmlaNew)
 														{
 _asm nop;
@@ -574,8 +574,8 @@ _asm nop;
 														bxmlaNew->_parent = bxml;
 
 														// Store the tag name and allocate space for the data, set it to NULLs
-														oss_datumSet (&bxmlaNew->_name,	(u8*)buffer + lnOffset,												lnAttrTagLength,			false);
-														oss_datum2Set(&bxmlaNew->_data,	(u8*)buffer + lnOffset + lnAttrTagLength + 1 + lnNumberLength1 + 1,	lnValue,		lnValue,	false);
+														vvm_datumSet (&bxmlaNew->_name,	(u8*)buffer + lnOffset,												lnAttrTagLength,			false);
+														vvm_datum2Set(&bxmlaNew->_data,	(u8*)buffer + lnOffset + lnAttrTagLength + 1 + lnNumberLength1 + 1,	lnValue,		lnValue,	false);
 
 														// Move past this attribute size allocator
 														lnOffset += lnAttrTagLength + 1 + lnNumberLength1 + 1 + lnValue;
@@ -604,7 +604,7 @@ _asm nop;
 									// When we get here, this attribute has been processed
 
 									// Skip past any whitespaces between attributes
-									lnOffset += ioss_skipWhitespaces(buffer + lnOffset, tnMaxLength - lnOffset);
+									lnOffset += vvm_iSkipWhitespaces(buffer + lnOffset, tnMaxLength - lnOffset);
 									if (lnOffset >= tnMaxLength)
 									{
 _asm nop;
@@ -773,7 +773,7 @@ _asm nop;
 			}
 
 			// Populate its header 
-			bxmlNew->ll4.uniqueId	= oss_getNextUniqueId();
+			bxmlNew->ll4.uniqueId	= vvm_getNextUniqueId();
 
 			// Store the level
 			bxmlNew->level			= tnLevel;
@@ -851,7 +851,7 @@ _asm nop;
 				{
 					// Two spaces per indention
 					for (lnI = 0; lnI < bxml->level; lnI++)
-						oss_builderAppendData(build, (s8*)cgcSpaceBxmlIndent, sizeof(cgcSpaceBxmlIndent) - 1);
+						vvm_builderAppendData(build, (s8*)cgcSpaceBxmlIndent, sizeof(cgcSpaceBxmlIndent) - 1);
 				}
 
 
@@ -859,10 +859,10 @@ _asm nop;
 			// Append the tag format
 			//////
 				// <
-				oss_builderAppendData(build, (s8*)cgcTagLeader, sizeof(cgcTagLeader) - 1);
+				vvm_builderAppendData(build, (s8*)cgcTagLeader, sizeof(cgcTagLeader) - 1);
 
 				// tag name
-				oss_builderAppendData(build, bxml->_name.data._s8, (u32)bxml->_name.length);
+				vvm_builderAppendData(build, bxml->_name.data._s8, (u32)bxml->_name.length);
 
 				// If there are attributes, process them
 				if (bxml->_attributes.masterCount != 0)
@@ -871,17 +871,17 @@ _asm nop;
 					// Iterate through each attribute, appending them as we go
 					cb._func	= (u64)&iibxml_saveNodeCallback;
 					cb.extra	= (u64)(void*)build;
-					oss_SEChain_iterateThroughForCallback(&bxml->_attributes, &cb);
+					vvm_SEChain_iterateThroughForCallback(&bxml->_attributes, &cb);
 				}
 
 				// Add the closer for this tag
 				if (bxml->ll4.child && tlSaveChildNodes)
 				{
 					// There are children, so this tag is not closed
-					oss_builderAppendData(build, (s8*)cgcTagCloser, sizeof(cgcTagCloser) - 1);
+					vvm_builderAppendData(build, (s8*)cgcTagCloser, sizeof(cgcTagCloser) - 1);
 
 					// Append CR/LF
-					oss_builderAppendData(build, (s8*)cgcCrLf, sizeof(cgcCrLf) - 1);
+					vvm_builderAppendData(build, (s8*)cgcCrLf, sizeof(cgcCrLf) - 1);
 
 					// Append the children
 					ibxml_saveNode(build, (SBxml*)bxml->ll4.child, tlSaveChildNodes, tlSaveSiblings, tnError);
@@ -891,27 +891,27 @@ _asm nop;
 					// Close the tag
 					// Two spaces per indention
 					for (lnI = 0; lnI < bxml->level; lnI++)
-						oss_builderAppendData(build, (s8*)cgcSpaceBxmlIndent, sizeof(cgcSpaceBxmlIndent) - 1);
+						vvm_builderAppendData(build, (s8*)cgcSpaceBxmlIndent, sizeof(cgcSpaceBxmlIndent) - 1);
 
 					// </
-					oss_builderAppendData(build, (s8*)cgcTagClosingLeader, sizeof(cgcTagClosingLeader) - 1);
+					vvm_builderAppendData(build, (s8*)cgcTagClosingLeader, sizeof(cgcTagClosingLeader) - 1);
 
 					// tag name
-					oss_builderAppendData(build, bxml->_name.data._s8, (u32)bxml->_name.length);
+					vvm_builderAppendData(build, bxml->_name.data._s8, (u32)bxml->_name.length);
 
 					// closing tag
-					oss_builderAppendData(build, (s8*)cgcTagCloser, sizeof(cgcTagCloser) - 1);
+					vvm_builderAppendData(build, (s8*)cgcTagCloser, sizeof(cgcTagCloser) - 1);
 
 				} else {
 					// We are completed, there are no children, or they do not want to see children, so we add the singleCloser
-					oss_builderAppendData(build, (s8*)cgcTagSingleCloser, sizeof(cgcTagSingleCloser) - 1);
+					vvm_builderAppendData(build, (s8*)cgcTagSingleCloser, sizeof(cgcTagSingleCloser) - 1);
 				}
 
 
 			//////////
 			// Append CR/LF
 			//////
-				oss_builderAppendData(build, (s8*)cgcCrLf, sizeof(cgcCrLf) - 1);
+				vvm_builderAppendData(build, (s8*)cgcCrLf, sizeof(cgcCrLf) - 1);
 
 
 			//////////
@@ -949,10 +949,10 @@ _asm nop;
 		// Append our attribute
 		//////
 			// Append space before each attribute
-			oss_builderAppendData(build, (s8*)cgcSpace1, sizeof(cgcSpace1) - 1);
+			vvm_builderAppendData(build, (s8*)cgcSpace1, sizeof(cgcSpace1) - 1);
 
 			// Attribute name
-			oss_builderAppendData(build, bxmla->_name.data._s8, (u32)bxmla->_name.length);
+			vvm_builderAppendData(build, bxmla->_name.data._s8, (u32)bxmla->_name.length);
 			if (bxmla->_data.datum.data._s8)
 			{
 				// There is actually data allocated for the tag
@@ -961,39 +961,39 @@ _asm nop;
 				{
 					// Both the attribute length and the total length are the same, so we can store it as one attr:##=
 					// However, if the data allocated is all NULLs, then we don't need to store it
-					if (bxmla->_data.datum.length >= 1 && bxmla->_data.datum.data._s8[0] == 0 && oss_scanForwardUntilCharacterChanges(bxmla->_data.datum.data, bxmla->_data.datum.length) == bxmla->_data.datum.length)
+					if (bxmla->_data.datum.length >= 1 && bxmla->_data.datum.data._s8[0] == 0 && vvm_scanForwardUntilCharacterChanges(bxmla->_data.datum.data, bxmla->_data.datum.length) == bxmla->_data.datum.length)
 					{
 						// It's all NULL, we need to write, so we write "attr::##"
 						sprintf_s(buffer, sizeof(buffer), "%u\0", bxmla->_data.lengthTotal);
-						oss_builderAppendData(build, (s8*)cgcColonColon, sizeof(cgcColonColon) - 1);
-						oss_builderAppendData(build, buffer, strlen(buffer));
+						vvm_builderAppendData(build, (s8*)cgcColonColon, sizeof(cgcColonColon) - 1);
+						vvm_builderAppendData(build, buffer, strlen(buffer));
 						llStoreAttributeData = false;
 
 					} else {
 						// There is data we need to write, so we write "attr:##="
 						sprintf_s(buffer, sizeof(buffer), "%u\0", bxmla->_data.lengthTotal);
-						oss_builderAppendData(build, (s8*)cgcColon, sizeof(cgcColon) - 1);
-						oss_builderAppendData(build, buffer, strlen(buffer));
+						vvm_builderAppendData(build, (s8*)cgcColon, sizeof(cgcColon) - 1);
+						vvm_builderAppendData(build, buffer, strlen(buffer));
 					}
 
 				} else {
 					// The attribute length and the total space assigned to it are not the same, so we must store as attr:#1:#2=
 					// Append total length indicated
 					sprintf_s(buffer, sizeof(buffer), "%u\0", bxmla->_data.lengthTotal);
-					oss_builderAppendData(build, (s8*)cgcColon, sizeof(cgcColon) - 1);
-					oss_builderAppendData(build, buffer, strlen(buffer));
+					vvm_builderAppendData(build, (s8*)cgcColon, sizeof(cgcColon) - 1);
+					vvm_builderAppendData(build, buffer, strlen(buffer));
 					// Append data length
 					sprintf_s(buffer, sizeof(buffer), "%u\0", bxmla->_data.datum.length);
-					oss_builderAppendData(build, (s8*)cgcColon, sizeof(cgcColon) - 1);
-					oss_builderAppendData(build, buffer, strlen(buffer));
+					vvm_builderAppendData(build, (s8*)cgcColon, sizeof(cgcColon) - 1);
+					vvm_builderAppendData(build, buffer, strlen(buffer));
 				}
 
 				// If we need to store the literal data, do so
 				if (llStoreAttributeData)
 				{
 					// Store the attribute data (equal sign and content)
-					oss_builderAppendData(build, (s8*)cgcEqual, sizeof(cgcEqual) - 1);
-					oss_builderAppendData(build, bxmla->_data.datum.data._s8, (u32)bxmla->_data.datum.length);
+					vvm_builderAppendData(build, (s8*)cgcEqual, sizeof(cgcEqual) - 1);
+					vvm_builderAppendData(build, bxmla->_data.datum.data._s8, (u32)bxmla->_data.datum.length);
 				}
 
 
@@ -1001,8 +1001,8 @@ _asm nop;
 				// There is no data allocated, so it's a storage mechanism that has no data associated with it
 				// These are stored as attr::##
 				sprintf_s(buffer, sizeof(buffer), "%u\0", max(bxmla->_data.lengthTotal, bxmla->_data.lengthTotal));
-				oss_builderAppendData(build, (s8*)cgcColonColon, sizeof(cgcColonColon) - 1);
-				oss_builderAppendData(build, buffer, strlen(buffer));
+				vvm_builderAppendData(build, (s8*)cgcColonColon, sizeof(cgcColonColon) - 1);
+				vvm_builderAppendData(build, buffer, strlen(buffer));
 			}
 		}
 	}
@@ -1058,10 +1058,10 @@ _asm nop;
 				}
 
 				// Delete the name
-				oss_datumDelete(&bxmla->_name);
+				vvm_datumDelete(&bxmla->_name);
 
 				// Delete the data
-				oss_datum2Delete(&bxmla->_data);
+				vvm_datum2Delete(&bxmla->_data);
 
 				// Now that we've deleted the subordinate structure components, we are free to release the structure itself, both happily, and obediently. :-)
 				// Indicate we found our man
@@ -1151,7 +1151,7 @@ _asm nop;
 
 			// If we're valid, duplicate the source entry's data component
 			if (bxmlaNew)
-				oss_datum2Duplicate(&bxmlaNew->_data, &bxmlaOriginal->_data);
+				vvm_datum2Duplicate(&bxmlaNew->_data, &bxmlaOriginal->_data);
 		}
 		// Indicate our status
 		return(bxmlaNew);
@@ -1185,10 +1185,10 @@ _asm nop;
 				memset(bxmlaNew, 0, sizeof(SBxmla));
 
 				// Populate its key components
-				bxmlaNew->ll.uniqueId = oss_getNextUniqueId();
+				bxmlaNew->ll.uniqueId = vvm_getNextUniqueId();
 
 				// Duplicate the source entry's components
-				oss_datumSet(&bxmlaNew->_name, (u8*)tcNewName, tnNewNameLength, false);
+				vvm_datumSet(&bxmlaNew->_name, (u8*)tcNewName, tnNewNameLength, false);
 			}
 		}
 		// Indicate our status
@@ -1213,7 +1213,7 @@ _asm nop;
 		if (bxmlaNew)
 		{
 			// Append the data
-			oss_datum2Set(&bxmlaNew->_data, (u8*)tcData, tnDataLength, tnTotalDataLength, false);
+			vvm_datum2Set(&bxmlaNew->_data, (u8*)tcData, tnDataLength, tnTotalDataLength, false);
 
 		}
 		// Indicate our status
@@ -1248,10 +1248,10 @@ _asm nop;
 				memset(bxmlNew, 0, sizeof(SBxmla));
 
 				// Populate its key components
-				bxmlNew->ll4.uniqueId = oss_getNextUniqueId();
+				bxmlNew->ll4.uniqueId = vvm_getNextUniqueId();
 
 				// Duplicate the source entry's components
-				oss_datumSet(&bxmlNew->_name, (u8*)tcNewName, tnNewNameLength, false);
+				vvm_datumSet(&bxmlNew->_name, (u8*)tcNewName, tnNewNameLength, false);
 			}
 		}
 		// Indicate our status
@@ -1288,7 +1288,7 @@ _asm nop;
 			if (bxmlNew)
 			{
 				// Duplicate the name
-				oss_datumSet(&bxmlNew->_name, (u8*)tcNewName, tnNewNameLength, false);
+				vvm_datumSet(&bxmlNew->_name, (u8*)tcNewName, tnNewNameLength, false);
 
 				// If we are to copy attributes, do so
 				if (tlCopyAttributes && bxmlSrc->_attributes.masterCount != 0)
@@ -1334,7 +1334,7 @@ _asm nop;
 			// Iterate through each attribute copying them out
 			cb._func	= (u64)&iibxml_nodeCopyAttributesCallback;
 			cb.extra	= (u64)(void*)&params;
-			oss_SEChain_iterateThroughForCallback(&bxmlSrc->_attributes, &cb);
+			vvm_SEChain_iterateThroughForCallback(&bxmlSrc->_attributes, &cb);
 
 			// Update the result if we failed
 			if (tlResult && !*params.tlResult)
@@ -1362,7 +1362,7 @@ _asm nop;
 			bxmlaNew	= ibxml_attributeDuplicate(bxmla);
 
 			// Append this attribute to the destination
-			if (bxmlaNew)		ioss_SEChain_appendOrPrependExisting(&params->bxmlDst->_attributes, (SLL*)bxmlaNew, _COMMON_START_END_SMALL_BLOCK_SIZE, false, &llResult);
+			if (bxmlaNew)		ivvm_SEChain_appendOrPrependExisting(&params->bxmlDst->_attributes, (SLL*)bxmlaNew, _COMMON_START_END_SMALL_BLOCK_SIZE, false, &llResult);
 			else				llResult = false;
 
 			// Update our status if we fail
@@ -1434,7 +1434,7 @@ _asm nop;
 					//////////
 					// Append the duplicated tag name
 					//////
-						oss_datumDuplicate(&bxmlNew->_name, &bxmlSrcChild->_name);
+						vvm_datumDuplicate(&bxmlNew->_name, &bxmlSrcChild->_name);
 
 
 					//////////
@@ -1500,7 +1500,7 @@ _asm nop;
 		gsLastErrorInfo.lastErrorCode	= tnErrorNumber;
 
 		// Update the last error structure
-		oss_datumSet(&gsLastErrorInfo.description, (u8*)tcDescriptionZ, oss_strlen(_csu8p(tcDescriptionZ)), true);
+		vvm_datumSet(&gsLastErrorInfo.description, (u8*)tcDescriptionZ, oss_strlen(_csu8p(tcDescriptionZ)), true);
 		// When we get here, the last error has been updated
 	}
 
@@ -1533,8 +1533,8 @@ _asm nop;
 			if (bxml->_attributes.masterCount != 0)
 			{
 				// Get the count of items that should be deleted
-				lnOriginalCount	= oss_SEChain_countValids(&bxml->_attributes);
-				lnDeletedCount	= oss_SEChain_delete(&bxml->_attributes, (u64)&iibxml_nodeDeleteBranchAttributeCallback, (u64)(void*)bxml, true);
+				lnOriginalCount	= vvm_SEChain_countValids(&bxml->_attributes);
+				lnDeletedCount	= vvm_SEChain_delete(&bxml->_attributes, (u64)&iibxml_nodeDeleteBranchAttributeCallback, (u64)(void*)bxml, true);
 
 				// Our success indicates whether or not they were completely deleted
 				llResult = (lnOriginalCount == lnDeletedCount);
@@ -1563,8 +1563,8 @@ _asm nop;
 			bxml	= (SBxml*)cb->extra;
 
 			// Delete this attribute's datum and datum2 items
-			oss_datumDelete(&bxmla->_name);
-			oss_datum2Delete(&bxmla->_data);
+			vvm_datumDelete(&bxmla->_name);
+			vvm_datum2Delete(&bxmla->_data);
 		}
 	}
 
@@ -1576,7 +1576,7 @@ _asm nop;
 // Called to compute the SHA-1 of the one attribute, or all attributes, or just tags, or just data.
 //
 //////
-	u64 ioss_bxmlAttributeSha1One(SBxmla* bxmla, u8 sha20Bytes[20])
+	u64 ivvm_bxmlAttributeSha1One(SBxmla* bxmla, u8 sha20Bytes[20])
 	{
 		u8	context[92];
 		u8	buffer[64];
@@ -1586,17 +1586,17 @@ _asm nop;
 		if (bxmla)
 		{
 			// We can compute it
-			oss_sha1ComputeSha1_Start(context);
-			iioss_bxmlComputeSha1OnAttribute(bxmla, context, buffer, true, true);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			return(oss_sha1Compute64BitFromSha1(sha20Bytes));
+			vvm_sha1ComputeSha1_Start(context);
+			iivvm_bxmlComputeSha1OnAttribute(bxmla, context, buffer, true, true);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			return(vvm_sha1Compute64BitFromSha1(sha20Bytes));
 		}
 		// If we get here, failure
 		memset(sha20Bytes, 0, sizeof(sha20Bytes));
 		return(-1);
 	}
 
-	u64 ioss_bxmlAttributeSha1(SBxml* bxml, u8 sha20Bytes[20])
+	u64 ivvm_bxmlAttributeSha1(SBxml* bxml, u8 sha20Bytes[20])
 	{
 		u8	context[92];
 		u8	buffer[64];
@@ -1606,17 +1606,17 @@ _asm nop;
 		if (bxml)
 		{
 			// We can compute it
-			oss_sha1ComputeSha1_Start(context);
-			iioss_bxmlComputeSha1OnNode(bxml, context, buffer, 0, true, false, false);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			return(oss_sha1Compute64BitFromSha1(sha20Bytes));
+			vvm_sha1ComputeSha1_Start(context);
+			iivvm_bxmlComputeSha1OnNode(bxml, context, buffer, 0, true, false, false);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			return(vvm_sha1Compute64BitFromSha1(sha20Bytes));
 		}
 		// If we get here, failure
 		memset(sha20Bytes, 0, sizeof(sha20Bytes));
 		return(-1);
 	}
 
-	u64 ioss_bxmlAttributeSha1Tag(SBxml* bxml, u8 sha20Bytes[20])
+	u64 ivvm_bxmlAttributeSha1Tag(SBxml* bxml, u8 sha20Bytes[20])
 	{
 		SBxmla*	bxmla;
 		u8		context[92];
@@ -1627,29 +1627,29 @@ _asm nop;
 		if (bxml)
 		{
 			// We can compute it
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 			
 			// Repeat for every attribute, just doing the names
-			bxmla = oss_bxmlNodeGetFirstAttribute(bxml);
+			bxmla = vvm_bxmlNodeGetFirstAttribute(bxml);
 			while (bxmla)
 			{
 				// Process this attribute
-				iioss_bxmlComputeSha1OnAttribute(bxmla, context, buffer, true, false);
+				iivvm_bxmlComputeSha1OnAttribute(bxmla, context, buffer, true, false);
 
 				// Move to next attribute
-				bxmla = oss_bxmlaGetNext(bxmla);
+				bxmla = vvm_bxmlaGetNext(bxmla);
 			}
 
 			// All done
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			return(oss_sha1Compute64BitFromSha1(sha20Bytes));
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			return(vvm_sha1Compute64BitFromSha1(sha20Bytes));
 		}
 		// If we get here, failure
 		memset(sha20Bytes, 0, sizeof(sha20Bytes));
 		return(-1);
 	}
 
-	u64 ioss_bxmlAttributeSha1Data(SBxml* bxml, u8 sha20Bytes[20])
+	u64 ivvm_bxmlAttributeSha1Data(SBxml* bxml, u8 sha20Bytes[20])
 	{
 		SBxmla*	bxmla;
 		u8		context[92];
@@ -1660,22 +1660,22 @@ _asm nop;
 		if (bxml)
 		{
 			// We can compute it
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 
 			// Repeat for every attribute, just doing the names
-			bxmla = oss_bxmlNodeGetFirstAttribute(bxml);
+			bxmla = vvm_bxmlNodeGetFirstAttribute(bxml);
 			while (bxmla)
 			{
 				// Process this attribute
-				iioss_bxmlComputeSha1OnAttribute(bxmla, context, buffer, false, true);
+				iivvm_bxmlComputeSha1OnAttribute(bxmla, context, buffer, false, true);
 
 				// Move to next attribute
-				bxmla = oss_bxmlaGetNext(bxmla);
+				bxmla = vvm_bxmlaGetNext(bxmla);
 			}
 
 			// All done
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			return(oss_sha1Compute64BitFromSha1(sha20Bytes));
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			return(vvm_sha1Compute64BitFromSha1(sha20Bytes));
 		}
 		// If we get here, failure
 		memset(sha20Bytes, 0, sizeof(sha20Bytes));
@@ -1691,7 +1691,7 @@ _asm nop;
 //
 //////
 	// Computes the SHA-1 on the entire node, including its data, all children, all siblings (at or below the child level)
-	u64 ioss_bxmlNodeSha1(SBxml* bxml, u8 sha20Bytes[20])
+	u64 ivvm_bxmlNodeSha1(SBxml* bxml, u8 sha20Bytes[20])
 	{
 		u8	context[92];
 		u8	buffer[64];
@@ -1701,10 +1701,10 @@ _asm nop;
 		if (bxml)
 		{
 			// We can compute it
-			oss_sha1ComputeSha1_Start(context);
-			iioss_bxmlComputeSha1OnNode(bxml, context, buffer, 0, true, true, true);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			return(oss_sha1Compute64BitFromSha1(sha20Bytes));
+			vvm_sha1ComputeSha1_Start(context);
+			iivvm_bxmlComputeSha1OnNode(bxml, context, buffer, 0, true, true, true);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			return(vvm_sha1Compute64BitFromSha1(sha20Bytes));
 		}
 		// If we get here, failure
 		memset(sha20Bytes, 0, sizeof(sha20Bytes));
@@ -1712,7 +1712,7 @@ _asm nop;
 	}
 
 	// Computes the SHA-1 on the entire node tree of tag names only, including all children, all siblings (at or below the child level)
-	u64 ioss_bxmlNodeSha1Tag(SBxml* bxml, u8 sha20Bytes[20])
+	u64 ivvm_bxmlNodeSha1Tag(SBxml* bxml, u8 sha20Bytes[20])
 	{
 		u8	context[92];
 		u8	buffer[64];
@@ -1722,10 +1722,10 @@ _asm nop;
 		if (bxml)
 		{
 			// We can compute it
-			oss_sha1ComputeSha1_Start(context);
-			iioss_bxmlComputeSha1OnNode(bxml, context, buffer, 0, false, true, true);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			return(oss_sha1Compute64BitFromSha1(sha20Bytes));
+			vvm_sha1ComputeSha1_Start(context);
+			iivvm_bxmlComputeSha1OnNode(bxml, context, buffer, 0, false, true, true);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			return(vvm_sha1Compute64BitFromSha1(sha20Bytes));
 		}
 		// If we get here, failure
 		memset(sha20Bytes, 0, sizeof(sha20Bytes));
@@ -1733,7 +1733,7 @@ _asm nop;
 	}
 
 	// Computes the SHA-1 on the node's data, including only its attributes (names and data)
-	u64 ioss_bxmlNodeSha1Data(SBxml* bxml, u8 sha20Bytes[20])
+	u64 ivvm_bxmlNodeSha1Data(SBxml* bxml, u8 sha20Bytes[20])
 	{
 		u8	context[92];
 		u8	buffer[64];
@@ -1743,10 +1743,10 @@ _asm nop;
 		if (bxml)
 		{
 			// We can compute it
-			oss_sha1ComputeSha1_Start(context);
-			iioss_bxmlComputeSha1OnNode(bxml, context, buffer, 0, true, false, false);
-			oss_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
-			return(oss_sha1Compute64BitFromSha1(sha20Bytes));
+			vvm_sha1ComputeSha1_Start(context);
+			iivvm_bxmlComputeSha1OnNode(bxml, context, buffer, 0, true, false, false);
+			vvm_sha1ComputeSha1_FinishAsSha1(context, sha20Bytes, false);
+			return(vvm_sha1Compute64BitFromSha1(sha20Bytes));
 		}
 		// If we get here, failure
 		memset(sha20Bytes, 0, sizeof(sha20Bytes));
@@ -1754,7 +1754,7 @@ _asm nop;
 	}
 
 	// Computes the SHA-1 on this node, and possibly its attributes, children and siblings
-	void iioss_bxmlComputeSha1OnNode(SBxml* bxml, u8 handle[92], u8 buffer[64], u32 tnLevel, bool tlAttributes, bool tlChildren, bool tlSiblings)
+	void iivvm_bxmlComputeSha1OnNode(SBxml* bxml, u8 handle[92], u8 buffer[64], u32 tnLevel, bool tlAttributes, bool tlChildren, bool tlSiblings)
 	{
 		_isSBxmlComputeSha1NodeParams	cbParams;
 		SStartEndCallback				cb;
@@ -1769,37 +1769,37 @@ _asm nop;
 			cbParams.buffer64Bytes	= buffer;
 
 			// Compute the SHA-1 on the tag name of this node
-			oss_sha1ComputeSha1_ProcessThisData(handle, (s8*)bxml->_name.data._s8, (u32)bxml->_name.length);
+			vvm_sha1ComputeSha1_ProcessThisData(handle, (s8*)bxml->_name.data._s8, (u32)bxml->_name.length);
 
 			// If we are to process attributes, process them next
 			if (tlAttributes && bxml->_attributes.masterCount != 0)
 			{
-				cb._func	= (u64)&iioss_bxmlComputeSha1OnNodeAttributeCallback;
+				cb._func	= (u64)&iivvm_bxmlComputeSha1OnNodeAttributeCallback;
 				cb.extra	= (u64)(void*)&cbParams;
-				oss_SEChain_iterateThroughForCallback(&bxml->_attributes, &cb);
+				vvm_SEChain_iterateThroughForCallback(&bxml->_attributes, &cb);
 			}
 
 			// If we are to process children, process them next
 			if (tlChildren)
-				iioss_bxmlComputeSha1OnNode(oss_bxmlNodeGetFirstChild(bxml), handle, buffer, tnLevel + 1, tlAttributes, tlChildren, tlSiblings);
+				iivvm_bxmlComputeSha1OnNode(vvm_bxmlNodeGetFirstChild(bxml), handle, buffer, tnLevel + 1, tlAttributes, tlChildren, tlSiblings);
 
 			// If we are to process siblings, process them next
 			if (tnLevel != 0 && tlSiblings)
 			{
-				bxml = oss_bxmlNodeGetNext(bxml);
+				bxml = vvm_bxmlNodeGetNext(bxml);
 				while (bxml)
 				{
 					// Compute on this sibling node
-					iioss_bxmlComputeSha1OnNode(bxml, handle, buffer, tnLevel + 1, tlAttributes, tlChildren, tlSiblings);
+					iivvm_bxmlComputeSha1OnNode(bxml, handle, buffer, tnLevel + 1, tlAttributes, tlChildren, tlSiblings);
 
 					// Move to next sibling
-					bxml = oss_bxmlNodeGetNext(bxml);
+					bxml = vvm_bxmlNodeGetNext(bxml);
 				}
 			}
 		}
 	}
 
-	void iioss_bxmlComputeSha1OnNodeAttributeCallback(SStartEndCallback* cb)
+	void iivvm_bxmlComputeSha1OnNodeAttributeCallback(SStartEndCallback* cb)
 	{
 		_isSBxmlComputeSha1NodeParams*	cbParams;
 
@@ -1810,18 +1810,18 @@ _asm nop;
 			cbParams = (_isSBxmlComputeSha1NodeParams*)cb->extra;
 
 			// Process this attribute
-			iioss_bxmlComputeSha1OnAttribute((SBxmla*)cb->ptr, cbParams->handle92Bytes, cbParams->buffer64Bytes, true, true);
+			iivvm_bxmlComputeSha1OnAttribute((SBxmla*)cb->ptr, cbParams->handle92Bytes, cbParams->buffer64Bytes, true, true);
 		}
 	}
 
 	// Computes the SHA-1 on this attribute, including its tag name and data
-	void iioss_bxmlComputeSha1OnAttribute(SBxmla* bxmla, u8 handle[92], u8 buffer[64], bool tlName, bool tlData)
+	void iivvm_bxmlComputeSha1OnAttribute(SBxmla* bxmla, u8 handle[92], u8 buffer[64], bool tlName, bool tlData)
 	{
 		//////////
 		// Attribute name
 		//////
 			if (tlName)
-				oss_sha1ComputeSha1_ProcessThisData(handle, (s8*)bxmla->_name.data._s8, (u32)bxmla->_name.length);
+				vvm_sha1ComputeSha1_ProcessThisData(handle, (s8*)bxmla->_name.data._s8, (u32)bxmla->_name.length);
 
 
 			if (tlData)
@@ -1831,15 +1831,440 @@ _asm nop;
 				//////
 					// Get a 32-byte form of the lengthTotal and the populated length values
 					sprintf_s((s8*)buffer, 64, "%016llx%016llx\0", bxmla->_data.lengthTotal, bxmla->_data.datum.length);
-					oss_sha1ComputeSha1_ProcessThisData(handle, (s8*)buffer, 32);
+					vvm_sha1ComputeSha1_ProcessThisData(handle, (s8*)buffer, 32);
 
 
 				//////////
 				// Attribute raw data
 				//////
 					if (bxmla->_data.datum.length != 0)
-						oss_sha1ComputeSha1_ProcessThisData(handle, bxmla->_data.datum.data._s8, (u32)bxmla->_data.datum.length);
+						vvm_sha1ComputeSha1_ProcessThisData(handle, bxmla->_data.datum.data._s8, (u32)bxmla->_data.datum.length);
 			}
 
 		// This attribute is completed
+	}
+
+
+
+
+//////////
+//
+// Called to search for the attribute and store it optionally if indicated
+//
+//////
+	SBxmla* iivvm_bxmlFindAttribute(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance)
+	{
+		SBxmla* lbxmla;
+
+
+		// Find and store the attribute
+		lbxmla = vvm_bxmlFindAttribute(bxml, tsWildcardSearch->data._s8, (u32)tsWildcardSearch->length, tnInstance);
+		if (bxmla)
+			*bxmla = lbxmla;
+
+		// Indicate our success or failure
+		return(lbxmla);
+	}
+
+
+
+
+//////////
+//
+// Called to find the first match from the indicated location.
+//
+// Note:  *x must be NULL on the first call.  If x is populated, and *x is not NULL, it is assumed
+//        to have been populated by a prior call to iivvm_bxmlFindFirst() and is reused.
+//
+// Note:  Use oss_free(x) to release the memory when it's no longer needed.
+//
+//////
+	bool iivvm_bxmlFindFirst(SBxml* bxmlRoot, SBxml** bxmlNodeFound, SBxmla** bxmlaAttributeFound, SDatum* tsWildcard, bool tlTraverseChildren, bool tlSearchAttributes, void** x)
+	{
+		_isSBxmlFind*	bxmlFind;
+		_isSBxmlFind	xTemp;
+
+
+		//////////
+		// Create our x structure (if they want one)
+		//////
+			if (x)
+			{
+				// They want one
+				if (!*x)
+				{
+					// It hasn't been populated yet
+					bxmlFind = (_isSBxmlFind*)oss_alloc(sizeof(_isSBxmlFind), true);	// Initially set everything to NULL
+					if (!bxmlFind)
+					{
+						// Failure allocating memory
+						return(false);
+					}
+					// Store the pointer for the user's use
+					*x = bxmlFind;
+
+				} else {
+					// Grab the existing pointer
+					bxmlFind = (_isSBxmlFind*)*x;
+				}
+				// Initialize the memory block to empty
+				memset(bxmlFind, 0, sizeof(_isSBxmlFind));
+
+			} else {
+				// We will create a fake x for the purpose of a one-shot find
+				memset(&xTemp, 0, sizeof(_isSBxmlFind));
+				bxmlFind = &xTemp;
+			}
+
+
+		//////////
+		// Populate the initial information, so vvm_bxmlFindcontinue() knows how to proceed, and where to stop
+		//////
+			bxmlFind->bxmlRoot				= bxmlRoot;
+			bxmlFind->bxmlRootParent		= (SBxml*)bxmlRoot->ll4.parent;
+
+			bxmlFind->traverseChildren		= tlTraverseChildren;
+			bxmlFind->searchAttributes		= tlSearchAttributes;
+
+			bxmlFind->bxmlNodeFound			= bxmlNodeFound;
+			bxmlFind->bxmlaAttributeFound	= bxmlaAttributeFound;
+			bxmlFind->wildcard				= tsWildcard;
+
+
+		//////////
+		// Call the function
+		//////
+			if (x)		return(iivvm_bxmlFindContinue(*x));					// Call the function and return the result
+			else		return(iivvm_bxmlFindContinue((void*)&xTemp));		// Call the function using our xTemp, and return the result
+	}
+
+
+
+
+//////////
+//
+// Called to continue a prior call to vvm_bxmlFindFirst() and the x that was populated there.
+//
+// Note:  The pointers for bxmlNodeFound and bxmlaAttributeFound will be reused and populated based
+//        on the results of this find continue.
+//
+// Note:  The previous tsWildcard SDatum must remain viable for this to continue.  The wildcard
+//        values used in tsWildcard can be updated during the middle of the search, but the search
+//        will only continue forward from the last find unless vvm_bxmlFindFirst() is called.
+//
+//////
+	bool iivvm_bxmlFindContinue(void* x)
+	{
+		_isSBxmlFind*	bxmlFind;
+
+
+		// Grab our pointer
+		bxmlFind = (_isSBxmlFind*)x;
+
+
+		//////////
+		// What is our status?
+		//////
+				 if (bxmlFind->lastFindOnNode)			goto continueToAttributes;				// Last find was this node, so we continue on beyond that node
+			else if (bxmlFind->lastFindOnAttribute)		goto continueToNextAttribute;			// Last find was this attribute, so we continue on to the next attribute
+			else										bxmlFind->bxml = bxmlFind->bxmlRoot;	// There was no last find.  So we start at the beginning.
+
+
+		///////////
+		// Search for the first match
+		//////
+			while (bxmlFind->bxml)
+			{
+				//////////
+				// Is this node name a match?
+				//////
+					if (bxmlFind->bxmlNodeFound && vvm_wildcardMatch(_csu8p(bxmlFind->bxml->_name.data._u8), _csu8p(bxmlFind->wildcard->data._u8), false) == 0)
+					{
+						// Yes, store the found information node
+															*bxmlFind->bxmlNodeFound		= bxmlFind->bxml;	// Store the found node
+						if (bxmlFind->bxmlaAttributeFound)	*bxmlFind->bxmlaAttributeFound	= NULL;				// Indicate the attribute was not found
+
+						// Update user's x for subsequent calls to vvm_bxmlFindContinue()
+						bxmlFind->lastFindOnNode		= true;		// Was found on a node, not an attribute
+						bxmlFind->lastFindOnAttribute	= false;	// Was found on a node, not an attribute
+
+						// Indicate success
+						return(true);
+					}
+					// If we get here, no match on node name
+
+
+				//////////
+				// Does it match on any of the attributes?
+				//////
+continueToAttributes:
+					if (bxmlFind->bxmlaAttributeFound)
+					{
+						// Iterate through any attributes
+						if (!bxmlFind->bxml && bxmlFind->bxmla)
+							bxmlFind->bxml = bxmlFind->bxmla->_parent;		// Update the bxml by the current attribute's parent
+
+						// Make sure this attribute still has a parent
+						if (!bxmlFind->bxml)
+							break;		// Nope, we're done with this search
+
+						for ( ; bxmlFind->_mlIterator < bxmlFind->bxml->_attributes.masterCount; )
+						{
+							// Grab this attribute
+							bxmlFind->_ml = bxmlFind->bxml->_attributes.master[bxmlFind->_mlIterator];
+
+							// Is this master slot used?
+							if (bxmlFind->_ml && bxmlFind->_ml->used)
+							{
+								// Grab the master list's associated pointer, which is the attribute
+								bxmlFind->bxmla = (SBxmla*)bxmlFind->_ml->ptr;
+
+								// Does this attribute name match
+								if (bxmlFind->bxmla && vvm_wildcardMatch(_csu8p(bxmlFind->bxmla->_name.data._u8), _csu8p(bxmlFind->wildcard->data._u8), false) == 0)
+								{
+									// Yes, store the found information node
+																	*bxmlFind->bxmlaAttributeFound	= bxmlFind->bxmla;	// Store the found attribute
+									if (bxmlFind->bxmlNodeFound)	*bxmlFind->bxmlNodeFound		= NULL;				// Indicate the node was not found
+
+
+									// Update user's x for subsequent calls to vvm_bxmlFindContinue()
+									bxmlFind->lastFindOnNode		= false;	// Was found on an attribute, not a node
+									bxmlFind->lastFindOnAttribute	= true;		// Was found on an attribute, not a node
+
+									// Indicate success
+									return(true);
+								}
+							}
+continueToNextAttribute:
+							// Move to next entry
+							++bxmlFind->_mlIterator;
+						}
+					}
+
+
+				//////////
+				// See if they are any children?
+				//////
+					if (bxmlFind->traverseChildren && bxmlFind->bxml->ll4.firstChild)
+					{
+						// Search child nodes
+						bxmlFind->bxml			= (SBxml*)bxmlFind->bxml->ll4.firstChild;
+						bxmlFind->_mlIterator	= 0;
+
+					} else {
+						// Iterate until we find a sibling or reach the end of the parentage
+						while (1)
+						{
+							if (bxmlFind->bxml->ll4.next)
+							{
+								// Continue on to the next sibling
+								bxmlFind->bxml			= (SBxml*)bxmlFind->bxml->ll4.next;
+								bxmlFind->_mlIterator	= 0;
+								break;
+
+							} else {
+								// We're done at this level, can we go back up one?
+								if (!bxmlFind->bxml->ll4.parent || (SBxml*)bxmlFind->bxml->ll4.parent == bxmlFind->bxmlRootParent)
+								{
+									// No, if we go up another level we'll exit the bxml, or we'll be at the root's parent
+									// Yes, no more finds
+									if (bxmlFind->bxmlNodeFound)			*bxmlFind->bxmlNodeFound		= NULL;		// Not found on a node
+									if (bxmlFind->bxmlaAttributeFound)		*bxmlFind->bxmlaAttributeFound	= NULL;		// Not found on an attribute
+									return(false);
+
+								} else {
+									// Go back up to the parent
+									bxmlFind->bxml = (SBxml*)bxmlFind->bxml->ll4.parent;
+									// And by looping, then to the parent's next sibling
+								}
+							}
+						}
+					}
+			}
+			// When we get here, no additional find was made with all the nodes at this level
+
+
+		//////////
+		// Indicate failure
+		//////
+			return(false);
+	}
+
+
+
+
+//////////
+//
+// Called to find the first data match from the indicated location.
+//
+// Note:  *x must be NULL on the first call.  If x is populated, and *x is not NULL, it is assumed
+//        to have been populated by a prior call to iivvm_bxmlDataFindFirst() and is reused.
+//
+// Note:  Use oss_free(x) to release the memory when it's no longer needed.
+//
+//////
+	bool iivvm_bxmlDataFindFirst(SBxml* bxmlRoot, SBxmla** bxmlaAttributeFound, SDatum* tsWildcard, bool tlTraverseChildren, void** x)
+	{
+		_isSBxmlFind*	bxmlFind;
+		_isSBxmlFind	xTemp;
+
+
+		//////////
+		// Create our x structure (if they want one)
+		//////
+			if (x)
+			{
+				// They want one
+				if (!*x)
+				{
+					// It hasn't been populated yet
+					bxmlFind = (_isSBxmlFind*)oss_alloc(sizeof(_isSBxmlFind), true);	// Initially set everything to NULL
+					if (!bxmlFind)
+					{
+						// Failure allocating memory
+						return(false);
+					}
+					// Store the pointer for the user's use
+					*x = bxmlFind;
+				}
+				//else it's already been created, but will be re-populated below
+
+			} else {
+				// We will create a fake x for the purpose of a one-shot find
+				memset(&xTemp, 0, sizeof(_isSBxmlFind));
+				bxmlFind = &xTemp;
+			}
+
+
+		//////////
+		// Populate the initial information, so vvm_bxmlFindcontinue() knows how to proceed, and where to stop
+		//////
+			bxmlFind->bxmlRoot				= bxmlRoot;
+			bxmlFind->bxmlRootParent		= (SBxml*)bxmlRoot->ll4.parent;
+			bxmlFind->bxml					= NULL;
+			bxmlFind->bxmla					= NULL;
+
+			bxmlFind->traverseChildren		= tlTraverseChildren;
+
+			bxmlFind->bxmlaAttributeFound	= bxmlaAttributeFound;
+			bxmlFind->wildcard				= tsWildcard;
+
+
+		//////////
+		// Call the function
+		//////
+			if (x)		return(iivvm_bxmlDataFindContinue(*x));					// Call the function and return the result
+			else		return(iivvm_bxmlDataFindContinue((void*)&xTemp));		// Call the function using our xTemp, and return the result
+	}
+
+
+
+
+//////////
+//
+// Called to continue a prior call to vvm_bxmlFindFirst() and the x that was populated there.
+//
+// Note:  The pointers for bxmlNodeFound and bxmlaAttributeFound will be reused and populated based
+//        on the results of this find continue.
+//
+// Note:  The previous tsWildcard SDatum must remain viable for this to continue.  The wildcard
+//        values used in tsWildcard can be updated during the middle of the search, but the search
+//        will only continue forward from the last find unless vvm_bxmlFindFirst() is called.
+//
+//////
+	bool iivvm_bxmlDataFindContinue(void* x)
+	{
+		_isSBxmlFind* bxmlFind;
+
+
+		// Grab our pointer
+		bxmlFind = (_isSBxmlFind*)x;
+
+
+		//////////
+		// What is our status?
+		//////
+			if (bxmlFind->lastFindOnAttribute)		goto continueToNextAttribute;			// Last find was this attribute, so we continue on to the next attribute
+			else									bxmlFind->bxml = bxmlFind->bxmlRoot;	// There was no last find.  So we start at the beginning.
+
+
+		///////////
+		// Search for the first match
+		//////
+			while (bxmlFind->bxml)
+			{
+				//////////
+				// Does it match on any of the attribute's data?
+				//////
+					// Iterate through any attributes
+					bxmlFind->_ml = bxmlFind->bxml->_attributes.root;
+					while (bxmlFind->_ml)
+					{
+						// Is this master slot used?
+						if (bxmlFind->_ml->used)
+						{
+							// Grab the master list's associated pointer, which is the attribute
+							bxmlFind->bxmla = (SBxmla*)bxmlFind->_ml->ptr;
+
+							// Does this attribute name match
+							if (bxmlFind->bxmla && vvm_wildcardMatch(_csu8p(bxmlFind->bxmla->_data.datum.data._u8), _csu8p(bxmlFind->wildcard->data._u8), false) == 0)
+							{
+								// Yes, store the found information node
+								*bxmlFind->bxmlaAttributeFound	= bxmlFind->bxmla;	// Store the found attribute
+								bxmlFind->lastFindOnAttribute	= true;				// Was found on an attribute
+
+								// Indicate success
+								return(true);
+							}
+						}
+
+continueToNextAttribute:
+						// Move to next record
+						bxmlFind->_ml = (SMasterList*)bxmlFind->_ml->ll.next;
+					}
+
+
+				//////////
+				// See if they are any children?
+				//////
+					if (bxmlFind->traverseChildren && bxmlFind->bxml->ll4.firstChild)
+					{
+						// Search child nodes
+						bxmlFind->bxml = (SBxml*)bxmlFind->bxml->ll4.firstChild;
+
+					} else {
+						// Iterate until we find a sibling or reach the end of the parentage
+						while (1)
+						{
+							if (bxmlFind->bxml->ll4.next)
+							{
+								// Continue on to the next sibling
+								bxmlFind->bxml = (SBxml*)bxmlFind->bxml->ll4.next;
+								break;
+
+							} else {
+								// We're done at this level, can we go back up one?
+								if (!bxmlFind->bxml->ll4.parent || (SBxml*)bxmlFind->bxml->ll4.parent == bxmlFind->bxmlRootParent)
+								{
+									// No, if we go up another level we'll exit the bxml, or we'll be at the root's parent
+									// Yes, no more finds
+									*bxmlFind->bxmlaAttributeFound = NULL;		// Not found on an attribute
+									return(false);
+
+								} else {
+									// Go back up to the parent
+									bxmlFind->bxml = (SBxml*)bxmlFind->bxml->ll4.parent;
+									// And by looping, then to the parent's next sibling
+								}
+							}
+						}
+					}
+			}
+			// When we get here, no additional find was made with all the nodes at this level
+
+
+		//////////
+		// Indicate failure
+		//////
+			return(false);
 	}

@@ -246,5 +246,10 @@
 		<icon name="roundRed"/>
 		<icon name="roundGrn"/>
 		<icon name="roundBlu"/>
+		<icon name="edit" tip="Edit mode"/>
+		<icon name="move" tip="Move item"/>
+		<icon name="stretch" tip="Stretch item"/>
+		<icon name="rotate" tip="Rotate item"/>
+		<icon name="scale" tip="Scale item"/>
 	</icons>
 </vdebug>

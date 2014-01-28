@@ -208,7 +208,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 //////////
 // Various macros
 //////
-	#define oss_strlen(tcData)			oss_scanForwardUntilCharacter(tcData, 0)
+	#define oss_strlen(tcData)			vvm_scanForwardUntilCharacter(tcData, 0)
 	#define defineCallback1(x, arg1) \
 											u64 semaphore_ ## x; \
 												union { \
@@ -557,7 +557,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	const u32 _LL4_EAST			= 2;
 	const u32 _LL4_NORTH		= 4;
 	const u32 _LL4_SOUTH		= 8;
-	const u32 _LL4_ALL			= 16;			// Go out in every direction (only valid on oss_ll4_deleteChain() and oss_ll4_deleteChainWithCallback())
+	const u32 _LL4_ALL			= 16;			// Go out in every direction (only valid on vvm_ll4_deleteChain() and vvm_ll4_deleteChainWithCallback())
 	struct SLL4
 	{
 		union {
@@ -1040,7 +1040,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 			SXYF64	p2;
 		};
 
-		// The following are computed with oss_math_computeLine()
+		// The following are computed with vvm_math_computeLine()
 		SXYF64		delta;						// Delta between start and end
 		SXYF64		mid;						// Midpoint
 		union {
@@ -1446,7 +1446,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 // In addition, for touch operations, it can also have added benefit for more rapid navigation.
 //
 // If a region has a canvas, then it will be drawn (re-drawn if dirty) whenever that region is
-// updated with the oss_screenRefresh() function.
+// updated with the vvm_screenRefresh() function.
 //
 //////
 //

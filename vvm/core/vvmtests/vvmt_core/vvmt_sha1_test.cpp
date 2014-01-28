@@ -85,8 +85,8 @@
 		// A9993E36 4706816A BA3E2571 7850C26C 9CD0D89D
 		//////
 			vvm_resourcePrintf(IDS_VVM_1DOTDOTDOT);
-			oss_sha1ComputeSha1AsHex((s8*)cgc_Test_Sha1_1_1, sizeof(cgc_Test_Sha1_1_1) - 1, cgc_Test_Sha1_1_3, true);;
-			if (oss_memicmp(_csu8p(cgc_Test_Sha1_1_2), _csu8p(cgc_Test_Sha1_1_3), sizeof(cgc_Test_Sha1_1_2) - 1) != 0)
+			vvm_sha1ComputeSha1AsHex((s8*)cgc_Test_Sha1_1_1, sizeof(cgc_Test_Sha1_1_1) - 1, cgc_Test_Sha1_1_3, true);;
+			if (vvm_memicmp(_csu8p(cgc_Test_Sha1_1_2), _csu8p(cgc_Test_Sha1_1_3), sizeof(cgc_Test_Sha1_1_2) - 1) != 0)
 			{
 failure:
 				// Error
@@ -102,8 +102,8 @@ failure:
 		// 84983E44 1C3BD26E BAAE4AA1 F95129E5 E54670F1
 		//////
 			vvm_resourcePrintf(IDS_VVM_2DOTDOTDOT);
-			oss_sha1ComputeSha1AsHex((s8*)cgc_Test_Sha1_2_1, sizeof(cgc_Test_Sha1_2_1) - 1, cgc_Test_Sha1_2_3, true);;
-			if (oss_memicmp(_csu8p(cgc_Test_Sha1_2_2), _csu8p(cgc_Test_Sha1_2_3), sizeof(cgc_Test_Sha1_2_2) - 1) != 0)
+			vvm_sha1ComputeSha1AsHex((s8*)cgc_Test_Sha1_2_1, sizeof(cgc_Test_Sha1_2_1) - 1, cgc_Test_Sha1_2_3, true);;
+			if (vvm_memicmp(_csu8p(cgc_Test_Sha1_2_2), _csu8p(cgc_Test_Sha1_2_3), sizeof(cgc_Test_Sha1_2_2) - 1) != 0)
 				goto failure;		// Failure
 
 
@@ -114,15 +114,15 @@ failure:
 			vvm_resourcePrintf(IDS_VVM_3DOTDOTDOT);
 
 			// Initialize
-			oss_sha1ComputeSha1_Start(context);
+			vvm_sha1ComputeSha1_Start(context);
 
 			// Process one million lower-case "a" characters in succession, one at a time
 			for (lnI = 0; lnI < 1000000; lnI++)
-				oss_sha1ComputeSha1_ProcessThisData(context, (s8*)cgc_Test_Sha1_3_1, sizeof(cgc_Test_Sha1_3_1) - 1);
+				vvm_sha1ComputeSha1_ProcessThisData(context, (s8*)cgc_Test_Sha1_3_1, sizeof(cgc_Test_Sha1_3_1) - 1);
 
 			// Finalize and compute the value a hex
-			oss_sha1ComputeSha1_FinishAsHex(context, cgc_Test_Sha1_3_3, true, true);
-			if (oss_memicmp(_csu8p(cgc_Test_Sha1_3_2), _csu8p(cgc_Test_Sha1_3_3), sizeof(cgc_Test_Sha1_3_2) - 1) != 0)
+			vvm_sha1ComputeSha1_FinishAsHex(context, cgc_Test_Sha1_3_3, true, true);
+			if (vvm_memicmp(_csu8p(cgc_Test_Sha1_3_2), _csu8p(cgc_Test_Sha1_3_3), sizeof(cgc_Test_Sha1_3_2) - 1) != 0)
 				goto failure;		// Failure
 
 

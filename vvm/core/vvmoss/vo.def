@@ -17,8 +17,6 @@ EXPORTS
 	oss_dateTimeGet
 	oss_changePathnameExtension
 	oss_validateFilenameCharacter
-	oss_getNextUniqueId
-	oss_getNextN_UniqueIds
 
 	oss_deleteScreen
 	oss_deleteCanvas
@@ -31,50 +29,17 @@ EXPORTS
 	oss_createRegionAndCanvas
 	oss_createFontHandle
 
-	oss_screenRefresh
-	oss_screenSetFocus
-	oss_screenCreateTemplate
-	oss_screenComputeMonitorCoordinates
-	oss_screenEnumerateMonitors
-	oss_screenGetDimensions
-	
-	oss_regionDuplicate
-	oss_regionDefaultPaint
-	oss_regionRefresh
-	
-	oss_canvasDrawFixedPointText
-	oss_canvasDrawText
-	oss_canvasFrameRect
-	oss_canvasFillRect
-	oss_canvasLine
-	oss_canvasArc
-	oss_canvasBezier
-	oss_canvasExtract
-	oss_canvasColorize
-	oss_canvasGrayscale
-	oss_canvasGradient
-	oss_canvasBitBlt
-	oss_canvasScale
-	oss_canvasRotate
-	oss_canvasRotateAbout
-	oss_canvasPolygon
-	
-	oss_caskDefineStandard
-	oss_caskDefineEncompassingRectangle
-	oss_caskDefineUpRectangle
-	oss_caskDefineDownRectangle
-	oss_caskSetPipByValues
-	oss_caskSetPipByStruct
-	oss_caskCreate
-	oss_caskRefresh
-
 	oss_screenMouseSetEventCallback
 	oss_screenMouseRemoveEventCallback
 	oss_screenMouseGetEventCallbacksList
 	oss_screenKeyboardSetEventCallback
 	oss_screenKeyboardRemoveEventCallback
 	oss_screenKeyboardGetEventCallbacksList
-	
+
+	oss_findSOssWindowLLByHwnd
+	oss_findSOssWindowLLByScreenId
+	oss_find_iswSOssWindowLL_By_iOssWindowId
+
 	oss_bitmapLoadFromDisk
 	oss_bitmapSaveToDisk
 	
@@ -87,6 +52,8 @@ EXPORTS
 	oss_getNextMessage
 	oss_messageBox
 	oss_messageBoxUnicode
+
+	oss_drawText
 
 	oss_alloc
 	oss_realloc
@@ -128,212 +95,9 @@ EXPORTS
 	oss_sharedAsciiDeleteFile
 	oss_sharedAsciiWriteOutFile
 	
-	oss_duplicateString
-	oss_duplicateUnicodeString
-	oss_datumSet
-	oss_datum2Set
-	oss_datumDuplicate
-	oss_datum2Duplicate
-	oss_datumDelete
-	oss_datum2Delete
-	oss_datum2SetNullString
-	oss_copyUpToShortestString
-	oss_wildcardMatchDatum
-	oss_wildcardMatch
-	oss_asciiToUnicode
-	oss_unicodeToAscii
-	oss_asciiToUnicodeChar
-	oss_unicodeToAsciiCharacter
-	oss_scanForwardUntilCharacterChanges
-	oss_scanForwardUntilCharacter
-	oss_unicodeMemcmp
-	oss_unicodeMemicmp
-	oss_unicodeMemset
-	oss_upperCaseW
-	oss_lowerCaseW
-	oss_memset
-	oss_memset4
-	oss_memcpy
-	oss_memcmp
-	oss_memicmp
-	oss_memicmpTwoLengths
-	oss_memicmpDatum
-	oss_memicmpDatum2
-	oss_memicmpDatumDatum
-	oss_memicmpDatum2Datum2
-	oss_deriveRGBA
-	oss_getPredictableSequentialPattern
-
-	oss_ll_create
-	oss_ll_insert
-	oss_ll_delete
-	oss_ll_deleteWithCallback
-	oss_ll_orphanize
-	oss_ll_deleteChain
-	oss_ll_deleteChainWithCallback
-	oss_ll_iterateViaCallback
-	oss_ll_iterateBackwardViaCallback
-	oss_ll_getFirstNode
-	oss_ll_getLastNode
-
-	oss_ll4_create
-	oss_ll4_createChain
-	oss_ll4_delete
-	oss_ll4_orphanize
-	oss_ll4_insertNorthSouth
-	oss_ll4_insertWestEast
-	oss_ll4_deleteChain
-	oss_ll4_deleteChainWithCallback
-	oss_ll4_iterateViaCallback
-	oss_ll4_getLastNode
-
-	oss_ll4bxml_orphanize
-	oss_ll4bxml_insert
-	oss_ll4bxml_insertAsChild
-	oss_ll4bxml_insertAsChildRegarding
-
-	oss_SEChain_prepend
-	oss_SEChain_append
-	oss_SEChain_appendRelativeToMember
-	oss_SEChain_appendExistingRelativeToMember
-
-	oss_SEChain_migrateAll
-	oss_SEChain_migrateByPtr
-	oss_SEChain_migrateByNum
-	oss_SEChain_completelyMigrateSLLByPtr
-	oss_SEChain_completelyMigrateSLLByNum
-
-	oss_SEChain_countValids
-	oss_SEChain_delete
-	oss_SEChain_deleteAsPtrBlock
-	oss_SEChain_deleteFrom
-	oss_SEChain_deleteFromAfterCallback
-
-	oss_SEChain_allocateAdditionalMasterSlots
-	oss_SEChain_searchByUniqueId
-	oss_SEChain_searchByCallback
-	oss_SEChain_iterateThroughForCallback
-	oss_SEChain_validate
-	oss_swapEndian
-	oss_RGBA2BGRA
-	oss_allocateAndNull
-	oss_isNeedleInHaystack
-	oss_isNeedleInHaystack_Unicode
-	oss_countConsecutiveAsciiNumericDigits
-	oss_convertTextToU32
-
-	oss_math_computeTriangle
-	oss_math_computeSquare
-	oss_math_computeLine
-	oss_math_squareRotateAbout
-	oss_math_getGravityOfThetaAndLeft
-	oss_math_getGravity07FromDecoratedGravity
-	oss_math_getAreaOfSquareUsing_po_p1_p2
-	oss_math_getNextAxisInterceptXY
-	oss_math_getGravityByRelativePosition
-	oss_math_getGravityInteger
-	oss_math_fineAdjustGravityByTheta
-	oss_math_adjustTheta
-	oss_math_withinDelta
-	oss_math_washFloans
-
-	oss_bezier_initialize
-	oss_bezier_setByValues
-
-	oss_polygon_initialize
-	oss_polygon_setByPolyLine
-	oss_polygon_setByValues
-	oss_polygon_reset
-	oss_polygon_freeAndRelease
-	
 	oss_fileFindFirst
 	oss_fileFindNext
 	oss_fileFindClose
-	
-	oss_builderCreateAndInitialize
-	oss_builderAppendData
-	oss_builderAllocateBytes
-	oss_builderSetSize
-	oss_builderFreeAndRelease
-	oss_builderAsciiWriteOutFile
-	
-	oss_sha1ComputeSha1
-	oss_sha1ComputeSha1As64Bit
-	oss_sha1ComputeSha1As32Bit
-	oss_sha1ComputeSha1AsHex
-	oss_sha1ConvertHexToSha1
-	oss_sha1ConvertSha1ToHex
-	oss_sha1ComputeSha1_Start
-	oss_sha1ComputeSha1_ProcessThisData
-	oss_sha1ComputeSha1_FinishAsSha1
-	oss_sha1ComputeSha1_FinishAsHex
-	oss_sha1Compute64BitFromSha1
-	oss_sha1Compute32BitFromSha1
-	oss_sha1Compare
-	
-	oss_bxmlLoad
-	oss_bxmlLoadFromBuffer
-	oss_bxmlSave
-	oss_bxmlSaveToBuffer
-
-	oss_bxmlaCreate
-	oss_bxmlaSetName
-	oss_bxmlaSetData
-	oss_bxmlaSetTotalLength
-	oss_bxmlaDelete
-	oss_bxmlaInsert
-	oss_bxmlaInsertExisting
-	oss_bxmlaCopy
-	oss_bxmlaCopyAs
-	oss_bxmlaGetNext
-	oss_bxmlaGetPrev
-	oss_bxmlaSha1One
-	oss_bxmlaSha1
-	oss_bxmlaSha1Tag
-	oss_bxmlaSha1Data
-	
-	oss_bxmlaFindAndGetString
-	oss_bxmlaFindAndGetU32
-	oss_bxmlaFindAndGetU64
-	oss_bxmlaFindAndGetBool
-	oss_bxmlaFindAndGetF32
-	oss_bxmlaFindAndGetF64
-
-	oss_bxmlaGetString
-	oss_bxmlaGetU32
-	oss_bxmlaGetU64
-	oss_bxmlaGetBool
-	oss_bxmlaGetF32
-	oss_bxmlaGetF64
-
-	oss_bxmlNodeCreate
-	oss_bxmlNodeSetName
-	oss_bxmlNodeDelete
-	oss_bxmlNodeInsert
-	oss_bxmlNodeInsertAsChild
-	oss_bxmlNodeInsertAsChildAfter
-	oss_bxmlNodeCopy
-	oss_bxmlNodeCopyAs
-	oss_bxmlNodeSha1
-	oss_bxmlNodeSha1Tag
-	oss_bxmlNodeSha1Data
-	
-	oss_bxmlNodeGetNext
-	oss_bxmlNodeGetPrev
-	oss_bxmlNodeGetParent
-	oss_bxmlNodeGetFirstChild
-	oss_bxmlNodeGetFirstAttribute
-	
-	oss_bxmlFindAttribute
-	oss_bxmlFindFirst
-	oss_bxmlFindContinue
-	oss_bxmlFindAllAsStartEndLists
-	
-	oss_bxmlDataFindFirst
-	oss_bxmlDataFindContinue
-	oss_bxmlDataFindAllAsStartEndList
-	
-	oss_bxmlGetLastError
 
 	oss_threadCreate
 	oss_threadSuspend

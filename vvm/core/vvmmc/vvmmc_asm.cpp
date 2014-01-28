@@ -60,7 +60,7 @@
 
 
 		// Allocate our assembly data
-		la = (SAssembly*)oss_SEChain_append(&tsProgram->_assembly, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SAssembly), _COMMON_START_END_BLOCK_SIZE, NULL);
+		la = (SAssembly*)vvm_SEChain_append(&tsProgram->_assembly, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SAssembly), _COMMON_START_END_BLOCK_SIZE, NULL);
 		if (!la)	return(0);		// This is bad.  Very bad.  Should never happen.
 		la->prog	= tsProgram;
 

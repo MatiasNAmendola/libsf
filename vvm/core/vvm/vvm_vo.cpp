@@ -62,6 +62,9 @@
 		if (!oss_createMessageWindow())
 			return(false);
 
+		// Initialize our unique number critical section access
+		InitializeCriticalSection(&gcsUniqueIdAccess);
+
 		// We're good
 		return(true);
 	}

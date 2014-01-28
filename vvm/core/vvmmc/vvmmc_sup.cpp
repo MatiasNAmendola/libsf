@@ -108,7 +108,7 @@
 		if (tseErrors && line && comp)
 		{
 			// Create our new error entry
-			lve = (SVvmmcError*)oss_SEChain_append(tseErrors, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SVvmmcError), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
+			lve = (SVvmmcError*)vvm_SEChain_append(tseErrors, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SVvmmcError), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 			if (lve)
 			{
 				// Store the error location
@@ -154,17 +154,17 @@
 		// Make sure our environment is sane
 		if (tseVariable && compName && compName->line && compName->line->base && compData && compData->line && compData->line->base && tnLength > 0)
 		{
-			lv = (SVariable*)oss_SEChain_append(tseVariable, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SVariable), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
+			lv = (SVariable*)vvm_SEChain_append(tseVariable, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SVariable), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 			if (lv)
 			{
 				// Store the variable
 				lv->name.data._s8					= (s8*)oss_alloc(compName->length + 1, true);
-				if (lv->name.data._s8)				oss_memcpy(lv->name.data._s8, compName->line->base + compName->line->start + compName->line->whitespace + compName->start, compName->length);
+				if (lv->name.data._s8)				vvm_memcpy(lv->name.data._s8, compName->line->base + compName->line->start + compName->line->whitespace + compName->start, compName->length);
 				lv->name.length						= compName->length;
 
 				// Store the variable's data
 				lv->current._value.data._s8			= (s8*)oss_alloc(tnLength + 1, true);
-				if (lv->current._value.data._s8)	oss_memcpy(lv->current._value.data._s8, compData->line->base + compData->line->start + compData->line->whitespace + compData->start, tnLength);
+				if (lv->current._value.data._s8)	vvm_memcpy(lv->current._value.data._s8, compData->line->base + compData->line->start + compData->line->whitespace + compData->start, tnLength);
 				lv->current._value.length			= tnLength;
 
 				// Indicate this variable is ascii character data
@@ -245,7 +245,7 @@
 		{
 			cb._func	= (u64)iivvmmc_searchVariablesByNameCallback;
 			cb.extra	= (u64)tsDatum;
-			return((SVariable*)oss_SEChain_searchByCallback(tseVariables, &cb));
+			return((SVariable*)vvm_SEChain_searchByCallback(tseVariables, &cb));
 
 		} else {
 			return(NULL);		// None are yet defined
@@ -294,8 +294,8 @@
 			line = (SOssLine*)cb->ptr;
 
 			// Validate any of the line's components or combined components
-			oss_SEChain_validate(&line->comps, 0);
-			oss_SEChain_validate(&line->compsCombined, 0);
+			vvm_SEChain_validate(&line->comps, 0);
+			vvm_SEChain_validate(&line->compsCombined, 0);
 
 			// If we get here, we're good, had there been an error there would've been _asm int 3 on one of those iValidateStartEnd entries
 			return(true);
@@ -405,8 +405,8 @@
 						{
 							// It is known, we need to swap it out
 							// Delete the existing components on this line
-							oss_SEChain_delete(&line->comps, 0, 0, true);
-							oss_SEChain_delete(&line->compsCombined, 0, 0, true);
+							vvm_SEChain_delete(&line->comps, 0, 0, true);
+							vvm_SEChain_delete(&line->compsCombined, 0, 0, true);
 
 
 							//////////
@@ -418,11 +418,11 @@
 								if (lcNewLineBase)
 								{
 									// Copy everything up to the tilde
-									oss_memcpy(lcNewLineBase, line->base + line->start, line->whitespace + lnStart);
+									vvm_memcpy(lcNewLineBase, line->base + line->start, line->whitespace + lnStart);
 									// Copy the substitution
-									oss_memcpy(lcNewLineBase + line->whitespace + lnStart, ld->current._value.data._s8, ld->current._value.length);
+									vvm_memcpy(lcNewLineBase + line->whitespace + lnStart, ld->current._value.data._s8, ld->current._value.length);
 									// Copy everything after the tilde
-									oss_memcpy(lcNewLineBase + line->whitespace + lnStart + ld->current._value.length, 
+									vvm_memcpy(lcNewLineBase + line->whitespace + lnStart + ld->current._value.length, 
 											line->base + line->start + line->whitespace + lnStart + lnEnd,
 											line->length - lnStart - lnEnd - 2);
 									// When we get here, we have our new, expanded line
@@ -532,7 +532,7 @@
 		// Add this filename to the list of loaded files
 		//////
 			lnLength	= strlen(tcSourcePathname);
-			lsf			= (SSourceFile*)oss_SEChain_append(&ta->includeFiles, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SSourceFile), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
+			lsf			= (SSourceFile*)vvm_SEChain_append(&ta->includeFiles, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SSourceFile), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 			if (!lsf)	return(NULL);		// Failure
 
 
@@ -541,7 +541,7 @@
 		//////
 			lsf->pathname.data._s8				= (s8*)oss_alloc(lnLength + 1, true);
 			if (!lsf->pathname.data._s8)		return(lsf);			// Failure
-			oss_memcpy(lsf->pathname.data._s8, tcSourcePathname, lnLength);
+			vvm_memcpy(lsf->pathname.data._s8, tcSourcePathname, lnLength);
 			lsf->pathname.length				= lnLength;
 
 
@@ -550,7 +550,7 @@
 		//////
 			lsf->sourceCode.data._s8			= (s8*)oss_alloc(tnFileSize, false);
 			if (!lsf->sourceCode.data._s8)		return(lsf);			// Failure
-			oss_memcpy(lsf->sourceCode.data._s8, tcData, tnFileSize);
+			vvm_memcpy(lsf->sourceCode.data._s8, tcData, tnFileSize);
 			lsf->sourceCode.length				= tnFileSize;
 
 
@@ -583,7 +583,7 @@
 #pragma message("vvmmc_sup.cpp::ivvmmc_loadSourceFile() contains several validation functions that can be removed in the future.")
 SStartEndCallback cb;
 cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
-oss_SEChain_validate(&lsf->lines, &cb);
+vvm_SEChain_validate(&lsf->lines, &cb);
 
 //if (iIsNeedleInHaystack(line->base + line->start + line->whitespace, line->length, "_", 1))
 //	oss_writeSOssLineSequenceCompsToDisk("\\libsf\\vvm\\vasm\\test\\testoutcomps.txt", &lsf->lines);
@@ -595,27 +595,27 @@ oss_SEChain_validate(&lsf->lines, &cb);
 // TODO:  (future enhancement) will need to continually combine items which are related, such as a variable _like_this_14_abc into a single alphanumeric
 					oss_combine2SOssComps			(line, _VVMMC_ICODE_UNDERSCORE,		_VVMMC_ICODE_NUMERIC,		_VVMMC_ICODE_ALPHANUMERIC);
 cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
-oss_SEChain_validate(&lsf->lines, &cb);
+vvm_SEChain_validate(&lsf->lines, &cb);
 
 					oss_combine2SOssComps			(line, _VVMMC_ICODE_ALPHA,			_VVMMC_ICODE_UNDERSCORE,	_VVMMC_ICODE_ALPHA);
 cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
-oss_SEChain_validate(&lsf->lines, &cb);
+vvm_SEChain_validate(&lsf->lines, &cb);
 
 					oss_combine2SOssComps			(line, _VVMMC_ICODE_UNDERSCORE,		_VVMMC_ICODE_ALPHA,			_VVMMC_ICODE_ALPHA);
 cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
-oss_SEChain_validate(&lsf->lines, &cb);
+vvm_SEChain_validate(&lsf->lines, &cb);
 
 					oss_combine2SOssComps			(line, _VVMMC_ICODE_ALPHA,			_VVMMC_ICODE_NUMERIC,		_VVMMC_ICODE_ALPHANUMERIC);
 cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
-oss_SEChain_validate(&lsf->lines, &cb);
+vvm_SEChain_validate(&lsf->lines, &cb);
 
 					oss_combine2SOssComps			(line, _VVMMC_ICODE_ALPHANUMERIC,	_VVMMC_ICODE_UNDERSCORE,	_VVMMC_ICODE_ALPHANUMERIC);
 cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
-oss_SEChain_validate(&lsf->lines, &cb);
+vvm_SEChain_validate(&lsf->lines, &cb);
 
 					oss_combine3SOssComps			(line, _VVMMC_ICODE_NUMERIC,		_VVMMC_ICODE_PERIOD,		_VVMMC_ICODE_NUMERIC,		_VVMMC_ICODE_NUMERIC);
 cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
-oss_SEChain_validate(&lsf->lines, &cb);
+vvm_SEChain_validate(&lsf->lines, &cb);
 
 //if (iIsNeedleInHaystack(line->base + line->start + line->whitespace, line->length, "_", 1))
 //	oss_writeSOssLineSequenceCompsToDisk("\\libsf\\vvm\\vasm\\test\\testoutcomps.txt", &lsf->lines);
@@ -626,15 +626,15 @@ oss_SEChain_validate(&lsf->lines, &cb);
 				//////
 					oss_combineAllBetweenSOssComps	(line, _VVMMC_ICODE_SINGLE_QUOTE,		_VVMMC_ICODE_SINGLE_QUOTED_TEXT);
 cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
-oss_SEChain_validate(&lsf->lines, &cb);
+vvm_SEChain_validate(&lsf->lines, &cb);
 
 					oss_combineAllBetweenSOssComps	(line, _VVMMC_ICODE_DOUBLE_QUOTE,		_VVMMC_ICODE_DOUBLE_QUOTED_TEXT);
 cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
-oss_SEChain_validate(&lsf->lines, &cb);
+vvm_SEChain_validate(&lsf->lines, &cb);
 
 					oss_combineAllAfterSOssComp		(line, _VVMMC_ICODE_COMMENT);
 cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
-oss_SEChain_validate(&lsf->lines, &cb);
+vvm_SEChain_validate(&lsf->lines, &cb);
 
 				//////////
 				// Move to next line
@@ -781,15 +781,15 @@ oss_SEChain_validate(&lsf->lines, &cb);
 							}
 
 							// Copy and null-terminate the filename
-							oss_memset(lcIncludeFilename, 0, sizeof(lcIncludeFilename));
+							vvm_memset(lcIncludeFilename, 0, sizeof(lcIncludeFilename));
 							if (compName->iCode == _VVMMC_ICODE_SINGLE_QUOTED_TEXT || compName->iCode == _VVMMC_ICODE_DOUBLE_QUOTED_TEXT)
 							{
 								// We have to bypass the quote character
-								oss_memcpy(lcIncludeFilename, compName->line->base + compName->line->start + compName->line->whitespace + compName->start + 1, min(lnLastPosition, sizeof(lcIncludeFilename)-1));
+								vvm_memcpy(lcIncludeFilename, compName->line->base + compName->line->start + compName->line->whitespace + compName->start + 1, min(lnLastPosition, sizeof(lcIncludeFilename)-1));
 
 							} else {
 								// It's just a filename, copy it as it is
-								oss_memcpy(lcIncludeFilename, compName->line->base + compName->line->start + compName->line->whitespace + compName->start, min(lnLastPosition, sizeof(lcIncludeFilename)-1));
+								vvm_memcpy(lcIncludeFilename, compName->line->base + compName->line->start + compName->line->whitespace + compName->start, min(lnLastPosition, sizeof(lcIncludeFilename)-1));
 							}
 
 							// Try to open it and load its lines
@@ -806,7 +806,7 @@ oss_SEChain_validate(&lsf->lines, &cb);
 								((SOssLine*)lsf->lines.last->ptr)->ll.next	= (SLL*)lineNext;
 
 								// Move all the lsf->lines to the end of tsf->lines.  They won't be in sequence in tsf->lines, but the proper order was handled above
-								oss_SEChain_migrateAll(&tsf->lines, &lsf->lines);
+								vvm_SEChain_migrateAll(&tsf->lines, &lsf->lines);
 
 // For debugging:
 // Write the output file of all the lines now to disk
@@ -1023,7 +1023,7 @@ oss_SEChain_validate(&lsf->lines, &cb);
 		if (tniCode == _VVMMC_ICODE_UNKNOWN)
 		{
 			// Allocate the start of this block
-			*block = (SBlock*)oss_SEChain_append(&pbsd->tsf->blocks, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SBlock), _COMMON_START_END_BLOCK_SIZE, NULL);
+			*block = (SBlock*)vvm_SEChain_append(&pbsd->tsf->blocks, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SBlock), _COMMON_START_END_BLOCK_SIZE, NULL);
 			if (!*block)
 			{
 				// Memory error
@@ -1120,7 +1120,7 @@ oss_SEChain_validate(&lsf->lines, &cb);
 			return(NULL);
 		}
 		// If we get here, we're in a block
-		pbsd->llab = (SLabelInfo*)oss_SEChain_append(&(*block)->labels, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SLabelInfo), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
+		pbsd->llab = (SLabelInfo*)vvm_SEChain_append(&(*block)->labels, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SLabelInfo), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 		if (!pbsd->llab)
 		{
 			// Memory error
@@ -1148,7 +1148,7 @@ oss_SEChain_validate(&lsf->lines, &cb);
 			return(NULL);
 		}
 		// If we get here, we're good
-		pbsd->ldfi = (SDllFuncInfo*)oss_SEChain_append(&(*block)->dllFuncs, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SDllFuncInfo), _COMMON_START_END_BLOCK_SIZE, NULL);
+		pbsd->ldfi = (SDllFuncInfo*)vvm_SEChain_append(&(*block)->dllFuncs, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SDllFuncInfo), _COMMON_START_END_BLOCK_SIZE, NULL);
 		if (!pbsd->ldfi)
 		{
 			// Memory error
@@ -1171,11 +1171,11 @@ oss_SEChain_validate(&lsf->lines, &cb);
 		if (pbsd->ldfi)
 		{
 			// Adding to the pipe data here
-			pbsd->lpip = (SPipeInfo*)oss_SEChain_append(&pbsd->ldfi->pipeData, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SPipeInfo), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
+			pbsd->lpip = (SPipeInfo*)vvm_SEChain_append(&pbsd->ldfi->pipeData, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SPipeInfo), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 
 		} else if (pbsd->llOkayToAddPipeDataToBlock) {
 			// We are adding to the block
-			pbsd->lpip = (SPipeInfo*)oss_SEChain_append(&(*block)->pipeData, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SPipeInfo), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
+			pbsd->lpip = (SPipeInfo*)vvm_SEChain_append(&(*block)->pipeData, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SPipeInfo), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 
 		} else {
 			// "What we have here is a failure to communicate" :-)

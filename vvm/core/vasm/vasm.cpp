@@ -310,7 +310,7 @@ void		iAssembleFile						(s8* tcPathname);
 		// Initialize our variables
 		memset(&lseProg, 0, sizeof(lseProg));
 		// Define this initial program to its default empty state
-		lp = (SProgram*)oss_SEChain_append(&lseProg, oss_getNextUniqueId(), oss_getNextUniqueId(), sizeof(SProgram), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
+		lp = (SProgram*)vvm_SEChain_append(&lseProg, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SProgram), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 		printf(vvmmc_loadResourceAsciiText(IDS_ASSEMBLING), tcPathname);
 
 

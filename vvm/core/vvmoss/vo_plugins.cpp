@@ -65,8 +65,8 @@
 		// Initialize
 		//////
 			memset(&lff, 0, sizeof(lff));
-			oss_datumSet(&lff.pathnameOfSearch, (u8*)".\\plugins\\",	-1, false);
-			oss_datumSet(&lff.filenameSearched, (u8*)"*.dll",			-1, false);
+			vvm_datumSet(&lff.pathnameOfSearch, (u8*)".\\plugins\\",	-1, false);
+			vvm_datumSet(&lff.filenameSearched, (u8*)"*.dll",			-1, false);
 
 
 		//////////

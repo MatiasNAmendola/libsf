@@ -80,16 +80,22 @@
 	void				iibxml_recordLastError							(u32 tnResourceNumber, u32 tnErrorNumber, s8* tcDescriptionZ, SBxml* bxml, SBxmla* bxmla, u64 tnErrorOffset);
 	bool				ibxml_nodeDeleteBranch							(SBxml* bxml);
 	void				iibxml_nodeDeleteBranchAttributeCallback		(SStartEndCallback* cb);
-	u64					ioss_bxmlAttributeSha1One						(SBxmla* bxmla, u8 sha20Bytes[20]);
-	u64					ioss_bxmlAttributeSha1							(SBxml*  bxml,  u8 sha20Bytes[20]);
-	u64					ioss_bxmlAttributeSha1Tag						(SBxml*  bxml,  u8 sha20Bytes[20]);
-	u64					ioss_bxmlAttributeSha1Data						(SBxml*  bxml,  u8 sha20Bytes[20]);
-	u64					ioss_bxmlNodeSha1								(SBxml*  bxml,  u8 sha20Bytes[20]);
-	u64					ioss_bxmlNodeSha1Tag							(SBxml*  bxml,  u8 sha20Bytes[20]);
-	u64					ioss_bxmlNodeSha1Data							(SBxml*  bxml,  u8 sha20Bytes[20]);
-	void				iioss_bxmlComputeSha1OnNode						(SBxml*  bxml,  u8 handle[92], u8 buffer[64], u32 tnLevel, bool tlAttributes, bool tlChildren, bool tlSiblings);
-	void				iioss_bxmlComputeSha1OnNodeAttributeCallback	(SStartEndCallback* cb);
-	void				iioss_bxmlComputeSha1OnAttribute				(SBxmla* bxmla, u8 handle[92], u8 buffer[64], bool tlName, bool tlData);
+	u64					ivvm_bxmlAttributeSha1One						(SBxmla* bxmla, u8 sha20Bytes[20]);
+	u64					ivvm_bxmlAttributeSha1							(SBxml*  bxml,  u8 sha20Bytes[20]);
+	u64					ivvm_bxmlAttributeSha1Tag						(SBxml*  bxml,  u8 sha20Bytes[20]);
+	u64					ivvm_bxmlAttributeSha1Data						(SBxml*  bxml,  u8 sha20Bytes[20]);
+	u64					ivvm_bxmlNodeSha1								(SBxml*  bxml,  u8 sha20Bytes[20]);
+	u64					ivvm_bxmlNodeSha1Tag							(SBxml*  bxml,  u8 sha20Bytes[20]);
+	u64					ivvm_bxmlNodeSha1Data							(SBxml*  bxml,  u8 sha20Bytes[20]);
+	void				iivvm_bxmlComputeSha1OnNode						(SBxml*  bxml,  u8 handle[92], u8 buffer[64], u32 tnLevel, bool tlAttributes, bool tlChildren, bool tlSiblings);
+	void				iivvm_bxmlComputeSha1OnNodeAttributeCallback	(SStartEndCallback* cb);
+	void				iivvm_bxmlComputeSha1OnAttribute				(SBxmla* bxmla, u8 handle[92], u8 buffer[64], bool tlName, bool tlData);
+
+	bool				iivvm_bxmlFindFirst								(SBxml* bxmlRoot, SBxml** bxmlNodeFound, SBxmla** bxmlaAttributeFound, SDatum* tsWildcard, bool tlTraverseChildren, bool tlSearchAttributes, void** x);
+	bool				iivvm_bxmlFindContinue							(void* x);
+	bool				iivvm_bxmlDataFindFirst							(SBxml* bxmlRoot, SBxmla** bxmlaAttributeFound, SDatum* tsWildcard, bool tlTraverseChildren, void** x);
+	bool				iivvm_bxmlDataFindContinue						(void* x);
+	SBxmla*				iivvm_bxmlFindAttribute							(SBxml* bxml, SBxmla** bxmla, SDatum* tsWildcardSearch, u32 tnInstance);
 
 
 

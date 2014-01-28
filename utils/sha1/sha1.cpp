@@ -472,8 +472,8 @@
 
 	bool sha1_compare(u8 sha20Bytes1[_SHA1_NUMBER_SIZE], u8 sha20Bytes2[_SHA1_NUMBER_SIZE])
 	{
-#ifdef oss_memicmp
-		return(oss_memicmp(sha20Bytes1, sha20Bytes2, 20) == 0);
+#ifdef vvm_memicmp
+		return(vvm_memicmp(sha20Bytes1, sha20Bytes2, 20) == 0);
 #else
 		return(_memicmp(sha20Bytes1, sha20Bytes2, 20) == 0);
 #endif

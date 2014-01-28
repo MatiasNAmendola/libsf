@@ -18,6 +18,9 @@ EXPORTS
 	dsf_user_settings
 
 	dsf_set_active_character
+	dsf_get_hwnd_contents
+	dsf_scaled_interface_to_hwnd
+	dsf_window_on_taskbar
 	dsf_render_markup
 	dsf_render_final
 	dsf_re_render

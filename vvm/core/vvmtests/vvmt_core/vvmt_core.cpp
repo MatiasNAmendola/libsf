@@ -58,6 +58,7 @@
 #include <windows.h>
 #include <math.h>
 #include "\libsf\vvm\core\common\common.h"
+#include "\libsf\utils\sha1\sha1.h"											// SHA-1 hashing algorithm
 #include "\libsf\vvm\core\localization\vvmenu\resource.h"					// Resource constants
 #include "vvmt_const.h"
 #include "\libsf\vvm\core\vvm\vvm_structs.h"
@@ -69,9 +70,6 @@
 #include "vvmt_glob.h"
 #include "\libsf\vvm\core\vvmoss\vo_class.h"
 #include "\libsf\vvm\core\common\vvm_key_const.h"
-
-// The following are include files of external (non-VVM) LibSF projects
-#include "\libsf\utils\sha1\sha1.h"		// SHA-1 hashing algorithm
 
 // Test source files
 #include "vvmt_sha1_test.cpp"
@@ -218,7 +216,7 @@
 // 	SXYF64		lfPo, p1, p2, pg;
 // 	s8			buffer[4096];
 // 
-// 		oss_builderCreateAndInitialize(&builder, 2048);
+// 		vvm_builderCreateAndInitialize(&builder, 2048);
 // 		// po
 // 		lnPo.x = 0;
 // 		lnPo.y = 0;
@@ -245,18 +243,18 @@
 // 			//////////
 // 			// Compute their intercepts
 // 			//////
-// 				oss_math_getNextAxisInterceptXY(&p1, oss_math_adjustTheta(lfTheta));
-// 				oss_math_getNextAxisInterceptXY(&pg, oss_math_adjustTheta(lfTheta - (_PI / 8.0)));
-// 				oss_math_getNextAxisInterceptXY(&p2, oss_math_adjustTheta(lfTheta + (_PI / 4.0)));
+// 				vvm_math_getNextAxisInterceptXY(&p1, vvm_math_adjustTheta(lfTheta));
+// 				vvm_math_getNextAxisInterceptXY(&pg, vvm_math_adjustTheta(lfTheta - (_PI / 8.0)));
+// 				vvm_math_getNextAxisInterceptXY(&p2, vvm_math_adjustTheta(lfTheta + (_PI / 4.0)));
 // 
 // 
 // 			//////////
 // 			// Grab their gravities
 // 			//////
-// 				lnGravity				= oss_math_getGravityByRelativePosition(&pg, &lnPo);
-// 				lnGravity1Intercept		= oss_math_getGravityByRelativePosition(&p1, &lnPo);
-// 				lnGravity2Intercept		= oss_math_getGravityByRelativePosition(&p2, &lnPo);
-// 				lnGravity				= oss_math_fineAdjustGravityByTheta(&lfPo, &p1, &pg, lnGravity1Intercept, lnGravity);
+// 				lnGravity				= vvm_math_getGravityByRelativePosition(&pg, &lnPo);
+// 				lnGravity1Intercept		= vvm_math_getGravityByRelativePosition(&p1, &lnPo);
+// 				lnGravity2Intercept		= vvm_math_getGravityByRelativePosition(&p2, &lnPo);
+// 				lnGravity				= vvm_math_fineAdjustGravityByTheta(&lfPo, &p1, &pg, lnGravity1Intercept, lnGravity);
 // 
 // 
 // 			//////////
@@ -265,7 +263,7 @@
 // 			//////
 // // if (lfTheta >= 3.932)
 // // 	_asm nop;
-// 				lfArea = oss_math_getAreaOfSquareUsing_po_p1_p2(lnGravity1Intercept, lnGravity2Intercept, lnGravity, &lfPo, &p1, &p2);
+// 				lfArea = vvm_math_getAreaOfSquareUsing_po_p1_p2(lnGravity1Intercept, lnGravity2Intercept, lnGravity, &lfPo, &p1, &p2);
 // 
 // 
 // 			//////////
@@ -273,10 +271,10 @@
 // 			//////
 // 				// theta, p1.x,p1.y, p2.x,p2.y, area
 // 				sprintf_s(buffer, sizeof(buffer), "%lf, , %lf,%lf, , %lf,%lf, %lf, %u, %u, %u\n\0", lfTheta, p1.x, p1.y, p2.x, p2.y, lfArea, lnGravity1Intercept, lnGravity2Intercept, lnGravity);
-// 				oss_builderAppendData(builder, buffer, -1);
+// 				vvm_builderAppendData(builder, buffer, -1);
 // 		}
 // 		// When we get here, we're done
-// 		oss_builderAsciiWriteOutFile(builder, "c:\\temp\\information.txt");
+// 		vvm_builderAsciiWriteOutFile(builder, "c:\\temp\\information.txt");
 
 
 	//////////
@@ -299,8 +297,8 @@
 			//////
 				black.color = rgba(0,0,0,255);
 				// 100,500 to 300,50 to 500,500
-// 				oss_bezier_initialize(&bez3, 3, 1000, true);
-// 				oss_bezier_setByValues(&bez3, black, make_SXYF64(&p1, 100.0, 500.0), make_SXYF64(&p2, 300.0, 50.0), make_SXYF64(&p3, 500.0, 500.0), NULL, NULL);
+// 				vvm_bezier_initialize(&bez3, 3, 1000, true);
+// 				vvm_bezier_setByValues(&bez3, black, make_SXYF64(&p1, 100.0, 500.0), make_SXYF64(&p2, 300.0, 50.0), make_SXYF64(&p3, 500.0, 500.0), NULL, NULL);
 // 				oss_canvasBezier(lc, lc->bd, &bez3);
 // 				oss_bitmapSaveToDisk(lc, lc->bd, "c:\\temp\\bezier3.bmp");
 
@@ -311,8 +309,8 @@
 				white.color = rgba(255,255,255,255);
 				// 100,500 to 200,50 to 300,300 to 500, 500
 // 				oss_canvasFillRect(lc, lc->bd, 0, 0, lc->width, lc->height, 0, white, white);
-// 				oss_bezier_initialize(&bez4, 4, 1000, true);
-// 				oss_bezier_setByValues(&bez4, black, make_SXYF64(&p1, 100.0, 500.0), make_SXYF64(&p2, 200.0, 50.0), make_SXYF64(&p3, 300.0, 300.0), make_SXYF64(&p4, 500.0, 500.0), NULL);
+// 				vvm_bezier_initialize(&bez4, 4, 1000, true);
+// 				vvm_bezier_setByValues(&bez4, black, make_SXYF64(&p1, 100.0, 500.0), make_SXYF64(&p2, 200.0, 50.0), make_SXYF64(&p3, 300.0, 300.0), make_SXYF64(&p4, 500.0, 500.0), NULL);
 // 				oss_canvasBezier(lc, lc->bd, &bez4);
 // 				oss_bitmapSaveToDisk(lc, lc->bd, "c:\\temp\\bezier4.bmp");
 
@@ -322,8 +320,8 @@
 			//////
 				// 100,500 to 200,50 to 300,300 to 400,100 to 500,300
 // 				oss_canvasFillRect(lc, lc->bd, 0, 0, lc->width, lc->height, 0, white, white);
-// 				oss_bezier_initialize(&bez5, 5, 1000, true);
-// 				oss_bezier_setByValues(&bez5, black, make_SXYF64(&p1, 100.0, 500.0), make_SXYF64(&p2, 200.0, 50.0), make_SXYF64(&p3, 300.0, 300.0), make_SXYF64(&p4, 400.0, 100.0), make_SXYF64(&p5, 500.0, 300.0));
+// 				vvm_bezier_initialize(&bez5, 5, 1000, true);
+// 				vvm_bezier_setByValues(&bez5, black, make_SXYF64(&p1, 100.0, 500.0), make_SXYF64(&p2, 200.0, 50.0), make_SXYF64(&p3, 300.0, 300.0), make_SXYF64(&p4, 400.0, 100.0), make_SXYF64(&p5, 500.0, 300.0));
 // 				oss_canvasBezier(lc, lc->bd, &bez5);
 // 				oss_bitmapSaveToDisk(lc, lc->bd, "c:\\temp\\bezier5.bmp");
 // 				_asm nop;
@@ -336,7 +334,7 @@
 // 			// Initialize the polygon
 // 			memset(&polygon, 0, sizeof(polygon));
 // 			polygon.line		= (SPolyLine**)NULL;
-// 			oss_polygon_initialize(&polygon, 4, true);
+// 			vvm_polygon_initialize(&polygon, 4, true);
 // 
 // 			lfTheta = 0.0;
 // 			for (lfTheta = 0.0; lfTheta < _2PI; lfTheta += _2PI / 8.0)
@@ -360,16 +358,16 @@
 // 				gravity.y		= (p1.y + p2.y + p3.y + p4.y) / 4.0;
 // 
 // 				// Set the lines
-// 				oss_polygon_setByValues(&polygon, 0, &p1, &p2, &gravity);		// p1..p2
-// 				oss_polygon_setByValues(&polygon, 1, &p2, &p3, &gravity);		// p2..p3
-// 				oss_polygon_setByValues(&polygon, 2, &p3, &p4, &gravity);		// p3..p4
-// 				oss_polygon_setByValues(&polygon, 3, &p4, &p1, &gravity);		// p4..p1
+// 				vvm_polygon_setByValues(&polygon, 0, &p1, &p2, &gravity);		// p1..p2
+// 				vvm_polygon_setByValues(&polygon, 1, &p2, &p3, &gravity);		// p2..p3
+// 				vvm_polygon_setByValues(&polygon, 2, &p3, &p4, &gravity);		// p3..p4
+// 				vvm_polygon_setByValues(&polygon, 3, &p4, &p1, &gravity);		// p4..p1
 // 
 // 				// Draw the polygon
 // 				lnPixelsDrawn = oss_canvasPolygon(lc, lc->bd, &polygon, black);
 // 
 // 				// Reset it for the next go-round
-// 				oss_polygon_reset(&polygon, true);
+// 				vvm_polygon_reset(&polygon, true);
 
 // 				// Draw this line
 //				SXYF32 p1, p2;
@@ -382,11 +380,11 @@
 //////////
 // Test for rotating an image
 //////
-	oss_builderCreateAndInitialize(&builder, 2048);
+	vvm_builderCreateAndInitialize(&builder, 2048);
 	oss_bitmapLoadFromDisk("c:\\temp\\test.bmp", &lc, &lnWidth, &lnHeight, white);
 
-	lcExtract = oss_canvasExtract(lc, lc->bd, 200, 200, 205, 205);
-	oss_canvasRotate(lc, lc->bd, 200, 200, lcExtract, lcExtract->bd, 6.28f * (45.0f / 360.0f));
+	lcExtract = vvm_canvasExtract(lc, lc->bd, 200, 200, 205, 205);
+	vvm_canvasRotate(lc, lc->bd, 200, 200, lcExtract, lcExtract->bd, 6.28f * (45.0f / 360.0f));
 
 // 	lnHStep = (f64)lnHeight / 5.0;
 // 	lnWStep = (f64)lnWidth / 5.0;
@@ -399,9 +397,9 @@
 // 			oss_canvasScale(lcScaled, lc, &lcScaled->firstScaleMap);
 // 			oss_dateTimeGet(&lsdtStop);
 // 			sprintf(timing, "\\temp\\Scale_%ux%u_Iteration_%u_Milliseconds_%f.bmp\0", (u32)lnW, (u32)lnH, lnI, (f32)((f64)(lsdtStop.tickCount - lsdtStart.tickCount) / (f64)lsdtStart.frequency));
-// 			oss_builderAppendData(builder, timing + 6, strlen(timing) - 6 - 4);
+// 			vvm_builderAppendData(builder, timing + 6, strlen(timing) - 6 - 4);
 // 	//		oss_bitmapSaveToDisk(lcScaled, lcScaled->bd, timing);
-// 			oss_builderAppendData(builder, "\n", 1);
+// 			vvm_builderAppendData(builder, "\n", 1);
 // 		}
 // 		//oss_bitmapSaveToDisk(lcScaled, lcScaled->bd, buffer);
 // 		//oss_deleteCanvas(lcScaled);

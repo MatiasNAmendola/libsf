@@ -89,7 +89,7 @@
 // Called to obtain the bitmap of the indicated character.
 //
 //////
-	int dsf_get_character_bitmap(int tnAscii, char* tcBitmapFilename, char* tcFloanFilename, char* tcFontName, int tnHeight, int tnWidth)
+	int dsf_get_character_bitmap(int tnAscii, s8* tcBitmapFilename, s8* tcFloanFilename, s8* tcFontName, int tnHeight, int tnWidth)
 	{
 		int		lnResult;
 		bool	llPseudo;
@@ -102,7 +102,7 @@
 			if (!tcBitmapFilename || strlen(tcBitmapFilename) == 0)
 			{
 				llPseudo			= true;
-				tcBitmapFilename	= (char*)buffer;		// Use our fake filename
+				tcBitmapFilename	= (s8*)buffer;		// Use our fake filename
 			}
 
 
@@ -143,11 +143,9 @@
 // target font.
 //
 //////
-	int dsf_scale_and_clip_bitmap(char* tcBitmapFilenameIn, char* tcBitmapFilenameOut, f64 tfWidth, f64 tfHeight, int tnClipLeft, int tnClipTop, int tnNewWidth, int tnNewHeight)
+	int dsf_scale_and_clip_bitmap(s8* tcBitmapFilenameIn, s8* tcBitmapFilenameOut, f64 tfWidth, f64 tfHeight, int tnClipLeft, int tnClipTop, int tnNewWidth, int tnNewHeight)
 	{
-// TODO:  This feature may be supplanted by using the templates point system, whereby points are simply manipulated rather than a physical bitmap being scaled.
-// TODO:  However, "We shall see, Xur.  We shall see."  Can you name that quote? :-)  Here's another clue:  "It takes more than a sceptor to rule, Xur, even on Rylos."
-// TODO:  https://www.youtube.com/watch?v=JwaRQ-_kgy8
+// TODO:  This feature may be supplanted by using the templates point system (tems), whereby points are simply manipulated rather than a physical bitmap being scaled.
 		return(0);
 	}
 
@@ -204,9 +202,9 @@
 // Called to set the data for the font instance
 //
 //////
-	int dsf_load_font(u32 tnInstance,	f32 tfAscent,	f32 tfUpper,	f32 tfLower,		f32 tfLeft,			f32 tfRight,
-										f32 tfBase,		f32 tfDescent,	f32 tfWidth,
-										f32 tfItalics,	f32 tfBold,		f32 tfUnderTop,		f32 tfUnderBot,		f32 tfStrikeTop,	f32 tfStrikeBot)
+	int dsf_load_font(u32 tnInstance,	f64 tfAscent,	f64 tfUpper,	f64 tfLower,		f64 tfLeft,			f64 tfRight,
+										f64 tfBase,		f64 tfDescent,	f64 tfWidth,
+										f64 tfItalics,	f64 tfBold,		f64 tfUnderTop,		f64 tfUnderBot,		f64 tfStrikeTop,	f64 tfStrikeBot)
 	{
 		SInstance*	p;
 		bool		llValid;
@@ -408,7 +406,7 @@
 // with this information.  If so, it's updated.  If not, it's appended.
 //
 //////
-	int dsf_load_template(u32 tnInstance, u32 tipid, f32 tfX, f32 tfY, u32 tnRecno)
+	int dsf_load_template(u32 tnInstance, u32 tipid, f64 tfX, f64 tfY, u32 tnRecno)
 	{
 		SInstance*	p;
 		STems*		t;
@@ -701,7 +699,8 @@
 //////////
 //
 // Called to set the cues the user wants to see, along with whether or not the mouse should track
-// near to any of the specified cues.
+// near to any of the specified cues.  Will NOT issue a redraw.  Use dsf_user_cues() and then
+// dsf_user_cues2() for updating cues, and then use dsf_user_settings() to issue the redraw.
 //
 //////
 	int dsf_user_cues(u32 tnInstance,	u32 tnAscent,			u32 tnTrackAscent, 
@@ -799,7 +798,7 @@
 
 //////////
 //
-// Called to convey user settings
+// Called to convey user settings.  Will issue a redraw.
 //
 //////
 	int dsf_user_settings(u32 tnInstance,
@@ -869,7 +868,7 @@
 
 //////////
 //
-// Called to indicate the user wants to make active another character for editing
+// Called to indicate the user wants to make active another character for editing.  Will issue a redraw.
 //
 //////
 	int dsf_set_active_character(u32 tnInstance, u32 tiid)
@@ -906,11 +905,234 @@
 
 //////////
 //
+// Called to indicate what tool the user wants to use.  Will issue a redraw.
+//
+//////
+	int dsf_set_active_tool(u32 tnInstance, u32 tnToolNumber)
+	{
+		u32			lnI;
+		SInstance*	p;
+		SHwnd*		h;
+		bool		llValid;
+
+		//////////
+		// Make sure our environment is sane
+		//////
+			p = iGetDsfInstance(tnInstance, &llValid);
+			if (!llValid)
+				return(-1);
+
+
+		//////////
+		// Set the values, and trigger a refresh on any markup windows
+		//////
+			p->activeTool		= iValidateRange(tnToolNumber,		_TOOL_EDIT,		_TOOL_SCALE,	_TOOL_EDIT);
+
+
+		//////////
+		// Force a re-render (whether we need one or not. :-))
+		//////
+			for (lnI = 0; lnI < p->hwnds->populatedLength; lnI += sizeof(SHwnd))
+			{
+				// Grab the pointer
+				h = (SHwnd*)(p->hwnds->data + lnI);
+
+				// If it's a markup window, re-render it
+				PostMessage(h->hwndParent, WM_REDRAW_WINDOW, (u32)p, (u32)h->hwnd);
+			}
+
+
+		//////////
+		// Indicate success
+		//////
+			return(0);
+	}
+
+
+
+
+//////////
+//
+// Called to capture the contents of the indicated window to a disk file.
+//
+//////////
+//
+// Note:  In general, minimized windows can't be captured.
+// Note:  However, if the window is minimized it can still be captured using a type of hack.
+// Note:  This must be done in rapid succession.  In general, it will be, but it remains slower than capturing a visible window.
+// Steps:
+// (1) Disable the MinAnimate() effect globally:
+//		ANIMATIONINFO animInfo;
+//		u32 lnOldState;
+//		SystemParametersInfo(SPI_GETANIMATION, sizeof(ANIMATIONINFO), &animInfo, 0);
+//		lnOldAnim = animInfo.iMinAnimate
+//		animInfo.iMinAnimate = 1;
+//		SystemParametersInfo(SPI_SETANIMATION, sizeof(ANIMATIONINFO), &animInfo, SPIF_SENDCHANGE);
+// (2) Alter the window style to make the window appear completely transparent (so as to hide its restoration)
+//		winLong = GetWindowLong(hwnd, GWL_EXSTYLE);
+//		SetWindowLong(hwnd, GWL_EXSTYLE, winLong | WS_EX_LAYERED);
+//		SetLayeredWindowAttributes(hwnd, 0, 1, LWA_ALPHA);
+// (3) Restore the window
+//		ShowWindow(hwnd, SW_SHOW);
+// (4) Capture
+//		PrintWindow(hwnd, lhdc, PW_CLIENTONLY);
+// (5) Minimize the window
+//		ShowWindow(hwnd, SW_HIDE);
+// (6) Restore the original window style
+//		SetWindowLong(hwnd, GWL_EXSTYLE, winLong);
+// (7) Restore the original MinAnimate() effect
+//		animInfo.iMinAnimate = lnOldAnim;
+//		SystemParametersInfo(SPI_SETANIMATION, sizeof(ANIMATIONINFO), &animInfo, SPIF_SENDCHANGE);
+//
+//////
+//
+//////
+	int dsf_get_hwnd_contents(u32 tnHwnd, s8* tcBitmapFilename)
+	{
+		union {
+			HWND	hwnd;
+			u32		_hwnd;
+		};
+		HDC					lhdc;
+		HBITMAP				lhbmp;
+		RECT				lrc;
+		BITMAPFILEHEADER	bh;
+		BITMAPINFOHEADER	bi;
+		SBGR*				bd;
+
+
+		//////////
+		// Store the parameter locally
+		//////
+			_hwnd = tnHwnd;
+
+
+		//////////
+		// Make sure it's a valid window
+		//////
+			if (IsWindow(hwnd))
+			{
+				// Get crucial window data
+				GetClientRect(hwnd, &lrc);
+				// Setup crucial window components
+				lhdc	= CreateCompatibleDC(GetDC(hwnd));
+				bd		= NULL;
+				lhbmp	= iCreateBitmap(lhdc, lrc.right - lrc.left, lrc.bottom - lrc.top, 1, 24, (void**)&bd, &bh, &bi);
+				SelectObject(lhdc, lhbmp);
+
+				// Ask Windows to draw its window contents into our device context
+				PrintWindow(hwnd, lhdc, PW_CLIENTONLY);
+
+				// Save the bitmap
+				iSaveBitmapByParams(&bh, &bi, bd, tcBitmapFilename);
+
+				// Cleanup
+				DeleteObject((HGDIOBJ)lhbmp);
+				DeleteDC(lhdc);
+
+				// Success
+				return(0);
+			}
+			return(-1);
+	}
+
+
+
+
+//////////
+//
+// Called to create a scaled interface into the HWND.
+//
+//////
+	int dsf_scaled_interface_to_hwnd(u32 tnHwnd, s8* tcIdentifer, f32 tfInitialScale)
+	{
+		union {
+			HWND	hwnd;
+			u32		_hwnd;
+		};
+		HDC					lhdc;
+		HBITMAP				lhbmp;
+		RECT				lrc;
+		BITMAPFILEHEADER	bh;
+		BITMAPINFOHEADER	bi;
+		SBGR*				bd;
+
+
+		//////////
+		// Store the parameter locally
+		//////
+			_hwnd = tnHwnd;
+
+
+		//////////
+		// Make sure it's a valid window
+		//////
+			if (IsWindow(hwnd))
+			{
+				// Get crucial window data
+				GetClientRect(hwnd, &lrc);
+
+				// Setup crucial window components
+				lhdc	= CreateCompatibleDC(GetDC(hwnd));
+				bd		= NULL;
+				HMENU hmenu = CreateMenu();
+				lhbmp	= iCreateBitmap(lhdc, lrc.right - lrc.left, lrc.bottom - lrc.top, 1, 24, (void**)&bd, &bh, &bi);
+				SelectObject(lhdc, lhbmp);
+
+				// Ask Windows to draw its window contents into our device context
+				PrintWindow(hwnd, lhdc, PW_CLIENTONLY);
+
+				// Create the scaled window implementation
+
+				// Success
+				return(0);
+			}
+			return(-1);
+	}
+
+
+
+
+//////////
+//
+// Called to show or hide the window on the taskbar
+//
+/////
+	int dsf_window_on_taskbar(u32 tnHwnd, u32 tnShow)
+	{
+		u32 lnResult;
+		union {
+			HWND	hwnd;
+			u32		_hwnd;
+		};
+
+
+		//////////
+		// If it's a window, process it
+		//////
+			_hwnd = tnHwnd;
+			if (IsWindow(hwnd))
+			{
+				// Show or hide it
+				if (tnShow == 0)		lnResult = giTaskbar->DeleteTab(hwnd);
+				else					lnResult = giTaskbar->AddTab(hwnd);
+
+				return(lnResult != 0);
+			}
+			// Failure
+			return(-1);
+	}
+
+
+
+
+//////////
+//
 // Called to render a markup form used for editing, or for debugging, at the indicated size.  This
 // is what the font looks like in the edit window of the DSF Font Editor.
 //
 //////
-	int dsf_render_markup(u32 tnInstance, s32 tnWidth, s32 tnHeight, u32 tlBold, u32 tlItalic, u32 tlUnderline, u32 tlStrikethrough, s8* tcBitmapPathname, u32 tnHwnd, s32 tnX, s32 tnY)
+	int dsf_render_markup(u32 tnInstance, s32 tnWidth, s32 tnHeight, u32 tlBold, u32 tlItalic, u32 tlUnderline, u32 tlStrikethrough, s8* tcBitmapPathname, u32 tnHwnd, s32 tnX, s32 tnY, s32 tnControlX, s32 tnControlY, s32 tnControlWidth, s32 tnControlHeight)
 	{
 		SInstance*	p;
 		SHwnd*		h;
@@ -943,13 +1165,22 @@
 
 
 		//////////
-		// Render it
+		// Set it
 		//////
 			h->markup			= true;
 			h->bold				= tlBold;
 			h->italic			= tlItalic;
 			h->underline		= tlUnderline;
 			h->strikethrough	= tlStrikethrough;
+
+			// Create our control window if need be
+			if (!h->_hwndControl && tnControlX >= 0 && tnControlY >= 0)
+				h->_hwndControl	= iCreateControlWindow(h, tnControlX, tnControlY, tnControlWidth, tnControlHeight);
+
+
+		//////////
+		// Render it
+		//////
 			return(iRender(p, h, thisChar, tnWidth, tnHeight, tnHwnd, tnX, tnY));
 	}
 
@@ -1064,6 +1295,14 @@
 	{
 		f64			lfX, lfY, lfTheta, lfRadius, lfA, lfB, lfV1, lfV2;
 		bool		llPenDown;
+		HRESULT		hRes;
+
+
+		//////////
+		// Initialize our taskbar class.
+		//////
+			hRes = OleInitialize(NULL);
+			CoCreateInstance(CLSID_TaskbarList, 0, CLSCTX_INPROC_SERVER, IID_ITaskbarList, (void**)&giTaskbar);
 
 
 		//////////
@@ -1234,7 +1473,7 @@
 // used based on the height and width, with the final image generated being scaled to the
 //
 //////
-	int iGetCharacterBitmap(int tnAscii, char* tcBitmapFilename, char* tcFontName, int tnHeight, int tnWidth)
+	int iGetCharacterBitmap(int tnAscii, s8* tcBitmapFilename, s8* tcFontName, int tnHeight, int tnWidth)
 	{
 		int			lnWidth, lnHeight, lnMakeWidth;
 		f64			lfH, lfV;
@@ -1295,7 +1534,7 @@
 		//////////
 		// Bitmap 2
 		//////
-			lhbmp2 = iCreateBitmap(lhdc, lnWidth, lnHeight, 1, 24, (void**)&bd2);
+			lhbmp2 = iCreateBitmap(lhdc, lnWidth, lnHeight, 1, 24, (void**)&bd2, NULL, NULL);
 			SelectObject(lhdc, lhbmp2);
 			FillRect(lhdc, &lrc2, (HBRUSH)GetStockObject(WHITE_BRUSH));
 			DrawTextA(lhdc, buffer, strlen(buffer), &lrc2, DT_LEFT);
@@ -1323,7 +1562,7 @@
 		//////
 			lfH = (f64)tnWidth	/ (f64)lnMakeWidth;
 			lfV = (f64)tnHeight	/ (f64)lnHeight;
-			iScaleImage(rawBuffer, tcBitmapFilename, (f32)lfH, (f32)lfV);
+			iScaleImage(rawBuffer, tcBitmapFilename, (f64)lfH, (f64)lfV);
 			DeleteFileA(rawBuffer);
 
 
@@ -1333,7 +1572,31 @@
 			return(0);
 	}
 
-	int iSaveBitmap(SBGR* bgr, int tnWidth, int tnHeight, int tnLeft, char* tcBitmapFilename, int tnMakeWidth)
+	int iSaveBitmapByParams(BITMAPFILEHEADER* tbh, BITMAPINFOHEADER* tbi, SBGR* tbd, s8* tcBitmapFilename)
+	{
+		FILE* lfh;
+
+
+		//////////
+		// Simple disk write
+		//////
+			lfh = fopen(tcBitmapFilename, "wb+");
+			if (lfh)
+			{
+				// Write file header, info header, bitmap bits
+				fwrite(tbh, 1, sizeof(BITMAPFILEHEADER), lfh);
+				fwrite(tbi, 1, sizeof(BITMAPINFOHEADER), lfh);
+				fwrite(tbd, 1, tbi->biSizeImage, lfh);
+				// Close
+				fclose(lfh);
+				// Done
+				return(0);
+			}
+			// Failure
+			return(-1);
+	}
+
+	int iSaveBitmap(SBGR* tbd, int tnWidth, int tnHeight, int tnLeft, s8* tcBitmapFilename, int tnMakeWidth)
 	{
 		int					lnY, lnRowWidth, lnWritePels, lnCopyPels, lnOffset, lnCopyWidth;
 		SBGR*				lbgr;
@@ -1394,7 +1657,7 @@
 						//////////
 						// Compute the offset to this part
 						//////
-							lbgr = (SBGR*)((char*)bgr + (lnY * lnRowWidth) + (tnLeft * 3));
+							lbgr = (SBGR*)((s8*)tbd + (lnY * lnRowWidth) + (tnLeft * 3));
 
 
 						//////////
@@ -1433,26 +1696,56 @@
 		return(lnWidth);
 	}
 
-	HBITMAP iCreateBitmap(HDC thdc, int tnWidth, int tnHeight, int tnPlanes, int tnBits, void**tbd)
+	HBITMAP iCreateBitmap(HDC thdc, int tnWidth, int tnHeight, int tnPlanes, int tnBits, void** tbd, BITMAPFILEHEADER* tbh, BITMAPINFOHEADER* tbi)
 	{
-		BITMAPINFO bi;
+		BITMAPFILEHEADER	bf;
+		BITMAPINFOHEADER	bi;
+		BITMAPINFOHEADER*	lbi;
+		HBITMAP				lhbmp;
 
 
 		//////////
-		// Create a new DIB
+		// Use remote or local
 		//////
-			memset(&bi, 0, sizeof(BITMAPINFO));
-			bi.bmiHeader.biSize			= sizeof(bi.bmiHeader);
-			bi.bmiHeader.biWidth		= tnWidth;
-			bi.bmiHeader.biHeight		= tnHeight;
-			bi.bmiHeader.biPlanes		= tnPlanes;
-			bi.bmiHeader.biBitCount		= tnBits;
+			if (tbi)		lbi = tbi;		// Use caller's
+			else			lbi = &bi;		// Use ours
+
+
+		//////////
+		// Create a new DIB (these parts are required for CreateDIBSection to work)
+		//////
+			memset(lbi, 0, sizeof(BITMAPINFOHEADER));
+			lbi->biSize			= sizeof(BITMAPINFOHEADER);
+			lbi->biWidth		= tnWidth;
+			lbi->biHeight		= tnHeight;
+			lbi->biPlanes		= tnPlanes;
+			lbi->biBitCount		= tnBits;
+
+
+		//////////
+		// Populate caller parts (these parts are also required for disk files)
+		//////
+			if (tbi)
+			{
+				lbi->biSizeImage		= iComputeRowWidth(tnWidth) * tnHeight;
+				lbi->biXPelsPerMeter	= 3270;
+				lbi->biYPelsPerMeter	= 3270;
+			}
+			if (tbh)
+			{
+				tbh->bfType				= 'MB';
+				tbh->bfReserved1		= 0;
+				tbh->bfReserved2		= 0;
+				tbh->bfOffBits			= sizeof(bf) + sizeof(bi);
+				tbh->bfSize				= tbh->bfOffBits + tbi->biSizeImage;
+			}
 
 
 		//////////
 		// Physically create the bitmap
 		//////
-			return(CreateDIBSection(thdc, &bi, DIB_RGB_COLORS, tbd, NULL, 0));
+			lhbmp = CreateDIBSection(thdc, (BITMAPINFO*)lbi, DIB_RGB_COLORS, tbd, NULL, 0);
+			return(lhbmp);
 	}
 
 
@@ -1469,7 +1762,7 @@
 		f64	y;			// Y coordinate of an X,Y pair
 	};
 
-	int iGetFloanFromBitmap(u32 tnAscii, char* tcBitmapFilename, char* tcFloanFilename)
+	int iGetFloanFromBitmap(u32 tnAscii, s8* tcBitmapFilename, s8* tcFloanFilename)
 	{
 		int					lnI, lnY, lnX, lnRowWidth, lnOldFloanCount, lnNewFloanCount;
 		f64					lfGray, lfLastGray;
@@ -1546,7 +1839,7 @@
 			for (lnY = 0; lnY < lbi.biHeight; lnY++)
 			{
 				// Iterate all the way across
-				lbgr = (SBGR*)((char*)lbgrBuffer + (lnY * lnRowWidth));
+				lbgr = (SBGR*)((s8*)lbgrBuffer + (lnY * lnRowWidth));
 
 				// Look for where things start or stop
 				for (lnX = 0; lnX < lbi.biWidth; lnX++, lbgr++)
@@ -1585,7 +1878,7 @@
 			for (lnY = 0; lnY < lbi.biHeight; lnY++)
 			{
 				// Iterate all the way across
-				lbgr = (SBGR*)((char*)lbgrBuffer + (lnY * lnRowWidth));
+				lbgr = (SBGR*)((s8*)lbgrBuffer + (lnY * lnRowWidth));
 
 				// Look for where things start or stop
 				lfLastGray = 1.0;		// Assume we start on a white pixel
@@ -1618,7 +1911,7 @@
 			for (lnX = 0; lnX < lbi.biWidth; lnX++)
 			{
 				// Iterate point by point in vertical columns
-				lbgr = (SBGR*)((char*)lbgrBuffer + (lnX * 3));
+				lbgr = (SBGR*)((s8*)lbgrBuffer + (lnX * 3));
 
 				// Look for where things start or stop
 				lfLastGray = 1.0;		// Assume we start on a white pixel
@@ -2301,8 +2594,8 @@
 			SetTextColor(h->hdc, RGB(255,255,255));
 
 			// Get our coordinates
-			sprintf(bufferX, "X:%6.4lf\0", (f32)gMouse.xi			/ (f32)h->w);
-			sprintf(bufferY, "Y:%6.4lf\0", ((f32)(h->h - gMouse.yi) / (f32)h->h));		// Invert mouse Y coordinate for the calculation
+			sprintf(bufferX, "X:%6.4lf\0", (f64)gMouse.xi			/ (f64)h->w);
+			sprintf(bufferY, "Y:%6.4lf\0", ((f64)(h->h - gMouse.yi) / (f64)h->h));		// Invert mouse Y coordinate for the calculation
 
 			// Find out how big it is
 			SetRect(&lrcX, 0, 0, 0, 0);
@@ -2463,12 +2756,13 @@
 //////
 	void iRenderSplines(SInstance* p, SHwnd* h, SChars* c, u32 tlMarkup, u32 tlBold, u32 tlItalic, u32 tlUnderline, u32 tlStrikethrough)
 	{
-		u32			lnI, lnSplineNumber;
+		u32			lnI, lnJ, lnSplineNumber, lnSplineCount;
 		SXYF64		prLast, poLast, plLast;
 		SXYF64		pr, po, pl;
 		SLineF64	line, lineL, lineR, lineLLast, lineRLast, lineLtoLLast, lineRtoRLast;
 		SSpline*	s;
 		SSpline*	sLast;
+		SSpline*	sTest;
 		SBuilder*	b;
 		SBGR		colorLine;
 		SBGR		quad, quadSelected, p1ColorR, p2ColorR, p3ColorR, p4ColorR, p1ColorL, p2ColorL, p3ColorL, p4ColorL;
@@ -2478,16 +2772,20 @@
 		// For new characters or definitions there may not yet be any splines.  We use a placeholder
 		// drawn onto the character until such time
 		/////
+			//////////
 			// Draw a placeholder (used for debugging)
-			if (c->splines->populatedLength <= sizeof(SSpline))		b = placeholder;//	return;		// Return (optionally, the the placeholder could be drawn)
-			else													b = c->splines;					// Draw the character splines
+			// b = placeholder;
+			/////
+			b = c->splines;
 
-			// Determine the colors
-			// Fill area
+
+		//////////
+		// Determine the colors
+		//////
 			if (tlMarkup == 0)
 			{
 				// It is a final render, black on white
-				quad			= black;
+												quad			= black;
 				if (p->highlighSelection)		quadSelected	= blackSelected;
 				else							quadSelected	= black;
 
@@ -2507,8 +2805,7 @@
 			}
 
 			// Splines
-			if (p->splinesType != _SPLINES_FILL)					colorLine = gray;				// They don't want to see it filled in, so make it a little more visible
-			else													colorLine = black;				// They want to see it filled in, so it can be black
+			colorLine = iSetLineColor(p);
 
 
 		//////////
@@ -2582,8 +2879,38 @@
 						//////////
 						// Indicate the spline number
 						//////
-							if (s->lPenDown)		lnSplineNumber = 0;
-							else					++lnSplineNumber;
+							if (s->lPenDown)
+							{
+								// Start of a new stroke, find out how many splines there are in this stroke
+								lnSplineNumber	= 0;
+								lnSplineCount	= 1;
+								for (lnJ = lnI + sizeof(SSpline); lnJ < b->populatedLength; lnJ += sizeof(SSpline))
+								{
+									// Grab the pointer
+									sTest = (SSpline*)(b->data + lnJ);
+
+									// See if it's a new stroke
+									if (sTest->lPenDown)
+										break;
+
+									// It's not a new stroke yet
+									++lnSplineCount;
+								}
+								// When we get here, lnSplineCount is populated with the number of splines for this stroke
+								if (lnSplineCount == 1)
+								{
+									// Since there's only one spline here, make the border a little more visible
+									colorLine = gray;
+
+								} else {
+									// Determine the color based on the drawing mode
+									colorLine = iSetLineColor(p);
+								}
+
+							} else {
+								// Increase our spline number
+								++lnSplineNumber;
+							}
 
 
 						//////////
@@ -2647,11 +2974,11 @@
 								// Connect left, right as markup lines
 								if (p->splinesType == _SPLINES_FILL || p->splinesType == _SPLINES_OUTLINE)
 								{
-									iDrawLine(h, &pr, &prLast, s->tlRSelected ? colorSelected : colorLine, sLast->tlRSelected ? colorSelected : colorLine, 6.0);
-									iDrawLine(h, &po, &poLast, s->tlOSelected ? colorSelected : colorLine, sLast->tlOSelected ? colorSelected : colorLine, 6.0);
-									iDrawLine(h, &pl, &plLast, s->tlLSelected ? colorSelected : colorLine, sLast->tlLSelected ? colorSelected : colorLine, 6.0);
+									iDrawLine(h, &pr, &prLast, s->tlRSelected ? colorSelected : colorLine, sLast->tlRSelected ? colorSelected : colorLine, gfLinePower);
+									iDrawLine(h, &po, &poLast, s->tlOSelected ? colorSelected : colorLine, sLast->tlOSelected ? colorSelected : colorLine, gfLinePower);
+									iDrawLine(h, &pl, &plLast, s->tlLSelected ? colorSelected : colorLine, sLast->tlLSelected ? colorSelected : colorLine, gfLinePower);
 								}
-								iDrawPoints(p, h, &prLast, &poLast, &plLast, sLast, colorSelected, colorR, colorO, colorL, colorRSelected, colorOSelected, colorLSelected);
+								iDrawPoints(p, h, &prLast, &poLast, &plLast, sLast, colorSelected, colorR, colorO, colorL, colorRSelected, colorOSelected, colorLSelected, colorLine);
 
 							} else {
 								// Reset the spline count
@@ -2659,9 +2986,9 @@
 							}
 
 							// Connect left, middle, right as markup lines
-							iDrawLine(h, &po, &pr, s->tlOSelected ? colorSelected : colorLine, s->tlRSelected ? colorSelected : colorLine, 6.0);
-							iDrawLine(h, &po, &pl, s->tlOSelected ? colorSelected : colorLine, s->tlLSelected ? colorSelected : colorLine, 6.0);
-							iDrawPoints(p, h, &pr, &po, &pl, s, colorSelected, colorR, colorO, colorL, colorRSelected, colorOSelected, colorLSelected);
+							iDrawLine(h, &po, &pr, s->tlOSelected ? colorSelected : colorLine, s->tlRSelected ? colorSelected : colorLine, gfLinePower);
+							iDrawLine(h, &po, &pl, s->tlOSelected ? colorSelected : colorLine, s->tlLSelected ? colorSelected : colorLine, gfLinePower);
+							iDrawPoints(p, h, &pr, &po, &pl, s, colorSelected, colorR, colorO, colorL, colorRSelected, colorOSelected, colorLSelected, colorLine);
 
 
 						//////////
@@ -2674,6 +3001,12 @@
 					}
 				}
 			}
+	}
+
+	SBGR iSetLineColor(SInstance* p)
+	{
+		if (p->splinesType != _SPLINES_FILL)		return(gray);				// They don't want to see it filled in, so make it a little more visible
+		else										return(black);				// They want to see it filled in, so it can be black
 	}
 
 	void iDrawPenDown(SHwnd* h, SLineF64* line)
@@ -2813,17 +3146,8 @@
 		*p4ColorL	= ((sLast->tlLSelected)	? quadSelected : quadNormal);
 	}
 
-	void iDrawPoints(SInstance* p, SHwnd* h, SXYF64* pr, SXYF64* po, SXYF64* pl, SSpline* s, SBGR colorSelected, SBGR colorR, SBGR colorO, SBGR colorL, SBGR colorRSelected, SBGR colorOSelected, SBGR colorLSelected)
+	void iDrawPoints(SInstance* p, SHwnd* h, SXYF64* pr, SXYF64* po, SXYF64* pl, SSpline* s, SBGR colorSelected, SBGR colorR, SBGR colorO, SBGR colorL, SBGR colorRSelected, SBGR colorOSelected, SBGR colorLSelected, SBGR colorLine)
 	{
-		SBGR colorLine;
-
-
-		//////////
-		// Set the color
-		//////
-			if (p->splinesType != _SPLINES_FILL)		colorLine = gray;			// They don't want to see it filled in, so make it a little more visible
-			else										colorLine = black;			// They want to see it filled in, so it can be black
-
 		//////////
 		// Right
 		//////
@@ -3924,6 +4248,31 @@
 			return(NULL);
 	}
 
+	SHwnd* iFindOnlyHwndByHwndControl(SBuilder* hwnds, u32 tnHwndParent, u32 tnHwndControl)
+	{
+		u32		lnI;
+		SHwnd*	h;
+
+
+		//////////
+		// See if the existing item exists
+		//////
+			for (lnI = 0; lnI < hwnds->populatedLength; lnI += sizeof(SHwnd))
+			{
+				// Grab this pointer
+				h = (SHwnd*)(hwnds->data + lnI);
+
+				// See if it's a match
+				if (h->_hwndParent == tnHwndParent && h->_hwndControl == tnHwndControl)
+				{
+					// It's a match
+					return(h);
+				}
+			}
+			// If we get here, it wasn't found
+			return(NULL);
+	}
+
 	SHwnd* iFindOnlyHwndByHwndParent(SBuilder* hwnds, u32 tnHwndParent)
 	{
 		u32		lnI;
@@ -4079,16 +4428,8 @@
 				SetWindowLong(h->hwnd, GWL_WNDPROC, (long)&iWindowProcCallback);
 
 				// Add a timer for markup windows (there should only be one)
-				if (h->markup)
-				{
-// Removed ... probably not necessary any longer 12/10
-// 					// We need the parent's window messages as well
-// 					h->oldWndParentProcAddress = (WNDPROC)GetWindowLong(h->hwndParent, GWL_WNDPROC);
-// 					SetWindowLong(h->hwndParent, GWL_WNDPROC, (long)&iWindowProcCallback);
-
-					// Create a timer to read the mouse 30 times per second
-					SetTimer(h->hwnd, (u32)h, 33, NULL);
-				}
+				if (h->markup && gnTimer == 0)
+					gnTimer = SetTimer(h->hwnd, (u32)h, 33, NULL);		// Create a timer to read the mouse 30 times per second
 
 				// Create a DIB Section for accessing this window's bits
 				SetRect(&h->rc, h->x, h->y, (h->x + h->w), (h->y + h->h));
@@ -4120,7 +4461,95 @@
 				int error = GetLastError();
 				_asm int 3;
 			}
+
+			// Indicate our status
 			return(h->_hwnd);
+	}
+
+
+
+
+//////////
+//
+// Called to create the control window for contextual things related to the selected control.
+//
+//////
+	u32 iCreateControlWindow(SHwnd* h, u32 tnX, u32 tnY, u32 tnW, u32 tnH)
+	{
+		ATOM			atom;
+		WNDCLASSEXA		classa;
+		RECT			lrc;
+
+
+		//////////
+		// Register the class if need be
+		//////
+			if (!GetClassInfoExA(ghInstance, cgcControlWindowClass, &classa))
+			{
+				// Initialize
+				memset(&classa, 0, sizeof(classa));
+
+				// Populate
+				classa.cbSize				= sizeof(WNDCLASSEXA);
+				classa.hInstance			= ghInstance;
+				classa.style				= CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
+				classa.lpszClassName		= cgcControlWindowClass;
+				classa.lpfnWndProc			= (WNDPROC)GetWindowLong(h->hwndParent, GWL_WNDPROC);
+
+				// Register
+				atom = RegisterClassExA(&classa);
+				if (!atom)
+					return(0);		// Failure
+			}
+		
+
+
+		//////////
+		// Create the window
+		//////
+			// Bitmap info
+			h->biControl.biSize				= sizeof(h->biControl);
+			h->biControl.biWidth			= tnW;
+			h->biControl.biHeight			= tnH;
+			h->biControl.biPlanes			= 1;
+			h->biControl.biBitCount			= 24;
+			h->biControl.biXPelsPerMeter	= 3270;
+			h->biControl.biYPelsPerMeter	= 3270;
+			h->biControl.biSizeImage		= h->rowWidth * tnH;
+
+			// Bitmap header
+			h->bhControl.bfType				= 'MB';
+			h->bhControl.bfOffBits			= sizeof(h->bhControl) + sizeof(h->biControl);
+			h->bhControl.bfSize				= h->bhControl.bfOffBits + h->biControl.biSizeImage;
+
+			// Window
+			h->hwndControl = CreateWindowA(cgcControlWindowClass, cgcControlWindowClass, WS_CHILD, tnX, tnY, tnW, tnH, h->hwndParent, NULL, ghInstance, (LPVOID)h);
+			if (h->_hwndControl)
+			{
+				// Update the WNDPROC handler so we receive messages
+				SetWindowLong(h->hwndControl, GWL_WNDPROC, (long)&iControlWindowProcCallback);
+
+				// Create a DIB Section for accessing this window's bits
+				SetRect(&h->rcControl, tnX, tnY, (tnX + tnY), (tnY + tnH));
+				h->hdcControl	= CreateCompatibleDC(GetDC(h->hwndControl));
+				h->hbmpControl	= CreateDIBSection(h->hdcControl, (BITMAPINFO*)&h->biControl, DIB_RGB_COLORS, (void**)&h->bdControl, NULL, 0);
+				SelectObject(h->hdcControl, h->hbmpControl);
+
+				// Make it initially white
+				SetRect(&lrc, 0, 0, tnW, tnH);
+				FillRect(h->hdcControl, &lrc, (HBRUSH)GetStockObject(WHITE_BRUSH));
+				InvalidateRect(h->hwndControl, NULL, FALSE);
+
+				// Make it visible
+				ShowWindow(h->hwndControl, SW_SHOW);
+
+			} else {
+				int error = GetLastError();
+				_asm int 3;
+			}
+
+			// Indicate our status
+			return(h->_hwndControl);
 	}
 
 
@@ -4852,7 +5281,66 @@
 
 //////////
 //
-// Callback for the window
+// Callback for the control window
+//
+//////
+	LRESULT CALLBACK iControlWindowProcCallback(HWND hwnd, UINT m, WPARAM w, LPARAM l)
+	{
+		u32				lnI;
+		PAINTSTRUCT		ps;
+		HDC				lhdc;
+		union {
+			HWND		thisHwnd;
+			u32			_thisHwnd;
+		};
+		union {
+			HWND		hwndParent;
+			u32			_hwndParent;
+		};
+		SHwnd*			h;
+		SInstance*		s;
+
+
+		// See if we know this hwnd
+		thisHwnd	= hwnd;
+		hwndParent	= GetParent(hwnd);
+		for (lnI = 0; lnI < instances->populatedLength; lnI += sizeof(SInstance))
+		{
+			// Grab the pointer
+			s = (SInstance*)(instances->data + lnI);
+
+			// See if we're found on this instance
+			h = iFindOnlyHwndByHwndControl(s->hwnds, _hwndParent, _thisHwnd);
+			if (h)
+			{
+				// It was one of our windows
+				switch (m)
+				{
+					// Redraw the window
+					case WM_PAINT:
+						// Paint it
+						lhdc = BeginPaint(hwnd, &ps);
+						BitBlt(lhdc, 0, 0, h->w, h->h, h->hdcControl, 0, 0, SRCCOPY);
+						EndPaint(hwnd, &ps);
+						// All done
+						// Indicate to Windows that we processed it
+						return 0;
+				}
+				// Call Windows' default procedure handler
+				return(DefWindowProc(hwnd, m, w, l));
+			}
+		}
+		// Call Windows' default procedure handler
+		return(DefWindowProc(hwnd, m, w, l));
+
+	}
+
+
+
+
+//////////
+//
+// Callback for the render and final windows
 //
 //////
 	LRESULT CALLBACK iWindowProcCallback(HWND hwnd, UINT m, WPARAM w, LPARAM l)
@@ -4887,11 +5375,6 @@
 				// It was one of our windows
 				switch (m)
 				{
-					// Create a timer for reading the mouse position because as of yet I have not figured out how to get this child window attached to a VFP form to reliably send over WM_MOUSEMOVE messages unless the mouse is physically depressed
-					case WM_DESTROY:
-						KillTimer(hwnd, (u32)h);
-						break;
-
 					// Get the mouse and keyboard state
 					case WM_TIMER:
 						iReadMousePosition(s, h);
