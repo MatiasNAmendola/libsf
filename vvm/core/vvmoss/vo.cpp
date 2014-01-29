@@ -1325,7 +1325,7 @@
 
 			// Set the length if necessary
 			if (tnCaptionLength == -1)
-				tnCaptionLength = (u32)oss_strlen(_csu8p(tcCaption));
+				tnCaptionLength = (u32)vvm_scanForwardUntilCharacter(_csu8p(tcCaption), 0);
 
 			// Visible identifier
 			tisw->caption			= (s8*)vvm_duplicateString((u8*)tcCaption, tnCaptionLength + 1);

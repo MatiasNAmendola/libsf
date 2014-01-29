@@ -2978,8 +2978,8 @@ _asm int 3;
 				if (tsFileInfo->pathnameOfSearch.data._u8)
 					vvm_memcpy(buffer, tsFileInfo->pathnameOfSearch.data._s8, tsFileInfo->pathnameOfSearch.length);
 
-				vvm_memcpy(buffer + oss_strlen(_csu8p(buffer)), twfd->cFileName, oss_strlen(_csu8p(twfd->cFileName)));
-				vvm_datumSet(&tsFileInfo->file, (u8*)buffer, oss_strlen(_csu8p(buffer)), true);
+				vvm_memcpy(buffer + vvm_scanForwardUntilCharacter(_csu8p(buffer), 0), twfd->cFileName, vvm_scanForwardUntilCharacter(_csu8p(twfd->cFileName), 0));
+				vvm_datumSet(&tsFileInfo->file, (u8*)buffer, vvm_scanForwardUntilCharacter(_csu8p(buffer), 0), true);
 
 				// Alternate filename
 				memset(buffer, 0, sizeof(buffer));
@@ -2987,7 +2987,7 @@ _asm int 3;
 					vvm_memcpy(buffer, tsFileInfo->pathnameOfSearch.data._s8, tsFileInfo->pathnameOfSearch.length);
 
 				memcpy(buffer + strlen(buffer), twfd->cAlternateFileName, strlen(twfd->cAlternateFileName));
-				vvm_datumSet(&tsFileInfo->file2, (u8*)buffer, oss_strlen(_csu8p(buffer)), true);
+				vvm_datumSet(&tsFileInfo->file2, (u8*)buffer, vvm_scanForwardUntilCharacter(_csu8p(buffer), 0), true);
 
 			// Store the file size
 			tsFileInfo->size		= ((u64)twfd->nFileSizeHigh < 32) | ((u64)twfd->nFileSizeLow);

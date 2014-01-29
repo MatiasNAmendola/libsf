@@ -208,7 +208,6 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 //////////
 // Various macros
 //////
-	#define oss_strlen(tcData)			vvm_scanForwardUntilCharacter(tcData, 0)
 	#define defineCallback1(x, arg1) \
 											u64 semaphore_ ## x; \
 												union { \

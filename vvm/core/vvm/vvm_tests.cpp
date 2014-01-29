@@ -94,7 +94,7 @@
 			memset(&lff, 0, sizeof(lff));
 			vvm1_datumSet(&lff.pathnameOfSearch, tcDirectory._u8,	-1, false);
 			vvm1_datumSet(&lff.filenameSearched, tcFilePattern._u8,	-1, false);
-			lnExclusionListLength	= (u32)oss_strlen(tcExclusionList);
+			lnExclusionListLength	= (u32)vvm1_scanForwardUntilCharacter(tcExclusionList, 0);
 			llCumulativeResult		= true;
 
 

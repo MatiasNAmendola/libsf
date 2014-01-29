@@ -95,7 +95,7 @@
 		// Try to find the resource we've already loaded
 		cb._func	= (u64)&iivvm_loadResourceAsciiTextCallback;
 		cb.extra	= tnResourceNumber;
-		lr = (SVvmmcResourceText*)vvm_SEChain_searchByCallback(&gsVvm.gseRootResourceTexts, &cb);
+		lr = (SVvmmcResourceText*)vvm1_SEChain_searchByCallback(&gsVvm.gseRootResourceTexts, &cb);
 		if (lr)
 			return(lr->text);		// It's already been loaded
 
@@ -104,7 +104,7 @@
 			return((s8*)cgcUnableToLocateResource);		// Use the default failure string
 
 		// Allocate the new item
-		lr = (SVvmmcResourceText*)vvm_SEChain_append(&gsVvm.gseRootResourceTexts, vvm1_getNextUniqueId(), vvm1_getNextUniqueId(), sizeof(SVvmResourceText), _COMMON_START_END_BLOCK_SIZE, NULL);
+		lr = (SVvmmcResourceText*)vvm1_SEChain_append(&gsVvm.gseRootResourceTexts, vvm1_getNextUniqueId(), vvm1_getNextUniqueId(), sizeof(SVvmResourceText), _COMMON_START_END_BLOCK_SIZE, NULL);
 		if (lr)
 		{
 			// Store the resource information
@@ -797,7 +797,7 @@
 		{
 			// If they want us to populate the length, do so
 			if (tnDataLength == -1)
-				tnDataLength = (u32)oss_strlen(_csu8p(tcData));
+				tnDataLength = (u32)vvm1_scanForwardUntilCharacter(_csu8p(tcData), 0);
 
 			// If there's anything to do, do it
 			if (tnDataLength != 0)
@@ -1120,7 +1120,7 @@ _asm int 3;
 		// Initialize our return values
 		llResult = false;
 		if (tnBytesWritten)							*tnBytesWritten = 0;
-		if (tcPathname && tnPathnameLength == 0)	tnPathnameLength = (u32)oss_strlen(_csu8p(tcPathname));
+		if (tcPathname && tnPathnameLength == 0)	tnPathnameLength = (u32)vvm1_scanForwardUntilCharacter(_csu8p(tcPathname), 0);
 
 		// Make sure our environment is sane
 		if (bxml && tcPathname)
@@ -1390,7 +1390,7 @@ _asm nop;
 			{
 				cb._func	= (u64)&iibxml_AttributeDeleteCallback;
 				cb.extra	= (u64)&lbadp;
-				vvm_SEChain_deleteFromAfterCallback(&bxmla->_parent->_attributes, true, &cb);
+				vvm1_SEChain_deleteFromAfterCallback(&bxmla->_parent->_attributes, true, &cb);
 			}
 			// When we get here, it's either been removed, or not
 		}
@@ -1456,7 +1456,7 @@ _asm nop;
 		if (bxml && bxmlaNew)
 		{
 			// Append it to the chain after the entry
-			vvm_SEChain_appendExistingRelativeToMember(&bxml->_attributes, (SLL*)bxmlaRef, vvm1_getNextUniqueId(), (SLL*)bxmlaNew, _COMMON_START_END_BLOCK_SIZE, tlAfter, &llResult);
+			vvm1_SEChain_appendExistingRelativeToMember(&bxml->_attributes, (SLL*)bxmlaRef, vvm1_getNextUniqueId(), (SLL*)bxmlaNew, _COMMON_START_END_BLOCK_SIZE, tlAfter, &llResult);
 
 		} else {
 			// Invalid parameters
@@ -2181,7 +2181,7 @@ _asm nop;
 							if (bxml)
 							{
 								// A node was found
-								bxmlList = (SBxmlList*)vvm_SEChain_append(bxmlFinds, vvm1_getNextUniqueId(), vvm1_getNextUniqueId(), sizeof(SBxmlList), _COMMON_START_END_BLOCK_SIZE, &llResult);
+								bxmlList = (SBxmlList*)vvm1_SEChain_append(bxmlFinds, vvm1_getNextUniqueId(), vvm1_getNextUniqueId(), sizeof(SBxmlList), _COMMON_START_END_BLOCK_SIZE, &llResult);
 
 								// Store that node
 								if (bxmlList)
@@ -2192,7 +2192,7 @@ _asm nop;
 
 							} else {
 								// An attribute was found
-								bxmlaList = (SBxmlaList*)vvm_SEChain_append(bxmlaFinds, vvm1_getNextUniqueId(), vvm1_getNextUniqueId(), sizeof(SBxmlaList), _COMMON_START_END_BLOCK_SIZE, &llResult);
+								bxmlaList = (SBxmlaList*)vvm1_SEChain_append(bxmlaFinds, vvm1_getNextUniqueId(), vvm1_getNextUniqueId(), sizeof(SBxmlaList), _COMMON_START_END_BLOCK_SIZE, &llResult);
 
 								// Store that attribute
 								if (bxmlaList)
@@ -2308,7 +2308,7 @@ _asm nop;
 							if (bxmla)
 							{
 								// An attribute was found
-								bxmlaList = (SBxmlaList*)vvm_SEChain_append(bxmlaFinds, vvm1_getNextUniqueId(), vvm1_getNextUniqueId(), sizeof(SBxmlaList), _COMMON_START_END_BLOCK_SIZE, &llResult);
+								bxmlaList = (SBxmlaList*)vvm1_SEChain_append(bxmlaFinds, vvm1_getNextUniqueId(), vvm1_getNextUniqueId(), sizeof(SBxmlaList), _COMMON_START_END_BLOCK_SIZE, &llResult);
 
 								// Store that attribute
 								if (bxmlaList)
@@ -2435,7 +2435,7 @@ _asm nop;
 		{
 			// Do they want us to set the length?
 			if (length == -1)
-				length = oss_strlen(_csu8p(ptr));
+				length = vvm1_scanForwardUntilCharacter(_csu8p(ptr), 0);
 
 			// Is there anything to do?
 			if (length != 0)
@@ -2501,7 +2501,7 @@ _asm nop;
 		{
 			// Do they want us to set the length?
 			if (length == -1)
-				length = oss_strlen(_csu8p(ptr));
+				length = vvm1_scanForwardUntilCharacter(_csu8p(ptr), 0);
 
 			// Is there anything to do?
 			if (length != 0)
@@ -2822,7 +2822,7 @@ _asm nop;
 									haystack	= _csu8p(candidate._u8			+ lnC);
 
 									// Search forward for it
-									if (!vvm1_isNeedleInHaystack(haystack, (u32)oss_strlen(candidate) - lnC, needle, lnNeedleLength, tlCaseSensitive, &lnFoundPosition))
+									if (!vvm1_isNeedleInHaystack(haystack, (u32)vvm1_scanForwardUntilCharacter(candidate, 0) - lnC, needle, lnNeedleLength, tlCaseSensitive, &lnFoundPosition))
 										return(-1);		// Not found, the candidate is less than the wildcardPattern
 
 									// If we get here, then it was found, so we continue on
@@ -2864,7 +2864,7 @@ _asm nop;
 				if (llWildcardFound)
 				{
 					// The lengths must match to be a match
-					return(oss_strlen(candidate) == oss_strlen(wildcardPattern));
+					return(vvm1_scanForwardUntilCharacter(candidate, 0) == vvm1_scanForwardUntilCharacter(wildcardPattern, 0));
 
 				} else {
 					// It was a match
@@ -4898,7 +4898,7 @@ _asm nop;
 				ptrCaller->uniqueId	= tnUniqueId;
 
 				// Append the now existing pointer
-				return(vvm_SEChain_appendExistingRelativeToMember(ptrSE, ptrRef, tnUniqueIdExtra, ptrCaller, tnBlockSizeIfNewBlockNeeded, tlAfter, tlResult));
+				return(vvm1_SEChain_appendExistingRelativeToMember(ptrSE, ptrRef, tnUniqueIdExtra, ptrCaller, tnBlockSizeIfNewBlockNeeded, tlAfter, tlResult));
 			}
 		}
 		// If we get here, error
@@ -5043,7 +5043,7 @@ _asm nop;
 			// If we get here, no slots are available, add some more
 
 			// Allocate some pointer space
-			vvm_SEChain_allocateAdditionalMasterSlots(ptrSE, tnBlockSizeIfNewBlockNeeded);
+			vvm1_SEChain_allocateAdditionalMasterSlots(ptrSE, tnBlockSizeIfNewBlockNeeded);
 			// We never break out of this loop because we will always return above from it
 		}
 	}
@@ -5094,7 +5094,7 @@ _asm nop;
 				// We did not find room
 				// Allocate some pointer space
 				//////
-					vvm_SEChain_allocateAdditionalMasterSlots(ptrSE, tnBlockSizeIfNewBlockNeeded);
+					vvm1_SEChain_allocateAdditionalMasterSlots(ptrSE, tnBlockSizeIfNewBlockNeeded);
 					// We never break out of this loop because we will always return above from it
 
 			} while (1);
@@ -5228,7 +5228,7 @@ _asm int 3;
 				{
 					// This is our man, migrate it
 // TODO:  (enhancement) we want some kind of better hinting algorithm here, such as the end of the list - common block size, for now we'll just pass 0
-					return(vvm_SEChain_migrateByNum(ptrSEDst, ptrSESrc, lnI, 0, tnBlockSize));
+					return(vvm1_SEChain_migrateByNum(ptrSEDst, ptrSESrc, lnI, 0, tnBlockSize));
 				}
 			}
 			// If we get here, not found
@@ -5309,7 +5309,7 @@ _asm int 3;
 					}
 				}
 				// If we get here, no empty slots. Allocate some, rinse, and repeat. :-)
-				vvm_SEChain_allocateAdditionalMasterSlots(ptrSEDst, tnBlockSize);
+				vvm1_SEChain_allocateAdditionalMasterSlots(ptrSEDst, tnBlockSize);
 
 				// Process through again beginning at the newly added portion
 				tnHint = lnI;
@@ -5345,7 +5345,7 @@ _asm int 3;
 				{
 					// This is our man, migrate it
 // TODO:  (enhancement) we want some kind of better hinting algorithm here, such as the end of the list - common block size, for now we'll just pass 0
-					return(vvm_SEChain_completelyMigrateSLLByNum(ptrSEDst, ptrSESrc, lnI, 0, tnBlockSize));
+					return(vvm1_SEChain_completelyMigrateSLLByNum(ptrSEDst, ptrSESrc, lnI, 0, tnBlockSize));
 				}
 			}
 			// If we get here, not found
@@ -5366,7 +5366,7 @@ _asm int 3;
 		if (ptrSEDst && ptrSESrc && lnSrcNum < ptrSESrc->masterCount && lnSrcNum <= ptrSESrc->masterCount)
 		{
 			// Migrate it, and get its SMasterList entry
-			lml = vvm_SEChain_migrateByNum(ptrSEDst, ptrSESrc, lnSrcNum, tnHint, tnBlockSize);
+			lml = vvm1_SEChain_migrateByNum(ptrSEDst, ptrSESrc, lnSrcNum, tnHint, tnBlockSize);
 			if (lml && lml->ptr)
 			{
 				// Grab the pointer to the SLL entry
@@ -5476,7 +5476,7 @@ _asm int 3;
 						callbackAddress(ptrSE->master[lnI]->ptr, tnParam);
 
 					// Delete the pointer from the list
-					vvm_SEChain_deleteFrom(ptrSE, ptrSE->master[lnI]->ptr, tlDeletePointers);
+					vvm1_SEChain_deleteFrom(ptrSE, ptrSE->master[lnI]->ptr, tlDeletePointers);
 					++lnDeletedCount;
 				}
 			}
@@ -5636,7 +5636,7 @@ _asm int 3;
 					if (cb->funcBool(cb))
 					{
 						// This is the entry they want to delete
-						vvm_SEChain_deleteFrom(ptrSE, ptrSE->master[lnI]->ptr, tlDeletePointers);
+						vvm1_SEChain_deleteFrom(ptrSE, ptrSE->master[lnI]->ptr, tlDeletePointers);
 						llResult = true;
 						break;
 					}
@@ -6694,7 +6694,7 @@ _asm int 3;
 				{
 					cb._func		= (u64)&ivvm_regionRefreshCallback;
 					cb.ex2PtrRegion	= trParent;
-					vvm_SEChain_iterateThroughForCallback(&tr->subRegions, &cb);
+					vvm1_SEChain_iterateThroughForCallback(&tr->subRegions, &cb);
 				}
 
 
@@ -6757,7 +6757,7 @@ _asm int 3;
 		{
 			// Make sure our count is valid
 			if (characterCount == -1)
-				characterCount = (u32)oss_strlen(_csu8p(text));
+				characterCount = (u32)vvm1_scanForwardUntilCharacter(_csu8p(text), 0);
 
 			// Draw the text
 			lnResult = vvm1_iDrawFixedPoint(tc, bd, fontWidth, fontHeight, ulx, uly, text, characterCount, foreground, background);
