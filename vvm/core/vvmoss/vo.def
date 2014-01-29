@@ -47,6 +47,12 @@ EXPORTS
 	oss_systemCreateBitmap
 	oss_systemFindFontByHandle
 	
+	oss_screenCreateTemplate
+	oss_screenCreateTemplate
+	oss_screenEnumerateMonitors
+	oss_screenComputeMonitorCoordinates
+	oss_screenGetDimensions
+
 	oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb
 	oss_lowLevel_bitBlt_ossRgb_onto_canvasBgra
 	oss_getNextMessage

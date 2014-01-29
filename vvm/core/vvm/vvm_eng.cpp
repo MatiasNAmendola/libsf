@@ -66,7 +66,7 @@
 
 
 		// Create the base VVM state
-		lp = (SProgram*)vvm_SEChain_append(&gsVvm.gseRootPrograms, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SProgram), 1, NULL);
+		lp = (SProgram*)vvm1_SEChain_append(&gsVvm.gseRootPrograms, vvm1_getNextUniqueId(), vvm1_getNextUniqueId(), sizeof(SProgram), 1, NULL);
 
 
 		// Enter a loop so we can break out

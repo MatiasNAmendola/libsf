@@ -100,6 +100,20 @@ struct SOssWindowLL;
 	const s8		cgcOssCreateSystemBitmap[]								= "oss_systemCreateBitmap";
 	const s8		cgcOssFindSystemFontByHandle[]							= "oss_systemFindFontByHandle";
 
+	const s8		cgcOssCreateScreenTemplate[]							= "oss_screenCreateTemplate";
+	const s8		cgcOssComputeMonitorCoordinates[]						= "oss_screenComputeMonitorCoordinates";
+	const s8		cgcOssEnumerateMonitors[]								= "oss_screenEnumerateMonitors";
+	const s8		cgcOssGetScreenDimensions[]								= "oss_screenGetDimensions";
+	const s8		cgcOssSetFocus[]										= "oss_setFocus";
+
+	const s8		cgcOssLowLevelBitBltCanvasBgraOntoOssRgb[]				= "oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb";
+	const s8		cgcOssLowLevelBitBltOssRgbOntoCanvasBgra[]				= "oss_lowLevel_bitBlt_ossRgb_onto_canvasBgra";
+
+	const s8		cgcOssGetNextMessage[]									= "oss_getNextMessage";
+	const s8		cgcOssMessageBox[]										= "oss_messageBox";
+	const s8		cgcOssMessageBoxUnicode[]								= "oss_messageBoxUnicode";
+	const s8		cgcOssDrawText[]										= "oss_drawText";
+
 	const s8		cgcOssAlloc[]											= "oss_alloc";
 	const s8		cgcOssRealloc[]											= "oss_realloc";
 	const s8		cgcOssFree[]											= "oss_free";
@@ -141,20 +155,6 @@ struct SOssWindowLL;
 	const s8		cgcOssThreadSuspend[]									= "oss_threadSuspend";
 	const s8		cgcOssThreadResume[]									= "oss_threadResume";
 	const s8		cgcOssThreadTerminate[]									= "oss_threadTerminate";
-
-	const s8		cgcOssCreateScreenTemplate[]							= "oss_screenCreateTemplate";
-	const s8		cgcOssComputeMonitorCoordinates[]						= "oss_screenComputeMonitorCoordinates";
-	const s8		cgcOssEnumerateMonitors[]								= "oss_screenEnumerateMonitors";
-	const s8		cgcOssGetScreenDimensions[]								= "oss_screenGetDimensions";
-	const s8		cgcOssSetFocus[]										= "oss_setFocus";
-
-	const s8		cgcOssLowLevelBitBltCanvasBgraOntoOssRgb[]				= "oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb";
-	const s8		cgcOssLowLevelBitBltOssRgbOntoCanvasBgra[]				= "oss_lowLevel_bitBlt_ossRgb_onto_canvasBgra";
-
-	const s8		cgcOssGetNextMessage[]									= "oss_getNextMessage";
-	const s8		cgcOssMessageBox[]										= "oss_messageBox";
-	const s8		cgcOssMessageBoxUnicode[]								= "oss_messageBoxUnicode";
-	const s8		cgcOssDrawText[]										= "oss_drawText";
 
 	const s8		cgcOssCreateSemaphore[]									= "oss_createSemaphore";
 	const s8		cgcOssLockSemaphore[]									= "oss_lockSemaphore";
@@ -253,8 +253,8 @@ struct SOssWindowLL;
 																					SBGRA tnForeColor, SBGRA tnBackColor,
 																					bool tlResizable, bool tlMovable, bool tlClosable, bool tlVisible, bool tlBorder,
 																					SCallbacksW* callbacks);
-		SOssWindow*		(CALLTYPE *oss_screenEnumerateMonitors)						(SStartEnd* tsMonitors/*Returns SOssWindow* structures*/);
-		void			(CALLTYPE *oss_screenComputeMonitorCoordinates)				(SOssWindow* tow, f32 tfPercent, u32 tnPosition, f32 tfMargin, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin);
+		SOssWindow*		(CALLTYPE *oss_screenEnumerateMonitors)					(SStartEnd* tsMonitors/*Returns SOssWindow* structures*/);
+		void			(CALLTYPE *oss_screenComputeMonitorCoordinates)			(SOssWindow* tow, f32 tfPercent, u32 tnPosition, f32 tfMargin, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin);
 		bool			(CALLTYPE *oss_screenGetDimensions)						(u64 tnOssWindowId, s32* tnX, s32* tnY, u32* tnWidth, u32* tnHeight, u32* tnWidthMax, u32* tnHeightMax, u32* tnWidthMin, u32* tnHeightMin);
 
 		u64				(CALLTYPE *oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb)	(u64 tnOssWindowId, SBGRA* bd, u32 width, u32 height);
@@ -447,6 +447,20 @@ struct SOssWindowLL;
 		(void *)&oss_systemCreateBitmap,									(void *)cgcOssCreateSystemBitmap,
 		(void *)&oss_systemFindFontByHandle,								(void *)cgcOssFindSystemFontByHandle,
 
+		(void *)&oss_screenCreateTemplate,									(void *)cgcOssCreateScreenTemplate,
+		(void *)&oss_screenComputeMonitorCoordinates,						(void *)cgcOssComputeMonitorCoordinates,
+		(void *)&oss_screenEnumerateMonitors,								(void *)cgcOssEnumerateMonitors,
+		(void *)&oss_screenGetDimensions,									(void *)cgcOssGetScreenDimensions,
+
+		(void *)&oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb,				(void *)cgcOssLowLevelBitBltCanvasBgraOntoOssRgb,
+		(void *)&oss_lowLevel_bitBlt_ossRgb_onto_canvasBgra,				(void *)cgcOssLowLevelBitBltOssRgbOntoCanvasBgra,
+
+		(void *)&oss_getNextMessage,										(void *)cgcOssGetNextMessage,
+		(void *)&oss_messageBox,											(void *)cgcOssMessageBox,
+		(void *)&oss_messageBoxUnicode,										(void *)cgcOssMessageBoxUnicode,
+
+		(void *)&oss_drawText,												(void *)cgcOssDrawText,
+
 		(void *)&oss_alloc,													(void *)cgcOssAlloc,
 		(void *)&oss_realloc,												(void *)cgcOssRealloc,
 		(void *)&oss_free,													(void *)cgcOssFree,
@@ -496,20 +510,6 @@ struct SOssWindowLL;
 		(void *)&oss_threadSuspend,											(void *)cgcOssThreadSuspend,
 		(void *)&oss_threadResume,											(void *)cgcOssThreadResume,
 		(void *)&oss_threadTerminate,										(void *)cgcOssThreadTerminate,
-
-		(void *)&oss_screenCreateTemplate,									(void *)cgcOssCreateScreenTemplate,
-		(void *)&oss_screenComputeMonitorCoordinates,								(void *)cgcOssComputeMonitorCoordinates,
-		(void *)&oss_screenEnumerateMonitors,										(void *)cgcOssEnumerateMonitors,
-		(void *)&oss_screenGetDimensions,									(void *)cgcOssGetScreenDimensions,
-
-		(void *)&oss_lowLevel_bitBlt_CanvasBgra_onto_ossRgb,				(void *)cgcOssLowLevelBitBltCanvasBgraOntoOssRgb,
-		(void *)&oss_lowLevel_bitBlt_ossRgb_onto_canvasBgra,				(void *)cgcOssLowLevelBitBltOssRgbOntoCanvasBgra,
-
-		(void *)&oss_getNextMessage,										(void *)cgcOssGetNextMessage,
-		(void *)&oss_messageBox,											(void *)cgcOssMessageBox,
-		(void *)&oss_messageBoxUnicode,										(void *)cgcOssMessageBoxUnicode,
-
-		(void *)&oss_drawText,												(void *)cgcOssDrawText,
 
 		(void *)&oss_createSemaphore,										(void *)cgcOssCreateSemaphore,
 		(void *)&oss_lockSemaphore,											(void *)cgcOssLockSemaphore,
