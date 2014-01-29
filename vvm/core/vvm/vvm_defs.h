@@ -637,13 +637,13 @@ inline bool					ioss_verifyLength							(u64 tnGoingTo, u64 tnMaxAllowable);
 
 	// Searches node or attribute names for the indicated wildcard search string
 	SBxmla* CALLTYPE		vvm1_bxmlFindAttribute						(SBxml* bxml, SDatum* tsWildcardSearch, u32 tnInstance);
-	bool CALLTYPE			vvm1_bxmlFindFirst							(SBxml* bxmlRoot, SBxml* bxmlNodeFound, SBxmla* bxmlaAttributeFound, SDatum* tsWildcardSearch, bool tlTraverseChildren, bool tlSearchAttributes, void** x);
+	bool CALLTYPE			vvm1_bxmlFindFirst							(SBxml* bxmlRoot, SBxml** bxmlNodeFound, SBxmla** bxmlaAttributeFound, SDatum* tsWildcardSearch, bool tlTraverseChildren, bool tlSearchAttributes, void** x);
 	bool CALLTYPE			vvm1_bxmlFindContinue						(void* x);
-	u32 CALLTYPE			vvm1_bxmlFindAllAsStartEndLists				(SBxml* bxmlRoot, SStartEnd** bxmlFinds, SStartEnd** bxmlaFinds, SDatum* tsWildcardSearch, u32* tnMaxFindsToInclude, bool tlTraverseChildren, bool tlSearchAttributes);
+	u32 CALLTYPE			vvm1_bxmlFindAllAsStartEndLists				(SBxml* bxmlRoot, SStartEnd* bxmlFinds, SStartEnd* bxmlaFinds, SDatum* tsWildcardSearch, u32* tnMaxFindsToInclude, bool tlTraverseChildren, bool tlSearchAttributes);
 	// Searches populated data in attributes for the indicated wildcard search string
-	bool CALLTYPE			vvm1_bxmlDataFindFirst						(SBxml* bxmlRoot, SBxmla* bxmlaAttributeFound, SDatum* tsWildcardSearch, bool tlTraverseChildren, void** x);
+	bool CALLTYPE			vvm1_bxmlDataFindFirst						(SBxml* bxmlRoot, SBxmla** bxmlaAttributeFound, SDatum* tsWildcardSearch, bool tlTraverseChildren, void** x);
 	bool CALLTYPE			vvm1_bxmlDataFindContinue					(void* x);
-	u32 CALLTYPE			vvm1_bxmlDataFindAllAsStartEndList			(SBxml* bxmlRoot, SStartEnd** bxmlaFinds, SDatum* tsWildcardSearch, u32* tnMaxFindsToInclude, bool tlTraverseChildren);
+	u32 CALLTYPE			vvm1_bxmlDataFindAllAsStartEndList			(SBxml* bxmlRoot, SStartEnd* bxmlaFinds, SDatum* tsWildcardSearch, u32* tnMaxFindsToInclude, bool tlTraverseChildren);
 
 	void CALLTYPE			vvm1_bxmlGetLastError						(SBxmlError* errorInfo);
 
@@ -817,7 +817,7 @@ inline bool					ioss_verifyLength							(u64 tnGoingTo, u64 tnMaxAllowable);
 	u64 CALLTYPE			vvm1_iRegionDefaultPaintLabel				(SRegion* tr, SCanvas* tc, SBGRA* bd, SRegionLabelData* label);
 	u64 CALLTYPE			vvm1_iRegionDefaultPaintCheckbox			(SRegion* tr, SCanvas* tc, SBGRA* bd, SRegionCheckboxData* checkbox);
 	u64 CALLTYPE			vvm1_iRegionDefaultPaintRectangle			(SRegion* tr, SCanvas* tc, SBGRA* bd, SRegionRectangleData* rectangle);
-	void CALLTYPE			vvm1_iRegionDoDefaultDebugTrapCallback		(SRegion* tr, u64 tnIdentifier, u64 tnExtra);
+	void CALLTYPE			ivvm_regionDoDefaultDebugTrapCallback		(SRegion* tr, u64 tnIdentifier, u64 tnExtra);
 	u64 CALLTYPE			vvm1_iDrawFixedPoint						(SCanvas* tc, SBGRA* bd, u32 fontWidth, u32 fontHeight, s32 ulx, s32 uly, s8* text, u32 characterCount, SBGRA foreground, SBGRA background);
 	u64 CALLTYPE			vvm1_iBitBltAll								(SCanvas* tsDst, bool tlDstIsAccumulatorBuffer, s32 tnX, s32 tnY, SCanvas* tsSrc, bool tlSrcIsAccumulatorBuffer);
 	void CALLTYPE			vvm1_iiBitBltAll_Opaque						(SBGRA* trgbaDstRoot, SCanvas* tsDst, s32 tnX, s32 tnY, SBGRA* trgbaSrcRoot, SCanvas* tsSrc);

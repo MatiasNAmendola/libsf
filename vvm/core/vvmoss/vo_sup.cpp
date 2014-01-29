@@ -1020,79 +1020,6 @@ _asm int 3;
 
 //////////
 //
-// Callback searches through screens visible on the display at the present time by HWND
-//
-//////
-	bool iioss_findSOssWindowLLByHwndCallback(SStartEndCallback* cb)
-	{
-		SOssWindowLL* low;
-
-
-		// Make sure our environment is sane
-		if (cb && cb->ptr)
-		{
-			low = (SOssWindowLL*)cb->ptr;
-			if (low->isw.osHandle == cb->extra)
-				return(true);		// It's a match
-		}
-		// If we get here, not found
-		return(false);
-	}
-
-
-
-
-//////////
-//
-// Searches through screens visible on the display at the present time by screen id
-//
-//////
-	bool iioss_findSOssWindowLLByScreenId(SStartEndCallback* cb)
-	{
-		SOssWindowLL* low;
-
-
-		// Make sure our environment is sane
-		if (cb && cb->ptr)
-		{
-			low = (SOssWindowLL*)cb->ptr;
-			if (low->isw.screenId == cb->extra)
-				return(true);		// It's a match
-		}
-		// If we get here, not found
-		return(false);
-	}
-
-
-
-
-//////////
-//
-// Searches the indicated SOssWindowLL structure by its ID
-//
-//////
-	bool iioss_findSOssWindowByOssWindowIdCallback(SStartEndCallback* cb)
-	{
-		SOssWindowLL* low;
-
-
-		// Make sure the environment is sane
-		if (cb && cb->ptr)
-		{
-			low = (SOssWindowLL*)cb->ptr;
-			if (low->ll.uniqueId == cb->extra)
-				return(true);
-		}
-		// If we get here, not a match
-		return(false);
-	}
-
-
-
-
-
-//////////
-//
 // Converts the windows encoded mouse data to something usable by VVM
 //
 //////
@@ -3374,6 +3301,81 @@ _asm int 3;
 				return(true);	// Yes
 		}
 		// Not found
+		return(false);
+	}
+
+
+
+
+//////////
+//
+// Searches through the list of known screens visible on the display at the present
+// time by HWND, and returns a pointer to it if found.  NULL if not.
+//
+//////
+	bool iioss_findSOssWindowLLByHwndCallback(SStartEndCallback* cb)
+	{
+		SOssWindowLL* low;
+
+
+		// Make sure our environment is sane
+		if (cb && cb->ptr)
+		{
+			low = (SOssWindowLL*)cb->ptr;
+			if (low->isw.osHandle == cb->extra)
+				return(true);		// It's a match
+		}
+		// If we get here, not found
+		return(false);
+	}
+
+
+
+
+//////////
+//
+// Searches through the list of known screens visible on the display at the present
+// time by screen id, and returns a pointer to it if found.  NULL if not.
+//
+//////
+	bool iioss_findSOssWindowLLByScreenId(SStartEndCallback* cb)
+	{
+		SOssWindowLL* low;
+
+
+		// Make sure our environment is sane
+		if (cb && cb->ptr)
+		{
+			low = (SOssWindowLL*)cb->ptr;
+			if (low->isw.screenId == cb->extra)
+				return(true);		// It's a match
+		}
+		// If we get here, not found
+		return(false);
+	}
+
+
+
+
+//////////
+//
+// Callback from findScreenByOssWindowId() to locate the indicated SOssWindowLL structure by its
+// ID, and not the actual SOssWindowLL->isw->ll.uniqueId for the actual internal screen structure
+//
+//////
+	bool iioss_findSOssWindowByOssWindowIdCallback(SStartEndCallback* cb)
+	{
+		SOssWindowLL* low;
+
+
+		// Make sure the environment is sane
+		if (cb && cb->ptr)
+		{
+			low = (SOssWindowLL*)cb->ptr;
+			if (low->ll.uniqueId == cb->extra)
+				return(true);
+		}
+		// If we get here, not a match
 		return(false);
 	}
 

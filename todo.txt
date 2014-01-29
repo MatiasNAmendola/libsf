@@ -1,5 +1,16 @@
+Jan.28.2014 - Validate canvas, region and data subsystems.
+              Jan.28.2014 - planned
+
+Jan.28.2014 - Refactor VVM into vvm.exe and vvm.dll.
+              Jan.28.2014 - planned
+
+Nov.18.2013 - Refactor several VVMOSS into VVM functions.
+              Jan.28.2014 - complete
+
 May.11.2013 - Rewrite the test harness to be slew of separate plugins.
               Jun.07.2013 - in progress
+			  Nov.18.2013 - complete
+			  Jan.28.2014 - additional tests being written continuously
 
 May.31.2013 - Load SDL sound plugin, get frequency and stream playback working.
               Jun.05.2013 - complete

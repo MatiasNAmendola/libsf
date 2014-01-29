@@ -284,9 +284,6 @@
 	void					ioss_initializeBackground						(u32 tnWidth, u32 tnHeight, u32 tnBackColor, s8* tbd, u32 tnActualWidth);
 	u32						ioss_computeActualWidth							(u32 tnWidth);
 	bool					ioss_paintWindow								(HWND hwnd);
-	bool					iioss_findSOssWindowLLByHwndCallback			(SStartEndCallback* cb);
-	bool					iioss_findSOssWindowLLByScreenId				(SStartEndCallback* cb);
-	bool					iioss_findSOssWindowByOssWindowIdCallback		(SStartEndCallback* cb);
 	void					ioss_deriveMouseInformation						(u32* tnX, u32* tnY, u32* tnButtons, u32* tnKeyFlags, u32 tnWinKeys, u32 tnXlowYhigh);
 	void					ioss_recordMouseEvent							(HWND hwnd, u32 tnEVent, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeyFlags);
 	void					ioss_deriveKeyboardInformation					(u32* tnKey, u32* tnKeyFlags, s8* tcAscii, s16* tuUnicode, u32 tnVkey, _iswSwindowExtraKeyData* tsXKeyInfo);
@@ -326,6 +323,10 @@
 	SRegion*				ioss_appendRegionToRegion						(SRegion* trParent, SRegion* trChild, u64 tnAssociatedId, SRegionState* tsState, u32 tnX, u32 tnY, SCallbacks* callback);
 	void					iioss_createRegionAppendEventsCallback			(SStartEndCallback* cb);
 	void					iivvm_screenRefreshCallback						(SStartEndCallback* cb);
+
+	bool					iioss_findSOssWindowLLByHwndCallback			(SStartEndCallback* cb);
+	bool					iioss_findSOssWindowLLByScreenId				(SStartEndCallback* cb);
+	bool					iioss_findSOssWindowByOssWindowIdCallback		(SStartEndCallback* cb);
 
 	BOOL CALLBACK			iioss_enumerateMonitors							(HMONITOR hMonitor, HDC hdcMonitor, LPRECT lprcMonitor, LPARAM dwData);
 	void					iioss_enumerateMonitorsIterateCallback			(SStartEndCallback* cb);

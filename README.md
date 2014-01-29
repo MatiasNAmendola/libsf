@@ -3,7 +3,7 @@
 
 --------------
 
-        May.31.2013 - Development of WhiteBox ongoing.
+        Jan.28.2014 - Development is ongoing.  Slow and steady wins the race. :-)
         May.11.2013 - Development of WhiteBox continues.  About 2500 lines of code.
         Apr.29.2013 - Development on Visual FreePro is suspended pending the completion of WhiteBox.
         Apr.29.2013 - Development of WhiteBox begins.
@@ -86,15 +86,14 @@ vvm\localization
 
 apps\whitebox
 ====
-        WhiteBox is a non-linear audio/video editor.
+        WhiteBox is a non-linear audio/video editor.  Jan.28.2014 On hold
+        pending additional completion of the virtual machine and supporting
+        infrastructure.
 
 
 Future Plans
 ====
-        Apr.30.2014 - (planned) Visual FreePro 1.20 is released, fully supporting Android, plus bug fixes.  VVM 1.20 is also released for bug fixes.
-        Dec.31.2013 - (planned) Visual FreePro 1.10 is released, adds support for Linux, FreeBSD and limited Android support, bug fixes.
-        Dec.31.2013 - (planned) Visual FreePro 0.90 is released, a 1.00 candidate awaiting bug fixes.  VVM 1.10 is released for bug fixes.
-        Dec.31.2013 - (planned) VVM 0.90 is released, a 1.00 candidate awaiting bug fixes.
+        Jul.15.2014 - (planned) Visual FreePro 0.60 is released, able to execute several commands.
 
 
 Timeline

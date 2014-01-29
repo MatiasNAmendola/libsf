@@ -13,12 +13,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vvmoss", "vvmoss\vvmoss.vcp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vvm_plugin_sound", "plugins\sound\sound.vcproj", "{8D1B2D7D-3C21-4747-9AFA-03B15B44A39E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "whitebox", "..\apps\whitebox\whitebox.vcproj", "{BA90963A-1C66-488C-AD42-92F9A95E9E3C}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "whiteboxLauncher", "..\apps\whitebox\launcher\launcher.vcproj", "{312FE97F-C89A-448B-9638-B0CD64D81C78}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "whiteboxenu", "..\apps\whitebox\whiteboxenu\whiteboxenu.vcproj", "{8BB60A55-C814-48E3-95C7-EC460BFE299C}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vvmt_core", "vvmtests\vvmt_core\vvmt_core.vcproj", "{2A9A8478-654D-49A6-9940-24FF5DE94BE0}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vvm_plugin_wideedit", "plugins\wideedit\wideedit.vcproj", "{672982BC-73C8-4EF1-B9B5-B6FDDE566293}"
@@ -66,24 +60,6 @@ Global
 		{8D1B2D7D-3C21-4747-9AFA-03B15B44A39E}.Debug|Win32.Build.0 = Debug|Win32
 		{8D1B2D7D-3C21-4747-9AFA-03B15B44A39E}.Release|Win32.ActiveCfg = Release|Win32
 		{8D1B2D7D-3C21-4747-9AFA-03B15B44A39E}.Release|Win32.Build.0 = Release|Win32
-		{BA90963A-1C66-488C-AD42-92F9A95E9E3C}.debug_vasm|Win32.ActiveCfg = Debug|Win32
-		{BA90963A-1C66-488C-AD42-92F9A95E9E3C}.debug_vasm|Win32.Build.0 = Debug|Win32
-		{BA90963A-1C66-488C-AD42-92F9A95E9E3C}.Debug|Win32.ActiveCfg = Debug|Win32
-		{BA90963A-1C66-488C-AD42-92F9A95E9E3C}.Debug|Win32.Build.0 = Debug|Win32
-		{BA90963A-1C66-488C-AD42-92F9A95E9E3C}.Release|Win32.ActiveCfg = Release|Win32
-		{BA90963A-1C66-488C-AD42-92F9A95E9E3C}.Release|Win32.Build.0 = Release|Win32
-		{312FE97F-C89A-448B-9638-B0CD64D81C78}.debug_vasm|Win32.ActiveCfg = Debug|Win32
-		{312FE97F-C89A-448B-9638-B0CD64D81C78}.debug_vasm|Win32.Build.0 = Debug|Win32
-		{312FE97F-C89A-448B-9638-B0CD64D81C78}.Debug|Win32.ActiveCfg = Debug|Win32
-		{312FE97F-C89A-448B-9638-B0CD64D81C78}.Debug|Win32.Build.0 = Debug|Win32
-		{312FE97F-C89A-448B-9638-B0CD64D81C78}.Release|Win32.ActiveCfg = Release|Win32
-		{312FE97F-C89A-448B-9638-B0CD64D81C78}.Release|Win32.Build.0 = Release|Win32
-		{8BB60A55-C814-48E3-95C7-EC460BFE299C}.debug_vasm|Win32.ActiveCfg = Debug|Win32
-		{8BB60A55-C814-48E3-95C7-EC460BFE299C}.debug_vasm|Win32.Build.0 = Debug|Win32
-		{8BB60A55-C814-48E3-95C7-EC460BFE299C}.Debug|Win32.ActiveCfg = Debug|Win32
-		{8BB60A55-C814-48E3-95C7-EC460BFE299C}.Debug|Win32.Build.0 = Debug|Win32
-		{8BB60A55-C814-48E3-95C7-EC460BFE299C}.Release|Win32.ActiveCfg = Release|Win32
-		{8BB60A55-C814-48E3-95C7-EC460BFE299C}.Release|Win32.Build.0 = Release|Win32
 		{2A9A8478-654D-49A6-9940-24FF5DE94BE0}.debug_vasm|Win32.ActiveCfg = Debug|Win32
 		{2A9A8478-654D-49A6-9940-24FF5DE94BE0}.debug_vasm|Win32.Build.0 = Debug|Win32
 		{2A9A8478-654D-49A6-9940-24FF5DE94BE0}.Debug|Win32.ActiveCfg = Debug|Win32

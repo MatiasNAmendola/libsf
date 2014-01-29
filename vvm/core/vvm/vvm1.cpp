@@ -2294,7 +2294,6 @@ _asm nop;
 				bxmla		= NULL;
 				x			= NULL;
 
-
 				//////////
 				// Iterate so long as there are finds
 				//////
@@ -6521,7 +6520,7 @@ _asm int 3;
 			if (vvm1_regionRefresh(ts->activeRegion, NULL) != 0)
 			{
 				// Something was updated, refresh this screen
-				w = ioss_find_iswSOssWindowLL_By_iOssWindowId(ts->_iOssWindowId);
+				w = oss_find_iswSOssWindowLL_By_iOssWindowId(ts->_iOssWindowId);
 				if (w)
 				{
 					// See if the window is the same size
@@ -6559,7 +6558,7 @@ _asm int 3;
 		if (ts)
 		{
 			// Make sure the screen they indicated is valid
-			low = ioss_findSOssWindowLLByScreenId(ts->_iOssWindowId);
+			low = oss_findSOssWindowLLByScreenId(ts->_iOssWindowId);
 			if (low)
 			{
 				// Sends the WM_SETFOCUS message so it hits the window-owner thread, which then
@@ -6634,12 +6633,18 @@ _asm int 3;
 
 				default:
 					// There is no default type that is recognized
-					vvm1_iRegionDoDefaultDebugTrapCallback(tr, _VVM_DEBUGTRAP_UNKNOWN_TYPE, lnType);
+					ivvm_regionDoDefaultDebugTrapCallback(tr, _VVM_DEBUGTRAP_UNKNOWN_TYPE, lnType);
 					break;
 			}
 		}
 		// Indicate how many pixels were drawn
 		return(lnPixelsDrawn);
+	}
+
+	void CALLTYPE ivvm_regionDoDefaultDebugTrapCallback(SRegion* tr, u64 tnIdentifier, u64 tnExtra)
+	{
+		// Trapped due to error, return and see where it occurred
+		_asm int 3;
 	}
 
 
