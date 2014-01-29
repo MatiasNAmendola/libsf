@@ -162,7 +162,7 @@
 		while (lnOffset < tnMaxLength && lnLevel >= 0)
 		{
 			// Skip past initial white spaces
-			lnOffset += ioss_skipWhitespacesAndCrLf(buffer + lnOffset, tnMaxLength - lnOffset);
+			lnOffset += ivvm_skipWhitespacesAndCrLf(buffer + lnOffset, tnMaxLength - lnOffset);
 			if (lnOffset >= tnMaxLength)
 				break;		// We've reached the end of the XML file
 
@@ -170,11 +170,11 @@
 			// Right now, we should be on the first non-whitespace character at (wherever we are in the file)
 			if (buffer[lnOffset] == '<')
 			{
-				if (ioss_verifyLength(lnOffset + 3, tnMaxLength) && buffer[lnOffset + 1] == '!' && buffer[lnOffset + 2] == '-' && buffer[lnOffset + 3] == '-')
+				if (ivvm_verifyLength(lnOffset + 3, tnMaxLength) && buffer[lnOffset + 1] == '!' && buffer[lnOffset + 2] == '-' && buffer[lnOffset + 3] == '-')
 				{
 					// Ignore comments, skip forward until we find "-->"
 					lnLength = 4;
-					while (ioss_verifyLength(lnOffset + lnLength + 2, tnMaxLength) && !(buffer[lnOffset + lnLength] == '-' && buffer[lnOffset + lnLength + 1] == '-' && buffer[lnOffset + lnLength + 2] == '>'))
+					while (ivvm_verifyLength(lnOffset + lnLength + 2, tnMaxLength) && !(buffer[lnOffset + lnLength] == '-' && buffer[lnOffset + lnLength + 1] == '-' && buffer[lnOffset + lnLength + 2] == '>'))
 						++lnLength;
 
 					// Append an attribute which contains the comment data
@@ -193,7 +193,7 @@ _asm nop;
 					vvm_datum2Set(&bxmlaNew->_data,	(u8*)buffer + lnOffset,		lnLength + 3,				lnLength + 3,	false);
 
 					// If we're at the end of the input, syntax error
-					if (!ioss_verifyLength(lnOffset + 2, tnMaxLength))
+					if (!ivvm_verifyLength(lnOffset + 2, tnMaxLength))
 					{
 _asm nop;
 						return((SBxml*)-1);		// We reached end-of-file before finding the closing comment tag
@@ -202,7 +202,7 @@ _asm nop;
 					// If we get here, we went past our comment
 					lnOffset += lnLength + 3;
 
-				} else if (ioss_verifyLength(lnOffset + 1, tnMaxLength) && buffer[lnOffset + 1] == '/') {
+				} else if (ivvm_verifyLength(lnOffset + 1, tnMaxLength) && buffer[lnOffset + 1] == '/') {
 					// We've reached the </ which should be </something> where "something" matches the parent bxml entry
 					lnOffset += 2;
 					if (lnOffset >= tnMaxLength)
@@ -212,7 +212,7 @@ _asm nop;
 					}
 
 					// Is it alpha?
-					if (!ioss_isAlpha(buffer[lnOffset + 1]))
+					if (!ivvm_isAlpha(buffer[lnOffset + 1]))
 					{
 _asm nop;
 						return((SBxml*)-1);
@@ -284,7 +284,7 @@ _asm nop;
 					}
 
 					// Is it alpha?
-					if (!ioss_isAlpha(buffer[lnOffset + 1]))
+					if (!ivvm_isAlpha(buffer[lnOffset + 1]))
 					{
 _asm nop;
 						return((SBxml*)-1);
@@ -339,7 +339,7 @@ _asm nop;
 						{
 							case '/':
 								// It's likely a /> closing tag
-								if (ioss_verifyLength(lnOffset + 1, tnMaxLength) && buffer[lnOffset + 1] == '>')
+								if (ivvm_verifyLength(lnOffset + 1, tnMaxLength) && buffer[lnOffset + 1] == '>')
 								{
 									// We're good
 									llProcessingAttributes = false;
@@ -367,7 +367,7 @@ _asm nop;
 								// See what it is, if it's alpha or underscore, it is another attribute
 // TODO:  this nop can be removed, it's kept here for easy breakpoint testing
 _asm nop;
-								while (ioss_isAlpha(buffer[lnOffset]))
+								while (ivvm_isAlpha(buffer[lnOffset]))
 								{
 _asm nop;
 									// It could be an attribute
@@ -454,7 +454,7 @@ _asm nop;
 												}
 
 												// Get the value of the number
-												lnValue = ioss_convertValidatedNumericStringToU32(buffer + lnOffset + lnAttrTagLength + 2, (u32)lnNumberLength);
+												lnValue = ivvm_convertValidatedNumericStringToU32(buffer + lnOffset + lnAttrTagLength + 2, (u32)lnNumberLength);
 
 												// Append this attribute
 												bxmlaNew = (SBxmla*)vvm_SEChain_append(&bxml->_attributes, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
@@ -498,7 +498,7 @@ _asm nop;
 												}
 
 												// Get the value of the first number
-												lnValue = ioss_convertValidatedNumericStringToU32(buffer + lnOffset + lnAttrTagLength + 1, (u32)lnNumberLength1);
+												lnValue = ivvm_convertValidatedNumericStringToU32(buffer + lnOffset + lnAttrTagLength + 1, (u32)lnNumberLength1);
 
 												// See what's after the number, it must be either a colon or an equal sign
 												switch (buffer[lnOffset + lnAttrTagLength + 1 + lnNumberLength1])
@@ -521,7 +521,7 @@ _asm nop;
 														}
 
 														// Get the value of the second number
-														lnValue2 = ioss_convertValidatedNumericStringToU32(buffer + lnOffset + lnAttrTagLength + 1 + lnNumberLength1 + 1, (u32)lnNumberLength2);
+														lnValue2 = ivvm_convertValidatedNumericStringToU32(buffer + lnOffset + lnAttrTagLength + 1 + lnNumberLength1 + 1, (u32)lnNumberLength2);
 														if (lnValue >= lnValue2)
 														{
 															// The attribute is something like name:20:5=
@@ -560,7 +560,7 @@ _asm nop;
 													case '=':
 														// It's attr:#=
 														// Get the value of the number
-														lnValue = ioss_convertValidatedNumericStringToU32(buffer + lnOffset + lnAttrTagLength + 1, (u32)lnNumberLength1);
+														lnValue = ivvm_convertValidatedNumericStringToU32(buffer + lnOffset + lnAttrTagLength + 1, (u32)lnNumberLength1);
 
 														// Append this attribute
 														bxmlaNew = (SBxmla*)vvm_SEChain_append(&bxml->_attributes, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SBxmla), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
@@ -681,12 +681,12 @@ _asm nop;
 			if (lnI == 0)
 			{
 				// First character must not be numeric
-				if (!ioss_isAlpha(buffer[lnI]))
+				if (!ivvm_isAlpha(buffer[lnI]))
 					break;		// It is not an alphanumeric kid
 
 			} else {
 				// Every character thereafter can be alpha, numeric, or underscore
-				if (!ioss_isAlphanumeric(buffer[lnI]))
+				if (!ivvm_isAlphanumeric(buffer[lnI]))
 					break;		// It is not an alphanumeric kid
 			}
 		}
@@ -711,7 +711,7 @@ _asm nop;
 		for (lnI = 0; lnI < tnMaxLength; lnI++)
 		{
 			// See if that character is a numeric
-			if (!ioss_isNumeric(buffer[lnI]))
+			if (!ivvm_isNumeric(buffer[lnI]))
 				break;		// It is not an alphanumeric kid
 		}
 		// When we get here, we're reached the end

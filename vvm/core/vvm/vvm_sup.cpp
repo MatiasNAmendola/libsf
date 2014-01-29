@@ -137,7 +137,7 @@
 //		-1 if error
 //
 //////
-	u64 ioss_getNextN_UniqueIds(u64* tnArrayBase, u32 tnCount)
+	u64 ivvm_getNextN_UniqueIds(u64* tnArrayBase, u32 tnCount)
 	{
 		u64 lnI;
 
@@ -429,7 +429,7 @@
 // character.
 //
 //////
-	u64 ioss_skipWhitespacesAndCrLf(s8* tcData, u64 tnMaxLength)
+	u64 ivvm_skipWhitespacesAndCrLf(s8* tcData, u64 tnMaxLength)
 	{
 		u64 lnLength;
 
@@ -455,7 +455,7 @@
 // Verifies that the indicated length is allowed based on the maximum length / position.
 //
 //////
-	inline bool ioss_verifyLength(u64 tnGoingTo, u64 tnMaxAllowable)
+	inline bool ivvm_verifyLength(u64 tnGoingTo, u64 tnMaxAllowable)
 	{
 		return(tnGoingTo <= tnMaxAllowable);
 	}
@@ -468,7 +468,7 @@
 // Returns whether or not the indicated character is alpha or alphanumeric
 //
 //////
-	bool ioss_isAlpha(s8 c)
+	bool ivvm_isAlpha(s8 c)
 	{
 		if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_')
 			return(true);
@@ -477,7 +477,7 @@
 		return(false);
 	}
 
-	bool ioss_isNumeric(s8 c)
+	bool ivvm_isNumeric(s8 c)
 	{
 		if (c >= '0' && c <= '9')
 			return(true);
@@ -486,7 +486,7 @@
 		return(false);
 	}
 
-	bool ioss_isAlphanumeric(s8 c)
+	bool ivvm_isAlphanumeric(s8 c)
 	{
 		if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
 			return(true);
@@ -504,7 +504,7 @@
 // numeric digits, into a number.
 //
 //////
-	u32 ioss_convertValidatedNumericStringToU32(s8* tcData, u32 tnMaxLength)
+	u32 ivvm_convertValidatedNumericStringToU32(s8* tcData, u32 tnMaxLength)
 	{
 		u32 lnI, lnValue;
 
@@ -525,7 +525,7 @@
 		return(lnValue);
 	}
 
-	u64 ioss_convertValidatedNumericStringToU64(s8* tcData, u32 tnMaxLength)
+	u64 ivvm_convertValidatedNumericStringToU64(s8* tcData, u32 tnMaxLength)
 	{
 		u32 lnI;
 		u64 lnValue;
@@ -719,7 +719,7 @@
 // issue.  If not, reallocates the buffer.
 //
 //////
-	void ioss_bufferVerifySizeForNewBytes(SBuilder* buffRoot, u32 tnDataLength)
+	void ivvm_bufferVerifySizeForNewBytes(SBuilder* buffRoot, u32 tnDataLength)
 	{
 		// Make sure our environment is sane
 		if (buffRoot && tnDataLength != 0)
@@ -938,8 +938,8 @@
 			if (line->quads)
 			{
 				// Quads 1..4
-				line->p1_quad	= iioss_math_computeQuad(&line->p1);
-				line->p2_quad	= iioss_math_computeQuad(&line->p2);
+				line->p1_quad	= iivvm_math_computeQuad(&line->p1);
+				line->p2_quad	= iivvm_math_computeQuad(&line->p2);
 			}
 	}
 
@@ -951,7 +951,7 @@
 // Returns the quadrant for the indicated point
 //
 //////
-	s32 iioss_math_computeQuad(SXYF64* p)
+	s32 iivvm_math_computeQuad(SXYF64* p)
 	{
 		if (p->x >= 0.0)
 		{
@@ -974,7 +974,7 @@
 // Copies the two points into the line, and optionally computes the line
 //
 //////
-	void iioss_copyLine(SLineF64* line, SXYF64* p1, SXYF64* p2, bool tlComputeLine)
+	void iivvm_copyLine(SLineF64* line, SXYF64* p1, SXYF64* p2, bool tlComputeLine)
 	{
 		// Copy
 		memcpy(&line->p1, p1, sizeof(SXYF64));
@@ -1264,7 +1264,7 @@
 
 
 
-	void iioss_canvasPolygon_processSmall(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color, _isSCanvasDrawPolygonParameters* lcdp)
+	void iivvm_canvasPolygon_processSmall(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color, _isSCanvasDrawPolygonParameters* lcdp)
 	{
 		u32				lnI;
 		s32				lnX, lnY, lnX4, lnY4, lnMinX, lnMinY, lnMaxX, lnMaxY, lnWidth, lnHeight, lnMinX4, lnMinY4, lnMaxX4, lnMaxY4;
@@ -1349,8 +1349,8 @@
 				line = lpoly.line[lnI];
 
 				// Multiply each point size by 4
-				iioss_math_multiplyBy(&line->start,	4.0);
-				iioss_math_multiplyBy(&line->end,	4.0);
+				iivvm_math_multiplyBy(&line->start,	4.0);
+				iivvm_math_multiplyBy(&line->end,	4.0);
 			}
 		
 		
@@ -1451,7 +1451,7 @@
 			vvm_polygon_freeAndRelease(poly, true);
 	}
 
-	void iioss_canvasPolygon_processNormal(SCanvas* tsDst, SPolygon* poly, _isSCanvasDrawPolygonParameters* lcdp)
+	void iivvm_canvasPolygon_processNormal(SCanvas* tsDst, SPolygon* poly, _isSCanvasDrawPolygonParameters* lcdp)
 	{
 		//////////
 		// Allocate for the corners, floans, and lines, and initialize our internal structure
@@ -1475,15 +1475,15 @@
 			{
 				// Compute this polyline
 				lcdp->lpl = poly->line[lcdp->lnI];
-				iioss_canvasPolygon_computeLine(tsDst, lcdp);
+				iivvm_canvasPolygon_computeLine(tsDst, lcdp);
 			}
 
 
 		//////////
 		// Compute the corners and fillers
 		//////
-			iioss_canvasPolygon_getCornerFloans(lcdp);
-			iioss_canvasPolygon_getRangeFloans(tsDst, poly, lcdp);
+			iivvm_canvasPolygon_getCornerFloans(lcdp);
+			iivvm_canvasPolygon_getRangeFloans(tsDst, poly, lcdp);
 
 
 		//////////
@@ -1492,7 +1492,7 @@
 			lcdp->lnPixelsDrawn += (poly->pixelFloans->populatedLength / sizeof(SBGRACompute));
 	}
 
-	void iioss_canvasPolygon_draw(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color, _isSCanvasDrawPolygonParameters* lcdp)
+	void iivvm_canvasPolygon_draw(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, SBGRA color, _isSCanvasDrawPolygonParameters* lcdp)
 	{
 		//////////
 		// If they want us to actually draw something, then draw it, otherwise we just store it
@@ -1509,12 +1509,12 @@
 				lcdp->lnPixelsDrawn = 0;
 
 				// Physically draw the polygon
-				iioss_canvasPolygon_drawPixelFloans(tsDst, bd, poly, lcdp);			// Draw the pixel floans
-				iioss_canvasPolygon_drawRangeFloans(bd, poly, lcdp);					// Draw the range floans
+				iivvm_canvasPolygon_drawPixelFloans(tsDst, bd, poly, lcdp);			// Draw the pixel floans
+				iivvm_canvasPolygon_drawRangeFloans(bd, poly, lcdp);					// Draw the range floans
 			}
 	}
 
-	void iioss_canvasPolygon_computeLine(SCanvas* tsDst, _isSCanvasDrawPolygonParameters* lcdp)
+	void iivvm_canvasPolygon_computeLine(SCanvas* tsDst, _isSCanvasDrawPolygonParameters* lcdp)
 	{
 		//////////
 		// Compute deltas, slope, theta and gravity
@@ -1550,7 +1550,7 @@
 		//////////
 		// Store the starting floan, and move to the first whole pixel start
 		//////
-			iioss_canvasPolygon_storeCorner(lcdp->corners, &lcdp->lpl->start, &lcdp->sfld.p2, &lcdp->sfld);
+			iivvm_canvasPolygon_storeCorner(lcdp->corners, &lcdp->lpl->start, &lcdp->sfld.p2, &lcdp->sfld);
 
 
 		//////////
@@ -1587,7 +1587,7 @@
 				//////////
 				// Store this pixel's floans
 				//////
-					iioss_canvasPolygon_storeFloans(&lcdp->sfld);
+					iivvm_canvasPolygon_storeFloans(&lcdp->sfld);
 
 			} while (1);
 
@@ -1603,10 +1603,10 @@
 			iivvm_math_getNextAxisInterceptXY(&lcdp->sfld.p2, iivvm_math_adjustTheta(lcdp->sfld.theta + _PI));
 
 			// Store it
-			iioss_canvasPolygon_storeCorner(lcdp->corners, &lcdp->lpl->end, &lcdp->sfld.p2, &lcdp->sfld);
+			iivvm_canvasPolygon_storeCorner(lcdp->corners, &lcdp->lpl->end, &lcdp->sfld.p2, &lcdp->sfld);
 	}
 
-	void iioss_canvasPolygon_getCornerFloans(_isSCanvasDrawPolygonParameters* lcdp)
+	void iivvm_canvasPolygon_getCornerFloans(_isSCanvasDrawPolygonParameters* lcdp)
 	{
 		//////////
 		// Now we need to connect all corners that are connected. If a corner is
@@ -1632,17 +1632,17 @@
 					{
 						// This is a match
 						// Grab all the points for this pixel
-						iioss_canvasPolygon_storeFloansCorner(&lcdp->sfld, lcdp->sfcdRoot, lcdp->sfcd);
+						iivvm_canvasPolygon_storeFloansCorner(&lcdp->sfld, lcdp->sfcdRoot, lcdp->sfcd);
 						break;
 					}
 				}
 			}
 	}
 
-	void iioss_canvasPolygon_getRangeFloans(SCanvas* tsDst, SPolygon* poly, _isSCanvasDrawPolygonParameters* lcdp)
+	void iivvm_canvasPolygon_getRangeFloans(SCanvas* tsDst, SPolygon* poly, _isSCanvasDrawPolygonParameters* lcdp)
 	{
 			lcdp->lnFloanCount = poly->pixelFloans->populatedLength / sizeof(SBGRACompute);
-			qsort(poly->pixelFloans->data, (size_t)lcdp->lnFloanCount, sizeof(SBGRACompute), iioss_canvasPolygon_qsortFloansCallback);
+			qsort(poly->pixelFloans->data, (size_t)lcdp->lnFloanCount, sizeof(SBGRACompute), iivvm_canvasPolygon_qsortFloansCallback);
 
 			// Iterate through each block and grab horizontal line runs in blocks
 			// Note:  At each horizontal stop there may be one or more pixels side-by-side.
@@ -1651,7 +1651,7 @@
 			for (lcdp->lnI = 0; lcdp->lnI < lcdp->lnFloanCount; lcdp->lnI = lcdp->lnINext)
 			{
 				// Grab the next set of line entries for this block
-				lcdp->lnINext = iioss_canvasPolygon_getNextLineSegment(lcdp->lnI, lcdp->lnFloanCount, (SBGRACompute*)poly->pixelFloans->data, &lcdp->sbgrac1, &lcdp->sbgrac2);
+				lcdp->lnINext = iivvm_canvasPolygon_getNextLineSegment(lcdp->lnI, lcdp->lnFloanCount, (SBGRACompute*)poly->pixelFloans->data, &lcdp->sbgrac1, &lcdp->sbgrac2);
 
 				// Are we still valid?
 				if (lcdp->lnINext < lcdp->lnFloanCount)
@@ -1689,7 +1689,7 @@
 	}
 
 
-	void iioss_canvasPolygon_drawPixelFloans(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, _isSCanvasDrawPolygonParameters* lcdp)
+	void iivvm_canvasPolygon_drawPixelFloans(SCanvas* tsDst, SBGRA* bd, SPolygon* poly, _isSCanvasDrawPolygonParameters* lcdp)
 	{
 		// Iterate through every floan, drawing it one by one
 		for (lcdp->lnI = 0; lcdp->lnI < poly->pixelFloans->populatedLength; lcdp->lnI += sizeof(SBGRACompute))
@@ -1712,7 +1712,7 @@
 		}
 	}
 
-	void iioss_canvasPolygon_drawRangeFloans(SBGRA* bd, SPolygon* poly, _isSCanvasDrawPolygonParameters* lcdp)
+	void iivvm_canvasPolygon_drawRangeFloans(SBGRA* bd, SPolygon* poly, _isSCanvasDrawPolygonParameters* lcdp)
 	{
 		for (lcdp->lnI = 0; lcdp->lnI < poly->rangeFloans->populatedLength; lcdp->lnI += sizeof(SBGRACompute))
 		{
@@ -1748,7 +1748,7 @@
 // if there are any segments which are less than one pixel)
 //
 //////
-	bool iioss_canvasPolygon_determineIfSmall(SPolygon* poly)
+	bool iivvm_canvasPolygon_determineIfSmall(SPolygon* poly)
 	{
 		u32			lnI;
 		SLineF64	line;
@@ -1810,7 +1810,7 @@
 // rangeFloan and floan merging algorithms.
 //
 //////
-	int iioss_canvasPolygon_qsortFloansCallback(const void* l, const void* r)
+	int iivvm_canvasPolygon_qsortFloansCallback(const void* l, const void* r)
 	{
 		SBGRACompute*        left;
 		SBGRACompute*        right;
@@ -1834,7 +1834,7 @@
 // Grabs the next line segment as processing through the floans.
 //
 //////
-	u32 iioss_canvasPolygon_getNextLineSegment(u32 tnIndex, u32 tnMaxCount, SBGRACompute* sbgracRoot, SBGRACompute** p1, SBGRACompute** p2)
+	u32 iivvm_canvasPolygon_getNextLineSegment(u32 tnIndex, u32 tnMaxCount, SBGRACompute* sbgracRoot, SBGRACompute** p1, SBGRACompute** p2)
 	{
 		u32				lnSkip;
 		SBGRACompute*	sbgrac;
@@ -1850,7 +1850,7 @@
 				if ((sbgrac + lnSkip)->y != (sbgrac + lnSkip - 1)->y)
 				{
 					// We've passed to another row, we begin again, but from here
-					return(iioss_canvasPolygon_getNextLineSegment(tnIndex + lnSkip, tnMaxCount, sbgracRoot, p1, p2));
+					return(iivvm_canvasPolygon_getNextLineSegment(tnIndex + lnSkip, tnMaxCount, sbgracRoot, p1, p2));
 				}
 
 
@@ -1883,7 +1883,7 @@
 // Note (from code in iioss_canvasPolygon()): SBuilder* corners; // SXYF64 indicating where the corner falls
 //
 //////
-	void iioss_canvasPolygon_storeCorner(SBuilder* corners, SXYF64* po, SXYF64* pi, _isSStoreFloan_lineData* sfld)
+	void iivvm_canvasPolygon_storeCorner(SBuilder* corners, SXYF64* po, SXYF64* pi, _isSStoreFloan_lineData* sfld)
 	{
 		_isSStoreFloan_cornerData lsfcd;
 
@@ -1955,7 +1955,7 @@
 		(u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_1_7, (u32)&storeFloan_pointToPoint_2_7, (u32)&storeFloan_pointToPoint_3_7, (u32)&storeFloan_pointToPoint_4_7, (u32)&storeFloan_pointToPoint_5_7, (u32)&storeFloan_pointToPoint_bad, (u32)&storeFloan_pointToPoint_bad
 	};
 
-	void iioss_canvasPolygon_storeFloans(_isSStoreFloan_lineData* sfld)
+	void iivvm_canvasPolygon_storeFloans(_isSStoreFloan_lineData* sfld)
 	{
 		u32 lnOperation;
 		s32 lnGravityFrom, lnGravityTo;
@@ -1983,7 +1983,7 @@
 			}
 	}
 
-	void iioss_canvasPolygon_storeFloansCorner(_isSStoreFloan_lineData* sfld, _isSStoreFloan_cornerData* sfcd1, _isSStoreFloan_cornerData* sfcd2)
+	void iivvm_canvasPolygon_storeFloansCorner(_isSStoreFloan_lineData* sfld, _isSStoreFloan_cornerData* sfcd1, _isSStoreFloan_cornerData* sfcd2)
 	{
 		s32							lnGravity1i, lnGravity2i;
 		f64							lfArea;
@@ -3703,7 +3703,7 @@
 // Called to multiply an x,y combination by a constant value
 //
 //////
-	void iioss_math_multiplyBy(SXYF64* p, f64 tfMultiplier)
+	void iivvm_math_multiplyBy(SXYF64* p, f64 tfMultiplier)
 	{
 		if (p)
 		{
@@ -6087,7 +6087,7 @@
 // Rotates the indicated canvas about the indicated point.
 //
 //////
-	u64 iioss_canvasRotateAbout(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, f32 ox, f32 oy)
+	u64 iivvm_canvasRotateAbout(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, f32 ox, f32 oy)
 	{
 // TODO:  Write this algorithm. :-)
 		return(0);
@@ -6101,7 +6101,7 @@
 // Called to draw or generate the bezier using 3 points
 //
 //////
-	u64 iioss_canvasBezier3(SCanvas* tc, SBGRA* bd, SBezier* bez)
+	u64 iivvm_canvasBezier3(SCanvas* tc, SBGRA* bd, SBezier* bez)
 	{
 		u32				lnI;
 		u64				lnPixelCount;
@@ -6137,8 +6137,8 @@
 			//////////
 			// Copy and compute our lines
 			//////
-				iioss_copyLine(&l1, &bez->p1, &bez->p2, true);
-				iioss_copyLine(&l2, &bez->p2, &bez->p3, true);
+				iivvm_copyLine(&l1, &bez->p1, &bez->p2, true);
+				iivvm_copyLine(&l2, &bez->p2, &bez->p3, true);
 
 
 			//////////
@@ -6177,7 +6177,7 @@
 					//////////
 					// Construct the line between
 					//////
-						iioss_copyLine(&lmid, &p1, &p2, true);
+						iivvm_copyLine(&lmid, &p1, &p2, true);
 
 
 					//////////
@@ -6209,7 +6209,7 @@
 				// Finish by washing if need be
 				//////
 					if (bez->wash)
-						iioss_canvasBezier_wash(tc, bd, &pointFloans, &washFloans, bez);
+						iivvm_canvasBezier_wash(tc, bd, &pointFloans, &washFloans, bez);
 		}
 
 
@@ -6217,7 +6217,7 @@
 		// Populate onto the canvas
 		//////
 			if (tc && bd)
-				lnPixelCount = iioss_canvasBezier_draw(tc, bd, bez);
+				lnPixelCount = iivvm_canvasBezier_draw(tc, bd, bez);
 
 
 		//////////
@@ -6234,7 +6234,7 @@
 // Called to draw or generate the bezier using 4 points
 //
 //////
-	u64 iioss_canvasBezier4(SCanvas* tc, SBGRA* bd, SBezier* bez)
+	u64 iivvm_canvasBezier4(SCanvas* tc, SBGRA* bd, SBezier* bez)
 	{
 		u32				lnI;
 		u64				lnPixelCount;
@@ -6276,9 +6276,9 @@
 			//////////
 			// Copy and compute our lines
 			//////
-				iioss_copyLine(&l1, &bez->p1, &bez->p2, true);
-				iioss_copyLine(&l2, &bez->p2, &bez->p3, true);
-				iioss_copyLine(&l3, &bez->p3, &bez->p4, true);
+				iivvm_copyLine(&l1, &bez->p1, &bez->p2, true);
+				iivvm_copyLine(&l2, &bez->p2, &bez->p3, true);
+				iivvm_copyLine(&l3, &bez->p3, &bez->p4, true);
 
 
 			//////////
@@ -6323,8 +6323,8 @@
 					//////////
 					// Construct the lines between
 					//////
-						iioss_copyLine(&lmid1, &p1, &p2, true);
-						iioss_copyLine(&lmid2, &p2, &p3, true);
+						iivvm_copyLine(&lmid1, &p1, &p2, true);
+						iivvm_copyLine(&lmid2, &p2, &p3, true);
 
 
 					//////////
@@ -6337,7 +6337,7 @@
 						pm2.x = lmid2.p1.x + (lfPercent * lmid2.radius * cos(lmid2.theta));
 						pm2.y = lmid2.p1.y + (lfPercent * lmid2.radius * sin(lmid2.theta));
 						// Compute the line between
-						iioss_copyLine(&lmid, &pm1, &pm2, true);
+						iivvm_copyLine(&lmid, &pm1, &pm2, true);
 
 
 					//////////
@@ -6365,7 +6365,7 @@
 				}
 
 				// Finish by washing
-				iioss_canvasBezier_wash(tc, bd, &pointFloans, &washFloans, bez);
+				iivvm_canvasBezier_wash(tc, bd, &pointFloans, &washFloans, bez);
 		}
 
 
@@ -6373,7 +6373,7 @@
 		// Populate onto the canvas
 		//////
 			if (tc && bd)
-				lnPixelCount = iioss_canvasBezier_draw(tc, bd, bez);
+				lnPixelCount = iivvm_canvasBezier_draw(tc, bd, bez);
 
 
 		//////////
@@ -6390,7 +6390,7 @@
 // Called to draw or generate the bezier using 5 points
 //
 //////
-	u64 iioss_canvasBezier5(SCanvas* tc, SBGRA* bd, SBezier* bez)
+	u64 iivvm_canvasBezier5(SCanvas* tc, SBGRA* bd, SBezier* bez)
 	{
 		u32				lnI;
 		u64				lnPixelCount;
@@ -6440,10 +6440,10 @@
 			//////////
 			// Copy and compute our lines
 			//////
-				iioss_copyLine(&l1, &bez->p1, &bez->p2, true);
-				iioss_copyLine(&l2, &bez->p2, &bez->p3, true);
-				iioss_copyLine(&l3, &bez->p3, &bez->p4, true);
-				iioss_copyLine(&l4, &bez->p4, &bez->p5, true);
+				iivvm_copyLine(&l1, &bez->p1, &bez->p2, true);
+				iivvm_copyLine(&l2, &bez->p2, &bez->p3, true);
+				iivvm_copyLine(&l3, &bez->p3, &bez->p4, true);
+				iivvm_copyLine(&l4, &bez->p4, &bez->p5, true);
 
 
 			//////////
@@ -6494,9 +6494,9 @@
 					//////////
 					// Construct the lines between
 					//////
-						iioss_copyLine(&lmid1, &p1, &p2, true);
-						iioss_copyLine(&lmid2, &p2, &p3, true);
-						iioss_copyLine(&lmid3, &p3, &p4, true);
+						iivvm_copyLine(&lmid1, &p1, &p2, true);
+						iivvm_copyLine(&lmid2, &p2, &p3, true);
+						iivvm_copyLine(&lmid3, &p3, &p4, true);
 
 
 					//////////
@@ -6512,8 +6512,8 @@
 						pm3.x = p3.x + (lfPercent * l3.radius * cos(lmid3.theta));
 						pm3.y = p3.x + (lfPercent * l3.radius * sin(lmid3.theta));
 						// Compute the lines between
-						iioss_copyLine(&lmmid1, &pm1, &pm2, true);
-						iioss_copyLine(&lmmid2, &pm2, &pm3, true);
+						iivvm_copyLine(&lmmid1, &pm1, &pm2, true);
+						iivvm_copyLine(&lmmid2, &pm2, &pm3, true);
 
 
 					//////////
@@ -6526,7 +6526,7 @@
 						pmm2.x = pm2.x + (lfPercent * lmmid2.radius * cos(lmmid2.theta));
 						pmm2.y = pm2.y + (lfPercent * lmmid2.radius * sin(lmmid2.theta));
 						// Compute the lines between
-						iioss_copyLine(&lmid, &pmm1, &pmm2, true);
+						iivvm_copyLine(&lmid, &pmm1, &pmm2, true);
 
 
 					//////////
@@ -6554,7 +6554,7 @@
 				}
 
 				// Finish by washing
-				iioss_canvasBezier_wash(tc, bd, &pointFloans, &washFloans, bez);
+				iivvm_canvasBezier_wash(tc, bd, &pointFloans, &washFloans, bez);
 		}
 
 
@@ -6562,7 +6562,7 @@
 		// Populate onto the canvas
 		//////
 			if (tc && bd)
-				lnPixelCount = iioss_canvasBezier_draw(tc, bd, bez);
+				lnPixelCount = iivvm_canvasBezier_draw(tc, bd, bez);
 
 
 		//////////
@@ -6580,7 +6580,7 @@
 // by the common bezier drawing algorithm
 //
 //////
-	void iioss_canvasBezier_wash(SCanvas* tc, SBGRA* bd, SBuilder** pointFloans, SBuilder** washFloans, SBezier* bez)
+	void iivvm_canvasBezier_wash(SCanvas* tc, SBGRA* bd, SBuilder** pointFloans, SBuilder** washFloans, SBezier* bez)
 	{
 		//////////
 		// Wash
@@ -6596,7 +6596,7 @@
 // Called as a common drawing algorithm for the bezier curves
 //
 //////
-	u64 iioss_canvasBezier_draw(SCanvas* tc, SBGRA* bd, SBezier* bez)
+	u64 iivvm_canvasBezier_draw(SCanvas* tc, SBGRA* bd, SBezier* bez)
 	{
 		u32				lnI;
 		u64				lnPixelCount;
@@ -6710,7 +6710,7 @@
 				//////
 					prexy1 = (SXYF64*)(pre->data + lnI);
 					prexy2 = (SXYF64*)(pre->data + lnI + sizeof(SXYF64));
-					iioss_copyLine(&line, prexy1, prexy2, true);
+					iivvm_copyLine(&line, prexy1, prexy2, true);
 
 
 				//////////
@@ -6752,10 +6752,10 @@
 									borderProjected.x = lastPixelCross.x;
 									borderProjected.y = lastPixelCross.y;
 									iivvm_math_getNextAxisInterceptXY(&borderProjected, line.theta);
-									iioss_copyLine(&lineProjectedToNextPixel, &lastPixelCross, &borderProjected, true);
+									iivvm_copyLine(&lineProjectedToNextPixel, &lastPixelCross, &borderProjected, true);
 
 									// To end point
-									iioss_copyLine(&lineProjectedToPrexy2, &lastPixelCross, prexy2, true);
+									iivvm_copyLine(&lineProjectedToPrexy2, &lastPixelCross, prexy2, true);
 
 
 								//////////
@@ -6872,7 +6872,7 @@
 				//////////
 				// pg (compute the gravity to be either to the left or right of the center of this point)
 				//////
-					iioss_copyLine(&line, &p1, &p2, true);
+					iivvm_copyLine(&line, &p1, &p2, true);
 					line.theta = iivvm_math_adjustTheta(line.theta + ((tlIsFilledLeft) ? _PI_4 : -_PI_4));
 					iivvm_math_getNextAxisInterceptXY(&line.mid, line.theta);
 
@@ -6929,8 +6929,24 @@
 // We use cb->extra for the total pixels drawn
 //
 //////
-	void ioss_regionRefreshCallback(SStartEndCallback* cb)
+	void ivvm_regionRefreshCallback(SStartEndCallback* cb)
 	{
 		// Process this region
 		vvm_regionRefresh(cb->ptrRegion, cb->ex1PtrRegion);
+	}
+
+
+
+
+//////////
+//
+// Callback when there is a specified region that isn't a default being passed.  This could
+// indicate a program error or an incompatibility between expected data, and available data
+// for processing.
+//
+//////
+	void ivvm_regionDoDefaultDebugTrapCallback(SRegion* tr, u64 tnIdentifier, u64 tnExtra)
+	{
+		// Trapped due to error, return and see where it occurred
+		_asm int 3;
 	}

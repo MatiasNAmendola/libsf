@@ -803,7 +803,7 @@
 			if (tnDataLength != 0)
 			{
 				// Make sure this much data will fit there in the buffer
-				ioss_bufferVerifySizeForNewBytes(buffRoot, tnDataLength);
+				ivvm_bufferVerifySizeForNewBytes(buffRoot, tnDataLength);
 
 				// If we're still valid, proceed with the copy
 				if (buffRoot->data && tcData)
@@ -831,7 +831,7 @@
 		{
 			// Make sure this much data will fit there in the buffer
 			if (tnDataLength != 0)
-				ioss_bufferVerifySizeForNewBytes(buffRoot, tnDataLength);
+				ivvm_bufferVerifySizeForNewBytes(buffRoot, tnDataLength);
 			
 			// Indicate where the start of that buffer is
 			return(buffRoot->data + buffRoot->populatedLength - tnDataLength);
@@ -6641,12 +6641,6 @@ _asm int 3;
 		return(lnPixelsDrawn);
 	}
 
-	void CALLTYPE ivvm_regionDoDefaultDebugTrapCallback(SRegion* tr, u64 tnIdentifier, u64 tnExtra)
-	{
-		// Trapped due to error, return and see where it occurred
-		_asm int 3;
-	}
-
 
 
 
@@ -6698,7 +6692,7 @@ _asm int 3;
 			//////
 				if (tr->subRegions.masterCount != 0)
 				{
-					cb._func		= (u64)&ioss_regionRefreshCallback;
+					cb._func		= (u64)&ivvm_regionRefreshCallback;
 					cb.ex2PtrRegion	= trParent;
 					vvm_SEChain_iterateThroughForCallback(&tr->subRegions, &cb);
 				}
@@ -7104,11 +7098,11 @@ _asm int 3;
 			switch (bez->curveCount)
 			{
 				case 3:
-					return(iioss_canvasBezier3(tc, bd, bez));
+					return(iivvm_canvasBezier3(tc, bd, bez));
 				case 4:
-					return(iioss_canvasBezier4(tc, bd, bez));
+					return(iivvm_canvasBezier4(tc, bd, bez));
 				case 5:
-					return(iioss_canvasBezier5(tc, bd, bez));
+					return(iivvm_canvasBezier5(tc, bd, bez));
 			}
 
 		}
@@ -7373,7 +7367,7 @@ _asm int 3;
 	u64 CALLTYPE vvm1_canvasRotate(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians)
 	{
 		if (tsDst && bdd && tsSrc && bds)
-			return(iioss_canvasRotateAbout(tsDst, bdd, ulx, uly, tsSrc, bds, tfRadians, (f32)ulx + ((f32)tsSrc->width / 2.0f), (f32)uly + ((f32)tsSrc->height / 2.0f)));
+			return(iivvm_canvasRotateAbout(tsDst, bdd, ulx, uly, tsSrc, bds, tfRadians, (f32)ulx + ((f32)tsSrc->width / 2.0f), (f32)uly + ((f32)tsSrc->height / 2.0f)));
 
 		// If we get here, failure
 		return(0);
@@ -7394,7 +7388,7 @@ _asm int 3;
 	u64 CALLTYPE vvm1_canvasRotateAbout(SCanvas* tsDst, SBGRA* bdd, s32 ulx, s32 uly, SCanvas* tsSrc, SBGRA* bds, f32 tfRadians, f32 ox, f32 oy)
 	{
 		if (tsDst && bdd && tsSrc && bds)
-			return(iioss_canvasRotateAbout(tsDst, bdd, ulx, uly, tsSrc, bds, tfRadians, ox, oy));
+			return(iivvm_canvasRotateAbout(tsDst, bdd, ulx, uly, tsSrc, bds, tfRadians, ox, oy));
 
 		// If we get here, failure
 		return(0);
@@ -7694,15 +7688,15 @@ _asm int 3;
 			if (!poly->pixelFloans && !poly->rangeFloans)
 			{
 				// Should it be computed as a small or big polygon?
-				if (iioss_canvasPolygon_determineIfSmall(poly))
+				if (iivvm_canvasPolygon_determineIfSmall(poly))
 				{
 					// We process it at 16x resolution (4x wider, 4x higher), then merge down the computed values for the final / partial floan computations.
-					iioss_canvasPolygon_processSmall(tsDst, bd, poly, color, &lcdp);
+					iivvm_canvasPolygon_processSmall(tsDst, bd, poly, color, &lcdp);
 
 				} else {
 					// Normal.
 					// Build all floans like normal.
-					iioss_canvasPolygon_processNormal(tsDst, poly, &lcdp);
+					iivvm_canvasPolygon_processNormal(tsDst, poly, &lcdp);
 				}
 			}
 
@@ -7710,7 +7704,7 @@ _asm int 3;
 		//////////
 		// Draw
 		//////
-			iioss_canvasPolygon_draw(tsDst, bd, poly, color, &lcdp);
+			iivvm_canvasPolygon_draw(tsDst, bd, poly, color, &lcdp);
 
 
 		//////////
