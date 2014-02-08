@@ -311,7 +311,7 @@
 	void					ivvme_executeThreadSnippet_extended			(_ivvme_executeThreadSnippetData* tsed);
 
 
-	// vvm_tm.cpp (thread manager)
+	// vvm_tm.cpp (thread mizer)
 	bool					ivvmtm_initialize							(void);
 	void					ivvmtm_mainLoop								(void* ttm);
 	void					ivvmtm_mainLoopPrograms						(_ivvmtm_SMainLoop* tml);

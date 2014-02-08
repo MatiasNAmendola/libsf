@@ -1,10 +1,10 @@
-<vdebug>
+e<vdebug>
 	<icons file="vdebug_icons.bmp" ulx="2" uly="2" width="36" height="36" stridex="38" stridey="38">
 		<icon name="pursueAcceptOne" tip="Accept one level of the current pursues"/>
 		<icon name="pursue" tip="Enter another pursue level"/>
 		<icon name="pursueRejectOne" tip="Reject one level of the current pursues"/>
-		<icon name="noStepIntoFunctionEnable" tip="Allow this function to be stepped into"/>
-		<icon name="noStepIntoFunctionDisable" tip="Disallow this function to be stepped into"/>
+		<icon name="noStepIntoFunctionEnable" tip="Allow this function to be stepped into"
+		<icon name="noStepIntoFunctionDisable" tip="Disallow this function to be stepped into"
 		<icon name="breadcrumbsPrevDocument" tip="Move to the previous breadcrumb"/>
 		<icon name="breadcrumbsNextDocument" tip="Move to the next breadcrumb"/>
 		<icon name="breadcrumbsLineEnable" tip="Line breadcrumbs"/>
@@ -69,14 +69,14 @@
 		<icon name="hover" tip="Display the hover window"/>
 		<icon name="play" tip="Resume normal execution"/>
 		<icon name="pause" tip="Pause execution of the current thread"/>
-		<icon name="stop" tip="Stop execution of the current thread"/>
+		<icon name="unused" tip="unused"/>
 		<icon name="restart" tip="Restart with normal execution"/>
 		<icon name="assemblyMix" tip="Toggle display of virtual machine disassembly"/>
 		<icon name="breadcrumbsPrev" tip="Move to the previous breadcrumbs only in the current function"/>
 		<icon name="breadcrumbsNext" tip="Move to the next breadcrumbs only in the current function"/>
 		<icon name="breadcrumbsPrevFunction" tip="Move to the breadcrumbs in previous function"/>
 		<icon name="breadcrumbsNextFunction" tip="Move to the breadcrumbs in next function"/>
-		<icon name="pursuePrev" tip="Examine previous pursue level" var1="pursueCurrent-1"/>
+		<icon name="pursuePrev" tip="Examine previous pursue level" var1="pursueCurrent-1/>
 		<icon name="pursueNext" tip="Examine next pursue level" var1="pursueCurrent+1"/>
 		<icon name="breadcrumbsDeltasEnable" tip="Breadcrumb deltas enabled"/>
 		<icon name="stack" tip="Display stack"/>
@@ -121,8 +121,8 @@
 		<icon name="pursueCount" tip="Shows current pursue view level, and total nested levels" var1="pursueCurrent" var2="pursueCount"/>
 		<icon name="assemblyOnly" tip="Toggle display of virtual machine disassembly"/>
 		<icon name="anchorCount" tip="Shows current anchor view level, and total anchor levels" var1="anchorCurrent" var2="anchorCount"/>
-		<icon name="vvmSuspend" tip="Suspend the virtual machine" var1="suspend1" var2="suspend2" var3="suspend3" var4="suspend4" var5="suspend5" var6="suspend6" var7="suspend7" var8="suspend8"/>
-		<icon name="vvmResume" tip="Resume the virtual machine" var1="resume1" var2="resume2" var3="resume3" var4="resume4" var5="resume5" var6="resume6" var7="resume7" var8="resume8"/>
+		<icon name="suspend" tip="Suspend the virtual machine" var1="suspend1" var2="suspend2" var3="suspend3" var4="suspend4" var5="suspend5" var6="suspend6" var7="suspend7" var8="suspend8"/>
+		<icon name="resume" tip="Resume the virtual machine" var1="resume1" var2="resume2" var3="resume3" var4="resume4" var5="resume5" var6="resume6" var7="resume7" var8="resume8"/>
 		<icon name="breadcrumbsCount" tip="Shows the breadcrumbs count" var1="breadcrumbsCount"/>
 		<icon name="pursueEnabled" tip="Shown when pursue mode is enabled"/>
 		<icon name="clipListCount" tip="Shows how many items are in the clip list"/>
@@ -130,8 +130,8 @@
 		<icon name="chainCount" tip="Shows how many chain views there are"/>
 		<icon name="chainView" tip="View/edit chain view entries"/>
 		<icon name="chainAddHorizontal" tip="Add a line to the active chain view window"/>
-		<icon name="noStepIntoFunctionInstanceEnable" tip="Allow the instance of this function to be stepped into"/>
-		<icon name="noStepIntoFunctionInstanceDisable" tip="Disallow the instance of this function to be stepped into"/>
+		<icon name="noStepIntoFunctionInstanceEnable" tip="Allow the instance of this function to be stepped into"
+		<icon name="noStepIntoFunctionInstanceDisable" tip="Disallow the instance of this function to be stepped into"
 		<icon name="breadcrumbsView" tip="View all breadcrumbs"/>
 		<icon name="stepToCursorHorizontal" tip="Steps forward to the horizontal cursor position on the current line"/>
 		<icon name="stepInOne" tip="Steps in to the next deeper block"/>
@@ -184,12 +184,12 @@
 		<icon name="deleteToEndOfLine" tip="Deletes everything at end of line"/>
 		<icon name="deleteToStartOfLine" tip="Deletes everything to start of line"/>
 		<icon name="selectLine" tip="Begins selecting in entire line mode"/>
-		<icon name="selectCommand" tip="Begins selecting in entire command mode"/>
+		<icon name="selectCommand" tip="Begins selecting in entire line / command mode"/>
 		<icon name="selectColumn" tip="Begins selecting in column"/>
 		<icon name="selectStart" tip="Begins selecting at the cursor location"/>
 		<icon name="selectBlock" tip="Selects the current block"/>
 		<icon name="selectFunction" tip="Selects the current function"/>
-		<icon name="selectBlockOut" tip="Selects up to include the immediate outer block"/>
+		<icon name="selectBlockOut" tip="Selects up to include the immediate outter block"/>
 		<icon name="selectBlockIn" tip="Selects down to the inner block"/>
 		<icon name="selectBlockUp" tip="Selects the immediate block up"/>
 		<icon name="selectBlockDown" tip="Selects the immediate block down"/>
@@ -219,8 +219,8 @@
 		<icon name="breadcrumbsHorizontalEnable" tip="Horizontal breadcrumbs"/>
 		<icon name="breadcrumbsDeltasDisable" tip="Breadcrumb deltas disabled"/>
 		<icon name="breadcrumbsClear" tip="Enable breadcrumbs deltas"/>
-		<icon name="vvmDebugger" tip="View the multiple VVM debugger instances running"/>
-		<icon name="vvmLink" tip="Link this debugger instance to another debugger instance, or to a running program or thread"/>
+		<icon name="vvmDebuggers" tip="View the multiple VVM debugger instance running"/>
+		<icon name="vvmLink" tip="Link this debugger instance to another debugger instance"/>
 		<icon name="chainPursue" tip="Add pursue line data to the active chain view window"/>
 		<icon name="breadcrumbsDeltaPrev" tip="Move to previous breadcrumb in the current document which had a delta"/>
 		<icon name="breadcrumbsDeltaNext" tip="Move to next breadcrumb in the current document which had a delta"/>
@@ -246,10 +246,19 @@
 		<icon name="roundRed"/>
 		<icon name="roundGrn"/>
 		<icon name="roundBlu"/>
-		<icon name="edit" tip="Edit mode"/>
-		<icon name="move" tip="Move item"/>
-		<icon name="stretch" tip="Stretch item"/>
-		<icon name="rotate" tip="Rotate item"/>
-		<icon name="scale" tip="Scale item"/>
+		<icon name="edit" tip="Edit icon"/>
+		<icon name="move" tip="Move icon"/>
+		<icon name="stretch" tip="Stretch icon"/>
+		<icon name="rotate" tip="Rotate icon"/>
+		<icon name="exit" tip="Exit icon"/>
+		<icon name="unused" tip="unused"/>
+		<icon name="unused" tip="unused"/>
+		<icon name="unused" tip="unused"/>
+		<icon name="run" tip="Run icon"/>
+		<icon name="SourceLight" tip="SourceLight icon"/>
+		<icon name="unused" tip="unused"/>
+		<icon name="unused" tip="unused"/>
+		<icon name="unused" tip="unused"/>
+		<icon name="cross" tip="Cross icon"/>
 	</icons>
 </vdebug>
