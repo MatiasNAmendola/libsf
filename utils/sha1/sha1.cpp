@@ -64,27 +64,38 @@
 #ifdef _TEST_ME
 	#include <stdio.h>
 	#include <string.h>
-	#include <stdint.h>
-	typedef uint64_t			u64;
-	typedef uint32_t			u32;
-	typedef uint16_t			u16;
-	typedef unsigned char		u8;
+	#ifdef _MSC_VER
+		typedef unsigned long long	u64;
+		typedef unsigned long		u32;
+		typedef unsigned short		u16;
+		typedef unsigned char		u8;
 
-	typedef int64_t				s64;
-	typedef int32_t				s32;
-	typedef int16_t				s16;
-	typedef char				s8;
+		typedef long long			s64;
+		typedef long				s32;
+		typedef short				s16;
+		typedef char				s8;
 
-	typedef float				f32;
-	typedef double				f64;
+		typedef float				f32;
+		typedef double				f64;
+	#else
+		#include <stdint.h>
+		typedef uint64_t			u64;
+		typedef uint32_t			u32;
+		typedef uint16_t			u16;
+		typedef unsigned char		u8;
+
+		typedef int64_t				s64;
+		typedef int32_t				s32;
+		typedef int16_t				s16;
+		typedef char				s8;
+
+		typedef float				f32;
+		typedef double				f64;
+	#endif
 
 	#ifndef _memicmp
 		#define _memicmp(x,y,z)			strncmp((s8*)x, (s8*)y, z)
 	#endif
-
-//	#ifndef memicmp
-//		#include <memory.h>
-//	#endif
 
 	#include "sha1.h"
 #endif
@@ -555,17 +566,29 @@
 
 
 #ifdef _TEST_ME
-	#define RW(x) (char []) { x } 
+	#ifdef _MSC_VER
+		s8* test_data[] = {		"abc",
+								"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
+								"A million repetitions of 'a'"
+							};
 
-	s8* test_data[] = {		RW("abc"),
-							RW("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"),
-							RW("A million repetitions of 'a'")
-						};
+		s8* test_results[] = {		"A9993E36 4706816A BA3E2571 7850C26C 9CD0D89D",
+									"84983E44 1C3BD26E BAAE4AA1 F95129E5 E54670F1",
+									"34AA973C D4C4DAA4 F61EEB2B DBAD2731 6534016F"
+							};
+	#else
+		#define RW(x) (char []) { x } 
 
-	s8* test_results[] = {		RW("A9993E36 4706816A BA3E2571 7850C26C 9CD0D89D"),
-								RW("84983E44 1C3BD26E BAAE4AA1 F95129E5 E54670F1"),
-								RW("34AA973C D4C4DAA4 F61EEB2B DBAD2731 6534016F")
-						};
+		s8* test_data[] = {		RW("abc"),
+								RW("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"),
+								RW("A million repetitions of 'a'")
+							};
+
+		s8* test_results[] = {		RW("A9993E36 4706816A BA3E2571 7850C26C 9CD0D89D"),
+									RW("84983E44 1C3BD26E BAAE4AA1 F95129E5 E54670F1"),
+									RW("34AA973C D4C4DAA4 F61EEB2B DBAD2731 6534016F")
+							};
+	#endif
 
 
 	void digest_to_hex(const u8 digest[_SHA1_NUMBER_SIZE], s8* output)
