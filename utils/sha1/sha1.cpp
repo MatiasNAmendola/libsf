@@ -60,7 +60,7 @@
 
 
 // This constant should only be defined when testing from within the sha1.sln project.
-#define _TEST_ME
+// #define _TEST_ME
 #ifdef _TEST_ME
 	#include <stdio.h>
 	#include <string.h>
