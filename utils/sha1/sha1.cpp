@@ -12,11 +12,12 @@
 // Public Domain - See sha1_continueOnThisData() for instructions on how to process a SHA1 value.
 //////
 // Last update:
-//     February 16, 2013
+//     February 10, 2014
 //////
 // Change log:
-//     February 16, 2013 - Initial creation, compiles with Visual Studio 2008 Professional.
+//     February 10, 2014 - Modified to work with both GCC for x86, and Visual Studio 2008 Professional.
 //     February 17, 2013 - Added hexadecimal to sha-1 160-bit format conversion in preparation for use in VVMOSS
+//     February 16, 2013 - Initial creation, compiles with Visual Studio 2008 Professional.
 //////
 //
 // This software is released into the Public Domain.  Enjoy. :-)
@@ -59,7 +60,7 @@
 
 
 // This constant should only be defined when testing from within the sha1.sln project.
-// #define _TEST_ME
+#define _TEST_ME
 #ifdef _TEST_ME
 	#include <stdio.h>
 	#include <string.h>
@@ -185,11 +186,11 @@
 			for (lnI = 0; lnI < _SHA1_NUMBER_SIZE; lnI++)
 			{
 				// Convert this 32-bit quantity to hexadecimal
-				sprintf_s(buffer + strlen(buffer), sizeof(buffer) - strlen(buffer), "%02x\0", sha20Bytes[lnI]);
+				sprintf(buffer + strlen(buffer), "%02x\0", sha20Bytes[lnI]);
 
 				// Append a space between each 32-bit quantity if they want
 				if (tlSpacesBetween && lnI != 0 && (lnI + 1) % 4 == 0)
-					sprintf_s(buffer + strlen(buffer), sizeof(buffer) - strlen(buffer), " ");
+					sprintf(buffer + strlen(buffer), " ");
 			}
 
 			// When we get here, we have our string
@@ -544,15 +545,15 @@
 
 
 #ifdef _TEST_ME
-	static s8* test_data[] = {		"abc",
-									"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
-									"A million repetitions of 'a'"
-								};
+	s8* test_data[] = {		"abc",
+							"abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
+							"A million repetitions of 'a'"
+						};
 
-	static s8* test_results[] = {		"A9993E36 4706816A BA3E2571 7850C26C 9CD0D89D",
-										"84983E44 1C3BD26E BAAE4AA1 F95129E5 E54670F1",
-										"34AA973C D4C4DAA4 F61EEB2B DBAD2731 6534016F"
-									};
+	s8* test_results[] = {		"A9993E36 4706816A BA3E2571 7850C26C 9CD0D89D",
+								"84983E44 1C3BD26E BAAE4AA1 F95129E5 E54670F1",
+								"34AA973C D4C4DAA4 F61EEB2B DBAD2731 6534016F"
+						};
 
 
 	void digest_to_hex(const u8 digest[_SHA1_NUMBER_SIZE], s8* output)
@@ -562,10 +563,10 @@
 
 		for (i = 0; i < _SHA1_NUMBER_SIZE/4; i++) {
 			for (j = 0; j < 4; j++) {
-				sprintf_s(c, 3, "%02X", digest[i*4+j]);
+				sprintf(c, "%02X", digest[i*4+j]);
 				c += 2;
 			}
-			sprintf_s(c, 2, " ");
+			sprintf(c, " ");
 			c += 1;
 		}
 		*(c - 1) = '\0';
@@ -591,7 +592,7 @@
 
 			sha1_initialize(&context);
 			sha1_continueOnThisData(&context, (u8*)test_data[lnI], strlen(test_data[lnI]));
-			sha1_finalize(&context, sha20Bytes);
+			sha1_finalize(&context, sha20Bytes, false);
 
 			memset(sha20ConvertedToHex, 0, sizeof(sha20ConvertedToHex));
 			digest_to_hex(sha20Bytes, sha20ConvertedToHex);
@@ -619,7 +620,7 @@
 		for (lnIteratorA = 0; lnIteratorA < 1000000; lnIteratorA++)
 			sha1_continueOnThisData(&context, (u8*)"a", 1);
 
-		sha1_finalize(&context, sha20Bytes);
+		sha1_finalize(&context, sha20Bytes, false);
 
 		memset(sha20ConvertedToHex, 0, sizeof(sha20ConvertedToHex));
 		digest_to_hex(sha20Bytes, sha20ConvertedToHex);
@@ -663,7 +664,6 @@
 
 		// success
 		fprintf(stdout, "\nFinished ok\n");
-_asm int 3;
 		return(0);
 	}
 #endif
