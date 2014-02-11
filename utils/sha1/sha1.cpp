@@ -60,11 +60,12 @@
 
 
 // This constant should only be defined when testing from within the sha1.sln project.
-#define _TEST_ME
+// #define _TEST_ME
 #ifdef _TEST_ME
 	#include <stdio.h>
 	#include <string.h>
 	#ifdef _MSC_VER
+		// Visual C++ compiler
 		typedef unsigned long long	u64;
 		typedef unsigned long		u32;
 		typedef unsigned short		u16;
@@ -77,7 +78,9 @@
 
 		typedef float				f32;
 		typedef double				f64;
+
 	#else
+		// Most likely GCC (at least in my world that is nyuck nyuck)
 		#include <stdint.h>
 		typedef uint64_t			u64;
 		typedef uint32_t			u32;
@@ -91,10 +94,14 @@
 
 		typedef float				f32;
 		typedef double				f64;
-	#endif
 
-	#ifndef _memicmp
-		#define _memicmp(x,y,z)			strncmp((s8*)x, (s8*)y, z)
+		#ifndef _memicmp
+			#define _memicmp(x,y,z)			strncmp((s8*)x, (s8*)y, z)
+		#endif
+
+		#ifndef sprintf_s
+			#define sprintf_s(x,y,z...)	sprintf(x, z)
+		#endif
 	#endif
 
 	#include "sha1.h"
@@ -207,11 +214,11 @@
 			for (lnI = 0; lnI < _SHA1_NUMBER_SIZE; lnI++)
 			{
 				// Convert this 32-bit quantity to hexadecimal
-				sprintf(buffer + strlen(buffer), "%02x\0", sha20Bytes[lnI]);
+				sprintf_s(buffer + strlen(buffer), sizeof(buffer) - strlen(buffer), "%02x\0", sha20Bytes[lnI]);
 
 				// Append a space between each 32-bit quantity if they want
 				if (tlSpacesBetween && lnI != 0 && (lnI + 1) % 4 == 0)
-					sprintf(buffer + strlen(buffer), " ");
+					sprintf_s(buffer + strlen(buffer), sizeof(buffer) - strlen(buffer), " ");
 			}
 
 			// When we get here, we have our string
@@ -598,11 +605,11 @@
 
 		for (i = 0; i < _SHA1_NUMBER_SIZE/4; i++) {
 			for (j = 0; j < 4; j++) {
-				sprintf(c, "%02X", digest[i*4+j]);
+				sprintf_s(c, 2, "%02X", digest[i*4+j]);
 				c += 2;
 			}
-			sprintf(c, " ");
-			c += 1;
+			sprintf_s(c, 1, " ");
+			++c;
 		}
 		*(c - 1) = '\0';
 	}
