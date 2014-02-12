@@ -1,6 +1,6 @@
 //////////
 //
-// /libsf/source/vjr/vjr.h
+// /libsf/source/vjr/vjr_const.h
 //
 //////
 // Version 0.10
@@ -36,19 +36,46 @@
 
 
 
-#include <windows.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <Shobjidl.h>
-#include "resource.h"
+// Unsigned
+typedef		unsigned __int64	u64;
+typedef		unsigned long		u32;
+typedef		unsigned short		u16;
+typedef		unsigned char		u8;
 
-#include "vjr_const.h"
+// Signed
+typedef		LARGE_INTEGER		i64;
+typedef		__int64				s64;
+typedef		long				s32;
+typedef		short				s16;
+typedef		char				s8;
 
-#include "builder.cpp"
+// Floating point
+typedef		float				f32;
+typedef		double				f64;
 
-#include "vjr_structs.h"
-#include "vjr_defs.h"
-#include "vjr_globals.h"
+// Constant signed
+typedef		const s8			cs8;
+typedef		const s16			cs16;
+typedef		const s32			cs32;
+typedef		const s64			cs64;
 
-#include "vjr_sup.cpp"
+// Constant unsigned
+typedef		const u8			cu8;
+typedef		const u16			cu16;
+typedef		const u32			cu32;
+typedef		const u64			cu64;
+
+// Constant floating point
+typedef		const f64			cf64;
+typedef		const f64			cf64;
+
+
+// Union helper
+#define _union(x, y, z) union { x z; y _ ## z; };
+
+
+// Constant strings
+const s8			cgcMessageWindowClass[]					= "VJr.MessageWindow";
+const s8			cgcInterfaceWindowClass[]				= "VJr.InterfaceWindow";
+const s8			cgcTitle[]								= "Visual FreePro Jr v0.10";
+const s8			cgcTahoma[]								= "Tahoma";
