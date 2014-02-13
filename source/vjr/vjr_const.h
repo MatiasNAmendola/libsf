@@ -43,7 +43,6 @@ typedef		unsigned short		u16;
 typedef		unsigned char		u8;
 
 // Signed
-typedef		LARGE_INTEGER		i64;
 typedef		__int64				s64;
 typedef		long				s32;
 typedef		short				s16;
@@ -70,12 +69,35 @@ typedef		const f64			cf64;
 typedef		const f64			cf64;
 
 
+//////////
 // Union helper
-#define _union(x, y, z) union { x z; y _ ## z; };
+//////
+	#define _union(x, y, z) union { x z; y _ ## z; };
 
 
+//////////
+// Red,Grn,Blu,Alp color maker
+//////
+	#define rgba(r,g,b,a)					((a & 0xff) << 24) + \
+											((r & 0xff) << 16) + \
+											((g & 0xff) <<  8) + \
+											((b & 0xff))
+
+	#define rgb(r,g,b)						(0xff       << 24) + \
+											((r & 0xff) << 16) + \
+											((g & 0xff) <<  8) + \
+											((b & 0xff))
+
+	#define alp(rgbaColor)					((rgbaColor >> 24) & 0xff)
+	#define red(rgbaColor)					((rgbaColor >> 16) & 0xff)
+	#define grn(rgbaColor)					((rgbaColor >> 8)  & 0xff)
+	#define blu(rgbaColor)					( rgbaColor        & 0xff)
+
+
+//////////
 // Constant strings
-const s8			cgcMessageWindowClass[]					= "VJr.MessageWindow";
-const s8			cgcInterfaceWindowClass[]				= "VJr.InterfaceWindow";
-const s8			cgcTitle[]								= "Visual FreePro Jr v0.10";
-const s8			cgcTahoma[]								= "Tahoma";
+//////
+	const s8			cgcMessageWindowClass[]				= "VJr.MessageWindow";
+	const s8			cgcInterfaceWindowClass[]			= "VJr.InterfaceWindow";
+	const s8			cgcTitle[]							= "Visual FreePro Jr v0.10";
+	const s8			cgcTahoma[]							= "Tahoma";

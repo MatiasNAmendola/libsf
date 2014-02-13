@@ -69,47 +69,6 @@ int CALLBACK WinMain(	HINSTANCE	hInstance,
 
 
 
-// ATOM MyRegisterClass(HINSTANCE hInstance)
-// {
-// 	WNDCLASSEX wcex;
-// 
-// 	wcex.cbSize = sizeof(WNDCLASSEX);
-// 
-// 	wcex.style			= CS_HREDRAW | CS_VREDRAW;
-// 	wcex.lpfnWndProc	= WndProc;
-// 	wcex.cbClsExtra		= 0;
-// 	wcex.cbWndExtra		= 0;
-// 	wcex.hInstance		= hInstance;
-// 	wcex.hIcon			= LoadIcon(hInstance, MAKEINTRESOURCE(IDI_VJR));
-// 	wcex.hCursor		= LoadCursor(NULL, IDC_ARROW);
-// 	wcex.hbrBackground	= (HBRUSH)(COLOR_WINDOW+1);
-// 	wcex.lpszMenuName	= MAKEINTRESOURCE(IDC_VJR);
-// 	wcex.lpszClassName	= szWindowClass;
-// 	wcex.hIconSm		= LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_SMALL));
-// 
-// // 		case WM_COMMAND:
-// // 			wmId    = LOWORD(w);
-// // 			wmEvent = HIWORD(w);
-// // 			// Parse the menu selections:
-// // 			switch (wmId)
-// // 			{
-// // 				case IDM_ABOUT:
-// // 					DialogBox(ghInst, MAKEINTRESOURCE(IDD_ABOUTBOX), h, About);
-// // 					break;
-// // 				case IDM_EXIT:
-// // 					DestroyWindow(h);
-// // 					break;
-// // 				default:
-// // 					return DefWindowProc(h, m, w, l);
-// // 			}
-// // 			break;
-// 
-// 	return RegisterClassEx(&wcex);
-// }
-
-
-
-
 //////////
 //
 // Message handler for about box

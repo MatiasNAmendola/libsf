@@ -63,6 +63,7 @@
 				LinkIncremental="2"
 				GenerateDebugInformation="true"
 				SubSystem="2"
+				ImportLibrary="\libsf\source\vjr\icons.lib"
 				TargetMachine="1"
 			/>
 			<Tool

@@ -49,6 +49,13 @@
 	s64					systemStartedMs;
 
 
+	// Global colors
+	const SBGRA			white								= { rgba(255, 255, 255, 255) };
+	const SBGRA			black								= { rgba(0, 0, 0, 255) };
+	const SBGRA			gray								= { rgba(192, 192, 192, 255) };
+	const SBGRA			light_green							= { rgba(235, 255, 235, 255) };
+
+
 	// Mouse options
 	bool				glMoving							= false;								// When the user clicks and drags the title bar area, the window will move
 	bool				glResizing							= false;								// When the user clicks and drags the corner triangle areas, the window will resize, resulting in larger or smaller scaling
@@ -67,3 +74,4 @@
 	bool				glMouseLeftButton					= false;
 	bool				glMouseMiddleButton					= false;
 	bool				glMouseRightButton					= false;
+

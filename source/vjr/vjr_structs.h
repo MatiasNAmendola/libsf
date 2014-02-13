@@ -45,10 +45,15 @@ struct SBGR
 
 struct SBGRA
 {
-	u8	blu;
-	u8	grn;
-	u8	red;
-	u8	alp;
+	union {
+		u32		color;
+		struct {
+			u8	blu;
+			u8	grn;
+			u8	red;
+			u8	alp;
+		};
+	};
 };
 
 struct SBitmap
@@ -167,16 +172,8 @@ struct SWindowIface
 	SObject		arrowLl;
 
 	// For mouse objects
-	SObject		settings;
 	SObject		minimize;
 	SObject		maximize;
 	SObject		close;
-	SObject		keyIcon;
-	SObject		clientCamcorder;
-	SObject		clientCamera;
-	SObject		clientSettings;
-
-	SObject		tabLeft;
-	SObject		tabMiddle;
-	SObject		tabRight;
+	SObject		appIcon;
 };

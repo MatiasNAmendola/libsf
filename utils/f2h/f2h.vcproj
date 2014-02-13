@@ -132,6 +132,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				OutputFile="\libsf\vvm\bin\$(ProjectName).exe"
 				LinkIncremental="1"
 				GenerateDebugInformation="true"
 				SubSystem="1"
@@ -159,8 +160,8 @@
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				Description="Copy f2h.exe to vvm\bin\"
-				CommandLine="copy $(OutDir)\$(ProjectName).exe \libsf\vvm\bin\"
+				Description=""
+				CommandLine=""
 			/>
 		</Configuration>
 	</Configurations>
