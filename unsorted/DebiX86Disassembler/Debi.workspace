@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CodeLite_Workspace Name="Debi" Database="./Debi.tags">
+  <Project Name="Debi" Path="Debi/Debi.project" Active="Yes"/>
+  <Project Name="Test" Path="Test.project"/>
+  <BuildMatrix>
+    <WorkspaceConfiguration Name="Debug" Selected="yes">
+      <Project Name="Debi" ConfigName="Debug"/>
+      <Project Name="Test" ConfigName="Debug"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release" Selected="no">
+      <Project Name="Debi" ConfigName="Release"/>
+      <Project Name="Test" ConfigName="Release"/>
+    </WorkspaceConfiguration>
+  </BuildMatrix>
+</CodeLite_Workspace>

@@ -1,0 +1,113 @@
+1247
+
+	(DISASM_FUNC)&opcode_jo,                    /* 70 */
+    (DISASM_FUNC)&opcode_jno,                   /* 71 */
+    (DISASM_FUNC)&opcode_jc,                    /* 72 */
+    (DISASM_FUNC)&opcode_jnc,                   /* 73 */
+    (DISASM_FUNC)&opcode_jz,                    /* 74 */
+    (DISASM_FUNC)&opcode_jnz,                   /* 75 */
+    (DISASM_FUNC)&opcode_jna,                   /* 76 */
+    (DISASM_FUNC)&opcode_ja,                    /* 77 */
+    (DISASM_FUNC)&opcode_js,                    /* 78 */
+    (DISASM_FUNC)&opcode_jns,                   /* 79 */
+    (DISASM_FUNC)&opcode_jpe,                   /* 7a */
+    (DISASM_FUNC)&opcode_jpo,                   /* 7b */
+    (DISASM_FUNC)&opcode_jl,                    /* 7c */
+    (DISASM_FUNC)&opcode_jnl,                   /* 7d */
+    (DISASM_FUNC)&opcode_jng,                   /* 7e */
+    (DISASM_FUNC)&opcode_jg,                    /* 7f */
+	
+    (DISASM_FUNC)&opcode_jo_l,                  /* 80 */
+    (DISASM_FUNC)&opcode_jno_l,                 /* 81 */
+    (DISASM_FUNC)&opcode_jc_l,                  /* 82 */
+    (DISASM_FUNC)&opcode_jnc_l,                 /* 83 */
+    (DISASM_FUNC)&opcode_jz_l,                  /* 84 */
+    (DISASM_FUNC)&opcode_jnz_l,                 /* 85 */
+    (DISASM_FUNC)&opcode_jna_l,                 /* 86 */
+    (DISASM_FUNC)&opcode_ja_l,                  /* 87 */
+    (DISASM_FUNC)&opcode_js_l,                  /* 88 */
+    (DISASM_FUNC)&opcode_jns_l,                 /* 89 */
+    (DISASM_FUNC)&opcode_jpe_l,                 /* 8a */
+    (DISASM_FUNC)&opcode_jpo_l,                 /* 8b */
+    (DISASM_FUNC)&opcode_jl_l,                  /* 8c */
+    (DISASM_FUNC)&opcode_jnl_l,                 /* 8d */
+    (DISASM_FUNC)&opcode_jng_l,                 /* 8e */
+    (DISASM_FUNC)&opcode_jg_l,                  /* 8f */
+
+
+do_common_opcode_rm8_one_operand(u8* data, SDisasmData* dd, u8* mnemonic)
+	"%s r/m8"
+	dec		rm8
+
+do_common_opcode_rm16_rm32_one_operand(u8* data, SDisasmData* dd, u8* mnemonic)
+	"%s r/m16; %s r32/m32"
+	dec		rm16/32
+
+do_common_opcode_rm8(SDisasmData* dd, u8* mnemonic)
+	"%s r/m8,r8"
+	mov		byte ptr ss:[ebp+esi*8+40],dh
+
+do_common_opcode_rm8_reversed(SDisasmData* dd, u8* mnemonic)
+	"%s r8,r/m8"
+	mov		dh,byte ptr ss:[ebp+esi*8+40]
+
+do_common_opcode_r1632_rm1632
+	// 32-bit	mov		edx,ebx
+	// 16-bit	mov		dx,bx
+
+do_common_opcode_rm16_rm32(SDisasmData* dd, u8* mnemonic)
+	"%s r/m16,r16; %s r32/m32,r32"
+	xor		ss:[ebp+esi*4+18],eax
+
+do_common_opcode_rm16_r16(SDisasmData* dd, u8* mnemonic)
+	"%s r/m16,r16"
+	sbb		fs:[edi],bx
+
+do_common_opcode_rm32_r32(SDisasmData* dd, u8* mnemonic)
+	"%s r/m32,r32"
+	sbb		gs:[esi],ebp
+
+do_common_opcode_r16_rm16(SDisasmData* dd, u8* mnemonic)
+	"%s r16,r/m16"
+	and		si,gs:[bx+di]
+
+do_common_opcode_r32_rm32(SDisasmData* dd, u8* mnemonic)
+	"%s r32,r/m32"
+	mov		ebx,ss:[ebp+12]
+
+do_common_opcode_rm16_rm32_reversed
+	"%s r16,r/m16; %s r32,r32/m32"
+	mov		dx,word ptr ss:[ebp+12]
+
+do_common_rm8_immed8(u8* data, SDisasmData* dd, u8* mnemonic)
+	"%s r/m8,immed8"
+	mov		dl,2
+
+do_common_rm16_32_immed8(u8* data, SDisasmData* dd, u8* mnemonic)
+	"%s r/m16,immed8; %s r32/m32,immed8"
+	sub		dword ptr es:[edi+ebx+5],5
+
+do_common_rm16_32_immed16_32(u8* data, SDisasmData* dd, u8* mnemonic)
+	"%s r/m16,immed16; %s r32/m32,immed32"
+	and		dword ptr es:[edi+ebx+5],075003h
+
+do_common_accum8_immed8(u8* data, SDisasmData* dd, u8* mnemonic)
+	"%s al,immed8"
+	add		al,2
+
+do_common_accum16_32_immed8(u8* data, SDisasmData* dd, u8* mnemonic)
+	"%s ax,immed16; %s eax,immed32"
+	add		ax,50000
+
+do_common_accum16_32_immed16_32(u8* data, SDisasmData* dd, u8* mnemonic)
+	"%s ax,immed8; %s eax,immed8"
+	add		eax,5
+
+do_common_mnemonic(SDisasmData* dd, u8* mnemonic, u32 opcode_length)
+	cpuid
+
+do_common_operand_size_check_mnemonic(SDisasmData* dd, u32 opcode_length, u8* _16bit_mnemonic, u8* _32bit_mnemonic)
+	// 32-bit
+		lodsd
+	// 16-bit
+		lodsw
