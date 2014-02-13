@@ -13,6 +13,8 @@ or other extensions.
 
 This represents a lot of work I did with my evenings while staying in
 a hotel room in downtown Lawrenceville, IL, circa 2009 - 2010. :-)
+It is a port of my Debi debugger from the Exodus 32-bit operating
+system in assembly into C/C++.
 
 Best regards,
 Rick C. Hodgin
