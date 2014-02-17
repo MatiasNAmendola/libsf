@@ -1,6 +1,6 @@
 //////////
 //
-// cmpfr.h
+// cbignum.h
 //
 /////
 //
@@ -51,8 +51,9 @@
 		void Setpi2(void);
 		void Setpi4(void);
 		void Set3pi2(void);
-		// golden ratio = (1 + sqrt(5)) / 2
 		void Setgr(void);
+		void SetLn2(void);
+		void SetLn10(void);
 
 		void Abs(void);
 		void Min(CBignum& c1);
@@ -70,6 +71,17 @@
 		void Square(f64 d1);
 		void Square(CBignum& c1);
 
+		void YToX(CBignum& bnX);
+
+		void Log(void);
+		void Log(CBignum& bn1);
+
+		void Log2(void);
+		void Log2(CBignum& bn1);
+
+		void Log10(void);
+		void Log10(CBignum& bn1);
+
 		s32 tos32(void);
 		f32 tof32(void);
 		f64 tof64(void);
@@ -78,12 +90,10 @@
 		void Neg(void);
 		void Neg(CBignum& c1);
 
-		void Mod2(CBignum& c1);
-		void Mod2(CBignum& c1, CBignum& c2);
+		void Mod(CBignum& c1);
 
 		void Mul(f64 d);
 		void Mul(CBignum& c1);
-		void Mul2(f64 d1, CBignum& c2);
 		void Mul2(CBignum& c1, f64 d2);
 		void Mul2(CBignum& c1, CBignum& c2);
 		void Mul3(CBignum& c1, CBignum& c2, CBignum& c3);
@@ -91,24 +101,23 @@
 
 		void Div(f64 d1);
 		void Div(CBignum& c1);
-		void Div2(f64 d1, CBignum& c2);
-		void Div2(CBignum& c1, f64 d2);
 		void Div2(CBignum& c1, CBignum& c2);
 		void Div3(CBignum& c1, CBignum& c2, CBignum& c3);
+		void Div4(CBignum& c1, CBignum& c2, CBignum& c3, CBignum& c4);
 
 		void Add(f64 d1);
 		void Add(CBignum& c1);
-		void Add2(f64 d1, CBignum& c2);
 		void Add2(CBignum& c1, f64 d2);
 		void Add2(CBignum& c1, CBignum& c2);
 		void Add3(CBignum& c1, CBignum& c2, CBignum& c3);
+		void Add4(CBignum& c1, CBignum& c2, CBignum& c3, CBignum& c4);
 
 		void Sub(f64 d1);
 		void Sub(CBignum& c1);
-		void Sub2(f64 d1, CBignum& c2);
 		void Sub2(CBignum& c1, f64 d2);
 		void Sub2(CBignum& c1, CBignum& c2);
 		void Sub3(CBignum& c1, CBignum& c2, CBignum& c3);
+		void Sub4(CBignum& c1, CBignum& c2, CBignum& c3, CBignum& c4);
 
 		void Cos(void);
 		void Cos(CBignum& c1);
@@ -138,6 +147,15 @@
 
 		void Sec(void);
 		void Sec(CBignum& c1);
+
+		void Cosh(void);
+		void Cosh(CBignum& c1);
+
+		void Sinh(void);
+		void Sinh(CBignum& c1);
+
+		void Tanh(void);
+		void Tanh(CBignum& c1);
 
 		void Cos(f64 d1);
 		void Sin(f64 d1);

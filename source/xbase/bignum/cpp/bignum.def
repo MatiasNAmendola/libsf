@@ -25,11 +25,14 @@ EXPORTS
 	bn_setpi4
 	bn_set3pi2
 	bn_set_golden_ratio
+	bn_set_ln2
+	bn_set_ln10
 	bn_abs
 	bn_min
 	bn_max
 	bn_sqrt
 	bn_square
+	bn_ytox
 	bn_to_s32
 	bn_to_f64
 	bn_to_text
@@ -57,3 +60,9 @@ EXPORTS
 	bn_cot
 	bn_csc
 	bn_sec
+	bn_log
+	bn_log2
+	bn_log10
+	bn_cosh
+	bn_sinh
+	bn_tanh
