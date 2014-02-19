@@ -12,6 +12,8 @@
 //////////
 // Global variables
 //////
+#define getPi() _float_table(_PI, fp.precision())
+
 	// This class encapsulates the functions above in a very straight-forward form
 	class CBignum
 	{

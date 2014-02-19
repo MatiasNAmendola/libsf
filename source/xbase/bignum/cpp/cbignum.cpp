@@ -47,11 +47,11 @@ void CBignum::Set1(void)						{	fp = 1.0;	}
 void CBignum::Set2(void)						{	fp = 2.0;	}
 void CBignum::Set3(void)						{	fp = 3.0;	}
 void CBignum::Set4(void)						{	fp = 4.0;	}
-void CBignum::Setpi(void)						{	fp = _PI;	}
-void CBignum::Set2pi(void)						{	fp = _PI; fp *= fp;	}
-void CBignum::Setpi2(void)						{	fp = _PI; fp /= 2.0;	}
-void CBignum::Setpi4(void)						{	fp = _PI; fp /= 4.0;	}
-void CBignum::Set3pi2(void)						{	fp = _PI; fp *= 3.0; fp /= 2.0;	}
+void CBignum::Setpi(void)						{	fp = getPi();	}
+void CBignum::Set2pi(void)						{	fp = getPi(); fp *= 2.0;	}
+void CBignum::Setpi2(void)						{	fp = getPi(); fp /= 2.0;	}
+void CBignum::Setpi4(void)						{	fp = getPi(); fp /= 4.0;	}
+void CBignum::Set3pi2(void)						{	fp = getPi(); fp *= 3.0; fp /= 2.0;	}
 // golden ratio = (1 + sqrt(5)) / 2
 void CBignum::Setgr(void)						{	fp = 5.0; fp = sqrt(fp); fp += 1.0; fp /= 2.0;	}
 void CBignum::SetLn2(void)						{	fp = _LN2; }
