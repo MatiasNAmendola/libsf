@@ -148,6 +148,15 @@
 		void Tanh(void);
 		void Tanh(CBignum& c1);
 
+		void Acosh(void);
+		void Acosh(CBignum& c1);
+
+		void Asinh(void);
+		void Asinh(CBignum& c1);
+
+		void Atanh(void);
+		void Atanh(CBignum& c1);
+
 		void Cos(f64 d1);
 		void Sin(f64 d1);
 		void Tan(f64 d1);

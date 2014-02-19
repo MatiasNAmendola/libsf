@@ -32,9 +32,11 @@ int CBignum::Cmp(CBignum& bn)
 int CBignum::CmpDelta(CBignum& t, CBignum& bn, CBignum& d)
 {
 	t.fp = fp - bn.fp;
-	if (t.fp < d.fp)			return(-1);	// fp is less than
-	else if (t.fp == d.fp)		return(0);	// fp is equal
-	else						return(1);	// fp is greater than
+	if (fabs(t.fp) <= d.fp)
+		return(0);	// fp is equal
+
+	// If we get here, it's not within the delta, so do a literal repair
+	return(Cmp(bn));
 }
 
 void CBignum::Set(CBignum& bn)					{	fp = bn.fp;	}
@@ -149,6 +151,15 @@ void CBignum::Sinh(CBignum& bn1)				{	fp = sinh(bn1.fp);	}
 
 void CBignum::Tanh(void)						{	fp = tanh(fp);	}
 void CBignum::Tanh(CBignum& bn1)				{	fp = tanh(bn1.fp);	}
+
+void CBignum::Acosh(void)						{	fp = acosh(fp);	}
+void CBignum::Acosh(CBignum& bn1)				{	fp = acosh(bn1.fp);	}
+
+void CBignum::Asinh(void)						{	fp = asinh(fp);	}
+void CBignum::Asinh(CBignum& bn1)				{	fp = asinh(bn1.fp);	}
+
+void CBignum::Atanh(void)						{	fp = atanh(fp);	}
+void CBignum::Atanh(CBignum& bn1)				{	fp = atanh(bn1.fp);	}
 
 void CBignum::Square(void)						{ fp = fp * fp;	}
 void CBignum::Square(f64 d1)					{ fp = d1 * d1;	}

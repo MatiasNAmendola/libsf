@@ -36,7 +36,7 @@ BOOL APIENTRY DllMain(	HMODULE	hModule,
 	{
 		case DLL_PROCESS_ATTACH:
 			// Initialize our slots for bignums
-			for (lnI = 0; lnI < sizeof(bnArray) / sizeof(CBignum); lnI++)
+			for (lnI = 0; lnI < sizeof(bnArray) / sizeof(SBignumSlot); lnI++)
 			{
 				// Initialize
 				bnArray[lnI].used = false;
@@ -682,6 +682,36 @@ u32 bn_tanh(s32 tnId)
 	if (isValid(tnId))
 	{
 		bnArray[tnId].bn.Tanh();
+		return(1);
+	}
+	return(0);
+}
+
+u32 bn_acosh(s32 tnId)
+{
+	if (isValid(tnId))
+	{
+		bnArray[tnId].bn.Acosh();
+		return(1);
+	}
+	return(0);
+}
+
+u32 bn_asinh(s32 tnId)
+{
+	if (isValid(tnId))
+	{
+		bnArray[tnId].bn.Asinh();
+		return(1);
+	}
+	return(0);
+}
+
+u32 bn_atanh(s32 tnId)
+{
+	if (isValid(tnId))
+	{
+		bnArray[tnId].bn.Atanh();
 		return(1);
 	}
 	return(0);

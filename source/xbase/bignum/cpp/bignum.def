@@ -63,3 +63,6 @@ EXPORTS
 	bn_cosh
 	bn_sinh
 	bn_tanh
+	bn_acosh
+	bn_asinh
+	bn_atanh

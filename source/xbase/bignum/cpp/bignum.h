@@ -27,7 +27,4 @@
 #include <math.h>
 
 #include "common.h"
-// #include "precision\fprecision.h"
-// #include "precision\intervalprecision.h"
-// #include "precision\iprecision.h"
 #include "precision\precisioncore.cpp"
