@@ -22,20 +22,20 @@ void CBignum::operator=(CBignum& right)			{	fp	= right.fp;	}
 
 void CBignum::Init(void)						{	fp = 0.0;	}
 
-int CBignum::Cmp(CBignum& bn)					{	return(0);	}
-int CBignum::Cmp(f64 d)							{	return(0);	}
-int CBignum::Cmp(long int i)					{	return(0);	}
+int CBignum::Cmp(CBignum& bn)
+{
+	if (fp < bn.fp)			return(-1);		// fp is less than
+	else if (fp == bn.fp)	return(0);		// fp is equal
+	else					return(1);		// fp is greater than
+}
 
-int CBignum::CmpDelta(CBignum& t, CBignum& bn, f64 delta)	{	return(0);	}
-int CBignum::CmpDelta(CBignum& t, f64 d, f64 delta)			{	return(0);	}
-
-bool CBignum::IsNan(void)						{	return(false);	}
-bool CBignum::IsNan(CBignum& bn1)				{	return(false);	}
-
-bool CBignum::IsInf(void)						{	return(false);	}
-bool CBignum::IsInf(CBignum& bn1)				{	return(false);	}
-
-void CBignum::Random(void)						{	}
+int CBignum::CmpDelta(CBignum& t, CBignum& bn, CBignum& d)
+{
+	t.fp = fp - bn.fp;
+	if (t.fp < d.fp)			return(-1);	// fp is less than
+	else if (t.fp == d.fp)		return(0);	// fp is equal
+	else						return(1);	// fp is greater than
+}
 
 void CBignum::Set(CBignum& bn)					{	fp = bn.fp;	}
 void CBignum::Set(f64 d)						{	fp = d;	}
@@ -69,9 +69,9 @@ void CBignum::Max3(CBignum& bn1, CBignum& bn2, CBignum& bn3)	{	fp = max(max(bn1.
 void CBignum::Sqrt(void)						{	fp = sqrt(fp);	}
 void CBignum::Sqrt(CBignum& bn1)				{	fp = sqrt(bn1.fp);	}
 
-s32 CBignum::tos32(void)						{	return(0);	}
-f32 CBignum::tof32(void)						{	return(0);	}
-f64 CBignum::tof64(void)						{	return(0);	}
+s32 CBignum::tos32(void)						{	return((s32)fp);	}
+f32 CBignum::tof32(void)						{	return((f32)fp);	}
+f64 CBignum::tof64(void)						{	return((f64)fp);	}
 
 u32 CBignum::toText(s8* tcValue, u32 tnLength)
 {

@@ -7,9 +7,6 @@ EXPORTS
 	bn_free
 	bn_cmp
 	bn_cmp_delta
-	bn_is_nan
-	bn_is_inf
-	bn_random
 	bn_set
 	bn_set_s32
 	bn_set_f64

@@ -119,41 +119,13 @@ s32 bn_cmp(s32 tnIdLeft, s32 tnIdRight)
 	return(-1);
 }
 
-s32 bn_cmp_delta(s32 tnIdTmp, s32 tnIdLeft, s32 tnIdRight, f64 delta)
+s32 bn_cmp_delta(s32 tnIdTmp, s32 tnIdLeft, s32 tnIdRight, s32 tnIdDelta)
 {
-	if (isValid(tnIdTmp) && isValid(tnIdLeft) && isValid(tnIdRight))
+	if (isValid(tnIdTmp) && isValid(tnIdLeft) && isValid(tnIdRight) && isValid(tnIdDelta))
 	{
-		return(bnArray[tnIdLeft].bn.CmpDelta(bnArray[tnIdTmp].bn, bnArray[tnIdRight].bn, delta));
+		return(bnArray[tnIdLeft].bn.CmpDelta(bnArray[tnIdTmp].bn, bnArray[tnIdRight].bn, bnArray[tnIdDelta].bn));
 	}
 	return(-1);
-}
-
-s32 bn_is_nan(s32 tnId)
-{
-	if (isValid(tnId))
-	{
-		return(bnArray[tnId].bn.IsNan());
-	}
-	return(true);
-}
-
-s32 bn_is_inf(s32 tnId)
-{
-	if (isValid(tnId))
-	{
-		return(bnArray[tnId].bn.IsInf());
-	}
-	return(true);
-}
-
-s32 bn_random(s32 tnId)
-{
-	if (isValid(tnId))
-	{
-		bnArray[tnId].bn.Random();
-		return(1);
-	}
-	return(0);
 }
 
 u32 bn_set(s32 tnId, s32 tnIdValue)

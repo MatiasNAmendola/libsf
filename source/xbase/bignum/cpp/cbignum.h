@@ -25,19 +25,8 @@
 		void Init(void);
 
 		int Cmp(CBignum& c);
-		int Cmp(f64 d);
-		int Cmp(long int i);
 
-		int CmpDelta(CBignum& t,	CBignum& c,	f64 delta);
-		int CmpDelta(CBignum& t,	f64 d,		f64 delta);
-
-		bool IsNan(void);
-		bool IsNan(CBignum& c1);
-
-		bool IsInf(void);
-		bool IsInf(CBignum& c1);
-
-		void Random(void);
+		int CmpDelta(CBignum& t, CBignum& c, CBignum& d);
 
 		void Set(CBignum& c);
 		void Set(f64 d);
