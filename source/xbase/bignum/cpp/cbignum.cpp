@@ -41,7 +41,7 @@ int CBignum::CmpDelta(CBignum& t, CBignum& bn, CBignum& d)
 
 void CBignum::Set(CBignum& bn)					{	fp = bn.fp;	}
 void CBignum::Set(f64 d)						{	fp = d;	}
-void CBignum::Set(s8* s)						{	fp = s; }
+void CBignum::Set(s8* s)						{	fp = _float_precision_atof((const s8*)s, fp.precision(), ROUND_NEAR); }
 
 // Common constants
 void CBignum::Set0(void)						{	fp = 0.0;	}
