@@ -43,7 +43,7 @@
 
 
 
-#include "vo_plugins.cpp"
+#include "oss_plugins.cpp"
 
 
 

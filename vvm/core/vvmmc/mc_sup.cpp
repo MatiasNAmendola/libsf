@@ -1,6 +1,6 @@
 //////////
 //
-// /libsf/vvm/vvmmc/vvmmc_sup.cpp
+// /libsf/vvm/vvmmc/mc_sup.cpp
 //
 //////
 // Version 0.60
@@ -75,7 +75,7 @@
 // Callback to search for matching resources to those already loaded
 //
 //////
-	bool iivvmmc_loadResourceAsciiTextCallback(SStartEndCallback* cb)
+	bool iimc_loadResourceAsciiTextCallback(SStartEndCallback* cb)
 	{
 		SVvmmcResourceText*	lr;
 
@@ -99,7 +99,7 @@
 // Append the indicated error to the error list
 //
 //////
-	void ivvmmc_appendError(SStartEnd* tseErrors, SOssLine* line, SOssComp* comp, u32 tnResource)
+	void imc_appendError(SStartEnd* tseErrors, SOssLine* line, SOssComp* comp, u32 tnResource)
 	{
 		SVvmmcError* lve;
 
@@ -118,7 +118,7 @@
 
 				// Store error number and info
 				lve->code			= tnResource;
-				lve->text			= vvmmc_loadResourceAsciiText(tnResource);
+				lve->text			= mc_loadResourceAsciiText(tnResource);
 			}
 		}
 	}
@@ -131,11 +131,11 @@
 // Append the indicated error to the error list
 //
 //////
-	void ivvmmc_appendWarning(SStartEnd* tseWarnings, SOssLine* line, SOssComp* comp, u32 tnResource)
+	void imc_appendWarning(SStartEnd* tseWarnings, SOssLine* line, SOssComp* comp, u32 tnResource)
 	{
 		// AT the current time, the storage mechanism for warnings and errors is the same.
 		// However, in the future it could be broken out and made separate
-		ivvmmc_appendError(tseWarnings, line, comp, tnResource);
+		imc_appendError(tseWarnings, line, comp, tnResource);
 	}
 
 
@@ -146,7 +146,7 @@
 // Append the indicated variable to the variable list
 //
 //////
-	void ivvmmc_appendVariable(SStartEnd* tseVariable, SOssComp* compName, SOssComp* compData, s64 tnLength)
+	void imc_appendVariable(SStartEnd* tseVariable, SOssComp* compName, SOssComp* compData, s64 tnLength)
 	{
 		SVariable*	lv;
 
@@ -181,43 +181,43 @@
 // Helper functions to save lots of syntax
 //
 //////
-	SStartEnd* ivvmmc_programGetScreens(SStartEnd* tseProg)
+	SStartEnd* imc_programGetScreens(SStartEnd* tseProg)
 	{
 		if (tseProg && tseProg->last && tseProg->last->ptr)		return(&(((SProgram*)tseProg->last->ptr)->screens));
 		return(NULL);		// If we get here, not valid
 	}
 
-	SStartEnd* ivvmmc_programGetGlobals(SStartEnd* tseProg)
+	SStartEnd* imc_programGetGlobals(SStartEnd* tseProg)
 	{
 		if (tseProg && tseProg->last && tseProg->last->ptr)		return(&(((SProgram*)tseProg->last->ptr)->_globals));
 		return(NULL);		// If we get here, not valid
 	}
 
-	SStartEnd* ivvmmc_programGetSnippets(SStartEnd* tseProg)
+	SStartEnd* imc_programGetSnippets(SStartEnd* tseProg)
 	{
 		if (tseProg && tseProg->last && tseProg->last->ptr)		return(&(((SProgram*)tseProg->last->ptr)->snips));
 		return(NULL);		// If we get here, not valid
 	}
 
-	SStartEnd* ivvmmc_programGetDynSnips(SStartEnd* tseProg)
+	SStartEnd* imc_programGetDynSnips(SStartEnd* tseProg)
 	{
 		if (tseProg && tseProg->last && tseProg->last->ptr)		return(&(((SProgram*)tseProg->last->ptr)->dsnips));
 		return(NULL);		// If we get here, not valid
 	}
 
-	SStartEnd* ivvmmc_programGetTimers(SStartEnd* tseProg)
+	SStartEnd* imc_programGetTimers(SStartEnd* tseProg)
 	{
 		if (tseProg && tseProg->last && tseProg->last->ptr)		return(&(((SProgram*)tseProg->last->ptr)->_timers));
 		return(NULL);		// If we get here, not valid
 	}
 
-	SStartEnd* ivvmmc_programGetThreads(SStartEnd* tseProg)
+	SStartEnd* imc_programGetThreads(SStartEnd* tseProg)
 	{
 		if (tseProg && tseProg->last && tseProg->last->ptr)		return(&(((SProgram*)tseProg->last->ptr)->_threads));
 		return(NULL);		// If we get here, not valid
 	}
 
-	SStartEnd* ivvmmc_programGetDefines(SStartEnd* tseProg)
+	SStartEnd* imc_programGetDefines(SStartEnd* tseProg)
 	{
 		if (tseProg && tseProg->last && tseProg->last->ptr)		return(&(((SProgram*)tseProg->last->ptr)->_defines));
 		return(NULL);		// If we get here, not valid
@@ -236,14 +236,14 @@
 //		NULL			- not found
 //
 //////
-	SVariable* ivvmmc_searchVariablesByName(SStartEnd* tseVariables, SDatum* tsDatum)
+	SVariable* imc_searchVariablesByName(SStartEnd* tseVariables, SDatum* tsDatum)
 	{
 		SStartEndCallback cb;
 
 		// If any defines are defined, then search them
 		if (tseVariables)
 		{
-			cb._func	= (u64)iivvmmc_searchVariablesByNameCallback;
+			cb._func	= (u64)iimc_searchVariablesByNameCallback;
 			cb.extra	= (u64)tsDatum;
 			return((SVariable*)vvm_SEChain_searchByCallback(tseVariables, &cb));
 
@@ -252,7 +252,7 @@
 		}
 	}
 
-	bool iivvmmc_searchVariablesByNameCallback(SStartEndCallback* cb)
+	bool iimc_searchVariablesByNameCallback(SStartEndCallback* cb)
 	{
 		SDatum*		ld;
 		SVariable*	lv;
@@ -282,7 +282,7 @@
 // Callback for validating the line comps (used during initial development/debugging only)
 //
 //////
-	bool iivvmmc_validateStartEndCompsCallback(SStartEndCallback* cb)
+	bool iimc_validateStartEndCompsCallback(SStartEndCallback* cb)
 	{
 		SOssLine* line;
 
@@ -309,14 +309,14 @@
 
 //////////
 //
-// From vvmmc_asm.cpp:
+// From mc_asm.cpp:
 //
 // Called to handle the pass-0 assembly process.  Breaks out all known tokens, and identifies
 // the start and end of every snip/dsnip block, along with global memory variable definition,
 // loading of constants, etc.
 //
 //////
-	void ivvmmc_assemblyPass0(SAssembly* ta, SSourceFile* tsf)
+	void imc_assemblyPass0(SAssembly* ta, SSourceFile* tsf)
 	{
 		SOssLine*				line;
 		SOssComp*				comp;
@@ -352,7 +352,7 @@
 			memset(&pbsd, 0, sizeof(_isPass0BlockScanData));
 			pbsd.ta		= ta;
 			pbsd.tsf	= tsf;
-			iivvmmc_assemblyPass0ScanForBlocks((SOssLine*)tsf->lines.root->ptr, _VVMMC_ICODE_UNKNOWN, NULL, &pbsd);
+			iimc_assemblyPass0ScanForBlocks((SOssLine*)tsf->lines.root->ptr, _MC_ICODE_UNKNOWN, NULL, &pbsd);
 			// There is a boolean value returned here, but we don't use it.
 			// The tsf->errors and tsf->warnings will be updated with issues when we return
 		}
@@ -363,7 +363,7 @@
 
 //////////
 //
-// From vvmmc_asm.cpp:
+// From mc_asm.cpp:
 //
 // Replace ~tilde~ values with related defines, and then re-parse the line.  The way this
 // replacement works is that it cannot and will not subsequently replace with the include
@@ -371,7 +371,7 @@
 // reported as an unknown keyword error.
 //
 //////
-	void ivvmmc_assemblyPass1(SAssembly* ta, SSourceFile* tsf)
+	void imc_assemblyPass1(SAssembly* ta, SSourceFile* tsf)
 	{
 		u64				lnStart, lnEnd, lnNewLength;
 		SOssLine*		line;
@@ -400,7 +400,7 @@
 						// Search the indicated ~tilde~ item to see if it's known to us
 						ldatum.data._s8		= line->base + line->start + line->whitespace + lnStart + 1;
 						ldatum.length		= lnEnd;
-						ld					= ivvmmc_searchVariablesByName(&ta->prog->_defines, &ldatum);
+						ld					= imc_searchVariablesByName(&ta->prog->_defines, &ldatum);
 						if (ld)
 						{
 							// It is known, we need to swap it out
@@ -459,7 +459,7 @@
 
 //////////
 //
-// From vvmmc_asm.cpp:
+// From mc_asm.cpp:
 //
 // Parses the starts and stops of key components for high-level pieces of snippet information.
 // By the time we get here, every keyword should be completely broken out, the blocks have
@@ -467,14 +467,14 @@
 // been identified.
 //
 //////
-	void ivvmmc_assemblyPass2(SAssembly* ta, SSourceFile* tsf)
+	void imc_assemblyPass2(SAssembly* ta, SSourceFile* tsf)
 	{
 		SOssLine*		line;
 		_isSLineInfo*	lli;
 
 
 		// Parse the block starting line, extracting components
-		if (!iivvmmc_assemblyPass2ParseBlockStartsAndLabels(ta, tsf))
+		if (!iimc_assemblyPass2ParseBlockStartsAndLabels(ta, tsf))
 			return;		// A failure parsing this block identifier
 
 		// Make sure there are lines to process
@@ -502,7 +502,7 @@
 
 //////////
 //
-// From vvmmc_asm.cpp:
+// From mc_asm.cpp:
 //
 // Called to do the heavy lifting of loading individual source files, breaking out lines, and
 // tagging each line with what is necessary for processing subsequent internal requests, such
@@ -511,7 +511,7 @@
 // We know when this function is called that tcData is valid, and that tnFileSize is > 0.
 //
 //////
-	SSourceFile* ivvmmc_loadSourceFile(	s8*			tcSourcePathname, 
+	SSourceFile* imc_loadSourceFile(	s8*			tcSourcePathname, 
 										s8*			tcData,					u64			tnFileSize, 
 										SAssembly*	ta, 
 										u64			tnAllocSize,			bool		tlUseOssAlloc		)
@@ -580,9 +580,9 @@
 				//////
 					comp = oss_translateSOssLinesToSOssComps(cgcKeywordOperators, line);
 					// Note:  comp is not used here, but it is included in source code to indicate at a glance what is returned
-#pragma message("vvmmc_sup.cpp::ivvmmc_loadSourceFile() contains several validation functions that can be removed in the future.")
+#pragma message("mc_sup.cpp::imc_loadSourceFile() contains several validation functions that can be removed in the future.")
 SStartEndCallback cb;
-cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
+cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
 
 //if (iIsNeedleInHaystack(line->base + line->start + line->whitespace, line->length, "_", 1))
@@ -593,28 +593,28 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 				// Combine standard things
 				//////
 // TODO:  (future enhancement) will need to continually combine items which are related, such as a variable _like_this_14_abc into a single alphanumeric
-					oss_combine2SOssComps			(line, _VVMMC_ICODE_UNDERSCORE,		_VVMMC_ICODE_NUMERIC,		_VVMMC_ICODE_ALPHANUMERIC);
-cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
+					oss_combine2SOssComps			(line, _MC_ICODE_UNDERSCORE,		_MC_ICODE_NUMERIC,		_MC_ICODE_ALPHANUMERIC);
+cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
 
-					oss_combine2SOssComps			(line, _VVMMC_ICODE_ALPHA,			_VVMMC_ICODE_UNDERSCORE,	_VVMMC_ICODE_ALPHA);
-cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
+					oss_combine2SOssComps			(line, _MC_ICODE_ALPHA,			_MC_ICODE_UNDERSCORE,	_MC_ICODE_ALPHA);
+cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
 
-					oss_combine2SOssComps			(line, _VVMMC_ICODE_UNDERSCORE,		_VVMMC_ICODE_ALPHA,			_VVMMC_ICODE_ALPHA);
-cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
+					oss_combine2SOssComps			(line, _MC_ICODE_UNDERSCORE,		_MC_ICODE_ALPHA,			_MC_ICODE_ALPHA);
+cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
 
-					oss_combine2SOssComps			(line, _VVMMC_ICODE_ALPHA,			_VVMMC_ICODE_NUMERIC,		_VVMMC_ICODE_ALPHANUMERIC);
-cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
+					oss_combine2SOssComps			(line, _MC_ICODE_ALPHA,			_MC_ICODE_NUMERIC,		_MC_ICODE_ALPHANUMERIC);
+cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
 
-					oss_combine2SOssComps			(line, _VVMMC_ICODE_ALPHANUMERIC,	_VVMMC_ICODE_UNDERSCORE,	_VVMMC_ICODE_ALPHANUMERIC);
-cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
+					oss_combine2SOssComps			(line, _MC_ICODE_ALPHANUMERIC,	_MC_ICODE_UNDERSCORE,	_MC_ICODE_ALPHANUMERIC);
+cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
 
-					oss_combine3SOssComps			(line, _VVMMC_ICODE_NUMERIC,		_VVMMC_ICODE_PERIOD,		_VVMMC_ICODE_NUMERIC,		_VVMMC_ICODE_NUMERIC);
-cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
+					oss_combine3SOssComps			(line, _MC_ICODE_NUMERIC,		_MC_ICODE_PERIOD,		_MC_ICODE_NUMERIC,		_MC_ICODE_NUMERIC);
+cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
 
 //if (iIsNeedleInHaystack(line->base + line->start + line->whitespace, line->length, "_", 1))
@@ -624,16 +624,16 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 				//////////
 				// Fixup quotes, comments
 				//////
-					oss_combineAllBetweenSOssComps	(line, _VVMMC_ICODE_SINGLE_QUOTE,		_VVMMC_ICODE_SINGLE_QUOTED_TEXT);
-cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
+					oss_combineAllBetweenSOssComps	(line, _MC_ICODE_SINGLE_QUOTE,		_MC_ICODE_SINGLE_QUOTED_TEXT);
+cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
 
-					oss_combineAllBetweenSOssComps	(line, _VVMMC_ICODE_DOUBLE_QUOTE,		_VVMMC_ICODE_DOUBLE_QUOTED_TEXT);
-cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
+					oss_combineAllBetweenSOssComps	(line, _MC_ICODE_DOUBLE_QUOTE,		_MC_ICODE_DOUBLE_QUOTED_TEXT);
+cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
 
-					oss_combineAllAfterSOssComp		(line, _VVMMC_ICODE_COMMENT);
-cb._func = (u64)iivvmmc_validateStartEndCompsCallback;
+					oss_combineAllAfterSOssComp		(line, _MC_ICODE_COMMENT);
+cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
 
 				//////////
@@ -647,7 +647,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 		//////////
 		// Load any include files found within
 		//////
-			ivvmmc_parseIncludeFilesAndDefines(ta, lsf);
+			imc_parseIncludeFilesAndDefines(ta, lsf);
 
 
 		// Indicate our success
@@ -661,13 +661,13 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 
 //////////
 //
-// From vvmmc_asm.cpp:
+// From mc_asm.cpp:
 //
 // Called to scan the source file for include lines, and if found to load them, which pre-parses
 // them into their cgcKeywordOperators condition.
 //
 //////
-	void ivvmmc_parseIncludeFilesAndDefines(SAssembly* ta, SSourceFile* tsf)
+	void imc_parseIncludeFilesAndDefines(SAssembly* ta, SSourceFile* tsf)
 	{
 		u64				lnLastPosition;
 		_isSLineInfo*	lli;
@@ -706,7 +706,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 						comp = (SOssComp*)line->comps.root->ptr;
 
 						// Check for comments and include files only
-						if (comp->iCode == _VVMMC_ICODE_COMMENT)
+						if (comp->iCode == _MC_ICODE_COMMENT)
 						{
 							// The first component is a comment, mark this whole line as completed
 							lli->completed = true;
@@ -714,42 +714,42 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 //////////
 // DEFINE
 //////
-						} else if (comp->iCode == _VVMMC_ICODE_DEFINE) {
+						} else if (comp->iCode == _MC_ICODE_DEFINE) {
 							// It's a define command, add it to the list of defines
 							// See if there is a name for the define thing
 							compName = (SOssComp*)comp->ll.next;
-							compName = oss_skipPastSOssComp_iCode(compName, _VVMMC_ICODE_WHITESPACE);
+							compName = oss_skipPastSOssComp_iCode(compName, _MC_ICODE_WHITESPACE);
 							if (!compName)
 							{
 								// Syntax error, nothing after define
-								ivvmmc_appendError(&tsf->errors, line, comp, IDS_SYNTAX_ERROR);
+								imc_appendError(&tsf->errors, line, comp, IDS_SYNTAX_ERROR);
 								break;
 							}
 
 							// See if there is something after the name
 							compData = (SOssComp*)compName->ll.next;
-							compData = oss_skipPastSOssComp_iCode(compData, _VVMMC_ICODE_WHITESPACE);
+							compData = oss_skipPastSOssComp_iCode(compData, _MC_ICODE_WHITESPACE);
 							if (!compData)
 							{
 								// Syntax error, nothing after define name
-								ivvmmc_appendError(&tsf->errors, line, (SOssComp*)comp->ll.next, IDS_SYNTAX_ERROR);
+								imc_appendError(&tsf->errors, line, (SOssComp*)comp->ll.next, IDS_SYNTAX_ERROR);
 								break;
 							}
 
 							// Verify the name is in proper form
-							if (!vvmmc_verifyVariableAsciiName(compName, &lnLastPosition))
+							if (!mc_verifyVariableAsciiName(compName, &lnLastPosition))
 							{
 								// Name is not proper
 								// Adjust to the position of error
 								compName->start += lnLastPosition;
 
 								// Store the error
-								ivvmmc_appendError(&tsf->errors, line, compName, IDS_INVALID_VARIABLE_NAME);
+								imc_appendError(&tsf->errors, line, compName, IDS_INVALID_VARIABLE_NAME);
 								break;
 							}
 
 							// Store the new define variable
-							ivvmmc_appendVariable(&ta->prog->_defines, compName, compData, line->length - compData->start);
+							imc_appendVariable(&ta->prog->_defines, compName, compData, line->length - compData->start);
 
 							// Mark it as completed
 							lli->completed = true;
@@ -757,32 +757,32 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 //////////
 // INCLUDE
 //////
-						} else if (comp->iCode == _VVMMC_ICODE_INCLUDE) {
+						} else if (comp->iCode == _MC_ICODE_INCLUDE) {
 							// The first component is the include keyword
 							compName = (SOssComp*)comp->ll.next;
-							compName = oss_skipPastSOssComp_iCode(compName, _VVMMC_ICODE_WHITESPACE);
+							compName = oss_skipPastSOssComp_iCode(compName, _MC_ICODE_WHITESPACE);
 							if (!compName)
 							{
 								// Syntax error, nothing after define
-								ivvmmc_appendError(&tsf->errors, line, compName, IDS_SYNTAX_ERROR);
+								imc_appendError(&tsf->errors, line, compName, IDS_SYNTAX_ERROR);
 								break;
 							}
 
 							// Grab the filename
-							if (!vvmmc_verifyAsciiFilename(compName, &lnLastPosition))
+							if (!mc_verifyAsciiFilename(compName, &lnLastPosition))
 							{
 								// Name is not proper
 								// Adjust to the position of error
 								compName->start += lnLastPosition;
 
 								// Store the error
-								ivvmmc_appendError(&tsf->errors, line, compName, IDS_INVALID_VARIABLE_NAME);
+								imc_appendError(&tsf->errors, line, compName, IDS_INVALID_VARIABLE_NAME);
 								break;
 							}
 
 							// Copy and null-terminate the filename
 							vvm_memset(lcIncludeFilename, 0, sizeof(lcIncludeFilename));
-							if (compName->iCode == _VVMMC_ICODE_SINGLE_QUOTED_TEXT || compName->iCode == _VVMMC_ICODE_DOUBLE_QUOTED_TEXT)
+							if (compName->iCode == _MC_ICODE_SINGLE_QUOTED_TEXT || compName->iCode == _MC_ICODE_DOUBLE_QUOTED_TEXT)
 							{
 								// We have to bypass the quote character
 								vvm_memcpy(lcIncludeFilename, compName->line->base + compName->line->start + compName->line->whitespace + compName->start + 1, min(lnLastPosition, sizeof(lcIncludeFilename)-1));
@@ -793,7 +793,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 							}
 
 							// Try to open it and load its lines
-							lsf = iivvmmc_loadThisIncludeFile(lcIncludeFilename, line, compName, ta, tsf);
+							lsf = iimc_loadThisIncludeFile(lcIncludeFilename, line, compName, ta, tsf);
 							if (!lsf)
 								return;		// There were errors loading this file.
 
@@ -835,14 +835,14 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 
 //////////
 //
-// From vvmmc_asm.cpp:
+// From mc_asm.cpp:
 //
 // Called to physically load the indicated include file from disk.
 // Note:  This is not the original (top-level) .vasm source file, but is only the
 //        subsequent include files that are specified.
 //
 //////
-	SSourceFile* iivvmmc_loadThisIncludeFile(s8* tcPathname, SOssLine* line, SOssComp* compName, SAssembly* ta, SSourceFile* tsf)
+	SSourceFile* iimc_loadThisIncludeFile(s8* tcPathname, SOssLine* line, SOssComp* compName, SAssembly* ta, SSourceFile* tsf)
 	{
 		s64		lnHandle, lnFileSize, lnNumread;
 		s8*		lcData;
@@ -853,7 +853,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 		if (lnHandle < 0)
 		{
 			// Open file error
-			ivvmmc_appendError(&tsf->errors, line, compName, IDS_ERROR_UNABLE_TO_OPEN);
+			imc_appendError(&tsf->errors, line, compName, IDS_ERROR_UNABLE_TO_OPEN);
 			return(NULL);
 		}
 		// If we get here, we're good
@@ -864,14 +864,14 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 		if (lnFileSize > 0xffffffff)
 		{
 			// Uhhh... what are they trying to do to us? :-)
-			ivvmmc_appendError(&tsf->errors, line, compName, IDS_ERROR_FILE_IS_TOO_BIG);
+			imc_appendError(&tsf->errors, line, compName, IDS_ERROR_FILE_IS_TOO_BIG);
 			return(NULL);
 		}
 		if (lnFileSize == 0)
 		{
 			// This is not an error for include files, as they can be zero bytes
 			// It is a warning, however.
-			ivvmmc_appendWarning(&tsf->errors, line, compName, IDS_WARNING_FILE_IS_0_BYTES);
+			imc_appendWarning(&tsf->errors, line, compName, IDS_WARNING_FILE_IS_0_BYTES);
 			oss_sharedAsciiCloseFile(lnHandle);
 			return(NULL);
 		}
@@ -882,7 +882,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 		if (!lcData)
 		{
 			// We should always be able to allocate memory
-			ivvmmc_appendError(&tsf->errors, line, compName, IDS_ERROR_ALLOCATING_MEMORY);
+			imc_appendError(&tsf->errors, line, compName, IDS_ERROR_ALLOCATING_MEMORY);
 			oss_sharedAsciiCloseFile(lnHandle);
 			return(NULL);
 		}
@@ -895,13 +895,13 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 		if (lnNumread != lnFileSize)
 		{
 			// We should always be able to read the file bytes
-			ivvmmc_appendError(&tsf->errors, line, compName, IDS_ERROR_UNABLE_TO_READ_BYTES_FROM);
+			imc_appendError(&tsf->errors, line, compName, IDS_ERROR_UNABLE_TO_READ_BYTES_FROM);
 			return(NULL);
 		}
 		// We're good
 
 		// Load the raw data, parse out into lines, load any include files contained therein
-		return(ivvmmc_loadSourceFile(tcPathname, lcData, (u32)lnFileSize, ta, sizeof(_isSLineInfo), false));
+		return(imc_loadSourceFile(tcPathname, lcData, (u32)lnFileSize, ta, sizeof(_isSLineInfo), false));
 	}
 
 
@@ -912,7 +912,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 // Scan for blocks, called recursively to scan for matched blocks
 //
 //////
-	SOssLine* iivvmmc_assemblyPass0ScanForBlocks(SOssLine* line, u32 tniCode, SBlock* block, _isPass0BlockScanData* pbsd)
+	SOssLine* iimc_assemblyPass0ScanForBlocks(SOssLine* line, u32 tniCode, SBlock* block, _isPass0BlockScanData* pbsd)
 	{
 		SOssLine*		lineResult;
 		_isSLineInfo*	lli;
@@ -940,54 +940,54 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 					pbsd->comp = (SOssComp*)line->comps.root->ptr;
 
 					// See where we are
-					if (pbsd->comp->iCode != _VVMMC_ICODE_COMMENT)
+					if (pbsd->comp->iCode != _MC_ICODE_COMMENT)
 					{
 						// We process block pipes up until we hit any other line of code
-						if (pbsd->comp->iCode != _VVMMC_ICODE_PIPE_SIGN)
+						if (pbsd->comp->iCode != _MC_ICODE_PIPE_SIGN)
 							pbsd->llOkayToAddPipeDataToBlock = false;
 
 						//////////
 						// For certain block-related components, we process them here
 						//////
-							if (pbsd->comp->iCode == _VVMMC_ICODE_SNIP_DEFINITION || 
-								pbsd->comp->iCode == _VVMMC_ICODE_DSNIP_DEFINITION || 
-								pbsd->comp->iCode == _VVMMC_ICODE_DSNIP_DLL_DEFINITION ||
-								pbsd->comp->iCode == _VVMMC_ICODE_DSNIP_BXML_DEFINITION)
+							if (pbsd->comp->iCode == _MC_ICODE_SNIP_DEFINITION || 
+								pbsd->comp->iCode == _MC_ICODE_DSNIP_DEFINITION || 
+								pbsd->comp->iCode == _MC_ICODE_DSNIP_DLL_DEFINITION ||
+								pbsd->comp->iCode == _MC_ICODE_DSNIP_BXML_DEFINITION)
 							{
 								// We've found the start of a SNIP/FUNCTION or DSNIP definition
-								line = iivvmmc_assemblyPass0ScanForBlocksSnipDefs(line, tniCode, &block, pbsd);
+								line = iimc_assemblyPass0ScanForBlocksSnipDefs(line, tniCode, &block, pbsd);
 								if (!line)	return(NULL);
 
-							} else if (pbsd->comp->iCode == _VVMMC_ICODE_END) {
+							} else if (pbsd->comp->iCode == _MC_ICODE_END) {
 								// We've found the end
 								// It's either a correct end, or an incorrect end, but regardless we're returning to the caller
-								return(iivvmmc_assemblyPass0ScanForBlocksEnd(line, tniCode, &block, pbsd));
+								return(iimc_assemblyPass0ScanForBlocksEnd(line, tniCode, &block, pbsd));
 
-							} else if (pbsd->comp->iCode == _VVMMC_ICODE_COLON) {
+							} else if (pbsd->comp->iCode == _MC_ICODE_COLON) {
 								// It's the start of a label, which *MUST* appear within a block
-								lineResult = iivvmmc_assemblyPass0ScanForBlocksColin(line, tniCode, &block, pbsd);
+								lineResult = iimc_assemblyPass0ScanForBlocksColin(line, tniCode, &block, pbsd);
 								if (!lineResult)	return(lineResult);
 
-							} else if (pbsd->comp->iCode == _VVMMC_ICODE_DLL_FUNCTION_DEFINITION) {
+							} else if (pbsd->comp->iCode == _MC_ICODE_DLL_FUNCTION_DEFINITION) {
 								// We are starting a DLL function definition.  We need to be inside a DSNIP_DLL iCode.
-								lineResult = iivvmmc_assemblyPass0ScanForBlocksDllFuncDef(line, tniCode, &block, pbsd);
+								lineResult = iimc_assemblyPass0ScanForBlocksDllFuncDef(line, tniCode, &block, pbsd);
 								if (!lineResult)	return(lineResult);
 
-							} else if (pbsd->comp->iCode == _VVMMC_ICODE_PIPE_SIGN) {
+							} else if (pbsd->comp->iCode == _MC_ICODE_PIPE_SIGN) {
 								// There is pipe data, needs to be for either the block (appropriately) or the dsnip_dll
-								lineResult = iivvmmc_assemblyPass0ScanForBlocksPipeSign(line, tniCode, &block, pbsd);
+								lineResult = iimc_assemblyPass0ScanForBlocksPipeSign(line, tniCode, &block, pbsd);
 								if (!lineResult)	return(lineResult);
 
 							} else {
 								// When we get here, we have not found one of our regular keywords we're looking for at this level.
 								// However, if we are outside of a block, we only allow comments and variable declarations
-								if (tniCode == _VVMMC_ICODE_UNKNOWN)
+								if (tniCode == _MC_ICODE_UNKNOWN)
 								{
 									// We're outside of a block
-									if (pbsd->comp->iCode < _VVMMC_LOWEST_ICODE_VARIABLE_DEFINITION || pbsd->comp->iCode > _VVMMC_HIGHEST_ICODE_VARIABLE_DEFINITION)
+									if (pbsd->comp->iCode < _MC_LOWEST_ICODE_VARIABLE_DEFINITION || pbsd->comp->iCode > _MC_HIGHEST_ICODE_VARIABLE_DEFINITION)
 									{
 										// Oops!  And we found something other than a comment!
-										ivvmmc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_ERROR_UNABLE_TO_READ_BYTES_FROM);
+										imc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_ERROR_UNABLE_TO_READ_BYTES_FROM);
 										return(NULL);
 									}
 								}
@@ -1001,18 +1001,18 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 			line			= (SOssLine*)line->ll.next;
 		}
 		// When we get here, we're done
-		if (tniCode != _VVMMC_ICODE_UNKNOWN && tniCode != _VVMMC_ICODE_END)
+		if (tniCode != _MC_ICODE_UNKNOWN && tniCode != _MC_ICODE_END)
 		{
 			// We have reached the end, but we weren't looking for the end
-			if (pbsd->linePrev)	ivvmmc_appendError(&pbsd->tsf->errors, pbsd->linePrev,	NULL,	IDS_UNMATCHED_BLOCK);
-			else				ivvmmc_appendError(&pbsd->tsf->errors, NULL,			NULL,	IDS_UNMATCHED_BLOCK);
+			if (pbsd->linePrev)	imc_appendError(&pbsd->tsf->errors, pbsd->linePrev,	NULL,	IDS_UNMATCHED_BLOCK);
+			else				imc_appendError(&pbsd->tsf->errors, NULL,			NULL,	IDS_UNMATCHED_BLOCK);
 		}
 		// When we get here, we're always NULL
 		return(NULL);
 	}
 
 // TODO:  in the future, concatenated snippets may be allowed.  For now, they will have to be named with underscores.
-	SOssLine* iivvmmc_assemblyPass0ScanForBlocksSnipDefs(SOssLine* line, u32 tniCode, SBlock** block, _isPass0BlockScanData* pbsd)
+	SOssLine* iimc_assemblyPass0ScanForBlocksSnipDefs(SOssLine* line, u32 tniCode, SBlock** block, _isPass0BlockScanData* pbsd)
 	{
 		SLabelInfo*		llab;
 		SPipeInfo*		lpip;
@@ -1020,14 +1020,14 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 
 
 		// See where we are
-		if (tniCode == _VVMMC_ICODE_UNKNOWN)
+		if (tniCode == _MC_ICODE_UNKNOWN)
 		{
 			// Allocate the start of this block
 			*block = (SBlock*)vvm_SEChain_append(&pbsd->tsf->blocks, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SBlock), _COMMON_START_END_BLOCK_SIZE, NULL);
 			if (!*block)
 			{
 				// Memory error
-				ivvmmc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_ERROR_ALLOCATING_MEMORY);
+				imc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_ERROR_ALLOCATING_MEMORY);
 				return(NULL);
 			}
 
@@ -1036,14 +1036,14 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 			(*block)->compTrigger	= pbsd->comp;
 
 			// Allocate the start of the thing
-			if (pbsd->comp->iCode == _VVMMC_ICODE_SNIP_DEFINITION)
+			if (pbsd->comp->iCode == _MC_ICODE_SNIP_DEFINITION)
 			{
 				// Allocate the snippet (for future use)
 				(*block)->snip = (SSnip*)oss_alloc(sizeof(SSnip), true);
 				if (!(*block)->snip)
 				{
 					// Memory error
-					ivvmmc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_ERROR_ALLOCATING_MEMORY);
+					imc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_ERROR_ALLOCATING_MEMORY);
 					return(NULL);
 				}
 
@@ -1053,7 +1053,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 				if (!(*block)->dsnip)
 				{
 					// Memory error
-					ivvmmc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_ERROR_ALLOCATING_MEMORY);
+					imc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_ERROR_ALLOCATING_MEMORY);
 					return(NULL);
 				}
 			}
@@ -1064,7 +1064,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 			ldfi			= pbsd->ldfi;
 
 			// We are not currently looking for anything, so we can accept this and we must be looking for the matching END
-			pbsd->lineNext	= iivvmmc_assemblyPass0ScanForBlocks((SOssLine*)line->ll.next, _VVMMC_ICODE_END, *block, pbsd);
+			pbsd->lineNext	= iimc_assemblyPass0ScanForBlocks((SOssLine*)line->ll.next, _MC_ICODE_END, *block, pbsd);
 			if (!pbsd->lineNext)
 				return(NULL);		// Not found, did not match up
 
@@ -1082,41 +1082,41 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 			return(line);
 
 
-		} else if (tniCode == _VVMMC_ICODE_END) {
+		} else if (tniCode == _MC_ICODE_END) {
 			// We were explicitly looking for the END
 			// If we get here, we're not looking for an 'END' keyword
-			ivvmmc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_EXPECTED_END);
+			imc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_EXPECTED_END);
 			return(NULL);
 
 
 		} else {
 			// Expected something to be matched, but not sure what it is
-			ivvmmc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_UNMATCHED_BLOCK);
+			imc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_UNMATCHED_BLOCK);
 			return(NULL);
 		}
 	}
 
-	SOssLine* iivvmmc_assemblyPass0ScanForBlocksEnd(SOssLine* line, u32 tniCode, SBlock** block, _isPass0BlockScanData* pbsd)
+	SOssLine* iimc_assemblyPass0ScanForBlocksEnd(SOssLine* line, u32 tniCode, SBlock** block, _isPass0BlockScanData* pbsd)
 	{
-		if (pbsd->comp->iCode == _VVMMC_ICODE_END)
+		if (pbsd->comp->iCode == _MC_ICODE_END)
 			return((SOssLine*)line);		// We're good, matched up
 
 		// If we get here, we're not looking for an end
-		ivvmmc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_UNMATCHED_BLOCK);
+		imc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_UNMATCHED_BLOCK);
 		return(NULL);
 	}
 
-	SOssLine* iivvmmc_assemblyPass0ScanForBlocksColin(SOssLine* line, u32 tniCode, SBlock** block, _isPass0BlockScanData* pbsd)
+	SOssLine* iimc_assemblyPass0ScanForBlocksColin(SOssLine* line, u32 tniCode, SBlock** block, _isPass0BlockScanData* pbsd)
 	{
 		_isSLineInfo*	lli;
 
 
 		// Make sure we're where we should be
-		if (tniCode != _VVMMC_ICODE_END)
+		if (tniCode != _MC_ICODE_END)
 		{
 			// We're not looking for the end, so this label is out in the middle of space
 			// If we get here, we're not looking for an end
-			ivvmmc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_LABEL_OUTSIDE_OF_BLOCK);
+			imc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_LABEL_OUTSIDE_OF_BLOCK);
 			return(NULL);
 		}
 		// If we get here, we're in a block
@@ -1124,7 +1124,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 		if (!pbsd->llab)
 		{
 			// Memory error
-			ivvmmc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_ERROR_ALLOCATING_MEMORY);
+			imc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_ERROR_ALLOCATING_MEMORY);
 			return(NULL);
 		}
 		// Record this line
@@ -1139,12 +1139,12 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 		return(line);
 	}
 
-	SOssLine* iivvmmc_assemblyPass0ScanForBlocksDllFuncDef(SOssLine* line, u32 tniCode, SBlock** block, _isPass0BlockScanData* pbsd)
+	SOssLine* iimc_assemblyPass0ScanForBlocksDllFuncDef(SOssLine* line, u32 tniCode, SBlock** block, _isPass0BlockScanData* pbsd)
 	{
-		if (!*block || (*block)->compTrigger->iCode != _VVMMC_ICODE_DSNIP_DLL_DEFINITION)
+		if (!*block || (*block)->compTrigger->iCode != _MC_ICODE_DSNIP_DLL_DEFINITION)
 		{
 			// A DLL_FUNCTION was found where it should not be
-			ivvmmc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_ERROR_UNEXPECTED_KEYWORD);
+			imc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_ERROR_UNEXPECTED_KEYWORD);
 			return(NULL);
 		}
 		// If we get here, we're good
@@ -1152,7 +1152,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 		if (!pbsd->ldfi)
 		{
 			// Memory error
-			ivvmmc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_ERROR_ALLOCATING_MEMORY);
+			imc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_ERROR_ALLOCATING_MEMORY);
 			return(NULL);
 		}
 		// If we get here, we have allocated our entry
@@ -1162,7 +1162,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 		return(line);
 	}
 
-	SOssLine* iivvmmc_assemblyPass0ScanForBlocksPipeSign(SOssLine* line, u32 tniCode, SBlock** block, _isPass0BlockScanData* pbsd)
+	SOssLine* iimc_assemblyPass0ScanForBlocksPipeSign(SOssLine* line, u32 tniCode, SBlock** block, _isPass0BlockScanData* pbsd)
 	{
 		_isSLineInfo*	lli;
 
@@ -1180,7 +1180,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 		} else {
 			// "What we have here is a failure to communicate" :-)
 			// A DLL_FUNCTION was found where it should not be
-			ivvmmc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_SYNTAX_ERROR);
+			imc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_SYNTAX_ERROR);
 			return(NULL);
 		}
 
@@ -1188,7 +1188,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 		if (!pbsd->lpip)
 		{
 			// Memory error
-			ivvmmc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_ERROR_ALLOCATING_MEMORY);
+			imc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_ERROR_ALLOCATING_MEMORY);
 			return(NULL);
 		}
 		// When we get here, we have our pipe entry
@@ -1210,7 +1210,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 // Parse the block starts and labels to make sure they're valid
 //
 //////
-	bool iivvmmc_assemblyPass2ParseBlockStartsAndLabels(SAssembly* ta, SSourceFile* tsf)
+	bool iimc_assemblyPass2ParseBlockStartsAndLabels(SAssembly* ta, SSourceFile* tsf)
 	{
 		SBlock*	block;
 
@@ -1224,36 +1224,36 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 			switch (block->compTrigger->iCode)
 			{
 
-				case _VVMMC_ICODE_DSNIP_DEFINITION:
+				case _MC_ICODE_DSNIP_DEFINITION:
 				//////////
 				// This DSNIP definition is not allowed explicitly to be defined at runtime.
 				// Only implicitly through the DSNIP_Bxml syntax.  However, in saved states
 				// of a captured-to-disk running VM, the DSNIP is valid.
 				//////
-					ivvmmc_appendError(&tsf->errors, block->compTrigger->line, block->compTrigger, IDS_ERROR_DSNIP_NOT_ALLOWED_AT_COMPILE_TIME);
+					imc_appendError(&tsf->errors, block->compTrigger->line, block->compTrigger, IDS_ERROR_DSNIP_NOT_ALLOWED_AT_COMPILE_TIME);
 					return(false);
 					break;
 
-				case _VVMMC_ICODE_DSNIP_DLL_DEFINITION:
+				case _MC_ICODE_DSNIP_DLL_DEFINITION:
 					// Process the DSNIP_DLL source line, as well as any DLL_FUNCTION lines within (and their pipe-signs)
-					if (!iivvmmc_assemblyPass2ParseBlockStartsAndLabelsDsnipDll(ta, tsf, block))
+					if (!iimc_assemblyPass2ParseBlockStartsAndLabelsDsnipDll(ta, tsf, block))
 						return(false);
 					break;
 
-				case _VVMMC_ICODE_DSNIP_BXML_DEFINITION:
+				case _MC_ICODE_DSNIP_BXML_DEFINITION:
 					// Process the DSNIP_Bxml source line, as well as the required pipe-sign PROTOTYPE line within
-					if (!iivvmmc_assemblyPass2ParseBlockStartsAndLabelsDsnipBxml(ta, tsf, block))
+					if (!iimc_assemblyPass2ParseBlockStartsAndLabelsDsnipBxml(ta, tsf, block))
 						return(false);
 					break;
 
-				case _VVMMC_ICODE_SNIP_DEFINITION:
+				case _MC_ICODE_SNIP_DEFINITION:
 					// Process the FUNCTION / SNIP source line, as well as any pipe-signs and labels
-					if (!iivvmmc_assemblyPass2ParseBlockStartsAndLabelsSnip(ta, tsf, block))
+					if (!iimc_assemblyPass2ParseBlockStartsAndLabelsSnip(ta, tsf, block))
 						return(false);
 					break;
 
 				default:
-					ivvmmc_appendError(&tsf->errors, block->compTrigger->line, block->compTrigger, IDS_ERROR_INTERNAL_COMPILER_ERROR);
+					imc_appendError(&tsf->errors, block->compTrigger->line, block->compTrigger, IDS_ERROR_INTERNAL_COMPILER_ERROR);
 					return(false);
 			}
 
@@ -1280,7 +1280,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 //				|RETURNS	u32
 //
 //////
-	bool iivvmmc_assemblyPass2ParseBlockStartsAndLabelsDsnipDll(SAssembly* ta, SSourceFile* tsf, SBlock* block)
+	bool iimc_assemblyPass2ParseBlockStartsAndLabelsDsnipDll(SAssembly* ta, SSourceFile* tsf, SBlock* block)
 	{
 		SOssComp*	comp;
 		SDynSnip*	dsnip;
@@ -1288,9 +1288,9 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 
 		// The next component after block->compTrigger must be a single/double-quoted text component
 		comp = (SOssComp*)block->compTrigger->ll.next;
-		if (!comp || (comp->iCode != _VVMMC_ICODE_SINGLE_QUOTED_TEXT && comp->iCode != _VVMMC_ICODE_DOUBLE_QUOTED_TEXT))
+		if (!comp || (comp->iCode != _MC_ICODE_SINGLE_QUOTED_TEXT && comp->iCode != _MC_ICODE_DOUBLE_QUOTED_TEXT))
 		{
-			ivvmmc_appendError(&tsf->errors, block->compTrigger->line, block->compTrigger, IDS_ERROR_EXPECTED_QUOTED_PATHNAME);
+			imc_appendError(&tsf->errors, block->compTrigger->line, block->compTrigger, IDS_ERROR_EXPECTED_QUOTED_PATHNAME);
 			return(false);
 		}
 		// If we get here, we have at least one pathname
@@ -1312,7 +1312,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 //			|PROTOTYPE "c:\path\to\devtime\loadable.bxml"
 //
 //////
-	bool iivvmmc_assemblyPass2ParseBlockStartsAndLabelsDsnipBxml(SAssembly* ta, SSourceFile* tsf, SBlock* block)
+	bool iimc_assemblyPass2ParseBlockStartsAndLabelsDsnipBxml(SAssembly* ta, SSourceFile* tsf, SBlock* block)
 	{
 // TODO:  working here
 		return(false);
@@ -1335,7 +1335,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 //		:foo
 //
 //////
-	bool iivvmmc_assemblyPass2ParseBlockStartsAndLabelsSnip(SAssembly* ta, SSourceFile* tsf, SBlock* block)
+	bool iimc_assemblyPass2ParseBlockStartsAndLabelsSnip(SAssembly* ta, SSourceFile* tsf, SBlock* block)
 	{
 // TODO:  working here
 		return(false);

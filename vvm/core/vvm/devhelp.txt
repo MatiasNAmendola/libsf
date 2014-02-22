@@ -67,7 +67,7 @@
 
 
 //////////
-// Add a new VVMOSS function visible to VVM and debuggers
+// Add a new VO (VVM Operating System Specific) function visible to VVM and debuggers
 //////
     (1)  common_vvmoss.h    - VVMOSS related function prototyping and definition
     (2)  vo_defs.h          - Forward declarations
@@ -78,10 +78,10 @@
 
 
 //////////
-// Add a new VVMMC function visible to VVM and debuggers
+// Add a new MC (machine code) function visible to VVM and debuggers
 //////
-    (1)  common_vvmmc.h     - VVMMC related function prototyping and definition
-    (2)  vvmmc_defs.h       - Forward declarations
+    (1)  common_mc.h        - MC related function prototyping and definition
+    (2)  mc_defs.h       - Forward declarations
     (3)  vvmmc.cpp          - Code definition
     (4)  vvmmc.def          - Exports
 

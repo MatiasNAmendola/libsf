@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="VDebug"
+	Name="vdebug"
 	ProjectGUID="{11AEDF6C-F889-4757-99AD-2DE64FEB5C31}"
 	RootNamespace="VDebug"
 	Keyword="Win32Proj"

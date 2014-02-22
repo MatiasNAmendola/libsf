@@ -1,6 +1,6 @@
 //////////
 //
-// /libsf/vvm/vvmmc/vvmmc_asm.cpp
+// /libsf/vvm/vvmmc/mc_asm.cpp
 //
 //////
 // Version 0.60
@@ -52,7 +52,7 @@
 //		       been updated.
 //
 //////
-	u32 CALLTYPE vvmmc_assembleSourceCode(s8* tcVasmPathname, s8* tcData, u32 tnFileSize, SProgram* tsProgram)
+	u32 CALLTYPE mc_assembleSourceCode(s8* tcVasmPathname, s8* tcData, u32 tnFileSize, SProgram* tsProgram)
 	{
 		u32				lnBytes;
 		SAssembly*		la;
@@ -76,7 +76,7 @@
 			//////////
 			// Load the raw data, parse out into lines, load any include files
 			//////
-				lsf = ivvmmc_loadSourceFile(tcVasmPathname, tcData, tnFileSize, la, sizeof(_isSLineInfo), false);
+				lsf = imc_loadSourceFile(tcVasmPathname, tcData, tnFileSize, la, sizeof(_isSLineInfo), false);
 				if (lsf->errors.masterCount != 0)
 					break;		// Errors at this stage, we're done
 
@@ -86,7 +86,7 @@
 			//////
 // For debugging:
 //oss_writeSOssLineSequenceCompsDebuggingToDisk("\\libsf\\vvm\\vasm\\test\\testoutcomps.txt", &lsf->lines);
-				ivvmmc_assemblyPass0(la, lsf);
+				imc_assemblyPass0(la, lsf);
 // For debugging:
 //oss_writeSOssLineSequenceCompsDebuggingToDisk("\\libsf\\vvm\\vasm\\test\\testoutcomps2.txt", &lsf->lines);
 				if (lsf->errors.masterCount != 0)
@@ -96,7 +96,7 @@
 			//////////
 			// Replace any tilde quantities, which are "macro substitutions" (for lack of a better term)
 			//////
-				ivvmmc_assemblyPass1(la, lsf);
+				imc_assemblyPass1(la, lsf);
 // For debugging:
 //oss_writeSOssLineSequenceCompsDebuggingToDisk("\\libsf\\vvm\\vasm\\test\\testoutcomps3.txt", &lsf->lines);
 				if (lsf->errors.masterCount != 0)
@@ -107,7 +107,7 @@
 			// Look for anything that's not currently known (meaning the first comp is one of alpha/alphanumeric/numeric/unknown)
 			//////
 // TODO:  continuing here
-				ivvmmc_assemblyPass2(la, lsf);
+				imc_assemblyPass2(la, lsf);
 // For debugging:
 //oss_writeSOssLineSequenceCompsDebuggingToDisk("\\libsf\\vvm\\vasm\\test\\testoutcomps3.txt", &lsf->lines);
 				if (lsf->errors.masterCount != 0)

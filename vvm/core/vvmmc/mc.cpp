@@ -1,6 +1,6 @@
 //////////
 //
-// /libsf/vvm/vvmmc/vvmmc.cpp
+// /libsf/vvm/mc/mc.cpp
 //
 //////
 // Version 0.60
@@ -47,16 +47,16 @@
 #include "stdio.h"
 #include "\libsf\vvm\core\common\common.h"
 #include "\libsf\vvm\core\common\vvm_key_const.h"
-#include "\libsf\vvm\core\vvmoss\vo_class.h"
+#include "\libsf\vvm\core\vvmoss\oss_class.h"
 #include "\libsf\vvm\core\vvm\vvm_structs.h"
-#include "\libsf\vvm\core\vvmoss\vo_structs.h"
-#include "vvmmc_const.h"
-#include "vvmmc_structs.h"
-#include "vvmmc_istructs.h"
-#include "vvmmc_defs.h"
-#include "vvmmc_glob.h"
+#include "\libsf\vvm\core\vvmoss\oss_structs.h"
+#include "mc_const.h"
+#include "mc_structs.h"
+#include "mc_istructs.h"
+#include "mc_defs.h"
+#include "mc_glob.h"
 #include "\libsf\vvm\core\common\common_vvm.h"
-#include "\libsf\vvm\core\common\common_vvmoss.h"
+#include "\libsf\vvm\core\common\common_oss.h"
 #include "\libsf\vvm\core\localization\vvmmcenu\resource.h"
 
 
@@ -92,7 +92,7 @@
 	// If this DLL is loaded from another source (not the VVM), it is not
 	// to call this function.  The VVM calls to give it the address to call
 	// for debugger API requests, as well as those of the already loaded VVMOSS.
-	u64 CALLTYPE vvmmc_firstCallback(u64 tnCallbackAddress)
+	u64 CALLTYPE mc_firstCallback(u64 tnCallbackAddress)
 	{
 		//////////
 		// Load all VVM and VVMOSS functions
@@ -120,7 +120,7 @@
 // VVM and VVMOSS are available, and not completely at that.
 //
 //////
-	void CALLTYPE vvmmc_bootstrapInitialization(u64 tnDebuggerInterfaceAddress)
+	void CALLTYPE mc_bootstrapInitialization(u64 tnDebuggerInterfaceAddress)
 	{
 		// Nothing is currently defined for bootstrap initialization
 	}
@@ -135,7 +135,7 @@
 // all initial conditions are met, able to service requests.
 //
 //////
-	void CALLTYPE vvmmc_initialization(u64 tnDebuggerInterfaceAddress)
+	void CALLTYPE mc_initialization(u64 tnDebuggerInterfaceAddress)
 	{
 		// Nothing is currently defined for initialization
 	}
@@ -148,7 +148,7 @@
 // Called to indicate the VVMMC.DLL version
 //
 //////
-	const s8* CALLTYPE vvmmc_getVersion(void)
+	const s8* CALLTYPE mc_getVersion(void)
 	{
 		return(cgcVvmmcVersion);
 	}
@@ -162,9 +162,9 @@
 // original caller's use/activity.
 //
 //////
-	bool CALLTYPE vvmmc_loadVvmmOssFunctions(void)
+	bool CALLTYPE mc_loadVvmmOssFunctions(void)
 	{
-		return(iLoadVvmOssFunctionsFromDll());
+		return(iLoadOssFunctionsFromDll());
 	}
 
 
@@ -176,7 +176,7 @@
 // This function is called from non-VVM users of this DLL.
 //
 //////
-	bool CALLTYPE vvmmc_loadResourceLanguage(s8* tcResourceLanguage, u64* tnDllHandle)
+	bool CALLTYPE mc_loadResourceLanguage(s8* tcResourceLanguage, u64* tnDllHandle)
 	{
 		bool llResult;
 
@@ -200,7 +200,7 @@
 // Loads the indicated resource string from the localization file
 //
 //////
-	s8* CALLTYPE vvmmc_loadResourceAsciiText(u32 tnResourceNumber)
+	s8* CALLTYPE mc_loadResourceAsciiText(u32 tnResourceNumber)
 	{
 		u32					lnLength;
 		SVvmmcResourceText*	lr;
@@ -209,7 +209,7 @@
 
 
 		// Try to find the resource we've already loaded
-		cb._func	= (u64)&iivvmmc_loadResourceAsciiTextCallback;
+		cb._func	= (u64)&iimc_loadResourceAsciiTextCallback;
 		cb.extra	= tnResourceNumber;
 		lr = (SVvmmcResourceText*)vvm_SEChain_searchByCallback(&gseRootResourceTexts, &cb);
 		if (lr)
@@ -254,7 +254,7 @@
 //		false	- invalid form
 //
 //////
-	bool CALLTYPE vvmmc_verifyVariableAsciiName(SOssComp* compName, u64* tnCompOffsetOfError)
+	bool CALLTYPE mc_verifyVariableAsciiName(SOssComp* compName, u64* tnCompOffsetOfError)
 	{
 		s64			lnI;
 		u8			ch;
@@ -316,7 +316,7 @@
 //		true		- tnCompOffsetOfError indicates the length of the pathname specified (which could be across many components)
 //
 //////
-	bool CALLTYPE vvmmc_verifyAsciiFilename(SOssComp* compFilename, u64* tnCompOffsetOfError)
+	bool CALLTYPE mc_verifyAsciiFilename(SOssComp* compFilename, u64* tnCompOffsetOfError)
 	{
 		u64		lnI, lnLength;
 		s8*		lcFilename;
@@ -329,7 +329,7 @@
 			lcFilename = (compFilename->line->base + compFilename->line->start + compFilename->line->whitespace) + compFilename->start;
 
 			// Determine if it's a quoted filename, or not
-			if (compFilename->iCode == _VVMMC_ICODE_SINGLE_QUOTED_TEXT || compFilename->iCode == _VVMMC_ICODE_DOUBLE_QUOTED_TEXT)
+			if (compFilename->iCode == _MC_ICODE_SINGLE_QUOTED_TEXT || compFilename->iCode == _MC_ICODE_DOUBLE_QUOTED_TEXT)
 			{
 				// Quoted text, so we reduce the name by one on each side, resulting in a length of 2 less than its current length
 				++lcFilename;		// Move past the leading quote
@@ -362,16 +362,16 @@
 
 
 
-	void CALLTYPE vvmmc_enableBreakpoints(void)
+	void CALLTYPE mc_enableBreakpoints(void)
 	{
 	}
 
-	void CALLTYPE vvmmc_disableBreakpoints(void)
+	void CALLTYPE mc_disableBreakpoints(void)
 	{
 	}
 
 
-#include "vvmmc_asm.cpp"
-#include "vvmmc_disasm.cpp"
-#include "vvmmc_save.cpp"
-#include "vvmmc_sup.cpp"
+#include "mc_asm.cpp"
+#include "mc_disasm.cpp"
+#include "mc_save.cpp"
+#include "mc_sup.cpp"

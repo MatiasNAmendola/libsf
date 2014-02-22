@@ -10,7 +10,7 @@
 //     February 17, 2013
 //////
 // Change log:
-//     February 17, 2013 - Initial creation, compiles with VVMOSS in VS2008 Professional.
+//     February 17, 2013 - Initial creation, compiles with OSS in VS2008 Professional.
 //////
 //
 // This software is released into the Public Domain.  Enjoy. :-)

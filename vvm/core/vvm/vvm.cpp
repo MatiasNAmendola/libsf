@@ -54,9 +54,9 @@
 #include "\libsf\utils\sha1\sha1.h"											// SHA-1 hashing algorithm
 #include "\libsf\vvm\core\localization\vvmenu\resource.h"					// Resource constants
 #include "vvm_const.h"
-#include "\libsf\vvm\core\vvmoss\vo_class.h"
-#include "\libsf\vvm\core\vvmoss\vo_structs.h"
-#include "\libsf\vvm\core\vvmmc\vvmmc_structs.h"
+#include "\libsf\vvm\core\vvmoss\oss_class.h"
+#include "\libsf\vvm\core\vvmoss\oss_structs.h"
+#include "\libsf\vvm\core\vvmmc\mc_structs.h"
 #include "\libsf\vvm\core\common\fonts\font8x6.h"
 #include "\libsf\vvm\core\common\fonts\font8x8.h"
 #include "\libsf\vvm\core\common\fonts\font8x14.h"
@@ -65,8 +65,8 @@
 #include "vvm_istructs.h"
 #include "vvm_defs.h"
 #include "\libsf\vvm\core\common\common_vvm.h"
-#include "\libsf\vvm\core\common\common_vvmoss.h"
-#include "\libsf\vvm\core\common\common_vvmmc.h"
+#include "\libsf\vvm\core\common\common_oss.h"
+#include "\libsf\vvm\core\common\common_mc.h"
 #include "vvm_glob.h"
 #include "vvm_bxml.h"
 
@@ -147,7 +147,7 @@
 		// Indicate to the VVMOSS and VVMMC that we've now loaded everything and they can proceed with the rest of their initialization requirements (if any)
 		//////
 			oss_initialization((u64)&vvm_debuggerInterfaceCallback);
-			vvmmc_initialization((u64)&vvm_debuggerInterfaceCallback);
+			mc_initialization((u64)&vvm_debuggerInterfaceCallback);
 
 
 		//////////
@@ -191,8 +191,8 @@
 #include "vvm_eng.cpp"					// Main execution engine code
 #include "vvm_tm.cpp"					// Execution engine thread mizer (thread scheduler)
 #include "vvm_sup.cpp"					// Supplemental source code to vvm_eng.cpp mostly
-#include "vvm_vo.cpp"					// Code related to interfacing with vvmoss.dll
-#include "vvm_vvmmc.cpp"				// Code related to interfacing with vvmmc.dll
+#include "vvm_oss.cpp"					// Code related to interfacing with oss.dll
+#include "vvm_mc.cpp"					// Code related to interfacing with mc.dll
 #include "vvm_res.cpp"					// Load resource dll
 #include "vvm_misc.cpp"					// Miscellaneous support functions
 #include "vvm1.cpp"						// Version 1 VVM interface (for the debugger or other apps desiring to use the VVM)

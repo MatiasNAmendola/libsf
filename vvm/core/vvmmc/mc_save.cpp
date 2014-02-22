@@ -1,17 +1,18 @@
 //////////
 //
-// /libsf/vvm/vvm/vvm_vvmmc.cpp
+// /libsf/vvm/vvmmc/mc_save.cpp
 //
 //////
 // Version 0.60
 // Copyright (c) 2012, 2013 by Rick C. Hodgin
 //////
 // Last update:
-//     Mar.02.2013
+//     November 14, 2012
 //////
 // Change log:
-//     Mar.02.2013	- Initial creation
+//     November 14, 2012 - Initial creation
 //////
+// VVM Save Snippets to BXML File
 // See devhelp.txt.
 //////
 //
@@ -41,21 +42,7 @@
 
 
 
-//////////
-//
-// Called to load the VVMOSS.DLL stuff, following the startup protocol.
-//
-//////
-	bool ivvm_loadAndInitializeVvmmc(void)
-	{
-		// Load the DLL
-		if (!iLoadVvmmcFunctionsFromDll())
-			return(false);
-
-		// Let it initialize itself
-		vvmmc_firstCallback((u64)&vvm_debuggerInterfaceCallback);
-		vvmmc_bootstrapInitialization((u64)&vvm_debuggerInterfaceCallback);
-
-		// We're good
-		return(true);
-	}
+u32 CALLTYPE mc_saveSnippetsToBxml(s8* tcBxmlPathname, SStartEnd* tseSnips, bool tlOverwrite)
+{
+	return(0);
+}

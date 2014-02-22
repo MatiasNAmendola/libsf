@@ -1,19 +1,18 @@
 //////////
 //
-// /libsf/vvm/vvmoss/vo_const.h
+// /libsf/vvm/vvmmc/mc_disasm.cpp
 //
 //////
 // Version 0.60
 // Copyright (c) 2012, 2013 by Rick C. Hodgin
 //////
 // Last update:
-//     November 07, 2012
+//     November 13, 2012
 //////
 // Change log:
-//     September 20, 2012 - Initial creation
-//     September 29, 2012 - PBL v1.0 license included directly in source files.
-//     November 07, 2012 - 0.60 development begins
+//     November 13, 2012 - Initial creation
 //////
+// VVM Disassembler Logic
 // See devhelp.txt.
 //////
 //
@@ -42,11 +41,7 @@
 
 
 
-
-//////////
-//
-// Constant strings
-//
-//////
-	const s8		cgcVvmossVersion[]						= "VVMOSS.DLL Version 0.60";			// The format of this version string will remain consistent throughout all future releases
-	const wchar_t	cgw1msTimer[]							= L"vvmoss_1msTimer";
+u32 CALLTYPE mc_disassembleOpcodes(s8* vvmMachineCode, u32 tnVvmMachineCodeLength)
+{
+	return(NULL);
+}

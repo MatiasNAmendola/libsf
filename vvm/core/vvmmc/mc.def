@@ -1,25 +1,25 @@
-LIBRARY	"vvmmc"
+LIBRARY	"mc"
 
 EXPORTS
 
 ; This one export is the only function the VVM calls to initiate the interface
-	vvmmc_firstCallback
-	vvmmc_bootstrapInitialization
-	vvmmc_initialization
-	vvmmc_getVersion
-	vvmmc_loadVvmmOssFunctions
-	vvmmc_loadResourceLanguage
-	vvmmc_loadResourceAsciiText
+	mc_firstCallback
+	mc_bootstrapInitialization
+	mc_initialization
+	mc_getVersion
+	mc_loadVvmmOssFunctions
+	mc_loadResourceLanguage
+	mc_loadResourceAsciiText
 	
-	vvmmc_verifyVariableAsciiName
-	vvmmc_verifyAsciiFilename
+	mc_verifyVariableAsciiName
+	mc_verifyAsciiFilename
 	
-	vvmmc_assembleSourceCode
-	vvmmc_disassembleOpcodes
-	vvmmc_saveSnippetsToBxml
+	mc_assembleSourceCode
+	mc_disassembleOpcodes
+	mc_saveSnippetsToBxml
 
-	vvmmc_enableBreakpoints
-	vvmmc_disableBreakpoints
+	mc_enableBreakpoints
+	mc_disableBreakpoints
 
 
 

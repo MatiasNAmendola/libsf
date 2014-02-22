@@ -1,6 +1,6 @@
 //////////
 //
-// /libsf/vvm/vvm/vvm_vo.cpp
+// /libsf/vvm/vvm/vvm_oss.cpp
 //
 //////
 // Version 0.60
@@ -51,7 +51,7 @@
 	bool ivvm_loadAndInitializeVvmOss(void)
 	{
 		// Load the DLL
-		if (!iLoadVvmOssFunctionsFromDll())
+		if (!iLoadOssFunctionsFromDll())
 			return(false);
 
 		// Let it initialize itself
@@ -90,7 +90,7 @@
 
 //////////
 //
-// V V M O S S   FUNCTIONS
+// O S S   FUNCTIONS
 //
 //////
 		// Search for the needle (tnFunctionName) in the haystack (gVvmOssFunction's lcFuncName)
@@ -110,16 +110,16 @@
 
 //////////
 //
-// V V M M C   FUNCTIONS
+// M C   FUNCTIONS
 //
 //////
 		// Search for the needle (tnFunctionName) in the haystack (gVvmmcFunctions's lcFuncName)
 		lnNeedleLength = strlen(tcFunctionName);
-		for (lnI = 0; lnI < gVvmmcFunctionCount; lnI++)
+		for (lnI = 0; lnI < gMcFunctionCount; lnI++)
 		{
 			// Grab the details of this entry
-			lcFuncAddress	= (void**)gVvmmcFunctions[(lnI * 2) + 0];						// Grab the indirect address to store
-			lcFuncName		= (s8*)   gVvmmcFunctions[(lnI * 2) + 1];						// Grab the function name to request
+			lcFuncAddress	= (void**)gMcFunctions[(lnI * 2) + 0];							// Grab the indirect address to store
+			lcFuncName		= (s8*)   gMcFunctions[(lnI * 2) + 1];							// Grab the function name to request
 
 			lnHaystackLength = strlen(lcFuncName);
 			if (lnNeedleLength == lnHaystackLength && _memicmp(tcFunctionName, lcFuncName, lnHaystackLength) == 0)

@@ -407,7 +407,63 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\vvm_mc.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="debug_vasm|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath=".\vvm_misc.cpp"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="debug_vasm|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\vvm_oss.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -464,62 +520,6 @@
 				</File>
 				<File
 					RelativePath=".\vvm_tm.cpp"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="debug_vasm|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\vvm_vo.cpp"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="debug_vasm|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="VCCLCompilerTool"
-						/>
-					</FileConfiguration>
-				</File>
-				<File
-					RelativePath=".\vvm_vvmmc.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -612,23 +612,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\common_mc.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\common_oss.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\common_oss_const.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\common_oss_plugins.h"
+				>
+			</File>
+			<File
 				RelativePath="..\common\common_vvm.h"
-				>
-			</File>
-			<File
-				RelativePath="..\common\common_vvmmc.h"
-				>
-			</File>
-			<File
-				RelativePath="..\common\common_vvmoss.h"
-				>
-			</File>
-			<File
-				RelativePath="..\common\common_vvmoss_const.h"
-				>
-			</File>
-			<File
-				RelativePath="..\common\common_vvmoss_plugins.h"
 				>
 			</File>
 			<File

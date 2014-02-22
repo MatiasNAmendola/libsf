@@ -1,6 +1,6 @@
 //////////
 //
-// /libsf/vvm/vvmmc/vvmmc_istructs.h
+// /libsf/vvm/vvmmc/mc_istructs.h
 //
 //////
 // Version 0.60

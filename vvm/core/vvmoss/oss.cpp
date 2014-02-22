@@ -58,18 +58,18 @@
 #include <math.h>
 #include "\libsf\vvm\core\common\common.h"
 #include "\libsf\vvm\core\common\common_vvm.h"
-#include "\libsf\vvm\core\common\common_vvmoss_plugins.h"
-#include "\libsf\vvm\core\common\common_vvmoss_const.h"
-#include "\libsf\vvm\core\common\common_vvmmc.h"
+#include "\libsf\vvm\core\common\common_oss_plugins.h"
+#include "\libsf\vvm\core\common\common_oss_const.h"
+#include "\libsf\vvm\core\common\common_mc.h"
 #include "\libsf\vvm\core\localization\vvmenu\resource.h"					// Resource constants
-#include "vo_const.h"
-#include "vo_structs.h"
-#include "vo_istructs.h"
+#include "oss_const.h"
+#include "oss_structs.h"
+#include "oss_istructs.h"
 #include "\libsf\vvm\core\vvm\vvm_structs.h"
-#include "vo_plugins.h"
-#include "vo_defs.h"
-#include "vo_glob.h"
-#include "vo_class.h"
+#include "oss_plugins.h"
+#include "oss_defs.h"
+#include "oss_glob.h"
+#include "oss_class.h"
 #include "\libsf\vvm\core\common\vvm_key_const.h"
 
 
@@ -3836,4 +3836,4 @@ openAgain:
 
 
 // Additional source files not compiled separately, but merely as logical breakouts
-#include "vo_sup.cpp"					// Support algorithms for VVMOSS in general
+#include "oss_sup.cpp"					// Support algorithms for VVMOSS in general

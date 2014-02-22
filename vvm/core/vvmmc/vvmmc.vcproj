@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="vvmmc"
+	Name="mc"
 	ProjectGUID="{67445613-FA49-4DB1-9153-2315A273165E}"
 	RootNamespace="vvmmc"
 	Keyword="Win32Proj"
@@ -65,7 +65,7 @@
 				OutputFile="\libsf\vvm\dev\$(ProjectName).dll"
 				LinkIncremental="2"
 				ManifestFile="$(TargetDir)int\$(TargetFileName).intermediate.manifest"
-				ModuleDefinitionFile="vvmmc.def"
+				ModuleDefinitionFile="mc.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)pdbs\$(TargetName).pdb"
 				SubSystem="2"
@@ -144,7 +144,7 @@
 				OutputFile="\libsf\vvm\dev\$(ProjectName).dll"
 				LinkIncremental="1"
 				ManifestFile="$(TargetDir)int\$(TargetFileName).intermediate.manifest"
-				ModuleDefinitionFile="vvmmc.def"
+				ModuleDefinitionFile="mc.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)pdbs\$(TargetName).pdb"
 				SubSystem="2"
@@ -263,18 +263,18 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\vvmmc.cpp"
+				RelativePath=".\mc.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\vvmmc.def"
+				RelativePath=".\mc.def"
 				>
 			</File>
 			<Filter
 				Name="more"
 				>
 				<File
-					RelativePath=".\vvmmc_asm.cpp"
+					RelativePath=".\mc_asm.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -302,7 +302,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\vvmmc_disasm.cpp"
+					RelativePath=".\mc_disasm.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -330,7 +330,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\vvmmc_save.cpp"
+					RelativePath=".\mc_save.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -358,7 +358,7 @@
 					</FileConfiguration>
 				</File>
 				<File
-					RelativePath=".\vvmmc_sup.cpp"
+					RelativePath=".\mc_sup.cpp"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
@@ -391,23 +391,23 @@
 			Name="Header Files"
 			>
 			<File
-				RelativePath=".\vvmmc_const.h"
+				RelativePath=".\mc_const.h"
 				>
 			</File>
 			<File
-				RelativePath=".\vvmmc_defs.h"
+				RelativePath=".\mc_defs.h"
 				>
 			</File>
 			<File
-				RelativePath=".\vvmmc_glob.h"
+				RelativePath=".\mc_glob.h"
 				>
 			</File>
 			<File
-				RelativePath=".\vvmmc_istructs.h"
+				RelativePath=".\mc_istructs.h"
 				>
 			</File>
 			<File
-				RelativePath=".\vvmmc_structs.h"
+				RelativePath=".\mc_structs.h"
 				>
 			</File>
 		</Filter>

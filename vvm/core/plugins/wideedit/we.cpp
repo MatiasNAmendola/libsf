@@ -50,7 +50,7 @@
 #include <stdio.h>
 #include <windows.h>
 #include "\libsf\vvm\core\common\common.h"
-#include "\libsf\vvm\core\common\common_vvmoss.h"
+#include "\libsf\vvm\core\common\common_oss.h"
 #include "we_const.h"
 #include "we.h"
 

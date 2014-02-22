@@ -52,7 +52,7 @@
 #include <windows.h>
 #include "\libsf\vvm\core\common\common.h"
 #include "\libsf\vvm\core\common\common_vvm.h"
-#include "\libsf\vvm\core\common\common_vvmoss.h"
+#include "\libsf\vvm\core\common\common_oss.h"
 #include <sdl/SDL.h>
 #include <sdl/SDL_audio.h>
 #include <queue>

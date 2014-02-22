@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="vvmoss"
+	Name="oss"
 	ProjectGUID="{A3368817-54CB-4520-8057-71EFCE0D98D7}"
 	RootNamespace="vvmoss"
 	Keyword="Win32Proj"
@@ -65,7 +65,7 @@
 				OutputFile="\libsf\vvm\dev\$(ProjectName).dll"
 				LinkIncremental="2"
 				ManifestFile="$(TargetDir)int\$(TargetFileName).intermediate.manifest"
-				ModuleDefinitionFile="vo.def"
+				ModuleDefinitionFile="oss.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)pdbs\$(TargetName).pdb"
 				SubSystem="2"
@@ -144,7 +144,7 @@
 				OutputFile="\libsf\vvm\dev\$(ProjectName).dll"
 				LinkIncremental="1"
 				ManifestFile="$(TargetDir)int\$(TargetFileName).intermediate.manifest"
-				ModuleDefinitionFile="vo.def"
+				ModuleDefinitionFile="oss.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)pdbs\$(TargetName).pdb"
 				SubSystem="2"
@@ -224,7 +224,7 @@
 				OutputFile="\libsf\vvm\dev\$(ProjectName).dll"
 				LinkIncremental="2"
 				ManifestFile="$(TargetDir)int\$(TargetFileName).intermediate.manifest"
-				ModuleDefinitionFile="vo.def"
+				ModuleDefinitionFile="oss.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)pdbs\$(TargetName).pdb"
 				SubSystem="2"
@@ -263,71 +263,71 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath=".\oss.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\oss.def"
+				>
+			</File>
+			<File
+				RelativePath=".\oss_plugins.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="debug_vasm|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\oss_sup.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="debug_vasm|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="..\..\..\utils\sha1\sha1.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="debug_vasm|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\vo.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\vo.def"
-				>
-			</File>
-			<File
-				RelativePath=".\vo_plugins.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="debug_vasm|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\vo_sup.cpp"
 				>
 				<FileConfiguration
 					Name="Debug|Win32"
@@ -361,35 +361,35 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath=".\oss_class.h"
+				>
+			</File>
+			<File
+				RelativePath=".\oss_const.h"
+				>
+			</File>
+			<File
+				RelativePath=".\oss_defs.h"
+				>
+			</File>
+			<File
+				RelativePath=".\oss_glob.h"
+				>
+			</File>
+			<File
+				RelativePath=".\oss_istructs.h"
+				>
+			</File>
+			<File
+				RelativePath=".\oss_plugins.h"
+				>
+			</File>
+			<File
+				RelativePath=".\oss_structs.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\..\utils\sha1\sha1.h"
-				>
-			</File>
-			<File
-				RelativePath=".\vo_class.h"
-				>
-			</File>
-			<File
-				RelativePath=".\vo_const.h"
-				>
-			</File>
-			<File
-				RelativePath=".\vo_defs.h"
-				>
-			</File>
-			<File
-				RelativePath=".\vo_glob.h"
-				>
-			</File>
-			<File
-				RelativePath=".\vo_istructs.h"
-				>
-			</File>
-			<File
-				RelativePath=".\vo_plugins.h"
-				>
-			</File>
-			<File
-				RelativePath=".\vo_structs.h"
 				>
 			</File>
 		</Filter>

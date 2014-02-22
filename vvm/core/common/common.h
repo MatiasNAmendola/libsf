@@ -262,7 +262,17 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 											((g & 0xff) <<  8) + \
 											((b & 0xff))
 
+	#define bgra(b,g,r,a)					((a & 0xff) << 24) + \
+											((r & 0xff) << 16) + \
+											((g & 0xff) <<  8) + \
+											((b & 0xff))
+
 	#define rgb(r,g,b)						(0xff       << 24) + \
+											((r & 0xff) << 16) + \
+											((g & 0xff) <<  8) + \
+											((b & 0xff))
+
+	#define bgr(b,g,r)						(0xff       << 24) + \
 											((r & 0xff) << 16) + \
 											((g & 0xff) <<  8) + \
 											((b & 0xff))
@@ -1359,7 +1369,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 
 		// Information about the component
 		SOssLine*		line;											// The line this component relates to
-		u32				iCode;											// Refer to _VVMMC_COMP_* structs in vvmmc_const.h
+		u32				iCode;											// Refer to _VVMMC_COMP_* structs in mc_const.h
 		u64				start;											// Start into the indicates line's source code
 		s64				length;											// Length of the component
 

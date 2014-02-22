@@ -42,7 +42,7 @@
 
 
 
-#include "common_vvmoss_const.h"
+#include "common_oss_const.h"
 struct SOssWindowLL;
 
 
@@ -118,7 +118,7 @@ struct SOssWindowLL;
 	const s8		cgcOssRealloc[]											= "oss_realloc";
 	const s8		cgcOssFree[]											= "oss_free";
 
-	#include "common_vvmoss_plugins.h"
+	#include "common_oss_plugins.h"
 
 	const s8		cgcOssBreakoutAsciiTextDataIntoSOssLines[]				= "oss_breakoutAsciiTextIntoSOssLines";
 	const s8		cgcOssTranslateSOssLinesToSOssComps[]					= "oss_translateSOssLinesToSOssComps";
@@ -579,8 +579,8 @@ struct SOssWindowLL;
 // Attempt to load vvmoss.dll and access all required functions
 //
 //////
-	HINSTANCE vvmOssDllInstance = NULL;
-	bool iLoadVvmOssFunctionsFromDll(void)
+	HINSTANCE ossDllInstance = NULL;
+	bool iLoadOssFunctionsFromDll(void)
 	{
 		u32			lnI;
 		s8*			lcFuncName;
@@ -590,10 +590,10 @@ struct SOssWindowLL;
 
 
 		// Try to load the dll
-		if (!vvmOssDllInstance)
+		if (!ossDllInstance)
 		{
-			vvmOssDllInstance = LoadLibraryA("vvmoss.dll");
-			if (!vvmOssDllInstance)
+			ossDllInstance = LoadLibraryA("oss.dll");
+			if (!ossDllInstance)
 			{
 				// There was an error loading the dll
 				return(false);
@@ -610,7 +610,7 @@ struct SOssWindowLL;
 			lcFuncName		= (s8*)   gVvmOssFunctions[(lnI * 2) + 1];		// Grab the function name to request
 
 			// Ask the VVM for this specific function location
-			lcAddress = GetProcAddress(vvmOssDllInstance, lcFuncName);
+			lcAddress = GetProcAddress(ossDllInstance, lcFuncName);
 
 			// Process the result
 			if (!lcAddress)

@@ -46,12 +46,12 @@
 #include <stdio.h>
 #include <windows.h>
 #include "\libsf\vvm\core\common\common.h"
-#include "\libsf\vvm\core\vvmoss\vo_structs.h"
+#include "\libsf\vvm\core\vvmoss\oss_structs.h"
 #include "\libsf\vvm\core\vvm\vvm_structs.h"
-#include "\libsf\vvm\core\vvmmc\vvmmc_structs.h"
+#include "\libsf\vvm\core\vvmmc\mc_structs.h"
 #include "\libsf\vvm\core\common\common_vvm.h"
-#include "\libsf\vvm\core\common\common_vvmmc.h"
-#include "\libsf\vvm\core\common\common_vvmoss.h"
+#include "\libsf\vvm\core\common\common_mc.h"
+#include "\libsf\vvm\core\common\common_oss.h"
 #include "\libsf\vvm\core\localization\vvmmcenu\resource.h"
 
 
@@ -128,7 +128,7 @@ void		iAssembleFile						(s8* tcPathname);
 		// When we get here, we've done a first pass on the command line parameters
 
 
-		// Try to load the VVMOSS.DLL and VVMMC.DLL files now that we have the language
+		// Try to load the OSS.DLL and MC.DLL files now that we have the language
 		iLoadDlls();
 
 
@@ -145,7 +145,7 @@ void		iAssembleFile						(s8* tcPathname);
 
 		// All done
 		printf("---\n");
-		printf(vvmmc_loadResourceAsciiText(IDS_FILES_PROCESSED), gnFilesProcessed, gnErrors, gnWarnings);
+		printf(mc_loadResourceAsciiText(IDS_FILES_PROCESSED), gnFilesProcessed, gnErrors, gnWarnings);
 		return gnErrors;
 	}
 
@@ -177,21 +177,21 @@ void		iAssembleFile						(s8* tcPathname);
 
 	void iLoadDlls(void)
 	{
-		// Try to load VVMMC.DLL
-		if (!iLoadVvmmcFunctionsFromDll() || !vvmmc_loadResourceLanguage(gcResourceLanguage, (u64*)&vvmmcResourceDll))
+		// Try to load MC.DLL
+		if (!iLoadVvmmcFunctionsFromDll() || !mc_loadResourceLanguage(gcResourceLanguage, (u64*)&vvmmcResourceDll))
 		{
-			printf("* Error:  Unable to load required VVMMC.DLL.  Terminating with -2.\n");
+			printf("* Error:  Unable to load required MC.DLL.  Terminating with -2.\n");
 			exit(-2);
 		}
 
 
-		// Try to load VVMOSS.DLL
-		if (!iLoadVvmOssFunctionsFromDll())
+		// Try to load OSS.DLL
+		if (!iLoadOssFunctionsFromDll())
 		{
 			printf("* Error:  Unable to load required VVMOSS.DLL.  Terminating with -1.\n");
 			exit(-1);
 		}
-		if (!vvmmc_loadVvmmOssFunctions())
+		if (!mc_loadVvmmOssFunctions())
 		{
 			printf("* Error:  VVMMC was unable to load required VVMOSS.DLL functions.  Terminating with -3.\n");
 			exit(-3);
@@ -203,8 +203,8 @@ void		iAssembleFile						(s8* tcPathname);
 
 
 		// Indicate the version we have loaded
-		printf(vvmmc_loadResourceAsciiText(IDS_LOADED), oss_getVersion());
-		printf(vvmmc_loadResourceAsciiText(IDS_LOADED), vvmmc_getVersion());
+		printf(mc_loadResourceAsciiText(IDS_LOADED), oss_getVersion());
+		printf(mc_loadResourceAsciiText(IDS_LOADED), mc_getVersion());
 		printf("---\n");
 		printf("---\n");
 	}
@@ -260,7 +260,7 @@ void		iAssembleFile						(s8* tcPathname);
 		if (lnHandle < 0)
 		{
 			// Open file error
-			printf(vvmmc_loadResourceAsciiText(IDS_UNABLE_TO_OPEN), tcPathname);
+			printf(mc_loadResourceAsciiText(IDS_UNABLE_TO_OPEN), tcPathname);
 			++gnErrors;
 			return;
 		}
@@ -272,13 +272,13 @@ void		iAssembleFile						(s8* tcPathname);
 		if (lnFileSize > 0xffffffff)
 		{
 			// Uhhh... what are they trying to do to us? :-)
-			printf(vvmmc_loadResourceAsciiText(IDS_FILE_IS_TOO_BIG), tcPathname);
+			printf(mc_loadResourceAsciiText(IDS_FILE_IS_TOO_BIG), tcPathname);
 			++gnErrors;
 			return;
 		}
 		if (lnFileSize == 0)
 		{
-			printf(vvmmc_loadResourceAsciiText(IDS_FILE_IS_ZERO_BYTES), tcPathname);
+			printf(mc_loadResourceAsciiText(IDS_FILE_IS_ZERO_BYTES), tcPathname);
 			++gnErrors;
 			return;
 		}
@@ -288,7 +288,7 @@ void		iAssembleFile						(s8* tcPathname);
 		lcData = (s8*)oss_alloc((u32)lnFileSize, false);
 		if (!lcData)
 		{
-			printf(vvmmc_loadResourceAsciiText(IDS_ERROR_ALLOCATING), lnFileSize, tcPathname);
+			printf(mc_loadResourceAsciiText(IDS_ERROR_ALLOCATING), lnFileSize, tcPathname);
 			++gnErrors;
 			return;
 		}
@@ -299,7 +299,7 @@ void		iAssembleFile						(s8* tcPathname);
 		lnNumread = oss_sharedAsciiReadFile(lnHandle, lcData, (u32)lnFileSize);
 		if (lnNumread != lnFileSize)
 		{
-			printf(vvmmc_loadResourceAsciiText(IDS_UNABLE_TO_READ_BYTES_FROM), (u32)lnFileSize, tcPathname, lnNumread);
+			printf(mc_loadResourceAsciiText(IDS_UNABLE_TO_READ_BYTES_FROM), (u32)lnFileSize, tcPathname, lnNumread);
 			++gnErrors;
 			return;
 		}
@@ -311,7 +311,7 @@ void		iAssembleFile						(s8* tcPathname);
 		memset(&lseProg, 0, sizeof(lseProg));
 		// Define this initial program to its default empty state
 		lp = (SProgram*)vvm_SEChain_append(&lseProg, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SProgram), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
-		printf(vvmmc_loadResourceAsciiText(IDS_ASSEMBLING), tcPathname);
+		printf(mc_loadResourceAsciiText(IDS_ASSEMBLING), tcPathname);
 
 
 		//////////
@@ -320,7 +320,7 @@ void		iAssembleFile						(s8* tcPathname);
 			//
 			//////
 				//
-				lnMachineCodeBytes = vvmmc_assembleSourceCode(tcPathname, lcData, (u32)lnFileSize, lp);
+				lnMachineCodeBytes = mc_assembleSourceCode(tcPathname, lcData, (u32)lnFileSize, lp);
 				//
 			//////
 			//
@@ -338,7 +338,7 @@ void		iAssembleFile						(s8* tcPathname);
 		if (!lp->_assembly.root)
 		{
 			// A fatal, unrecoverable error occurred where we didn't even get the initial startup data allocated
-			printf(vvmmc_loadResourceAsciiText(IDS_UNRECOVERABLE_ERROR));
+			printf(mc_loadResourceAsciiText(IDS_UNRECOVERABLE_ERROR));
 			++gnErrors;
 			return;
 		}
@@ -384,7 +384,7 @@ void		iAssembleFile						(s8* tcPathname);
 
 		// Write the output
 		lcBxmlPathname = oss_changePathnameExtension(tcPathname, ".bxml");
-		vvmmc_saveSnippetsToBxml(lcBxmlPathname, &lseProg, true);
+		mc_saveSnippetsToBxml(lcBxmlPathname, &lseProg, true);
 		oss_free(lcBxmlPathname);
 
 
@@ -394,7 +394,7 @@ void		iAssembleFile						(s8* tcPathname);
 
 		// Indicate our final status
 		printf("---\n");
-		printf(vvmmc_loadResourceAsciiText(IDS_ERRORS_WARNINGS_FOUND), lsf->errors.masterCount, lsf->warnings.masterCount, tcPathname);
+		printf(mc_loadResourceAsciiText(IDS_ERRORS_WARNINGS_FOUND), lsf->errors.masterCount, lsf->warnings.masterCount, tcPathname);
 		printf("---\n");
 
 		// Update global totals
