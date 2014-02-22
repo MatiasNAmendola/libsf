@@ -1,0 +1,468 @@
++---------------------------------------+
+|               OBED VM                 |
+|                                       |
+|  OBJECT/EVENT DRIVEN VIRTUAL MACHINE  |
+|                                       |
+|          NOVEMBER 07, 2012            |
+|             DRAFT 0.60                |
+|          BY RICK C. HODGIN            |
+|                                       |
+|  RELEASED AS THE GO-FORWARD PROTOTYPE |
+|  FOR THE MECHANICS OF THE VVM ENGINE. |
+|  IN PRAYER (MUCH PRAYER)... -RCH      |
++----------------------------------------
+
++---------------------------------------+
+|   A REQUEST IN PRAYER THROUGH FAITH   |
+|---------------------------------------|
+| MAY THE LORD, JESUS CHRIST, BLESS THE |
+| WORK OF MY HANDS ON THIS PROJECT, AS  |
+| I GIVE ALL CREDIT, HONOR AND GLORY TO |
+| HIM.  AMEN.                           |
+|---------------------------------------|
+| MAY THE LORD, JESUS CHRIST, BLESS THE |
+| WORK OF ALL HANDS ON THIS PROJECT, AS |
+| WE GIVE ALL CREDIT, HONOR AND GLORY   |
+| TO HIM.  AMEN.                        |
++---------------------------------------+
+
+
+
+
+OBJECT EVENT DRIVEN VIRTUAL MACHINE (OBED)
+------------------------------------------
+MACHINE BOOTS UP WITH A MEMORY BUFFER BEGINNING
+AT OFFSET 0.  INSTANTIATES WITH A SINGLE PROGRAM
+OBJECT, WHICH POINTS TO AN INITIAL ENVIRONMENT.
+THIS PROGRAM WAS PREVIOUSLY COMPILED FOR EXECUTION
+ON THE OBED VM.  IT IS A BXML FILE THAT CONTAINS
+SPECIFIC INFORMATION FOR LOADING INTO THE OBED VM.
+
+VARIABLE DEFINITIONS
+--------------------
+ALL OBED VM NAMES ARE PREFIXED WITH A FOUR-CHARACTER
+SEQUENCE IDENTIFYING THEIR TYPE AND LOCALITY.
+
+EXAMPLE:  p,l,g,r			= PARAMETER, LOCAL, GLOBAL AND RETURN
+          s08,s16,s32,s64	= SIGNED 8-BIT, 16-BIT, 32-BIT AND 64-BIT
+          u08,u16,u32,u64	= UNSIGNED 8-BIT, 16-BIT, 32-BIT AND 64-BIT
+          f32,f64			= FLOATING POINT 32-BIT, 64-BIT
+
+NOTE:  These are defined in the code executed on the VM.
+       The IDE can use any variable name to hide this requirement
+       and allow for other variable forms.  An example of a
+       simplified variable name:
+              OBED VM SEES:  ls64Foo
+              SHOWN IN IDE:  foo or lnFoo
+
+GLOBAL OBJECTS
+--------------
+	prg								-- A running program
+	scr								-- Screens (child of PRG)
+	cvs								-- Canvas (child of SCREEN)
+	rgn								-- Regions (child of CVS)
+	glo								-- Global variables (child of PRG)
+	snp								-- Snippets (child of PRG)
+	dyn								-- Dynamic Snippets (child of PRG)
+	tmg								-- Global Timer (child of PRG)
+	thr								-- Threads (child of PRG) 
+	sta								-- Stack (child of THR)
+	reg								-- Registers (child of THR)
+	tmr								-- Thread Timer (child of THR)
+	ets								-- Executing Thread Snippet (child of THR)
+
+	* The following have future consideration:
+	com								-- Communications object
+
+OBJECT DETAILS
+--------------
+	prg								-- Global program object
+	prg.sta							-- Stack
+	prg.glo							-- Global variable definitions
+	prg.snp							-- All code snippets known to the executing environment
+	prg.dyn							-- All code snippets that are loaded dynamically while running in the executing environment
+	prg.glo._N.nam					-- global variable definition for data quantities referenced in snippets
+	prg.snp._N.nam					-- Name of the code snippet which exists in the project / program
+	prg.dyn._N.nam					-- Name of the dynamic code snippet which exists in the loaded module
+
+	scr								-- Program Screen Objects
+	scr.cvs							-- Screen canvas objects
+	scr._mcb						-- Mouse callbacks defined for this screen
+	scr._kcb						-- Keyboard callbacks defined for this screen
+
+	cvs								-- Canvas Objects
+	cvs.rgn							-- Regions defined within the canvas
+	cvs.rgn._rcb					-- Region callbacks defined for this region
+	cvs.left						-- Left coordinate on parent canvas
+	cvs.top							-- Top coordinate on parent canvas
+	cvs.width						-- Width of the canvas
+	cvs.height						-- Height of the canvas
+	cvs.bitBuffer					-- Pointer to 32-bit bit buffer for this canvas
+	cvs.renderSnippet				-- Code to call to render this canvas
+	cvs.parentCanvas				-- The canvas object this item is a child of
+
+	thr								-- Thread
+	thr.threadName					-- Thread, name of this thread (if specified)
+	thr.sta							-- Thread, stack space
+	thr.reg							-- Thread, register + sandbox space
+	thr.tmr							-- Thread, first timer for the thread
+	thr.ets							-- Thread, executing code snippet (program, function, method, event, etc.)
+
+	ets								-- Executing Thread Snippets
+	ets.par							-- Snippet parameters
+	ets.ret							-- Return parameters
+	ets.loc							-- Local variables
+	ets.snp							-- Currently executing snippet
+	
+	As each thread calls child functions, is interrupted by a timer, whatever it is, these objects are added:
+	x.snp.call.snp					-- On this thread, an explicit call was made, the result of source code
+	x.snp.event.snp					-- On this thread, an implicit call was made, the result of an event
+	
+	Subsequent calls are treed like this:
+	x.snp.call.call.snp				-- Another explicit call
+	x.snp.call.event.snp			-- An event occurred after an explicit call
+	x.snp.event.call.snp			-- An explicit call was made after an event was triggered
+	x.snp.event.event.snp			-- A secondary event occurred after a primary event
+		and so on...				-- every call or event triggers the addition of a new child level
+
+	* For future consideration:
+	com								-- Communications object
+	com._ip4						-- IPv4 network communication (to be defined later)
+	com._ip6						-- IPv6 network communication (to be defined later)
+
+VARIABLES
+---------
+	x.var.nam						-- Name and value of variable in ASCII
+	x.var._uni						-- (if defined) name of the variable in UNICODE
+	x.var._xunderflow				-- (If defined) Exception to trigger on variable underflow
+	x.var._xoverflow				-- (If defined) Exception to trigger on variable overflow
+	x.var._min						-- (If defined) Minimum value that can be stored in this value
+	x.var._max						-- (If defined) Maximum value that can be stored in this value
+
+VVM SELF-INSTANTIATES WITH AN OPTIONAL PROGRAM TO LAUNCH,
+WHICH LETS IT DETERMINE HOW THE VVM WILL OPERATE.  HOWEVER,
+IF NO PROGRAM IS SPECIFIED, THE VVM LOADS A DEFAULT, INTERNALLY
+LAUNCHED PROGRAM WHICH IS BASICALLY AN OSS-SPECIFIC PROMPT
+ASKING THE USER WHICH DISK-BASED BXML THEY WISH TO RUN.
+
+
+RELATIVE PATHNAMES
+------------------
+THE VVM WILL SUPPORT A HOME FOLDER LOCATION THAT CAN ALWAYS BE
+IDENTIFIED WITHIN A PATHNAME AS "~home~/" AND THEN THE RELATIVE
+PATH AFTER THAT.  IN THIS WAY MIGRATING SUSPENDED MACHINES ON ONE
+ARCHITECTURE, TO BE RESUMED ON ANOTHER, WILL WORK CORRECTLY.
+
+
+DYNAMIC SNIPPET PARAMETERS
+--------------------------
+EVERY DYNAMIC SNIPPET PARAMETER IS IDENTIFIED AS ONE OF A FEW TYPES.
+FOR COMPLEX DATA ITEMS, THEY CAN BE PASSED AS AN SDatum STRUCTURE.
+
+DATUM
+------
+	A DATUM IS THE LOWEST LEVEL PRIMITIVE FOR STORING SOMETHING.
+	IT ALWAYS EXISTS ON AN OBJECT, WHICH IS ITS PARENT.
+	A DATUM CONTAINS A NAME AND ASSOCIATED DATA.
+	SINCE OBED IS OBJECT EVENT DRIVEN, EVERYTHING HAS A NAME.
+	EVERY NAME HAS A LENGTH AND THE ASCII NAME BYTES.
+	EVERY NAME CAN HAVE AN OPTIONAL UNICODE NAME.
+	ALL DATA HAS A LENGTH AND THE DATA BYTES.
+
+OBJECTS
+-------
+	EVERY OBJECT IS A CONTAINER.
+	EVERY OBJECT HAS NEXT, PREV WHICH POINT TO ITS SIBLINGS.
+	EVERY OBJECT HAS PARENT, FIRST CHILD WHICH POINT TO ITS LINEAGE.
+	EVERY OBJECT HAS A FIRST DATUM WHICH CONTAINS ATTRIBUTE ITEMS FOR THE OBJECT, INCLUDING BASICS LIKE A NAME.
+
+MEMORY
+------
+	ALL MEMORY IS LINEAR.  NO PAGING.  NO SWAPPING TO DISK.  THIS IS HANDLED BY THE HOST OS AS NEEDED.
+	MEMORY IS INITIALLY ALLOCATED BEGINNING AT OFFSET 0 FOR SOME SIZE (A VM INSTANCE SETTING, MINIMUM OF 4 MB).
+	THE VM CAN LAUNCH PAUSED WITH NO PROGRAM TO RUN.  FROM THERE, PRIOR SAVED SESSIONS CAN BE RESTORED.
+	THE PROGRAM TO RUN IS LOADED BEGINNING AT THAT LOCATION.
+	ONCE LOADED CONTROL IS TRANSFERRED TO THE INSTRUCTION AT OFFSET 0.
+
+	VARIOUS FIXED INTERNAL OBJECTS ARE MAINTAINED OUTSIDE OF MAIN MEMORY WHICH HOLD
+	INFORMATION ABOUT THE RUNNING VM.  THESE ARE QUERIED BY THE HOST AND GUEST THROUGH
+	A SPECIAL API.
+
+	DYNAMIC CODE CAN BE LOADED AND IS UPDATED IN THE FIXED INTERNAL OBJECTS, AND IS
+	STORED IN THE AREAS OF AVAILABLE MEMORY.
+
+	EVERY OBJECT HAS A POINTER TO THE START OF THE NAME, OR START OF ASSOCIATED DATA.
+	ALL REFERENCES TO EVERY DATUM WHICH EXIST ARE BY OBJECT NAMES.
+
+EDIT-AND-CONTINUE
+-----------------
+	ALL CODE SUPPORTS EDIT-AND-CONTINUE.
+	A THREAD CAN BE PAUSED, CODE CHANGED/REPLACED, AND THEN RESUMED ON A RUNNING VM.  IF OBED VM
+    IDENTIFIES THAT ITEMS BEING UPDATED ARE IN USE IN OTHER THREADS, THOSE THREADS ARE SUSPENDED
+    AUTOMATICALLY WHILE THE UPDATE TAKES PLACE.  THIS IS SUPPORTED USING THIS MODEL:
+
+		LINE 1	-	JUMPS TO SNIPPET FOR LINE 1
+					EXECUTES THAT LINE'S SNIPPET
+                    JUMPS TO START OF LINE 2
+		LINE 2	-	JUMPS TO SNIPPET FOR LINE 2
+
+		PROCESS REPEATS FOR EACH SUCCESSIVE LINE.
+
+	WHEN CHANGES ARE MADE, THE PROGRAM PORTIONS FOR EACH LINE ARE CHANGED,
+	WITH NEW LINES BEING INSERTED, DELETED LINES BEING REMOVED, ETC.
+
+	BY MAINTAINING THIS LINE-TO-SNIPPET RELATIONSHIP, EDIT-AND-CONTINUE
+	BECOMES VERY EASY TO IMPLEMENT.  HOWEVER, THIS IS NOT THE ONLY MODEL.
+	THE ENTIRE ABI CAN BE SWAPPED OUT AND REPLACED AS NECESSARY, PROVIDED
+	THE INTEGRITY OF THE ENTIRE MACHINE STATE IS MAINTAINED.
+
+REGISTERS
+------------------------------------------
+	REGISTERS ARE AUTOMATICALLY ALLOCATED FOR EACH CALLED SNIPPET.
+	REGISTERS ARE RELATIONAL TO ONE ANOTHER IN THE SAME PHYSICAL REGISTER SPACE.
+	THE LOWER 8-BITS ARE THE BASE.
+	EACH SUCCESSIVE LARGER SIZE REGISTER INCLUDES THE LOWER REGISTER, PLUS NEW SPACE.
+	HERE WE SEE BIT POSITIONS FOR REGISTERS.
+
+     ___________________________________ _________________ ________ ________
+    |                 X64               |       X32       |  X16   |   X8   |
+    |........|........|........|........|........|........|........|........|
+    63                                32                16        8        0
+
+     ___________________________________ _________________ ________ ________
+    |                FX64               |                FX32               |
+    |........|........|........|........|........|........|........|........|
+    63                                32                                   0
+
+	OFFSET		CODE	INTEGER REGISTERS
+	------		----	-----------------
+	+000		n/a		RESULT							; Assembly instructions which return unique id numbers, indicate counts, etc., return their result here
+
+	OFFSET		CODE	INTEGER REGISTERS
+	------		----	-----------------
+	+008		0000	A8		A16		A32		A64		; INTEGER, POINTER AND GENERAL PURPOSE REGISTERS
+	+016		0001	B8		B16		B32		B64
+	+024		0010	C8		C16		C32		C64
+	+032		0011	D8		D16		D32		D64
+	+040		0100	E8		E16		E32		E64
+	+048		0101	F8		F16		F32		F64
+	+056		0110	G8		G16		G32		G64
+	+064		0111	H8		H16		H32		H64
+	+072		1000	I8		I16		I32		I64
+	+080		1001	J8		J16		J32		J64
+	+088		1010	K8		K16		K32		K64
+	+096		1011	L8		L16		L32		L64
+	+104		1100	M8		M16		M32		M64
+	+112		1101	N8		N16		N32		N64
+	+120		1110	O8		O16		O32		A64
+	+128		1111	P8		P16		P32		P64
+	
+	OFFSET		CODE	FLOATING POINT REGISTERS
+	------		----	------------------------
+	+136		0000	FA32	FA64					;  FLOATING POINT REGISTERS
+	+144		0001	FB32	FB64
+	+152		0010	FC32	FC64
+	+160		0011	FD32	FD64
+	+168		0100	FE32	FE64
+	+176		0101	FF32	FF64
+	+184		0110	FG32	FG64
+	+192		0111	FH32	FH64
+	+200		1000	FI32	FI64
+	+208		1001	FJ32	FJ64
+	+216		1010	FK32	FK64
+	+224		1011	FL32	FL64
+	+232		1100	FM32	FM64
+	+240		1101	FN32	FN64
+	+248		1110	FO32	FO64
+	+256		1111	FP32	FP64
+
+	OTHER REGISTERS (ACCESSIBLE ONLY BY SPECIAL INSTRUCTIONS)
+	---------------------------------------------------------
+	+264		FLAGS			- FLAGS
+	+272		IP				- INSTRUCTION POINTER
+	+280		SP				- STACK POINTER
+	
+	+288		SNIP			- CURRENTLY SNIPPET NUMBER EXECUTING
+	+296		EXSNIP			- SNIPPET ID NUMBER TO BRANCH TO ON EXCEPTION
+	
+	+304		SB				- SANDBOX OFFSET (INCREASES UPON ALLOCATION, DECREASES UPON DEALLOCATION)
+	+312		ERROR			- THE MACHINE OPCODE ERROR GENERATED DURING EXECUTION (SNIP:IP IS POINTING TO OFFENDING INSTRUCTION)
+	
+	+320		PRED			- PREDICATE FLAG SETTING, LOWER 24-BITS USED, 64-BITS STORAGE
+	+328		PREDCOUNT		- PREDICATE COUNT, RESETS PRED TO 0 WHEN REACHES 0
+	
+	NOTE:  THERE ARE NO INSTRUCTIONS WHICH DIRECTLY AFFECT THESE REGISTERS.  THEY ARE SET/CLEARED BY THE DEBUGGER.
+	+336		DSNP1			- A DEBUGGER REGISTER FOR BREAKPOINTS, THE INDICATED SNIPPET OR DYNAMIC SNIPPET
+	+344		DOFF1			- OFFSET INTO THE SNIPPET'S MACHINE CODE BYTES FOR BREAKPOINT
+	+352		DSNP2			- A DEBUGGER REGISTER FOR BREAKPOINTS, THE INDICATED SNIPPET OR DYNAMIC SNIPPET
+	+360		DOFF2			- OFFSET INTO THE SNIPPET'S MACHINE CODE BYTES FOR BREAKPOINT
+	+368		DSNP3			- A DEBUGGER REGISTER FOR BREAKPOINTS, THE INDICATED SNIPPET OR DYNAMIC SNIPPET
+	+376		DOFF3			- OFFSET INTO THE SNIPPET'S MACHINE CODE BYTES FOR BREAKPOINT
+	+384		DSNP4			- A DEBUGGER REGISTER FOR BREAKPOINTS, THE INDICATED SNIPPET OR DYNAMIC SNIPPET
+	+392		DOFF4			- OFFSET INTO THE SNIPPET'S MACHINE CODE BYTES FOR BREAKPOINT
+
+
+FLAGS (64-bits, only lower 24-bits shown populated, dots indicate unused bits)
+------------------------------------------------------------------------------
+    ........ ........ ........ ........ ........ 00000000 00000000 00000001   - CARRY?
+    ........ ........ ........ ........ ........ 00000000 00000000 00000010   - OVERFLOW?
+    ........ ........ ........ ........ ........ 00000000 00000000 00000100   - UNDERFLOW?
+    ........ ........ ........ ........ ........ 00000000 00000000 00001000   - EQUAL?
+    ........ ........ ........ ........ ........ 00000000 00000000 00010000   - ZERO?
+    ........ ........ ........ ........ ........ 00000000 00000000 00100000   - NEGATIVE?
+    ........ ........ ........ ........ ........ 00000000 00000000 01000000   - POSITIVE?
+    ........ ........ ........ ........ ........ 00000000 00000000 10000000   - APP  - (aka APP0) AVAILABLE TO APPLICATION
+
+    ........ ........ ........ ........ ........ 00000000 00000001 00000000   - APP1 - AVAILABLE TO APPLICATION
+    ........ ........ ........ ........ ........ 00000000 00000010 00000000   - APP2 - AVAILABLE TO APPLICATION
+    ........ ........ ........ ........ ........ 00000000 00000100 00000000   - APP3 - AVAILABLE TO APPLICATION
+    ........ ........ ........ ........ ........ 00000000 00001000 00000000   - APP4 - AVAILABLE TO APPLICATION
+    ........ ........ ........ ........ ........ 00000000 00010000 00000000   - APP5 - AVAILABLE TO APPLICATION
+    ........ ........ ........ ........ ........ 00000000 00100000 00000000   - APP6 - AVAILABLE TO APPLICATION
+    ........ ........ ........ ........ ........ 00000000 01000000 00000000   - APP7 - AVAILABLE TO APPLICATION
+    ........ ........ ........ ........ ........ 00000000 10000000 00000000   - APP8 - AVAILABLE TO APPLICATION
+	
+    NOTE:  THERE ARE NO INSTRUCTIONS WHICH DIRECTLY AFFECT THESE REGISTERS.
+           THEY ARE SET/CLEARED BY THE DEBUGGER, OR BY THE RUNTIME EXECUTION ENGINE.
+    ........ ........ ........ ........ ........ 00000001 00000000 00000000   - IS_SUSPENDED?
+    ........ ........ ........ ........ ........ 00000010 00000000 00000000   - IN_ERROR?
+    ........ ........ ........ ........ ........ 00000100 00000000 00000000   - SINGLE_STEP?
+    ........ ........ ........ ........ ........ 00001000 00000000 00000000   - DEBUG1_IS_ACTIVE?
+    ........ ........ ........ ........ ........ 00010000 00000000 00000000   - DEBUG2_IS_ACTIVE?
+    ........ ........ ........ ........ ........ 00100000 00000000 00000000   - DEBUG3_IS_ACTIVE?
+    ........ ........ ........ ........ ........ 01000000 00000000 00000000   - DEBUG4_IS_ACTIVE?
+    ........ ........ ........ ........ ........ 10000000 00000000 00000000   - EXTENDED_DEBUG_IS_ACTIVE?
+
+
+PREDICATE (64-bits, only lower 24-bits shown are used)
+------------------------------------------------------------------------------
+    THESE VALUES BEING SET HAVE NO EFFECT ON VVM-CPU PROCESSING UNLESS THEIR BITS ARE SET IN THE NEXT BYTE:
+    ........ ........ ........ ........ ........ 00000000 00000000 00000001   - CARRY?
+    ........ ........ ........ ........ ........ 00000000 00000000 00000010   - OVERFLOW?
+    ........ ........ ........ ........ ........ 00000000 00000000 00000100   - UNDERFLOW?
+    ........ ........ ........ ........ ........ 00000000 00000000 00001000   - EQUAL?
+    ........ ........ ........ ........ ........ 00000000 00000000 00010000   - ZERO?
+    ........ ........ ........ ........ ........ 00000000 00000000 00100000   - NEGATIVE?
+    ........ ........ ........ ........ ........ 00000000 00000000 01000000   - POSITIVE?
+    ........ ........ ........ ........ ........ 00000000 00000000 10000000   - APP  - (aka APP0) AVAILABLE TO APPLICATION
+    
+    THE FOLLOWING BITS INDICATE IF THE FLAG CONDITIONS ABOVE ARE TO BE TESTED OR IGNORED:
+    ........ ........ ........ ........ ........ 00000000 00000001 00000000   - CARRY?		IS A VALID BOOLEAN CONDITION?
+    ........ ........ ........ ........ ........ 00000000 00000010 00000000   - OVERFLOW?	IS A VALID BOOLEAN CONDITION?
+    ........ ........ ........ ........ ........ 00000000 00000100 00000000   - UNDERFLOW?	IS A VALID BOOLEAN CONDITION?
+    ........ ........ ........ ........ ........ 00000000 00001000 00000000   - EQUAL?		IS A VALID BOOLEAN CONDITION?
+    ........ ........ ........ ........ ........ 00000000 00010000 00000000   - ZERO?		IS A VALID BOOLEAN CONDITION?
+    ........ ........ ........ ........ ........ 00000000 00100000 00000000   - NEGATIVE?	IS A VALID BOOLEAN CONDITION?
+    ........ ........ ........ ........ ........ 00000000 01000000 00000000   - POSITIVE?	IS A VALID BOOLEAN CONDITION?
+    ........ ........ ........ ........ ........ 00000000 10000000 00000000   - APP?		IS A VALID BOOLEAN CONDITION?
+
+    THESE VALUES CAN ONLY BE TESTED FOR THEIR SET (1) CONDITION, IF 0 IGNORED:	
+    ........ ........ ........ ........ ........ 00000001 00000000 00000000   - APP1 IS SET
+    ........ ........ ........ ........ ........ 00000010 00000000 00000000   - APP2 IS SET
+    ........ ........ ........ ........ ........ 00000100 00000000 00000000   - APP3 IS SET
+    ........ ........ ........ ........ ........ 00001000 00000000 00000000   - APP4 IS SET
+    ........ ........ ........ ........ ........ 00010000 00000000 00000000   - APP5 IS SET
+    ........ ........ ........ ........ ........ 00100000 00000000 00000000   - APP6 IS SET
+    ........ ........ ........ ........ ........ 01000000 00000000 00000000   - APP7 IS SET
+    ........ ........ ........ ........ ........ 10000000 00000000 00000000   - APP8 IS SET
+	NOTE:  PRED REGISTER IS ONLY POPULATED BY TWO INSTRUCTIONS:  PREDICATE, COPYPRED
+	NOTE:  PRED IS RESET TO 0 AFTER COUNT REACHES ZERO
+
+
+GENERAL INSTRUCTION FORMAT
+--------------------------
+	[PREDICATE]										- THE PREDICATE COMES FROM A PRIOR INSTRUCTION
+	[OPCODE][OPERANDS][LITERALS][IMMEDIATES]
+
+
+INSTRUCTION FORMAT
+------------------
+[4:PREDICATE] PRECEDES EVERY OPCODE
+	0000	- NO PREDICATE
+	0001	- CARRY?
+	0010	- EQUAL?
+	0100	- ZERO?
+	1000	- UNDERFLOW?
+	1001	- OVERFLOW?
+	1010	- NEGATIVE?
+	1011	- POSITIVE?
+	1100	- CARRY? AND NEGATIVE?
+	1101	- CARRY? AND POSITIVE?
+	1110	- OVERFLOW? OR UNDERFLOW?
+	1111	- APP?
+
+[12:EXTENDED PREDICATE, IMMEDIATE VALUES FOR "PREDICATE" ASSEMBLY INSTRUCTION]
+	none are currently defined
+	
+[4:SOURCES]
+	0000	IMM16				[16:ENCODED IMMEDIATELY AFTER THE OPCODES]
+	0001	IMM32				[32:ENCODED IMMEDIATELY AFTER THE OPCODES]
+	0010	IMM64				[64:ENCODED IMMEDIATELY AFTER THE OPCODES]
+	0011	REGISTER			[4:NUMBER]
+	0100	SP[N]				[32:RELATIVE OFFSET TO SP]
+	0101	SBD[N]				[4:REG RELATIVE OFFSET TO SANDBOX BASE]
+	0110	PARAM				[4:PARAMETER NUMBER]
+	0111	RETURN				[4:RETURN NUMBER]
+	1000	LOCAL				[32:NUMBER, IF NEGATIVE EXPLICIT LOCAL, IF POSITIVE DYNAMIC ALLOCATION]
+	1001	GLOBALS				[32:NUMBER, IF NEGATIVE EXPLICIT GLOBAL, IF POSITIVE DYNAMIC ALLOCATION]
+	1010	OBJECT				[32:NUMBER, IF NEGATIVE EXPLICIT OBJECT, IF POSITIVE DYNAMIC ALLOCATION]
+	1011	REG+REG				[4:NUMBER][4:NUMBER]
+	1100	FREG+FREG			[4:NUMBER][4:NUMBER]
+	1101	[REG+IMM8]			[4:OBJECT NUMBER][8:OFFSET INTO OBJECT]
+	1110	[REG+REG]			[4:OBJECT NUMBER][4:OFFSET INTO OBJECT]
+	1111	RESULT				USES THE RESULT REGISTER FOR THIS SOURCE
+
+	
+[8:INSTRUCTION] - INSTRUCTION SET (OPCODE BYTE VALUES TO BE DEFINED LATER)
+	* NOTE:  REFER TO OBED_DRAFT_0.60.ASSEMBLY_INSTRUCTIONS.TXT FOR EXPLICIT ENCODINGS AND SYNTAX OF EACH OPCODE
+	x1111111	- EXTENDED INSTRUCTION BYTE FOLLOWS (TO BE DEFINED / ADDED LATER)
+				EXAMPLES:
+					SINE
+					COSINE
+					TANGENT
+					ARCSINE
+					ARCCOSINE
+					ARCTANGENT
+					SQUARE ROOT
+					ROUND
+					ISINT
+
+DEBUGGER API
+------------
+WARNING:  THE PORTION BEYOND THIS LINE MAY NO LONGER BE ACCURATE.
+          I WILL REVISIT IT IN THE COMING WEEKS.
+	THIS API IS DESIGNED SO NUMEROUS EXTERNAL DEBUGGERS CAN CONNECT
+	TO ANY RUNNING VM INSTANCE AND MONITOR, INFLUENCE OR DEVASTATE
+	ITS NORMAL OPERATION INDEPENDENTLY.
+
+	NOTE: THIS DEBUGGER INTERFACE IS SEPARATE AND ISOLATED FROM NORMAL
+	WINDOW DEBUGGER ADHERENCE.  IT IS ITS OWN PROTOCOL AND WILL BE
+	IMPLEMENTED IDENTICALLY ON ALL PLATFORMS, ALLOWING THE SAME DEBUGGER
+	CODE TO OPERATE ON ALL PLATFORMS.
+	
+	THE FOLLOWING LIST OF FUNCTIONS ARE AVAILABLE TO EXTERNAL
+	DEBUGGERS WISHING TO CONNECT TO A RUNNING VM INSTANCE.
+	u32			debuggerRequestUniqueID						(void);
+	
+	THESE TWO FUNCTIONS ARE USED TO ATTACH A DEBUGGER.  THEY ARE
+	AVAILABLE BY SENDING MESSAGES TO THE RUNNING VM INSTANCE.
+	THE RESPONSE GIVEN BY THE VM INDICATES SUCCESS OR FAILURE:
+	u32			debuggerConnect								(u32 id, s8* tcPath);
+	u32			debuggerConnectRemote						(u32 id, s8* tcPath, s8* ipAddressOrMachineName);
+
+	THE UNIQUE ID IS USED AS A "vvm_########.ini" FILE THAT IS POPULATED
+	IN GENERAL WITH THIS INFORMATION:
+		name=My Debugger's Name
+		dll=c:\path\to\debugger.dll
+
+	THE VVM ATTEMPTS TO LOCATE THE "vvmDebugger()" FUNCTION AND BEGINS
+	A PROTOCOL TO IDENTIFY MUTUALLY REQUIRED PROCEDURE / FUNCTION
+	LOCATIONS, ALLOWING THE VVM TO CALL THE DEBUGGER CODE DIRECTLY,
+	AND THE DEBUGGER CODE TO CALL THE VVM DIRECTLY, ASYNCHRONOUSLY,
+	AND IN A MULTI-THREADED CAPACITY (ALL FUNCTIONS ARE FULLY REENTRANT).
+	
+* In future this group may be renamed gui* instead of debugger*, as I
+* am determining how I want plugins to operate within the VVM.  Plugins
+* would request the same function addresses, but would do so without
+* the logical context of "being a debugger".
+* Refer to vvm_vdeb1.cpp, common_vvm.h for information about debugger functions.
