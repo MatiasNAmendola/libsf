@@ -1,75 +1,84 @@
 +---------------------------------------+
 |               OBED VM                 |
 |                                       |
-|  OBJECT/EVENT DRIVEN VIRTUAL MACHINE  |
+|  OBject/Event Driven Virtual Machine  |
 |                                       |
-|          NOVEMBER 07, 2012            |
-|             DRAFT 0.60                |
-|          BY RICK C. HODGIN            |
+|          February 22, 2014            |
+|             Draft 0.70                |
+|          by Rick C. Hodgin            |
 |                                       |
-|  RELEASED AS THE GO-FORWARD PROTOTYPE |
-|  FOR THE MECHANICS OF THE VVM ENGINE. |
-|  IN PRAYER (MUCH PRAYER)... -RCH      |
+|  Released as the Go-Forward prototype |
+|  for the mechancis of the VVM engine. |
+|  In prayer (much prayer)... -RCH      |
 +----------------------------------------
 
 +---------------------------------------+
-|   A REQUEST IN PRAYER THROUGH FAITH   |
+|  A request in prayer, through faith   |
 |---------------------------------------|
-| MAY THE LORD, JESUS CHRIST, BLESS THE |
-| WORK OF MY HANDS ON THIS PROJECT, AS  |
-| I GIVE ALL CREDIT, HONOR AND GLORY TO |
-| HIM.  AMEN.                           |
+| May the Lord, Jesus Christ, bless the |
+| work of my hands on this project, as  |
+| I give all credit, honor, and glory   |
+| to Him.  Amen.                        |
 |---------------------------------------|
-| MAY THE LORD, JESUS CHRIST, BLESS THE |
-| WORK OF ALL HANDS ON THIS PROJECT, AS |
-| WE GIVE ALL CREDIT, HONOR AND GLORY   |
-| TO HIM.  AMEN.                        |
+| May the Lord, Jesus Christ, bless the |
+| work of all hands on this project, as |
+| we give all credit, honor, and glory  |
+| to Him.  Amen.                        |
 +---------------------------------------+
 
 
 
 
-OBJECT EVENT DRIVEN VIRTUAL MACHINE (OBED)
+Object/Event Driven Virtual Machine (OBED)
 ------------------------------------------
-MACHINE BOOTS UP WITH A MEMORY BUFFER BEGINNING
-AT OFFSET 0.  INSTANTIATES WITH A SINGLE PROGRAM
-OBJECT, WHICH POINTS TO AN INITIAL ENVIRONMENT.
-THIS PROGRAM WAS PREVIOUSLY COMPILED FOR EXECUTION
-ON THE OBED VM.  IT IS A BXML FILE THAT CONTAINS
-SPECIFIC INFORMATION FOR LOADING INTO THE OBED VM.
+
+The machine boots up with a memory buffer beginning at offset 0.  Instantiates with a single
+program object, which points to an initial environment.  This program was previously compiled
+for operation on the OBED VM.  It is a BXML file that contains specific information for loading
+into the OBED VM.
 
 VARIABLE DEFINITIONS
 --------------------
-ALL OBED VM NAMES ARE PREFIXED WITH A FOUR-CHARACTER
-SEQUENCE IDENTIFYING THEIR TYPE AND LOCALITY.
+All OBED variables names are prefixed during compilation with a four-character sequence
+identifying their type and locality.  These do not affect their relationship to outside-
+facing variable names, but are used internally for processing.
 
-EXAMPLE:  p,l,g,r			= PARAMETER, LOCAL, GLOBAL AND RETURN
-          s08,s16,s32,s64	= SIGNED 8-BIT, 16-BIT, 32-BIT AND 64-BIT
-          u08,u16,u32,u64	= UNSIGNED 8-BIT, 16-BIT, 32-BIT AND 64-BIT
-          f32,f64			= FLOATING POINT 32-BIT, 64-BIT
+The format conveys two parts, XYYY.
 
-NOTE:  These are defined in the code executed on the VM.
-       The IDE can use any variable name to hide this requirement
-       and allow for other variable forms.  An example of a
-       simplified variable name:
-              OBED VM SEES:  ls64Foo
-              SHOWN IN IDE:  foo or lnFoo
+EXAMPLE:  p,l,g,t,v,r		-- Parameter, Local, Global, Thread global, Private, Return
+          s08,s16,s32,s64	-- Signed 8-bit, 16-bit, 32-bit, and 64-bit
+          u08,u16,u32,u64	-- Unsigned 8-bit, 16-bit, 32-bit, and 64-bit
+          f32,f64			-- Floating point, 32-bit, 64-bit
+		  bin				-- Bignum integer
+		  bfp				-- Bignum floating point
 
-GLOBAL OBJECTS
---------------
-	prg								-- A running program
-	scr								-- Screens (child of PRG)
-	cvs								-- Canvas (child of SCREEN)
-	rgn								-- Regions (child of CVS)
-	glo								-- Global variables (child of PRG)
-	snp								-- Snippets (child of PRG)
-	dyn								-- Dynamic Snippets (child of PRG)
-	tmg								-- Global Timer (child of PRG)
-	thr								-- Threads (child of PRG) 
-	sta								-- Stack (child of THR)
-	reg								-- Registers (child of THR)
-	tmr								-- Thread Timer (child of THR)
-	ets								-- Executing Thread Snippet (child of THR)
+NOTE:  These are defined in the code executed on the VM.  The debugger environment has
+       settings which allow this naming convention to be hidden, 
+       An example of a simplified variable name:
+	   
+              OBED VM sees:     ls64Foo
+			
+              In the debugger:  foo
+			               Or:  lnFoo
+
+Global Objects Visible in the Debugger
+--------------------------------------
+	vvm							-- The top level object
+	vvm.prg						-- A running program instance (this is the top level object
+									visible to the running program.  It cannot see vvm objects.
+	vvm.prg.scr					-- Allocated screens (visible windows on the user's desktop)
+	vvm.prg.scr.cvs				-- Allocated canvases (per screen, or singletons per program)
+	vvm.prg.scr.cvs.rgn			-- Allocated regions (per canvas, or singletons per program)
+// TODO:  Working here...
+	glo				-- Global variables (child of PRG)
+	snp				-- Snippets (child of PRG)
+	dyn				-- Dynamic Snippets (child of PRG)
+	tmg				-- Global Timer (child of PRG)
+	thr				-- Threads (child of PRG) 
+	sta				-- Stack (child of THR)
+	reg				-- Registers (child of THR)
+	tmr				-- Thread Timer (child of THR)
+	ets				-- Executing Thread Snippet (child of THR)
 
 	* The following have future consideration:
 	com								-- Communications object
