@@ -37,6 +37,7 @@ program object, which points to an initial environment.  This program was previo
 for operation on the OBED VM.  It is a BXML file that contains specific information for loading
 into the OBED VM.
 
+
 VARIABLE DEFINITIONS
 --------------------
 All OBED variables names are prefixed during compilation with a four-character sequence
@@ -61,85 +62,49 @@ NOTE:  These are defined in the code executed on the VM.  The debugger environme
               In the debugger:  foo
 			               Or:  lnFoo
 
+						   
 Global Objects Visible in the Debugger
 --------------------------------------
 	vvm							-- The top level object
 	vvm.prg						-- A running program instance (this is the top level object
 									visible to the running program.  It cannot see vvm objects.
+	vvm.prg.glo					-- Global variables for this program
 	vvm.prg.scr					-- Allocated screens (visible windows on the user's desktop)
-	vvm.prg.scr.cvs				-- Allocated canvases (per screen, or singletons per program)
-	vvm.prg.scr.cvs.rgn			-- Allocated regions (per canvas, or singletons per program)
-// TODO:  Working here...
-	glo				-- Global variables (child of PRG)
-	snp				-- Snippets (child of PRG)
-	dyn				-- Dynamic Snippets (child of PRG)
-	tmg				-- Global Timer (child of PRG)
-	thr				-- Threads (child of PRG) 
-	sta				-- Stack (child of THR)
-	reg				-- Registers (child of THR)
-	tmr				-- Thread Timer (child of THR)
-	ets				-- Executing Thread Snippet (child of THR)
+	vvm.prg.scr.cvs				-- Allocated canvases (per screen)
+	vvm.prg.cvs					-- Raw list of canvases allocated by program
+	vvm.prg.scr.cvs.rgn			-- Allocated regions (per canvas)
+	vvm.prg.rgn					-- Raw list of regions allocated by program
+	vvm.prg.rgn.cbk.mou			-- Mouse callbacks (per region)
+	vvm.prg.rgn.cbk.key			-- Keyboard callbacks (per region)
+	vvm.prg.rgn.cbk.cus			-- Custom callbacks (per region)
+	vvm.prg.snp					-- Code snippets compiled for the program
+	vvm.prg.snp.par				-- Parameter variables for each snippet
+	vvm.prg.snp.ret				-- Return variables for each snippet
+	vvm.prg.snp.loc				-- Local variables for each snippet
+	vvm.prg.snp.sco				-- Scoped variables for each snippet
+	vvm.prg.dyn					-- Dynamic code snippets compiled for the program
+	vvm.prg.dyn.par				-- Parameter variables for each dynamic snippet
+	vvm.prg.dyn.ret				-- Return variables for each dynamic snippet
+	vvm.prg.dyn.loc				-- Local variables for each dynamic snippet
+	vvm.prg.dyn.sco				-- Scoped variables for each dynamic snippet
+	vvm.prg.gti					-- Global timers for this program (timers which fire in their own new thread)
+	vvm.prg.thr					-- Thread pool for this program
+	vvm.prg.thr.sta				-- Thread stack
+	vvm.prg.thr.reg				-- Thread CPU flags and registers
+	vvm.prg.thr.tgl				-- Thread globals (global variables for this thread)
+	vvm.prg.thr.tti				-- Thread timers (timers which will fire on the current thread)
+	vvm.prg.thr.rsn				-- Running snippet (part of a hierarchical structure for call stack)
+	vvm.prg.thr.rsn.par			-- Parameter variables for the current running snippet
+	vvm.prg.thr.rsn.ret			-- Return variables for current running snippet
+	vvm.prg.thr.rsn.loc			-- Local variables for current running snippet
+	vvm.prg.thr.rsn.sco			-- Scoped variables for current running snippet
+	vvm.prg.thr.ets				-- Currently executing thread snippet (vvm.prg.thr.ets.parent goes back up, etc.)
 
 	* The following have future consideration:
-	com								-- Communications object
+	com							-- Communications object
+	sec							-- Security objects
 
-OBJECT DETAILS
---------------
-	prg								-- Global program object
-	prg.sta							-- Stack
-	prg.glo							-- Global variable definitions
-	prg.snp							-- All code snippets known to the executing environment
-	prg.dyn							-- All code snippets that are loaded dynamically while running in the executing environment
-	prg.glo._N.nam					-- global variable definition for data quantities referenced in snippets
-	prg.snp._N.nam					-- Name of the code snippet which exists in the project / program
-	prg.dyn._N.nam					-- Name of the dynamic code snippet which exists in the loaded module
-
-	scr								-- Program Screen Objects
-	scr.cvs							-- Screen canvas objects
-	scr._mcb						-- Mouse callbacks defined for this screen
-	scr._kcb						-- Keyboard callbacks defined for this screen
-
-	cvs								-- Canvas Objects
-	cvs.rgn							-- Regions defined within the canvas
-	cvs.rgn._rcb					-- Region callbacks defined for this region
-	cvs.left						-- Left coordinate on parent canvas
-	cvs.top							-- Top coordinate on parent canvas
-	cvs.width						-- Width of the canvas
-	cvs.height						-- Height of the canvas
-	cvs.bitBuffer					-- Pointer to 32-bit bit buffer for this canvas
-	cvs.renderSnippet				-- Code to call to render this canvas
-	cvs.parentCanvas				-- The canvas object this item is a child of
-
-	thr								-- Thread
-	thr.threadName					-- Thread, name of this thread (if specified)
-	thr.sta							-- Thread, stack space
-	thr.reg							-- Thread, register + sandbox space
-	thr.tmr							-- Thread, first timer for the thread
-	thr.ets							-- Thread, executing code snippet (program, function, method, event, etc.)
-
-	ets								-- Executing Thread Snippets
-	ets.par							-- Snippet parameters
-	ets.ret							-- Return parameters
-	ets.loc							-- Local variables
-	ets.snp							-- Currently executing snippet
-	
-	As each thread calls child functions, is interrupted by a timer, whatever it is, these objects are added:
-	x.snp.call.snp					-- On this thread, an explicit call was made, the result of source code
-	x.snp.event.snp					-- On this thread, an implicit call was made, the result of an event
-	
-	Subsequent calls are treed like this:
-	x.snp.call.call.snp				-- Another explicit call
-	x.snp.call.event.snp			-- An event occurred after an explicit call
-	x.snp.event.call.snp			-- An explicit call was made after an event was triggered
-	x.snp.event.event.snp			-- A secondary event occurred after a primary event
-		and so on...				-- every call or event triggers the addition of a new child level
-
-	* For future consideration:
-	com								-- Communications object
-	com._ip4						-- IPv4 network communication (to be defined later)
-	com._ip6						-- IPv6 network communication (to be defined later)
-
-VARIABLES
+Variables
 ---------
 	x.var.nam						-- Name and value of variable in ASCII
 	x.var._uni						-- (if defined) name of the variable in UNICODE
@@ -148,51 +113,80 @@ VARIABLES
 	x.var._min						-- (If defined) Minimum value that can be stored in this value
 	x.var._max						-- (If defined) Maximum value that can be stored in this value
 
-VVM SELF-INSTANTIATES WITH AN OPTIONAL PROGRAM TO LAUNCH,
-WHICH LETS IT DETERMINE HOW THE VVM WILL OPERATE.  HOWEVER,
-IF NO PROGRAM IS SPECIFIED, THE VVM LOADS A DEFAULT, INTERNALLY
-LAUNCHED PROGRAM WHICH IS BASICALLY AN OSS-SPECIFIC PROMPT
-ASKING THE USER WHICH DISK-BASED BXML THEY WISH TO RUN.
+VVM self-instantiates with an optional program to launch,
+which lets it determine how the VVM will operate.  However,
+if no program is specified, the VVM loads a default, internally
+launched program which is basically an OSS-specific prompt
+asking the user which disk-based BXML they desire to run.
 
 
-RELATIVE PATHNAMES
+Relative Pathnames
 ------------------
-THE VVM WILL SUPPORT A HOME FOLDER LOCATION THAT CAN ALWAYS BE
-IDENTIFIED WITHIN A PATHNAME AS "~home~/" AND THEN THE RELATIVE
-PATH AFTER THAT.  IN THIS WAY MIGRATING SUSPENDED MACHINES ON ONE
-ARCHITECTURE, TO BE RESUMED ON ANOTHER, WILL WORK CORRECTLY.
+The VVM creates an isolated virtual environment, and supports a
+home folder location that can always be identified within a pathname
+as "//" followed by the relative portion.  This makes "//" its "root"
+directory.  In this way, migrating suspended VVM instances from one
+machine to another, or one session to another, allows their data
+connections to persist, even if suspended and resumed later.
 
 
-DYNAMIC SNIPPET PARAMETERS
---------------------------
-EVERY DYNAMIC SNIPPET PARAMETER IS IDENTIFIED AS ONE OF A FEW TYPES.
-FOR COMPLEX DATA ITEMS, THEY CAN BE PASSED AS AN SDatum STRUCTURE.
+Dynamic Snippets
+----------------
+Dynamic Snippets exist as two distinct types.
 
-DATUM
+(1) The first is something most developers will be familiar with.
+It specifies the interface parameters in communicating with an
+external DLL.  It is the prototype definition that is created in
+the VVM, so that the VVM calls the appropriate dynamic snippet,
+which then forwards on to the external DLL.  And, upon return,
+based upon the return parameter(s), it translates information
+from the DLL into VVM-specific variables.
+
+(2) The VVM supports an edit-and-continue ABI, and this is how it
+is implemented.  Initially (at the time of first compile), an
+actual snippet is created.  However, if that snippet is replaced
+in the debugger during runtime, a dynamic snippet takes its place.
+A "forward pointer" from the snippet indicates which dynamic
+snippet should be run in its place.  And with each subsequent
+change either the dynamic snippet is updated (depending on the
+nature of the change), or it is supplanted by a new dynamic
+snippet with the previous one being moved into an anchor history
+list if required.
+
+
+Datum
 ------
-	A DATUM IS THE LOWEST LEVEL PRIMITIVE FOR STORING SOMETHING.
-	IT ALWAYS EXISTS ON AN OBJECT, WHICH IS ITS PARENT.
-	A DATUM CONTAINS A NAME AND ASSOCIATED DATA.
-	SINCE OBED IS OBJECT EVENT DRIVEN, EVERYTHING HAS A NAME.
-	EVERY NAME HAS A LENGTH AND THE ASCII NAME BYTES.
-	EVERY NAME CAN HAVE AN OPTIONAL UNICODE NAME.
-	ALL DATA HAS A LENGTH AND THE DATA BYTES.
+	A Datum is the lowest-level primitive form for storing data.
+	It is the root item used on every object, as each object
+	reference has a name and associated data.  Both the name and
+	the data are stored as Datums.  Every data has a name, and
+	name length, and a data, and data length.  There is also a
+	Datum2 which allows a "logical size" to be created, which
+	is not allocated, but indicates a maximum that can be allocated.
 
-OBJECTS
--------
-	EVERY OBJECT IS A CONTAINER.
-	EVERY OBJECT HAS NEXT, PREV WHICH POINT TO ITS SIBLINGS.
-	EVERY OBJECT HAS PARENT, FIRST CHILD WHICH POINT TO ITS LINEAGE.
-	EVERY OBJECT HAS A FIRST DATUM WHICH CONTAINS ATTRIBUTE ITEMS FOR THE OBJECT, INCLUDING BASICS LIKE A NAME.
-
-MEMORY
+	
+Object
 ------
-	ALL MEMORY IS LINEAR.  NO PAGING.  NO SWAPPING TO DISK.  THIS IS HANDLED BY THE HOST OS AS NEEDED.
-	MEMORY IS INITIALLY ALLOCATED BEGINNING AT OFFSET 0 FOR SOME SIZE (A VM INSTANCE SETTING, MINIMUM OF 4 MB).
-	THE VM CAN LAUNCH PAUSED WITH NO PROGRAM TO RUN.  FROM THERE, PRIOR SAVED SESSIONS CAN BE RESTORED.
-	THE PROGRAM TO RUN IS LOADED BEGINNING AT THAT LOCATION.
-	ONCE LOADED CONTROL IS TRANSFERRED TO THE INSTRUCTION AT OFFSET 0.
+	Every variable is an object.
+	Every object is a container.
+	Every object has a next and prev, which points to siblings.
+	Every object has a parent (even singletons, whose parent is vvm.prg.glo object).
 
+	
+Memory
+------
+	All memory is linear per program.  No paging.  No mechanical swapping to disk.  So far as the VVM programs
+	are concerned, there is an unlimited 64-bit flat memory area which extends from 0 upward.
+	
+	Memory is initially allocated beginning at offset 0 for some size (a VVM instance setting, minimum of 4MB).
+	The VVM can launch paused with no program running.  From there, prior saved sessions can be restored, or
+	programs can be loaded manually and run.
+	
+	Each program has a main, and it begins running at that location.  Every suspended and resumed process will
+	maintain its last executing line, and will continue on from there upon resumption.  Only those functions
+	which are not tagged (|NOSUSPEND|) can be suspended in.
+
+// TODO:  working here...
 	VARIOUS FIXED INTERNAL OBJECTS ARE MAINTAINED OUTSIDE OF MAIN MEMORY WHICH HOLD
 	INFORMATION ABOUT THE RUNNING VM.  THESE ARE QUERIED BY THE HOST AND GUEST THROUGH
 	A SPECIAL API.
