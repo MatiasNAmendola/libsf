@@ -1,4 +1,5 @@
-[12:PREDICATE + INSTRUCTION] - INSTRUCTION SET (OPCODE BYTE VALUES TO BE DEFINED LATER)
+[8:INSTRUCTION] - INSTRUCTION SET (OPCODE BYTE VALUES TO BE DEFINED LATER)
+
 	; Unsigned add
 	0		- UADD64 [PARAM1] TO [PARAM2]
 	1		- UADD32 [PARAM1] TO [PARAM2]
@@ -202,7 +203,7 @@
 	141		- ROR16 [PARAM1] BY [PARAM2]
 	142		- ROR8 [PARAM1] BY [PARAM2]
     
-	143		- NUSERVED
+	143		- Nuserved
     
 	; Copy floating point to integer, or integer to floating point
 	144		- COPYF32I32 [FREG32] TO [REG32]
@@ -221,37 +222,38 @@
 	153		- FLAGSIN [PARAM1] TO FLAGS
 	
 	; Common register operations
-	154		- COPYRESULT [PARAM1]				; COPIES RESULT TO [PARAM1]
-	155		- BUMP [IMM8]						; COPIES RESULT TO +008, and each additional slot up for the [IMM8] slot count
-	156		- NUSERVED
+	154		- COPYRESULT [PARAM1]				; Copies result to [PARAM1]
+	155		- BUMP								; Copies result to +008
+	156		- BUMP [IMM8]						; Copies result to +008, and each additional slot up for the [IMM8] slot count
     
 	; Operations
 	157		- DEBUG								; DEBUGGER BREAKPOINT
-	158		- HALT								; HALTS TIMESLICE EXECUTION UNTIL NEXT SCHEDULING
+	158		- SLEEP								; Releases timeslice execution until next scheduling
 	159		- NOP								; USED FOR PADDING
-	160		- PRIORITY [IMM8]					; SIGNED VALUE INDICATING PRIORTY (LOWEST TO HIGHTEST, NEGATIVE TO 0 TO POSITIVE, 0=NORMAL)
-	161		- NUSERVED
-	162		- NUSERVED
-	163		- NUSERVED
-	164		- UNIQUE							; GET THE NEXT SYSTEM-WIDE 64-BIT UNIQUE NUMBER
+	160		- PRIORITY [IMM8]					; Signed value indicating current thread priority (negative to positive, lowest to highest, 0 is default)
+	161		- UNIQUE							; GET THE NEXT SYSTEM-WIDE 64-BIT UNIQUE NUMBER
+	
+	162		- Nuserved
+	163		- Nuserved
+	164		- Nuserved
     
 	; Branching
-	165		- SETIP [PARAM1]:[PARAM2]			; EXPLICIT OFFSET [PARAM2] IN EXPLICIT SNIPPET [PARAM1] 
-	166		- SETIP [PARAM1]:[PARAM2]			; EXPLICIT OFFSET [PARAM2] IN EXPLICIT DYNAMIC SNIPPET [PARAM1] 
-	167		- SETIP [PARAM1]					; EXPLICIT OFFSET IN CURRENT SNIPPET
-	168		- ADJIP64 [PARAM1]					; ADJUST IP FORWARD BACKWARD BY SIGNED [SOURCE]
-	169		- ADJIP32 [PARAM2]					; ADJUST IP FORWARD BACKWARD BY SIGNED [SOURCE]
-	170		- ADJIP16 [IMM16]					; ADJUST IP FORWARD BACKWARD BY SIGNED [IMM16]
-	171		- ADJIP8 [IMM8]						; ADJUST IP FORWARD BACKWARD BY SIGNED [IMM8]
+	165		- JUMPSN [PARAM1]:[PARAM2]			; EXPLICIT OFFSET [PARAM2] IN EXPLICIT SNIPPET [PARAM1] 
+	166		- JUMPDSN [PARAM1]:[PARAM2]			; EXPLICIT OFFSET [PARAM2] IN EXPLICIT DYNAMIC SNIPPET [PARAM1] 
+	167		- JUMP [PARAM1]						; Move to explicit offset in current snippet or dynamic snippet
+	168		- JUMPREL [PARAM1]					; ADJUST IP FORWARD BACKWARD BY SIGNED [PARAM1]
+	169		- JUMPREL [IMM16]					; ADJUST IP FORWARD BACKWARD BY SIGNED [IMM16]
+	170		- JUMPREL [IMM8]					; ADJUST IP FORWARD BACKWARD BY SIGNED [IMM8]
+	171		- 
     
 	; Calling
 	172		- CALLSN [PARAM1]					; CALL SNIPPET [PARAM1]
 	173		- CALLDSN [PARAM1]					; CALL DYNAMIC SNIPPET [PARAM1]
 	174		- HOST [IMM16]						; EXECUTE HOST FUNCTION [IMM16]
-	175		- NUSERVED
-	176		- NUSERVED
-	177		- NUSERVED
-	178		- RETURN							; EXPLICIT RETURN, IF EXECUTED WITH NO RETURN SNIPPET, TERMINATES PROGRAM
+	175		- CALLSNO [PARAM1]:[PARAM2]			; Call snippet [PARAM1] with offset of explicit [PARAM2]
+	176		- CALLDSO [PARAM1]:[PARAM2]			; Call dynamic snippet [PARAM1] with offset of explicit [PARAM2]
+	177		- RETURN [IMM8]						; Explicit return, and decrease SP by [IMM8]
+	178		- RETURN							; Explicit return, if executed with no return snippet, terminates program
     
 	; Stack
 	179		- PUSH64 [PARAM1]					; PUSHES 64-BIT QUANTITY ONTO STACK FROM SOURCE
@@ -260,9 +262,9 @@
 	182		- POP32 [PARAM1]					; POPS 32-BIT QUANTITY BACK OFF STACK INTO SOURCE
 	183		- STACKCOPY SP[PARAM1],[PARAM2],[IMM32]	; COPY [IMM32] BYTES FROM STACK+[PARAM1] TO [PARAM2]
     
-	184		- NUSERVED
-	185		- NUSERVED
-	186		- NUSERVED
+	184		- Nuserved
+	185		- Nuserved
+	186		- Nuserved
     
 	; Flags
 	187		- FLAGSET [IMM8]					; SET FLAG BIT [IMM8]
@@ -279,56 +281,56 @@
 	198		- SETP								; SET POSITIVE? FLAG
 	199		- SETA								; SET APP? FLAG
 	
-	200		- NUSERVED
-	201		- NUSERVED
-	202		- NUSERVED
-	203		- NUSERVED
-	204		- NUSERVED
-	205		- NUSERVED
-	206		- NUSERVED
-	207		- NUSERVED
-	208		- NUSERVED
-	209		- NUSERVED
-	210		- NUSERVED
-	211		- NUSERVED
-	212		- NUSERVED
-	213		- NUSERVED
-	214		- NUSERVED
+	200		- Nuserved
+	201		- Nuserved
+	202		- Nuserved
+	203		- Nuserved
+	204		- Nuserved
+	205		- Nuserved
+	206		- Nuserved
+	207		- Nuserved
+	208		- Nuserved
+	209		- Nuserved
+	210		- Nuserved
+	211		- Nuserved
+	212		- Nuserved
+	213		- Nuserved
+	214		- Nuserved
 	
 	; Register spilling / filling
 	215		- SCATTER [PARAM1][PARAM2][IMM16]	; SCATTER REGISTER BLOCK BEGINNING AT [PARAM1] TO [PARAM2] FOR [IMM16] BYTES
 	216		- GATHER [PARAM1][PARAM2][IMM16]	; GATHER REGISTER BLOCK FROM [PARAM2] TO [PARAM1] FOR [IMM16] BYTES
 	
-	217		- NUSERVED
-	218		- NUSERVED
-	219		- NUSERVED
-	220		- NUSERVED
-	221		- NUSERVED
-	222		- NUSERVED
-	223		- NUSERVED
-	224		- NUSERVED
-	225		- NUSERVED
+	217		- Nuserved
+	218		- Nuserved
+	219		- Nuserved
+	220		- Nuserved
+	221		- Nuserved
+	222		- Nuserved
+	223		- Nuserved
+	224		- Nuserved
+	225		- Nuserved
 	
 	; VVM operations
 	226		- DOWN								; SUSPEND THE VIRTUAL MACHINE
 	
-	227		- NUSERVED
-	228		- NUSERVED
+	227		- Nuserved
+	228		- Nuserved
 	
 	; Exception handling
 	229		- EXSNIP [PARAM1]					; SET THE DEFAULT EXCEPTION SNIPPET TO [PARAM1]
 	230		- EXCEPTION [PARAM1]				; TRIGGER AN EXCEPTION TO SNIPPET [PARAM1]
 			
-	231		- NUSERVED
-	232		- NUSERVED
-	233		- NUSERVED
-	234		- NUSERVED
-	235		- NUSERVED
-	236		- NUSERVED
-	237		- NUSERVED
-	238		- NUSERVED
-	239		- NUSERVED
-	240		- NUSERVED
+	231		- Nuserved
+	232		- Nuserved
+	233		- Nuserved
+	234		- Nuserved
+	235		- Nuserved
+	236		- Nuserved
+	237		- Nuserved
+	238		- Nuserved
+	239		- Nuserved
+	240		- Nuserved
 	
 	; Semaphore processing
 	241		- SEMAPHORECREATE					; SEMAPHORE CREATE
@@ -340,15 +342,15 @@
 	; Predicate population
 	246		- PREDICATE [IMM16][4:REPEAT]		; USES AN EXTENDED PREDICATE FOR A HIGH COMBINATION OF EXPLICIT CONDITIONS
 	247		- PREDICATE [PARAM1][8:REPEAT]		; COPIES 64-BIT QUANTITY INTO PRED REGISTER, AND INDICATES AN 8-BIT REPEAT COUNT
-	248		- PREDIMPORT						; IMPORTS LOWER 16 BITS OF FLAGS REGISTER INTO PRED
+	248		- PREDIN							; IMPORTS LOWER 16 BITS OF FLAGS REGISTER INTO PRED
 			
-	248		- NUSERVED
-	249		- NUSERVED
-	250		- NUSERVED
-	251		- NUSERVED
-	252		- NUSERVED
-	253		- NUSERVED
-	254		- NUSERVED
+	248		- Nuserved
+	249		- Nuserved
+	250		- Nuserved
+	251		- Nuserved
+	252		- Nuserved
+	253		- Nuserved
+	254		- Nuserved
     
 	; Extended instructions
 	255		- EXTENDED INSTRUCTION BYTE FOLLOWS (TO BE DEFINED / ADDED LATER)

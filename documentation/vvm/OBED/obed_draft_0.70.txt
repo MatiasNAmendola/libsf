@@ -50,8 +50,8 @@ EXAMPLE:  p,l,g,t,v,r		-- Parameter, Local, Global, Thread global, Private, Retu
           s08,s16,s32,s64	-- Signed 8-bit, 16-bit, 32-bit, and 64-bit
           u08,u16,u32,u64	-- Unsigned 8-bit, 16-bit, 32-bit, and 64-bit
           f32,f64			-- Floating point, 32-bit, 64-bit
-		  bin				-- Bignum integer
-		  bfp				-- Bignum floating point
+		  bni				-- Bignum integer
+		  bnf				-- Bignum floating point
 
 NOTE:  These are defined in the code executed on the VM.  The debugger environment has
        settings which allow this naming convention to be hidden, 
@@ -65,59 +65,9 @@ NOTE:  These are defined in the code executed on the VM.  The debugger environme
 						   
 Global Objects Visible in the Debugger
 --------------------------------------
-	vvm							-- The top level object
-	vvm.prg						-- A running program instance (this is the top level object
-									visible to the running program.  It cannot see vvm objects.
-	vvm.prg.glo					-- Global variables for this program
-	vvm.prg.scr					-- Allocated screens (visible windows on the user's desktop)
-	vvm.prg.scr.cvs				-- Allocated canvases (per screen)
-	vvm.prg.cvs					-- Raw list of canvases allocated by program
-	vvm.prg.scr.cvs.rgn			-- Allocated regions (per canvas)
-	vvm.prg.rgn					-- Raw list of regions allocated by program
-	vvm.prg.rgn.cbk.mou			-- Mouse callbacks (per region)
-	vvm.prg.rgn.cbk.key			-- Keyboard callbacks (per region)
-	vvm.prg.rgn.cbk.cus			-- Custom callbacks (per region)
-	vvm.prg.snp					-- Code snippets compiled for the program
-	vvm.prg.snp.par				-- Parameter variables for each snippet
-	vvm.prg.snp.ret				-- Return variables for each snippet
-	vvm.prg.snp.loc				-- Local variables for each snippet
-	vvm.prg.snp.sco				-- Scoped variables for each snippet
-	vvm.prg.dyn					-- Dynamic code snippets compiled for the program
-	vvm.prg.dyn.par				-- Parameter variables for each dynamic snippet
-	vvm.prg.dyn.ret				-- Return variables for each dynamic snippet
-	vvm.prg.dyn.loc				-- Local variables for each dynamic snippet
-	vvm.prg.dyn.sco				-- Scoped variables for each dynamic snippet
-	vvm.prg.gti					-- Global timers for this program (timers which fire in their own new thread)
-	vvm.prg.thr					-- Thread pool for this program
-	vvm.prg.thr.sta				-- Thread stack
-	vvm.prg.thr.reg				-- Thread CPU flags and registers
-	vvm.prg.thr.tgl				-- Thread globals (global variables for this thread)
-	vvm.prg.thr.tti				-- Thread timers (timers which will fire on the current thread)
-	vvm.prg.thr.rsn				-- Running snippet (part of a hierarchical structure for call stack)
-	vvm.prg.thr.rsn.par			-- Parameter variables for the current running snippet
-	vvm.prg.thr.rsn.ret			-- Return variables for current running snippet
-	vvm.prg.thr.rsn.loc			-- Local variables for current running snippet
-	vvm.prg.thr.rsn.sco			-- Scoped variables for current running snippet
-	vvm.prg.thr.ets				-- Currently executing thread snippet (vvm.prg.thr.ets.parent goes back up, etc.)
-
-	* The following have future consideration:
-	com							-- Communications object
-	sec							-- Security objects
-
-Variables
----------
-	x.var.nam						-- Name and value of variable in ASCII
-	x.var._uni						-- (if defined) name of the variable in UNICODE
-	x.var._xunderflow				-- (If defined) Exception to trigger on variable underflow
-	x.var._xoverflow				-- (If defined) Exception to trigger on variable overflow
-	x.var._min						-- (If defined) Minimum value that can be stored in this value
-	x.var._max						-- (If defined) Maximum value that can be stored in this value
-
-VVM self-instantiates with an optional program to launch,
-which lets it determine how the VVM will operate.  However,
-if no program is specified, the VVM loads a default, internally
-launched program which is basically an OSS-specific prompt
-asking the user which disk-based BXML they desire to run.
+	The object structure is given by the natural hierarchy which is visible in the VVM structs.  Refer to the vvm_structs.png
+	image for the relationship between structs.
+// TODO:  Create this vvm_structs.png image once the structures settle down. :-)
 
 
 Relative Pathnames
@@ -132,7 +82,8 @@ connections to persist, even if suspended and resumed later.
 
 Dynamic Snippets
 ----------------
-Dynamic Snippets exist as two distinct types.
+Dynamic Snippets exist as two distinct types.  One is for external definition.
+The other is for support of edit-and-continue.
 
 (1) The first is something most developers will be familiar with.
 It specifies the interface parameters in communicating with an
@@ -169,8 +120,8 @@ Object
 ------
 	Every variable is an object.
 	Every object is a container.
-	Every object has a next and prev, which points to siblings.
-	Every object has a parent (even singletons, whose parent is vvm.prg.glo object).
+	Every object has a next and prev to siblings.
+	Every object has a parent and child for lineage.
 
 	
 Memory
@@ -209,13 +160,6 @@ Edit-and-continue
 	in operation will not be affected by the change, continued, otherwise the thread will be suspended so a
 	developer can determine through the debugger on which line to proceed.
 	
-	WHEN CHANGES ARE MADE, THE PROGRAM PORTIONS FOR EACH LINE ARE CHANGED,
-	WITH NEW LINES BEING INSERTED, DELETED LINES BEING REMOVED, ETC.
-
-	BY MAINTAINING THIS LINE-TO-SNIPPET RELATIONSHIP, EDIT-AND-CONTINUE
-	BECOMES VERY EASY TO IMPLEMENT.  HOWEVER, THIS IS NOT THE ONLY MODEL.
-	THE ENTIRE ABI CAN BE SWAPPED OUT AND REPLACED AS NECESSARY, PROVIDED
-	THE INTEGRITY OF THE ENTIRE MACHINE STATE IS MAINTAINED.
 
 VVM Registers
 ------------------------------------------
@@ -235,15 +179,15 @@ VVM Registers
 	
 	Note:  The following are shorthand names to explicit offsets, which can make reading assembly easier.
 	
-	OFFSET		INTEGER REGISTERS
-	------		-----------------
-	+008		A8		A16		A32		A64
-	+016		B8		B16		B32		B64
-	+024		C8		C16		C32		C64
-	+032		D8		D16		D32		D64
-	+040		E8		E16		E32		E64
-	+048		F8		F16		F32		F64
-	+056		G8		G16		G32		G64
+	OFFSET		INTEGER Register Alias Names
+	------		----------------------------
+	+008		A8		A16		A32		A64		eax		rax		; x86 name relates to A32 and A64
+	+016		B8		B16		B32		B64		ebx		rbx		; x86 name relates to B32 and B64
+	+024		C8		C16		C32		C64		ecx		rcx		; x86 name relates to C32 and C64
+	+032		D8		D16		D32		D64		edx		rdx		; x86 name relates to D32 and D64
+	+040		E8		E16		E32		E64		esi		rsi		; x86 name relates to E32 and E64
+	+048		F8		F16		F32		F64		edi		rdi		; x86 name relates to F32 and F64
+	+056		G8		G16		G32		G64		
 	+064		H8		H16		H32		H64
 	+072		I8		I16		I32		I64
 	+080		J8		J16		J32		J64
@@ -254,48 +198,47 @@ VVM Registers
 	+120		O8		O16		O32		A64
 	+128		P8		P16		P32		P64
 	            
-	OFFSET		FLOATING POINT REGISTERS
-	------		------------------------
-	+136		FA32	FA64
-	+144		FB32	FB64
-	+152		FC32	FC64
-	+160		FD32	FD64
-	+168		FE32	FE64
-	+176		FF32	FF64
-	+184		FG32	FG64
-	+192		FH32	FH64
-	+200		FI32	FI64
-	+208		FJ32	FJ64
-	+216		FK32	FK64
-	+224		FL32	FL64
-	+232		FM32	FM64
-	+240		FN32	FN64
-	+248		FO32	FO64
-	+256		FP32	FP64
+	OFFSET		FLOATING POINT Register Alias Names
+	------		-----------------------------------
+	+136		FA32	FA64	st0		xmm0		; x86 names relate to 64-bit IEEE forms only
+	+144		FB32	FB64	st1		xmm1		; x86 names relate to 64-bit IEEE forms only
+	+152		FC32	FC64	st2		xmm2		; x86 names relate to 64-bit IEEE forms only
+	+160		FD32	FD64	st3		xmm3		; x86 names relate to 64-bit IEEE forms only
+	+168		FE32	FE64	st4		xmm4		; x86 names relate to 64-bit IEEE forms only
+	+176		FF32	FF64	st5		xmm5		; x86 names relate to 64-bit IEEE forms only
+	+184		FG32	FG64	st6		xmm6		; x86 names relate to 64-bit IEEE forms only
+	+192		FH32	FH64	st7		xmm7		; x86 names relate to 64-bit IEEE forms only
+	+200		FI32	FI64	st8		xmm8		; x86 names relate to 64-bit IEEE forms only
+	+208		FJ32	FJ64	st9		xmm9		; x86 names relate to 64-bit IEEE forms only
+	+216		FK32	FK64	st10	xmm10		; x86 names relate to 64-bit IEEE forms only
+	+224		FL32	FL64	st11	xmm11		; x86 names relate to 64-bit IEEE forms only
+	+232		FM32	FM64	st12	xmm12		; x86 names relate to 64-bit IEEE forms only
+	+240		FN32	FN64	st13	xmm13		; x86 names relate to 64-bit IEEE forms only
+	+248		FO32	FO64	st14	xmm14		; x86 names relate to 64-bit IEEE forms only
+	+256		FP32	FP64	st15	xmm15		; x86 names relate to 64-bit IEEE forms only
 
 	Other registers (accessible only by special instructions)
 	---------------------------------------------------------
 	+264		FLAGS			- FLAGS
 	+272		IP				- INSTRUCTION POINTER
-	+280		SP				- STACK POINTER
+	+280		SP				- STACK POINTER (SP always points to the next slot to push to, so last pushed is SP-4 or SP-8)
 	
 	+288		SNIP			- CURRENTLY SNIPPET NUMBER EXECUTING
 	+296		EXSNIP			- SNIPPET ID NUMBER TO BRANCH TO ON EXCEPTION
-	+304		Nuserved
-	+312		ERROR			- THE MACHINE OPCODE ERROR GENERATED DURING EXECUTION (SNIP:IP IS POINTING TO OFFENDING INSTRUCTION)
+	+304		ERROR			- THE MACHINE OPCODE ERROR GENERATED DURING EXECUTION (SNIP:IP IS POINTING TO OFFENDING INSTRUCTION)
 	
-	+320		PRED			- PREDICATE FLAG SETTING, LOWER 24-BITS USED, 64-BITS STORAGE
-	+328		PREDCOUNT		- PREDICATE COUNT
+	+312		PRED			- PREDICATE FLAG SETTING, LOWER 24-BITS USED, 64-BITS STORAGE
+	+320		PREDCOUNT		- PREDICATE COUNT
 	
-	NOTE:  THERE ARE NO INSTRUCTIONS WHICH DIRECTLY AFFECT THESE REGISTERS.  THEY ARE SET/CLEARED BY THE DEBUGGER.
-	+336		DSNP1			- A DEBUGGER REGISTER FOR BREAKPOINTS, THE INDICATED SNIPPET OR DYNAMIC SNIPPET
-	+344		DOFF1			- OFFSET INTO THE SNIPPET'S MACHINE CODE BYTES FOR BREAKPOINT
-	+352		DSNP2			- A DEBUGGER REGISTER FOR BREAKPOINTS, THE INDICATED SNIPPET OR DYNAMIC SNIPPET
-	+360		DOFF2			- OFFSET INTO THE SNIPPET'S MACHINE CODE BYTES FOR BREAKPOINT
-	+368		DSNP3			- A DEBUGGER REGISTER FOR BREAKPOINTS, THE INDICATED SNIPPET OR DYNAMIC SNIPPET
-	+376		DOFF3			- OFFSET INTO THE SNIPPET'S MACHINE CODE BYTES FOR BREAKPOINT
-	+384		DSNP4			- A DEBUGGER REGISTER FOR BREAKPOINTS, THE INDICATED SNIPPET OR DYNAMIC SNIPPET
-	+392		DOFF4			- OFFSET INTO THE SNIPPET'S MACHINE CODE BYTES FOR BREAKPOINT
+	+328		Nuserved
+	+336		Nuserved
+	+344		Nuserved
+	+352		Nuserved
+	+360		Nuserved
+	+368		Nuserved
+	+376		Nuserved
+	+384		Nuserved
+	+392		Nuserved
 
 
 FLAGS (64-bits, lower 24-bits are currently defined, the rest are nuserved)
@@ -354,22 +297,22 @@ PRED (64-bits, only lower 32-bits are currently defined and used, the upper 32-b
     ........ ........ ........ ........ 00000000 00000000 10000000 00000000   - APP8 IS SET
 
     THESE VALUES CAN ONLY BE TESTED FOR THEIR SET (1) CONDITION, IF 0 IGNORED:	
-    ........ ........ ........ ........ 00000000 00000001 00000000 00000000   - CARRY?		IS THIS A TEST?
-    ........ ........ ........ ........ 00000000 00000010 00000000 00000000   - OVERFLOW?	IS THIS A TEST?
-    ........ ........ ........ ........ 00000000 00000100 00000000 00000000   - UNDERFLOW?	IS THIS A TEST?
-    ........ ........ ........ ........ 00000000 00001000 00000000 00000000   - EQUAL?		IS THIS A TEST?
-    ........ ........ ........ ........ 00000000 00010000 00000000 00000000   - ZERO?		IS THIS A TEST?
-    ........ ........ ........ ........ 00000000 00100000 00000000 00000000   - NEGATIVE?	IS THIS A TEST?
-    ........ ........ ........ ........ 00000000 01000000 00000000 00000000   - POSITIVE?	IS THIS A TEST?
-    ........ ........ ........ ........ 00000000 10000000 00000000 00000000   - APP?		IS THIS A TEST?
-    ........ ........ ........ ........ 00000001 00000000 00000000 00000000   - APP1?		IS THIS A TEST?
-    ........ ........ ........ ........ 00000010 00000000 00000000 00000000   - APP2?		IS THIS A TEST?
-    ........ ........ ........ ........ 00000100 00000000 00000000 00000000   - APP3?		IS THIS A TEST?
-    ........ ........ ........ ........ 00001000 00000000 00000000 00000000   - APP4?		IS THIS A TEST?
-    ........ ........ ........ ........ 00010000 00000000 00000000 00000000   - APP5?		IS THIS A TEST?
-    ........ ........ ........ ........ 00100000 00000000 00000000 00000000   - APP6?		IS THIS A TEST?
-    ........ ........ ........ ........ 01000000 00000000 00000000 00000000   - APP7?		IS THIS A TEST?
-    ........ ........ ........ ........ 10000000 00000000 00000000 00000000   - APP8?		IS THIS A TEST?
+    ........ ........ ........ ........ 00000000 00000001 00000000 00000000   - CARRY?		Is this bit to be tested?
+    ........ ........ ........ ........ 00000000 00000010 00000000 00000000   - OVERFLOW?	Is this bit to be tested?
+    ........ ........ ........ ........ 00000000 00000100 00000000 00000000   - UNDERFLOW?	Is this bit to be tested?
+    ........ ........ ........ ........ 00000000 00001000 00000000 00000000   - EQUAL?		Is this bit to be tested?
+    ........ ........ ........ ........ 00000000 00010000 00000000 00000000   - ZERO?		Is this bit to be tested?
+    ........ ........ ........ ........ 00000000 00100000 00000000 00000000   - NEGATIVE?	Is this bit to be tested?
+    ........ ........ ........ ........ 00000000 01000000 00000000 00000000   - POSITIVE?	Is this bit to be tested?
+    ........ ........ ........ ........ 00000000 10000000 00000000 00000000   - APP?		Is this bit to be tested?
+    ........ ........ ........ ........ 00000001 00000000 00000000 00000000   - APP1?		Is this bit to be tested?
+    ........ ........ ........ ........ 00000010 00000000 00000000 00000000   - APP2?		Is this bit to be tested?
+    ........ ........ ........ ........ 00000100 00000000 00000000 00000000   - APP3?		Is this bit to be tested?
+    ........ ........ ........ ........ 00001000 00000000 00000000 00000000   - APP4?		Is this bit to be tested?
+    ........ ........ ........ ........ 00010000 00000000 00000000 00000000   - APP5?		Is this bit to be tested?
+    ........ ........ ........ ........ 00100000 00000000 00000000 00000000   - APP6?		Is this bit to be tested?
+    ........ ........ ........ ........ 01000000 00000000 00000000 00000000   - APP7?		Is this bit to be tested?
+    ........ ........ ........ ........ 10000000 00000000 00000000 00000000   - APP8?		Is this bit to be tested?
 	NOTE:  PRED REMAINS STICKY AFTER PREDCOUNT REACHES ZERO, can be re-used.  See PREDIMPORT instruction for
 	       population on subsequent uses.
 
