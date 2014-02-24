@@ -174,64 +174,74 @@ VVM Registers
 	OFFSET		CODE	INTEGER REGISTERS
 	------		----	-----------------
 	+000		n/a		RESULT						; All computed results are returned here
-	264 bytes			Full register space begins at 0..255 and proceeds up for 8 bytes
+	+008		n/a		BUMP RESULT					; A common location used with BUMP to store a previous result
 
 	
 	Note:  The following are shorthand names to explicit offsets, which can make reading assembly easier.
 	
 	OFFSET		INTEGER Register Alias Names
 	------		----------------------------
-	+008		A8		A16		A32		A64		eax		rax		; x86 name relates to A32 and A64
-	+016		B8		B16		B32		B64		ebx		rbx		; x86 name relates to B32 and B64
-	+024		C8		C16		C32		C64		ecx		rcx		; x86 name relates to C32 and C64
-	+032		D8		D16		D32		D64		edx		rdx		; x86 name relates to D32 and D64
-	+040		E8		E16		E32		E64		esi		rsi		; x86 name relates to E32 and E64
-	+048		F8		F16		F32		F64		edi		rdi		; x86 name relates to F32 and F64
-	+056		G8		G16		G32		G64		
-	+064		H8		H16		H32		H64
-	+072		I8		I16		I32		I64
-	+080		J8		J16		J32		J64
-	+088		K8		K16		K32		K64
-	+096		L8		L16		L32		L64
-	+104		M8		M16		M32		M64
-	+112		N8		N16		N32		N64
-	+120		O8		O16		O32		A64
-	+128		P8		P16		P32		P64
+	; 264 bytes is full register space
+	; Begins at 0 and continues up to 255 plus the extra 8-bytes beyond (ending at 263)
+
+	; These are common names assigned to various areas
+	; The ability to emulate the x86 ISA, and ARM ISA, indicates some registers alias
+												 X86	ARM
+												------	---
+	+008		A8		A16		A32		A64		eax		r0
+	+016		B8		B16		B32		B64		ebx		r1
+	+024		C8		C16		C32		C64		ecx		r2
+	+032		D8		D16		D32		D64		edx		r3
+	+040		E8		E16		E32		E64		esi		r4
+	+048		F8		F16		F32		F64		edi		r5
+	+056		G8		G16		G32		G64		ebp		r6
+	+064		H8		H16		H32		H64		esp		r7
+	+072		I8		I16		I32		I64		eflags	r8
+	+080		J8		J16		J32		J64				r9
+	+088		K8		K16		K32		K64				r10
+	+096		L8		L16		L32		L64				r11
+	+104		M8		M16		M32		M64				r12
+	+112		N8		N16		N32		N64				r13
+	+120		O8		O16		O32		A64				r14
+	+128		P8		P16		P32		P64				flags
 	            
 	OFFSET		FLOATING POINT Register Alias Names
 	------		-----------------------------------
-	+136		FA32	FA64	st0		xmm0		; x86 names relate to 64-bit IEEE forms only
-	+144		FB32	FB64	st1		xmm1		; x86 names relate to 64-bit IEEE forms only
-	+152		FC32	FC64	st2		xmm2		; x86 names relate to 64-bit IEEE forms only
-	+160		FD32	FD64	st3		xmm3		; x86 names relate to 64-bit IEEE forms only
-	+168		FE32	FE64	st4		xmm4		; x86 names relate to 64-bit IEEE forms only
-	+176		FF32	FF64	st5		xmm5		; x86 names relate to 64-bit IEEE forms only
-	+184		FG32	FG64	st6		xmm6		; x86 names relate to 64-bit IEEE forms only
-	+192		FH32	FH64	st7		xmm7		; x86 names relate to 64-bit IEEE forms only
-	+200		FI32	FI64	st8		xmm8		; x86 names relate to 64-bit IEEE forms only
-	+208		FJ32	FJ64	st9		xmm9		; x86 names relate to 64-bit IEEE forms only
-	+216		FK32	FK64	st10	xmm10		; x86 names relate to 64-bit IEEE forms only
-	+224		FL32	FL64	st11	xmm11		; x86 names relate to 64-bit IEEE forms only
-	+232		FM32	FM64	st12	xmm12		; x86 names relate to 64-bit IEEE forms only
-	+240		FN32	FN64	st13	xmm13		; x86 names relate to 64-bit IEEE forms only
-	+248		FO32	FO64	st14	xmm14		; x86 names relate to 64-bit IEEE forms only
-	+256		FP32	FP64	st15	xmm15		; x86 names relate to 64-bit IEEE forms only
+									 X86	ARM
+									------	---
+	+136		FA32	FA64		st0		f0		; Both x86 and ARM emulation only support 64-bit operations
+	+144		FB32	FB64		st1		f1
+	+152		FC32	FC64		st2		f2
+	+160		FD32	FD64		st3		f3
+	+168		FE32	FE64		st4		f4
+	+176		FF32	FF64		st5		f5
+	+184		FG32	FG64		st6		f6
+	+192		FH32	FH64		st7		f7
+	+200		FI32	FI64
+	+208		FJ32	FJ64
+	+216		FK32	FK64
+	+224		FL32	FL64
+	+232		FM32	FM64
+	+240		FN32	FN64
+	+248		FO32	FO64
+	+256		FP32	FP64
 
 	Other registers (accessible only by special instructions)
 	---------------------------------------------------------
-	+264		FLAGS			- FLAGS
-	+272		IP				- INSTRUCTION POINTER
-	+280		SP				- STACK POINTER (SP always points to the next slot to push to, so last pushed is SP-4 or SP-8)
-	
-	+288		SNIP			- CURRENTLY SNIPPET NUMBER EXECUTING
-	+296		EXSNIP			- SNIPPET ID NUMBER TO BRANCH TO ON EXCEPTION
-	+304		ERROR			- THE MACHINE OPCODE ERROR GENERATED DURING EXECUTION (SNIP:IP IS POINTING TO OFFENDING INSTRUCTION)
-	
+	+264		SNIP			- Currentl snippet number executing
+	+272		IP				- Instruction pointer
+	+280		SP				- Stack pointer (SP always points to the next slot, so data is accessed at SP-4, SP-8, etc)
+
+	+288		READY			- READY block of data sent to a snippet
+	+296		READY.OFFSET	- The incrementing offset into the ready block
+
+	+304		FLAGS			- FLAGS
 	+312		PRED			- PREDICATE FLAG SETTING, LOWER 24-BITS USED, 64-BITS STORAGE
 	+320		PREDCOUNT		- PREDICATE COUNT
-	
-	+328		Nuserved
-	+336		Nuserved
+
+	+328		EXSNIP			- SNIPPET NUMBER TO BRANCH TO ON EXCEPTION
+	+336		ERROR			- THE MACHINE OPCODE ERROR GENERATED DURING EXECUTION (SNIP:IP IS POINTING TO OFFENDING INSTRUCTION)
+
 	+344		Nuserved
 	+352		Nuserved
 	+360		Nuserved
@@ -346,35 +356,30 @@ INSTRUCTION FORMAT
 	none are currently defined
 	
 [4:PARAM1][4:PARAM2]
-	0000	IMM8				[8 BIT IMMEDIATE]
-	0001	IMM32				[32 BIT IMMEDIATE]
-	0010	SP[REGISTER]		[8:OFFSET]
-	0011	SP[REGISTER+IMM32]	[8:OFFSET][32:IMMEDIATE]
-	
-	0100	REG					[8:OFFSET]
-	0101	REG+REG				[8:OFFSET][8:OFFSET]
-	
-	0110	GLOBAL				[32:NUMBER]
-	0111	THREADGLOBAL		[32:NUMBER]
-	1000	PARAM				[8:NUMBER]
-	1001	RETURN				[8:NUMBER]
-	1010	LOCAL				[32:NUMBER]
-	
-	1011	RESULT
-	
-	1100	[REG+REG]			[8:OFFSET][8:OFFSET]
-	1101	[REG+IMM8]			[8:OFFSET][8:IMMEDIATE SIGN EXTENDED TO 64-BITS]
-	1110	[REG+IMM16]			[8:OFFSET][16:IMMEDIATE SIGN EXTENDED TO 64-BITS]
-	1111	[REG+IMM32]			[8:OFFSET][32:IMMEDIATE SIGN EXTENDED TO 64-BITS]
+	0000	RESULT
+	0001	IMM16					[16:IMMEDIATE]
+	0010	IMM32					[32:IMMEDIATE]
+
+	0011	SP-[IMM16]				[16:IMMEDIATE]
+	0100	SP-[REG]+[IMM16]		[8:OFFSET][16:IMMEDIATE]
+	0101	[SP-[IMM16]]			[16:IMMEDIATE SIGN-EXTENDED TO 64-BITS]
+	0110	[SP-[REG]+[IMM16]]		[8:OFFSET][16:IMMEDIATE SIGN-EXTENDED TO 64-BITS]
+
+	0111	READY+[IMM16]			[16:IMMEDIATE]
+	1000	READY+[REG]+[IMM16]		[8:OFFSET][16:IMMEDIATE]
+	1001	[READY+[IMM16]]			[16:IMMEDIATE SIGN-EXTENDED TO 64-BITS]
+	1010	[READY+[REG]+[IMM16]]	[8:OFFSET][16:IMMEDIATE SIGN-EXTENDED TO 64-BITS]
+
+	1011	REG						[8:OFFSET]
+
+	1100	[REG]					[8:OFFSET]
+	1101	[REG+IMM8]				[8:OFFSET][8:IMMEDIATE SIGN-EXTENDED TO 64-BITS]
+	1110	[REG+IMM16]				[8:OFFSET][16:IMMEDIATE SIGN EXTENDED TO 64-BITS]
+	1111	[REG+IMM32]				[8:OFFSET][32:IMMEDIATE SIGN EXTENDED TO 64-BITS]
 
 	
 [8:INSTRUCTION] - INSTRUCTION SET (OPCODE BYTE VALUES TO BE DEFINED LATER)
-	* NOTE:  REFER TO OBED_DRAFT_0.70.ASSEMBLY_INSTRUCTIONS.TXT FOR EXPLICIT ENCODINGS AND SYNTAX OF EACH OPCODE
-	11111111	- EXTENDED INSTRUCTION BYTE FOLLOWS (TO BE DEFINED / ADDED LATER)
-				EXAMPLES:
-					SIN, COS, TAN
-					ASIN, ACOS, ATAN
-					SQUARE, SQRT, ROUND
+	* Note:  Refer to obed_draft_0.70.assembly_instructions.txt for explicit encodings and syntax of each opcode
 
 
 DEBUGGER API
