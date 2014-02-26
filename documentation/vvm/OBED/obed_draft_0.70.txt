@@ -3,7 +3,7 @@
 |                                       |
 |  OBject/Event Driven Virtual Machine  |
 |                                       |
-|          February 22, 2014            |
+|             Feb.22.2014               |
 |             Draft 0.70                |
 |          by Rick C. Hodgin            |
 |                                       |

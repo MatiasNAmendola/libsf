@@ -3,14 +3,15 @@
 // /libsf/vmm/vmm/vmm_istructs.h
 //
 //////
-// Version 0.60
-// Copyright (c) 2012, 2013 by Rick C. Hodgin
+// Version 0.70
+// Copyright (c) 2012, 2014 by Rick C. Hodgin
 //////
 // Last update:
-//     November 11, 2012
+//     Feb.25.2014
 //////
 // Change log:
-//     November 11, 2012 - Initial creation
+//     Feb.25.2014 - Development on 0.70 begins
+//     Nov.11.2012 - Initial creation
 //////
 // See devhelp.txt.
 //////

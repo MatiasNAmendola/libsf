@@ -3,15 +3,16 @@
 // /libsf/vvm/core/vvmtests/vvmt_core/vvmt_core.cpp
 //
 //////
-// Version 0.60
-// Copyright (c) 2012, 2013 by Rick C. Hodgin
+// Version 0.70
+// Copyright (c) 2012, 2014 by Rick C. Hodgin
 //////
 // Last update:
-//     Jun.20.2013
+//     Feb.25.2014
 //////
 // Change log:
-//     Mar.02.2013	- Initial creation
+//     Feb.25.2014 - Development on 0.70 begins
 //     Jun.20.2013	- Refactoring into a stand-alone DLL loaded at runtime only if -test is specified on the command line
+//     Mar.02.2013	- Initial creation
 //////
 //
 // VVM Primary Test application.

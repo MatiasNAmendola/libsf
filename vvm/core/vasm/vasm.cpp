@@ -3,14 +3,15 @@
 // libsf/vvm/vasm/vasm.cpp
 //
 //////
-// Version 0.60
-// Copyright (c) 2012, 2013 by Rick C. Hodgin
+// Version 0.70
+// Copyright (c) 2012, 2014 by Rick C. Hodgin
 //////
 // Last update:
-//     November 13, 2012
+//     Feb.25.2014
 //////
 // Change log:
-//     November 13, 2012 - Initial creation
+//     Feb.25.2014 - Development on 0.70 begins
+//     Nov.13.2012 - Initial creation
 //////
 // VVM Assembler Command Line Utility
 // See devhelp.txt.
@@ -88,8 +89,8 @@ void		iAssembleFile						(s8* tcPathname);
 
 
 		// Tell the world who we are
-		printf("Visual FreePro Virtual Machine Assembler 0.60\n");
-		printf("Copyright (c) 2012 Rick C. Hodgin - Released under PBL1.0 - /? for help\n");
+		printf("Visual FreePro Virtual Machine Assembler 0.70\n");
+		printf("Copyright (c) 2012 Rick C. Hodgin - Released under PBL 1.0 - /? for help\n");
 		printf("---\n");
 		printf("---\n");
 

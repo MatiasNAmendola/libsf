@@ -3,13 +3,14 @@
 // /libsf/vvm/core/plugins/sound.cpp
 //
 //////
-// Version 0.60
+// Version 0.70
 // Copyright (c) 2013 by Rick C. Hodgin
 //////
 // Last update:
-//     May.07.2013
+//     Feb.25.2014
 //////
 // Change log:
+//     Feb.25.2014 - Development on 0.70 begins
 //     May.07.2013 - Initial creation
 //////
 // Note:  The function names in here match up with those expected from the VVMOSS because

@@ -3,13 +3,14 @@
 // /libsf/vvm/core/plugins/wideedit/wideedit.h
 //
 //////
-// Version 0.60
-// Copyright (c) 2012, 2013 by Rick C. Hodgin
+// Version 0.70
+// Copyright (c) 2012, 2014 by Rick C. Hodgin
 //////
 // Last update:
-//     Oct.19.2013
+//     Feb.25.2014
 //////
 // Change log:
+//     Feb.25.2014 - Development on 0.70 begins
 //     Oct.19.2013 - Initial creation
 //////
 // See devhelp.txt.

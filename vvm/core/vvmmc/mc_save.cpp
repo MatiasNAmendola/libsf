@@ -3,14 +3,15 @@
 // /libsf/vvm/vvmmc/mc_save.cpp
 //
 //////
-// Version 0.60
-// Copyright (c) 2012, 2013 by Rick C. Hodgin
+// Version 0.70
+// Copyright (c) 2012, 2014 by Rick C. Hodgin
 //////
 // Last update:
-//     November 14, 2012
+//     Feb.25.2014
 //////
 // Change log:
-//     November 14, 2012 - Initial creation
+//     Feb.25.2014 - Development on 0.70 begins
+//     Nov.14.2012 - Initial creation
 //////
 // VVM Save Snippets to BXML File
 // See devhelp.txt.

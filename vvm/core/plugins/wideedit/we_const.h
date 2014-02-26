@@ -3,13 +3,14 @@
 // /libsf/vvm/core/plugins/wideedit/wideedit_const.h
 //
 //////
-// Version 0.60
-// Copyright (c) 2012, 2013 by Rick C. Hodgin
+// Version 0.70
+// Copyright (c) 2012, 2014 by Rick C. Hodgin
 //////
 // Last update:
-//     Oct.20.2013
+//     Feb.25.2014
 //////
 // Change log:
+//     Feb.25.2014 - Development on 0.70 begins
 //     Oct.20.2013 - Initial creation
 //////
 // See devhelp.txt.
@@ -49,6 +50,6 @@
 //////////
 // Constants
 //////
-	const s8		cgcWideEditVersion[]							= "WideEdit.DLL Version 0.60";	// The format of this version string will remain consistent throughout all future releases
-	const f32		cgfVersion										= 0.60f;						// Version 0.60
+	const s8		cgcWideEditVersion[]							= "WideEdit.DLL Version 0.70";	// The format of this version string will remain consistent throughout all future releases
+	const f32		cgfVersion										= 0.70f;						// Version 0.70
 	const u32		cgnBuild										= 1;							// Build 0001

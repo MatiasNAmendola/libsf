@@ -12,12 +12,12 @@
 // Public Domain - See sha1_continueOnThisData() for instructions on how to process a SHA1 value.
 //////
 // Last update:
-//     February 10, 2014
+//     Feb.10.2014
 //////
 // Change log:
-//     February 10, 2014 - Modified to work with both GCC for x86, and Visual Studio 2008 Professional.
-//     February 17, 2013 - Added hexadecimal to sha-1 160-bit format conversion in preparation for use in OSS
-//     February 16, 2013 - Initial creation, compiles with Visual Studio 2008 Professional.
+//     Feb.10.2014 - Modified to work with both GCC for x86, and Visual Studio 2008 Professional.
+//     Feb.17.2013 - Added hexadecimal to sha-1 160-bit format conversion in preparation for use in OSS
+//     Feb.16.2013 - Initial creation, compiles with Visual Studio 2008 Professional.
 //////
 //
 // This software is released into the Public Domain.  Enjoy. :-)

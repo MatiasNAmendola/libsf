@@ -3,16 +3,17 @@
 // /libsf/vvm/vvm/vvm.cpp
 //
 //////
-// Version 0.60
-// Copyright (c) 2012, 2013 by Rick C. Hodgin
+// Version 0.70
+// Copyright (c) 2012, 2014 by Rick C. Hodgin
 //////
 // Last update:
-//     November 07, 2012
+//     Feb.25.2014
 //////
 // Change log:
-//     September 17, 2012 - Initial creation
-//     September 29, 2012 - PBL v1.0 license included directly in source files.
-//     November 07, 2012 - 0.60 development begins
+//     Feb.25.2014 - Development on 0.70 begins
+//     Nov.07.2012 - 0.60 development begins
+//     Sep.29.2012 - PBL v1.0 license included directly in source files.
+//     Sep.17.2012 - Initial creation
 //////
 // See devhelp.txt.
 //////

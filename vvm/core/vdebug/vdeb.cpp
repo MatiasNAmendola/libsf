@@ -3,16 +3,17 @@
 // /libsf/vvm/vdebug/vdebug.cpp
 //
 //////
-// Version 0.60
-// Copyright (c) 2012, 2013 by Rick C. Hodgin
+// Version 0.70
+// Copyright (c) 2012, 2014 by Rick C. Hodgin
 //////
 // Last update:
-//     November 07, 2012
+//     Nov.07.2012
 //////
 // Change log:
-//     September 20, 2012 - Initial creation
-//     September 29, 2012 - PBL v1.0 license included directly in source files.
-//     November 07, 2012 - 0.60 development begins
+//     Feb.25.2014 - Development on 0.70 begins
+//     Nov.07.2012 - 0.60 development begins
+//     Sep.29.2012 - PBL v1.0 license included directly in source files.
+//     Sep.20.2012 - Initial creation
 //////
 // See devhelp.txt.
 //////
@@ -153,15 +154,15 @@
 	DWORD CALLTYPE iDebuggerMain(LPVOID lpParameter)
 	{
 		u32		lnDebuggerUid;
-//		SBxml*	bxmlDebuggerSettings;
+		u64		lnNumread, lnError, lnErrorCode;
+		SBxml*	bxmlDebuggerSettings;
 
 
 		// Grab the unique id for this instance
 		lnDebuggerUid = (u32)lpParameter;
 
 		// Build the debugger screen
-// TODO:  Working on vdebug.bxml
-//		bxmlDebuggerSettings = ivdeb_getDebuggerSettings();
+		bxmlDebuggerSettings = vvm_bxmlLoad((s8*)gcVdebSettingsBxml, sizeof(gcVdebSettingsBxml) - 1, &lnNumread, &lnError, &lnErrorCode );
 
 		// Create the debugger screen
 		while (1 /*Need to add a global variable for this instance of the debugger running*/)

@@ -3,16 +3,17 @@
 // /libsf/vvm/vdebug/vdeb_const.h
 //
 //////
-// Version 0.60
-// Copyright (c) 2012, 2013 by Rick C. Hodgin
+// Version 0.70
+// Copyright (c) 2012, 2014 by Rick C. Hodgin
 //////
 // Last update:
-//     November 07, 2012
+//     Feb.25.2014
 //////
 // Change log:
-//     September 26, 2012 - Initial creation
-//     September 29, 2012 - PBL v1.0 license included directly in source files.
-//     November 07, 2012 - 0.60 development begins
+//     Feb.25.2014 - 0.70 development begins
+//     Nov.07.2012 - 0.60 development begins
+//     Sep.29.2012 - PBL v1.0 license included directly in source files.
+//     Sep.26.2012 - Initial creation
 //////
 // See devhelp.txt.
 //////
@@ -45,22 +46,8 @@
 //////////
 // Constants used for the debugger
 //////
-	cs8	cgcVdebugVersion[]					= "VDEBUG.DLL Version 0.60";							// The format of this version string will remain consistent throughout all future releases
-	s8	cgcVvmmcEngDll[]					= "vdebugenu.dll";
-	s8	cgcVDebugWindowCaption[]			= "VDebug 0.60";
-	s8	gcAsciiCaption[]					= "ASCII Chart VDebug 0.60";
-	s8	gcScratchCaption[]					= "Scratch Memory VDebug 0.60";
-	s8	gcProgramRegistersCaption[]			= "Program Registers VDebug 0.60";
-	s8	gcControlRegistersCaption[]			= "Control Registers VDebug 0.60";
-	s8	gcIntegerRegistersCaption[]			= "Integer Registers VDebug 0.60";
-	s8	gcFloatingPointRegistersCaption[]	= "Floating Point Registers VDebug 0.60";
-	s8	gcStackCaption[]					= "Stack VDebug 0.60";
-	s8	gcWatchCaption[]					= "Watch Window VDebug 0.60";
-	s8	gcHoverCaption[]					= "Hover Window VDebug 0.60";
-	s8	gcLocalsCaption[]					= "Locals VDebug 0.60";
-	s8	gcAutosCaption[]					= "Autos VDebug 0.60";
-	s8	gcTimersCaption[]					= "Timers VDebug 0.60";
-	s8	gcMemoryCaption[]					= "Memory Window VDebug 0.60";
-	s8	gcProgramsCaption[]					= "Programs VDebug 0.60";
-	s8	gcThreadsCaption[]					= "Threads VDebug 0.60";
-	s8	gcVDebLauncherCaption[]				= "VDeb Launcher 0.60";
+	cs8	cgcVdebugVersion[]					= "VDEBUG.DLL Version 0.70";							// The format of this version string will remain consistent throughout all future releases
+	cs8	cgcVvmmcEngDll[]					= "vdebugenu.dll";
+	cs8 gcVdebSettingsBxml[]				= "C:\\libsf\\vvm\\core\\vdebug\\settings\\vdeb.bxml";	// Temporary settings file to use during development
+	cs8	cgcVDebugWindowCaption[]			= "VDebug 0.70";
+	

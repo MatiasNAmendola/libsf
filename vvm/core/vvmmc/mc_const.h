@@ -3,14 +3,15 @@
 // /libsf/vvm/vvmmc/mc_const.h
 //
 //////
-// Version 0.60
-// Copyright (c) 2012, 2013 by Rick C. Hodgin
+// Version 0.70
+// Copyright (c) 2012, 2014 by Rick C. Hodgin
 //////
 // Last update:
-//     November 13, 2012
+//     Feb.25.2014
 //////
 // Change log:
-//     November 13, 2012 - Initial creation
+//     Feb.25.2014 - Development on 0.70 begins
+//     Nov.13.2012 - Initial creation
 //////
 // See devhelp.txt.
 //////
@@ -46,7 +47,7 @@
 // Constant strings
 //
 //////
-	const s8		cgcVvmmcVersion[]								= "MC.DLL Version 0.60";		// The format of this version string will remain consistent throughout all future releases
+	const s8		cgcVvmmcVersion[]								= "MC.DLL Version 0.70";		// The format of this version string will remain consistent throughout all future releases
 	const s8		cgcUnableToLocateResource[]						= "Unable to locate resource";
 
 

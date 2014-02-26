@@ -1,3 +1,35 @@
++---------------------------------------+
+|               OBED VM                 |
+|                                       |
+|  OBject/Event Driven Virtual Machine  |
+|  Assembly Language Opcode Definition  |
+|                                       |
+|             Feb.22.2014               |
+|             Draft 0.70                |
+|          by Rick C. Hodgin            |
+|                                       |
+|  Released as the Go-Forward prototype |
+|  for the mechanics of the VVM engine. |
+|  In prayer (much prayer)... -RCH      |
++----------------------------------------
+
++---------------------------------------+
+|  A request in prayer, through faith   |
+|---------------------------------------|
+| May the Lord, Jesus Christ, bless the |
+| work of my hands on this project, as  |
+| I give all credit, honor, and glory   |
+| to Him.  Amen.                        |
+|---------------------------------------|
+| May the Lord, Jesus Christ, bless the |
+| work of all hands on this project, as |
+| we give all credit, honor, and glory  |
+| to Him.  Amen.                        |
++---------------------------------------+
+
+
+
+
 [8:INSTRUCTION] - INSTRUCTION SET (OPCODE BYTE VALUES TO BE DEFINED LATER)
 
 	; Unsigned add

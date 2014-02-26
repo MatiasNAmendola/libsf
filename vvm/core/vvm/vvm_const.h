@@ -3,16 +3,17 @@
 // /libsf/vvm/vvm/vvm_const.h
 //
 //////
-// Version 0.60
-// Copyright (c) 2012, 2013 by Rick C. Hodgin
+// Version 0.70
+// Copyright (c) 2012, 2014 by Rick C. Hodgin
 //////
 // Last update:
-//     November 07, 2012
+//     Feb.25.2014
 //////
 // Change log:
-//     September 24, 2012 - Initial creation
-//     September 29, 2012 - PBL v1.0 license included directly in source files.
-//     November 07, 2012 - 0.60 development begins
+//     Feb.25.2014 - Development on 0.70 begins
+//     Nov.07.2012 - 0.60 development begins
+//     Sep.29.2012 - PBL v1.0 license included directly in source files.
+//     Sep.24.2012 - Initial creation
 //////
 // See devhelp.txt.
 //////
@@ -51,7 +52,7 @@
 //////////
 // Constant strings
 //////
-	const s8	cgcVvmVersion[]								= "VVM.EXE Version 0.60";							// The format of this version string will remain consistent throughout all future releases
+	const s8	cgcVvmVersion[]								= "VVM.EXE Version 0.70";							// The format of this version string will remain consistent throughout all future releases
 	const s8	cgcEnu[]									= "enu";
 	const s8	cgcVvmEngDll[]								= "vvmeng.dll";
 	const s8	cgcUnableToLocateResource[]					= "Unable to locate resource";

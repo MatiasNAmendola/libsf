@@ -3,14 +3,15 @@
 // /libsf/vvm/vvm/vvm_sup.cpp
 //
 //////
-// Version 0.60
-// Copyright (c) 2012, 2013 by Rick C. Hodgin
+// Version 0.70
+// Copyright (c) 2012, 2014 by Rick C. Hodgin
 //////
 // Last update:
-//     November 07, 2012
+//     Feb.25.2014
 //////
 // Change log:
-//     November 07, 2012 - Iniital creation
+//     Feb.25.2014 - Development on 0.70 begins
+//     Nov.07.2012 - Iniital creation
 //////
 // See devhelp.txt.
 //////

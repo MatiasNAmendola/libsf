@@ -3,14 +3,15 @@
 // /libsf/vvm/core/vvmtests/vvmt_core/vvmt_sll_test.cpp
 //
 //////
-// Version 0.60
-// Copyright (c) 2012, 2013 by Rick C. Hodgin
+// Version 0.70
+// Copyright (c) 2012, 2014 by Rick C. Hodgin
 //////
 // Last update:
-//     Jul.24.2013
+//     Feb.25.2014
 //////
 // Change log:
-//     Jul.24.2013	- Initial creation
+//     Feb.25.2014 - Development on 0.70 begins
+//     Jul.24.2013 - Initial creation
 //////
 //
 // This software is released as Liberty Software under a Repeat License, as governed

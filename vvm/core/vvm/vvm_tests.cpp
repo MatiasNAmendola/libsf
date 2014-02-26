@@ -3,14 +3,15 @@
 // /libsf/vvm/vvm/vvm_tests.cpp
 //
 //////
-// Version 0.60
-// Copyright (c) 2012, 2013 by Rick C. Hodgin
+// Version 0.70
+// Copyright (c) 2012, 2014 by Rick C. Hodgin
 //////
 // Last update:
-//     February 16, 2013
+//     Feb.25.2014
 //////
 // Change log:
-//     February 16, 2013 - Initial creation
+//     Feb.25.2014 - Development on 0.70 begins
+//     Feb.16.2013 - Initial creation
 //////
 //
 // This software is released as Liberty Software under a Repeat License, as governed
