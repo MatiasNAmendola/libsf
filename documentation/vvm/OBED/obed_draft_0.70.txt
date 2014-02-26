@@ -8,7 +8,7 @@
 |          by Rick C. Hodgin            |
 |                                       |
 |  Released as the Go-Forward prototype |
-|  for the mechancis of the VVM engine. |
+|  for the mechanics of the VVM engine. |
 |  In prayer (much prayer)... -RCH      |
 +----------------------------------------
 
@@ -228,21 +228,20 @@ VVM Registers
 
 	Other registers (accessible only by special instructions)
 	---------------------------------------------------------
-	+264		SNIP			- Currentl snippet number executing
+	+264		SNIP			- Current snippet number executing
 	+272		IP				- Instruction pointer
 	+280		SP				- Stack pointer (SP always points to the next slot, so data is accessed at SP-4, SP-8, etc)
-
-	+288		READY			- READY block of data sent to a snippet
-	+296		READY.OFFSET	- The incrementing offset into the ready block
-
-	+304		FLAGS			- FLAGS
-	+312		PRED			- PREDICATE FLAG SETTING, LOWER 24-BITS USED, 64-BITS STORAGE
-	+320		PREDCOUNT		- PREDICATE COUNT
-
-	+328		EXSNIP			- SNIPPET NUMBER TO BRANCH TO ON EXCEPTION
-	+336		ERROR			- THE MACHINE OPCODE ERROR GENERATED DURING EXECUTION (SNIP:IP IS POINTING TO OFFENDING INSTRUCTION)
-
-	+344		Nuserved
+	+288		BP				- Base pointer (After a CALL or GO, BP is always updated to new SP value)
+	
+	+296		READY			- READY block of data sent to a snippet
+	+304		READY.OFFSET	- The incrementing offset into the ready block
+	
+	+312		FLAGS			- FLAGS
+	+320		PRED			- Predicate FLAGS setting, the lower 24-BITS are used in 0.70, 64-BITS storage
+	+328		PRED.COUNT		- Predicate Countdown
+	
+	+336		EXSNIP			- SNIPPET NUMBER TO BRANCH TO ON EXCEPTION
+	+344		ERROR			- THE MACHINE OPCODE ERROR GENERATED DURING EXECUTION (SNIP:IP IS POINTING TO OFFENDING INSTRUCTION)
 	+352		Nuserved
 	+360		Nuserved
 	+368		Nuserved
@@ -355,15 +354,16 @@ INSTRUCTION FORMAT
 [12:EXTENDED PREDICATE, IMMEDIATE VALUES FOR "PREDICATE" ASSEMBLY INSTRUCTION]
 	none are currently defined
 	
-[4:PARAM1][4:PARAM2]
+[4:PARAM]
 	0000	RESULT
 	0001	IMM16					[16:IMMEDIATE]
 	0010	IMM32					[32:IMMEDIATE]
 
-	0011	SP-[IMM16]				[16:IMMEDIATE]
-	0100	SP-[REG]+[IMM16]		[8:OFFSET][16:IMMEDIATE]
-	0101	[SP-[IMM16]]			[16:IMMEDIATE SIGN-EXTENDED TO 64-BITS]
-	0110	[SP-[REG]+[IMM16]]		[8:OFFSET][16:IMMEDIATE SIGN-EXTENDED TO 64-BITS]
+	; Note: REG values are sign added, imm16 values are unsigned added
+	0011	BP+[IMM16]				[16:IMMEDIATE ZERO-EXTENDED TO 64-BITS]
+	0100	BP+[REG]+[IMM16]		[8:OFFSET][16:IMMEDIATE ZERO-EXTENDED TO 64-BITS]
+	0101	[BP+[IMM16]]			[16:IMMEDIATE ZERO-EXTENDED TO 64-BITS]
+	0110	[BP+[REG]+[IMM16]]		[8:OFFSET][16:IMMEDIATE ZERO-EXTENDED TO 64-BITS]
 
 	0111	READY+[IMM16]			[16:IMMEDIATE]
 	1000	READY+[REG]+[IMM16]		[8:OFFSET][16:IMMEDIATE]
@@ -380,6 +380,41 @@ INSTRUCTION FORMAT
 	
 [8:INSTRUCTION] - INSTRUCTION SET (OPCODE BYTE VALUES TO BE DEFINED LATER)
 	* Note:  Refer to obed_draft_0.70.assembly_instructions.txt for explicit encodings and syntax of each opcode
+
+
+CALL STACK
+----------
+	; Before:				SP->|xxxxxxxx:xxxxxxxx|
+							0   |                 |
+	CALL	dsnip
+	; After:				SP->|yyyyyyyy:yyyyyyyy|		<- New BP points here
+							32	|     prev BP     |
+							24	|    prev snip    |
+							16	|     prev IP     |
+							8	|xxxxxxxx:xxxxxxxx|
+							0   |                 |
+
+
+GO STACK
+--------
+	; Before:				SP->|xxxxxxxx:xxxxxxxx|
+							0   |                 |
+	READY
+	; After:				SP->|yyyyyyyy:yyyyyyyy|
+							38	| unpopulated slot|		<- Future prev BP
+							32	| unpopulated slot|		<- Future prev snip
+							24	| unpopulated slot|		<- Future prev IP
+							16	|    prev READY   |		<- Stores old READY value
+							8	|xxxxxxxx:xxxxxxxx|
+							0   |                 |
+	GO
+	; After:				SP->|yyyyyyyy:yyyyyyyy|		<- New BP points here
+							38	|     prev BP     |
+							32	|    prev snip    |
+							24	|     prev IP     |
+							16	|    prev READY   |
+							8	|xxxxxxxx:xxxxxxxx|
+							0   |                 |
 
 
 DEBUGGER API
