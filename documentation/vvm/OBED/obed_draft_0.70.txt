@@ -389,8 +389,8 @@ CALL STACK
 	CALL	dsnip
 	; After:				SP->|yyyyyyyy:yyyyyyyy|		<- New BP points here
 							32	|     prev BP     |
-							24	|    prev snip    |
-							16	|     prev IP     |
+							24	|   return snip   |
+							16	|    return IP    |
 							8	|xxxxxxxx:xxxxxxxx|
 							0   |                 |
 
@@ -410,8 +410,8 @@ GO STACK
 	GO
 	; After:				SP->|yyyyyyyy:yyyyyyyy|		<- New BP points here
 							38	|     prev BP     |
-							32	|    prev snip    |
-							24	|     prev IP     |
+							32	|   return snip   |
+							24	|    return IP    |
 							16	|    prev READY   |
 							8	|xxxxxxxx:xxxxxxxx|
 							0   |                 |
