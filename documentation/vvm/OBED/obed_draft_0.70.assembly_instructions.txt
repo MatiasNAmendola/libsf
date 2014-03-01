@@ -33,99 +33,99 @@
 [8:INSTRUCTION] - INSTRUCTION SET (OPCODE BYTE VALUES TO BE DEFINED LATER)
 
 	; Unsigned add
-	0		- ADD.u64 [PARAM1] TO [PARAM2]
-	1		- ADD.u32 [PARAM1] TO [PARAM2]
-	2		- ADD.u16 [PARAM1] TO [PARAM2]
-	3		- ADD.u8 [PARAM1] TO [PARAM2]
+	0		- add.u64 [param1] to [param2]
+	1		- add.u32 [param1] to [param2]
+	2		- add.u16 [param1] to [param2]
+	3		- add.u8 [param1] to [param2]
 	
 	; Unsigned subtract
-	4		- SUB.u64 [PARAM1] FROM [PARAM2]
-	5		- SUB.u32 [PARAM1] FROM [PARAM2]
-	6		- SUB.u16 [PARAM1] FROM [PARAM2]
-	7		- SUB.u8 [PARAM1] FROM [PARAM2]
+	4		- sub.u64 [param1] from [param2]
+	5		- sub.u32 [param1] from [param2]
+	6		- sub.u16 [param1] from [param2]
+	7		- sub.u8 [param1] from [param2]
     
 	; Unsigned multiply
-	8		- MUL.u64 [PARAM1] BY [PARAM2]
-	9		- MUL.u32 [PARAM1] BY [PARAM2]
-	10		- MUL.u16 [PARAM1] BY [PARAM2]
-	11		- MUL.u8 [PARAM1] BY [PARAM2]
+	8		- mul.u64 [param1] by [param2]
+	9		- mul.u32 [param1] by [param2]
+	10		- mul.u16 [param1] by [param2]
+	11		- mul.u8 [param1] by [param2]
     
 	; Unsigned divide
-	12		- DIV.u64 [PARAM1] BY [PARAM2]
-	13		- DIV.u32 [PARAM1] BY [PARAM2]
-	14		- DIV.u16 [PARAM1] BY [PARAM2]
-	15		- DIV.u8 [PARAM1] BY [PARAM2]
+	12		- div.u64 [param1] by [param2]
+	13		- div.u32 [param1] by [param2]
+	14		- div.u16 [param1] by [param2]
+	15		- div.u8 [param1] by [param2]
     
 	; Unsigned compare
-	16		- COMP.u64 [PARAM1] TO [PARAM2]
-	17		- COMP.u32 [PARAM1] TO [PARAM2]
-	18		- COMP.u16 [PARAM1] TO [PARAM2]
-	19		- COMP.u8 [PARAM1] TO [PARAM2]
+	16		- comp.u64 [param1] to [param2]
+	17		- comp.u32 [param1] to [param2]
+	18		- comp.u16 [param1] to [param2]
+	19		- comp.u8 [param1] to [param2]
     
 	; Signed add
-	20		- ADD.F64 [PARAM1] TO [PARAM2]
-	21		- ADD.F32 [PARAM1] TO [PARAM2]
-	22		- ADD.s64 [PARAM1] TO [PARAM2]
-	23		- ADD.s32 [PARAM1] TO [PARAM2]
-	24		- ADD.s16 [PARAM1] TO [PARAM2]
-	25		- ADD.s8 [PARAM1] TO [PARAM2]
+	20		- add.f64 [param1] to [param2]
+	21		- add.f32 [param1] to [param2]
+	22		- add.s64 [param1] to [param2]
+	23		- add.s32 [param1] to [param2]
+	24		- add.s16 [param1] to [param2]
+	25		- add.s8 [param1] to [param2]
     
 	; Signed subtract
-	26		- SUB.F64 [PARAM1] FROM [PARAM2]
-	27		- SUB.F32 [PARAM1] FROM [PARAM2]
-	28		- SUB.s64 [PARAM1] FROM [PARAM2]
-	29		- SUB.s32 [PARAM1] FROM [PARAM2]
-	30		- SUB.s16 [PARAM1] FROM [PARAM2]
-	31		- SUB.s8 [PARAM1] FROM [PARAM2]
+	26		- sub.f64 [param1] from [param2]
+	27		- sub.f32 [param1] from [param2]
+	28		- sub.s64 [param1] from [param2]
+	29		- sub.s32 [param1] from [param2]
+	30		- sub.s16 [param1] from [param2]
+	31		- sub.s8 [param1] from [param2]
     
 	; Signed multiply
-	32		- MUL.F64 [PARAM1] BY [PARAM2]
-	33		- MUL.F32 [PARAM1] BY [PARAM2]
-	34		- MUL.s64 [PARAM1] BY [PARAM2]
-	35		- MUL.s32 [PARAM1] BY [PARAM2]
-	36		- MUL.s16 [PARAM1] BY [PARAM2]
-	37		- MUL.s8 [PARAM1] BY [PARAM2]
+	32		- mul.f64 [param1] by [param2]
+	33		- mul.f32 [param1] by [param2]
+	34		- mul.s64 [param1] by [param2]
+	35		- mul.s32 [param1] by [param2]
+	36		- mul.s16 [param1] by [param2]
+	37		- mul.s8 [param1] by [param2]
     
 	; Signed divide
-	38		- DIV.F64 [PARAM1] BY [PARAM2]
-	39		- DIV.F32 [PARAM1] BY [PARAM2]
-	40		- DIV.s64 [PARAM1] BY [PARAM2]
-	41		- DIV.s32 [PARAM1] BY [PARAM2]
-	42		- DIV.s16 [PARAM1] BY [PARAM2]
-	43		- DIV.s8 [PARAM1] BY [PARAM2]
+	38		- div.f64 [param1] by [param2]
+	39		- div.f32 [param1] by [param2]
+	40		- div.s64 [param1] by [param2]
+	41		- div.s32 [param1] by [param2]
+	42		- div.s16 [param1] by [param2]
+	43		- div.s8 [param1] by [param2]
     
 	; Signed compare
-	44		- COMP.F64 [PARAM1] TO [PARAM2]
-	45		- COMP.F32 [PARAM1] TO [PARAM2]
-	46		- COMP.s64 [PARAM1] TO [PARAM2]
-	47		- COMP.s32 [PARAM1] TO [PARAM2]
-	48		- COMP.s16 [PARAM1] TO [PARAM2]
-	49		- COMP.s8 [PARAM1] TO [PARAM2]
+	44		- comp.f64 [param1] to [param2]
+	45		- comp.f32 [param1] to [param2]
+	46		- comp.s64 [param1] to [param2]
+	47		- comp.s32 [param1] to [param2]
+	48		- comp.s16 [param1] to [param2]
+	49		- comp.s8 [param1] to [param2]
     
 	; Copy data
-	50		- COPY.F64 [PARAM1] TO [PARAM2]
-	51		- COPY.F32 [PARAM1] TO [PARAM2]
-	52		- COPY.u64 [PARAM1] TO [PARAM2]
-	53		- COPY.u32 [PARAM1] TO [PARAM2]
-	54		- COPY.u16 [PARAM1] TO [PARAM2]
-	55		- COPY.u8 [PARAM1] TO [PARAM2]
-	56		- COPY.EXTENDED [PARAM1] TO [PARAM2] FOR [IMM32]	; COPY [IMM32] BYTES OF DATA FROM [PARAM1] TO [PARAM2]
+	50		- copy.f64 [param1] to [param2]
+	51		- copy.f32 [param1] to [param2]
+	52		- copy.u64 [param1] to [param2]
+	53		- copy.u32 [param1] to [param2]
+	54		- copy.u16 [param1] to [param2]
+	55		- copy.u8 [param1] to [param2]
+	56		- copy.extended [param1] to [param2] for [imm32]	; copy [imm32] bytes of data from [param1] to [param2]
     
 	; Move data (copy and zero out)
-	57		- MOVE.F64 [PARAM1] TO [PARAM2]
-	58		- MOVE.F32 [PARAM1] TO [PARAM2]
-	59		- MOVE.u64 [PARAM1] TO [PARAM2]
-	60		- MOVE.u32 [PARAM1] TO [PARAM2]
-	61		- MOVE.u16 [PARAM1] TO [PARAM2]
-	62		- MOVE.u8 [PARAM1] TO [PARAM2]
+	57		- move.f64 [param1] to [param2]
+	58		- move.f32 [param1] to [param2]
+	59		- move.u64 [param1] to [param2]
+	60		- move.u32 [param1] to [param2]
+	61		- move.u16 [param1] to [param2]
+	62		- move.u8 [param1] to [param2]
     
 	; Exchange data
-	63		- EXCHANGE.F64 [PARAM1] WITH [PARAM2]
-	64		- EXCHANGE.F32 [PARAM1] WITH [PARAM2]
-	65		- EXCHANGE.u64 [PARAM1] WITH [PARAM2]
-	66		- EXCHANGE.u32 [PARAM1] WITH [PARAM2]
-	67		- EXCHANGE.u16 [PARAM1] WITH [PARAM2]
-	68		- EXCHANGE.u8 [PARAM1] WITH [PARAM2]
+	63		- exchange.f64 [param1] with [param2]
+	64		- exchange.f32 [param1] with [param2]
+	65		- exchange.u64 [param1] with [param2]
+	66		- exchange.u32 [param1] with [param2]
+	67		- exchange.u16 [param1] with [param2]
+	68		- exchange.u8 [param1] with [param2]
     
 	69		- Nuserved
 	70		- Nuserved
@@ -149,161 +149,161 @@
 	88		- Nuserved
     
 	; Logical AND
-	89		- AND.u64 [PARAM1] AGAINST [PARAM2]
-	90		- AND.u32 [PARAM1] AGAINST [PARAM2]
-	91		- AND.u16 [PARAM1] AGAINST [PARAM2]
-	92		- AND.u8 [PARAM1] AGAINST [PARAM2]
+	89		- and.u64 [param1] against [param2]
+	90		- and.u32 [param1] against [param2]
+	91		- and.u16 [param1] against [param2]
+	92		- and.u8 [param1] against [param2]
     
 	; Logical OR
-	93		- OR.u64 [PARAM1] AGAINST [PARAM2]
-	94		- OR.u32 [PARAM1] AGAINST [PARAM2]
-	95		- OR.u16 [PARAM1] AGAINST [PARAM2]
-	96		- OR.u8 [PARAM1] AGAINST [PARAM2]
+	93		- or.u64 [param1] against [param2]
+	94		- or.u32 [param1] against [param2]
+	95		- or.u16 [param1] against [param2]
+	96		- or.u8 [param1] against [param2]
     
 	; Logical NOT
-	97		- NOT.u64 [PARAM1] AGAINST [PARAM2]
-	98		- NOT.u32 [PARAM1] AGAINST [PARAM2]
-	99		- NOT.u16 [PARAM1] AGAINST [PARAM2]
-	100		- NOT.u8 [PARAM1] AGAINST [PARAM2]
+	97		- not.u64 [param1] against [param2]
+	98		- not.u32 [param1] against [param2]
+	99		- not.u16 [param1] against [param2]
+	100		- not.u8 [param1] against [param2]
     
 	; Logical XOR
-	101		- XOR.u64 [PARAM1] AGAINST [PARAM2]
-	102		- XOR.u32 [PARAM1] AGAINST [PARAM2]
-	103		- XOR.u16 [PARAM1] AGAINST [PARAM2]
-	104		- XOR.u8 [PARAM1] AGAINST [PARAM2]
+	101		- xor.u64 [param1] against [param2]
+	102		- xor.u32 [param1] against [param2]
+	103		- xor.u16 [param1] against [param2]
+	104		- xor.u8 [param1] against [param2]
     
 	; Negate
-	105		- NEG.F64 [PARAM1]
-	106		- NEG.F32 [PARAM1]
-	107		- NEG.u64 [PARAM1]
-	108		- NEG.u32 [PARAM1]
-	109		- NEG.u16 [PARAM1]
-	110		- NEG.u8 [PARAM1]
+	105		- neg.f64 [param1]
+	106		- neg.f32 [param1]
+	107		- neg.u64 [param1]
+	108		- neg.u32 [param1]
+	109		- neg.u16 [param1]
+	110		- neg.u8 [param1]
     
 	; Increment
-	111		- INC.F64 [PARAM1]
-	112		- INC.F32 [PARAM1]
-	113		- INC.u64 [PARAM1]
-	114		- INC.u32 [PARAM1]
-	115		- INC.u16 [PARAM1]
-	116		- INC.u8 [PARAM1]
+	111		- inc.f64 [param1]
+	112		- inc.f32 [param1]
+	113		- inc.u64 [param1]
+	114		- inc.u32 [param1]
+	115		- inc.u16 [param1]
+	116		- inc.u8 [param1]
     
 	; Decrement
-	117		- DEC.F64 [PARAM1]
-	118		- DEC.F32 [PARAM1]
-	119		- DEC.u64 [PARAM1]
-	120		- DEC.u32 [PARAM1]
-	121		- DEC.u16 [PARAM1]
-	122		- DEC.u8 [PARAM1]
+	117		- dec.f64 [param1]
+	118		- dec.f32 [param1]
+	119		- dec.u64 [param1]
+	120		- dec.u32 [param1]
+	121		- dec.u16 [param1]
+	122		- dec.u8 [param1]
 	
 	; Shift left
-	123		- SHL.u64 [PARAM1] BY [PARAM2]
-	124		- SHL.u32 [PARAM1] BY [PARAM2]
-	125		- SHL.u16 [PARAM1] BY [PARAM2]
-	126		- SHL.u8 [PARAM1] BY [PARAM2]
+	123		- shl.u64 [param1] by [param2]
+	124		- shl.u32 [param1] by [param2]
+	125		- shl.u16 [param1] by [param2]
+	126		- shl.u8 [param1] by [param2]
     
 	; Shift right unsigned
-	127		- SHR.u64 [PARAM1] BY [PARAM2]
-	128		- SHR.u32 [PARAM1] BY [PARAM2]
-	129		- SHR.u16 [PARAM1] BY [PARAM2]
-	130		- SHR.u8 [PARAM1] BY [PARAM2]
+	127		- shr.u64 [param1] by [param2]
+	128		- shr.u32 [param1] by [param2]
+	129		- shr.u16 [param1] by [param2]
+	130		- shr.u8 [param1] by [param2]
     
 	; Shift right signed
-	131		- SHR.s64 [PARAM1] BY [PARAM2]
-	132		- SHR.s32 [PARAM1] BY [PARAM2]
-	133		- SHR.s16 [PARAM1] BY [PARAM2]
-	134		- SHR.s8 [PARAM1] BY [PARAM2]
+	131		- shr.s64 [param1] by [param2]
+	132		- shr.s32 [param1] by [param2]
+	133		- shr.s16 [param1] by [param2]
+	134		- shr.s8 [param1] by [param2]
     
 	; Rotate left
-	135		- ROL.u64 [PARAM1] BY [PARAM2]
-	136		- ROL.u32 [PARAM1] BY [PARAM2]
-	137		- ROL.u16 [PARAM1] BY [PARAM2]
-	138		- ROL.u8 [PARAM1] BY [PARAM2]
+	135		- rol.u64 [param1] by [param2]
+	136		- rol.u32 [param1] by [param2]
+	137		- rol.u16 [param1] by [param2]
+	138		- rol.u8 [param1] by [param2]
     
 	; Rotate right
-	139		- ROR.u64 [PARAM1] BY [PARAM2]
-	140		- ROR.u32 [PARAM1] BY [PARAM2]
-	141		- ROR.u16 [PARAM1] BY [PARAM2]
-	142		- ROR.u8 [PARAM1] BY [PARAM2]
+	139		- ror.u64 [param1] by [param2]
+	140		- ror.u32 [param1] by [param2]
+	141		- ror.u16 [param1] by [param2]
+	142		- ror.u8 [param1] by [param2]
 
 	; Compute an address
-	143		- ADDRESS [PARAM1] + [PARAM2]
+	143		- address [param1] + [param2]
     
 	; Copy floating point to integer, or integer to floating point
-	144		- COPY.f32.s32 [FREG32] TO [REG32]
-	145		- COPY.s32.f32 [REG32] TO [FREG32]
-	146		- COPY.f64.s64 [FREG64] TO [REG64]
-	147		- COPY.s64.f64 [REG64] TO [FREG64]
+	144		- copy.f32.s32 [freg32] to [reg32]
+	145		- copy.s32.f32 [reg32] to [freg32]
+	146		- copy.f64.s64 [freg64] to [reg64]
+	147		- copy.s64.f64 [reg64] to [freg64]
     
 	; Upsize or downsize floating point to integer, or integer to floating point
-	148		- COPY.f32.s64 [FREG32] TO [REG64]
-	149		- COPY.s32.f64 [REG32] TO [FREG64]
-	150		- COPY.f64.s32 [FREG64] TO [REG32]
-	151		- COPY.s64.f32 [REG64] TO [FREG32]
+	148		- copy.f32.s64 [freg32] to [reg64]
+	149		- copy.s32.f64 [reg32] to [freg64]
+	150		- copy.f64.s32 [freg64] to [reg32]
+	151		- copy.s64.f32 [reg64] to [freg32]
     
 	; Save flags, restore flags
-	152		- FLAGS.OUT [PARAM1]					; Save flags to some location
-	153		- FLAGS.IN [PARAM1]					; Set flags from some location
+	152		- flags.out [param1]					; save flags to some location
+	153		- flags.in [param1]					; set flags from some location
 	
 	; Common register operations
-	154		- COPY.RESULT [PARAM1]				; Copies result to [PARAM1]
-	155		- BUMP								; Copies result to +008
-	156		- BUMP [IMM8]						; Copies result to +008, and each additional slot up for the [IMM8] slot count
+	154		- copy.result [param1]				; copies result to [param1]
+	155		- bump								; copies result to +008
+	156		- bump [imm8]						; copies result to +008, and each additional slot up for the [imm8] slot count
     
 	; Operations
-	157		- DEBUG								; Debugger breakpoint
-	158		- SLEEP								; Releases timeslice execution until next scheduling
-	159		- NOP								; No operation
-	160		- Nuserved
-	161		- Nuserved
-	162		- Nuserved
-	163		- SET.EXSNIP [PARAM1]				; Set the default exception snippet to [PARAM1]
-	164		- EXCEPTION [PARAM1]				; Trigger an exception to snippet [PARAM1]
+	157		- debug								; debugger breakpoint
+	158		- sleep								; releases timeslice execution until next scheduling
+	159		- nop								; no operation
+	160		- nuserved
+	161		- nuserved
+	162		- nuserved
+	163		- set.exsnip [param1]				; set the default exception snippet to [param1]
+	164		- exception [param1]				; trigger an exception to snippet [param1]
     
 	; Branching
-	165		- JUMP.SNO [PARAM1]:[PARAM2]		; Jump to snippet [PARAM1] with explicit offset [PARAM2]
-	166		- JUMP.DSNO [PARAM1]:[PARAM2]		; Jump to dynamic snippet [PARAM1] with explicit offset [PARAM2]
-	167		- JUMP [PARAM1]						; Move to explicit offset in current snippet or dynamic snippet
-	168		- JUMP.REL [PARAM1]					; ADJUST IP FORWARD BACKWARD BY SIGNED [PARAM1]
-	169		- JUMP.REL [IMM16]					; ADJUST IP FORWARD BACKWARD BY SIGNED [IMM16]
-	170		- JUMP.REL [IMM8]					; ADJUST IP FORWARD BACKWARD BY SIGNED [IMM8]
+	165		- jump.sno [param1]:[param2]		; jump to snippet [param1] with explicit offset [param2]
+	166		- jump.dsno [param1]:[param2]		; jump to dynamic snippet [param1] with explicit offset [param2]
+	167		- jump.hard [param1]				; move to explicit offset in current snippet or dynamic snippet
+	168		- jump [param1]						; adjust ip forward backward by signed [param1]
+	169		- jump [imm16]						; adjust ip forward backward by signed [imm16]
+	170		- jump [imm8]						; adjust ip forward backward by signed [imm8]
 	171		- Nuserved
     
 	; Calling
-	172		- CALL.SN [PARAM1]					; CALL SNIPPET [PARAM1]
-	173		- CALL.DSN [PARAM1]					; CALL DYNAMIC SNIPPET [PARAM1]
-	174		- CALL.SNO [PARAM1]:[PARAM2]		; Call snippet [PARAM1] with offset of explicit [PARAM2]
-	175		- CALL.DSNO [PARAM1]:[PARAM2]		; Call dynamic snippet [PARAM1] with offset of explicit [PARAM2]
-	176		- HOST [IMM16]						; EXECUTE HOST FUNCTION [IMM16]
-	177		- CALL.BACK							; Explicit return from a CALL
+	172		- call.sn [param1]					; call snippet [param1]
+	173		- call.dsn [param1]					; call dynamic snippet [param1]
+	174		- call.sno [param1]:[param2]		; call snippet [param1] with offset of explicit [param2]
+	175		- call.dsno [param1]:[param2]		; call dynamic snippet [param1] with offset of explicit [param2]
+	176		- host [imm16]						; execute host function [imm16]
+	177		- call.back							; explicit return from a call
 	178		- Nuserved
     
 	; Stack
-	179		- PUSH.u64 [PARAM1]					; PUSHES 64-BIT QUANTITY ONTO STACK FROM SOURCE
-	180		- POP.u64 [PARAM1]					; POPS 64-BIT QUANTITY BACK OFF STACK INTO SOURCE
-	181		- PUSH.u32 [PARAM1]					; PUSHES 32-BIT QUANTITY ONTO STACK FROM SOURCE
-	182		- POP.u32 [PARAM1]					; POPS 32-BIT QUANTITY BACK OFF STACK INTO SOURCE
+	179		- push.u64 [param1]					; pushes 64-bit quantity onto stack from source
+	180		- pop.u64 [param1]					; pops 64-bit quantity back off stack into source
+	181		- push.u32 [param1]					; pushes 32-bit quantity onto stack from source
+	182		- pop.u32 [param1]					; pops 32-bit quantity back off stack into source
 	183		- Nuserved
     
 	; Registers
-	184		- REGS.OUT [PARAM1],[IMM16],[IMM16]	; SAVE REGISTER BLOCK BEGINNING AT [PARAM1] + [IMM16] FOR [IMM16] BYTES
-	185		- REGS.IN [IMM16],[PARAM1],[IMM16]	; LOAD DATA INTO REGISTER BLOCK TO [IMM16] FROM [PARAM1] FOR [IMM16] BYTES
+	184		- regs.out [param1],[imm16],[imm16]	; save register block beginning at [param1] + [imm16] for [imm16] bytes
+	185		- regs.in [imm16],[param1],[imm16]	; load data into register block to [imm16] from [param1] for [imm16] bytes
 	186		- Nuserved
     
 	; Flags
-	187		- FLAG.SET [IMM8]					; SET FLAG BIT [IMM8]
-	188		- FLAG.CLEAR [IMM8]					; CLEAR FLAG BIT [IMM8]
-	189		- FLAG.TOGGLE [IMM8]				; TOGGLE FLAG BIT [IMM8]
-	190		- FLAG.IN [SOURCE]					; COPY [SOURCE] TO FLAGS
-	191		- FLAG.OUT [SOURCE]					; COPY FLAGS TO [SOURCE]
-	192		- SET.C								; SET CARRY? FLAG
-	193		- SET.O								; SET OVERFLOW? FLAG
-	194		- SET.U								; SET UNDERFLOW? FLAG
-	195		- SET.E								; SET EQUAL? FLAG
-	196		- SET.Z								; SET ZERO? FLAG
-	197		- SET.N								; SET NEGATIVE? FLAG
-	198		- SET.P								; SET POSITIVE? FLAG
-	199		- SET.A								; SET APP? FLAG
+	187		- flag.set [imm8]					; set flag bit [imm8]
+	188		- flag.clear [imm8]					; clear flag bit [imm8]
+	189		- flag.toggle [imm8]				; toggle flag bit [imm8]
+	190		- flag.in [source]					; copy [source] to flags
+	191		- flag.out [source]					; copy flags to [source]
+	192		- set.c								; set carry? flag
+	193		- set.o								; set overflow? flag
+	194		- set.u								; set underflow? flag
+	195		- set.e								; set equal? flag
+	196		- set.z								; set zero? flag
+	197		- set.n								; set negative? flag
+	198		- set.p								; set positive? flag
+	199		- set.a								; set app? flag
 	
 	200		- Nuserved
 	201		- Nuserved
@@ -321,45 +321,45 @@
 	213		- Nuserved
 
 	; For preparing and calling snippets and parameter blocks
-	214		- READY [PARAM1]					; Prepare a ready block pointing to snippet or dynamic snippet [PARAM1]
-	215		- READY.IN [PARAM1]					; Load the ready pointer
-	216		- READY.OUT [PARAM1]				; Save the ready pointer
-	217		- READY.OFFSET [PARAM1] [IMM16]		; Prepare a ready block pointing to [PARAM1] and set the ready offset to [IMM16]
-	218		- SET.READY.OFFSET [IMM16]			; Set the ready offset to this location
-	219		- SADD.READY.OFFSET [IMM16]			; Signed add N to ready.offset
-	220		- SET.SKIP.8						; Skip 8-bits
-	221		- SET.SKIP.16						; Skip 16-bits
-	222		- SET.SKIP.32						; Skip 32-bits
-	223		- SET.SKIP.64						; Skip 64-bits
-	224		- SET.8 [PARAM1] [IMM16]			; Set 8-bits by [PARAM1] at the explicit [IMM16] offset
-	225		- SET.16 [PARAM1] [IMM16]			; Set 16-bits by [PARAM1] at the explicit [IMM16] offset
-	226		- SET.32 [PARAM1] [IMM16]			; Set 32-bits by [PARAM1] at the explicit [IMM16] offset
-	227		- SET.64 [PARAM1] [IMM16]			; Set 64-bits by [PARAM1] at the explicit [IMM16] offset
-	228		- SET.IMM64 [IMM64] [IMM16]			; Set the 64-bit immediate value at the explicit [IMM16] offset
-	229		- SET.IMM32 [IMM32] [IMM16]			; Set the 32-bit immediate value at the explicit [IMM16] offset
-	230		- SET.8 [PARAM1]					; Set the next 8-bits in the ready block
-	231		- SET.16 [PARAM1]					; Set the next 16-bits in the ready block
-	232		- SET.32 [PARAM1]					; Set the next 32-bits in the ready block
-	233		- SET.64 [PARAM1]					; Set the next 64-bits in the ready block
-	234		- SET.IMM64 [IMM64]					; Set the 64-bit immediate value
-	235		- SET.IMM32 [IMM32]					; Set the 32-bit immediate value
-	236		- GO.SN [PARAM1]					; Call snippet [PARAM1] with an implicit offset of 0
-	237		- GO.DSN [PARAM1]					; Call dynamic snippet [PARAM1] with an implicit offset of 0
-	238		- GO.SNO [PARAM1]:[PARAM2]			; Call snippet [PARAM1] with an explicit offset [PARAM2]
-	239		- GO.DSNO [PARAM1]:[PARAM2]			; Call dynamic snippet [PARAM1] with an explicit offset [PARAM2]
-	240		- GO.BACK							; Explicit return from a GO
+	214		- ready [param1]					; prepare a ready block pointing to snippet or dynamic snippet [param1]
+	215		- ready.in [param1]					; load the ready pointer
+	216		- ready.out [param1]				; save the ready pointer
+	217		- ready.offset [param1] [imm16]		; prepare a ready block pointing to [param1] and set the ready offset to [imm16]
+	218		- set.ready.offset [imm16]			; set the ready offset to this location
+	219		- set.add.ready.offset [imm16]		; signed add n to ready.offset
+	220		- set.skip.8						; skip 8-bits
+	221		- set.skip.16						; skip 16-bits
+	222		- set.skip.32						; skip 32-bits
+	223		- set.skip.64						; skip 64-bits
+	224		- set.8 [param1] [imm16]			; set 8-bits by [param1] at the explicit [imm16] offset
+	225		- set.16 [param1] [imm16]			; set 16-bits by [param1] at the explicit [imm16] offset
+	226		- set.32 [param1] [imm16]			; set 32-bits by [param1] at the explicit [imm16] offset
+	227		- set.64 [param1] [imm16]			; set 64-bits by [param1] at the explicit [imm16] offset
+	228		- set.imm64 [imm64] [imm16]			; set the 64-bit immediate value at the explicit [imm16] offset
+	229		- set.imm32 [imm32] [imm16]			; set the 32-bit immediate value at the explicit [imm16] offset
+	230		- set.8 [param1]					; set the next 8-bits in the ready block
+	231		- set.16 [param1]					; set the next 16-bits in the ready block
+	232		- set.32 [param1]					; set the next 32-bits in the ready block
+	233		- set.64 [param1]					; set the next 64-bits in the ready block
+	234		- set.imm64 [imm64]					; set the 64-bit immediate value
+	235		- set.imm32 [imm32]					; set the 32-bit immediate value
+	236		- go.sn [param1]					; call snippet [param1] with an implicit offset of 0
+	237		- go.dsn [param1]					; call dynamic snippet [param1] with an implicit offset of 0
+	238		- go.sno [param1]:[param2]			; call snippet [param1] with an explicit offset [param2]
+	239		- go.dsno [param1]:[param2]			; call dynamic snippet [param1] with an explicit offset [param2]
+	240		- go.back							; explicit return from a go
 
 	; Semaphore processing
-	241		- SEMAPHORE.CREATE					; SEMAPHORE CREATE
-	242		- SEMAPHORE.TRYLOCK [PARAM1]		; SEMAPHORE TRY LOCK, AND SET CARRY? FLAG IF FAILURE
-	243		- SEMAPHORE.LOCK	[PARAM1]		; SEMAPHORE LOCK
-	244		- SEMAPHORE.UNLOCK [PARAM1]			; SEMAPHORE UNLOCK
-	245		- SEMAPHORE.DELETE [PARAM1]			; SEMAPHORE DELETE
+	241		- semaphore.create					; semaphore create
+	242		- semaphore.trylock [param1]		; semaphore try lock, and set carry? flag if failure
+	243		- semaphore.lock	[param1]		; semaphore lock
+	244		- semaphore.unlock [param1]			; semaphore unlock
+	245		- semaphore.delete [param1]			; semaphore delete
 
 	; Predicate population
-	246		- PRED.LOAD.4 [IMM16][4:REPEAT]		; USES AN EXTENDED PREDICATE FOR A HIGH COMBINATION OF EXPLICIT CONDITIONS
-	247		- PRED.LOAD.8 [PARAM1][8:REPEAT]	; COPIES 64-BIT QUANTITY INTO PRED REGISTER, AND INDICATES AN 8-BIT REPEAT COUNT
-	248		- PRED.FILL							; FILLS LOWER 16 BITS OF FLAGS REGISTER INTO PRED
+	246		- pred.load.4 [imm16][4:repeat]		; uses an extended predicate for a high combination of explicit conditions
+	247		- pred.load.8 [param1][8:repeat]	; copies 64-bit quantity into pred register, and indicates an 8-bit repeat count
+	248		- pred.fill							; fills lower 16 bits of flags register into pred
 	
 	; Preparing data for calling snippets
 	249		- Nuserved
@@ -368,9 +368,8 @@
 	252		- Nuserved
 
 	; Other ISA emulation
-	253		- X86 ISA EMULATION [PARAM1]		; An x86 32-bit assembly instruction block can be encoded and used
-	254		- ARM ISA EMULATION [PARAM1]		; An ARM 32-bit assembly instruction block can be encoded and used
+	253		- x86 [param1]						; Execute an x86 32-bit assembly instruction block snippet on the native cpu
+	254		- arm [param1]						; Execute an arm 32-bit assembly instruction block snippet on the native cpu
     
 	; Extended instructions
-	255		- EXTENDED INSTRUCTION BYTE FOLLOWS (TO BE DEFINED AND IMPLEMENTED LATER)
-
+	255		- Extended instruction byte follows (to be defined and implemented later)
