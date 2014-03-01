@@ -1,0 +1,122 @@
+<bxml>
+	<vdeb version="0.70">
+		<definitions>
+			<pane name="System Registers" shortname="Sys.Regs" width="28" height="17">
+				<text c="SNIP" x="3" y="1"/>
+				<text c="IP" x="5" y="2"/>
+				<text c="SP" x="5" y="3"/>
+				<text c="BP" x="5" y="4"/>
+				<text c="PRED" x="3" y="5"/>
+				<text c="COUNT" x="11" y="6"/>
+				<text c="EXSNIP" x="1" y="7"/>
+				<text c="ERROR" x="2" y="8"/>
+				<text c="FLAGS" x="2" y="10"/>
+				
+				<text c=":" x="16" y="1"/>
+				<text c=":" x="16" y="2"/>
+				<text c=":" x="16" y="3"/>
+				<text c=":" x="16" y="4"/>
+				<text c=":" x="16" y="5"/>
+				<text c=":" x="16" y="7"/>
+				<text c=":" x="16" y="8"/>
+				<text c=":" x="16" y="10"/>
+				
+				<reg n="snip" x="8" y="1" ldots/>
+				<lookup n="snip.name" x="17" y="1" w="8"/>
+				<reg n="ip" x="8" y="2" ldots/>
+				<reg n="sp" x="8" y="3" ldots/>
+				<reg n="bp" x="8" y="4" ldots/>
+				<reg n="pred" x="8" y="5" ldots/>
+				<reg n="pred.count" x="17" y="6"/>
+				<reg n="exsnip" x="8" y="9" ldots="1"/>
+				<lookup n="exsnip.name" x="17" y="9" w="8"/>
+				<reg n="error" x="8" y="10" ldots="1"/>
+				
+				<reg n="flags" x="8" y="11" ldots="1"/>
+				<lookup n="flags.line4" x="4" y="12" dots="1"/>
+				<lookup n="flags.line3" x="4" y="13" dots="1"/>
+				<lookup n="flags.line2" x="4" y="14" dots="1"/>
+				<lookup n="flags.line1" x="4" y="15" dots="1"/>
+				<lookup n="flags.ov" x="6" y="16"/>
+				<lookup n="flags.cy" x="10" y="16"/>
+				<lookup n="flags.ab" x="14" y="16"/>
+				<lookup n="flags.app" x="18" y="16"/>
+				<lookup n="flags.un" x="6" y="17"/>
+				<lookup n="flags.eq" x="10" y="17"/>
+				<lookup n="flags.be" x="14" y="17"/>
+			</pane>
+			
+			<pane name="Integer Registers" shortname="Int.Regs" width="28" height="17">
+				<text c="A" x="2" y="1"/>
+				<text c="B" x="2" y="2"/>
+				<text c="C" x="2" y="3"/>
+				<text c="D" x="2" y="4"/>
+				<text c="E" x="2" y="5"/>
+				<text c="F" x="2" y="6"/>
+				<text c="G" x="2" y="7"/>
+				<text c="H" x="2" y="8"/>
+				<text c="I" x="2" y="9"/>
+				<text c="J" x="2" y="10"/>
+				<text c="K" x="2" y="11"/>
+				<text c="L" x="2" y="12"/>
+				<text c="M" x="2" y="13"/>
+				<text c="N" x="2" y="14"/>
+				<text c="O" x="2" y="15"/>
+				<text c="P" x="2" y="16"/>
+				
+				<lookup n="regs.a" x="5" y="1"/>
+				<lookup n="regs.b" x="5" y="2"/>
+				<lookup n="regs.c" x="5" y="3"/>
+				<lookup n="regs.d" x="5" y="4"/>
+				<lookup n="regs.e" x="5" y="5"/>
+				<lookup n="regs.f" x="5" y="6"/>
+				<lookup n="regs.g" x="5" y="7"/>
+				<lookup n="regs.h" x="5" y="8"/>
+				<lookup n="regs.i" x="5" y="9"/>
+				<lookup n="regs.j" x="5" y="10"/>
+				<lookup n="regs.k" x="5" y="11"/>
+				<lookup n="regs.l" x="5" y="12"/>
+				<lookup n="regs.m" x="5" y="13"/>
+				<lookup n="regs.n" x="5" y="14"/>
+				<lookup n="regs.o" x="5" y="15"/>
+				<lookup n="regs.p" x="5" y="16"/>
+			</pane>
+			
+			<pane name="Floating Point Registers" shortname="FP.Regs" width="28" height="17">
+				<text c="FA" x="2" y="1"/>
+				<text c="FB" x="2" y="2"/>
+				<text c="FC" x="2" y="3"/>
+				<text c="FD" x="2" y="4"/>
+				<text c="FE" x="2" y="5"/>
+				<text c="FF" x="2" y="6"/>
+				<text c="FG" x="2" y="7"/>
+				<text c="FH" x="2" y="8"/>
+				<text c="FI" x="2" y="9"/>
+				<text c="FJ" x="2" y="10"/>
+				<text c="FK" x="2" y="11"/>
+				<text c="FL" x="2" y="12"/>
+				<text c="FM" x="2" y="13"/>
+				<text c="FN" x="2" y="14"/>
+				<text c="FO" x="2" y="15"/>
+				<text c="FP" x="2" y="16"/>
+				
+				<lookup n="regs.fa" x="5" y="1"/>
+				<lookup n="regs.fb" x="5" y="2"/>
+				<lookup n="regs.fc" x="5" y="3"/>
+				<lookup n="regs.fd" x="5" y="4"/>
+				<lookup n="regs.fe" x="5" y="5"/>
+				<lookup n="regs.ff" x="5" y="6"/>
+				<lookup n="regs.fg" x="5" y="7"/>
+				<lookup n="regs.fh" x="5" y="8"/>
+				<lookup n="regs.fi" x="5" y="9"/>
+				<lookup n="regs.fj" x="5" y="10"/>
+				<lookup n="regs.fk" x="5" y="11"/>
+				<lookup n="regs.fl" x="5" y="12"/>
+				<lookup n="regs.fm" x="5" y="13"/>
+				<lookup n="regs.fn" x="5" y="14"/>
+				<lookup n="regs.fo" x="5" y="15"/>
+				<lookup n="regs.fp" x="5" y="16"/>
+			</pane>
+		</definitions>
+	</vdeb>
+</bxml>
