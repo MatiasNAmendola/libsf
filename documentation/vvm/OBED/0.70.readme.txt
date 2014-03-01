@@ -1,0 +1,18 @@
+Feb.28.2014
+===========
+The current draft revision of OBED is 0.70.  This draft is still in flux,
+so check back often.  However, development is proceeding in the VVMMC
+(Visual FreePro Virtual Machine (VVM) Machine Code (MC)) module, as well
+as in VASM (the Visual FreePro Assembler), and VDeb (the Visual FreePro
+Debugger).
+
+See:
+\libsf\vvm\core\vvm.sln
+\libsf\vvm\core\vvmmc\
+\libsf\vvm\core\vasm\
+\libsf\vvm\core\vdebug\
+
+Blessings! :-)
+
+Best regards,
+Rick C. Hodgin
