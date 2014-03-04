@@ -1,7 +1,7 @@
 <bxml>
 	<vdeb version="0.70">
 		<definitions>
-			<pane name="System Registers" shortname="Sys.Regs" width="28" height="17">
+			<pane name="System Registers" shortname="Sys.Regs.1" width="28" height="17">
 				<text c="SNIP" x="3" y="1"/>
 				<text c="IP" x="5" y="2"/>
 				<text c="SP" x="5" y="3"/>
@@ -46,7 +46,7 @@
 				<lookup n="flags.be" x="14" y="17"/>
 			</pane>
 			
-			<pane name="Integer Registers" shortname="Int.Regs" width="28" height="17">
+			<pane name="Integer Registers" shortname="Int.Regs.1" width="28" height="17">
 				<text c="A" x="2" y="1"/>
 				<text c="B" x="2" y="2"/>
 				<text c="C" x="2" y="3"/>
@@ -82,7 +82,7 @@
 				<lookup n="regs.p" x="5" y="16"/>
 			</pane>
 			
-			<pane name="Floating Point Registers" shortname="FP.Regs" width="28" height="17">
+			<pane name="Floating Point Registers" shortname="FP.Regs.1" width="28" height="17">
 				<text c="FA" x="2" y="1"/>
 				<text c="FB" x="2" y="2"/>
 				<text c="FC" x="2" y="3"/>
@@ -116,6 +116,248 @@
 				<lookup n="regs.fn" x="5" y="14"/>
 				<lookup n="regs.fo" x="5" y="15"/>
 				<lookup n="regs.fp" x="5" y="16"/>
+			</pane>
+			
+			<pane name="Stack" shortname="Stack.1" width="28" height="17">
+				<lookup n="&stack.u32+120" x="1" y="1"/>
+				<lookup n="&stack.u32+112" x="1" y="2"/>
+				<lookup n="&stack.u32+104" x="1" y="3"/>
+				<lookup n="&stack.u32+96" x="1" y="4"/>
+				<lookup n="&stack.u32+88" x="1" y="5"/>
+				<lookup n="&stack.u32+80" x="1" y="6"/>
+				<lookup n="&stack.u32+72" x="1" y="7"/>
+				<lookup n="&stack.u32+64" x="1" y="8"/>
+				<lookup n="&stack.u32+56" x="1" y="9"/>
+				<lookup n="&stack.u32+48" x="1" y="10"/>
+				<lookup n="&stack.u32+40" x="1" y="11"/>
+				<lookup n="&stack.u32+32" x="1" y="12"/>
+				<lookup n="&stack.u32+24" x="1" y="13"/>
+				<lookup n="&stack.u32+16" x="1" y="14"/>
+				<lookup n="&stack.u32+8" x="1" y="15"/>
+				<lookup n="&stack.u32+0" x="1" y="16"/>
+			
+				<lookup n="stack.u64+120" x="10" y="1"/>
+				<lookup n="stack.u64+112" x="10" y="2"/>
+				<lookup n="stack.u64+104" x="10" y="3"/>
+				<lookup n="stack.u64+96" x="10" y="4"/>
+				<lookup n="stack.u64+88" x="10" y="5"/>
+				<lookup n="stack.u64+80" x="10" y="6"/>
+				<lookup n="stack.u64+72" x="10" y="7"/>
+				<lookup n="stack.u64+64" x="10" y="8"/>
+				<lookup n="stack.u64+56" x="10" y="9"/>
+				<lookup n="stack.u64+48" x="10" y="10"/>
+				<lookup n="stack.u64+40" x="10" y="11"/>
+				<lookup n="stack.u64+32" x="10" y="12"/>
+				<lookup n="stack.u64+24" x="10" y="13"/>
+				<lookup n="stack.u64+16" x="10" y="14"/>
+				<lookup n="stack.u64+8" x="10" y="15"/>
+				<lookup n="stack.u64+0" x="10" y="16"/>
+			</pane>
+			
+			<pane name="Watch Window" shortname="Watch.1" width="70" height="17">
+				<lookup n="watch.1" x="1" y="1"/>
+				<lookup n="watch.2" x="1" y="2"/>
+				<lookup n="watch.3" x="1" y="3"/>
+				<lookup n="watch.4" x="1" y="4"/>
+				<lookup n="watch.5" x="1" y="5"/>
+				<lookup n="watch.6" x="1" y="6"/>
+				<lookup n="watch.7" x="1" y="7"/>
+				<lookup n="watch.8" x="1" y="8"/>
+				<lookup n="watch.9" x="1" y="9"/>
+				<lookup n="watch.10" x="1" y="10"/>
+				<lookup n="watch.11" x="1" y="11"/>
+				<lookup n="watch.12" x="1" y="12"/>
+				<lookup n="watch.13" x="1" y="13"/>
+				<lookup n="watch.14" x="1" y="14"/>
+				<lookup n="watch.15" x="1" y="15"/>
+				<lookup n="watch.16" x="1" y="16"/>
+			</pane>
+			
+			<pane name="Ready Window" shortname="Ready.1" width="70" height="17">
+				<lookup n="ready.r3" x="1" y="1"/>
+				<lookup n="ready.r2" x="1" y="2"/>
+				<lookup n="ready.r1" x="1" y="3"/>
+				<lookup n="ready.p1" x="1" y="5"/>
+				<lookup n="ready.p2" x="1" y="6"/>
+				<lookup n="ready.p3" x="1" y="7"/>
+				<lookup n="ready.p4" x="1" y="8"/>
+				<lookup n="ready.p5" x="1" y="9"/>
+				<lookup n="ready.p6" x="1" y="10"/>
+				<lookup n="ready.p7" x="1" y="11"/>
+				<lookup n="ready.p8" x="1" y="12"/>
+				<lookup n="ready.p9" x="1" y="13"/>
+				<lookup n="ready.p10" x="1" y="14"/>
+				<lookup n="ready.p11" x="1" y="15"/>
+				<lookup n="ready.p12" x="1" y="16"/>
+			</pane>
+			
+			<pane name="Hover Window" shortname="Hover.1" width="50" height="17">
+				<lookup n="hover.16" x="1" y="1"/>
+				<lookup n="hover.15" x="1" y="2"/>
+				<lookup n="hover.14" x="1" y="3"/>
+				<lookup n="hover.13" x="1" y="4"/>
+				<lookup n="hover.12" x="1" y="5"/>
+				<lookup n="hover.11" x="1" y="6"/>
+				<lookup n="hover.10" x="1" y="7"/>
+				<lookup n="hover.9" x="1" y="8"/>
+				<lookup n="hover.8" x="1" y="9"/>
+				<lookup n="hover.7" x="1" y="10"/>
+				<lookup n="hover.6" x="1" y="11"/>
+				<lookup n="hover.5" x="1" y="12"/>
+				<lookup n="hover.4" x="1" y="13"/>
+				<lookup n="hover.3" x="1" y="14"/>
+				<lookup n="hover.2" x="1" y="15"/>
+				<lookup n="hover.1" x="1" y="16"/>
+			</pane>
+			
+			<pane name="Locals Window" shortname="Locals.1" width="50" height="17">
+				<lookup n="locals.16" x="1" y="1"/>
+				<lookup n="locals.15" x="1" y="2"/>
+				<lookup n="locals.14" x="1" y="3"/>
+				<lookup n="locals.13" x="1" y="4"/>
+				<lookup n="locals.12" x="1" y="5"/>
+				<lookup n="locals.11" x="1" y="6"/>
+				<lookup n="locals.10" x="1" y="7"/>
+				<lookup n="locals.9" x="1" y="8"/>
+				<lookup n="locals.8" x="1" y="9"/>
+				<lookup n="locals.7" x="1" y="10"/>
+				<lookup n="locals.6" x="1" y="11"/>
+				<lookup n="locals.5" x="1" y="12"/>
+				<lookup n="locals.4" x="1" y="13"/>
+				<lookup n="locals.3" x="1" y="14"/>
+				<lookup n="locals.2" x="1" y="15"/>
+				<lookup n="locals.1" x="1" y="16"/>
+			</pane>
+			
+			<pane name="Autos Window" shortname="Autos.1" width="50" height="17">
+				<lookup n="autos.1" x="1" y="1"/>
+				<lookup n="autos.2" x="1" y="2"/>
+				<lookup n="autos.3" x="1" y="3"/>
+				<lookup n="autos.4" x="1" y="4"/>
+				<lookup n="autos.5" x="1" y="5"/>
+				<lookup n="autos.6" x="1" y="6"/>
+				<lookup n="autos.7" x="1" y="7"/>
+				<lookup n="autos.8" x="1" y="8"/>
+				<lookup n="autos.9" x="1" y="9"/>
+				<lookup n="autos.10" x="1" y="10"/>
+				<lookup n="autos.11" x="1" y="11"/>
+				<lookup n="autos.12" x="1" y="12"/>
+				<lookup n="autos.13" x="1" y="13"/>
+				<lookup n="autos.14" x="1" y="14"/>
+				<lookup n="autos.15" x="1" y="15"/>
+				<lookup n="autos.16" x="1" y="16"/>
+			</pane>
+			
+			<pane name="Timers Window" shortname="Timers.1" width="50" height="17">
+				<lookup n="timers.1" x="1" y="1"/>
+				<lookup n="timers.2" x="1" y="2"/>
+				<lookup n="timers.3" x="1" y="3"/>
+				<lookup n="timers.4" x="1" y="4"/>
+				<lookup n="timers.5" x="1" y="5"/>
+				<lookup n="timers.6" x="1" y="6"/>
+				<lookup n="timers.7" x="1" y="7"/>
+				<lookup n="timers.8" x="1" y="8"/>
+				<lookup n="timers.9" x="1" y="9"/>
+				<lookup n="timers.10" x="1" y="10"/>
+				<lookup n="timers.11" x="1" y="11"/>
+				<lookup n="timers.12" x="1" y="12"/>
+				<lookup n="timers.13" x="1" y="13"/>
+				<lookup n="timers.14" x="1" y="14"/>
+				<lookup n="timers.15" x="1" y="15"/>
+				<lookup n="timers.16" x="1" y="16"/>
+			</pane>
+			
+			<pane name="Memory Window" shortname="Memory.1" width="55" height="17">
+				<lookup n="&memory.u20.1" x="6" y="1"/>
+				<lookup n="&memory.u20.2" x="6" y="2"/>
+				<lookup n="&memory.u20.3" x="6" y="3"/>
+				<lookup n="&memory.u20.4" x="6" y="4"/>
+				<lookup n="&memory.u20.5" x="6" y="5"/>
+				<lookup n="&memory.u20.6" x="6" y="6"/>
+				<lookup n="&memory.u20.7" x="6" y="7"/>
+				<lookup n="&memory.u20.8" x="6" y="8"/>
+				<lookup n="&memory.u20.9" x="6" y="9"/>
+				<lookup n="&memory.u20.10" x="6" y="10"/>
+				<lookup n="&memory.u20.11" x="6" y="11"/>
+				<lookup n="&memory.u20.12" x="6" y="12"/>
+				<lookup n="&memory.u20.13" x="6" y="13"/>
+				<lookup n="&memory.u20.14" x="6" y="14"/>
+				<lookup n="&memory.u20.15" x="6" y="15"/>
+				<lookup n="&memory.u20.16" x="6" y="16"/>
+			
+				<lookup n="memory.1" x="6" y="1"/>
+				<lookup n="memory.2" x="6" y="2"/>
+				<lookup n="memory.3" x="6" y="3"/>
+				<lookup n="memory.4" x="6" y="4"/>
+				<lookup n="memory.5" x="6" y="5"/>
+				<lookup n="memory.6" x="6" y="6"/>
+				<lookup n="memory.7" x="6" y="7"/>
+				<lookup n="memory.8" x="6" y="8"/>
+				<lookup n="memory.9" x="6" y="9"/>
+				<lookup n="memory.10" x="6" y="10"/>
+				<lookup n="memory.11" x="6" y="11"/>
+				<lookup n="memory.12" x="6" y="12"/>
+				<lookup n="memory.13" x="6" y="13"/>
+				<lookup n="memory.14" x="6" y="14"/>
+				<lookup n="memory.15" x="6" y="15"/>
+				<lookup n="memory.16" x="6" y="16"/>
+			</pane>
+			
+			<pane name="Programs Window" shortname="Programs.1" width="50" height="17">
+				<lookup n="programs.1" x="1" y="1"/>
+				<lookup n="programs.2" x="1" y="2"/>
+				<lookup n="programs.3" x="1" y="3"/>
+				<lookup n="programs.4" x="1" y="4"/>
+				<lookup n="programs.5" x="1" y="5"/>
+				<lookup n="programs.6" x="1" y="6"/>
+				<lookup n="programs.7" x="1" y="7"/>
+				<lookup n="programs.8" x="1" y="8"/>
+				<lookup n="programs.9" x="1" y="9"/>
+				<lookup n="programs.10" x="1" y="10"/>
+				<lookup n="programs.11" x="1" y="11"/>
+				<lookup n="programs.12" x="1" y="12"/>
+				<lookup n="programs.13" x="1" y="13"/>
+				<lookup n="programs.14" x="1" y="14"/>
+				<lookup n="programs.15" x="1" y="15"/>
+				<lookup n="programs.16" x="1" y="16"/>
+			</pane>
+			
+			<pane name="Threads Window" shortname="Threads.1" width="50" height="17">
+				<lookup n="threads.1" x="1" y="1"/>
+				<lookup n="threads.2" x="1" y="2"/>
+				<lookup n="threads.3" x="1" y="3"/>
+				<lookup n="threads.4" x="1" y="4"/>
+				<lookup n="threads.5" x="1" y="5"/>
+				<lookup n="threads.6" x="1" y="6"/>
+				<lookup n="threads.7" x="1" y="7"/>
+				<lookup n="threads.8" x="1" y="8"/>
+				<lookup n="threads.9" x="1" y="9"/>
+				<lookup n="threads.10" x="1" y="10"/>
+				<lookup n="threads.11" x="1" y="11"/>
+				<lookup n="threads.12" x="1" y="12"/>
+				<lookup n="threads.13" x="1" y="13"/>
+				<lookup n="threads.14" x="1" y="14"/>
+				<lookup n="threads.15" x="1" y="15"/>
+				<lookup n="threads.16" x="1" y="16"/>
+			</pane>
+			
+			<pane name="Ascii Chart" shortname="Ascii.1" width="20" height="17">
+				<lookup n="ascii.1" x="1" y="1"/>
+				<lookup n="ascii.2" x="1" y="2"/>
+				<lookup n="ascii.3" x="1" y="3"/>
+				<lookup n="ascii.4" x="1" y="4"/>
+				<lookup n="ascii.5" x="1" y="5"/>
+				<lookup n="ascii.6" x="1" y="6"/>
+				<lookup n="ascii.7" x="1" y="7"/>
+				<lookup n="ascii.8" x="1" y="8"/>
+				<lookup n="ascii.9" x="1" y="9"/>
+				<lookup n="ascii.10" x="1" y="10"/>
+				<lookup n="ascii.11" x="1" y="11"/>
+				<lookup n="ascii.12" x="1" y="12"/>
+				<lookup n="ascii.13" x="1" y="13"/>
+				<lookup n="ascii.14" x="1" y="14"/>
+				<lookup n="ascii.15" x="1" y="15"/>
+				<lookup n="ascii.16" x="1" y="16"/>
 			</pane>
 		</definitions>
 	</vdeb>
