@@ -351,7 +351,7 @@ struct	SUpSnip;
 //////
 	struct SRegs
 	{
-		u64				_result;				// 000, 8  - Each assembly instruction that performs some complex operation returns its result here
+		u64				result;					// 000, 8  - Each assembly instruction that performs some complex operation returns its result here
 
 		// Integer registers
 		SRegsI			a;						// 008, 8  - 64-bit integer
@@ -398,7 +398,10 @@ struct	SUpSnip;
 		u64				ready;					// 296, 8  - READY block of data to snippet
 		u64				readyOffset;			// 304, 8  - The incrementing offset into the ready block
 
-		SFlags			flags;					// 312, 8  - flags register
+		union {
+			u64			_flags;					// 312, 8  - flags integer
+			SFlags		flags;					// 312, 8  - flags register
+		};
 		u64				pred;					// 320, 8  - predicate flags
 		u64				predCount;				// 328, 8  - predicate reset count
 

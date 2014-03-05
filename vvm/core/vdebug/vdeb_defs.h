@@ -73,4 +73,7 @@
 	void				ivdeb_updatePrograms2							(SThread* th);
 	void				ivdeb_updateThreads2							(SThread* th);
 
-	s8*					ivdeb_getU64WithSpaceAndDots					(u64 tnValue, s8* buffer);
+	u8*					ivdeb_getU64WithSpaceAndDots					(u64 tnValue, u8* buffer);
+	u8*					ivdeb_getU8WithSpaceAndDots						(u8 tnValue, u8* buffer);
+	u8*					ivdeb_getU16AsBinaryWithSpaceAndDots			(u16 tnBits, u8* buffer);
+	void				ivdeb_getFlags									(SFlags flags, u8* line1, u8* line2);
