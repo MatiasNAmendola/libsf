@@ -644,6 +644,13 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		u32				iCode;											// An associated code to store when this entry is found
 		bool			firstOnLine;									// Should this item ONLY be the first on line?
 
+		// Used for an explicit callback to validate if this match is a match
+		union {
+			u64		_validateHandler;
+// TODO:  parameters need to be added here
+			bool		(*validate)(SOssComp* comp, u32 tniCode);
+		};
+
 		// Used for an explicit callback to handle this component text
 		union {
 			u64			_addressHandler;

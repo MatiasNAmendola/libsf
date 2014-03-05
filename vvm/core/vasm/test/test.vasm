@@ -44,19 +44,14 @@
 // @Version			0.70
 //
 // Predicates (lower-case means false, upper-case means true, or a ! prefix also means not):
-//		[z]		- zero?
 //		[c]		- carry?
 //		[e]		- equal?
-//		[u]		- underflow?
-//		[o]		- overflow?
-//		[n]		- negative?
-//		[p]		- positive?
 //		[a]		- app?
 //		[a3]	- app3?
 //
 // Examples:
-//		[CN]	- carry? and negative?
-//		[Cp]	- carry? and not positive?
+//		[C A3]	- carry? and app3?
+//		[e]		- not equal?
 //		et cetera
 //
 // To repeat a predicate over the next three instructions, use:
@@ -68,96 +63,62 @@
 
 
 // Include file
-include		"c:\libsf\vvm\vasm\test\testout.vasm"
-
-// Macros or constants
-define		user32		user32.dll
+(|include|c:\libsf\vvm\vasm\test\testout.vasm||)
 
 
+// Macros
+[|macro| [|token|user32||] [|swap|user32.dll||] ||]
 
 
-//////////
 // Global Variables
-//////
-	u32		foo[10]					= 1, 2, 3, 4, 5, 6
-	s8		someString[]			= "Hi, mom!"
-	s32		gnFlag
-	u32		lnHwnd.range(0..50)		= 0
+[|u32|10,foo, [|init|1, 2, 3, 4, 5, 6||] ||]
+[|s8|someString, [|init|"Hi, mom!"||] ||]
+[|s32|gnFlag||]
+[|u32|lnHwnd, [|min|0||] [|max|50||] [|init|0||] ||]
 
 
+[|dsnip|dll,~user32~||]
+[|dll_function|SendMessage||]
+[|params| [|u32|hwnd||] [|u32|msg||] [|u32|w||] [|u32|l||] ||]
+[|returns| [|u32|r1||] ||]
+
+[|dll_function|GetClientRect
+[|params| [|u32|hwnd||] [|u32*|rc||] ||]
+[|returns| [|u32|r1||] ||]
+
+[|dll_function|OtherFunction
+[|params| u32 foo
+[|end|]
 
 
-DSNIP_DLL ~user32~
-
-	DLL_FUNCTION SendMessage
-		|PARAMS		u32 hwnd, u32 msg, u32 w, u32 l
-		|RETURNS	u32
-
-	DLL_FUNCTION GetClientRect
-		|PARAMS		u32 hwnd, u32* rc
-		|RETURNS	u32
-
-	DLL_FUNCTION OtherFunction
-		|PARAMS		u32 foo
-	
-END
+[|dsnip|bxml,d:\path\to\runtime\loadable.bxml||]
+[|prototype|c:\path\to\devtime\loadable.bxml||]
+[|end|]
 
 
+(|source|c:\path\program.bxml::test_uadd||)
+(|line|1,FUNCTION test_uadd||)
+[|snip|test_uadd||]
+(|line|2,LPARAMETERS p1, p2, p3, p4, p5||)
+[|params| [|u32|p1||] [|u32|p2||] [|u32|p3||] [|u32|p4||] [|u32|p5||] ||]
+(|line|3,RETURNS r1, r2||)
+[|returns| [|u32|r1||] [|u32|r2||] ||]
+(|line|4,LOCALS lnI, lnJ, k||)
+[|locals| [|u32|lnI||] [|u32|lnJ||] [|u32|k||] [|u8|20,_sendMessageParams||] ||]
 
+(|line|6,lnC = lnA + lnB||)
+			add.s32		lnA,lnB							(|i|6,9||)
+			move.s32	lnC,result						(|i|0,5||)
 
-DSNIP_Bxml "d:\path\to\runtime\loadable.bxml", "loadable.bxml"
-	|PROTOTYPE "c:\path\to\devtime\loadable.bxml"
-END
+(|line|7,k = MySendMessage(lnHwnd, foo[0], foo[lnB], fa)||)
+			ready		_mySendMessageParams			(|i|-1||)
+			set.32		&k								(|i|0,3||)
+			set.32		lnHwnd							(|i|16,6||)
+			set.32		foo[0]							(|i|24,6||)
+			set.32		foo[lnB]						(|i|32,8||)
+			set.32		fa								(|i|42,2||)
+			go.dsn		SendMessage						(|i|4,11||)
 
-
-
-
-FUNCTION test_uadd
-	|PARAMS  u32 p1, u32 p2, u32 p3, u32 p4, u32 p5
-	|RETURNS u32 r1, u32 r2
-	|LOCALS  u32 lnI, u32 lnJ, u32 k
-
-			uadd64		a,b
-			uadd64		fc,fc
-			
-// Skip over the next uadd64 instruction
-			adjip		@F
-			uadd64		result,20
-:@@
-			uadd64		20,result
-			uadd64		sp[0],result
-			uadd64		result,sp[0]
-			uadd64		sbd[b],c
-			uadd64		c,sbd[b]
-			
-			move32		b,2
-			calldsn		k, SendMessage, lnHwnd, foo[0], foo[b], fa
-	
-// Recurisvely call this function, but go straight to :foo label, bypassing earlier instructions
-			callsn		r1, r2, test_uadd:foo, p1, p2, p3, p4, p5
-
-// Repeat five times
-			move64		c,5
-:@@
-			uadd64		f,param[0]
-			uadd64		param[0],fa+fc
-			dec64		c
-	[!z]	adjip		@B
-	
-			adjip		foo
-:foo
-			uadd64		g,return[0]
-			uadd64		return[0],sp[0]
-			uadd64		h,local[0]
-			uadd64		local[0],global[4]
-			uadd64		object[0],result
-			uadd64		result,object[0]
-			uadd64		i+j,result
-			uadd64		fa+fj,b+c
-			uadd64		d+e,fb+fl
-			uadd64		[a][0],fb+fc
-			uadd64		fb+fc,[h][0]
-			uadd64		[a][c],result
-			uadd64		result,[j][j]
-			return
-END
+(|line|8,RETURN||)
+			go.back
+[|end|]

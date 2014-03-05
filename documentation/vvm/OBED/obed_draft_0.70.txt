@@ -228,7 +228,7 @@ VVM Registers
 
 	Other registers (accessible only by special instructions)
 	---------------------------------------------------------
-	+264		SNIP			- Current snippet number executing
+	+264		ESNIP			- Current snippet number executing
 	+272		IP				- Instruction pointer
 	+280		SP				- Stack pointer (SP always points to the next slot, so data is accessed at SP-4, SP-8, etc)
 	+288		BP				- Base pointer (After a CALL or GO, BP is always updated to new SP value)
@@ -386,7 +386,7 @@ CALL STACK
 ----------
 	; Before:				SP->|xxxxxxxx:xxxxxxxx|
 							0   |                 |
-	CALL	dsnip
+	call.dsn	dsnip
 	; After:				SP->|yyyyyyyy:yyyyyyyy|		<- New BP points here
 							32	|     prev BP     |
 							24	|   return snip   |
@@ -399,7 +399,7 @@ GO STACK
 --------
 	; Before:				SP->|xxxxxxxx:xxxxxxxx|
 							0   |                 |
-	READY
+	ready
 	; After:				SP->|yyyyyyyy:yyyyyyyy|
 							38	| unpopulated slot|		<- Future prev BP
 							32	| unpopulated slot|		<- Future prev snip
@@ -407,7 +407,7 @@ GO STACK
 							16	|    prev READY   |		<- Stores old READY value
 							8	|xxxxxxxx:xxxxxxxx|
 							0   |                 |
-	GO
+	go.dsn		dsnip
 	; After:				SP->|yyyyyyyy:yyyyyyyy|		<- New BP points here
 							38	|     prev BP     |
 							32	|   return snip   |

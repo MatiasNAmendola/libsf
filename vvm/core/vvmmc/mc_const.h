@@ -103,11 +103,6 @@
 
 	const u32		_MC_ICODE_INCLUDE								= 100;
 	const u32		_MC_ICODE_DEFINE								= 101;
-	const u32		_MC_ICODE_DSNIP_DEFINITION						= 102;
-	const u32		_MC_ICODE_DSNIP_DLL_DEFINITION					= 103;
-	const u32		_MC_ICODE_DSNIP_BXML_DEFINITION					= 104;
-	const u32		_MC_ICODE_SNIP_DEFINITION						= 105;
-//	const u32		_MC_ICODE_FUNCTION								= 105;	// MAPPED ONTO _VMMC_ICODE_SNIP_DEFINITION
 	const u32		_MC_ICODE_DLL_FUNCTION_DEFINITION				= 106;
 	const u32		_MC_ICODE_PROTOTYPE								= 107;
 	const u32		_MC_ICODE_END									= 108;
@@ -115,22 +110,6 @@
 	const u32		_MC_ICODE_PARAMS_DEFINITION						= 109;
 	const u32		_MC_ICODE_RETURN_DEFINITION						= 110;
 	const u32		_MC_ICODE_LOCALS_DEFINITION						= 111;
-
-// TODO:  These values can be refactored into the traditional number range.  They were renumbered to allow BNI and BNF to be added.
-	const u32		_MC_LOWEST_ICODE_VARIABLE_DEFINITION			= 1000;
-	const u32		_MC_ICODE_U8_DEFINITION							= 1001;
-	const u32		_MC_ICODE_U16_DEFINITION						= 1002;
-	const u32		_MC_ICODE_U32_DEFINITION						= 1003;
-	const u32		_MC_ICODE_U64_DEFINITION						= 1004;
-	const u32		_MC_ICODE_S8_DEFINITION							= 1005;
-	const u32		_MC_ICODE_S16_DEFINITION						= 1006;
-	const u32		_MC_ICODE_S32_DEFINITION						= 1007;
-	const u32		_MC_ICODE_S64_DEFINITION						= 1008;
-	const u32		_MC_ICODE_F32_DEFINITION						= 1009;
-	const u32		_MC_ICODE_F64_DEFINITION						= 1010;
-	const u32		_MC_ICODE_BNI_DEFINITION						= 1011;
-	const u32		_MC_ICODE_BNF_DEFINITION						= 1012;
-	const u32		_MC_HIGHEST_ICODE_VARIABLE_DEFINITION			= 1013;
 
 	const u32		_MC_ICODE_U8									= 2000;
 	const u32		_MC_ICODE_U16									= 2001;
@@ -145,18 +124,42 @@
 	const u32		_MC_ICODE_BNI									= 2010;
 	const u32		_MC_ICODE_BNF									= 2011;
 
-	const u32		_MC_ICODE_SNIP									= 3000;
-	const u32		_MC_ICODE_IP									= 3001;
-	const u32		_MC_ICODE_SP									= 3002;
-	const u32		_MC_ICODE_BP									= 3003;
-	const u32		_MC_ICODE_READY									= 3004;
-	const u32		_MC_ICODE_READY_OFFSET							= 3005;
-	const u32		_MC_ICODE_FLAGS									= 3006;
-	const u32		_MC_ICODE_PRED									= 3007;
-	const u32		_MC_ICODE_PREDCOUNT								= 3008;
-	const u32		_MC_ICODE_EXSNIP								= 3009;
-	const u32		_MC_ICODE_ERROR									= 3010;
+	const u32		_MC_ICODE_ESNIP_REG								= 3000;
+	const u32		_MC_ICODE_IP_REG								= 3001;
+	const u32		_MC_ICODE_SP_REG								= 3002;
+	const u32		_MC_ICODE_BP_REG								= 3003;
+	const u32		_MC_ICODE_READY_REG								= 3004;
+	const u32		_MC_ICODE_READY_OFFSET_REG						= 3005;
+	const u32		_MC_ICODE_FLAGS_REG								= 3006;
+	const u32		_MC_ICODE_PRED_REG								= 3007;
+	const u32		_MC_ICODE_PREDCOUNT_REG							= 3008;
+	const u32		_MC_ICODE_EXSNIP_REG							= 3009;
+	const u32		_MC_ICODE_ERROR_REG								= 3010;
 
+	const u32		_MC_ICODE_DLL									= 125;
+	const u32		_MC_ICODE_BXML									= 126;
+	const u32		_MC_ICODE_PARAMS								= 127;
+	const u32		_MC_ICODE_RETURNS								= 128;
+	const u32		_MC_ICODE_DSNIP									= 129;
+	const u32		_MC_ICODE_SNIP									= 130;
+	const u32		_MC_ICODE_DLL_FUNCTION							= 131;
+	const u32		_MC_ICODE_CASK_ROUND_OPEN_PARAMS				= 132;
+	const u32		_MC_ICODE_CASK_ROUND_CLOSE_PARAMS				= 133;
+	const u32		_MC_ICODE_CASK_SQUARE_OPEN_PARAMS				= 134;
+	const u32		_MC_ICODE_CASK_SQUARE_CLOSE_PARAMS				= 135;
+	const u32		_MC_ICODE_CASK_TRIANGLE_OPEN_PARAMS				= 136;
+	const u32		_MC_ICODE_CASK_TRIANGLE_CLOSE_PARAMS			= 137;
+	const u32		_MC_ICODE_CASK_TILDE_OPEN_PARAMS				= 138;
+	const u32		_MC_ICODE_CASK_TILDE_CLOSE_PARAMS				= 139;
+	const u32		_MC_ICODE_CASK_ROUND_OPEN						= 140;
+	const u32		_MC_ICODE_CASK_ROUND_CLOSE						= 141;
+	const u32		_MC_ICODE_CASK_SQUARE_OPEN						= 142;
+	const u32		_MC_ICODE_CASK_SQUARE_CLOSE						= 143;
+	const u32		_MC_ICODE_CASK_TRIANGLE_OPEN					= 144;
+	const u32		_MC_ICODE_CASK_TRIANGLE_CLOSE					= 145;
+	const u32		_MC_ICODE_CASK_TILDE_OPEN						= 146;
+	const u32		_MC_ICODE_CASK_TILDE_CLOSE						= 147;
+	const u32		_MC_ICODE_LINE									= 148;
 	const u32		_MC_ICODE_COMMENT								= 149;
 
 	const u32		_MC_ICODE_A										= 150;
@@ -258,3 +261,7 @@
 	const u32		_MC_ICODE_DELETE								= 10000 + 57;
 	const u32		_MC_ICODE_LOAD									= 10000 + 58;
 	const u32		_MC_ICODE_FILL									= 10000 + 59;
+	const u32		_MC_ICODE_64									= 10000 + 60;
+	const u32		_MC_ICODE_32									= 10000 + 61;
+	const u32		_MC_ICODE_16									= 10000 + 62;
+	const u32		_MC_ICODE_8										= 10000 + 63;

@@ -348,6 +348,7 @@
 			}
 			// When we get here, everything that is initially known should be identified, including all blocks
 
+// TODO:  add a pass0 post fixup function which identifies common groupings
 
 			// Scan through to make sure blocks are matched, report first error and terminate
 			memset(&pbsd, 0, sizeof(_isPass0BlockScanData));
@@ -448,6 +449,8 @@
 
 				// Attempt to identify pass-1 keywords
 				oss_translateSOssCompsToOthers(cgcKeywordKeywords1, line);
+
+// TODO:  add a pass1 post fixup function which identifies common groupings
 
 				// Move to original next line
 				line = (SOssLine*)line->ll.next;
@@ -919,14 +922,12 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 		_isSLineInfo*	lli;
 
 
-// TODO:  untested code, breakpoint and examine
-// TODO:  need to check some more of these error conditions
+// TODO:  this algorithm needs to be completely refactored due to the use of casks
 		// Make sure our environment is sane
 		pbsd->llOkayToAddPipeDataToBlock	= (block != NULL);
 		pbsd->llab							= NULL;
 		pbsd->lpip							= NULL;
 		pbsd->ldfi							= NULL;
-// TODO:  literally, untested code, working here, ready to debug the new logic
 		while (line)
 		{
 			// Grab this line's extra information
@@ -1020,6 +1021,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 		SDllFuncInfo*	ldfi;
 
 
+// TODO:  this algorithm needs to be completely refactored due to the use of casks
 		// See where we are
 		if (tniCode == _MC_ICODE_UNKNOWN)
 		{
@@ -1340,4 +1342,18 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 	{
 // TODO:  working here
 		return(false);
+	}
+
+
+
+
+//////////
+//
+// Called to verify that the integer value found is prefixed with a dot, and if so it merges all
+// three into the indicated type.
+//
+//////
+	bool iimc_checkDotPrefix(SOssComp* comp, u32 tniCode)
+	{
+// TODO:  needs defined
 	}
