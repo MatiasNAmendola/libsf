@@ -305,14 +305,6 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\afxres.h"
-				>
-			</File>
-			<File
-				RelativePath=".\resource.h"
-				>
-			</File>
-			<File
 				RelativePath=".\vdeb_const.h"
 				>
 			</File>
@@ -326,6 +318,10 @@
 			</File>
 			<File
 				RelativePath=".\vdeb_screens.h"
+				>
+			</File>
+			<File
+				RelativePath=".\vdeb_structs.h"
 				>
 			</File>
 		</Filter>
@@ -354,6 +350,10 @@
 			</File>
 			<File
 				RelativePath="..\common\common_vvmoss_plugins.h"
+				>
+			</File>
+			<File
+				RelativePath=".\settings\vdeb.bxml"
 				>
 			</File>
 			<File

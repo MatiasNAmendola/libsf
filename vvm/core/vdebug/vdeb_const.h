@@ -1,6 +1,6 @@
 //////////
 //
-// /libsf/vvm/vdebug/vdeb_const.h
+// /libsf/vvm/core/vdebug/vdeb_const.h
 //
 //////
 // Version 0.70
@@ -40,6 +40,7 @@
 // talents, your gifts, your praise, unto Him.  In Jesus' name I pray.  Amen.
 //
 //
+
 
 
 

@@ -46,5 +46,6 @@
 //////////
 // Global variables
 //////
-	s32			gnFontSize					= 8;
+	s32			gnFontSize					= 8;					// Default font size
 	HINSTANCE	ghResourceDll				= NULL;					// Handle to the loaded resource dll instance
+	bool		glDebuggerInstanceRunning	= true;					// So long as the debugger is running, it remains true

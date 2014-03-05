@@ -94,3 +94,277 @@
 				return;
 		}
 	}
+
+
+
+
+//////////
+//
+// Called to create the initial debugger screen environment based on the indicated layout
+//
+//////
+	SBxml* ivdeb_debuggerScreensCreate(SBxml* bxml)
+	{
+		SBxml* bxmlScreen;
+		return(NULL);
+	}
+
+
+
+
+//////////
+//
+// Deletes the previous screens created
+//
+//////
+	void ivdeb_debuggerScreensDelete(SBxml* bxml)
+	{
+	}
+
+
+
+
+//////////
+//
+// Update the Locals.1 window source data
+//
+//////
+	void ivdeb_updateLocal1(SThread* th)
+	{
+	}
+
+
+
+
+//////////
+//
+// Update the Locals.2 window source data
+//
+//////
+	void ivdeb_updateLocal2(SThread* th)
+	{
+	}
+
+
+
+
+//////////
+//
+// Update the Locals.3 window source data
+//
+//////
+	void ivdeb_updateLocal3(SThread* th)
+	{
+	}
+
+
+
+
+//////////
+//
+// Update the Regs.1 window source data
+//
+//////
+// 	struct SThread
+// 	{
+// 		SLL				ll;						// 2-way link list
+// 		SThreadControl	status;					// Status of this thread
+// 
+// 		// Thread variables
+// 		SDatum			stack;					// Pointer to the stack's data block
+// 		SRegs			regs;					// Pointer to the registers for the VM
+// 
+// 		// For the local thread, individual timers which interrupt the current thread for execution
+// 		SStartEnd		_timers;				// Pointer to the list of STimer entries (if any)
+// 		SStartEnd		_globals;				// Pointer to thread-specific global variables
+// 
+// 		// For the current snippet:
+// 		SSnipExec*		current;				// Shortcut pointer to the currently executing snippet
+// 		SStartEnd		snippet;				// Pointer to the list of SSnippet entries in the program chain from main (levels down, SSnipExec structure)
+// 	};
+	void ivdeb_updateRegs1(SThread* th)
+	{
+		s8		lcSnippet[32];
+
+
+		// Get the snippet number in dot form
+// TODO: ivdeb_lookupSnippetName(th->regs.snip, lcSnippet, 17);
+		sprintf(gsRegs1.line1, "  SNIP %s\0",				ivdeb_getU64WithSpaceAndDots(th->regs.snip, lcSnippet));
+
+// 		ivdeb_getU64WithSpaceAndDots(th->regs.snip, buffer1);
+// 		ivdeb_lookupSnippetName(th->regs.snip, buffer2, 10);
+	}
+
+	s8* ivdeb_getU64WithSpaceAndDots(u64 tnValue, s8* buffer)
+	{
+// TODO:  working here
+		return(NULL);
+	}
+
+
+
+
+//////////
+//
+// Update the Int.1 window source data
+//
+//////
+	void ivdeb_updateInt1(SThread* th)
+	{
+	}
+
+
+
+
+//////////
+//
+// Update the Float.1 window source data
+//
+//////
+	void ivdeb_updateFloat1(SThread* th)
+	{
+	}
+
+
+
+
+//////////
+//
+// Update the CFSCA.1 window source data
+//
+//////
+	void ivdeb_updateCFSCA1(SThread* th)
+	{
+	}
+
+
+
+
+//////////
+//
+// Update the Ready.3 window source data
+//
+//////
+	void ivdeb_updateReady3(SThread* th)
+	{
+	}
+
+
+
+
+//////////
+//
+// Update the Memory.1 window source data
+//
+//////
+	void ivdeb_updateMemory1(SThread* th)
+	{
+	}
+
+
+
+
+//////////
+//
+// Update the Memory.2 window source data
+//
+//////
+	void ivdeb_updateMemory2(SThread* th)
+	{
+	}
+
+
+
+
+//////////
+//
+// Update the Memory.3 window source data
+//
+//////
+	void ivdeb_updateMemory3(SThread* th)
+	{
+	}
+
+
+
+
+//////////
+//
+// Update the Watch.3 window source data
+//
+//////
+	void ivdeb_updateWatch3(SThread* th)
+	{
+	}
+
+
+
+
+//////////
+//
+// Update the Autos.3 window source data
+//
+//////
+	void ivdeb_updateAutos3(SThread* th)
+	{
+	}
+
+
+
+
+//////////
+//
+// Update the Stack.1 window source data
+//
+//////
+	void ivdeb_updateStack1(SThread* th)
+	{
+	}
+
+
+
+
+//////////
+//
+// Update the Hover.2 window source data
+//
+//////
+	void ivdeb_updateHover2(SThread* th)
+	{
+	}
+
+
+
+
+//////////
+//
+// Update the Timer.2 window source data
+//
+//////
+	void ivdeb_updateTimer2(SThread* th)
+	{
+	}
+
+
+
+
+//////////
+//
+// Update the Programs.2 window source data
+//
+//////
+	void ivdeb_updatePrograms2(SThread* th)
+	{
+	}
+
+
+
+
+//////////
+//
+// Update the Threads.2 window source data
+//
+//////
+	void ivdeb_updateThreads2(SThread* th)
+	{
+	}

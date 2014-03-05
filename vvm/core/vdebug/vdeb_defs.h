@@ -51,36 +51,26 @@
 	DWORD CALLTYPE		iDebuggerMain									(LPVOID lpParameter);
 
 
-	// vdeb_screens.h
+	// vdeb_sup.cpp
+	SBxml*				ivdeb_debuggerScreensCreate						(SBxml* bxml);
+	void				ivdeb_debuggerScreensDelete						(SBxml* bxml);
+	void				ivdeb_updateLocal1								(SThread* th);
+	void				ivdeb_updateLocal2								(SThread* th);
+	void				ivdeb_updateLocal3								(SThread* th);
+	void				ivdeb_updateRegs1								(SThread* th);
+	void				ivdeb_updateInt1								(SThread* th);
+	void				ivdeb_updateFloat1								(SThread* th);
+	void				ivdeb_updateCFSCA1								(SThread* th);
+	void				ivdeb_updateReady3								(SThread* th);
+	void				ivdeb_updateMemory1								(SThread* th);
+	void				ivdeb_updateMemory2								(SThread* th);
+	void				ivdeb_updateMemory3								(SThread* th);
+	void				ivdeb_updateWatch3								(SThread* th);
+	void				ivdeb_updateAutos3								(SThread* th);
+	void				ivdeb_updateStack1								(SThread* th);
+	void				ivdeb_updateHover2								(SThread* th);
+	void				ivdeb_updateTimer2								(SThread* th);
+	void				ivdeb_updatePrograms2							(SThread* th);
+	void				ivdeb_updateThreads2							(SThread* th);
 
-
-	// vdeb_sup.h
-	u64 CALLTYPE		vdeb_window_created								(u64 tnUniqueId, SOssWindow* tisw);
-	u64 CALLTYPE		vdeb_window_unload								(u64 tnUniqueId, SOssWindow* tisw);
-	u64 CALLTYPE		vdeb_window_closed								(u64 tnUniqueId, SOssWindow* tisw);
-	u64 CALLTYPE		vdeb_window_moved								(u64 tnUniqueId, SOssWindow* tisw, u32 tnXNew, u32 tnYNew);
-	u64 CALLTYPE		vdeb_window_resized								(u64 tnUniqueId, SOssWindow* tisw, u32 tnWidthNew, u32 tnHeightNew);
-	u64 CALLTYPE		vdeb_window_gotFocus							(u64 tnUniqueId, SOssWindow* tisw);
-	u64 CALLTYPE		vdeb_window_lostFocus							(u64 tnUniqueId, SOssWindow* tisw);
-
-	u64 CALLTYPE		vdeb_region_enter								(SRegion* tr);
-	u64 CALLTYPE		vdeb_region_leave								(SRegion* tr);
-	u64 CALLTYPE		vdeb_region_paint								(SRegion* tr, SCanvas* tc, SBGRA* bd);
-	u64 CALLTYPE		vdeb_region_debugTrap							(SRegion* tr, u64 tnIdentifier, u64 tnExtra);
-
-	u64 CALLTYPE		vdeb_mouse_down									(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
-	u64 CALLTYPE		vdeb_mouse_up									(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
-	u64 CALLTYPE		vdeb_mouse_move									(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
-	u64 CALLTYPE		vdeb_mouse_hover								(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds, bool tlClosing);
-
-	u64 CALLTYPE		vdeb_keyboard_down								(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode);
-	u64 CALLTYPE		vdeb_keyboard_up								(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode);
-	u64 CALLTYPE		vdeb_keyboard_press								(u64 tnUniqueId, SOssWindow* tisw, u32 tnKey, u32 tnKeyFlags, u8 tcAscii, u16 tcUnicode);
-	u64 CALLTYPE		vdeb_keyboard_flags								(u64 tnUniqueId, SOssWindow* tisw, u32 tnKeyFlagsOld, u32 tnKeyFlagsNew);
-
-	u64 CALLTYPE		vdeb_drag_start									(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys);
-	u64 CALLTYPE		vdeb_drag_dragging								(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds);
-	u64 CALLTYPE		vdeb_drag_drop									(u64 tnUniqueId, SOssWindow* tisw, u32 tnX, u32 tnY, u32 tnButtons, u32 tnKeys, u64 tnMilliseconds);
-
-	u64 CALLTYPE		vdeb_custom_custom								(u64 tnUniqueId, SOssWindow* tisw, u64 tnCustomEventId, u64 tnOtherData);
-
+	s8*					ivdeb_getU64WithSpaceAndDots					(u64 tnValue, s8* buffer);

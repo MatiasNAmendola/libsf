@@ -390,28 +390,28 @@ struct	SUpSnip;
 		SRegsI			fp;						// 256, 8  - 64-bit floating point
 
 		// Control registers
-		SFlags			flags;					// 264, 8  - 64-bit flags register
-		u64				ip;						// 272, 8  - 64-bit instruction pointer
-		u64				sp;						// 280, 8  - 64-bit stack pointer
+		u64				snip;					// 264, 8  - current snippet number executing for this thread
+		u64				ip;						// 272, 8  - instruction pointer
+		u64				sp;						// 280, 8  - stack pointer
+		u64				bp;						// 288, 8  - base pointer
 
-		u64				snip;					// 288, 8  - 64-bit current snippet number executing for this thread
-		u64				exsnip;					// 296, 8  - 64-bit snippet ID to branch to on exception
+		u64				ready;					// 296, 8  - READY block of data to snippet
+		u64				readyOffset;			// 304, 8  - The incrementing offset into the ready block
 
-		u64				sb;						// 280, 8  - sandbox pointer
-		u64				error;					// 280, 8  - the error machine opcode error generated during execution (always 0 unless flags._in_error = 1)
+		SFlags			flags;					// 312, 8  - flags register
+		u64				pred;					// 320, 8  - predicate flags
+		u64				predCount;				// 328, 8  - predicate reset count
 
-		u64				pred;					// 280, 8  - predicate flags
-		u64				predCount;				// 280, 8  - predicate reset count
+		u64				exsnip;					// 336, 8  - Exception snippet
+		u64				error;					// 344, 8  - Error number signaled by the VVM
 
-		// For debugging if flags
-		u64				dsnp1;					// 280, 8  - #1 Snippet or Dynamic Snippet debug break number
-		u64				doff1;					// 280, 8  - #1 Offset into snippet where we are to break
-		u64				dsnp2;					// 280, 8  - #2 Snippet or Dynamic Snippet debug break number
-		u64				doff2;					// 280, 8  - #2 Offset into snippet where we are to break
-		u64				dsnp3;					// 280, 8  - #3 Snippet or Dynamic Snippet debug break number
-		u64				doff3;					// 280, 8  - #3 Offset into snippet where we are to break
-		u64				dsnp4;					// 280, 8  - #4 Snippet or Dynamic Snippet debug break number
-		u64				doff4;					// 280, 8  - #4 Offset into snippet where we are to break
+		u64				nuserved1;				// 352, 8  - #2 Snippet or Dynamic Snippet debug break number
+		u64				nuserved2;				// 360, 8  - #2 Offset into snippet where we are to break
+		u64				nuserved3;				// 368, 8  - #3 Snippet or Dynamic Snippet debug break number
+		u64				nuserved4;				// 376, 8  - #3 Offset into snippet where we are to break
+		u64				nuserved5;				// 384, 8  - #4 Snippet or Dynamic Snippet debug break number
+		u64				nuserved6;				// 392, 8  - #4 Offset into snippet where we are to break
+		// Total 400 bytes
 		// See current OBED definition
 	};
 

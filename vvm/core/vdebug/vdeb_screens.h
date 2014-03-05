@@ -1,6 +1,6 @@
 //////////
 //
-// /libsf/vvm/vdebug/vdebug/vdeb_screens.h
+// /libsf/vvm/core/vdebug/vdebug/vdeb_screens.h
 //
 //////
 // Version 0.70
@@ -43,323 +43,37 @@
 
 
 //////////
-// Ready window
+// VDeb supports the following screens:
+//		Locals.1, Locals.2, Locals.3
+//		Regs.1, Int.1, Float.1
+//		CFSCA.3
+//		Ready.3
+//		Memory.1, Memory.2, Memory.3
+//		Watch.3
+//		Autos.3
+//		Stack.1
+//		Hover.2
+//		Timer.2
+//		Programs.2
+//		Threads.2
 //////
-// 	s8	gcReady01[]					= "˜ֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽÝReady WindowÞֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽ»";
-// 	s8	gcReady02[]					= "             ÷                                                       ÷";
-// 	s8	gcReady03[]					= "             ÷                                                       ÷";
-// 	s8	gcReady04[]					= "             ÷                                                       ÷";
-// 	s8	gcReady05[]					= "ÿÿÿÿÿÿÿÿÿÿÿÿÿ÷ÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿÿ÷";
-// 	s8	gcReady06[]					= "             ÷                                                       ÷";
-// 	s8	gcReady07[]					= "             ÷                                                       ÷";
-// 	s8	gcReady08[]					= "             ÷                                                       ÷";
-// 	s8	gcReady09[]					= "             ÷                                                       ÷";
-// 	s8	gcReady10[]					= "             ÷                                                       ÷";
-// 	s8	gcReady11[]					= "             ÷                                                       ÷";
-// 	s8	gcReady12[]					= "             ÷                                                       ÷";
-// 	s8	gcReady13[]					= "             ÷                                                       ÷";
-// 	s8	gcReady14[]					= "             ÷                                                       ÷";
-// 	s8	gcReady15[]					= "             ÷                                                       ÷";
-// 	s8	gcReady16[]					= "             ÷                                                       ÷";
-// 	s8	gcReady17[]					= "             ÷                                                       ÷";
+	SLocal1		gsLoc1;
+	SLocal2		gsLoc2;
+	SLocal3		gsLoc3;
+	SRegs1		gsRegs1;
+	SInt1		gsInt1;
+	SFloat1		gsFloat1;
+	SCFSCA1		gsCFSCA1;
+	SReady3		gsReady3;
+	SMemory1	gsMemory1;
+	SMemory2	gsMemory2;
+	SMemory3	gsMemory3;
+	SWatch3		gsWatch3;
+	SAutos3		gsAutos3;
+	SStack1		gsStack1;
+	SHover2		gsHover2;
+	STimer2		gsTimer2;
+	SPrograms2	gsPrograms2;
+	SThreads2	gsThreads2;
 
-
-
-
-//////////
-// Registers
-//////
-// 	s8	gcProgramRegisters01[]			= "˜ֽֽֽֽֽֽֽÝRegistersÞֽֽֽֽֽֽ»˜";
-// 	s8	gcProgramRegisters02[]			= "   SNIP תתתתתתתת:Xxx       ÷";
-// 	s8	gcProgramRegisters03[]			= "     IP תתתתתתתת:תתתתתתתת  ÷";
-// 	s8	gcProgramRegisters04[]			= "     SP תתתתתתתת:תתתתתתתת  ÷";
-// 	s8	gcProgramRegisters05[]			= "     BP תתתתתתתת:תתתתתתתת  ÷";
-// 	s8	gcProgramRegisters06[]			= "   PRED תתתתתתתת:תתתתתתתת  ÷";
-// 	s8	gcProgramRegisters07[]			= "           COUNT תת        ÷";
-// 	s8	gcProgramRegisters08[]			= " EXSNIP תתתתתתתת:Xxx       ÷";
-// 	s8	gcProgramRegisters09[]			= "  ERROR תתתתתתתת:תתתתתתתת  ÷";
-// 	s8	gcProgramRegisters10[]			= "                           ÷";
-// 	s8	gcProgramRegisters11[]			= "  FLAGS תתתתתתתת:תתתתתתתת  ÷";
-// 	s8	gcProgramRegisters12[]			= "    תתתת-תתתת-תתתת-תתתת    ÷";
-// 	s8	gcProgramRegisters13[]			= "    תתתת-תתתת-תתתת-תתתת    ÷";
-// 	s8	gcProgramRegisters14[]			= "    תתתת-תתתת-תתתת-תתתת    ÷";
-// 	s8	gcProgramRegisters15[]			= "    תתתת-תתתת-תתתת-תתתת    ÷";
-// 	s8	gcProgramRegisters16[]			= "      ov? cy? ab? app?     ÷";
-// 	s8	gcProgramRegisters17[]			= "      un? eq? be?          ÷";
-
-// 	s8	gcIntegerRegisters01[]			= "ֽֽֽֽֽֽֽֽֽÝIntegerÞֽֽֽֽֽֽֽ»˜";
-// 	s8	gcIntegerRegisters02[]			= "  A  תתתת:תתתת:תתתת:תת:תת  ÷";
-// 	s8	gcIntegerRegisters03[]			= "  B  תתתת:תתתת:תתתת:תת:תת  ÷";
-// 	s8	gcIntegerRegisters04[]			= "  C  תתתת:תתתת:תתתת:תת:תת  ÷";
-// 	s8	gcIntegerRegisters05[]			= "  D  תתתת:תתתת:תתתת:תת:תת  ÷";
-// 	s8	gcIntegerRegisters06[]			= "  E  תתתת:תתתת:תתתת:תת:תת  ÷";
-// 	s8	gcIntegerRegisters07[]			= "  F  תתתת:תתתת:תתתת:תת:תת  ÷";
-// 	s8	gcIntegerRegisters08[]			= "  G  תתתת:תתתת:תתתת:תת:תת  ÷";
-// 	s8	gcIntegerRegisters09[]			= "  H  תתתת:תתתת:תתתת:תת:תת  ÷";
-// 	s8	gcIntegerRegisters10[]			= "  I  תתתת:תתתת:תתתת:תת:תת  ÷";
-// 	s8	gcIntegerRegisters11[]			= "  J  תתתת:תתתת:תתתת:תת:תת  ÷";
-// 	s8	gcIntegerRegisters12[]			= "  K  תתתת:תתתת:תתתת:תת:תת  ÷";
-// 	s8	gcIntegerRegisters13[]			= "  L  תתתת:תתתת:תתתת:תת:תת  ÷";
-// 	s8	gcIntegerRegisters14[]			= "  M  תתתת:תתתת:תתתת:תת:תת  ÷";
-// 	s8	gcIntegerRegisters15[]			= "  N  תתתת:תתתת:תתתת:תת:תת  ÷";
-// 	s8	gcIntegerRegisters16[]			= "  O  תתתת:תתתת:תתתת:תת:תת  ÷";
-// 	s8	gcIntegerRegisters17[]			= "  P  תתתת:תתתת:תתתת:תת:תת  ÷";
-
-// 	s8	gcFloatingPointRegisters01[]	= "ֽֽֽֽֽÝFloating PointÞֽֽֽֽֽ»";
-// 	s8	gcFloatingPointRegisters02[]	= "  FA +ת.תתתתתתתתתתתתתתתתת  ÷";
-// 	s8	gcFloatingPointRegisters03[]	= "  FB +ת.תתתתתתתתתתתתתתתתת  ÷";
-// 	s8	gcFloatingPointRegisters04[]	= "  FC +ת.תתתתתתתתתתתתתתתתת  ÷";
-// 	s8	gcFloatingPointRegisters05[]	= "  FD +ת.תתתתתתתתתתתתתתתתת  ÷";
-// 	s8	gcFloatingPointRegisters06[]	= "  FE +ת.תתתתתתתתתתתתתתתתת  ÷";
-// 	s8	gcFloatingPointRegisters07[]	= "  FF +ת.תתתתתתתתתתתתתתתתת  ÷";
-// 	s8	gcFloatingPointRegisters08[]	= "  FG +ת.תתתתתתתתתתתתתתתתת  ÷";
-// 	s8	gcFloatingPointRegisters09[]	= "  FH +ת.תתתתתתתתתתתתתתתתת  ÷";
-// 	s8	gcFloatingPointRegisters10[]	= "  FI +ת.תתתתתתתתתתתתתתתתת  ÷";
-// 	s8	gcFloatingPointRegisters11[]	= "  FJ +ת.תתתתתתתתתתתתתתתתת  ÷";
-// 	s8	gcFloatingPointRegisters12[]	= "  FK +ת.תתתתתתתתתתתתתתתתת  ÷";
-// 	s8	gcFloatingPointRegisters13[]	= "  FL +ת.תתתתתתתתתתתתתתתתת  ÷";
-// 	s8	gcFloatingPointRegisters14[]	= "  FM +ת.תתתתתתתתתתתתתתתתת  ÷";
-// 	s8	gcFloatingPointRegisters15[]	= "  FN +ת.תתתתתתתתתתתתתתתתת  ÷";
-// 	s8	gcFloatingPointRegisters16[]	= "  FO +ת.תתתתתתתתתתתתתתתתת  ÷";
-// 	s8	gcFloatingPointRegisters17[]	= "  FP +ת.תתתתתתתתתתתתתתתתת  ÷";
-
-
-
-
-//////////
-// Stack
-//////
-// 	s8	gcStack01[]					= "˜ֽֽֽֽֽֽֽֽֽÝStackÞֽֽֽֽֽֽֽֽֽֽ»";
-// 	s8	gcStack02[]					= " תתתתתתתת תתתתתתתת:תתתתתתתת ÷";
-// 	s8	gcStack03[]					= " תתתתתתתת תתתתתתתת:תתתתתתתת ÷";
-// 	s8	gcStack04[]					= " תתתתתתתת תתתתתתתת:תתתתתתתת ÷";
-// 	s8	gcStack05[]					= " תתתתתתתת תתתתתתתת:תתתתתתתת ÷";
-// 	s8	gcStack06[]					= " תתתתתתתת תתתתתתתת:תתתתתתתת ÷";
-// 	s8	gcStack07[]					= " תתתתתתתת תתתתתתתת:תתתתתתתת ÷";
-// 	s8	gcStack08[]					= " תתתתתתתת תתתתתתתת:תתתתתתתת ÷";
-// 	s8	gcStack09[]					= " תתתתתתתת תתתתתתתת:תתתתתתתת ÷";
-// 	s8	gcStack10[]					= " תתתתתתתת תתתתתתתת:תתתתתתתת ÷";
-// 	s8	gcStack11[]					= " תתתתתתתת תתתתתתתת:תתתתתתתת ÷";
-// 	s8	gcStack12[]					= " תתתתתתתת תתתתתתתת:תתתתתתתת ÷";
-// 	s8	gcStack13[]					= " תתתתתתתת תתתתתתתת:תתתתתתתת ÷";
-// 	s8	gcStack14[]					= " תתתתתתתת תתתתתתתת:תתתתתתתת ÷";
-// 	s8	gcStack15[]					= " תתתתתתתת תתתתתתתת:תתתתתתתת ÷";
-// 	s8	gcStack16[]					= " תתתתתתתת תתתתתתתת:תתתתתתתת ÷";
-// 	s8	gcStack17[]					= " תתתתתתתת תתתתתתתת:תתתתתתתת ÷";
-
-
-
-
-//////////
-// Watch Window
-//////
-// 	s8	gcWatch01[]					= "ֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽÝWatch WindowÞֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽ»";
-// 	s8	gcWatch02[]					= "            ÷                                                       ÷";
-// 	s8	gcWatch03[]					= "            ÷                                                       ÷";
-// 	s8	gcWatch04[]					= "            ÷                                                       ÷";
-// 	s8	gcWatch05[]					= "            ÷                                                       ÷";
-// 	s8	gcWatch06[]					= "            ÷                                                       ÷";
-// 	s8	gcWatch07[]					= "            ÷                                                       ÷";
-// 	s8	gcWatch08[]					= "            ÷                                                       ÷";
-// 	s8	gcWatch09[]					= "            ÷                                                       ÷";
-// 	s8	gcWatch10[]					= "            ÷                                                       ÷";
-// 	s8	gcWatch11[]					= "            ÷                                                       ÷";
-// 	s8	gcWatch12[]					= "            ÷                                                       ÷";
-// 	s8	gcWatch13[]					= "            ÷                                                       ÷";
-// 	s8	gcWatch14[]					= "            ÷                                                       ÷";
-// 	s8	gcWatch15[]					= "            ÷                                                       ÷";
-// 	s8	gcWatch16[]					= "            ÷                                                       ÷";
-// 	s8	gcWatch17[]					= "            ÷                                                       ÷";
-
-
-
-
-//////////
-// Hover Window
-//////
-// 	s8	gcHover01[]					= "˜ֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽÝHover WindowÞֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽ»";
-// 	s8	gcHover02[]					= "             ÷                                  ÷";
-// 	s8	gcHover03[]					= "             ÷                                  ÷";
-// 	s8	gcHover04[]					= "             ÷                                  ÷";
-// 	s8	gcHover05[]					= "             ÷                                  ÷";
-// 	s8	gcHover06[]					= "             ÷                                  ÷";
-// 	s8	gcHover07[]					= "             ÷                                  ÷";
-// 	s8	gcHover08[]					= "             ÷                                  ÷";
-// 	s8	gcHover09[]					= "             ÷                                  ÷";
-// 	s8	gcHover10[]					= "             ÷                                  ÷";
-// 	s8	gcHover11[]					= "             ÷                                  ÷";
-// 	s8	gcHover12[]					= "             ÷                                  ÷";
-// 	s8	gcHover13[]					= "             ÷                                  ÷";
-// 	s8	gcHover14[]					= "             ÷                                  ÷";
-// 	s8	gcHover15[]					= "             ÷                                  ÷";
-// 	s8	gcHover16[]					= "             ÷                                  ÷";
-// 	s8	gcHover17[]					= "             ÷                                  ÷";
-
-
-
-
-//////////
-// Locals
-//////
-// 	s8	gcLocals01[]				= "˜ֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽÝLocalsÞֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽ»";
-// 	s8	gcLocals02[]				= "             ÷    ÷                             ÷";
-// 	s8	gcLocals03[]				= "             ÷    ÷                             ÷";
-// 	s8	gcLocals04[]				= "             ÷    ÷                             ÷";
-// 	s8	gcLocals05[]				= "             ÷    ÷                             ÷";
-// 	s8	gcLocals06[]				= "             ÷    ÷                             ÷";
-// 	s8	gcLocals07[]				= "             ÷    ÷                             ÷";
-// 	s8	gcLocals08[]				= "             ÷    ÷                             ÷";
-// 	s8	gcLocals09[]				= "             ÷    ÷                             ÷";
-// 	s8	gcLocals10[]				= "             ÷    ÷                             ÷";
-// 	s8	gcLocals11[]				= "             ÷    ÷                             ÷";
-// 	s8	gcLocals12[]				= "             ÷    ÷                             ÷";
-// 	s8	gcLocals13[]				= "             ÷    ÷                             ÷";
-// 	s8	gcLocals14[]				= "             ÷    ÷                             ÷";
-// 	s8	gcLocals15[]				= "             ÷    ÷                             ÷";
-// 	s8	gcLocals16[]				= "             ÷    ÷                             ÷";
-// 	s8	gcLocals17[]				= "             ÷    ÷                             ÷";
-
-
-
-
-//////////
-// Autos
-//////
-// 	s8	gcAutos01[]					= "˜ֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽÝAutosÞֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽ»";
-// 	s8	gcAutos02[]					= "             ÷    ÷                             ÷";
-// 	s8	gcAutos03[]					= "             ÷    ÷                             ÷";
-// 	s8	gcAutos04[]					= "             ÷    ÷                             ÷";
-// 	s8	gcAutos05[]					= "             ÷    ÷                             ÷";
-// 	s8	gcAutos06[]					= "             ÷    ÷                             ÷";
-// 	s8	gcAutos07[]					= "             ÷    ÷                             ÷";
-// 	s8	gcAutos08[]					= "             ÷    ÷                             ÷";
-// 	s8	gcAutos09[]					= "             ÷    ÷                             ÷";
-// 	s8	gcAutos10[]					= "             ÷    ÷                             ÷";
-// 	s8	gcAutos11[]					= "             ÷    ÷                             ÷";
-// 	s8	gcAutos12[]					= "             ÷    ÷                             ÷";
-// 	s8	gcAutos13[]					= "             ÷    ÷                             ÷";
-// 	s8	gcAutos14[]					= "             ÷    ÷                             ÷";
-// 	s8	gcAutos15[]					= "             ÷    ÷                             ÷";
-// 	s8	gcAutos16[]					= "             ÷    ÷                             ÷";
-// 	s8	gcAutos17[]					= "             ÷    ÷                             ÷";
-
-
-
-
-//////////
-// Timers
-//////
-// 	s8	gcTimers01[]				= "˜ֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽÝTimersÞֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽ»";
-// 	s8	gcTimers02[]				= "         ÷     ÷     ÷                          ÷";
-// 	s8	gcTimers03[]				= "         ÷     ÷     ÷                          ÷";
-// 	s8	gcTimers04[]				= "         ÷     ÷     ÷                          ÷";
-// 	s8	gcTimers05[]				= "         ÷     ÷     ÷                          ÷";
-// 	s8	gcTimers06[]				= "         ÷     ÷     ÷                          ÷";
-// 	s8	gcTimers07[]				= "         ÷     ÷     ÷                          ÷";
-// 	s8	gcTimers08[]				= "         ÷     ÷     ÷                          ÷";
-// 	s8	gcTimers09[]				= "         ÷     ÷     ÷                          ÷";
-// 	s8	gcTimers10[]				= "         ÷     ÷     ÷                          ÷";
-// 	s8	gcTimers11[]				= "         ÷     ÷     ÷                          ÷";
-// 	s8	gcTimers12[]				= "         ÷     ÷     ÷                          ÷";
-// 	s8	gcTimers13[]				= "         ÷     ÷     ÷                          ÷";
-// 	s8	gcTimers14[]				= "         ÷     ÷     ÷                          ÷";
-// 	s8	gcTimers15[]				= "         ÷     ÷     ÷                          ÷";
-// 	s8	gcTimers16[]				= "         ÷     ÷     ÷                          ÷";
-// 	s8	gcTimers17[]				= "         ÷     ÷     ÷                          ÷";
-
-
-
-
-//////////
-// Memory Window
-//////
-// 	s8	gcMemory01[]				= "˜ֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽÝMemory תÞֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽ»";
-// 	s8	gcMemory02[]				= "00000³תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת÷";
-// 	s8	gcMemory03[]				= "00000³תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת÷";
-// 	s8	gcMemory04[]				= "00000³תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת÷";
-// 	s8	gcMemory05[]				= "00000³תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת÷";
-// 	s8	gcMemory06[]				= "00000³תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת÷";
-// 	s8	gcMemory07[]				= "00000³תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת÷";
-// 	s8	gcMemory08[]				= "00000³תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת÷";
-// 	s8	gcMemory09[]				= "00000³תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת÷";
-// 	s8	gcMemory10[]				= "00000³תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת÷";
-// 	s8	gcMemory11[]				= "00000³תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת÷";
-// 	s8	gcMemory12[]				= "00000³תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת÷";
-// 	s8	gcMemory13[]				= "00000³תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת÷";
-// 	s8	gcMemory14[]				= "00000³תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת÷";
-// 	s8	gcMemory15[]				= "00000³תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת÷";
-// 	s8	gcMemory16[]				= "00000³תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת÷";
-// 	s8	gcMemory17[]				= "00000³תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת:תת÷";
-
-
-
-
-//////////
-// Programs
-//////
-// 	s8	gcPrograms01[]				= "˜ֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽÝProgramsÞֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽ»";
-// 	s8	gcPrograms02[]				= "             ÷    ÷                             ÷";
-// 	s8	gcPrograms03[]				= "             ÷    ÷                             ÷";
-// 	s8	gcPrograms04[]				= "             ÷    ÷                             ÷";
-// 	s8	gcPrograms05[]				= "             ÷    ÷                             ÷";
-// 	s8	gcPrograms06[]				= "             ÷    ÷                             ÷";
-// 	s8	gcPrograms07[]				= "             ÷    ÷                             ÷";
-// 	s8	gcPrograms08[]				= "             ÷    ÷                             ÷";
-// 	s8	gcPrograms09[]				= "             ÷    ÷                             ÷";
-// 	s8	gcPrograms10[]				= "             ÷    ÷                             ÷";
-// 	s8	gcPrograms11[]				= "             ÷    ÷                             ÷";
-// 	s8	gcPrograms12[]				= "             ÷    ÷                             ÷";
-// 	s8	gcPrograms13[]				= "             ÷    ÷                             ÷";
-// 	s8	gcPrograms14[]				= "             ÷    ÷                             ÷";
-// 	s8	gcPrograms15[]				= "             ÷    ÷                             ÷";
-// 	s8	gcPrograms16[]				= "             ÷    ÷                             ÷";
-// 	s8	gcPrograms17[]				= "             ÷    ÷                             ÷";
-
-
-
-
-//////////
-// Threads
-//////
-// 	s8	gcThreads01[]				= "˜ֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽÝThreadsÞֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽ»";
-// 	s8	gcThreads02[]				= "             ÷    ÷                             ÷";
-// 	s8	gcThreads03[]				= "             ÷    ÷                             ÷";
-// 	s8	gcThreads04[]				= "             ÷    ÷                             ÷";
-// 	s8	gcThreads05[]				= "             ÷    ÷                             ÷";
-// 	s8	gcThreads06[]				= "             ÷    ÷                             ÷";
-// 	s8	gcThreads07[]				= "             ÷    ÷                             ÷";
-// 	s8	gcThreads08[]				= "             ÷    ÷                             ÷";
-// 	s8	gcThreads09[]				= "             ÷    ÷                             ÷";
-// 	s8	gcThreads10[]				= "             ÷    ÷                             ÷";
-// 	s8	gcThreads11[]				= "             ÷    ÷                             ÷";
-// 	s8	gcThreads12[]				= "             ÷    ÷                             ÷";
-// 	s8	gcThreads13[]				= "             ÷    ÷                             ÷";
-// 	s8	gcThreads14[]				= "             ÷    ÷                             ÷";
-// 	s8	gcThreads15[]				= "             ÷    ÷                             ÷";
-// 	s8	gcThreads16[]				= "             ÷    ÷                             ÷";
-// 	s8	gcThreads17[]				= "             ÷    ÷                             ÷";
-
-
-
-
-//////////
-// Ascii chart
-//////
-// 	s8 gcAsciiChart01[]				= "˜ֽֽÝAscii ChartÞֽֽ»";
-// 	s8 gcAsciiChart02[]				= "  0123456789ABCDEF ÷";
-// 	s8 gcAsciiChart03[]				= " 0                 ÷";
-// 	s8 gcAsciiChart04[]				= " 1                 ÷";
-// 	s8 gcAsciiChart05[]				= " 2                 ÷";
-// 	s8 gcAsciiChart06[]				= " 3                 ÷";
-// 	s8 gcAsciiChart07[]				= " 4                 ÷";
-// 	s8 gcAsciiChart08[]				= " 5                 ÷";
-// 	s8 gcAsciiChart09[]				= " 6                 ÷";
-// 	s8 gcAsciiChart10[]				= " 7                 ÷";
-// 	s8 gcAsciiChart11[]				= " 8                 ÷";
-// 	s8 gcAsciiChart12[]				= " 9                 ÷";
-// 	s8 gcAsciiChart13[]				= " A                 ÷";
-// 	s8 gcAsciiChart14[]				= " B                 ÷";
-// 	s8 gcAsciiChart15[]				= " C                 ÷";
-// 	s8 gcAsciiChart16[]				= " D                 ÷";
-// 	s8 gcAsciiChart17[]				= " E                 ÷";
-// 	s8 gcAsciiChart18[]				= " F                 ÷";
+	SBxml*		gsBxmlScreens;

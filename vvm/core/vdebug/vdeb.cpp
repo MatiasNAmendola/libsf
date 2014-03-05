@@ -1,6 +1,6 @@
 //////////
 //
-// /libsf/vvm/vdebug/vdebug.cpp
+// /libsf/vvm/core/vdebug/vdebug.cpp
 //
 //////
 // Version 0.70
@@ -53,6 +53,7 @@
 #include "vdeb_const.h"
 #include "vdeb_defs.h"
 #include "vdeb_glob.h"
+#include "vdeb_structs.h"
 #include "\libsf\vvm\core\common\common_vvm.h"
 #include "\libsf\vvm\core\common\common_oss.h"
 #include "\libsf\vvm\core\common\common_mc.h"
@@ -158,17 +159,38 @@
 		SBxml*	bxmlDebuggerSettings;
 
 
+		//////////
 		// Grab the unique id for this instance
-		lnDebuggerUid = (u32)lpParameter;
+		//////
+			lnDebuggerUid = (u32)lpParameter;
 
+
+		//////////
 		// Build the debugger screen
-		bxmlDebuggerSettings = vvm_bxmlLoad((s8*)gcVdebSettingsBxml, sizeof(gcVdebSettingsBxml) - 1, &lnNumread, &lnError, &lnErrorCode );
+		//////
+			bxmlDebuggerSettings = vvm_bxmlLoad((s8*)gcVdebSettingsBxml, sizeof(gcVdebSettingsBxml) - 1, &lnNumread, &lnError, &lnErrorCode );
+			if (bxmlDebuggerSettings)
+				gsBxmlScreens = ivdeb_debuggerScreensCreate(bxmlDebuggerSettings);
 
-		// Create the debugger screen
-		while (1 /*Need to add a global variable for this instance of the debugger running*/)
-		{
-			Sleep(1);
-		}
+
+		//////////
+		// As long as the debugger is running, maintain this thread
+		//////
+			while (gsBxmlScreens && glDebuggerInstanceRunning)
+			{
+				// Everything is handled externally, we just check every 1/10th second if it's time to exit
+				Sleep(100);
+			}
+
+
+		//////////
+		// Delete the indicated screens
+		//////
+			ivdeb_debuggerScreensDelete(gsBxmlScreens);
+
+
+		// Indicate success
+		ExitThread(0);
 	}
 
 
