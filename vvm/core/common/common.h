@@ -325,6 +325,7 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	struct SOssWindow;
 	struct SOssLine;
 	struct SOssComp;
+	struct SOssCompCallback;
 	struct SCallbacksW;
 	struct SSysInfo;
 	struct SCanvas;
@@ -646,15 +647,14 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 
 		// Used for an explicit callback to validate if this match is a match
 		union {
-			u64		_validateHandler;
-// TODO:  parameters need to be added here
-			bool		(*validate)(SOssComp* comp, u32 tniCode);
+			u64			_validateHandler;
+			bool		(*validate)(SOssCompCallback* val);
 		};
 
 		// Used for an explicit callback to handle this component text
 		union {
 			u64			_addressHandler;
-			u64			(*handler)(void);
+			void		(*handler)(void);
 		};
 	};
 
@@ -1383,6 +1383,19 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 
 		// If this component has sub-components, they go here
 		SStartEnd		comps;											// Pointer to any child components
+	};
+
+	struct SOssCompCallback
+	{
+		SOssComp*		comp;											// Component at start, and the component to continue processing after upon exit
+		u32				iCode;											// The iCode being queried
+
+		// Callbacks for adjustment
+		void			(*insertComponentByComp)(SOssComp* compRef, SOssComp* compNew, bool tlInsertAfter);
+		void			(*insertComponentByParams)(SOssComp* compRef, SOssLine* line, u32 tniCode, u64 tnStart, s64 tnLength, bool tlInsertAfter);
+		void			(*deleteComponent)(SOssComp* comp);
+		SOssComp*		(*cloneComponent)(SOssComp* comp);
+		SOssComp*		(*mergeComponents)(SOssComp* comp, u32 tnCount, u32 tniCodeNew);
 	};
 
 

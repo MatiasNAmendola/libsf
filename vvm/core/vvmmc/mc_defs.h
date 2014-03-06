@@ -107,4 +107,5 @@
 		bool				iimc_assemblyPass2ParseBlockStartsAndLabelsDsnipDll			(SAssembly* ta, SSourceFile* tsf, SBlock* block);
 		bool				iimc_assemblyPass2ParseBlockStartsAndLabelsDsnipBxml		(SAssembly* ta, SSourceFile* tsf, SBlock* block);
 		bool				iimc_assemblyPass2ParseBlockStartsAndLabelsSnip				(SAssembly* ta, SSourceFile* tsf, SBlock* block);
-		bool				iimc_checkDotPrefix											(SOssComp* comp, u32 tniCode);
+		bool				iimc_checkDotPrefix											(SOssCompCallback* cb);
+		void				iimc_processDotPrefix										(SOssCompCallback* cb);

@@ -73,7 +73,7 @@
 		{ "/",						1,			true,		_MC_ICODE_BACKSLASH,					false,				NULL,					NULL },
 		{ "\"",						1,			false,		_MC_ICODE_DOUBLE_QUOTE,					false,				NULL,					NULL },
 		{ "'",						1,			false,		_MC_ICODE_SINGLE_QUOTE,					false,				NULL,					NULL },
-		{ ".",						1,			false,		_MC_ICODE_PERIOD,						false,				NULL,					NULL },
+		{ ".",						1,			false,		_MC_ICODE_DOT,							false,				NULL,					NULL },
 		{ ",",						1,			false,		_MC_ICODE_COMMA,						false,				NULL,					NULL },
 		{ ":",						1,			false,		_MC_ICODE_COLON,						false,				NULL,					NULL },
 		{ "_",						1,			false,		_MC_ICODE_UNDERSCORE,					false,				NULL,					NULL },
@@ -270,9 +270,9 @@
 		{ "delete",					6,			false,		_MC_ICODE_DELETE,						false,				 NULL,					NULL },
 		{ "load",					4,			false,		_MC_ICODE_LOAD,							false,				 NULL,					NULL },
 		{ "fill",					4,			false,		_MC_ICODE_FILL,							false,				 NULL,					NULL },
-		{ "64",						2,			false,		_MC_ICODE_64,							false,				 (u64)&iimc_checkDotPrefix,	NULL },
-		{ "32",						2,			false,		_MC_ICODE_32,							false,				 (u64)&iimc_checkDotPrefix,	NULL },
-		{ "16",						2,			false,		_MC_ICODE_16,							false,				 (u64)&iimc_checkDotPrefix,	NULL },
-		{ "8",						2,			false,		_MC_ICODE_8,							false,				 (u64)&iimc_checkDotPrefix,	NULL },
-		{ 0,						0,			0,			0,										0,					0 }
+		{ "64",						2,			false,		_MC_ICODE_64,							false,				 (u64)&iimc_checkDotPrefix,	(u64)&iimc_processDotPrefix },
+		{ "32",						2,			false,		_MC_ICODE_32,							false,				 (u64)&iimc_checkDotPrefix,	(u64)&iimc_processDotPrefix },
+		{ "16",						2,			false,		_MC_ICODE_16,							false,				 (u64)&iimc_checkDotPrefix,	(u64)&iimc_processDotPrefix },
+		{ "8",						2,			false,		_MC_ICODE_8,							false,				 (u64)&iimc_checkDotPrefix,	(u64)&iimc_processDotPrefix },
+		{ 0,						0,			0,			0,										0,					0,						0 }
 	};

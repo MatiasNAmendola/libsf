@@ -71,7 +71,7 @@
 	const u32		_MC_ICODE_DOUBLE_QUOTE							= 10;
 	const u32		_MC_ICODE_SINGLE_QUOTE							= 11;
 	const u32		_MC_ICODE_TILDE									= 12;
-	const u32		_MC_ICODE_PERIOD								= 13;
+	const u32		_MC_ICODE_DOT									= 13;
 	const u32		_MC_ICODE_COLON									= 14;
 	const u32		_MC_ICODE_COMMA									= 15;
 	const u32		_MC_ICODE_UNDERSCORE							= 16;

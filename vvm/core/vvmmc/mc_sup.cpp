@@ -617,7 +617,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
 
-					oss_combine3SOssComps			(line, _MC_ICODE_NUMERIC,		_MC_ICODE_PERIOD,		_MC_ICODE_NUMERIC,		_MC_ICODE_NUMERIC);
+					oss_combine3SOssComps			(line, _MC_ICODE_NUMERIC,		_MC_ICODE_DOT,		_MC_ICODE_NUMERIC,		_MC_ICODE_NUMERIC);
 cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
 
@@ -1353,7 +1353,61 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 // three into the indicated type.
 //
 //////
-	bool iimc_checkDotPrefix(SOssComp* comp, u32 tniCode)
+	bool iimc_checkDotPrefix(SOssCompCallback* cb)
 	{
-// TODO:  needs defined
+		SOssComp* compPrev;
+
+
+		// Make sure our environment is sane
+		if (cb->comp && cb->comp->ll.prev)
+		{
+			// Get the previous component
+			compPrev = (SOssComp*)cb->comp->ll.prev;
+
+			// Is it prefixed with a period?
+			if (compPrev->iCode == _MC_ICODE_DOT && compPrev->start + 1 == cb->comp->start)
+				return(true);		// Yes
+		}
+		// If we get here, failure
+		return(false);
+	}
+
+
+
+
+//////////
+//
+// Called to verify that the integer value found is prefixed with a dot, and if so it merges all
+// three into the indicated type.
+//
+//////
+	void iimc_processDotPrefix(SOssCompCallback* cb)
+	{
+		SOssComp*	comp;
+		SOssComp*	compPrev;
+
+
+		// Make sure our environment is sane
+		if (cb->comp && cb->comp->ll.prev)
+		{
+			// Is it prefixed with a period?
+			comp		= cb->comp;
+			compPrev	= (SOssComp*)comp->ll.prev;
+			
+			// Convert it to a single operator
+			cb->mergeComponents(compPrev, 2, cb->iCode);
+
+//////////
+// mergeComponents()
+// 			compPrev->length	+= comp->length;
+// 			compPrev->ll.next	= comp->ll.next;
+// 			// Make the one after this point back to the one before this
+// 			if (comp->ll.next)
+// 				comp->ll.next->prev	= comp->ll.prev;
+//////////
+
+			// Indicate the new component to continue working on
+			cb->comp = compPrev;
+		}
+
 	}
