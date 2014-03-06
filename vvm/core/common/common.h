@@ -1405,15 +1405,15 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		};
 		union {
 			u64			_deleteComps;
-			void		(*deleteComps)			(SOssComp* comp);
+			void		(*deleteComps)			(SOssComp* comp, SOssLine* line);
 		};
 		union {
 			u64			_cloneComps;
-			SOssComp*	(*cloneComps)			(SOssComp* comp);
+			SOssComp*	(*cloneComps)			(SOssComp* comp, SOssLine* line);
 		};
 		union {
 			u64			_mergeComps;
-			SOssComp*	(*mergeComps)			(SOssComp* comp, u32 tnCount, u32 tniCodeNew);
+			SOssComp*	(*mergeComps)			(SOssComp* comp, SOssLine* line, u32 tnCount, u32 tniCodeNew);
 		};
 	};
 

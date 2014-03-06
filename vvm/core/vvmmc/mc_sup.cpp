@@ -1395,7 +1395,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 			compPrev	= (SOssComp*)comp->ll.prev;
 			
 			// Convert it to a single operator
-			cb->mergeComps(compPrev, 2, cb->iCode);
+			cb->mergeComps(compPrev, compPrev->line, 2, cb->iCode);
 
 			// Indicate the new component to continue working on
 			cb->comp = compPrev;

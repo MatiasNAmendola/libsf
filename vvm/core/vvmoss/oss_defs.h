@@ -318,9 +318,9 @@
 	bool					iioss_translateSOssCompsToOthersCallback								(SStartEndCallback* cb);
 	void					iioss_translateSOssCompsToOthersCallback__insertCompByCompCallback		(SOssComp* compRef, SOssComp* compNew, bool tlInsertAfter);
 	void					iioss_translateSOssCompsToOthersCallback__insertCompByParamsCallback	(SOssComp* compRef, SOssLine* line, u32 tniCode, u64 tnStart, s64 tnLength, bool tlInsertAfter);
-	void					iioss_translateSOssCompsToOthersCallback__deleteCompsCallback			(SOssComp* comp);
-	SOssComp*				iioss_translateSOssCompsToOthersCallback__cloneCompsCallback			(SOssComp* comp);
-	SOssComp*				iioss_translateSOssCompsToOthersCallback__mergeCompsCallback			(SOssComp* comp, u32 tnCount, u32 tniCodeNew);
+	void					iioss_translateSOssCompsToOthersCallback__deleteCompsCallback			(SOssComp* comp, SOssLine* line);
+	SOssComp*				iioss_translateSOssCompsToOthersCallback__cloneCompsCallback			(SOssComp* comp, SOssLine* line);
+	SOssComp*				iioss_translateSOssCompsToOthersCallback__mergeCompsCallback			(SOssComp* comp, SOssLine* line, u32 tnCount, u32 tniCodeNew);
 
 	void					ioss_setFindFileStatus							(SFindFile* tsFileInfo, WIN32_FIND_DATAA* twfd);
 	void					ioss_convertFileTimeToSDateTime					(SFileTime* tsDateTime, FILETIME* tsFiletime);

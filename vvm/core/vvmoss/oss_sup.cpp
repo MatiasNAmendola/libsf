@@ -2962,35 +2962,214 @@ _asm int 3;
 		return(false);
 	}
 
+
+
+
+//////////
+//
+// Called as a callback from the custom handler callback function, to do some manual insertion.
+// Note:  If a rogue component is inserted here, one not already defined in the ref's SOssLine parent,
+//        then it will need to be either manually added to the line->comps, or manually tended to.
+//
+//////
 	void iioss_translateSOssCompsToOthersCallback__insertCompByCompCallback(SOssComp* compRef, SOssComp* compNew, bool tlInsertAfter)
 	{
-// TODO:  Code this algorithm
-		_asm int 3;
+// TODO:  untested code, breakpoint and examine
+_asm int 3;
+		// Make sure our environment is sane
+		if (compRef && compNew)
+		{
+			// Before or after?
+			if (tlInsertAfter)
+			{
+				// Add the new comp after the reference comp
+				if (compRef->ll.next)
+					compRef->ll.next->prev	= (SLL*)compNew;	// One originally after ref points back to new
+
+				compNew->ll.next	= compRef->ll.next;			// New points forward to the one originally after ref
+				compNew->ll.prev	= (SLL*)compRef;			// New points back to ref
+				compRef->ll.next	= (SLL*)compNew;			// Ref points forward to new
+
+			} else {
+				// Add the new comp before the reference comp
+				if (compRef->ll.prev)
+					compRef->ll.prev->next	= (SLL*)compNew;	// One originally before ref points forward to new
+
+				compNew->ll.next	= (SLL*)compRef;			// New points forward to ref
+				compNew->ll.prev	= compRef->ll.prev;			// New points back to the one originally before ref
+				compRef->ll.prev	= (SLL*)compNew;			// Ref points back to new
+			}
+		}
 	}
 
+
+
+
+//////////
+//
+// Called as a callback from the custom handler callback function, to do some manual insertion.
+//
+//////
 	void iioss_translateSOssCompsToOthersCallback__insertCompByParamsCallback(SOssComp* compRef, SOssLine* line, u32 tniCode, u64 tnStart, s64 tnLength, bool tlInsertAfter)
 	{
-// TODO:  Code this algorithm
-		_asm int 3;
+		bool		llResult;
+		SOssComp*	compNew;
+
+
+// TODO:  untested code, breakpoint and examine
+_asm int 3;
+		// Make sure our environment is sane
+		if (compRef && line)
+		{
+			// Allocate a new pointer
+			compNew = (SOssComp*)vvm_SEChain_append(&line->comps, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SOssComp), -1, &llResult);
+			if (compNew)
+			{
+				// Initialize it
+				memset(compNew, 0, sizeof(SOssComp));
+
+				// Populate it
+				compNew->line		= line;
+				compNew->iCode		= tniCode;
+				compNew->start		= tnStart;
+				compNew->length		= tnLength;
+
+				// Add the new component as a component
+				iioss_translateSOssCompsToOthersCallback__insertCompByCompCallback(compRef, compNew, tlInsertAfter);
+			}
+		}
 	}
 
-	void iioss_translateSOssCompsToOthersCallback__deleteCompsCallback(SOssComp* comp)
+
+
+
+//////////
+//
+// Called as a callback from the custom handler callback function, to do delete the
+// indicated component.
+//
+//////
+	void iioss_translateSOssCompsToOthersCallback__deleteCompsCallback(SOssComp* comp, SOssLine* line)
 	{
-// TODO:  Code this algorithm
-		_asm int 3;
+// TODO:  untested code, breakpoint and examine
+_asm int 3;
+		//////////
+		// Disconnect the component from its siblings
+		//////
+			// Make the one before point forward to one after
+			if (comp->ll.prev)
+				comp->ll.prev->next = comp->ll.next;
+
+			// Make the one after point back to the one before
+			if (comp->ll.next)
+				comp->ll.next->prev = comp->ll.prev;
+
+
+		//////////
+		// Delete it from the list of known components.
+		// Component go bye bye. :-)
+		//////
+			if (line)
+			{
+				// Delete the entry from line->comps
+				vvm_SEChain_deleteFrom(&line->comps, comp, true);
+
+			} else {
+				// Free the rogue entry
+				free(comp);
+			}
 	}
 
-	SOssComp* iioss_translateSOssCompsToOthersCallback__cloneCompsCallback(SOssComp* comp)
+
+
+
+//////////
+//
+// Called as a callback from the custom handler callback function, to clone the indicated
+// component.  If line is not NULL, the component is automatically added to line->comps;
+//
+//////
+	SOssComp* iioss_translateSOssCompsToOthersCallback__cloneCompsCallback(SOssComp* comp, SOssLine* line)
 	{
-// TODO:  Code this algorithm
-		_asm int 3;
-		return(comp);
+		bool		llResult;
+		SOssComp*	compNew;
+
+
+// TODO:  untested code, breakpoint and examine
+_asm int 3;
+		// Make sure our environment is sane
+		if (comp)
+		{
+			// Are we adding to to a line?
+			if (line)
+			{
+				// Add the new component to line->comps
+				compNew = (SOssComp*)vvm_SEChain_append(&line->comps, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SOssComp), -1, &llResult);
+
+			} else {
+				// Just create a rogue one
+				compNew = (SOssComp*)malloc(sizeof(SOssComp));
+			}
+
+			// Was it valid?
+			if (compNew)
+			{
+				// Initialize it
+				memset(compNew, 0, sizeof(SOssComp));
+
+				// Populate it
+				compNew->line		= line;
+				compNew->iCode		= comp->iCode;
+				compNew->start		= comp->start;
+				compNew->length		= comp->length;
+
+				// All done!
+			}
+		}
+
+		// Return our new one, no matter if it was a success or not
+		return(compNew);
 	}
 
-	SOssComp* iioss_translateSOssCompsToOthersCallback__mergeCompsCallback(SOssComp* comp, u32 tnCount, u32 tniCodeNew)
+
+
+
+//////////
+//
+// Called as a callback from the custom handler callback function, to do merge components into
+// a new one, and delete the one(s) which were merged.
+//
+// NOTE:  It's theoretically possible that there could be a gap here, such as a component next to
+//        another component where there used to be a whitespace inbetween (or anything else), so
+//        the components are no longer right by each other.  The caller will have to manually
+//        handle that condition.
+//
+//////
+	SOssComp* iioss_translateSOssCompsToOthersCallback__mergeCompsCallback(SOssComp* comp, SOssLine* line, u32 tnCount, u32 tniCodeNew)
 	{
-// TODO:  Code this algorithm
-		_asm int 3;
+		u32			lnI;
+		SOssComp*	compThis;
+
+
+// TODO:  untested code, breakpoint and examine
+_asm int 3;
+		// Make sure our environment is sane
+		if (comp)
+		{
+			// Iterate for each merging
+			for (lnI = 1, compThis = (SOssComp*)comp->ll.next; compThis && lnI < tnCount; lnI++, compThis = (SOssComp*)comp->ll.next)
+			{
+				// Absorb compThis's length into comp's "collective"
+				comp->length += compThis->length;
+
+				// Delete this component
+				iioss_translateSOssCompsToOthersCallback__deleteCompsCallback(compThis, comp->line);
+
+				// Note:  compThis is always assigned comp->ll.next, because its next component keeps being updated after the delete
+			}
+			// When we get here, everything's merged
+		}
+		// Return the original component as a pass through (in case this is used as an intermediate function)
 		return(comp);
 	}
 
