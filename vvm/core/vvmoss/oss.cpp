@@ -2012,12 +2012,13 @@ storeFirstOne:
 	SOssComp* CALLTYPE oss_translateSOssLinesToSOssComps(SAsciiCompSearcher* tsComps, SOssLine* line)
 	{
 		s64						lnI, lnMaxLength, lnStart, lnLength, lnLacsLength;
-		bool					llSigned;
+		bool					llSigned, llResult;
 		SOssComp*				compFirst;
 		SOssComp*				compLast;
 		SOssComp*				comp;
 		s8*						lcData;
 		SAsciiCompSearcher*		lacs;
+		SOssCompCallback		lccb;
 
 
 		// Make sure the environment's sane
@@ -2048,64 +2049,90 @@ storeFirstOne:
 						// See if it matches
 						if (ioss_translateSOssLinesToSOssCompsTest((s8*)lacs->keyword, lcData + lnI, lacs->length) == 0)
 						{
-							// It matches, mark its current condition
-							lnStart		= lnI;
-							lnLength	= lnLacsLength;
-							// See if it's allowed to repeat
-							if (lacs->repeats)
+							// It matches
+							// Is there a secondary validation?
+							if (lacs->_validate)
 							{
-								while (	lnStart + lnLength + lnLacsLength <= lnMaxLength
-										&& ioss_translateSOssLinesToSOssCompsTest((s8*)lacs->keyword, lcData + lnStart + lnLength, lacs->length) == 0)
-								{
-									// We found another repeated entry
-									lnLength += lnLacsLength;
-								}
-								// When we get here, every repeated entry has been found (if any)
+								// Yes, make sure it validates there as well
+								lccb.text					= lcData + lnI;
+								lccb.length					= lacs->length;
+								lccb.iCode					= lacs->iCode;
+								lccb._insertCompByComp		= NULL;
+								lccb._insertCompByParams	= NULL;
+								lccb._deleteComps			= NULL;
+								lccb._cloneComps			= NULL;
+								lccb._mergeComps			= NULL;
+
+								// Perform the validation
+								llResult = lacs->validate(&lccb);
+
+							} else {
+								// If there is no extra validation, we just pass through
+								llResult = true;
 							}
-							// When we get here, we have the starting point and the full length (including any repeats)
-
-
-							//////////
-							// Allocate this entry
-							///////
-								comp = (SOssComp*)vvm_SEChain_append(&line->comps, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SOssComp), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
-
-
-							//////////
-							// Populate the component with specified information
-							//////
-								//
-								//////
-									if (comp)
+							
+							// Are we still good?
+							if (llResult)
+							{
+								// mark its current condition
+								lnStart		= lnI;
+								lnLength	= lnLacsLength;
+								// See if it's allowed to repeat
+								if (lacs->repeats)
+								{
+									while (	lnStart + lnLength + lnLacsLength <= lnMaxLength
+											&& ioss_translateSOssLinesToSOssCompsTest((s8*)lacs->keyword, lcData + lnStart + lnLength, lacs->length) == 0)
 									{
-										// Update the back links
-										if (compLast)	compLast->ll.next = (SLL*)comp;			// Previous one points to this one
-										comp->ll.prev	= (SLL*)compLast;						// This one points back to previous one
-
-										// Update the component's information
-										comp->line		= line;
-										comp->start		= lnStart;
-										comp->length	= lnLength;
-										comp->iCode		= lacs->iCode;
-
-										// Update our first component (if it's not updated already)
-										if (!compFirst)	compFirst = comp;
-
-										// All done
-										compLast = comp;
+										// We found another repeated entry
+										lnLength += lnLacsLength;
 									}
+									// When we get here, every repeated entry has been found (if any)
+								}
+								// When we get here, we have the starting point and the full length (including any repeats)
+
+
+								//////////
+								// Allocate this entry
+								///////
+									comp = (SOssComp*)vvm_SEChain_append(&line->comps, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SOssComp), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
+
+
+								//////////
+								// Populate the component with specified information
 								//////
-								//
-							//////
-							// END
-							//////////
+									//
+									//////
+										if (comp)
+										{
+											// Update the back links
+											if (compLast)	compLast->ll.next = (SLL*)comp;			// Previous one points to this one
+											comp->ll.prev	= (SLL*)compLast;						// This one points back to previous one
+
+											// Update the component's information
+											comp->line		= line;
+											comp->start		= lnStart;
+											comp->length	= lnLength;
+											comp->iCode		= lacs->iCode;
+
+											// Update our first component (if it's not updated already)
+											if (!compFirst)	compFirst = comp;
+
+											// All done
+											compLast = comp;
+										}
+									//////
+									//
+								//////
+								// END
+								//////////
 
 
-							//////////
-							// Move beyond this entry, and continue on search again afterward
-							//////
-								lnI += lnLength;
-								break;		// leaves lnJ loop, continues with lnI loop
+								//////////
+								// Move beyond this entry, and continue on search again afterward
+								//////
+									lnI += lnLength;
+									break;		// leaves lnJ loop, continues with lnI loop
+							}
 						}
 						//else it doesn't match, this isn't a good find
 					}

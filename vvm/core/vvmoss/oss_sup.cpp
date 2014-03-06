@@ -2889,9 +2889,11 @@ _asm int 3;
 //////
 	bool iioss_translateSOssCompsToOthersCallback(SStartEndCallback* cb)
 	{
-		s32					lnLacsLength;
-		SOssComp*			comp;
-		SAsciiCompSearcher*	lacs;
+		bool					llResult;
+		s32						lnLacsLength;
+		SOssComp*				comp;
+		SAsciiCompSearcher*		lacs;
+		SOssCompCallback		lccb;
 
 
 		// Make sure the environment is sane
@@ -2921,11 +2923,35 @@ _asm int 3;
 																	comp->line->base + comp->line->start + comp->line->whitespace + comp->start, 
 																	lacs->length) == 0)
 						{
-							// This is a match, convert it, translate it, whatever you want to call it, just make it be the new code, per the user's request, got it? :-)
-							comp->iCode = lacs->iCode;
+							// This is a match
+							// Is there a secondary test?
+							if (lacs->_validate)
+							{
+								// Yes, make sure it validates there as well
+								lccb.comp					= comp;
+								lccb.length					= 0;
+								lccb.iCode					= lacs->iCode;
+								lccb._insertCompByComp		= (u64)&iioss_translateSOssCompsToOthersCallback__insertCompByCompCallback;
+								lccb._insertCompByParams	= (u64)&iioss_translateSOssCompsToOthersCallback__insertCompByParamsCallback;
+								lccb._deleteComps			= (u64)&iioss_translateSOssCompsToOthersCallback__deleteCompsCallback;
+								lccb._cloneComps			= (u64)&iioss_translateSOssCompsToOthersCallback__cloneCompsCallback;
+								lccb._mergeComps			= (u64)&iioss_translateSOssCompsToOthersCallback__mergeCompsCallback;
 
-							// All done with this component
-							break;
+								// Perform the validation
+								llResult = lacs->validate(&lccb);
+
+							} else {
+								// No, just let it fall through
+								llResult = true;
+							}
+							
+							if (llResult)
+							{
+								// Convert it, translate it, whatever you want to call it, just make it be the new code, per the user's request, got it? :-)
+								comp->iCode = lacs->iCode;
+								// All done with this component
+								break;
+							}
 						}
 					}
 				}
@@ -2934,6 +2960,38 @@ _asm int 3;
 		}
 		// We always simulate a false condition so we'll keep receiving each item
 		return(false);
+	}
+
+	void iioss_translateSOssCompsToOthersCallback__insertCompByCompCallback(SOssComp* compRef, SOssComp* compNew, bool tlInsertAfter)
+	{
+// TODO:  Code this algorithm
+		_asm int 3;
+	}
+
+	void iioss_translateSOssCompsToOthersCallback__insertCompByParamsCallback(SOssComp* compRef, SOssLine* line, u32 tniCode, u64 tnStart, s64 tnLength, bool tlInsertAfter)
+	{
+// TODO:  Code this algorithm
+		_asm int 3;
+	}
+
+	void iioss_translateSOssCompsToOthersCallback__deleteCompsCallback(SOssComp* comp)
+	{
+// TODO:  Code this algorithm
+		_asm int 3;
+	}
+
+	SOssComp* iioss_translateSOssCompsToOthersCallback__cloneCompsCallback(SOssComp* comp)
+	{
+// TODO:  Code this algorithm
+		_asm int 3;
+		return(comp);
+	}
+
+	SOssComp* iioss_translateSOssCompsToOthersCallback__mergeCompsCallback(SOssComp* comp, u32 tnCount, u32 tniCodeNew)
+	{
+// TODO:  Code this algorithm
+		_asm int 3;
+		return(comp);
 	}
 
 

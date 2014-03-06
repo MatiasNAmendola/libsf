@@ -645,16 +645,16 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		u32				iCode;											// An associated code to store when this entry is found
 		bool			firstOnLine;									// Should this item ONLY be the first on line?
 
-		// Used for an explicit callback to validate if this match is a match
+		// Used for an explicit callback to validate if this match (as by text) is really a match (as by context)
 		union {
-			u64			_validateHandler;
+			u64			_validate;
 			bool		(*validate)(SOssCompCallback* val);
 		};
 
-		// Used for an explicit callback to handle this component text
+		// Used for an explicit callback to handle this component or text
 		union {
-			u64			_addressHandler;
-			void		(*handler)(void);
+			u64			_custom;
+			void		(*custom)(void);
 		};
 	};
 
@@ -1387,15 +1387,34 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 
 	struct SOssCompCallback
 	{
-		SOssComp*		comp;											// Component at start, and the component to continue processing after upon exit
+		union {
+			SOssComp*	comp;											// Component at start, and the component to continue processing after upon exit
+			s8*			text;											// Raw text (depending on when it is being processed
+		};
+		u32				length;											// If raw text, the length of the thing being searched, otherwise 0.
 		u32				iCode;											// The iCode being queried
 
-		// Callbacks for adjustment
-		void			(*insertComponentByComp)(SOssComp* compRef, SOssComp* compNew, bool tlInsertAfter);
-		void			(*insertComponentByParams)(SOssComp* compRef, SOssLine* line, u32 tniCode, u64 tnStart, s64 tnLength, bool tlInsertAfter);
-		void			(*deleteComponent)(SOssComp* comp);
-		SOssComp*		(*cloneComponent)(SOssComp* comp);
-		SOssComp*		(*mergeComponents)(SOssComp* comp, u32 tnCount, u32 tniCodeNew);
+		// Callback callbacks for adjustment
+		union {
+			u64			_insertCompByComp;
+			void		(*insertCompByComp)		(SOssComp* compRef, SOssComp* compNew, bool tlInsertAfter);
+		};
+		union {
+			u64			_insertCompByParams;
+			void		(*insertCompByParams)	(SOssComp* compRef, SOssLine* line, u32 tniCode, u64 tnStart, s64 tnLength, bool tlInsertAfter);
+		};
+		union {
+			u64			_deleteComps;
+			void		(*deleteComps)			(SOssComp* comp);
+		};
+		union {
+			u64			_cloneComps;
+			SOssComp*	(*cloneComps)			(SOssComp* comp);
+		};
+		union {
+			u64			_mergeComps;
+			SOssComp*	(*mergeComps)			(SOssComp* comp, u32 tnCount, u32 tniCodeNew);
+		};
 	};
 
 
