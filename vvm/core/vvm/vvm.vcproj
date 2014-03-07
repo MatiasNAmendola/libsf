@@ -20,7 +20,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="\libsf\vvm\dev"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
 			CharacterSet="1"
 			DeleteExtensionsOnClean=""
 			>
@@ -62,7 +62,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="\libsf\vvm\dev\$(ProjectName).exe"
+				OutputFile="\libsf\vvm\dev\$(ProjectName).dll"
 				LinkIncremental="2"
 				ManifestFile="$(TargetDir)int\$(TargetFileName).intermediate.manifest"
 				GenerateDebugInformation="true"
@@ -97,7 +97,7 @@
 			Name="Release|Win32"
 			OutputDirectory="\libsf\vvm\dev"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
 			CharacterSet="1"
 			DeleteExtensionsOnClean=""
 			WholeProgramOptimization="1"
@@ -140,7 +140,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="\libsf\vvm\dev\$(ProjectName).exe"
+				OutputFile="\libsf\vvm\dev\$(ProjectName).dll"
 				LinkIncremental="1"
 				ManifestFile="$(TargetDir)int\$(TargetFileName).intermediate.manifest"
 				GenerateDebugInformation="true"
@@ -177,7 +177,7 @@
 			Name="debug_vasm|Win32"
 			OutputDirectory="\libsf\vvm\dev"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
 			CharacterSet="1"
 			DeleteExtensionsOnClean=""
 			>
@@ -219,7 +219,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="\libsf\vvm\dev\$(ProjectName).exe"
+				OutputFile="\libsf\vvm\dev\$(ProjectName).dll"
 				LinkIncremental="2"
 				ManifestFile="$(TargetDir)int\$(TargetFileName).intermediate.manifest"
 				GenerateDebugInformation="true"
@@ -575,32 +575,6 @@
 			</File>
 			<File
 				RelativePath=".\vvm_structs.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="Resource Files"
-			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
-			>
-			<File
-				RelativePath=".\Resource.h"
-				>
-			</File>
-			<File
-				RelativePath=".\small.ico"
-				>
-			</File>
-			<File
-				RelativePath=".\targetver.h"
-				>
-			</File>
-			<File
-				RelativePath=".\vvm.ico"
-				>
-			</File>
-			<File
-				RelativePath=".\vvm.rc"
 				>
 			</File>
 		</Filter>

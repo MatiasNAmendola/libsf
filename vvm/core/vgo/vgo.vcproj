@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="vdeb"
-	ProjectGUID="{11AEDF6C-F889-4757-99AD-2DE64FEB5C31}"
-	RootNamespace="VDebug"
+	Name="vgo"
+	ProjectGUID="{8D4C64D5-A510-4F1C-9CAA-9B3F368E2EB4}"
+	RootNamespace="vvm"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
 	>
@@ -20,7 +20,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="\libsf\vvm\dev"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
+			ConfigurationType="1"
 			CharacterSet="1"
 			DeleteExtensionsOnClean=""
 			>
@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;VDEBUG_EXPORTS;_CRT_SECURE_NO_WARNINGS"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;UNICODE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -62,10 +62,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="\libsf\vvm\dev\vdebug.dll"
+				OutputFile="\libsf\vvm\dev\$(ProjectName).exe"
 				LinkIncremental="2"
 				ManifestFile="$(TargetDir)int\$(TargetFileName).intermediate.manifest"
-				ModuleDefinitionFile="VDeb.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)pdbs\$(TargetName).pdb"
 				SubSystem="2"
@@ -98,7 +97,7 @@
 			Name="Release|Win32"
 			OutputDirectory="\libsf\vvm\dev"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
+			ConfigurationType="1"
 			CharacterSet="1"
 			DeleteExtensionsOnClean=""
 			WholeProgramOptimization="1"
@@ -122,7 +121,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;VDEBUG_EXPORTS;_CRT_SECURE_NO_WARNINGS"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS"
 				RuntimeLibrary="2"
 				StructMemberAlignment="1"
 				EnableFunctionLevelLinking="true"
@@ -141,10 +140,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="\libsf\vvm\dev\vdebug.dll"
+				OutputFile="\libsf\vvm\dev\$(ProjectName).exe"
 				LinkIncremental="1"
 				ManifestFile="$(TargetDir)int\$(TargetFileName).intermediate.manifest"
-				ModuleDefinitionFile="VDeb.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)pdbs\$(TargetName).pdb"
 				SubSystem="2"
@@ -179,7 +177,7 @@
 			Name="debug_vasm|Win32"
 			OutputDirectory="\libsf\vvm\dev"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="2"
+			ConfigurationType="1"
 			CharacterSet="1"
 			DeleteExtensionsOnClean=""
 			>
@@ -201,7 +199,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;VDEBUG_EXPORTS;_CRT_SECURE_NO_WARNINGS"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;UNICODE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -221,10 +219,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				OutputFile="\libsf\vvm\dev\vdebug.dll"
+				OutputFile="\libsf\vvm\dev\$(ProjectName).exe"
 				LinkIncremental="2"
 				ManifestFile="$(TargetDir)int\$(TargetFileName).intermediate.manifest"
-				ModuleDefinitionFile="VDeb.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)pdbs\$(TargetName).pdb"
 				SubSystem="2"
@@ -263,40 +260,8 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\vdeb.cpp"
+				RelativePath=".\vgo.cpp"
 				>
-			</File>
-			<File
-				RelativePath=".\vdeb.def"
-				>
-			</File>
-			<File
-				RelativePath=".\vdeb_sup.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="debug_vasm|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
@@ -305,62 +270,52 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\vdeb_const.h"
+				RelativePath=".\vgo_const.h"
 				>
 			</File>
 			<File
-				RelativePath=".\vdeb_defs.h"
+				RelativePath=".\vgo_defs.h"
 				>
 			</File>
 			<File
-				RelativePath=".\vdeb_glob.h"
+				RelativePath=".\vgo_glob.h"
 				>
 			</File>
 			<File
-				RelativePath=".\vdeb_screens.h"
-				>
-			</File>
-			<File
-				RelativePath=".\vdeb_structs.h"
+				RelativePath=".\vgo_structs.h"
 				>
 			</File>
 		</Filter>
 		<Filter
-			Name="Common"
+			Name="Resource Files"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
 			<File
-				RelativePath="..\common\common.h"
+				RelativePath=".\Resource.h"
 				>
 			</File>
 			<File
-				RelativePath="..\common\common_vvm.h"
+				RelativePath=".\small.ico"
 				>
 			</File>
 			<File
-				RelativePath="..\common\common_vvmmc.h"
+				RelativePath=".\targetver.h"
 				>
 			</File>
 			<File
-				RelativePath="..\common\common_vvmoss.h"
+				RelativePath=".\vgo.ico"
 				>
 			</File>
 			<File
-				RelativePath="..\common\common_vvmoss_const.h"
-				>
-			</File>
-			<File
-				RelativePath="..\common\common_vvmoss_plugins.h"
-				>
-			</File>
-			<File
-				RelativePath=".\settings\vdeb.bxml"
-				>
-			</File>
-			<File
-				RelativePath="..\common\vvm_key_const.h"
+				RelativePath=".\vgo.rc"
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\devhelp.txt"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
