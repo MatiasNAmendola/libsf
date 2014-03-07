@@ -111,6 +111,7 @@
 	const u32		_MC_ICODE_RETURN_DEFINITION						= 110;
 	const u32		_MC_ICODE_LOCALS_DEFINITION						= 111;
 
+	const u32		_MC_LOWEST_ICODE_VARIABLE_DEFINITION			= 2000;
 	const u32		_MC_ICODE_U8									= 2000;
 	const u32		_MC_ICODE_U16									= 2001;
 	const u32		_MC_ICODE_U32									= 2002;
@@ -123,6 +124,7 @@
 	const u32		_MC_ICODE_F64									= 2009;
 	const u32		_MC_ICODE_BNI									= 2010;
 	const u32		_MC_ICODE_BNF									= 2011;
+	const u32		_MC_HIGHEST_ICODE_VARIABLE_DEFINITION			= 2011;
 
 	const u32		_MC_ICODE_ESNIP_REG								= 3000;
 	const u32		_MC_ICODE_IP_REG								= 3001;

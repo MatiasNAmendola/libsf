@@ -584,7 +584,7 @@
 				//////
 					comp = oss_translateSOssLinesToSOssComps(cgcKeywordOperators, line);
 					// Note:  comp is not used here, but it is included in source code to indicate at a glance what is returned
-#pragma message("mc_sup.cpp::imc_loadSourceFile() contains several validation functions that can be removed in the future.")
+#pragma message("mc_sup.cpp::imc_loadSourceFile() contains several validation functions which slow down performance.  These can be removed after development and strong testing.")
 SStartEndCallback cb;
 cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
@@ -923,6 +923,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 
 
 // TODO:  this algorithm needs to be completely refactored due to the use of casks
+_asm int 3;
 		// Make sure our environment is sane
 		pbsd->llOkayToAddPipeDataToBlock	= (block != NULL);
 		pbsd->llab							= NULL;
@@ -951,10 +952,10 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 						//////////
 						// For certain block-related components, we process them here
 						//////
-							if (pbsd->comp->iCode == _MC_ICODE_SNIP_DEFINITION || 
-								pbsd->comp->iCode == _MC_ICODE_DSNIP_DEFINITION || 
-								pbsd->comp->iCode == _MC_ICODE_DSNIP_DLL_DEFINITION ||
-								pbsd->comp->iCode == _MC_ICODE_DSNIP_BXML_DEFINITION)
+							if (pbsd->comp->iCode == _MC_ICODE_SNIP || 
+								pbsd->comp->iCode == _MC_ICODE_DSNIP || 
+								pbsd->comp->iCode == _MC_ICODE_DLL ||
+								pbsd->comp->iCode == _MC_ICODE_BXML)
 							{
 								// We've found the start of a SNIP/FUNCTION or DSNIP definition
 								line = iimc_assemblyPass0ScanForBlocksSnipDefs(line, tniCode, &block, pbsd);
@@ -967,7 +968,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 
 							} else if (pbsd->comp->iCode == _MC_ICODE_COLON) {
 								// It's the start of a label, which *MUST* appear within a block
-								lineResult = iimc_assemblyPass0ScanForBlocksColin(line, tniCode, &block, pbsd);
+								lineResult = iimc_assemblyPass0ScanForBlocksColon(line, tniCode, &block, pbsd);
 								if (!lineResult)	return(lineResult);
 
 							} else if (pbsd->comp->iCode == _MC_ICODE_DLL_FUNCTION_DEFINITION) {
@@ -1022,6 +1023,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 
 
 // TODO:  this algorithm needs to be completely refactored due to the use of casks
+_asm int 3;
 		// See where we are
 		if (tniCode == _MC_ICODE_UNKNOWN)
 		{
@@ -1039,7 +1041,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 			(*block)->compTrigger	= pbsd->comp;
 
 			// Allocate the start of the thing
-			if (pbsd->comp->iCode == _MC_ICODE_SNIP_DEFINITION)
+			if (pbsd->comp->iCode == _MC_ICODE_SNIP)
 			{
 				// Allocate the snippet (for future use)
 				(*block)->snip = (SSnip*)oss_alloc(sizeof(SSnip), true);
@@ -1109,11 +1111,13 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 		return(NULL);
 	}
 
-	SOssLine* iimc_assemblyPass0ScanForBlocksColin(SOssLine* line, u32 tniCode, SBlock** block, _isPass0BlockScanData* pbsd)
+	SOssLine* iimc_assemblyPass0ScanForBlocksColon(SOssLine* line, u32 tniCode, SBlock** block, _isPass0BlockScanData* pbsd)
 	{
 		_isSLineInfo*	lli;
 
 
+// TODO:  this algorithm needs to be completely refactored due to the use of casks
+_asm int 3;
 		// Make sure we're where we should be
 		if (tniCode != _MC_ICODE_END)
 		{
@@ -1144,7 +1148,9 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 
 	SOssLine* iimc_assemblyPass0ScanForBlocksDllFuncDef(SOssLine* line, u32 tniCode, SBlock** block, _isPass0BlockScanData* pbsd)
 	{
-		if (!*block || (*block)->compTrigger->iCode != _MC_ICODE_DSNIP_DLL_DEFINITION)
+// TODO:  this algorithm needs to be completely refactored due to the use of casks
+_asm int 3;
+		if (!*block || (*block)->compTrigger->iCode != _MC_ICODE_DLL)
 		{
 			// A DLL_FUNCTION was found where it should not be
 			imc_appendError(&pbsd->tsf->errors, line, pbsd->comp, IDS_ERROR_UNEXPECTED_KEYWORD);
@@ -1170,6 +1176,8 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 		_isSLineInfo*	lli;
 
 
+// TODO:  this algorithm needs to be completely refactored due to the use of casks
+_asm int 3;
 		// Make sure the environment is sane
 		if (pbsd->ldfi)
 		{
@@ -1218,6 +1226,8 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 		SBlock*	block;
 
 
+// TODO:  this algorithm needs to be completely refactored due to the use of casks
+_asm int 3;
 		// Parse the block starts and stops, labels and pipe-signs
 		block = (SBlock*)tsf->blocks.root->ptr;
 		while (block)
@@ -1227,7 +1237,7 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 			switch (block->compTrigger->iCode)
 			{
 
-				case _MC_ICODE_DSNIP_DEFINITION:
+				case _MC_ICODE_DSNIP:
 				//////////
 				// This DSNIP definition is not allowed explicitly to be defined at runtime.
 				// Only implicitly through the DSNIP_Bxml syntax.  However, in saved states
@@ -1237,19 +1247,19 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 					return(false);
 					break;
 
-				case _MC_ICODE_DSNIP_DLL_DEFINITION:
+				case _MC_ICODE_DLL:
 					// Process the DSNIP_DLL source line, as well as any DLL_FUNCTION lines within (and their pipe-signs)
 					if (!iimc_assemblyPass2ParseBlockStartsAndLabelsDsnipDll(ta, tsf, block))
 						return(false);
 					break;
 
-				case _MC_ICODE_DSNIP_BXML_DEFINITION:
+				case _MC_ICODE_BXML:
 					// Process the DSNIP_Bxml source line, as well as the required pipe-sign PROTOTYPE line within
 					if (!iimc_assemblyPass2ParseBlockStartsAndLabelsDsnipBxml(ta, tsf, block))
 						return(false);
 					break;
 
-				case _MC_ICODE_SNIP_DEFINITION:
+				case _MC_ICODE_SNIP:
 					// Process the FUNCTION / SNIP source line, as well as any pipe-signs and labels
 					if (!iimc_assemblyPass2ParseBlockStartsAndLabelsSnip(ta, tsf, block))
 						return(false);
@@ -1289,6 +1299,8 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 		SDynSnip*	dsnip;
 
 
+// TODO:  this algorithm needs to be completely refactored due to the use of casks
+_asm int 3;
 		// The next component after block->compTrigger must be a single/double-quoted text component
 		comp = (SOssComp*)block->compTrigger->ll.next;
 		if (!comp || (comp->iCode != _MC_ICODE_SINGLE_QUOTED_TEXT && comp->iCode != _MC_ICODE_DOUBLE_QUOTED_TEXT))

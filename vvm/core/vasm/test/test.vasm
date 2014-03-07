@@ -91,7 +91,7 @@
 [|end|]
 
 
-[|dsnip|bxml,d:\path\to\runtime\loadable.bxml||]
+[|dsnip|bxml||]
 [|prototype|c:\path\to\devtime\loadable.bxml||]
 [|end|]
 

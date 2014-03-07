@@ -100,7 +100,7 @@
 		SOssLine*			iimc_assemblyPass0ScanForBlocks								(SOssLine* line, u32 tniCode, SBlock*  block, _isPass0BlockScanData* pbsd);
 		SOssLine*			iimc_assemblyPass0ScanForBlocksSnipDefs						(SOssLine* line, u32 tniCode, SBlock** block, _isPass0BlockScanData* pbsd);
 		SOssLine*			iimc_assemblyPass0ScanForBlocksEnd							(SOssLine* line, u32 tniCode, SBlock** block, _isPass0BlockScanData* pbsd);
-		SOssLine*			iimc_assemblyPass0ScanForBlocksColin						(SOssLine* line, u32 tniCode, SBlock** block, _isPass0BlockScanData* pbsd);
+		SOssLine*			iimc_assemblyPass0ScanForBlocksColon						(SOssLine* line, u32 tniCode, SBlock** block, _isPass0BlockScanData* pbsd);
 		SOssLine*			iimc_assemblyPass0ScanForBlocksDllFuncDef					(SOssLine* line, u32 tniCode, SBlock** block, _isPass0BlockScanData* pbsd);
 		SOssLine*			iimc_assemblyPass0ScanForBlocksPipeSign						(SOssLine* line, u32 tniCode, SBlock** block, _isPass0BlockScanData* pbsd);
 		bool				iimc_assemblyPass2ParseBlockStartsAndLabels					(SAssembly* ta, SSourceFile* tsf);

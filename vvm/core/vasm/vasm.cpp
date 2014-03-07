@@ -89,8 +89,8 @@ void		iAssembleFile						(s8* tcPathname);
 
 
 		// Tell the world who we are
-		printf("Visual FreePro Virtual Machine Assembler 0.70\n");
-		printf("Copyright (c) 2012 Rick C. Hodgin - Released under PBL 1.0 - /? for help\n");
+		printf("Visual FreePro Assembler OBED 0.70\n");
+		printf("Copyright (c) 2012-2014 Rick C. Hodgin - Released under PBL 1.0 - /? for help\n");
 		printf("---\n");
 		printf("---\n");
 
@@ -200,7 +200,7 @@ void		iAssembleFile						(s8* tcPathname);
 
 
 		// Let it initialize itself
-		oss_bootstrapInitialization(0);
+		oss_bootstrapInitialization(_vvm_debuggerInterface);
 
 
 		// Indicate the version we have loaded

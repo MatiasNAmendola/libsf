@@ -123,7 +123,11 @@
 //////
 	void CALLTYPE mc_bootstrapInitialization(u64 tnDebuggerInterfaceAddress)
 	{
-		// Nothing is currently defined for bootstrap initialization
+_asm int 3;
+		// Store the address of the VVM interface for function address requests
+		_vvm_debuggerInterface = tnDebuggerInterfaceAddress;
+
+		// Nothing else is currently defined for bootstrap initialization
 	}
 
 
