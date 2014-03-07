@@ -47,9 +47,9 @@
 #include <stdio.h>
 #include <windows.h>
 #include "\libsf\vvm\core\common\common.h"
-#include "\libsf\vvm\core\vvmoss\oss_structs.h"
+#include "\libsf\vvm\core\oss\oss_structs.h"
 #include "\libsf\vvm\core\vvm\vvm_structs.h"
-#include "\libsf\vvm\core\vvmmc\mc_structs.h"
+#include "\libsf\vvm\core\mc\mc_structs.h"
 #include "\libsf\vvm\core\common\common_vvm.h"
 #include "\libsf\vvm\core\common\common_mc.h"
 #include "\libsf\vvm\core\common\common_oss.h"

@@ -5,15 +5,15 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vvm", "vvm\vvm.vcproj", "{1
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vasm", "vasm\vasm.vcproj", "{D628D9FA-7F64-494F-9E51-E005A46806CF}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VDebug", "vdebug\VDebug.vcproj", "{11AEDF6C-F889-4757-99AD-2DE64FEB5C31}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VDebug", "vdeb\VDebug.vcproj", "{11AEDF6C-F889-4757-99AD-2DE64FEB5C31}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vvmmc", "vvmmc\vvmmc.vcproj", "{67445613-FA49-4DB1-9153-2315A273165E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vvmmc", "mc\vvmmc.vcproj", "{67445613-FA49-4DB1-9153-2315A273165E}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vvmoss", "vvmoss\vvmoss.vcproj", "{A3368817-54CB-4520-8057-71EFCE0D98D7}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vvmoss", "oss\vvmoss.vcproj", "{A3368817-54CB-4520-8057-71EFCE0D98D7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "whiteboxLauncher", "..\apps\whitebox\launcher\launcher.vcproj", "{312FE97F-C89A-448B-9638-B0CD64D81C78}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VDebugLauncher", "vdebug\vdebugLauncher\VDebugLauncher.vcproj", "{02C5AFCA-F9F1-43C9-A6DA-CF1A9ACFC899}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "VDebugLauncher", "vdeb\vdebugLauncher\VDebugLauncher.vcproj", "{02C5AFCA-F9F1-43C9-A6DA-CF1A9ACFC899}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vdebugenu", "localization\vdebugenu\vdebugenu.vcproj", "{1F91E5E7-F6FC-4ECC-A3C9-4AAD65EF6E61}"
 EndProject

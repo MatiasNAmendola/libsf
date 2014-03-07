@@ -55,9 +55,9 @@
 #include "\libsf\utils\sha1\sha1.h"											// SHA-1 hashing algorithm
 #include "\libsf\vvm\core\localization\vvmenu\resource.h"					// Resource constants
 #include "vvm_const.h"
-#include "\libsf\vvm\core\vvmoss\oss_class.h"
-#include "\libsf\vvm\core\vvmoss\oss_structs.h"
-#include "\libsf\vvm\core\vvmmc\mc_structs.h"
+#include "\libsf\vvm\core\oss\oss_class.h"
+#include "\libsf\vvm\core\oss\oss_structs.h"
+#include "\libsf\vvm\core\mc\mc_structs.h"
 #include "\libsf\vvm\core\common\fonts\font8x6.h"
 #include "\libsf\vvm\core\common\fonts\font8x8.h"
 #include "\libsf\vvm\core\common\fonts\font8x14.h"

@@ -63,13 +63,13 @@
 #include "\libsf\vvm\core\localization\vvmenu\resource.h"					// Resource constants
 #include "vvmt_const.h"
 #include "\libsf\vvm\core\vvm\vvm_structs.h"
-#include "\libsf\vvm\core\vvmoss\oss_structs.h"
+#include "\libsf\vvm\core\oss\oss_structs.h"
 #include "\libsf\vvm\core\common\common_vvm.h"
 #include "\libsf\vvm\core\common\common_oss.h"
 #include "vvmt_structs.h"
 #include "vvmt_defs.h"
 #include "vvmt_glob.h"
-#include "\libsf\vvm\core\vvmoss\oss_class.h"
+#include "\libsf\vvm\core\oss\oss_class.h"
 #include "\libsf\vvm\core\common\vvm_key_const.h"
 
 // Test source files

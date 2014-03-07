@@ -49,7 +49,7 @@
 #include "\libsf\vvm\core\common\common.h"
 #include "\libsf\vvm\core\vvm\vvm_structs.h"
 #include "\libsf\vvm\core\common\common_vvm.h"
-#include "\libsf\vvm\core\vvmoss\oss_class.h"
+#include "\libsf\vvm\core\oss\oss_class.h"
 
 // Global variables
 const s8		cgcVDebugName[]					= "VDebug v0.70";
