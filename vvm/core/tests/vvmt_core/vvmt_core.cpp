@@ -123,6 +123,15 @@
 
 
 		//////////
+		// Tell each DLL to initialize itself
+		//////
+			vvm_firstCallback(0);
+			vvm_bootstrapInitialization();
+			oss_firstCallback(0);
+			oss_bootstrapInitialization();
+
+
+		//////////
 		// Indicate success
 		//////
 			return(0);

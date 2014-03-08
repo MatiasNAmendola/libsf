@@ -1,17 +1,16 @@
 //////////
 //
-// /libsf/vvm/vvm/vvm_mc.cpp
+// /libsf/vvm/core/vfrp/vfrp_glob.h
 //
 //////
 // Version 0.70
 // Copyright (c) 2012, 2014 by Rick C. Hodgin
 //////
 // Last update:
-//     Feb.25.2014
+//     Mar.07.2014
 //////
 // Change log:
-//     Feb.25.2014 - Development on 0.70 begins
-//     Mar.02.2013	- Initial creation
+//     Mar.07.2014 - Initial creation
 //////
 // See devhelp.txt.
 //////
@@ -38,25 +37,3 @@
 // talents, your gifts, your praise, unto Him.  In Jesus' name I pray.  Amen.
 //
 //
-
-
-
-
-//////////
-//
-// Called to load the OSS.DLL stuff, following the startup protocol.
-//
-//////
-	bool ivvm_loadAndInitializeVvmmc(void)
-	{
-		// Load the DLL
-		if (!iLoadMcFunctionsFromDll())
-			return(false);
-
-		// Let it initialize itself
-		mc_firstCallback((u64)&vvm_debuggerInterfaceCallback);
-		mc_bootstrapInitialization((u64)&vvm_debuggerInterfaceCallback);
-
-		// We're good
-		return(true);
-	}

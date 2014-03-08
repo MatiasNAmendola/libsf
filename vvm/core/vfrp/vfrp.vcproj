@@ -2,8 +2,8 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="vgo"
-	ProjectGUID="{8D4C64D5-A510-4F1C-9CAA-9B3F368E2EB4}"
+	Name="vfrp"
+	ProjectGUID="{ACD0A2A1-6C77-411A-BBA7-995C8E040233}"
 	RootNamespace="vvm"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="196613"
@@ -260,8 +260,36 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\vgo.cpp"
+				RelativePath=".\vfrp.cpp"
 				>
+			</File>
+			<File
+				RelativePath=".\vfrp_sup.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="debug_vasm|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 		</Filter>
 		<Filter
@@ -270,19 +298,19 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\vgo_const.h"
+				RelativePath=".\vfrp_const.h"
 				>
 			</File>
 			<File
-				RelativePath=".\vgo_defs.h"
+				RelativePath=".\vfrp_defs.h"
 				>
 			</File>
 			<File
-				RelativePath=".\vgo_glob.h"
+				RelativePath=".\vfrp_glob.h"
 				>
 			</File>
 			<File
-				RelativePath=".\vgo_structs.h"
+				RelativePath=".\vfrp_structs.h"
 				>
 			</File>
 		</Filter>
@@ -304,11 +332,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\vgo.ico"
+				RelativePath=".\vfrp.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\vgo.rc"
+				RelativePath=".\vfrp.rc"
 				>
 			</File>
 		</Filter>

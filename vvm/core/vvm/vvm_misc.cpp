@@ -51,6 +51,38 @@
 
 //////////
 //
+// Once the VVM is started, we need to engage the engine in the way it's designed to run.
+//
+//////
+	bool ivvm_loadAndInitializeOss(void)
+	{
+		// Create our main message window
+		if (!oss_createMessageWindow())
+			return(false);
+
+		// We're good
+		return(true);
+	}
+
+
+
+
+//////////
+//
+// Called to load the OSS.DLL stuff, following the startup protocol.
+//
+//////
+	bool ivvm_loadAndInitializeMc(void)
+	{
+		// Nothing is defined at the current time
+		return(true);
+	}
+
+
+
+
+//////////
+//
 // Called at bootup to initialize internal data structures
 //
 //////

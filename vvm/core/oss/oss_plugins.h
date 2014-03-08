@@ -50,9 +50,9 @@
 	//////////
 	// vo_plugins.cpp
 	//////
-		void					ioss_loadPlugins								(u64 tnDebuggerInterfaceAddress);
-		bool					ioss_loadPlugin_sound							(SFindFile* tff, u64 tnDebuggerInterfaceAddress);
-		bool					ioss_loadPlugin_function						(SFindFile* tff, u64 tnDebuggerInterfaceAddress);
+		void					ioss_loadPlugins								(void);
+		bool					ioss_loadPlugin_sound							(SFindFile* tff);
+		bool					ioss_loadPlugin_function						(SFindFile* tff);
 
 
 
@@ -73,7 +73,7 @@
 
 			union {
 				u64		_sound_initialize;
-				u64		(CALLTYPE *sound_initialize)		(u64 tnDebuggerInterfaceAddress);
+				u64		(CALLTYPE *sound_initialize)		(void);
 			};
 
 			union {
@@ -146,7 +146,7 @@
 			//////
 				union {
 					u64		_requestor;
-					u64		(CALLTYPE *requestor)				(u64 tnDebuggerInterfaceAddress, u64 tnInstanceId);
+					u64		(CALLTYPE *requestor)				(u64 tnInstanceId);
 				};
 
 

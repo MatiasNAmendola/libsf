@@ -76,15 +76,148 @@
 
 //////////
 //
-// VVM entry point
+// The first callback
 //
 //////
-	int APIENTRY wWinMain(	HINSTANCE	hInstance,
-							HINSTANCE	hPrevInstance,
-							LPWSTR		lpCmdLine,
-							int			nCmdShow)
+	u64 CALLTYPE vvm_firstCallback(u32 tnDoNotLoadOptions)
 	{
-		bool llRunTestCases;
+		//////////
+		// Load the base VVM functions
+		//////
+			iLoadOssFunctionsFromDll();
+			iLoadMcFunctionsFromDll();
+
+
+		//////////
+		// Let it OSS and MC initialize themselves
+		//////
+			if ((tnDoNotLoadOptions & _DO_NOT_LOAD_OSS) != _DO_NOT_LOAD_OSS)
+			{
+				oss_firstCallback(tnDoNotLoadOptions | _DO_NOT_LOAD_VVM);
+				oss_bootstrapInitialization();
+			}
+			if ((tnDoNotLoadOptions & _DO_NOT_LOAD_MC) != _DO_NOT_LOAD_MC)
+			{
+				mc_firstCallback(tnDoNotLoadOptions | _DO_NOT_LOAD_VVM);
+				mc_bootstrapInitialization();
+			}
+
+
+		//////////
+		// Initialize our unique number critical section access
+		//////
+			InitializeCriticalSection(&gcsUniqueIdAccess);
+
+
+		//////////
+		// Indicate success
+		//////
+			return(1);
+	}
+
+
+
+
+//////////
+//
+// 
+//////
+	void CALLTYPE vvm_bootstrapInitialization(void)
+	{
+		// Nothing currently defined
+	}
+
+
+
+
+//////////
+//
+// Parse the command line for known options
+//
+//////
+	s64 CALLTYPE vvm_startTheVvm(w16* tuCmdLine, bool* tlTestCasesOnly)
+	{
+		u32		lnI, lnLength, lnSkip;
+		bool	llRunTestCases;
+
+
+		// Find out how long the line is
+		lnLength = wcslen(tuCmdLine);
+
+		// Initially lower the test-case setting
+		llRunTestCases = false;
+		if (tlTestCasesOnly)
+			*tlTestCasesOnly = false;
+
+		// Iterate looking for known switches
+		for (lnI = 0; lnI < lnLength; lnI++)
+		{
+//////////
+// -r:ES, -r:ENU
+//////
+			if (lnLength - lnI >= 3 && ivvm_unicodeMemicmp(tuCmdLine + lnI, L"-r:", 3) == 0)
+			{
+				// Find out how long this string portion is
+				lnSkip					= ivvm_scanStringAndNullTerminateAtNextWhitespaceW(tuCmdLine + lnI + 3) + 3;
+				gsVvm.gcVvmResourceLang	= vvm_unicodeToAscii(tuCmdLine + lnI + 3, wcslen(tuCmdLine + lnI + 3));
+
+				// Blank out that portion of the command line
+				vvm_unicodeMemset(tuCmdLine + lnI, (w16)' ', lnSkip);
+
+				// Move past ti
+				lnI += lnSkip;
+
+
+//////////
+// -test
+//////
+// TODO:  a future syntax will allow for -test:file.bxml to run the tests identified within an executable file.
+			} else if (lnLength - lnI >= 5 && ivvm_unicodeMemicmp(tuCmdLine + lnI, L"-test", 5) == 0) {
+				// Yes
+				*tlTestCasesOnly = true;
+
+			}
+
+
+//////////
+// New commands can be added here:
+//////
+		}
+
+
+
+
+//////////
+//
+// Bootup initialization can now proceed.
+// This follow processing of the command line above.
+//
+//////////
+
+
+		///////////
+		// Load the required foundation components
+		//////
+			if (!ivvm_loadVvmResourceDll())
+				return(-1);
+
+
+		//////////
+		// Load OS-Specific functions following
+		//////
+			if (!ivvm_loadAndInitializeOss())
+				return(-2);
+
+
+		//////////
+		// Load Machine Code-Specific functions
+		//////
+			if (!ivvm_loadAndInitializeMc())
+			{
+				// Unable to load
+				ivvm_resourceMessageBoxLocal(IDS_VVM_FAILURE_TO_LOAD_VVMMC_MINUS_3, IDS_VVM_LOAD_ERROR, false, false, false);
+				exit(-3);
+			}
 
 
 		//////////
@@ -93,96 +226,44 @@
 			iivvm_bootupInitialization();
 
 
-		//////////
-		// Initially pass the command line
-		// Test cases can be run from the command line using:  "vvm -test"
-		//////
-			vvm_parseCommandLine(lpCmdLine, &llRunTestCases);
-
-
-		///////////
-		// Load the required foundation components
-		//////
-			if (!ivvm_loadVvmResourceDll())
-			{
-				// Unable to load
-				MessageBox(NULL, L"Missing Resource DLL (vvmenu.dll)\nTerminating with error code -1.", L"VVM Load Error", MB_OK);
-				exit(-1);
-			}
-
-
-		//////////
-		// Load OS-Specific functions
-		//////
-			if (!ivvm_loadAndInitializeVvmOss())
-			{
-				// Unable to load, or instantiate the message window for the VVM
-				ivvm_resourceMessageBoxLocal(IDS_VVM_FAILURE_TO_LOAD_MINUS_1, IDS_VVM_LOAD_ERROR, false, false, false);
-				exit(-1);
-			}
-
-
-		//////////
-		// Load Machine Code-Specific functions
-		//////
-			if (!ivvm_loadAndInitializeVvmmc())
-			{
-				// Unable to load
-				ivvm_resourceMessageBoxLocal(IDS_VVM_FAILURE_TO_LOAD_VVMMC_MINUS_3, IDS_VVM_LOAD_ERROR, false, false, false);
-				exit(-1);
-			}
-
-
 //////////
 //
 // Once we get here, the system has been through bootstrap initialization,
 // all resources are loaded, the system is in a condition where all base
 // criteria for successful operations have been achieved.
 //
-// In short, we're in a "GO" state.
+// In short, we're in a "FULL GO" state.
 //
 //////////
 
 
 		//////////
-		// Indicate to the VVMOSS and VVMMC that we've now loaded everything and they can proceed with the rest of their initialization requirements (if any)
+		// Tell the OSS and MC that we've now loaded everything and they can proceed with
+		// the rest of their initialization requirements (if any)
 		//////
-			oss_initialization((u64)&vvm_debuggerInterfaceCallback);
-			mc_initialization((u64)&vvm_debuggerInterfaceCallback);
+			oss_initialization();
+			mc_initialization();
 
 
 		//////////
-		// Initialize the VVM to its power-on state
+		// Initialize the VVM engine to its default power-on state
 		//////
-			if (!ivvme_initialize(GetCommandLineW(), &llRunTestCases))
-			{
-				ivvm_resourceMessageBox(IDS_VVM_FAILURE_TO_INITIALIZE_MINUS_2, IDS_VVM_INITIALIZE_ERROR, false, false, true, false, false);
-				exit(-2);
-			}
+			if (!ivvme_initialize(tuCmdLine, &llRunTestCases))
+				return(-4);
 
 
 		//////////
-		// Test cases
+		// If we are instructed to run test cases, then run them.
 		//////
 			if (llRunTestCases)
-				ivvm_runTestPlugins();	// They exist in vvm_tests.cpp
-
-
-		//////////
-		// Tell the world we're up and running, ready to do out utmost at all points. :-)
-		//////
-			ivvm_resourcePrintf(IDS_VVM_RUNNING);
-			while (gsVvm.glVvmIsRunning)
-			{
-				// Will need communication with OSS for thread scheduling and execution
-				Sleep(10);
-			}
+				ivvm_runTestPlugins();	// See vvm_tests.cpp
 
 
 		//////////
 		// All done!
+		// Indicate success.
 		//////
-			return(gsVvm.gnVvmReturnResult);
+			return(0);
 	}
 
 
@@ -192,8 +273,6 @@
 #include "vvm_eng.cpp"					// Main execution engine code
 #include "vvm_tm.cpp"					// Execution engine thread mizer (thread scheduler)
 #include "vvm_sup.cpp"					// Supplemental source code to vvm_eng.cpp mostly
-#include "vvm_oss.cpp"					// Code related to interfacing with oss.dll
-#include "vvm_mc.cpp"					// Code related to interfacing with mc.dll
 #include "vvm_res.cpp"					// Load resource dll
 #include "vvm_misc.cpp"					// Miscellaneous support functions
 #include "vvm1.cpp"						// Version 1 VVM interface (for the debugger or other apps desiring to use the VVM)

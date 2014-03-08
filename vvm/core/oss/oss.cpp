@@ -57,8 +57,12 @@
 #include <errno.h>
 #include <windows.h>
 #include <math.h>
+
+#define _OSS_COMPILING
+
 #include "\libsf\vvm\core\common\common.h"
 #include "\libsf\vvm\core\common\common_vvm.h"
+#include "\libsf\vvm\core\common\common_oss.h"
 #include "\libsf\vvm\core\common\common_oss_plugins.h"
 #include "\libsf\vvm\core\common\common_oss_const.h"
 #include "\libsf\vvm\core\common\common_mc.h"
@@ -114,12 +118,28 @@
 //
 //////
 	// Called after the VVM has loaded VVMOSS before continuing with loading VVMMCC
-	u64 CALLTYPE oss_firstCallback(u64 tnDebuggerInterfaceAddress)
+	u64 CALLTYPE oss_firstCallback(u32 tnDoNotLoadOptions)
 	{
 		//////////
 		// Load the base VVM functions
 		//////
 			iLoadVvmFunctionsFromDll();
+			iLoadMcFunctionsFromDll();
+
+
+		//////////
+		// Tell the VVM.DLL to initialize itself
+		//////
+			if ((tnDoNotLoadOptions & _DO_NOT_LOAD_VVM) != _DO_NOT_LOAD_VVM)
+			{
+				vvm_firstCallback(tnDoNotLoadOptions | _DO_NOT_LOAD_OSS);
+				vvm_bootstrapInitialization();
+			}
+			if ((tnDoNotLoadOptions & _DO_NOT_LOAD_MC) != _DO_NOT_LOAD_MC)
+			{
+				mc_firstCallback(tnDoNotLoadOptions | _DO_NOT_LOAD_OSS);
+				mc_bootstrapInitialization();
+			}
 
 
 		//////////
@@ -150,7 +170,7 @@
 // Called after the VVM has loaded VVMOSS, but before continuing on to load the VVMMCC
 //
 //////
-	void CALLTYPE oss_bootstrapInitialization(u64 tnDebuggerInterfaceAddress)
+	void CALLTYPE oss_bootstrapInitialization(void)
 	{
 		//////////
 		//
@@ -162,7 +182,7 @@
 		//		(as well as the source files in the \libsf\vvm\core\plugins\ directories)
 		//
 		//////
-			ioss_loadPlugins(tnDebuggerInterfaceAddress);
+			ioss_loadPlugins();
 	}
 
 
@@ -240,12 +260,9 @@
 // fundamental.
 //
 //////
-	void CALLTYPE oss_initialization(u64 tnDebuggerInterfaceAddress)
+	void CALLTYPE oss_initialization(void)
 	{
-		//////////
-		// Load the VVMMC functions (if they're available to us, they should be)
-		//////
-			iLoadMcFunctionsFromDll();
+		// Nothing is currently defined
 	}
 
 

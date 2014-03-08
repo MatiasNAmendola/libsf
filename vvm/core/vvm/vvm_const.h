@@ -54,7 +54,7 @@
 //////
 	const s8	cgcVvmVersion[]								= "VVM.EXE Version 0.70";							// The format of this version string will remain consistent throughout all future releases
 	const s8	cgcEnu[]									= "enu";
-	const s8	cgcVvmEngDll[]								= "vvmeng.dll";
+	const s8	cgcVvmEngDll[]								= "vvmenu.dll";
 	const s8	cgcUnableToLocateResource[]					= "Unable to locate resource";
 
 

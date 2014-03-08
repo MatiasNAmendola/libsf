@@ -87,7 +87,7 @@
 
 	// This function is called from the VVM after loading this DLL to give this debugger
 	// the address to call for debugger API requests
-	u64 CALLTYPE vvm_firstCallback(u64 tnCallbackAddress, u32 tnUniqueId)
+	u64 CALLTYPE vdeb_firstCallback(u32 tnUniqueId)
 	{
 		DWORD lnThreadId;
 
@@ -98,6 +98,17 @@
 			iLoadVvmFunctionsFromDll();
 			iLoadOssFunctionsFromDll();
 			iLoadMcFunctionsFromDll();
+
+
+		//////////
+		// Tell each DLL to initialize itself
+		//////
+			vvm_firstCallback(0);
+			vvm_bootstrapInitialization();
+			oss_firstCallback(0);
+			oss_bootstrapInitialization();
+			mc_firstCallback(0);
+			mc_bootstrapInitialization();
 
 
 		//////////

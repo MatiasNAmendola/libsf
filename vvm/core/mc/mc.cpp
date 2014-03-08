@@ -46,6 +46,9 @@
 #include "stdio.h"
 #include "windows.h"
 #include "stdio.h"
+
+#define _MC_COMPILING
+
 #include "\libsf\vvm\core\common\common.h"
 #include "\libsf\vvm\core\common\vvm_key_const.h"
 #include "\libsf\vvm\core\oss\oss_class.h"
@@ -58,6 +61,7 @@
 #include "mc_glob.h"
 #include "\libsf\vvm\core\common\common_vvm.h"
 #include "\libsf\vvm\core\common\common_oss.h"
+#include "\libsf\vvm\core\common\common_mc.h"
 #include "\libsf\vvm\core\localization\vvmmcenu\resource.h"
 
 
@@ -93,7 +97,7 @@
 	// If this DLL is loaded from another source (not the VVM), it is not
 	// to call this function.  The VVM calls to give it the address to call
 	// for debugger API requests, as well as those of the already loaded VVMOSS.
-	u64 CALLTYPE mc_firstCallback(u64 tnCallbackAddress)
+	u64 CALLTYPE mc_firstCallback(u32 tnDoNotLoadOptions)
 	{
 		//////////
 		// Load all VVM and VVMOSS functions
@@ -103,13 +107,28 @@
 
 
 		//////////
+		// Tell each DLL to initialize itself
+		//////
+			if ((tnDoNotLoadOptions & _DO_NOT_LOAD_VVM) != _DO_NOT_LOAD_VVM)
+			{
+				vvm_firstCallback(tnDoNotLoadOptions | _DO_NOT_LOAD_MC);
+				vvm_bootstrapInitialization();
+			}
+			if ((tnDoNotLoadOptions & _DO_NOT_LOAD_OSS) != _DO_NOT_LOAD_OSS)
+			{
+				oss_firstCallback(tnDoNotLoadOptions | _DO_NOT_LOAD_OSS);
+				oss_bootstrapInitialization();
+			}
+
+
+		//////////
 		// Load the resource, which contains text and graphics
 		//////
 			iLoadResource(vvm_getLanguage(NULL));
 
 
 		// Indicate success
-		return(gVvmFunctionCount);
+		return(1);
 	}
 
 
@@ -121,13 +140,9 @@
 // VVM and VVMOSS are available, and not completely at that.
 //
 //////
-	void CALLTYPE mc_bootstrapInitialization(u64 tnDebuggerInterfaceAddress)
+	void CALLTYPE mc_bootstrapInitialization(void)
 	{
-_asm int 3;
-		// Store the address of the VVM interface for function address requests
-		_vvm_debuggerInterface = tnDebuggerInterfaceAddress;
-
-		// Nothing else is currently defined for bootstrap initialization
+		// Nothing is currently defined for initialization
 	}
 
 
@@ -140,7 +155,7 @@ _asm int 3;
 // all initial conditions are met, able to service requests.
 //
 //////
-	void CALLTYPE mc_initialization(u64 tnDebuggerInterfaceAddress)
+	void CALLTYPE mc_initialization(void)
 	{
 		// Nothing is currently defined for initialization
 	}

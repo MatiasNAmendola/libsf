@@ -200,7 +200,7 @@ void		iAssembleFile						(s8* tcPathname);
 
 
 		// Let it initialize itself
-		oss_bootstrapInitialization(_vvm_debuggerInterface);
+		oss_bootstrapInitialization();
 
 
 		// Indicate the version we have loaded

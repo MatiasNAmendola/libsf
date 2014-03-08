@@ -1,16 +1,16 @@
 //////////
 //
-// /libsf/vvm/vgo/vgo_defs.h
+// /libsf/vvm/core/vfrp/vfrp_sup.cpp
 //
 //////
 // Version 0.70
 // Copyright (c) 2012, 2014 by Rick C. Hodgin
 //////
 // Last update:
-//     Mar.07.2014
+//     Mar.08.2014
 //////
 // Change log:
-//     Mar.07.2014 - Initial creation
+//     Mar.08.2012 - Initial creation
 //////
 // See devhelp.txt.
 //////
@@ -47,5 +47,65 @@
 
 
 //////////
-// Function prototype definitions
+//
+// Called to load the VVM.DLL stuff, following the startup protocol.
+//
 //////
+	bool ivfrp_loadAndInitializeVvm(void)
+	{
+		// Load the DLL
+		if (!iLoadVvmFunctionsFromDll())
+			return(false);
+
+		// Let it initialize itself
+		vvm_firstCallback(0);
+		vvm_bootstrapInitialization();
+
+		// We're good
+		return(true);
+	}
+
+
+
+
+//////////
+//
+// Called to load the OSS.DLL stuff, following the startup protocol.
+//
+//////
+	bool ivfrp_loadAndInitializeOss(void)
+	{
+		// Load the DLL
+		if (!iLoadOssFunctionsFromDll())
+			return(false);
+
+		// Let it initialize itself
+		oss_firstCallback(0);
+		oss_bootstrapInitialization();
+
+		// We're good
+		return(true);
+	}
+
+
+
+
+
+//////////
+//
+// Called to load the MC.DLL stuff, following the startup protocol.
+//
+//////
+	bool ivfrp_loadAndInitializeMc(void)
+	{
+		// Load the DLL
+		if (!iLoadMcFunctionsFromDll())
+			return(false);
+
+		// Let it initialize itself
+		mc_firstCallback(0);
+		mc_bootstrapInitialization();
+
+		// We're good
+		return(true);
+	}

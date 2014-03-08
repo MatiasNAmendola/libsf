@@ -123,7 +123,7 @@
 		//////
 			union {
 				u64		_firstCallback;
-				u64		(CALLTYPE *firstCallback)				(u64 tnDebuggerInterfaceAddress);
+				u64		(CALLTYPE *firstCallback)				(void);
 			};
 
 
@@ -132,7 +132,7 @@
 		//////
 			union {
 				u64		_bootstrapInitialization;
-				void	(CALLTYPE *bootstrapInitialization)		(u64 tnDebuggerInterfaceAddress);
+				void	(CALLTYPE *bootstrapInitialization)		(void);
 			};
 
 
@@ -141,7 +141,7 @@
 		//////
 			union {
 				u64		_initialization;
-				void	(CALLTYPE *initialization)				(u64 tnDebuggerInterfaceAddress);
+				void	(CALLTYPE *initialization)				(void);
 			};
 
 

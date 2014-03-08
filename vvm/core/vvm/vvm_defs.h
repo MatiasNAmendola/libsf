@@ -437,17 +437,17 @@ inline bool					ivvm_verifyLength							(u64 tnGoingTo, u64 tnMaxAllowable);
 	void					storeFloan_pointToPoint_7_5					(_isSStoreFloan_lineData* sfld);
 
 
-	// vvm_vo.cpp
-	bool					ivvm_loadAndInitializeVvmOss				(void);
-	u64 CALLTYPE			vvm_debuggerInterfaceCallback				(s8* tcFunctionName);
+	// vvm_oss.cpp
+	bool					ivvm_loadAndInitializeOss					(void);
 
 	// vvm_vvmmc.cpp
-	bool					ivvm_loadAndInitializeVvmmc					(void);
+	bool					ivvm_loadAndInitializeMc					(void);
 
 	// vvm_res.cpp
 	bool					ivvm_loadVvmResourceDll						(void);
 
 	// vvm_misc.cpp
+	bool					ivvm_loadAndInitializeOss					(void);
 	void					iivvm_bootupInitialization					(void);
 	u64						ivvm_resourceMessageBox						(int tnMessage, int tnCaption, bool tlYes, bool tlNo, bool tlOk, bool tlRetry, bool tlCancel);
 	u64						ivvm_resourceMessageBoxLocal				(int tnMessage, int tnCaption, bool tlYes,                       bool tlRetry, bool tlCancel);
@@ -478,8 +478,9 @@ inline bool					ivvm_verifyLength							(u64 tnGoingTo, u64 tnMaxAllowable);
 //////
 	// See devhelp.txt.  Duplicate changes here in VDebug.h, vvm.cpp, vvm_v1.cpp, vvm_defs.h, and vo_class.h.
 	// vvm_v1.cpp
-	void CALLTYPE			vvm_parseCommandLine						(w16* tcCmdLine, bool* tlTestCasesOnly);
-	u64 CALLTYPE			vvm_debugger								(s8* functionName);
+	u64 CALLTYPE			vvm_firstCallback							(u32 tnDoNotLoadOptions);
+	void CALLTYPE			vvm_bootstrapInitialization					(void);
+	s64 CALLTYPE			vvm_startTheVvm								(w16* tcCmdLine, bool* tlTestCasesOnly);
 	s8* CALLTYPE			vvm_getLanguage								(u32* tnLength);
 	s8* CALLTYPE			vvm_loadResourceAsciiText					(u32 tnResourceNumber);
 	void CALLTYPE			vvm_resourcePrintf							(u32 tnResourceNumber);

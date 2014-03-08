@@ -2,8 +2,9 @@ LIBRARY	"vvm"
 
 EXPORTS
 
-	vvm_parseCommandLine
-	vvm_debugger
+	vvm_firstCallback
+	vvm_bootstrapInitialization
+	vvm_startTheVvm
 	vvm_getLanguage
 	vvm_loadResourceAsciiText
 	vvm_resourcePrintf

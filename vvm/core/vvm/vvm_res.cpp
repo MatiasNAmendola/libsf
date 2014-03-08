@@ -60,9 +60,12 @@
 
 
 		// Try to load the dll
-		sprintf_s(buffer, sizeof(buffer), "vvm%s.dll\000", gsVvm.gcVvmResourceLang);
-		gsVvm.ghVvmResourceDll = LoadLibraryA(buffer);
-		if (!gsVvm.ghVvmResourceDll)
+		if (gsVvm.gcVvmResourceLang)
+		{
+			sprintf_s(buffer, sizeof(buffer), "vvm%s.dll\000", gsVvm.gcVvmResourceLang);
+			gsVvm.ghVvmResourceDll = LoadLibraryA(buffer);
+		}
+		if (!gsVvm.gcVvmResourceLang || !gsVvm.ghVvmResourceDll)
 		{
 			// There was an error loading the indicated resource dll
 			// Fallback to English

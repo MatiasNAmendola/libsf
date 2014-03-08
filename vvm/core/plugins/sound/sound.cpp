@@ -425,7 +425,7 @@
 // Called one time at startup to initialize the SDL library to handle the sound requests.
 //
 //////
-	void CALLTYPE oss_soundInitialize(u64 tnDebuggerInterfaceAddress)
+	void CALLTYPE oss_soundInitialize(void)
 	{
 		//////////
 		// Retrieve the necessary callbacks
@@ -433,6 +433,15 @@
 			iLoadVvmFunctionsFromDll();
 			iLoadOssFunctionsFromDll();
 			
+
+		//////////
+		// Tell each DLL to initialize itself
+		//////
+			vvm_firstCallback(0);
+			vvm_bootstrapInitialization();
+			oss_firstCallback(0);
+			oss_bootstrapInitialization();
+
 
 		//////////
 		// Setup the desired structure

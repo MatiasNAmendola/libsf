@@ -47,6 +47,7 @@
 //////////
 // Internal debugger functions
 //////
+	u64 CALLTYPE		vdeb_firstCallback								(u32 tnUniqueId);
 	bool				iLoadResource									(s8* tcLanguage);
 	DWORD CALLTYPE		iDebuggerMain									(LPVOID lpParameter);
 

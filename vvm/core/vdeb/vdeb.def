@@ -3,7 +3,7 @@ LIBRARY	"VDebug"
 EXPORTS
 
 ; Only one export, the one function the VVM calls to initiate the interface
-	vvm_firstCallback
+	vdeb_firstCallback
 
 
 

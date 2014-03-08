@@ -1,6 +1,6 @@
 //////////
 //
-// /libsf/vvm/vgo/vgo_globals.h
+// /libsf/vvm/core/vfrp/vfrp_const.h
 //
 //////
 // Version 0.70
@@ -37,3 +37,19 @@
 // talents, your gifts, your praise, unto Him.  In Jesus' name I pray.  Amen.
 //
 //
+
+
+
+
+
+
+
+
+
+//////////
+// Constant strings
+//////
+	const s8	cgcVvmVersion[]								= "VGO.EXE Version 0.70";							// The format of this version string will remain consistent throughout all future releases
+	const s8	cgcEnu[]									= "enu";
+	const s8	cgcVvmEngDll[]								= "vgoeng.dll";
+	const s8	cgcUnableToLocateResource[]					= "Unable to locate resource";

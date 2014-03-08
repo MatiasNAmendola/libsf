@@ -1,19 +1,16 @@
 //////////
 //
-// /libsf/vvm/vvm/vvm.cpp
+// /libsf/vvm/core/vfrp/vfrp.cpp
 //
 //////
 // Version 0.70
 // Copyright (c) 2012, 2014 by Rick C. Hodgin
 //////
 // Last update:
-//     Feb.25.2014
+//     Mar.07.2014
 //////
 // Change log:
-//     Feb.25.2014 - Development on 0.70 begins
-//     Nov.07.2012 - 0.60 development begins
-//     Sep.29.2012 - PBL v1.0 license included directly in source files.
-//     Sep.17.2012 - Initial creation
+//     Mar.07.2012 - Initial creation
 //////
 // See devhelp.txt.
 //////
@@ -52,7 +49,7 @@
 #include "\libsf\vvm\core\common\common.h"
 #include "\libsf\utils\sha1\sha1.h"											// SHA-1 hashing algorithm
 #include "\libsf\vvm\core\localization\vvmenu\resource.h"					// Resource constants
-#include "vgo_const.h"
+#include "vfrp_const.h"
 #include "\libsf\vvm\core\oss\oss_class.h"
 #include "\libsf\vvm\core\oss\oss_structs.h"
 #include "\libsf\vvm\core\mc\mc_structs.h"
@@ -60,19 +57,19 @@
 #include "\libsf\vvm\core\common\fonts\font8x8.h"
 #include "\libsf\vvm\core\common\fonts\font8x14.h"
 #include "\libsf\vvm\core\common\fonts\font8x16.h"
-#include "vgo_structs.h"
-#include "vgo_defs.h"
+#include "vfrp_structs.h"
+#include "vfrp_defs.h"
 #include "\libsf\vvm\core\common\common_vvm.h"
 #include "\libsf\vvm\core\common\common_oss.h"
 #include "\libsf\vvm\core\common\common_mc.h"
-#include "vgo_glob.h"
+#include "vfrp_glob.h"
 
 
 
 
 //////////
 //
-// VVM entry point
+// Visual FreePro top level entry point
 //
 //////
 	int APIENTRY wWinMain(	HINSTANCE	hInstance,
@@ -80,16 +77,17 @@
 							LPWSTR		lpCmdLine,
 							int			nCmdShow)
 	{
-		bool llRunTestCases;
+		s64		lnResult;
+		bool	llRunTestCases;
 
 
 		//////////
 		// Load VVM functions
 		//////
-			if (!iLoadVvmFunctionsFromDll())
+			if (!ivfrp_loadAndInitializeVvm())
 			{
 				// Unable to load, or instantiate the message window for the VVM
-//				ivgo_resourceMessageBoxLocal(IDS_VVM_FAILURE_TO_LOAD_MINUS_1, IDS_VVM_LOAD_ERROR, false, false, false);
+				MessageBoxA(NULL, "Unable to load VVM.DLL", "Visual FreePro Launch Error", MB_OK);
 				exit(-1);
 			}
 
@@ -97,10 +95,10 @@
 		//////////
 		// Load OS-Specific functions
 		//////
-			if (!iLoadOssFunctionsFromDll())
+			if (!ivfrp_loadAndInitializeOss())
 			{
 				// Unable to load, or instantiate the message window for the VVM
-//				ivgo_resourceMessageBoxLocal(IDS_VVM_FAILURE_TO_LOAD_MINUS_1, IDS_VVM_LOAD_ERROR, false, false, false);
+				MessageBoxA(NULL, "Unable to load OSS.DLL", "Visual FreePro Launch Error", MB_OK);
 				exit(-1);
 			}
 
@@ -108,10 +106,10 @@
 		//////////
 		// Load Machine Code-Specific functions
 		//////
-			if (!iLoadMcFunctionsFromDll())
+			if (!ivfrp_loadAndInitializeMc())
 			{
 				// Unable to load
-//				ivgo_resourceMessageBoxLocal(IDS_VVM_FAILURE_TO_LOAD_VVMMC_MINUS_3, IDS_VVM_LOAD_ERROR, false, false, false);
+				MessageBoxA(NULL, "Unable to load MC.DLL", "Visual FreePro Launch Error", MB_OK);
 				exit(-1);
 			}
 
@@ -120,11 +118,55 @@
 		// Initially pass the command line
 		// Test cases can be run from the command line using:  "vvm -test"
 		//////
-			vvm_parseCommandLine(lpCmdLine, &llRunTestCases);
+			if ((lnResult = vvm_startTheVvm(lpCmdLine, &llRunTestCases)) < 0 || llRunTestCases)
+			{
+				// If we ran test cases, 
+				if (llRunTestCases)
+					return((s32)lnResult);
+
+				// 
+				switch (lnResult)
+				{
+					case -1:
+						// Failure to load resource DLL
+						MessageBoxA(NULL, "Missing Resource DLL (vvmenu.dll)\nTerminating with error code -1.", "VVM Load Error", MB_OK);
+						break;
+
+					case -2:
+						// Failure to load OSS.DLL
+						MessageBoxA(NULL, "Missing OSS.DLL.\nTerminating with error code -2.", "VVM Load Error", MB_OK);
+						break;
+
+					case -3:
+						// Failure to load MC.DLL
+						MessageBoxA(NULL, "Missing MC.DLL.\nTerminating with error code -3.", "VVM Load Error", MB_OK);
+						break;
+
+					case -4:
+						// Failure to initialize the VVM to its power-on state
+						MessageBoxA(NULL, "Unable to initialize the VVM.\nTerminating with error code -4.", "VVM Initialization Error", MB_OK);
+						break;
+
+					default:
+						MessageBoxA(NULL, "An unspecified error occurred while starting the VVM.\nTerminating.", "VVM Load Error", MB_OK);
+				}
+			}
 
 
 		//////////
-		// Control will never get here:
+		// Begin processing Visual FreePro
 		//////
-			return(0);
+			// Note:  Nothing done yet ... but soon! (James 4:15)
+
+
+			// Indicate our final exit result
+			return((s32)lnResult);
 	}
+
+
+
+
+//////////
+// #include source files which are not compiled separately
+/////
+	#include "vfrp_sup.cpp"

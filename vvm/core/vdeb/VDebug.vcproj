@@ -333,19 +333,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\common\common_mc.h"
+				>
+			</File>
+			<File
+				RelativePath="..\common\common_oss.h"
+				>
+			</File>
+			<File
 				RelativePath="..\common\common_vvm.h"
-				>
-			</File>
-			<File
-				RelativePath="..\common\common_vvmmc.h"
-				>
-			</File>
-			<File
-				RelativePath="..\common\common_vvmoss.h"
-				>
-			</File>
-			<File
-				RelativePath="..\common\common_vvmoss_const.h"
 				>
 			</File>
 			<File

@@ -55,7 +55,7 @@
 // functions so their code does not need changed.
 //
 //////
-	void ioss_loadPlugins(u64 tnDebuggerInterfaceAddress)
+	void ioss_loadPlugins(void)
 	{
 		u64			lnHandle;
 		bool		llMore;
@@ -86,7 +86,7 @@
 						//////
 							// Do we still need to load the sound plugin?
 							if (!gsSoundPlugin.DllInstance)
-								if (ioss_loadPlugin_sound(&lff, tnDebuggerInterfaceAddress))
+								if (ioss_loadPlugin_sound(&lff))
 									break;
 	
 
@@ -94,7 +94,7 @@
 						// Function plugins
 						//////
 							// See if there are any function plugins that need loaded
-							if (ioss_loadPlugin_function(&lff, tnDebuggerInterfaceAddress))
+							if (ioss_loadPlugin_function(&lff))
 								break;
 
 
@@ -126,7 +126,7 @@
 //        Only the first sound plugin found is loaded, and any further sound plugins are ignored.
 //
 //////
-	bool ioss_loadPlugin_sound(SFindFile* tff, u64 tnDebuggerInterfaceAddress)
+	bool ioss_loadPlugin_sound(SFindFile* tff)
 	{
 		u64		lnInitialize, lnCreateTone, lnCreateStream, lnSetVolume, lnPlayStart, lnPlayCancel, lnDelete;
 		HMODULE	lnHmod;
@@ -169,7 +169,7 @@
 					gsSoundPlugin._sound_deleteHandle		= lnDelete;
 
 					// Ask it to initialize itself
-					oss_soundInitialize(tnDebuggerInterfaceAddress);
+					oss_soundInitialize();
 
 					// All done!
 					return true;
@@ -192,7 +192,7 @@
 //        Each one will be called where it sets itself up and self-registers its published abilities.
 //
 //////
-	bool ioss_loadPlugin_function(SFindFile* tff, u64 tnDebuggerInterfaceAddress)
+	bool ioss_loadPlugin_function(SFindFile* tff)
 	{
 		u64						lnRequestor;
 		HMODULE					lnHmod;
@@ -225,7 +225,7 @@
 						plugin->_requestor = lnRequestor;
 
 						// Ask this plugin to expost its abilities to the VVMOSS
-						plugin->requestor(tnDebuggerInterfaceAddress, plugin->DllInstance);
+						plugin->requestor(plugin->DllInstance);
 
 						// All done!
 						return true;
@@ -248,12 +248,12 @@
 // Returns a handle to the sound play.
 //
 //////
-	void CALLTYPE oss_soundInitialize(u64 tnDebuggerInterfaceAddress)
+	void CALLTYPE oss_soundInitialize(void)
 	{
 		if (gsSoundPlugin.DllInstance && gsSoundPlugin._sound_initialize)
 		{
 			// Call the plugin to handle the load
-			gsSoundPlugin.sound_initialize(tnDebuggerInterfaceAddress);
+			gsSoundPlugin.sound_initialize();
 		}
 	}
 

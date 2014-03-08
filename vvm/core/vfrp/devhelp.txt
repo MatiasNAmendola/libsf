@@ -7,9 +7,10 @@
 // Copyright (c) 2012, 2014 by Rick C. Hodgin
 //////
 // Last update:
-//     Feb.25.2014
+//     Mar.08.2014
 //////
 // Change log:
+//     Mar.08.2014 - VVM refactored from VVM.EXE into VVM.DLL, and VFRP.EXE
 //     Feb.25.2014 - Development on 0.70 begins
 //     Mar.02.2013 - Added VVMT info (test cases)
 //     Nov.28.2012 - Added VVMMC info
@@ -47,11 +48,12 @@
 //////////
 // General notes
 //////
-	Tabs are 4 characters wide
-	Visual Studio 2008 Professional was used to develop this system in Windows.
-	Codelite will be used to develop in Linux.
-    Functions prepended with i are internal, they are not visible as exposed functions to the outside world.
-    Functions prepended with ii are internal to internal functions, they should never be called directly.
+	(1)  Tabs are 4 characters wide
+	(2)  Visual Studio 2008 Professional was used to develop this system in Windows.
+	(3)  Visual FreePro's own IDE, once completed in Windows, will be used to develop in Linux.
+    (4)  Functions prepended with i are internal, they are not visible as exposed functions to the outside world.
+    (5)  Functions prepended with ii are internal to internal functions, they should never be called directly,
+         and bypass what may seem like otherwise proper pointer validation (for the sake of speedups).
 
 
 
@@ -61,30 +63,30 @@
     (1)  common_vvm.h       - VVM related function prototyping and definition
     (2)  vvm_defs.h         - Function prototyping
     (3)  vvm_vo.cpp         - vvm_debuggerInterface(), to setup known function interface by external names (for both VVM and VVMOSS)
-    (4)  vvm_debv1.cpp      - VVM/Debugger interface functions
+    (4)  vvm1.cpp           - VVM interface functions
     (5)  common.h           - SCallback definitions
 
 
 
 
 //////////
-// Add a new VO (VVM Operating System Specific) function visible to VVM and debuggers
+// Add a new OSS (VVM Operating System Specific) function visible to VVM and debuggers
 //////
-    (1)  common_vvmoss.h    - VVMOSS related function prototyping and definition
-    (2)  vo_defs.h          - Forward declarations
-    (3)  vo.cpp             - Code definition
-    (4)  vo.def             - Exports
+    (1)  common_oss.h       - OSS related function prototyping and definition
+    (2)  oss_defs.h          - Forward declarations
+    (3)  oss.cpp             - Code definition
+    (4)  oss.def             - Exports
 
 
 
 
 //////////
-// Add a new MC (machine code) function visible to VVM and debuggers
+// Add a new MC (VVM Machine Code) function visible to VVM and debuggers
 //////
     (1)  common_mc.h        - MC related function prototyping and definition
-    (2)  mc_defs.h       - Forward declarations
-    (3)  vvmmc.cpp          - Code definition
-    (4)  vvmmc.def          - Exports
+    (2)  mc_defs.h          - Forward declarations
+    (3)  mc.cpp             - Code definition
+    (4)  mc.def             - Exports
 
 
 
@@ -114,9 +116,9 @@
     //        might seem so at first. :-)
     //
     //////
-        (1)  sound.h            - Header file for the sound plugin
-        (2)  sound.cpp          - Source file for the sound plugin
-        (3)  common_vvmoss_plugins.h - Common location for the function definitions to sound.cpp and vo.cpp.
-        (4)  vo.cpp             - Sound interface (oss_sound* functions)
-        (5)  vo_plugins.h       - General VVMOSS plugins, including sound
-        (6)  vo_plugins.cpp     - General VVMOSS plugins, including sound
+        (1)  sound.h                - Header file for the sound plugin
+        (2)  sound.cpp              - Source file for the sound plugin
+        (3)  common_oss_plugins.h   - Common location for the function definitions to sound.cpp and vo.cpp.
+        (4)  oss.cpp			    - Sound interface (oss_sound* functions)
+        (5)  oss_plugins.h          - General VVMOSS plugins, including sound
+        (6)  oss_plugins.cpp        - General VVMOSS plugins, including sound

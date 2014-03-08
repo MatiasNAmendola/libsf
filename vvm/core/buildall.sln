@@ -31,7 +31,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vvm_plugin_sound", "plugins
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vvm_plugin_wideedit", "plugins\wideedit\wideedit.vcproj", "{672982BC-73C8-4EF1-B9B5-B6FDDE566293}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vgo", "vgo\vgo.vcproj", "{8D4C64D5-A510-4F1C-9CAA-9B3F368E2EB4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vfrp", "vfrp\vfrp.vcproj", "{ACD0A2A1-6C77-411A-BBA7-995C8E040233}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -130,12 +130,12 @@ Global
 		{672982BC-73C8-4EF1-B9B5-B6FDDE566293}.Debug|Win32.Build.0 = Debug|Win32
 		{672982BC-73C8-4EF1-B9B5-B6FDDE566293}.Release|Win32.ActiveCfg = Release|Win32
 		{672982BC-73C8-4EF1-B9B5-B6FDDE566293}.Release|Win32.Build.0 = Release|Win32
-		{8D4C64D5-A510-4F1C-9CAA-9B3F368E2EB4}.debug_vasm|Win32.ActiveCfg = debug_vasm|Win32
-		{8D4C64D5-A510-4F1C-9CAA-9B3F368E2EB4}.debug_vasm|Win32.Build.0 = debug_vasm|Win32
-		{8D4C64D5-A510-4F1C-9CAA-9B3F368E2EB4}.Debug|Win32.ActiveCfg = Debug|Win32
-		{8D4C64D5-A510-4F1C-9CAA-9B3F368E2EB4}.Debug|Win32.Build.0 = Debug|Win32
-		{8D4C64D5-A510-4F1C-9CAA-9B3F368E2EB4}.Release|Win32.ActiveCfg = Release|Win32
-		{8D4C64D5-A510-4F1C-9CAA-9B3F368E2EB4}.Release|Win32.Build.0 = Release|Win32
+		{ACD0A2A1-6C77-411A-BBA7-995C8E040233}.debug_vasm|Win32.ActiveCfg = debug_vasm|Win32
+		{ACD0A2A1-6C77-411A-BBA7-995C8E040233}.debug_vasm|Win32.Build.0 = debug_vasm|Win32
+		{ACD0A2A1-6C77-411A-BBA7-995C8E040233}.Debug|Win32.ActiveCfg = Debug|Win32
+		{ACD0A2A1-6C77-411A-BBA7-995C8E040233}.Debug|Win32.Build.0 = Debug|Win32
+		{ACD0A2A1-6C77-411A-BBA7-995C8E040233}.Release|Win32.ActiveCfg = Release|Win32
+		{ACD0A2A1-6C77-411A-BBA7-995C8E040233}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

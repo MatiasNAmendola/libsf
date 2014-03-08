@@ -47,9 +47,9 @@
 //////////
 // vo.cpp
 //////
-	u64 CALLTYPE			oss_firstCallback								(u64 tnDebuggerInterfaceAddress);
-	void CALLTYPE			oss_bootstrapInitialization						(u64 tnDebuggerInterfaceAddress);
-	void CALLTYPE			oss_initialization								(u64 tnDebuggerInterfaceAddress);
+	u64 CALLTYPE			oss_firstCallback								(u32 tnDoNotLoadOptions);
+	void CALLTYPE			oss_bootstrapInitialization						(void);
+	void CALLTYPE			oss_initialization								(void);
 	const s8* CALLTYPE		oss_getVersion									(void);
 	bool CALLTYPE			oss_createMessageWindow							(void);
 	u64 CALLTYPE			oss_createVisibleWindow							(SOssWindow* tisw, u64 tnScreenId);

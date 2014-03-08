@@ -48,9 +48,9 @@
 	//////////
 	// vvmmc.cpp
 	//////
-		u64 CALLTYPE			mc_firstCallback										(u64 tnDebuggerInterfaceAddress);
-		void CALLTYPE			mc_bootstrapInitialization								(u64 tnDebuggerInterfaceAddress);
-		void CALLTYPE			mc_initialization										(u64 tnDebuggerInterfaceAddress);
+		u64 CALLTYPE			mc_firstCallback										(void);
+		void CALLTYPE			mc_bootstrapInitialization								(void);
+		void CALLTYPE			mc_initialization										(void);
 		const s8* CALLTYPE		mc_getVersion											(void);
 		bool CALLTYPE			mc_loadVvmmOssFunctions									(void);
 		bool CALLTYPE			mc_loadResourceLanguage									(s8* tcResourceLanguage, u64* tnDllHandle);

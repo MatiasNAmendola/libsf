@@ -1,6 +1,6 @@
 //////////
 //
-// /libsf/vmm/vgo/vgo_structs.h
+// /libsf/vvm/core/vfrp/vfrp_defs.h
 //
 //////
 // Version 0.70
@@ -37,3 +37,19 @@
 // talents, your gifts, your praise, unto Him.  In Jesus' name I pray.  Amen.
 //
 //
+
+
+
+
+
+
+
+
+
+//////////
+// Function prototype definitions
+//////
+	// vfrp_sup.cpp
+	bool					ivfrp_loadAndInitializeVvm					(void);
+	bool					ivfrp_loadAndInitializeOss					(void);
+	bool					ivfrp_loadAndInitializeMc					(void);

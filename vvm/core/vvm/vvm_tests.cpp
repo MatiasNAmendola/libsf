@@ -151,7 +151,7 @@
 //////
 	bool iivvm_runVvmTest(u64 lnHandleLog, SFindFile* tff)
 	{
-		u64		lnFirstCallback, lnBootstrapInitialization, lnInitialization, lnGetVersion, lnExecuteTests, lnDebuggerInterface;
+		u64		lnFirstCallback, lnBootstrapInitialization, lnInitialization, lnGetVersion, lnExecuteTests;
 		bool	llResult;
 		HMODULE	lnHmod;
 		s8		filename[_MAX_PATH];
@@ -161,10 +161,6 @@
 		llResult = false;
 		if (tff)
 		{
-			// Set our constant initializations
-			lnDebuggerInterface = (u64)&vvm_debuggerInterfaceCallback;
-
-
 			// Get a local copy of our file into a null-terminated buffer
 			memset(&filename, 0, sizeof(filename));
 			memcpy(&filename, tff->file.data._u8, (u32)tff->file.length);
@@ -207,9 +203,9 @@
 						//////////
 						// Initialize
 						//////
-							gsVvmTest.firstCallback				(lnDebuggerInterface);
-							gsVvmTest.bootstrapInitialization	(lnDebuggerInterface);
-							gsVvmTest.initialization			(lnDebuggerInterface);
+							gsVvmTest.firstCallback();
+							gsVvmTest.bootstrapInitialization();
+							gsVvmTest.initialization();
 
 
 						//////////

@@ -131,6 +131,10 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 //////////
 // Common constants for use in the internal functions below
 /////
+	// Load DLL constants
+	cu32					_DO_NOT_LOAD_VVM						= 1;
+	cu32					_DO_NOT_LOAD_OSS						= 2;
+	cu32					_DO_NOT_LOAD_MC							= 4;
 	// Constant integers
 	cu32					_COMMON_START_END_BLOCK_SIZE			= 32;			// Allocate 32 entries/slots at a time (Start/end)
 	cu32					_COMMON_START_END_SMALL_BLOCK_SIZE		= 4;			// Allocate 4 entries/slots at a time (Start/end)
