@@ -140,6 +140,7 @@
 		const s8		cgcVvmV1FirstCallback[]							= "vvm_firstCallback";
 		const s8		cgcVvmV1BootstrapInitialization[]				= "vvm_bootstrapInitialization";
 		const s8		cgcVvmV1StartTheVvm[]							= "vvm_startTheVvm";
+		const s8		cgcVvmV1GetVersion[]							= "vvm_getVersion";
 		const s8		cgcVvmV1GetLanguage[]							= "vvm_getLanguage";
 		const s8		cgcVvmV1LoadResourceAsciiText[]					= "vvm_loadResourceAsciiText";
 		const s8		cgcVvmV1ResourcePrintf[]						= "vvm_resourcePrintf";
@@ -489,6 +490,7 @@
 		u64				(CALLTYPE *vvm_firstCallback)							(u32 tnDoNotLoadOptions);
 		void			(CALLTYPE *vvm_bootstrapInitialization)					(void);
 		s64				(CALLTYPE *vvm_startTheVvm)								(w16* tcCmdLine, bool* tlTestCasesOnly);
+		const s8*		(CALLTYPE *vvm_getVersion)								(void);
 		s8*				(CALLTYPE *vvm_getLanguage)								(u32* tnLength);
 		s8*				(CALLTYPE *vvm_loadResourceAsciiText)					(u32 tnResourceNumber);
 		void			(CALLTYPE *vvm_resourcePrintf)							(u32 tnResourceNumber);
@@ -865,6 +867,7 @@
 			(void *)&vvm_firstCallback,										(void *)cgcVvmV1FirstCallback,
 			(void *)&vvm_bootstrapInitialization,							(void *)cgcVvmV1BootstrapInitialization,
 			(void *)&vvm_startTheVvm,										(void *)cgcVvmV1StartTheVvm,
+			(void *)&vvm_getVersion,										(void *)cgcVvmV1GetVersion,
 			(void *)&vvm_getLanguage,										(void *)cgcVvmV1GetLanguage,
 			(void *)&vvm_loadResourceAsciiText,								(void *)cgcVvmV1LoadResourceAsciiText,
 			(void *)&vvm_resourcePrintf,									(void *)cgcVvmV1ResourcePrintf,

@@ -267,6 +267,34 @@
 				RelativePath=".\vasm.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\vasm_sup.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="debug_vasm|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
 		</Filter>
 		<Filter
 			Name="Reference"
@@ -311,6 +339,14 @@
 					</File>
 				</Filter>
 			</Filter>
+		</Filter>
+		<Filter
+			Name="Header Files"
+			>
+			<File
+				RelativePath=".\vasm_defs.h"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

@@ -276,7 +276,7 @@
 ///////
 	const s8* CALLTYPE oss_getVersion(void)
 	{
-		return(cgcVvmossVersion);
+		return(cgcOssVersion);
 	}
 
 

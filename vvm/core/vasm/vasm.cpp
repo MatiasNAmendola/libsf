@@ -46,6 +46,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <windows.h>
+
 #include "\libsf\vvm\core\common\common.h"
 #include "\libsf\vvm\core\oss\oss_structs.h"
 #include "\libsf\vvm\core\vvm\vvm_structs.h"
@@ -54,6 +55,7 @@
 #include "\libsf\vvm\core\common\common_mc.h"
 #include "\libsf\vvm\core\common\common_oss.h"
 #include "\libsf\vvm\core\localization\vvmmcenu\resource.h"
+#include "vasm_defs.h"
 
 
 
@@ -178,32 +180,47 @@ void		iAssembleFile						(s8* tcPathname);
 
 	void iLoadDlls(void)
 	{
-		// Try to load MC.DLL
-		if (!iLoadMcFunctionsFromDll() || !mc_loadResourceLanguage(gcResourceLanguage, (u64*)&vvmmcResourceDll))
-		{
-			printf("* Error:  Unable to load required MC.DLL.  Terminating with -2.\n");
-			exit(-2);
-		}
+		//////////
+		// Load VVM functions
+		//////
+			if (!ivasm_loadAndInitializeVvm())
+			{
+				// Unable to load, or instantiate the message window for the VVM
+				printf("Unable to load VVM.DLL. Terminating with -1.\n");
+				exit(-1);
+			}
 
 
-		// Try to load OSS.DLL
-		if (!iLoadOssFunctionsFromDll())
-		{
-			printf("* Error:  Unable to load required OSS.DLL.  Terminating with -1.\n");
-			exit(-1);
-		}
-		if (!mc_loadVvmmOssFunctions())
-		{
-			printf("* Error:  VVMMC was unable to load required OSS.DLL functions.  Terminating with -3.\n");
-			exit(-3);
-		}
+		//////////
+		// Load OS-Specific functions
+		//////
+			if (!ivasm_loadAndInitializeOss())
+			{
+				// Unable to load, or instantiate the message window for the VVM
+				printf("Unable to load OSS.DLL. Terminating with -2.\n");
+				exit(-2);
+			}
+
+
+		//////////
+		// Load Machine Code-Specific functions
+		//////
+			if (!ivasm_loadAndInitializeMc())
+			{
+				// Unable to load
+				printf("Unable to load MC.DLL. Terminating with -1.\n");
+				exit(-3);
+			}
 
 
 		// Let it initialize itself
+		vvm_bootstrapInitialization();
 		oss_bootstrapInitialization();
+		mc_bootstrapInitialization();
 
 
 		// Indicate the version we have loaded
+		printf(mc_loadResourceAsciiText(IDS_LOADED), vvm_getVersion());
 		printf(mc_loadResourceAsciiText(IDS_LOADED), oss_getVersion());
 		printf(mc_loadResourceAsciiText(IDS_LOADED), mc_getVersion());
 		printf("---\n");
@@ -402,3 +419,11 @@ void		iAssembleFile						(s8* tcPathname);
 		gnErrors	+= lnErrorCount;
 		gnWarnings	+= lnWarningCount;
 	}
+
+
+
+
+//////////
+// Source files that are not compiled separately
+//////
+	#include "vasm_sup.cpp"

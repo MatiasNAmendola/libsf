@@ -269,6 +269,19 @@
 
 
 
+//////////
+//
+// Called to get a version string of this DLL
+//
+///////
+	const s8* CALLTYPE vvm_getVersion(void)
+	{
+		return(cgcVvmVersion);
+	}
+
+
+
+
 // Include files that are not compiled separately / stand-alone
 #include "vvm_eng.cpp"					// Main execution engine code
 #include "vvm_tm.cpp"					// Execution engine thread mizer (thread scheduler)

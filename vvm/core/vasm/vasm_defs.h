@@ -1,19 +1,16 @@
 //////////
 //
-// /libsf/vvm/vvmoss/vo_const.h
+// /libsf/vvm/core/vasm/vasm_defs.h
 //
 //////
 // Version 0.70
 // Copyright (c) 2012, 2014 by Rick C. Hodgin
 //////
 // Last update:
-//     Feb.25.2014
+//     Mar.08.2014
 //////
 // Change log:
-//     Feb.25.2014 - Development on 0.70 begins
-//     Nov.07.2012 - 0.60 development begins
-//     Sep.29.2012 - PBL v1.0 license included directly in source files.
-//     Sep.20.2012 - Initial creation
+//     Mar.08.2014 - Initial creation
 //////
 // See devhelp.txt.
 //////
@@ -44,10 +41,15 @@
 
 
 
+
+
+
+
+
 //////////
-//
-// Constant strings
-//
+// Function prototype definitions
 //////
-	const s8		cgcOssVersion[]							= "OSS.DLL Version 0.70";			// The format of this version string will remain consistent throughout all future releases
-	const wchar_t	cgw1msTimer[]							= L"oss_1msTimer";
+	// vasm_sup.cpp
+	bool					ivasm_loadAndInitializeVvm					(void);
+	bool					ivasm_loadAndInitializeOss					(void);
+	bool					ivasm_loadAndInitializeMc					(void);

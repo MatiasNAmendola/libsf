@@ -481,6 +481,7 @@ inline bool					ivvm_verifyLength							(u64 tnGoingTo, u64 tnMaxAllowable);
 	u64 CALLTYPE			vvm_firstCallback							(u32 tnDoNotLoadOptions);
 	void CALLTYPE			vvm_bootstrapInitialization					(void);
 	s64 CALLTYPE			vvm_startTheVvm								(w16* tcCmdLine, bool* tlTestCasesOnly);
+	const s8* CALLTYPE		vvm_getVersion								(void);
 	s8* CALLTYPE			vvm_getLanguage								(u32* tnLength);
 	s8* CALLTYPE			vvm_loadResourceAsciiText					(u32 tnResourceNumber);
 	void CALLTYPE			vvm_resourcePrintf							(u32 tnResourceNumber);

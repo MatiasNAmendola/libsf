@@ -5,6 +5,7 @@ EXPORTS
 	vvm_firstCallback
 	vvm_bootstrapInitialization
 	vvm_startTheVvm
+	vvm_getVersion
 	vvm_getLanguage
 	vvm_loadResourceAsciiText
 	vvm_resourcePrintf
