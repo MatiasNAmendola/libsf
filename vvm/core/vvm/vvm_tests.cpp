@@ -93,9 +93,9 @@
 		// Initialize
 		//////
 			memset(&lff, 0, sizeof(lff));
-			vvm1_datumSet(&lff.pathnameOfSearch, tcDirectory._u8,	-1, false);
-			vvm1_datumSet(&lff.filenameSearched, tcFilePattern._u8,	-1, false);
-			lnExclusionListLength	= (u32)vvm1_scanForwardUntilCharacter(tcExclusionList, 0);
+			vvm_datumSet(&lff.pathnameOfSearch, tcDirectory._u8,	-1, false);
+			vvm_datumSet(&lff.filenameSearched, tcFilePattern._u8,	-1, false);
+			lnExclusionListLength	= (u32)vvm_scanForwardUntilCharacter(tcExclusionList, 0);
 			llCumulativeResult		= true;
 
 
@@ -109,7 +109,7 @@
 				while (llMore)
 				{
 					// Make sure it's not a file to exclude
-					if (!vvm1_isNeedleInHaystack(tcExclusionList, lnExclusionListLength, lff.file.data, (u32)lff.file.length, false, NULL))
+					if (!vvm_isNeedleInHaystack(tcExclusionList, lnExclusionListLength, lff.file.data, (u32)lff.file.length, false, NULL))
 					{
 						//////////
 						// Run this test

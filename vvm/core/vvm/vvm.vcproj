@@ -65,6 +65,7 @@
 				OutputFile="\libsf\vvm\dev\$(ProjectName).dll"
 				LinkIncremental="2"
 				ManifestFile="$(TargetDir)int\$(TargetFileName).intermediate.manifest"
+				ModuleDefinitionFile="vvm.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)pdbs\$(TargetName).pdb"
 				SubSystem="2"
@@ -143,6 +144,7 @@
 				OutputFile="\libsf\vvm\dev\$(ProjectName).dll"
 				LinkIncremental="1"
 				ManifestFile="$(TargetDir)int\$(TargetFileName).intermediate.manifest"
+				ModuleDefinitionFile="vvm.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)pdbs\$(TargetName).pdb"
 				SubSystem="2"
@@ -222,6 +224,7 @@
 				OutputFile="\libsf\vvm\dev\$(ProjectName).dll"
 				LinkIncremental="2"
 				ManifestFile="$(TargetDir)int\$(TargetFileName).intermediate.manifest"
+				ModuleDefinitionFile="vvm.def"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(TargetDir)pdbs\$(TargetName).pdb"
 				SubSystem="2"
@@ -261,6 +264,10 @@
 			>
 			<File
 				RelativePath=".\vvm.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\vvm.def"
 				>
 			</File>
 			<File

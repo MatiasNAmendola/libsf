@@ -179,7 +179,7 @@ void		iAssembleFile						(s8* tcPathname);
 	void iLoadDlls(void)
 	{
 		// Try to load MC.DLL
-		if (!iLoadVvmmcFunctionsFromDll() || !mc_loadResourceLanguage(gcResourceLanguage, (u64*)&vvmmcResourceDll))
+		if (!iLoadMcFunctionsFromDll() || !mc_loadResourceLanguage(gcResourceLanguage, (u64*)&vvmmcResourceDll))
 		{
 			printf("* Error:  Unable to load required MC.DLL.  Terminating with -2.\n");
 			exit(-2);
@@ -189,12 +189,12 @@ void		iAssembleFile						(s8* tcPathname);
 		// Try to load OSS.DLL
 		if (!iLoadOssFunctionsFromDll())
 		{
-			printf("* Error:  Unable to load required VVMOSS.DLL.  Terminating with -1.\n");
+			printf("* Error:  Unable to load required OSS.DLL.  Terminating with -1.\n");
 			exit(-1);
 		}
 		if (!mc_loadVvmmOssFunctions())
 		{
-			printf("* Error:  VVMMC was unable to load required VVMOSS.DLL functions.  Terminating with -3.\n");
+			printf("* Error:  VVMMC was unable to load required OSS.DLL functions.  Terminating with -3.\n");
 			exit(-3);
 		}
 

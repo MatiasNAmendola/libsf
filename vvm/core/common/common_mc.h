@@ -155,60 +155,11 @@
 
 //////////
 //
-// Called once to load all the gVvmmcFunctions[] at startup.
-//
-//////
-	void** iLoadVvmmcFunctionsFromVVM(void** tnFuncAddress)
-	{
-		u32			lnI;
-		s8*			lcFuncName;
-		void*		lnAddress;
-		void**		lnFuncAddress;
-		s8			buffer[1024];
-
-
-		// Grab the address of the VVM interface for function address requests
-		lnFuncAddress	= (void**)&vvm_debuggerInterface;
-		*lnFuncAddress	= (void*)tnFuncAddress;
-
-		
-		// Now, repeatedly call back that address with the request to all of the function addresses
-		for (lnI = 0; lnI < gMcFunctionCount; lnI++)
-		{
-			// Grab the details of this entry
-			tnFuncAddress	= (void**)gMcFunctions[(lnI * 2) + 0];			// Grab the indirect address to store
-			lcFuncName		= (s8*)   gMcFunctions[(lnI * 2) + 1];			// Grab the function name to request
-
-			// Ask the VVM for this specific function location
-			lnAddress = (void*)vvm_debuggerInterface(lcFuncName);				// We only call the indicated callback to obtain our portal for v1 functions
-
-			// Process the result
-			if (!lnAddress)
-			{
-				// The specified functionality is not available
-				// Note:  By design, this should never happen.  It is the result of a programming error.
-				sprintf_s(buffer, sizeof(buffer), "Error accessing: %s\000", lcFuncName);
-				MessageBoxA(NULL, buffer, "VVMMC (Machine Code) Initialization Error", MB_OK);
-				// We need all the functions we request, not just some of them
-				return((void**)-1);		// Indicate a fatal error
-			}
-			// If we get here, this function was found and we can store it
-			*tnFuncAddress = lnAddress;
-		}
-		// When we get here, we've made the full connection to the VVM
-		return(tnFuncAddress);
-	}
-
-
-
-
-//////////
-//
 // Attempt to load mc.dll and access all required functions
 //
 //////
 	HINSTANCE McDllInstance;
-	bool iLoadVvmmcFunctionsFromDll()
+	bool iLoadMcFunctionsFromDll()
 	{
 		u32			lnI;
 		s8*			lcFuncName;

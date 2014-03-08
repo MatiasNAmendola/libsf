@@ -430,8 +430,8 @@
 		//////////
 		// Retrieve the necessary callbacks
 		//////
-			iLoadVvmFunctionsFromVVM((void**)tnDebuggerInterfaceAddress);
-			iLoadVvmOssFunctionsFromVVM((void**)tnDebuggerInterfaceAddress);
+			iLoadVvmFunctionsFromDll();
+			iLoadOssFunctionsFromDll();
 			
 
 		//////////

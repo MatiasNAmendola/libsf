@@ -98,8 +98,8 @@
 		//////////
 		// Load all VVM and VVMOSS functions
 		//////
-			iLoadVvmFunctionsFromVVM((void**)tnCallbackAddress);
-			iLoadVvmOssFunctionsFromVVM((void**)tnCallbackAddress);
+			iLoadVvmFunctionsFromDll();
+			iLoadOssFunctionsFromDll();
 
 
 		//////////

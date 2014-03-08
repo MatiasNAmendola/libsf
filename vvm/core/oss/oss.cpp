@@ -119,8 +119,7 @@
 		//////////
 		// Load the base VVM functions
 		//////
-			if (tnDebuggerInterfaceAddress != 0)
-				iLoadVvmFunctionsFromVVM((void**)tnDebuggerInterfaceAddress);
+			iLoadVvmFunctionsFromDll();
 
 
 		//////////
@@ -246,8 +245,7 @@
 		//////////
 		// Load the VVMMC functions (if they're available to us, they should be)
 		//////
-			if (tnDebuggerInterfaceAddress != 0)
-				iLoadVvmmcFunctionsFromVVM((void**)tnDebuggerInterfaceAddress);
+			iLoadMcFunctionsFromDll();
 	}
 
 

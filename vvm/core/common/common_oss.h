@@ -201,7 +201,7 @@ struct SOssWindowLL;
 //////
 		void			(CALLTYPE *oss_getSystemInfo)							(SSysInfo* tsi);
 		void			(CALLTYPE *oss_sleep)									(u32 tnMilliseconds);
-		void			(CALLTYPE *oss_dateTimeGet)							(SDateTime* tdt);
+		void			(CALLTYPE *oss_dateTimeGet)								(SDateTime* tdt);
 		s8*				(CALLTYPE *oss_changePathnameExtension)					(s8* tcPathname, s8* tcNewPathname);
 		bool			(CALLTYPE *oss_validateFilenameCharacter)				(s8* tcPathname, u64 tnPathnameLength, u64* tnErrorPosition);
 
@@ -522,55 +522,6 @@ struct SOssWindowLL;
 		(void *)&oss_disableBreakpoints,									(void *)cgcOssDisableBreakpoints
 	};
 	u32 gVvmOssFunctionCount = sizeof(gVvmOssFunctions) / (2 * sizeof(void*));
-
-
-
-
-//////////
-//
-// Called once to load all the gVvmOssFunctions[] at startup.
-//
-//////
-	void** iLoadVvmOssFunctionsFromVVM(void** tnFuncAddress)
-	{
-		u32			lnI;
-		s8*			lcFuncName;
-		void*		lnAddress;
-		void**		lcFuncAddress;
-		s8			buffer[1024];
-
-
-		// Grab the address of the VVM interface for function address requests
-		lcFuncAddress	= (void**)&vvm_debuggerInterface;
-		*lcFuncAddress	= (void*)tnFuncAddress;
-
-
-		// Now, repeatedly call back that address with the request to all of the function addresses
-		for (lnI = 0; lnI < gVvmOssFunctionCount; lnI++)
-		{
-			// Grab the details of this entry
-			tnFuncAddress	= (void**)gVvmOssFunctions[(lnI * 2) + 0];						// Grab the indirect address to store
-			lcFuncName		= (s8*)   gVvmOssFunctions[(lnI * 2) + 1];						// Grab the function name to request
-
-			// Ask the VVM for this specific function location
-			lnAddress = (void*)vvm_debuggerInterface(lcFuncName);
-
-			// Process the result
-			if (!lnAddress)
-			{
-				// The specified functionality is not available
-				// Note:  By design, this should never happen.  It is the result of a programming error.
-				sprintf_s(buffer, sizeof(buffer), "Error accessing: %s\000", lcFuncName);
-				MessageBoxA(NULL, buffer, "VVMOSS Initialization Error", MB_OK);
-				// We need all the functions we request, not just some of them
-				return((void**)-1);		// Indicate a fatal error
-			}
-			// If we get here, this function was found and we can store it
-			*tnFuncAddress = lnAddress;
-		}
-		// When we get here, we've made the full connection to the VVM
-		return(tnFuncAddress);
-	}
 
 
 

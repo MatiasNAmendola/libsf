@@ -105,7 +105,7 @@
 		//////////
 		// Retrieve the necessary callbacks into the VVMOSS itself
 		//////
-			iLoadVvmOssFunctionsFromVVM((void**)tnDebuggerInterfaceAddress);
+			iLoadOssFunctionsFromDll();
 
 
 		//////////

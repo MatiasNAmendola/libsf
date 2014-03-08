@@ -191,14 +191,14 @@
 			lnStart = ptrSEVar->masterCount;
 
 			// Increase our buffer by the block size
-			llResult = vvm1_SEChain_allocateAdditionalMasterSlots(ptrSEVar, tnAllocationSize);
+			llResult = vvm_SEChain_allocateAdditionalMasterSlots(ptrSEVar, tnAllocationSize);
 			if (llResult)
 			{
 				// From our initial value to the end, allocate space for each variable
 				for (lnI = lnStart; llResult && lnI < ptrSEVar->masterCount; lnI++)
 				{
 					// Allocate the new entry
-					lv = (SVariable*)vvm1_SEChain_append(ptrSEVar, vvm1_getNextUniqueId(), vvm1_getNextUniqueId(), sizeof(SVariable), tnAllocationSize, NULL);
+					lv = (SVariable*)vvm_SEChain_append(ptrSEVar, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SVariable), tnAllocationSize, NULL);
 					if (lv)
 					{
 						// Indicate no variables initially exist here, and that this is an empty slot
@@ -267,15 +267,15 @@
 			// If we get here, we need to increase the allocation
 
 			// Allocate our new entry
-			if (vvm1_SEChain_allocateAdditionalMasterSlots(ptrSEVar, 1))
+			if (vvm_SEChain_allocateAdditionalMasterSlots(ptrSEVar, 1))
 			{
 				// We know we have our slot now
 				// Allocate our new entry
-				ltNew = (SThread*)vvm1_SEChain_append(ptrSEVar, vvm1_getNextUniqueId(), vvm1_getNextUniqueId(), sizeof(SThread), 1, NULL);
+				ltNew = (SThread*)vvm_SEChain_append(ptrSEVar, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SThread), 1, NULL);
 				if (ltNew)
 				{
 					// Allocate the stack size, we will use our 
-					ltNew->stack.data._u8			= (u8*)vvm1_allocateAndNull(gsVvm.gnStackAllocationBlockSize, true);
+					ltNew->stack.data._u8			= (u8*)vvm_allocateAndNull(gsVvm.gnStackAllocationBlockSize, true);
 					ltNew->stack.length				= gsVvm.gnStackAllocationBlockSize;
 					ltNew->status.semaphoreAccess	= oss_createSemaphore();
 
@@ -316,14 +316,14 @@
 			lnStart = ptrSESnip->masterCount;
 
 			// Increase our buffer by the block size
-			llResult = vvm1_SEChain_allocateAdditionalMasterSlots(ptrSESnip, gsVvm.gnSnippetAllocationBlockSize);
+			llResult = vvm_SEChain_allocateAdditionalMasterSlots(ptrSESnip, gsVvm.gnSnippetAllocationBlockSize);
 			if (llResult)
 			{
 				// From our initial value to the end, allocate space for each snippet
 				for (lnI = lnStart; llResult && lnI < ptrSESnip->masterCount; lnI++)
 				{
 					// Allocate the new entry
-					lse = (SSnipExec*)vvm1_SEChain_append(ptrSESnip, vvm1_getNextUniqueId(), vvm1_getNextUniqueId(), sizeof(SSnipExec), gsVvm.gnSnippetAllocationBlockSize, NULL);
+					lse = (SSnipExec*)vvm_SEChain_append(ptrSESnip, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SSnipExec), gsVvm.gnSnippetAllocationBlockSize, NULL);
 					if (lse)
 					{
 						// Indicate no parameters are initially populated at each snippet level
@@ -394,14 +394,14 @@
 			lnStart = ptrSEVar->masterCount;
 
 			// Increase our buffer by the block size
-			llResult = vvm1_SEChain_allocateAdditionalMasterSlots(ptrSEVar, tnAllocationSize);
+			llResult = vvm_SEChain_allocateAdditionalMasterSlots(ptrSEVar, tnAllocationSize);
 			if (llResult)
 			{
 				// From our initial value to the end, allocate space for each snippet
 				for (lnI = lnStart; llResult && lnI < ptrSEVar->masterCount; lnI++)
 				{
 					// Allocate the new entry
-					lv = (SVariable*)vvm1_SEChain_append(ptrSEVar, vvm1_getNextUniqueId(), vvm1_getNextUniqueId(), sizeof(SVariable), tnAllocationSize, NULL);
+					lv = (SVariable*)vvm_SEChain_append(ptrSEVar, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SVariable), tnAllocationSize, NULL);
 					if (lv)
 					{
 						// Indicate no variables initially exist here, and that this is an empty slot
@@ -570,7 +570,7 @@
 			// Initialize a buffer for all the of the nodes (we traverse to get a unique node list before deleting them all)
 			//////
 				memset(&nodeList, 0, sizeof(nodeList));
-				vvm1_SEChain_allocateAdditionalMasterSlots(&nodeList, _COMMON_START_END_BIG_BLOCK_SIZE);
+				vvm_SEChain_allocateAdditionalMasterSlots(&nodeList, _COMMON_START_END_BIG_BLOCK_SIZE);
 
 
 			//////////
@@ -607,14 +607,14 @@
 					//////////
 					// Free this node, which also orphanizes it if need be
 					//////
-						vvm1_ll4_delete((SLL4*)nodeList.ptr[lnI]);
+						vvm_ll4_delete((SLL4*)nodeList.ptr[lnI]);
 				}
 
 
 			//////////
 			// Delete the list of nodes, which is no longer required
 			//////
-				vvm1_SEChain_delete(&nodeList, 0, 0, false);
+				vvm_SEChain_delete(&nodeList, 0, 0, false);
 		}
 	}
 
@@ -656,7 +656,7 @@
 			// Is there enough space?
 			//////
 				if (lnI == nodeList->masterCount)
-					vvm1_SEChain_allocateAdditionalMasterSlots(nodeList, _COMMON_START_END_BIG_BLOCK_SIZE);		// No, allocate more space
+					vvm_SEChain_allocateAdditionalMasterSlots(nodeList, _COMMON_START_END_BIG_BLOCK_SIZE);		// No, allocate more space
 
 
 			//////////
@@ -1280,7 +1280,7 @@
 		//////////
 		// Create our temporary polygon
 		//////
-			if (!vvm1_polygon_initialize(&lpoly, poly->lineCount, true))
+			if (!vvm_polygon_initialize(&lpoly, poly->lineCount, true))
 				return;		// Failure allocating
 
 
@@ -1335,7 +1335,7 @@
 				end.y		= line->end.y	- (f64)lnMinY;
 
 				// Set this value
-				vvm1_polygon_setByValues(&lpoly, lnI, &start, &end, &line->gravity);
+				vvm_polygon_setByValues(&lpoly, lnI, &start, &end, &line->gravity);
 			}
 		
 		
@@ -1358,7 +1358,7 @@
 		//////////
 		// Recompute
 		//////
-			vvm1_iiCanvasPolygon(tsDst, NULL, &lpoly, color);
+			vvm_iiCanvasPolygon(tsDst, NULL, &lpoly, color);
 
 
 		//////////
@@ -1439,7 +1439,7 @@
 							sbgracNew.alpha		= lfArea;
 
 							// Add in a floan to the destination polygon
-							vvm1_builderAppendData(poly->pixelFloans, (s8*)&sbgracNew, sizeof(sbgracNew));
+							vvm_builderAppendData(poly->pixelFloans, (s8*)&sbgracNew, sizeof(sbgracNew));
 						}
 
 				}
@@ -1449,7 +1449,7 @@
 		//////////
 		// All done!
 		//////
-			vvm1_polygon_freeAndRelease(poly, true);
+			vvm_polygon_freeAndRelease(poly, true);
 	}
 
 	void iivvm_canvasPolygon_processNormal(SCanvas* tsDst, SPolygon* poly, _isSCanvasDrawPolygonParameters* lcdp)
@@ -1457,9 +1457,9 @@
 		//////////
 		// Allocate for the corners, floans, and lines, and initialize our internal structure
 		//////
-			vvm1_builderCreateAndInitialize(&lcdp->corners,		_COMMON_BUILDER_BLOCK_SIZE);
-			vvm1_builderCreateAndInitialize(&poly->pixelFloans,	_COMMON_BUILDER_BLOCK_SIZE_BIG);	// SBGRACompute structure indicating individual pixel populations
-			vvm1_builderCreateAndInitialize(&poly->rangeFloans,	_COMMON_BUILDER_BLOCK_SIZE_BIG);	// SBGRACompute structure indicating the starting and ending range
+			vvm_builderCreateAndInitialize(&lcdp->corners,		_COMMON_BUILDER_BLOCK_SIZE);
+			vvm_builderCreateAndInitialize(&poly->pixelFloans,	_COMMON_BUILDER_BLOCK_SIZE_BIG);	// SBGRACompute structure indicating individual pixel populations
+			vvm_builderCreateAndInitialize(&poly->rangeFloans,	_COMMON_BUILDER_BLOCK_SIZE_BIG);	// SBGRACompute structure indicating the starting and ending range
 			memset(&lcdp->sfld, 0, sizeof(lcdp->sfld));
 
 
@@ -1663,7 +1663,7 @@
 						if (lcdp->sbgrac1->x + 1 != lcdp->sbgrac2->x - 1)
 						{
 							// It is a range exceeding one pixel in length, so we add it as a range
-							lcdp->sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(poly->rangeFloans, sizeof(SBGRACompute));
+							lcdp->sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(poly->rangeFloans, sizeof(SBGRACompute));
 							if (lcdp->sbgrac)
 							{
 								// Store the from and to locations
@@ -1675,7 +1675,7 @@
 
 						} else {
 							// It is only a single pixel, we we simply add it as another pixel floan
-							lcdp->sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(poly->pixelFloans, sizeof(SBGRACompute));
+							lcdp->sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(poly->pixelFloans, sizeof(SBGRACompute));
 							if (lcdp->sbgrac)
 							{
 								// Store the from and to locations
@@ -1768,7 +1768,7 @@
 				memcpy(&line.end,		&(poly->line[lnI])->end,		sizeof(SXYF64));
 
 				// Compute the line
-				vvm1_math_computeLine(&line);
+				vvm_math_computeLine(&line);
 
 
 				//////////
@@ -1908,7 +1908,7 @@
 		//////////
 		// Append it
 		//////
-			vvm1_builderAppendData(corners, (s8*)&lsfcd, sizeof(lsfcd));
+			vvm_builderAppendData(corners, (s8*)&lsfcd, sizeof(lsfcd));
 	}
 
 
@@ -2019,7 +2019,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -3850,7 +3850,7 @@
 
 
 		// We will always store a floan here even if it's not needed
-		sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+		sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 		if (sbgrac)
 		{
 			// Set the offset
@@ -3912,7 +3912,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -3953,7 +3953,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-		sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+		sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 		if (sbgrac)
 		{
 			// Store the destination offset
@@ -4004,7 +4004,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -4043,7 +4043,7 @@
 
 
 		// We will always store a floan here even if it's not needed
-		sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+		sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 		if (sbgrac)
 		{
 			// Set the offset
@@ -4105,7 +4105,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -4166,7 +4166,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -4235,7 +4235,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -4314,7 +4314,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -4375,7 +4375,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -4414,7 +4414,7 @@
 
 
 		// We will always store a floan here even if it's not needed
-		sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+		sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 		if (sbgrac)
 		{
 			// Set the offset
@@ -4454,7 +4454,7 @@
 
 
 		// We will always store a floan here even if it's not needed
-		sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+		sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 		if (sbgrac)
 		{
 			// Set the offset
@@ -4516,7 +4516,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -4557,7 +4557,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-		sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+		sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 		if (sbgrac)
 		{
 			// Store the destination offset
@@ -4608,7 +4608,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -4669,7 +4669,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -4730,7 +4730,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -4791,7 +4791,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -4852,7 +4852,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -4921,7 +4921,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -4980,7 +4980,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-		sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+		sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 		if (sbgrac)
 		{
 			// Store the destination offset
@@ -5031,7 +5031,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -5077,7 +5077,7 @@
 
 		} else {
 			// Full floanage.
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the full pixel value since the gravity runs southward
@@ -5114,7 +5114,7 @@
 
 		} else {
 			// Full floanage.
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the full pixel value since the gravity runs eastward
@@ -5166,7 +5166,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -5227,7 +5227,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -5296,7 +5296,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -5375,7 +5375,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -5436,7 +5436,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -5497,7 +5497,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -5536,7 +5536,7 @@
 
 
 		// We will always store a floan here even if it's not needed
-		sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+		sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 		if (sbgrac)
 		{
 			// Set the offset
@@ -5598,7 +5598,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -5639,7 +5639,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -5690,7 +5690,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -5729,7 +5729,7 @@
 
 
 		// We will always store a floan here even if it's not needed
-		sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+		sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 		if (sbgrac)
 		{
 			// Set the offset
@@ -5791,7 +5791,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -5852,7 +5852,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -5921,7 +5921,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -6000,7 +6000,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -6061,7 +6061,7 @@
 		//////////
 		// Allocate space for the floan entry
 		//////
-			sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
+			sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(sfld->floans, sizeof(SBGRACompute));
 			if (sbgrac)
 			{
 				// Store the destination offset
@@ -6127,12 +6127,12 @@
 				l1.trig		= true;
 				l2.trig		= true;
 				lmid.trig	= true;
-				vvm1_builderCreateAndInitialize(&pointFloans,	_COMMON_BUILDER_BLOCK_SIZE);		// SXYF64		- for raw floan data points
-				vvm1_builderCreateAndInitialize(&washFloans,		_COMMON_BUILDER_BLOCK_SIZE);		// SBGRACompute	- used for fx/fy (start/end) floan data points across each pixel
+				vvm_builderCreateAndInitialize(&pointFloans,	_COMMON_BUILDER_BLOCK_SIZE);		// SXYF64		- for raw floan data points
+				vvm_builderCreateAndInitialize(&washFloans,		_COMMON_BUILDER_BLOCK_SIZE);		// SBGRACompute	- used for fx/fy (start/end) floan data points across each pixel
 
 				// Initialize the drawFloans if we need to (they may not be drawing, but just computing)
 				if (tc && bd && !bez->drawFloans)
-					vvm1_builderCreateAndInitialize(&bez->drawFloans, _COMMON_BUILDER_BLOCK_SIZE);
+					vvm_builderCreateAndInitialize(&bez->drawFloans, _COMMON_BUILDER_BLOCK_SIZE);
 
 
 			//////////
@@ -6194,7 +6194,7 @@
 					//////
 						if (pbez.x >= 0.0 && pbez.y >= 0.0 && (!tc || (pbez.x < (s32)tc->width && (s32)pbez.y < tc->height)))
 						{
-							lxy = (SXYF64*)vvm1_builderAllocateBytes(pointFloans, sizeof(SXYF64));
+							lxy = (SXYF64*)vvm_builderAllocateBytes(pointFloans, sizeof(SXYF64));
 							if (lxy)
 							{
 								// Store the point where it was computed.
@@ -6266,12 +6266,12 @@
 				lmid.trig	= true;
 				lmid1.trig	= true;
 				lmid2.trig	= true;
-				vvm1_builderCreateAndInitialize(&pointFloans,	_COMMON_BUILDER_BLOCK_SIZE);		// SXYF64		- for raw floan data points
-				vvm1_builderCreateAndInitialize(&washFloans,		_COMMON_BUILDER_BLOCK_SIZE);		// SBGRACompute	- used for fx/fy (start/end) floan data points across each pixel
+				vvm_builderCreateAndInitialize(&pointFloans,	_COMMON_BUILDER_BLOCK_SIZE);		// SXYF64		- for raw floan data points
+				vvm_builderCreateAndInitialize(&washFloans,		_COMMON_BUILDER_BLOCK_SIZE);		// SBGRACompute	- used for fx/fy (start/end) floan data points across each pixel
 
 				// Initialize the drawFloans if we need to (they may not be drawing, but just computing)
 				if (tc && bd && !bez->drawFloans)
-					vvm1_builderCreateAndInitialize(&bez->drawFloans, _COMMON_BUILDER_BLOCK_SIZE);
+					vvm_builderCreateAndInitialize(&bez->drawFloans, _COMMON_BUILDER_BLOCK_SIZE);
 
 
 			//////////
@@ -6354,7 +6354,7 @@
 					//////
 						if (pbez.x >= 0.0 && pbez.y >= 0.0 && (!tc || (pbez.x < (s32)tc->width && (s32)pbez.y < tc->height)))
 						{
-							lxy = (SXYF64*)vvm1_builderAllocateBytes(pointFloans, sizeof(SXYF64));
+							lxy = (SXYF64*)vvm_builderAllocateBytes(pointFloans, sizeof(SXYF64));
 							if (lxy)
 							{
 								// Store the point where it was computed.
@@ -6430,12 +6430,12 @@
 				lmid3.trig	= true;
 				lmmid1.trig	= true;
 				lmmid2.trig	= true;
-				vvm1_builderCreateAndInitialize(&pointFloans,	_COMMON_BUILDER_BLOCK_SIZE);		// SXYF64		- for raw floan data points
-				vvm1_builderCreateAndInitialize(&washFloans,		_COMMON_BUILDER_BLOCK_SIZE);		// SBGRACompute	- used for fx/fy (start/end) floan data points across each pixel
+				vvm_builderCreateAndInitialize(&pointFloans,	_COMMON_BUILDER_BLOCK_SIZE);		// SXYF64		- for raw floan data points
+				vvm_builderCreateAndInitialize(&washFloans,		_COMMON_BUILDER_BLOCK_SIZE);		// SBGRACompute	- used for fx/fy (start/end) floan data points across each pixel
 
 				// Initialize the drawFloans if we need to (they may not be drawing, but just computing)
 				if (tc && bd && !bez->drawFloans)
-					vvm1_builderCreateAndInitialize(&bez->drawFloans, _COMMON_BUILDER_BLOCK_SIZE);
+					vvm_builderCreateAndInitialize(&bez->drawFloans, _COMMON_BUILDER_BLOCK_SIZE);
 
 
 			//////////
@@ -6543,7 +6543,7 @@
 					//////
 						if (pbez.x >= 0.0 && pbez.y >= 0.0 && (!tc || (pbez.x < (s32)tc->width && (s32)pbez.y < tc->height)))
 						{
-							lxy = (SXYF64*)vvm1_builderAllocateBytes(pointFloans, sizeof(SXYF64));
+							lxy = (SXYF64*)vvm_builderAllocateBytes(pointFloans, sizeof(SXYF64));
 							if (lxy)
 							{
 								// Store the point where it was computed.
@@ -6725,7 +6725,7 @@
 							if (prexy1->x == (f64)((s32)prexy1->x) || prexy1->y == (f64)((s32)prexy1->y))
 							{
 								// Allocate for prexy1 (starting point)
-								sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(post, sizeof(SBGRACompute));
+								sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(post, sizeof(SBGRACompute));
 								if (sbgrac)
 								{
 									// Store it
@@ -6772,7 +6772,7 @@
 									if (lineProjectedToNextPixel.length < lineProjectedToPrexy2.length)
 									{
 										// Allocate for the intermediate point
-										sbgrac = (SBGRACompute*)vvm1_builderAllocateBytes(post, sizeof(SBGRACompute));
+										sbgrac = (SBGRACompute*)vvm_builderAllocateBytes(post, sizeof(SBGRACompute));
 										if (sbgrac)
 										{
 											// Store the floan
@@ -6799,7 +6799,7 @@
 		//////////
 		// Clean up pointFloans (since they've now been washed into washFloans)
 		//////
-			vvm1_builderFreeAndRelease(pointFloans);
+			vvm_builderFreeAndRelease(pointFloans);
 
 
 		//////////
@@ -6895,7 +6895,7 @@
 						lfArea	= iivvm_math_getAreaOfSquareUsing_po_p1_p2(lnGravityPO, lnGravityP1, lnGravityP2, &pof, &p1, &p2);
 
 						// Store the floan
-						sbgrac	= (SBGRACompute*)vvm1_builderAllocateBytes(draw, sizeof(SBGRACompute));
+						sbgrac	= (SBGRACompute*)vvm_builderAllocateBytes(draw, sizeof(SBGRACompute));
 						if (sbgrac)
 						{
 							// Store the offset and area (alpha) for this part
@@ -6912,8 +6912,8 @@
 		//////////
 		// Clean up washFloans, and resize drawFloans
 		//////
-			vvm1_builderFreeAndRelease(washFloans);
-			vvm1_builderSetSize(draw, draw->populatedLength);
+			vvm_builderFreeAndRelease(washFloans);
+			vvm_builderSetSize(draw, draw->populatedLength);
 
 
 		//////////
@@ -6933,7 +6933,7 @@
 	void ivvm_regionRefreshCallback(SStartEndCallback* cb)
 	{
 		// Process this region
-		vvm1_regionRefresh(cb->ptrRegion, cb->ex1PtrRegion);
+		vvm_regionRefresh(cb->ptrRegion, cb->ex1PtrRegion);
 	}
 
 

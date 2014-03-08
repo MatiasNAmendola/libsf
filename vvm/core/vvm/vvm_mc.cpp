@@ -44,13 +44,13 @@
 
 //////////
 //
-// Called to load the VVMOSS.DLL stuff, following the startup protocol.
+// Called to load the OSS.DLL stuff, following the startup protocol.
 //
 //////
 	bool ivvm_loadAndInitializeVvmmc(void)
 	{
 		// Load the DLL
-		if (!iLoadVvmmcFunctionsFromDll())
+		if (!iLoadMcFunctionsFromDll())
 			return(false);
 
 		// Let it initialize itself

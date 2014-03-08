@@ -1,0 +1,324 @@
+LIBRARY	"vvm"
+
+EXPORTS
+
+	vvm_parseCommandLine
+	vvm_debugger
+	vvm_getLanguage
+	vvm_loadResourceAsciiText
+	vvm_resourcePrintf
+	vvm_requestUniqueID
+	vvm_connect
+	vvm_connectRemote
+	vvm_getNextUniqueId
+
+	vvm_copyProgramList
+	vvm_programCopyScreensList
+	vvm_programCopyGlobalsList
+	vvm_programCopySnippetsList
+	vvm_programCopyDynamicSnippetsList
+	vvm_programCopyTimersList
+	vvm_programCopyThreadsList
+
+	vvm_programPause
+	vvm_programResume
+	vvm_programTerminate
+	vvm_threadPause
+	vvm_threadResume
+	vvm_threadTerminate
+	vvm_terminateVvm
+
+	vvm_getBreakpointList
+	vvm_breakpointSet
+	vvm_breakpointClear
+
+	vvm_copyProgram
+	vvm_copyThread
+	vvm_copyStack
+	vvm_copyRegisters
+	vvm_copyGlobal
+	vvm_copyTimer
+	vvm_copyScreen
+	vvm_copyCanvas
+
+	vvm_copySnippetTS
+	vvm_copySnippetParent
+	vvm_copySnippetSS
+	vvm_copyDynamicSnippet
+
+	vvm_snippetCompile
+	vvm_snippetCompileLine
+	vvm_dynSnipCompileLine
+	vvm_snippetDelete
+	vvm_snippetUpdate
+	vvm_snippetAppend
+	vvm_dynamicSnippetDelete
+	vvm_dynamicSnippetUpdate
+	vvm_dynamicSnippetAppend
+	vvm_flushChangesToBxml
+
+	vvm_createThread
+	vvm_messageBox
+
+	vvm_builderCreateAndInitialize
+	vvm_builderAppendData
+	vvm_builderAllocateBytes
+	vvm_builderSetSize
+	vvm_builderFreeAndRelease
+	vvm_builderAsciiWriteOutFile
+
+	vvm_sha1ComputeSha1
+	vvm_sha1ComputeSha1As64Bit
+	vvm_sha1ComputeSha1As32Bit
+	vvm_sha1ComputeSha1AsHex
+	vvm_sha1ConvertHexToSha1
+	vvm_sha1ConvertSha1ToHex
+	vvm_sha1ComputeSha1_Start
+	vvm_sha1ComputeSha1_ProcessThisData
+	vvm_sha1ComputeSha1_FinishAsSha1
+	vvm_sha1ComputeSha1_FinishAsHex
+	vvm_sha1Compute64BitFromSha1
+	vvm_sha1Compute32BitFromSha1
+	vvm_sha1Compare
+
+	vvm_bxmlLoad
+	vvm_bxmlLoadFromBuffer
+	vvm_bxmlSave
+	vvm_bxmlSaveToBuffer
+
+	vvm_bxmlaCreate
+	vvm_bxmlaSetName
+	vvm_bxmlaSetData
+	vvm_bxmlaSetTotalLength
+	vvm_bxmlaDelete
+	vvm_bxmlaInsert
+	vvm_bxmlaInsertExisting
+	vvm_bxmlaCopy
+	vvm_bxmlaCopyAs
+	vvm_bxmlaSha1One
+	vvm_bxmlaSha1
+	vvm_bxmlaSha1Tag
+	vvm_bxmlaSha1Data
+
+	vvm_bxmlaFindAndGetString
+	vvm_bxmlaFindAndGetU32
+	vvm_bxmlaFindAndGetU64
+	vvm_bxmlaFindAndGetBool
+	vvm_bxmlaFindAndGetF32
+	vvm_bxmlaFindAndGetF64
+
+	vvm_bxmlaGetString
+	vvm_bxmlaGetU32
+	vvm_bxmlaGetU64
+	vvm_bxmlaGetBool
+	vvm_bxmlaGetF32
+	vvm_bxmlaGetF64
+
+	vvm_bxmlaGetNext
+	vvm_bxmlaGetPrev
+
+	vvm_bxmlNodeCreate
+	vvm_bxmlNodeSetName
+	vvm_bxmlNodeDelete
+	vvm_bxmlNodeInsert
+	vvm_bxmlNodeInsertAsChild
+	vvm_bxmlNodeInsertAsChildAfter
+	vvm_bxmlNodeCopy
+	vvm_bxmlNodeCopyAs
+	vvm_bxmlNodeSha1
+	vvm_bxmlNodeSha1Tag
+	vvm_bxmlNodeSha1Data
+
+	vvm_bxmlNodeGetNext
+	vvm_bxmlNodeGetPrev
+	vvm_bxmlNodeGetParent
+	vvm_bxmlNodeGetFirstChild
+	vvm_bxmlNodeGetFirstAttribute
+
+	vvm_bxmlFindAttribute
+	vvm_bxmlFindFirst
+	vvm_bxmlFindContinue
+	vvm_bxmlFindAllAsStartEndLists
+
+	vvm_bxmlDataFindFirst
+	vvm_bxmlDataFindContinue
+	vvm_bxmlDataFindAllAsStartEndList
+
+	vvm_bxmlGetLastError
+
+	vvm_duplicateString
+	vvm_duplicateUnicodeString
+	vvm_datumSet
+	vvm_datum2Set
+	vvm_datumDuplicate
+	vvm_datum2Duplicate
+	vvm_datumDelete
+	vvm_datum2Delete
+	vvm_datum2SetNullString
+
+	vvm_copyUpToShortestString
+	vvm_wildcardMatchDatum
+	vvm_wildcardMatch
+	vvm_asciiToUnicode
+	vvm_unicodeToAscii
+	vvm_asciiToUnicodeChar
+	vvm_unicodeToAsciiCharacter
+	vvm_scanForwardUntilCharacterChanges
+	vvm_scanForwardUntilCharacter
+	vvm_unicodeMemcmp
+	vvm_unicodeMemicmp
+	vvm_unicodeMemset
+	vvm_upperCaseW
+	vvm_lowerCaseW
+	vvm_memset
+	vvm_memset4
+	vvm_memcpy
+	vvm_memcmp
+	vvm_memicmp
+	vvm_memicmpTwoLengths
+	vvm_memicmpDatum
+	vvm_memicmpDatum2
+	vvm_memicmpDatumDatum
+	vvm_memicmpDatum2Datum2
+	vvm_deriveRGBA
+	vvm_getPredictableSequentialPattern
+
+	vvm_ll_create
+	vvm_ll_delete
+	vvm_ll_deleteWithCallback
+	vvm_ll_insert
+	vvm_ll_orphanize
+	vvm_ll_deleteChain
+	vvm_ll_deleteChainWithCallback
+	vvm_ll_iterateViaCallback
+	vvm_ll_iterateBackwardViaCallback
+	vvm_ll_getFirstNode
+	vvm_ll_getLastNode
+
+	vvm_ll4_create
+	vvm_ll4_createChain
+	vvm_ll4_delete
+	vvm_ll4_orphanize
+	vvm_ll4_insertNorthSouth
+	vvm_ll4_insertWestEast
+	vvm_ll4_deleteChain
+	vvm_ll4_deleteChainWithCallback
+	vvm_ll4_iterateViaCallback
+	vvm_ll4_getLastNode
+
+	vvm_ll4bxml_orphanize
+	vvm_ll4bxml_insert
+	vvm_ll4bxml_insertAsChild
+	vvm_ll4bxml_insertAsChildRegarding
+
+	vvm_SEChain_prepend
+	vvm_SEChain_append
+	vvm_SEChain_appendRelativeToMember
+	vvm_SEChain_appendExistingRelativeToMember
+
+	vvm_SEChain_migrateAll
+	vvm_SEChain_migrateByPtr
+	vvm_SEChain_migrateByNum
+	vvm_SEChain_completelyMigrateSLLByPtr
+	vvm_SEChain_completelyMigrateSLLByNum
+
+	vvm_SEChain_countValids
+	vvm_SEChain_delete
+	vvm_SEChain_deleteAsPtrBlock
+	vvm_SEChain_deleteFrom
+	vvm_SEChain_deleteFromAfterCallback
+
+	vvm_SEChain_allocateAdditionalMasterSlots
+	vvm_SEChain_searchByUniqueId
+	vvm_SEChain_searchByCallback
+	vvm_SEChain_iterateThroughForCallback
+	vvm_SEChain_validate
+
+	vvm_swapEndian
+	vvm_RGBA2BGRA
+	vvm_allocateAndNull
+	vvm_isNeedleInHaystack
+	vvm_isNeedleInHaystack_Unicode
+	vvm_countConsecutiveAsciiNumericDigits
+	vvm_convertTextToU32
+
+	vvm_math_computeTriangle
+	vvm_math_computeSquare
+	vvm_math_computeLine
+	vvm_math_squareRotateAbout
+	vvm_math_getGravityOfThetaAndLeft
+	vvm_math_getGravity07FromDecoratedGravity
+	vvm_math_getAreaOfSquareUsing_po_p1_p2
+	vvm_math_getNextAxisInterceptXY
+	vvm_math_getGravityByRelativePosition
+	vvm_math_getGravityInteger
+	vvm_math_fineAdjustGravityByTheta
+	vvm_math_adjustTheta
+	vvm_math_withinDelta
+	vvm_math_washFloans
+
+	vvm_bezier_initialize
+	vvm_bezier_setByValues
+
+	vvm_polygon_initialize
+	vvm_polygon_setByPolyLine
+	vvm_polygon_setByValues
+	vvm_polygon_reset
+	vvm_polygon_freeAndRelease
+
+	vvm_screenRefresh
+	vvm_screenSetFocus
+
+	vvm_regionDuplicate
+	vvm_regionDefaultPaint
+	vvm_regionRefresh
+
+	vvm_canvasDrawFixedPointText
+	vvm_canvasDrawText
+	vvm_canvasFrameRect
+	vvm_canvasFillRect
+	vvm_canvasLine
+	vvm_canvasArc
+	vvm_canvasBezier
+
+	vvm_canvasExtract
+	vvm_canvasColorize
+	vvm_canvasGrayscale
+	vvm_canvasGradient
+	vvm_canvasBitBlt
+	vvm_canvasScale
+	vvm_canvasRotate
+	vvm_canvasRotateAbout
+	vvm_canvasPolygon
+
+	vvm_caskDefineStandard
+	vvm_caskDefineEncompassingRectangle
+	vvm_caskDefineUpRectangle
+	vvm_caskDefineDownRectangle
+	vvm_caskSetPipByValues
+	vvm_caskSetPipByStruct
+	vvm_caskCreate
+	vvm_caskRefresh
+
+	vvm_iiCanvasPolygon
+	vvm_iDeleteScaleCompute
+	vvm_iSkipWhitespaces
+	vvm_iSkipToCarriageReturnLineFeed
+	vvm_iRegionDefaultPaintEditbox
+	vvm_iRegionDefaultPaintButton
+	vvm_iRegionDefaultPaintImage
+	vvm_iRegionDefaultPaintLabel
+	vvm_iRegionDefaultPaintCheckbox
+	vvm_iRegionDefaultPaintRectangle
+	vvm_iDrawFixedPoint
+	vvm_iBitBltAll
+	vvm_iiBitBltAll_Opaque
+	vvm_iiBitBltAll_Alpha
+	vvm_iBitBltSection
+	vvm_iiBitBltSection_Opaque
+	vvm_iiBitBltSection_Alpha
+	vvm_iiGradient
+	vvm_iCanvasLine
+
+	vvm_enableBreakpoints
+	vvm_disableBreakpoints

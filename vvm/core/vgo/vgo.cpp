@@ -80,104 +80,51 @@
 							LPWSTR		lpCmdLine,
 							int			nCmdShow)
 	{
-// 		bool llRunTestCases;
-// 
-// 
-// 		//////////
-// 		// Bootup initialization
-// 		//////
-// 			iivvm_bootupInitialization();
-// 
-// 
-// 		//////////
-// 		// Initially pass the command line
-// 		// Test cases can be run from the command line using:  "vvm -test"
-// 		//////
-// 			ivvm_parseCommandLine(lpCmdLine, &llRunTestCases);
-// 
-// 
-// 		///////////
-// 		// Load the required foundation components
-// 		//////
-// 			if (!ivvm_loadVvmResourceDll())
-// 			{
-// 				// Unable to load
-// 				MessageBox(NULL, L"Missing Resource DLL (vvmenu.dll)\nTerminating with error code -1.", L"VVM Load Error", MB_OK);
-// 				exit(-1);
-// 			}
-// 
-// 
-// 		//////////
-// 		// Load OS-Specific functions
-// 		//////
-// 			if (!ivvm_loadAndInitializeVvmOss())
-// 			{
-// 				// Unable to load, or instantiate the message window for the VVM
-// 				ivvm_resourceMessageBoxLocal(IDS_VVM_FAILURE_TO_LOAD_MINUS_1, IDS_VVM_LOAD_ERROR, false, false, false);
-// 				exit(-1);
-// 			}
-// 
-// 
-// 		//////////
-// 		// Load Machine Code-Specific functions
-// 		//////
-// 			if (!ivvm_loadAndInitializeVvmmc())
-// 			{
-// 				// Unable to load
-// 				ivvm_resourceMessageBoxLocal(IDS_VVM_FAILURE_TO_LOAD_VVMMC_MINUS_3, IDS_VVM_LOAD_ERROR, false, false, false);
-// 				exit(-1);
-// 			}
-// 
-// 
-// //////////
-// //
-// // Once we get here, the system has been through bootstrap initialization,
-// // all resources are loaded, the system is in a condition where all base
-// // criteria for successful operations have been achieved.
-// //
-// // In short, we're in a "GO" state.
-// //
-// //////////
-// 
-// 
-// 		//////////
-// 		// Indicate to the VVMOSS and VVMMC that we've now loaded everything and they can proceed with the rest of their initialization requirements (if any)
-// 		//////
-// 			oss_initialization((u64)&vvm_debuggerInterfaceCallback);
-// 			mc_initialization((u64)&vvm_debuggerInterfaceCallback);
-// 
-// 
-// 		//////////
-// 		// Initialize the VVM to its power-on state
-// 		//////
-// 			if (!ivvme_initialize(GetCommandLineW(), &llRunTestCases))
-// 			{
-// 				ivvm_resourceMessageBox(IDS_VVM_FAILURE_TO_INITIALIZE_MINUS_2, IDS_VVM_INITIALIZE_ERROR, false, false, true, false, false);
-// 				exit(-2);
-// 			}
-// 
-// 
-// 		//////////
-// 		// Test cases
-// 		//////
-// 			if (llRunTestCases)
-// 				ivvm_runTestPlugins();	// They exist in vvm_tests.cpp
-// 
-// 
-// 		//////////
-// 		// Tell the world we're up and running, ready to do out utmost at all points. :-)
-// 		//////
-// 			ivvm_resourcePrintf(IDS_VVM_RUNNING);
-// 			while (gsVvm.glVvmIsRunning)
-// 			{
-// 				// Will need communication with OSS for thread scheduling and execution
-// 				Sleep(10);
-// 			}
-// 
-// 
-// 		//////////
-// 		// All done!
-// 		//////
-// 			return(gsVvm.gnVvmReturnResult);
-		return(0);
+		bool llRunTestCases;
+
+
+		//////////
+		// Load VVM functions
+		//////
+			if (!iLoadVvmFunctionsFromDll())
+			{
+				// Unable to load, or instantiate the message window for the VVM
+//				ivgo_resourceMessageBoxLocal(IDS_VVM_FAILURE_TO_LOAD_MINUS_1, IDS_VVM_LOAD_ERROR, false, false, false);
+				exit(-1);
+			}
+
+
+		//////////
+		// Load OS-Specific functions
+		//////
+			if (!iLoadOssFunctionsFromDll())
+			{
+				// Unable to load, or instantiate the message window for the VVM
+//				ivgo_resourceMessageBoxLocal(IDS_VVM_FAILURE_TO_LOAD_MINUS_1, IDS_VVM_LOAD_ERROR, false, false, false);
+				exit(-1);
+			}
+
+
+		//////////
+		// Load Machine Code-Specific functions
+		//////
+			if (!iLoadMcFunctionsFromDll())
+			{
+				// Unable to load
+//				ivgo_resourceMessageBoxLocal(IDS_VVM_FAILURE_TO_LOAD_VVMMC_MINUS_3, IDS_VVM_LOAD_ERROR, false, false, false);
+				exit(-1);
+			}
+
+
+		//////////
+		// Initially pass the command line
+		// Test cases can be run from the command line using:  "vvm -test"
+		//////
+			vvm_parseCommandLine(lpCmdLine, &llRunTestCases);
+
+
+		//////////
+		// Control will never get here:
+		//////
+			return(0);
 	}

@@ -97,7 +97,7 @@
 		// Initially pass the command line
 		// Test cases can be run from the command line using:  "vvm -test"
 		//////
-			ivvm_parseCommandLine(lpCmdLine, &llRunTestCases);
+			vvm_parseCommandLine(lpCmdLine, &llRunTestCases);
 
 
 		///////////

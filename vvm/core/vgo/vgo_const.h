@@ -49,50 +49,7 @@
 //////////
 // Constant strings
 //////
-	const s8	cgcVvmVersion[]								= "VVM.EXE Version 0.70";							// The format of this version string will remain consistent throughout all future releases
+	const s8	cgcVvmVersion[]								= "VGO.EXE Version 0.70";							// The format of this version string will remain consistent throughout all future releases
 	const s8	cgcEnu[]									= "enu";
-	const s8	cgcVvmEngDll[]								= "vvmeng.dll";
+	const s8	cgcVvmEngDll[]								= "vgoeng.dll";
 	const s8	cgcUnableToLocateResource[]					= "Unable to locate resource";
-
-
-
-
-//////////
-// For vvm_tests.cpp
-//////
-	const u8	cgcVvmTestDll_firstCallback[]				= "vvmt_firstCallback";
-	const u8	cgcVvmTestDll_bootstrapInitialization[]		= "vvmt_bootstrapInitialization";
-	const u8	cgcVvmTestDll_initialization[]				= "vvmt_initialization";
-	const u8	cgcVvmTestDll_getVersion[]					= "vvmt_getVersion";
-	const u8	cgcVvmTestDll_executeTests[]				= "vvmt_executeTests";
-	const u8	cgcVvmTestsDirectory[]						= ".\\tests\\";
-	const u8	cgcVvmTestCoreDll[]							= "vvmt_core.dll";
-	const u8	cgcVvmTestFilePattern[]						= "*.dll";
-	const u8	cgcVvmTestLogFile[]							= "vvm_test_results.txt";
-
-
-
-
-//////////
-// Constants used to define region events
-//////
-	// vvm_structs.h, see SRegion definition
-	const u32	_VVM_REGION_ENTER				= 1;
-	const u32	_VVM_REGION_LEAVE				= 2;
-	const u32	_VVM_REGION_MOUSE_DOWN			= 4;
-	const u32	_VVM_REGION_MOUSE_UP			= 8;
-	const u32	_VVM_REGION_MOUSE_MOVE			= 16;
-	const u32	_VVM_REGION_HOVER				= 32;
-	const u32	_VVM_REGION_DRAG_START			= 64;
-	const u32	_VVM_REGION_DRAG_STOP			= 128;
-	const u32	_VVM_REGION_DRAG_MOVE			= 256;
-
-
-
-	
-//////////
-// Dynamic snippet types, loaded as needed at runtime
-//////
-	const u32	_VVM_DYNSNIP_TYPE_VVM			= 1;			// A call to the VVM itself
-	const u32	_VVM_DYNSNIP_TYPE_DLL			= 2;			// A call to the a specified DLL
-	const u32	_VVM_DYNSNIP_TYPE_Bxml			= 3;			// A call to a loaded BXML snippet

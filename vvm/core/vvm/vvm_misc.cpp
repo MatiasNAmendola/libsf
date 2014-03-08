@@ -171,7 +171,7 @@
 				ivvm_debugBreak();
 			}
 			// Create a copy to be used
-			*tuString = vvm1_duplicateUnicodeString(luMessage);
+			*tuString = vvm_duplicateUnicodeString(luMessage);
 		}
 	}
 
@@ -203,54 +203,6 @@
 			ivvm_debugBreak();
 		}
 		wprintf(luMessage, p1);
-	}
-
-
-
-
-//////////
-//
-// Parse the command line for known options
-//
-//////
-	void ivvm_parseCommandLine(w16* tuCmdLine, bool* tlTestCasesOnly)
-	{
-		u32 lnI, lnLength, lnSkip;
-
-
-		// Find out how long the line is
-		lnLength = wcslen(tuCmdLine);
-
-		// Initially lower the test-case setting
-		if (tlTestCasesOnly)
-			*tlTestCasesOnly = false;
-
-		// Iterate looking for known switches
-		for (lnI = 0; lnI < lnLength; lnI++)
-		{
-			// Did they specify "-r:" (which is a resource override, using an alternate language, like -r:es for Spanish)
-			if (lnLength - lnI >= 3 && ivvm_unicodeMemicmp(tuCmdLine + lnI, L"-r:", 3) == 0)
-			{
-				// Find out how long this string portion is
-				lnSkip					= ivvm_scanStringAndNullTerminateAtNextWhitespaceW(tuCmdLine + lnI + 3) + 3;
-				gsVvm.gcVvmResourceLang	= vvm1_unicodeToAscii(tuCmdLine + lnI + 3, wcslen(tuCmdLine + lnI + 3));
-
-				// Blank out that portion of the command line
-				vvm1_unicodeMemset(tuCmdLine + lnI, (w16)' ', lnSkip);
-
-				// Move past ti
-				lnI += lnSkip;
-
-
-			// Do they want to run the gambit of test cases?
-			} else if (lnLength - lnI >= 5 && ivvm_unicodeMemicmp(tuCmdLine + lnI, L"-test", 5) == 0) {
-				// Yes
-				*tlTestCasesOnly = true;
-// TODO:  a future syntax will allow for -test:file.bxml to run the tests identified within an executable file.
-
-			}
-// TODO:  future command line switches can be added here as needed
-		}
 	}
 
 	int ivvm_unicodeMemicmp(w16* l, w16* r, u32 tnLength)
