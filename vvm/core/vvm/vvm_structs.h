@@ -438,7 +438,7 @@ struct	SUpSnip;
 
 //////////
 //
-// Master Program
+// Master Program definition file (an executable file for the VVM)
 //
 //////
 	struct SProgram

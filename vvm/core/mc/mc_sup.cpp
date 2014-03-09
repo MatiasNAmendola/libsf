@@ -530,7 +530,7 @@
 		// Verify our environment is sane
 		//////
 			if (!tcData || tnFileSize == 0 || !ta)
-				return(NULL);		// Bad news, bears. :-(
+				return(NULL);	// Nothing to do
 
 		//////////
 		// Add this filename to the list of loaded files
@@ -639,6 +639,21 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 					oss_combineAllAfterSOssComp		(line, _MC_ICODE_COMMENT);
 cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
+
+
+				//////////
+				// Fixup casks
+				//////
+					oss_combineAllCasks((SOssComp*)line->comps.root->ptr);
+cb._func = (u64)iimc_validateStartEndCompsCallback;
+vvm_SEChain_validate(&lsf->lines, &cb);
+if (	iIsNeedleInHaystack(line->base + line->start + line->whitespace, (u32)line->length, "(|", 2)
+	||	iIsNeedleInHaystack(line->base + line->start + line->whitespace, (u32)line->length, "[|", 2)
+	||	iIsNeedleInHaystack(line->base + line->start + line->whitespace, (u32)line->length, "<|", 2)
+	||	iIsNeedleInHaystack(line->base + line->start + line->whitespace, (u32)line->length, "~|", 2))
+	oss_writeSOssLineSequenceCompsToDisk("\\libsf\\vvm\\vasm\\test\\testoutcomps.txt", &lsf->lines);
+	_asm nop;
+
 
 				//////////
 				// Move to next line

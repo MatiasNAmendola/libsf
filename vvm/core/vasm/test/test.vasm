@@ -1,3 +1,71 @@
+// Include file
+(|include|[|pathname|c:\libsf\vvm\vasm\test\testout.vasm||]||)
+
+
+// Macros
+[|macro|[|name|user32||][|substitute|user32.dll||]||]
+
+
+// Global Variables
+[|u32|[|array|10||][|name|foo||][|init|1, 2, 3, 4, 5, 6||]||]
+[|s8|[|name|someString||][|init|"Hi, mom!"||]||]
+[|s32|[|name|gnFlag||]||]
+[|u32|[|name|lnHwnd||][|min|0||][|max|50||][|init|0||]||]
+
+
+[|dsnip|dll,~user32~||]
+[|dll_function|SendMessage||]
+[|params|[|u32|[|name|hwnd||]||][|u32|[|name|msg||]||][|u32|[|name|w||]||][|u32|[|name|l||]||]||]
+[|returns|[|u32|[|name|r1||]||]||]
+
+[|dll_function|GetClientRect
+[|params|[|u32|[|name|hwnd||]||][|u32*|[|name|rc||]||]||]
+[|returns|[|u32|[|name|r1||]||]||]
+
+[|dll_function|OtherFunction
+[|params|[|u32|[|name|foo||]||]||]
+[|end|]
+
+
+[|dsnip|bxml||]
+[|prototype|[|pathname|c:\path\to\devtime\loadable.bxml||]||]
+[|end|]
+
+
+(|source|[|pathname|c:\path\program.bxml::test_uadd||]||)
+
+[|line|[|number|1||][|source:18|FUNCTION test_uadd||]||]
+[|snip|[|name|test_uadd||]||]
+
+[|line|[|number|2||][|source:30|LPARAMETERS p1, p2, p3, p4, p5||]||]
+[|params|[|u32|[|name|p1||]||][|u32|[|name|p2||]||][|u32|[|name|p3||]||][|u32|[|name|p4||]||][|u32|[|name|p5||]||]||]
+
+[|line|[|number|3||][|source:14|RETURNS r1, r2||]||]
+[|returns|[|u32|[|name|r1||]||][|u32|[|name|r2||]||]||]
+
+[|line|[|number|4||][|source:18|LOCALS lnI, lnJ, k||]||]
+[|locals|[|u32|[|name|lnI||]||][|u32|[|name|lnJ||]||][|u32|[|name|k||]||][|u8|[|array|20||][|name|_sendMessageParams||]||]||]
+
+[|line|[|number|6||][|source:15|lnC = lnA + lnB||]||]
+			add.s32		lnA,lnB							[|source|[|index|6||][|length|9||]||]
+			move.s32	lnC,result						[|source|[|index|0||][|length|5||]||]
+
+[|line|[|number|7||][|source:37|k = MySendMessage(lnHwnd, foo[0], foo[lnB], fa)||]||]
+			ready		_mySendMessageParams			[|source|-1||]
+			set.32		&k								[|source|0,3||]
+			set.32		lnHwnd							[|source|16,6||]
+			set.32		foo[0]							[|source|24,6||]
+			set.32		foo[lnB]						[|source|32,8||]
+			set.32		fa								[|source|42,2||]
+			go.dsn		SendMessage						[|source|4,11||]
+
+[|line|[|number|8||][|source:6|RETURN||]||]
+			go.back										[|source|0,6||]
+[|end|]
+
+
+
+
 //////////
 //
 // /libsf/vvm/vasm/test/test.vasm
@@ -58,67 +126,3 @@
 //		[Z]:3	- zero? will be tested for the next three instructions
 //
 //
-
-
-
-
-// Include file
-(|include|c:\libsf\vvm\vasm\test\testout.vasm||)
-
-
-// Macros
-[|macro| [|token|user32||] [|swap|user32.dll||] ||]
-
-
-// Global Variables
-[|u32|10,foo, [|init|1, 2, 3, 4, 5, 6||] ||]
-[|s8|someString, [|init|"Hi, mom!"||] ||]
-[|s32|gnFlag||]
-[|u32|lnHwnd, [|min|0||] [|max|50||] [|init|0||] ||]
-
-
-[|dsnip|dll,~user32~||]
-[|dll_function|SendMessage||]
-[|params| [|u32|hwnd||] [|u32|msg||] [|u32|w||] [|u32|l||] ||]
-[|returns| [|u32|r1||] ||]
-
-[|dll_function|GetClientRect
-[|params| [|u32|hwnd||] [|u32*|rc||] ||]
-[|returns| [|u32|r1||] ||]
-
-[|dll_function|OtherFunction
-[|params| u32 foo
-[|end|]
-
-
-[|dsnip|bxml||]
-[|prototype|c:\path\to\devtime\loadable.bxml||]
-[|end|]
-
-
-(|source|c:\path\program.bxml::test_uadd||)
-(|line|1,FUNCTION test_uadd||)
-[|snip|test_uadd||]
-(|line|2,LPARAMETERS p1, p2, p3, p4, p5||)
-[|params| [|u32|p1||] [|u32|p2||] [|u32|p3||] [|u32|p4||] [|u32|p5||] ||]
-(|line|3,RETURNS r1, r2||)
-[|returns| [|u32|r1||] [|u32|r2||] ||]
-(|line|4,LOCALS lnI, lnJ, k||)
-[|locals| [|u32|lnI||] [|u32|lnJ||] [|u32|k||] [|u8|20,_sendMessageParams||] ||]
-
-(|line|6,lnC = lnA + lnB||)
-			add.s32		lnA,lnB							(|i|6,9||)
-			move.s32	lnC,result						(|i|0,5||)
-
-(|line|7,k = MySendMessage(lnHwnd, foo[0], foo[lnB], fa)||)
-			ready		_mySendMessageParams			(|i|-1||)
-			set.32		&k								(|i|0,3||)
-			set.32		lnHwnd							(|i|16,6||)
-			set.32		foo[0]							(|i|24,6||)
-			set.32		foo[lnB]						(|i|32,8||)
-			set.32		fa								(|i|42,2||)
-			go.dsn		SendMessage						(|i|4,11||)
-
-(|line|8,RETURN||)
-			go.back
-[|end|]

@@ -2836,6 +2836,57 @@ storeFirstOne:
 
 //////////
 //
+// Called to combine all of the casks into casks of the translated type.
+//
+// Operation:
+//		We scan from left to right on the line's comps, and process all comps within the mated
+//		left and right cask sides, noting that left-sides or right-sides can be either single
+//		or double casks.
+//
+//		For example:
+//			Valid cask:		(|cask|)						Left=(|			right=|)
+//			Valid cask:		(|cask|data||)					Left=(|			right=||)
+//			Valid cask:		(||data|cask|)					Left=(||		right=|)
+//			Valid cask:		(||data|cask|data||)			Left=(||		right=||)
+//
+//		All content between casks are shunted to their comp->childComps member, and then each
+//		of those are processed in turn for continually nested casks.
+//
+//////
+	u32 CALLTYPE oss_combineAllCasks(SOssComp* firstComp)
+	{
+		u32			lnCount;
+		SOssComp*	compNext;
+		SOssComp*	comp;
+
+
+		// Make sure our environment is sane
+		lnCount = 0;
+		if (firstComp && firstComp->line && firstComp->line->base)
+		{
+			// Iterate beginning at the first component
+			comp = firstComp;
+			while (comp)
+			{
+				// Get the next component
+				compNext = (SOssComp*)comp->ll.next;
+
+// TODO:  Working here, we need to create a stack for entry into the potentially nested cask definitions.
+// Note:  All comps before the name go into the firstCompUp, an all comps after the name go into firstCompsDown.
+
+				// Move to next component
+				comp = compNext;
+			}
+		}
+		// Indicate our conversion rate
+		return(lnCount);
+	}
+
+
+
+
+//////////
+//
 // Called to remove extraneous whitespaces
 //
 // Source:		u8* name		// user name
@@ -3017,7 +3068,7 @@ openAgain:
 //		number of bytes read
 //
 //////
-	u64 CALLTYPE oss_sharedAsciiReadFile(u64 tnFileHandle, s8* tcDest, u32 tnBytesToRead)
+	u64 CALLTYPE oss_sharedAsciiReadFile(u64 tnFileHandle, s8* tcDest, u64 tnBytesToRead)
 	{
 		s64					lnNumread;
 		_iswSSharedFile*	lsf;
@@ -3026,6 +3077,7 @@ openAgain:
 		// Make sure we can read somewhere
 		if (!tcDest)
 			return(-2);		// Invalid pointer
+
 // TODO:  (future enhancement) make this a true 64-bit read function
 		if (tnBytesToRead > 0xffffffff)
 			return(-4);
@@ -3040,7 +3092,7 @@ openAgain:
 
 
 		// Attempt the read
-		lnNumread = (s64)_read(lsf->handle, tcDest, tnBytesToRead);
+		lnNumread = (s64)_read(lsf->handle, tcDest, (s32)tnBytesToRead);
 		if (lnNumread <= 0)
 			return(-3);					// Read error
 

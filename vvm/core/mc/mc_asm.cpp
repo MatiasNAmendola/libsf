@@ -47,13 +47,17 @@
 //
 // Takes a VASM-compatible source file, and creates an executable program to be run on the VVM.
 //
+// Input:
+//		tcData		-- Start of assembly source code (typically a file read in from disk, but can be just memory)
+//		tnFileSize	-- Number of bytes in tcData for this file
+//
 // Returns:
 //		Number of bytes generated in machine code
 //		Note:  If 0, did not do any valid processing, however the tseProg structure may still have
 //		       been updated.
 //
 //////
-	u32 CALLTYPE mc_assembleSourceCode(s8* tcVasmPathname, s8* tcData, u32 tnFileSize, SProgram* tsProgram)
+	u32 CALLTYPE mc_assembleSourceCode(s8* tcVasmPathname, s8* tcData, u32 tnFileSize, SProgram* prog)
 	{
 		u32				lnBytes;
 		SAssembly*		la;
@@ -61,19 +65,18 @@
 
 
 		// Allocate our assembly data
-		la = (SAssembly*)vvm_SEChain_append(&tsProgram->_assembly, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SAssembly), _COMMON_START_END_BLOCK_SIZE, NULL);
-		if (!la)	return(0);		// This is bad.  Very bad.  Should never happen.
-		la->prog	= tsProgram;
+		la = (SAssembly*)vvm_SEChain_append(&prog->_assembly, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SAssembly), _COMMON_START_END_BLOCK_SIZE, NULL);
+		if (!la)
+			return(0);		// This is bad.  Very bad.  Should never happen.
+
+		// Assign its parent to itself (for subsequent reference without passing the extra parameter everywhere)
+		la->prog = prog;
 
 
 		// Make sure our environment is sane
 		lnBytes = 0;
-		while (1)
+		while (tcData && tnFileSize > 0)
 		{
-			if (!tcData || tnFileSize == 0)
-				break;		//  Nothing to do
-
-
 			//////////
 			// Load the raw data, parse out into lines, load any include files
 			//////

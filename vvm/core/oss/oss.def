@@ -86,6 +86,7 @@ EXPORTS
 	oss_combine3SOssComps
 	oss_combineAllBetweenSOssComps
 	oss_combineAllAfterSOssComp
+	oss_combineAllCasks
 	oss_removeExtraneousWhitespaceSOssComps
 	oss_validateFilenameCharacter
 

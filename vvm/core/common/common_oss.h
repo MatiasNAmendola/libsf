@@ -184,6 +184,7 @@
 		const s8		cgcOssCombine3SOssComps[]								= "oss_combine3SOssComps";
 		const s8		cgcOssCombineAllBetweenSOssComps[]						= "oss_combineAllBetweenSOssComps";
 		const s8		cgcOssCombineAllAfterSOssComp[]							= "oss_combineAllAfterSOssComp";
+		const s8		cgcOssCombineAllCasks[]									= "oss_combineAllCasks";
 		const s8		cgcOssRemoveExtraneousWhitespaceSOssComps[]				= "oss_removeExtraneousWhitespaceSOssComps";
 		const s8		cgcOssFindFirstOccurrenceOfAsciiCharacter[]				= "oss_findFirstOccurrenceOfAsciiCharacter";
 
@@ -354,19 +355,20 @@
 	//
 	//////////
 			u64				(CALLTYPE *oss_breakoutAsciiTextIntoSOssLines)		(s8* tcData, u64 tnFileSize, SStartEnd* tseLines, u64 tnAllocSize, bool tlUseOssAlloc);
-			SOssComp*		(CALLTYPE* oss_translateSOssLinesToSOssComps)		(SAsciiCompSearcher* tsComps, SOssLine* line);
-			void			(CALLTYPE* oss_translateSOssCompsToOthers)			(SAsciiCompSearcher* tsComps, SOssLine* line);
-			u64				(CALLTYPE* oss_writeSOssLineSequenceToDisk)			(s8* tcPathname, SStartEnd* tseLines);
-			u64				(CALLTYPE* oss_writeSOssLineSequenceCompsToDisk)	(s8* tcPathname, SStartEnd* tseLines);
-			u64				(CALLTYPE* oss_writeSOssLineSequenceCompsDebuggingToDisk)(s8* tcPathname, SStartEnd* tseLines);
-			SOssComp*		(CALLTYPE* oss_findNextSOssCompBy_iCode)			(SOssComp* comp, u32 tniCode, SOssComp** compLastScanned);
-			SOssComp*		(CALLTYPE* oss_skipPastSOssComp_iCode)				(SOssComp* comp, u32 tniCode);
-			u32				(CALLTYPE* oss_combine2SOssComps)					(SOssLine* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2,                     u32 tniCodeCombined);
-			u32				(CALLTYPE* oss_combine3SOssComps)					(SOssLine* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2, u32 tniCodeNeedle3, u32 tniCodeCombined);
-			u32				(CALLTYPE* oss_combineAllBetweenSOssComps)			(SOssLine* line, u32 tniCodeNeedle,                                          u32 tniCodeCombined);
-			u32				(CALLTYPE* oss_combineAllAfterSOssComp)				(SOssLine* line, u32 tniCodeNeedle);
-			u32				(CALLTYPE* oss_removeExtraneousWhitespaceSOssComps)	(SOssLine* line, u32 tniCodeWhitespace);
-			bool			(CALLTYPE* oss_findFirstOccurrenceOfAsciiCharacter)	(s8* tcHaystack, u64 tnHaystackLength, s8 tcNeedle, u64* tnPosition);
+			SOssComp*		(CALLTYPE *oss_translateSOssLinesToSOssComps)		(SAsciiCompSearcher* tsComps, SOssLine* line);
+			void			(CALLTYPE *oss_translateSOssCompsToOthers)			(SAsciiCompSearcher* tsComps, SOssLine* line);
+			u64				(CALLTYPE *oss_writeSOssLineSequenceToDisk)			(s8* tcPathname, SStartEnd* tseLines);
+			u64				(CALLTYPE *oss_writeSOssLineSequenceCompsToDisk)	(s8* tcPathname, SStartEnd* tseLines);
+			u64				(CALLTYPE *oss_writeSOssLineSequenceCompsDebuggingToDisk)(s8* tcPathname, SStartEnd* tseLines);
+			SOssComp*		(CALLTYPE *oss_findNextSOssCompBy_iCode)			(SOssComp* comp, u32 tniCode, SOssComp** compLastScanned);
+			SOssComp*		(CALLTYPE *oss_skipPastSOssComp_iCode)				(SOssComp* comp, u32 tniCode);
+			u32				(CALLTYPE *oss_combine2SOssComps)					(SOssLine* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2,                     u32 tniCodeCombined);
+			u32				(CALLTYPE *oss_combine3SOssComps)					(SOssLine* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2, u32 tniCodeNeedle3, u32 tniCodeCombined);
+			u32				(CALLTYPE *oss_combineAllBetweenSOssComps)			(SOssLine* line, u32 tniCodeNeedle,                                          u32 tniCodeCombined);
+			u32				(CALLTYPE *oss_combineAllAfterSOssComp)				(SOssLine* line, u32 tniCodeNeedle);
+			u32				(CALLTYPE *oss_combineAllCasks)						(SOssComp* firstComp);
+			u32				(CALLTYPE *oss_removeExtraneousWhitespaceSOssComps)	(SOssLine* line, u32 tniCodeWhitespace);
+			bool			(CALLTYPE *oss_findFirstOccurrenceOfAsciiCharacter)	(s8* tcHaystack, u64 tnHaystackLength, s8 tcNeedle, u64* tnPosition);
 
 
 	//////////
@@ -539,6 +541,7 @@
 			(void *)&oss_combine3SOssComps,										(void *)cgcOssCombine3SOssComps,
 			(void *)&oss_combineAllBetweenSOssComps,							(void *)cgcOssCombineAllBetweenSOssComps,
 			(void *)&oss_combineAllAfterSOssComp,								(void *)cgcOssCombineAllAfterSOssComp,
+			(void *)&oss_combineAllCasks,										(void *)cgcOssCombineAllCasks,
 			(void *)&oss_removeExtraneousWhitespaceSOssComps,					(void *)cgcOssRemoveExtraneousWhitespaceSOssComps,
 			(void *)&oss_findFirstOccurrenceOfAsciiCharacter,					(void *)cgcOssFindFirstOccurrenceOfAsciiCharacter,
 

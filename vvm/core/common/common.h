@@ -114,6 +114,26 @@ csu8p _csu8p(cs8* p)	{ csu8p x;	x._cs8	= p;	return(x);	}
 csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 
 
+bool iIsNeedleInHaystack(s8* haystack, u32 tnHaystackLength, s8* needle, u32 tnNeedleLength)
+{
+	s32 lnI;
+
+
+	// Make sure our environment's sane
+	if (haystack && tnHaystackLength > 0 && needle && tnNeedleLength > 0 && tnHaystackLength >= tnNeedleLength)
+	{
+		// Iterate until we reach the end
+		for (lnI = 0; lnI + tnNeedleLength <= tnHaystackLength; lnI++)
+		{
+			// Is this it?
+			if (_memicmp(haystack + lnI, needle, tnNeedleLength) == 0)
+				return(true);
+		}
+	}
+	// Not found
+	return(false);
+}
+
 
 
 //////////
@@ -337,6 +357,15 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	struct SRectXYWH;
 	struct SRectXYXY;
 	struct SRegion;
+	struct SSourceFile;
+	struct SAssembly;
+	struct SBlock;
+	struct SDllFuncInfo;
+	struct SLabelInfo;
+	struct SVariable;
+	struct SVarInst;
+	struct SProgram;
+	struct SVvm;
 
 
 
@@ -560,10 +589,33 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 	struct SLL
 	{
 		union {
-			SLL*		next;					// Next entry in linked list
-			SBxmla*		bxmla;					// To allow viewing as a bxmla structure
+			SLL*			next;				// Next entry in linked list
+			// The following are added to allow viewing in the debugger as the original source file
+			SBxmla*			next_bxmla;
+			SSourceFile*	next_sf;
+			SAssembly*		next_asm;
+			SBlock*			next_block;
+			SDllFuncInfo*	next_dllFuncInfo;
+			SLabelInfo*		next_labInfo;
+			SVariable*		next_var;
+			SVarInst*		next_varInst;
+			SProgram*		next_prog;
+			SVvm*			next_vvmInst;
 		};
-		SLL*			prev;					// Previous entry in linked list
+		union {
+			SLL*		prev;					// Previous entry in linked list
+			// The following are added to allow viewing in the debugger as the original source file
+			SBxmla*			prev_bxmla;
+			SSourceFile*	prev_sf;
+			SAssembly*		prev_asm;
+			SBlock*			prev_block;
+			SDllFuncInfo*	prev_dllFuncInfo;
+			SLabelInfo*		prev_labInfo;
+			SVariable*		prev_var;
+			SVarInst*		prev_varInst;
+			SProgram*		prev_prog;
+			SVvm*			prev_vvmInst;
+		};
 		u64				uniqueId;				// Unique id associated with this object
 	};
 
@@ -1386,7 +1438,8 @@ csu8p _csu8p(void* p)	{ csu8p x;	x._v	= p;	return(x);	}
 		s64				length;											// Length of the component
 
 		// If this component has sub-components, they go here
-		SStartEnd		comps;											// Pointer to any child components
+		SStartEnd		childCompsUp;									// Pointer to any child components before the cask name
+		SStartEnd		childCompsDown;									// Pointer to any child components after the cask name
 	};
 
 	struct SOssCompCallback

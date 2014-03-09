@@ -50,6 +50,23 @@
 	const s8		cgcVvmmcVersion[]								= "MC.DLL Version 0.70";		// The format of this version string will remain consistent throughout all future releases
 	const s8		cgcUnableToLocateResource[]						= "Unable to locate resource";
 
+	const s8		cgcCaskRoundOpenParams[]						= "(||";
+	const s8		cgcCaskRoundCloseParams[]						= "||)";
+	const s8		cgcCaskSquareOpenParams[]						= "[||";
+	const s8		cgcCaskSquareCloseParams[]						= "||]";
+	const s8		cgcCaskTriangleOpenParams[]						= "<||";
+	const s8		cgcCaskTriangleCloseParams[]					= "||>";
+	const s8		cgcCaskTildeOpenParams[]						= "~||";
+	const s8		cgcCaskTildeCloseParams[]						= "||~";
+	const s8		cgcCaskRoundOpen[]								= "(|";
+	const s8		cgcCaskRoundClose[]								= "|)";
+	const s8		cgcCaskSquareOpen[]								= "[|";
+	const s8		cgcCaskSquareClose[]							= "|]";
+	const s8		cgcCaskTriangleOpen[]							= "<|";
+	const s8		cgcCaskTriangleClose[]							= "|>";
+	const s8		cgcCaskTildeOpen[]								= "~|";
+	const s8		cgcCaskTildeClose[]								= "|~";
+
 
 
 

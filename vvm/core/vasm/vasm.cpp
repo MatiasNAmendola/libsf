@@ -265,7 +265,7 @@ void		iAssembleFile						(s8* tcPathname);
 		s64				lnHandle, lnFileSize, lnNumread;
 		s8*				lcData;
 		s8*				lcBxmlPathname;
-		SStartEnd		lseProg;
+		SStartEnd		prog;
 		SProgram*		lp;			// program
 		SVvmmcError*	lve;		// error
 		SVvmmcWarning*	lvw;		// warning
@@ -326,25 +326,18 @@ void		iAssembleFile						(s8* tcPathname);
 
 
 		// Initialize our variables
-		memset(&lseProg, 0, sizeof(lseProg));
+		memset(&prog, 0, sizeof(prog));
+
 		// Define this initial program to its default empty state
-		lp = (SProgram*)vvm_SEChain_append(&lseProg, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SProgram), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
+		lp = (SProgram*)vvm_SEChain_append(&prog, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SProgram), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
 		printf(mc_loadResourceAsciiText(IDS_ASSEMBLING), tcPathname);
 
 
 		//////////
-		// Physically conduct the assembly
+		// Physically translate into machine code, and the output bxml file
 		//////
-			//
-			//////
-				//
-				lnMachineCodeBytes = mc_assembleSourceCode(tcPathname, lcData, (u32)lnFileSize, lp);
-				//
-			//////
-			//
-		//////
-		// END
-		//////////
+			lnMachineCodeBytes = mc_assembleSourceCode(tcPathname, lcData, (u32)lnFileSize, lp);
+
 
 
 		// When we get here, we've assembled our source file, with warnings, errors, or whatever
@@ -402,7 +395,7 @@ void		iAssembleFile						(s8* tcPathname);
 
 		// Write the output
 		lcBxmlPathname = oss_changePathnameExtension(tcPathname, ".bxml");
-		mc_saveSnippetsToBxml(lcBxmlPathname, &lseProg, true);
+		mc_saveSnippetsToBxml(lcBxmlPathname, &prog, true);
 		oss_free(lcBxmlPathname);
 
 

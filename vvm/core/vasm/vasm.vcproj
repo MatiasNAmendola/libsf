@@ -295,48 +295,48 @@
 					/>
 				</FileConfiguration>
 			</File>
-		</Filter>
-		<Filter
-			Name="Reference"
-			>
 			<Filter
-				Name="libraries"
+				Name="Reference"
 				>
 				<Filter
-					Name="sha1"
+					Name="libraries"
 					>
-					<File
-						RelativePath="..\..\..\utils\sha1\sha1.cpp"
+					<Filter
+						Name="sha1"
 						>
-						<FileConfiguration
-							Name="Debug|Win32"
-							ExcludedFromBuild="true"
+						<File
+							RelativePath="..\..\..\utils\sha1\sha1.cpp"
 							>
-							<Tool
-								Name="VCCLCompilerTool"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="Release|Win32"
-							ExcludedFromBuild="true"
+							<FileConfiguration
+								Name="Debug|Win32"
+								ExcludedFromBuild="true"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="Release|Win32"
+								ExcludedFromBuild="true"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="debug_vasm|Win32"
+								ExcludedFromBuild="true"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+								/>
+							</FileConfiguration>
+						</File>
+						<File
+							RelativePath="..\..\..\utils\sha1\sha1.h"
 							>
-							<Tool
-								Name="VCCLCompilerTool"
-							/>
-						</FileConfiguration>
-						<FileConfiguration
-							Name="debug_vasm|Win32"
-							ExcludedFromBuild="true"
-							>
-							<Tool
-								Name="VCCLCompilerTool"
-							/>
-						</FileConfiguration>
-					</File>
-					<File
-						RelativePath="..\..\..\utils\sha1\sha1.h"
-						>
-					</File>
+						</File>
+					</Filter>
 				</Filter>
 			</Filter>
 		</Filter>
