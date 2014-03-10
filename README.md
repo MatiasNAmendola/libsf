@@ -1,8 +1,12 @@
-        This repository contains all source code maintained
-        by the Liberty Software Foundation.
+        This repository contains all source code maintained by the Liberty Software
+        Foundation (LibSF).  Our talents and skills given back to God, from whom they
+		come, being used to serve His Kingdom here upon this Earth.  In much prayer and
+		supplication, knowing that He is able to do exceedingly abundantly beyond any
+		of our needs.  Jesus Christ, our Savior, to Him be all the glory.
 
 --------------
 
+        Mar.09.2014 - Development is ongoing.  Working on VASM, VDeb, and the VVM execution engine per OBED 0.70.
         Jan.28.2014 - Development is ongoing.  Slow and steady wins the race. :-)
         May.11.2013 - Development of WhiteBox continues.  About 2500 lines of code.
         Apr.29.2013 - Development on Visual FreePro is suspended pending the completion of WhiteBox.
@@ -14,10 +18,10 @@
         which is comprised of several sub-components:
 
         (1) VVM    - The Visual FreePro Virtual Machine top-level program.
-        (2) VVMOSS - The VVM Operating System Specific code.
-        (3) VVMMC  - The VVM Machine Code assembler, disassembler for debugger.
+        (2) OSS    - The VVM Operating System Specific code.
+        (3) MC     - The VVM Machine Code assembler, disassembler for debugger.
         (4) VASM   - The VVM source code assembler.
-        (5) VDebug - The VVM Debugger (a compiled DLL).
+        (5) VDeb   - The VVM Debugger (a compiled DLL).
         (6) VDebugLauncher - The VVM Debugger launcher (tells VVM to load the debugger DLL).
         (7) Localization - Supporting resource DLLs for English and Spanish.
         (8) For more information, see:  https://github.com/RickCHodgin/libsf/blob/master/vvm/how_to_contribute.txt
@@ -40,12 +44,12 @@ vvm
         coded to that location.  In time, this will be made relative.
 
 
-vvm\vvmoss
+vvm\oss
 ====
         VVM's Operating System Specific code.
 
 
-vvm\vvmmc
+vvm\mc
 ====
         VVM's Machine Code support DLL. It is a common/shared component
         used to carry out work converting assembly source code into VVM
@@ -54,7 +58,7 @@ vvm\vvmmc
         to and from the VVM's executable file format, which is RXML format.
 
 
-vvm\vdebug
+vvm\vdeb
 ====
         A VVM debugger used for debugging native VVM programs.  The
         debugger is resource localized through vdebugenu.dll, with "enu"
@@ -88,14 +92,15 @@ apps\whitebox
 ====
         WhiteBox is a non-linear audio/video editor.  Jan.28.2014 On hold
         pending additional completion of the virtual machine and supporting
-        infrastructure.
+        infrastructure.  However, still planned.
 
 
 Future Plans
 ====
-        Jul.15.2014 - (planned) Visual FreePro 0.60 is released, able to execute several commands.
+        Jul.15.2014 - (planned) Visual FreePro 0.70 is released, able to execute several commands.
 
 
 Timeline
 ====
         See the https://github.com/RickCHodgin/libsf-full for the historic timeline.
+        See this repository for day-to-day updates and changes.

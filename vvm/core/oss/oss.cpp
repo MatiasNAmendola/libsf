@@ -2853,6 +2853,12 @@ storeFirstOne:
 //		of those are processed in turn for continually nested casks.
 //
 //////
+	struct _iSCaskNesting
+	{
+		SLL*		next;
+		u32			iCode;
+	};
+
 	u32 CALLTYPE oss_combineAllCasks(SOssComp* firstComp)
 	{
 		u32			lnCount;
