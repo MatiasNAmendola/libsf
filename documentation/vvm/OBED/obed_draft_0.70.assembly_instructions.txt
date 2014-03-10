@@ -254,7 +254,7 @@
 	157		- debug								; debugger breakpoint
 	158		- sleep								; releases timeslice execution until next scheduling
 	159		- nop								; no operation
-	160		- nuserved
+	160		- error								; Signal an error number, used to allow source code in error to still compile
 	161		- nuserved
 	162		- nuserved
 	163		- set.exsnip [param1]				; set the default exception snippet to [param1]
