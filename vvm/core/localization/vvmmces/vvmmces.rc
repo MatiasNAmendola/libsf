@@ -93,6 +93,7 @@ BEGIN
                             "GT:'DSNIP' definiciones no se permite en tiempo de compilación"
     IDS_ERROR_INTERNAL_COMPILER_ERROR "GT:error interno del compilador"
     IDS_ERROR_EXPECTED_QUOTED_PATHNAME "GT:espera un nombre de ruta citado"
+    IDS_CASK_NESTING_ERROR  "GT:error de anidamiento barrica"
 END
 
 #endif    // English (U.S.) resources

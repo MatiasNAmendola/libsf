@@ -185,13 +185,14 @@ EXPORTS
 	vvm_deriveRGBA
 	vvm_getPredictableSequentialPattern
 
-	vvm_ll_create
-	vvm_ll_delete
-	vvm_ll_deleteWithCallback
-	vvm_ll_insert
-	vvm_ll_orphanize
-	vvm_ll_deleteChain
-	vvm_ll_deleteChainWithCallback
+	vvm_ll_appendNode
+	vvm_ll_createNode
+	vvm_ll_deleteNode
+	vvm_ll_deleteNodeWithCallback
+	vvm_ll_insertNode
+	vvm_ll_orphanizeNode
+	vvm_ll_deleteNodeChain
+	vvm_ll_deleteNodeChainWithCallback
 	vvm_ll_iterateViaCallback
 	vvm_ll_iterateBackwardViaCallback
 	vvm_ll_getFirstNode

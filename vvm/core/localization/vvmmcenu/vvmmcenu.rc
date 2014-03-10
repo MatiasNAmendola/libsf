@@ -92,6 +92,7 @@ BEGIN
                             "'DSNIP' definitions not allowed at compile time"
     IDS_ERROR_INTERNAL_COMPILER_ERROR "internal compiler error"
     IDS_ERROR_EXPECTED_QUOTED_PATHNAME "expected a quoted pathname"
+    IDS_CASK_NESTING_ERROR  "cask nesting error"
 END
 
 #endif    // English (U.S.) resources

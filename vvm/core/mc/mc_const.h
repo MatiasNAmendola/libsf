@@ -50,23 +50,6 @@
 	const s8		cgcVvmmcVersion[]								= "MC.DLL Version 0.70";		// The format of this version string will remain consistent throughout all future releases
 	const s8		cgcUnableToLocateResource[]						= "Unable to locate resource";
 
-	const s8		cgcCaskRoundOpenParams[]						= "(||";
-	const s8		cgcCaskRoundCloseParams[]						= "||)";
-	const s8		cgcCaskSquareOpenParams[]						= "[||";
-	const s8		cgcCaskSquareCloseParams[]						= "||]";
-	const s8		cgcCaskTriangleOpenParams[]						= "<||";
-	const s8		cgcCaskTriangleCloseParams[]					= "||>";
-	const s8		cgcCaskTildeOpenParams[]						= "~||";
-	const s8		cgcCaskTildeCloseParams[]						= "||~";
-	const s8		cgcCaskRoundOpen[]								= "(|";
-	const s8		cgcCaskRoundClose[]								= "|)";
-	const s8		cgcCaskSquareOpen[]								= "[|";
-	const s8		cgcCaskSquareClose[]							= "|]";
-	const s8		cgcCaskTriangleOpen[]							= "<|";
-	const s8		cgcCaskTriangleClose[]							= "|>";
-	const s8		cgcCaskTildeOpen[]								= "~|";
-	const s8		cgcCaskTildeClose[]								= "|~";
-
 
 
 
@@ -162,22 +145,6 @@
 	const u32		_MC_ICODE_DSNIP									= 129;
 	const u32		_MC_ICODE_SNIP									= 130;
 	const u32		_MC_ICODE_DLL_FUNCTION							= 131;
-	const u32		_MC_ICODE_CASK_ROUND_OPEN_PARAMS				= 132;
-	const u32		_MC_ICODE_CASK_ROUND_CLOSE_PARAMS				= 133;
-	const u32		_MC_ICODE_CASK_SQUARE_OPEN_PARAMS				= 134;
-	const u32		_MC_ICODE_CASK_SQUARE_CLOSE_PARAMS				= 135;
-	const u32		_MC_ICODE_CASK_TRIANGLE_OPEN_PARAMS				= 136;
-	const u32		_MC_ICODE_CASK_TRIANGLE_CLOSE_PARAMS			= 137;
-	const u32		_MC_ICODE_CASK_TILDE_OPEN_PARAMS				= 138;
-	const u32		_MC_ICODE_CASK_TILDE_CLOSE_PARAMS				= 139;
-	const u32		_MC_ICODE_CASK_ROUND_OPEN						= 140;
-	const u32		_MC_ICODE_CASK_ROUND_CLOSE						= 141;
-	const u32		_MC_ICODE_CASK_SQUARE_OPEN						= 142;
-	const u32		_MC_ICODE_CASK_SQUARE_CLOSE						= 143;
-	const u32		_MC_ICODE_CASK_TRIANGLE_OPEN					= 144;
-	const u32		_MC_ICODE_CASK_TRIANGLE_CLOSE					= 145;
-	const u32		_MC_ICODE_CASK_TILDE_OPEN						= 146;
-	const u32		_MC_ICODE_CASK_TILDE_CLOSE						= 147;
 	const u32		_MC_ICODE_LINE									= 148;
 	const u32		_MC_ICODE_COMMENT								= 149;
 

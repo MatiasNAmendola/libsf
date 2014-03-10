@@ -2844,30 +2844,33 @@ storeFirstOne:
 //		or double casks.
 //
 //		For example:
-//			Valid cask:		(|cask|)						Left=(|			right=|)
-//			Valid cask:		(|cask|data||)					Left=(|			right=||)
-//			Valid cask:		(||data|cask|)					Left=(||		right=|)
-//			Valid cask:		(||data|cask|data||)			Left=(||		right=||)
+//			Normal cask:					(|cask|)						Left=(|			right=|)			single,single
+//			Return params cask:				(||data|cask|)					Left=(||		right=|)			double,single
+//			Passed params cask:				(|cask|data||)					Left=(|			right=||)			single,double
+//			Return and passed params cask:	(||data|cask|data||)			Left=(||		right=||)			double,double
+//
+//		The form is the same repeats for all cask types, but the matched pairing must be appropriate.
+//			(|reference|)
+//			[|definition|]
+//			<|logic|>
+//			~|general|~
 //
 //		All content between casks are shunted to their comp->childComps member, and then each
 //		of those are processed in turn for continually nested casks.
 //
 //////
-	struct _iSCaskNesting
+	u32 CALLTYPE oss_combineAllCasks(SOssComp* firstComp, bool* tlNestingError, SOssComp** compError)
 	{
-		SLL*		next;
-		u32			iCode;
-	};
-
-	u32 CALLTYPE oss_combineAllCasks(SOssComp* firstComp)
-	{
-		u32			lnCount;
-		SOssComp*	compNext;
-		SOssComp*	comp;
+		u32					lnCount;
+		SOssComp*			compNext;
+		SOssComp*			comp;
+		_iSCaskNesting*		nestRoot;
+		_iSCaskNesting*		thisNest;
 
 
 		// Make sure our environment is sane
-		lnCount = 0;
+		lnCount		= 0;
+		nestRoot	= NULL;
 		if (firstComp && firstComp->line && firstComp->line->base)
 		{
 			// Iterate beginning at the first component
@@ -2877,8 +2880,92 @@ storeFirstOne:
 				// Get the next component
 				compNext = (SOssComp*)comp->ll.next;
 
-// TODO:  Working here, we need to create a stack for entry into the potentially nested cask definitions.
-// Note:  All comps before the name go into the firstCompUp, an all comps after the name go into firstCompsDown.
+				// Is it an opening or closing cask side?
+				switch (comp->iCode)
+				{
+					case _MC_ICODE_CASK_ROUND_OPEN_PARAMS:
+					case _MC_ICODE_CASK_SQUARE_OPEN_PARAMS:
+					case _MC_ICODE_CASK_TRIANGLE_OPEN_PARAMS:
+					case _MC_ICODE_CASK_TILDE_OPEN_PARAMS:
+					case _MC_ICODE_CASK_ROUND_OPEN:
+					case _MC_ICODE_CASK_SQUARE_OPEN:
+					case _MC_ICODE_CASK_TRIANGLE_OPEN:
+					case _MC_ICODE_CASK_TILDE_OPEN:
+						// Deeper nesting
+						thisNest = (_iSCaskNesting*)vvm_ll_appendNode(&nestRoot, thisNest, NULL, thisNest, vvm_getNextUniqueId(), sizeof(_iSCaskNesting) - sizeof(SLL));
+						if (!thisNest)
+						{
+							// Error allocating
+							*tlNestingError	= true;
+							*compError		= comp;
+							return(lnCount);
+						}
+
+						// Store this nesting information
+						thisNest->iCode		= comp->iCode;
+						thisNest->compStart	= comp;
+						thisNest->compName	= NULL;
+						break;
+
+					case _MC_ICODE_CASK_ROUND_CLOSE_PARAMS:
+					case _MC_ICODE_CASK_ROUND_CLOSE:
+						// The current nest level must match up
+						if (!thisNest || (thisNest->iCode != _MC_ICODE_CASK_ROUND_OPEN_PARAMS && thisNest->iCode != _MC_ICODE_CASK_ROUND_OPEN))
+						{
+							// Nesting error
+							*tlNestingError	= true;
+							*compError		= comp;
+							return(lnCount);
+						}
+// TODO:  working here
+// Copy all of the comps between to the thisNest->compStart->ll.next and comp->ll.prev (inclusive) to thisNest-compStart->childCompsUp and childCompsDown depending on whether or not they are before the name, or after
+// Then recursively process that block for any casks.
+						thisNest = (_iSCaskNesting*)thisNest->ll.prev;
+						break;
+
+					case _MC_ICODE_CASK_SQUARE_CLOSE_PARAMS:
+					case _MC_ICODE_CASK_SQUARE_CLOSE:
+						if (!thisNest || (thisNest->iCode != _MC_ICODE_CASK_SQUARE_OPEN_PARAMS && thisNest->iCode != _MC_ICODE_CASK_SQUARE_OPEN))
+						{
+							// Nesting error
+							*tlNestingError	= true;
+							*compError		= comp;
+							return(lnCount);
+						}
+// TODO:  same here
+						thisNest = (_iSCaskNesting*)thisNest->ll.prev;
+						break;
+
+					case _MC_ICODE_CASK_TRIANGLE_CLOSE_PARAMS:
+					case _MC_ICODE_CASK_TRIANGLE_CLOSE:
+						if (!thisNest || (thisNest->iCode != _MC_ICODE_CASK_TRIANGLE_OPEN_PARAMS && thisNest->iCode != _MC_ICODE_CASK_SQUARE_OPEN))
+						{
+							// Nesting error
+							*tlNestingError	= true;
+							*compError		= comp;
+							return(lnCount);
+						}
+// TODO:  same here
+						thisNest = (_iSCaskNesting*)thisNest->ll.prev;
+						break;
+
+					case _MC_ICODE_CASK_TILDE_CLOSE_PARAMS:
+					case _MC_ICODE_CASK_TILDE_CLOSE:
+						if (!thisNest || (thisNest->iCode != _MC_ICODE_CASK_TILDE_OPEN_PARAMS && thisNest->iCode != _MC_ICODE_CASK_TILDE_OPEN))
+						{
+							// Nesting error
+							*tlNestingError	= true;
+							*compError		= comp;
+							return(lnCount);
+						}
+// TODO:  same here
+						thisNest = (_iSCaskNesting*)thisNest->ll.prev;
+						break;
+
+					//default:
+					// No, it is some other cask
+					//break;
+				}
 
 				// Move to next component
 				comp = compNext;

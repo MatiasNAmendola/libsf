@@ -321,13 +321,14 @@
 		const s8		cgcVvmV1DeriveRGBA[]							= "vvm_deriveRGBA";
 		const s8		cgcVvmV1GetPredictableSequentialPattern[]		= "vvm_getPredictableSequentialPattern";
 
-		const s8		cgcVvmV1LlCreate[]								= "vvm_ll_create";
-		const s8		cgcVvmV1LlDelete[]								= "vvm_ll_delete";
-		const s8		cgcVvmV1LlDeleteWithCallback[]					= "vvm_ll_deleteWithCallback";
-		const s8		cgcVvmV1LlInsert[]								= "vvm_ll_insert";
-		const s8		cgcVvmV1LlOrphanize[]							= "vvm_ll_orphanize";
-		const s8		cgcVvmV1LlDeleteChain[]							= "vvm_ll_deleteChain";
-		const s8		cgcVvmV1LlDeleteChainWithCallback[]				= "vvm_ll_deleteChainWithCallback";
+		const s8		cgcVvmV1LlAppendNode[]							= "vvm_ll_appendNode";
+		const s8		cgcVvmV1LlCreateNode[]							= "vvm_ll_createNode";
+		const s8		cgcVvmV1LlDeleteNode[]							= "vvm_ll_deleteNode";
+		const s8		cgcVvmV1LlDeleteNodeWithCallback[]				= "vvm_ll_deleteNodeWithCallback";
+		const s8		cgcVvmV1LlInsertNode[]							= "vvm_ll_insertNode";
+		const s8		cgcVvmV1LlOrphanizeNode[]						= "vvm_ll_orphanizeNode";
+		const s8		cgcVvmV1LlDeleteNodeChain[]						= "vvm_ll_deleteNodeChain";
+		const s8		cgcVvmV1LlDeleteNodeChainWithCallback[]			= "vvm_ll_deleteNodeChainWithCallback";
 		const s8		cgcVvmV1LlIterateViaCallback[]					= "vvm_ll_iterateViaCallback";
 		const s8		cgcVvmV1LlIterateBackwardViaCallback[]			= "vvm_ll_iterateBackwardViaCallback";
 		const s8		cgcVvmV1LlGetFirstNode[]						= "vvm_ll_getFirstNode";
@@ -711,13 +712,14 @@
 		void			(CALLTYPE *vvm_deriveRGBA)								(u32 tnColor, u8* tnRed, u8* tnGrn, u8* tnBlu, f32* tfAlp);
 		u8				(CALLTYPE *vvm_getPredictableSequentialPattern)			(u32 tnIterator, u32 tnValue);
 
-		SLL*			(CALLTYPE *vvm_ll_create)								(SLL* nodePrev, SLL* nodeNext, u64 tnUniqueId, u32  tnSize);
-		void			(CALLTYPE *vvm_ll_delete)								(SLL* node);
-		void			(CALLTYPE *vvm_ll_deleteWithCallback)					(SLLCallback* cb);
-		bool			(CALLTYPE *vvm_ll_insert)								(SLL* node, SLL* nodeRef, bool tlAfter);
-		void			(CALLTYPE *vvm_ll_orphanize)							(SLL* node);
-		void			(CALLTYPE *vvm_ll_deleteChain)							(SLL** root);
-		void			(CALLTYPE *vvm_ll_deleteChainWithCallback)				(SLLCallback* cb);
+		SLL*			(CALLTYPE *vvm_ll_appendNode)							(SLL** root, SLL* nodeHint, SLL* nodeNext, SLL* nodePrev, u64 tnUniqueId, u32 tnSize);
+		SLL*			(CALLTYPE *vvm_ll_createNode)							(SLL* nodePrev, SLL* nodeNext, u64 tnUniqueId, u32  tnSize);
+		void			(CALLTYPE *vvm_ll_deleteNode)							(SLL* node);
+		void			(CALLTYPE *vvm_ll_deleteNodesWithCallback)				(SLLCallback* cb);
+		bool			(CALLTYPE *vvm_ll_insertNode)							(SLL* node, SLL* nodeRef, bool tlAfter);
+		void			(CALLTYPE *vvm_ll_orphanizeNode)						(SLL* node);
+		void			(CALLTYPE *vvm_ll_deleteNodeChain)						(SLL** root);
+		void			(CALLTYPE *vvm_ll_deleteNodeChainWithCallback)			(SLLCallback* cb);
 		void			(CALLTYPE *vvm_ll_iterateViaCallback)					(SLLCallback* cb);
 		void			(CALLTYPE *vvm_ll_iterateBackwardViaCallback)			(SLLCallback* cb);
 		SLL*			(CALLTYPE *vvm_ll_getFirstNode)							(SLL* node);
@@ -1047,13 +1049,14 @@
 			(void*)&vvm_deriveRGBA,											(void*)cgcVvmV1DeriveRGBA,
 			(void*)&vvm_getPredictableSequentialPattern,					(void*)cgcVvmV1GetPredictableSequentialPattern,
 
-			(void*)&vvm_ll_create,											(void*)cgcVvmV1LlCreate,
-			(void*)&vvm_ll_delete,											(void*)cgcVvmV1LlDelete,
-			(void*)&vvm_ll_deleteWithCallback,								(void*)cgcVvmV1LlDeleteWithCallback,
-			(void*)&vvm_ll_insert,											(void*)cgcVvmV1LlInsert,
-			(void*)&vvm_ll_orphanize,										(void*)cgcVvmV1LlOrphanize,
-			(void*)&vvm_ll_deleteChain,										(void*)cgcVvmV1LlDeleteChain,
-			(void*)&vvm_ll_deleteChainWithCallback,							(void*)cgcVvmV1LlDeleteChainWithCallback,
+			(void*)&vvm_ll_appendNode,										(void*)cgcVvmV1LlAppendNode,
+			(void*)&vvm_ll_createNode,										(void*)cgcVvmV1LlCreateNode,
+			(void*)&vvm_ll_deleteNode,										(void*)cgcVvmV1LlDeleteNode,
+			(void*)&vvm_ll_deleteNodesWithCallback,							(void*)cgcVvmV1LlDeleteNodeWithCallback,
+			(void*)&vvm_ll_insertNode,										(void*)cgcVvmV1LlInsertNode,
+			(void*)&vvm_ll_orphanizeNode,									(void*)cgcVvmV1LlOrphanizeNode,
+			(void*)&vvm_ll_deleteNodeChain,									(void*)cgcVvmV1LlDeleteNodeChain,
+			(void*)&vvm_ll_deleteNodeChainWithCallback,						(void*)cgcVvmV1LlDeleteNodeChainWithCallback,
 			(void*)&vvm_ll_iterateViaCallback,								(void*)cgcVvmV1LlIterateViaCallback,
 			(void*)&vvm_ll_iterateBackwardViaCallback,						(void*)cgcVvmV1LlIterateBackwardViaCallback,
 			(void*)&vvm_ll_getFirstNode,									(void*)cgcVvmV1LlGetFirstNode,

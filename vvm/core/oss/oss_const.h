@@ -51,3 +51,45 @@
 //////
 	const s8		cgcOssVersion[]							= "OSS.DLL Version 0.70";			// The format of this version string will remain consistent throughout all future releases
 	const wchar_t	cgw1msTimer[]							= L"oss_1msTimer";
+
+
+
+
+//////////
+//
+// Used for cask definition processing
+//
+//////
+	const s8		cgcCaskRoundOpenParams[]						= "(||";
+	const s8		cgcCaskRoundCloseParams[]						= "||)";
+	const s8		cgcCaskSquareOpenParams[]						= "[||";
+	const s8		cgcCaskSquareCloseParams[]						= "||]";
+	const s8		cgcCaskTriangleOpenParams[]						= "<||";
+	const s8		cgcCaskTriangleCloseParams[]					= "||>";
+	const s8		cgcCaskTildeOpenParams[]						= "~||";
+	const s8		cgcCaskTildeCloseParams[]						= "||~";
+	const s8		cgcCaskRoundOpen[]								= "(|";
+	const s8		cgcCaskRoundClose[]								= "|)";
+	const s8		cgcCaskSquareOpen[]								= "[|";
+	const s8		cgcCaskSquareClose[]							= "|]";
+	const s8		cgcCaskTriangleOpen[]							= "<|";
+	const s8		cgcCaskTriangleClose[]							= "|>";
+	const s8		cgcCaskTildeOpen[]								= "~|";
+	const s8		cgcCaskTildeClose[]								= "|~";
+
+	const u32		_MC_ICODE_CASK_ROUND_OPEN_PARAMS				= 1000001;
+	const u32		_MC_ICODE_CASK_ROUND_CLOSE_PARAMS				= 1000002;
+	const u32		_MC_ICODE_CASK_SQUARE_OPEN_PARAMS				= 1000003;
+	const u32		_MC_ICODE_CASK_SQUARE_CLOSE_PARAMS				= 1000004;
+	const u32		_MC_ICODE_CASK_TRIANGLE_OPEN_PARAMS				= 1000005;
+	const u32		_MC_ICODE_CASK_TRIANGLE_CLOSE_PARAMS			= 1000006;
+	const u32		_MC_ICODE_CASK_TILDE_OPEN_PARAMS				= 1000007;
+	const u32		_MC_ICODE_CASK_TILDE_CLOSE_PARAMS				= 1000008;
+	const u32		_MC_ICODE_CASK_ROUND_OPEN						= 1000009;
+	const u32		_MC_ICODE_CASK_ROUND_CLOSE						= 1000010;
+	const u32		_MC_ICODE_CASK_SQUARE_OPEN						= 1000011;
+	const u32		_MC_ICODE_CASK_SQUARE_CLOSE						= 1000012;
+	const u32		_MC_ICODE_CASK_TRIANGLE_OPEN					= 1000013;
+	const u32		_MC_ICODE_CASK_TRIANGLE_CLOSE					= 1000014;
+	const u32		_MC_ICODE_CASK_TILDE_OPEN						= 1000015;
+	const u32		_MC_ICODE_CASK_TILDE_CLOSE						= 1000016;

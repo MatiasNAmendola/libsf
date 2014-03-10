@@ -521,8 +521,10 @@
 										u64			tnAllocSize,			bool		tlUseOssAlloc		)
 	{
 		u64				lnLineCount, lnLength;
+		bool			llCaskNestingErrors;
 		SOssLine*		line;
 		SOssComp*		comp;
+		SOssComp*		compError;
 		SSourceFile*	lsf;
 
 
@@ -584,13 +586,15 @@
 				//////
 					comp = oss_translateSOssLinesToSOssComps(cgcKeywordOperators, line);
 					// Note:  comp is not used here, but it is included in source code to indicate at a glance what is returned
+
 #pragma message("mc_sup.cpp::imc_loadSourceFile() contains several validation functions which slow down performance.  These can be removed after development and strong testing.")
 SStartEndCallback cb;
+// Validate
 cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
 
 //if (iIsNeedleInHaystack(line->base + line->start + line->whitespace, line->length, "_", 1))
-//	oss_writeSOssLineSequenceCompsToDisk("\\libsf\\vvm\\vasm\\test\\testoutcomps.txt", &lsf->lines);
+//	oss_writeSOssLineSequenceCompsToDisk("\\libsf\\vvm\\core\\vasm\\test\\testoutcomps.txt", &lsf->lines);
 //	_asm nop;
 
 				//////////
@@ -598,61 +602,77 @@ vvm_SEChain_validate(&lsf->lines, &cb);
 				//////
 // TODO:  (future enhancement) will need to continually combine items which are related, such as a variable _like_this_14_abc into a single alphanumeric
 					oss_combine2SOssComps			(line, _MC_ICODE_UNDERSCORE,		_MC_ICODE_NUMERIC,		_MC_ICODE_ALPHANUMERIC);
+// Validate
 cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
 
 					oss_combine2SOssComps			(line, _MC_ICODE_ALPHA,			_MC_ICODE_UNDERSCORE,	_MC_ICODE_ALPHA);
+// Validate
 cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
 
 					oss_combine2SOssComps			(line, _MC_ICODE_UNDERSCORE,		_MC_ICODE_ALPHA,			_MC_ICODE_ALPHA);
+// Validate
 cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
 
 					oss_combine2SOssComps			(line, _MC_ICODE_ALPHA,			_MC_ICODE_NUMERIC,		_MC_ICODE_ALPHANUMERIC);
+// Validate
 cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
 
 					oss_combine2SOssComps			(line, _MC_ICODE_ALPHANUMERIC,	_MC_ICODE_UNDERSCORE,	_MC_ICODE_ALPHANUMERIC);
+// Validate
 cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
 
 					oss_combine3SOssComps			(line, _MC_ICODE_NUMERIC,		_MC_ICODE_DOT,		_MC_ICODE_NUMERIC,		_MC_ICODE_NUMERIC);
+// Validate
 cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
 
 //if (iIsNeedleInHaystack(line->base + line->start + line->whitespace, line->length, "_", 1))
-//	oss_writeSOssLineSequenceCompsToDisk("\\libsf\\vvm\\vasm\\test\\testoutcomps.txt", &lsf->lines);
+//	oss_writeSOssLineSequenceCompsToDisk("\\libsf\\vvm\\core\\vasm\\test\\testoutcomps.txt", &lsf->lines);
 //	_asm nop;
 
 				//////////
 				// Fixup quotes, comments
 				//////
 					oss_combineAllBetweenSOssComps	(line, _MC_ICODE_SINGLE_QUOTE,		_MC_ICODE_SINGLE_QUOTED_TEXT);
+// Validate
 cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
 
 					oss_combineAllBetweenSOssComps	(line, _MC_ICODE_DOUBLE_QUOTE,		_MC_ICODE_DOUBLE_QUOTED_TEXT);
+// Validate
 cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
 
 					oss_combineAllAfterSOssComp		(line, _MC_ICODE_COMMENT);
+// Validate
 cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
 
 
 				//////////
-				// Fixup casks
+				// Fixup casks, report any errors
 				//////
-					oss_combineAllCasks((SOssComp*)line->comps.root->ptr);
+					oss_combineAllCasks((SOssComp*)line->comps.root->ptr, &llCaskNestingErrors, &compError);
+					if (llCaskNestingErrors)
+						imc_appendError(&lsf->errors, line, compError, IDS_CASK_NESTING_ERROR);
+// Validate
 cb._func = (u64)iimc_validateStartEndCompsCallback;
 vvm_SEChain_validate(&lsf->lines, &cb);
-if (	iIsNeedleInHaystack(line->base + line->start + line->whitespace, (u32)line->length, "(|", 2)
-	||	iIsNeedleInHaystack(line->base + line->start + line->whitespace, (u32)line->length, "[|", 2)
-	||	iIsNeedleInHaystack(line->base + line->start + line->whitespace, (u32)line->length, "<|", 2)
-	||	iIsNeedleInHaystack(line->base + line->start + line->whitespace, (u32)line->length, "~|", 2))
-	oss_writeSOssLineSequenceCompsToDisk("\\libsf\\vvm\\vasm\\test\\testoutcomps.txt", &lsf->lines);
+
+// Examine the conversion if it's a cask
+if (		iIsNeedleInHaystack(line->base + line->start + line->whitespace, (u32)line->length, "(|", 2)
+		||	iIsNeedleInHaystack(line->base + line->start + line->whitespace, (u32)line->length, "[|", 2)
+		||	iIsNeedleInHaystack(line->base + line->start + line->whitespace, (u32)line->length, "<|", 2)
+		||	iIsNeedleInHaystack(line->base + line->start + line->whitespace, (u32)line->length, "~|", 2))
+{
+	oss_writeSOssLineSequenceCompsToDisk("\\libsf\\vvm\\core\\vasm\\test\\testoutcomps.txt", &lsf->lines);
 	_asm nop;
+}
 
 
 				//////////

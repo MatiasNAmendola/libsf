@@ -3466,17 +3466,58 @@ _asm nop;
 
 
 
+//////////
+//
+// Append a new node to the list, and return the pointer.
+// The nodeHint is provided and can be used to find the end of the chain faster than iterating
+// from the root.  Typically it is the last returned node.  However, if NULL, this process will
+// iterate from the root node forward.
+//
+//////
+	SLL* CALLTYPE vvm_ll_appendNode(SLL** root, SLL* nodeHint, SLL* nodeNext, SLL* nodePrev, u64 tnUniqueId, u32 tnSize)
+	{
+		SLL* node;
+
+
+		// Make sure our environment is sane
+		node = NULL;
+		if (root)
+		{
+			// Create a new node
+			node = vvm_ll_createNode(nodePrev, nodeNext, tnUniqueId, tnSize);
+			
+			// Append it to the chain
+			if (*root)
+			{
+				// There is already data
+				if (!nodeHint)
+					nodeHint = *root;
+
+				// Iterate forward until we reach the end
+				while (nodeHint->next)
+					nodeHint = nodeHint->next;
+
+				// Append as the next item from where we are
+				nodeHint->next = node;
+
+			} else {
+				// This will be the first entry
+				*root = node;
+			}
+		}
+		// Indicate our success or failure
+		return(node);
+	}
+
+
+
 
 //////////
 //
 // Creates a new 2-way linked list with optional nodePrev and nodeNext info, using
-// the indicated size for the allocation (which includes the SLL portion at the head).
-// The value of tnSize is the number of extra bytes required for the structure.  It
-// should always be greater than zero because if it is only zero, that means only a
-// raw SLL will be created.
-//
+// the indicated size for the allocation (which is beyond the SLL portion at the head).
 //////
-	SLL* CALLTYPE vvm_ll_create(SLL* nodePrev, SLL* nodeNext, u64 tnUniqueId, u32 tnSize)
+	SLL* CALLTYPE vvm_ll_createNode(SLL* nodePrev, SLL* nodeNext, u64 tnUniqueId, u32 tnSize)
 	{
 		SLL* node;
 
@@ -3508,7 +3549,7 @@ _asm nop;
 // Called to delete a link list node.  If need be it orphanizes the node first.
 //
 //////
-	void CALLTYPE vvm_ll_delete(SLL* node)
+	void CALLTYPE vvm_ll_deleteNode(SLL* node)
 	{
 		if (node)
 		{
@@ -3516,7 +3557,7 @@ _asm nop;
 			// Disconnect
 			//////
 				if (node->prev || node->next)
-					vvm_ll_orphanize(node);
+					vvm_ll_orphanizeNode(node);
 
 
 			//////////
@@ -3534,7 +3575,7 @@ _asm nop;
 // Called to delete a link list node with a callback.  If need be it orphanizes the node first.
 //
 //////
-	void CALLTYPE vvm_ll_deleteWithCallback(SLLCallback* cb)
+	void CALLTYPE vvm_ll_deleteNodesWithCallback(SLLCallback* cb)
 	{
 		if (cb && cb->node)
 		{
@@ -3542,7 +3583,7 @@ _asm nop;
 			// Disconnect
 			//////
 				if (cb->node->prev || cb->node->next)
-					vvm_ll_orphanize(cb->node);
+					vvm_ll_orphanizeNode(cb->node);
 
 
 			//////////
@@ -3568,7 +3609,7 @@ _asm nop;
 // node is already connected, it is disconnected.
 //
 //////
-	bool CALLTYPE vvm_ll_insert(SLL* node,  SLL* nodeRef,  bool tlAfter)
+	bool CALLTYPE vvm_ll_insertNode(SLL* node,  SLL* nodeRef,  bool tlAfter)
 	{
 // TODO:  UNTESTED CODE
 		// Is our environment sane?
@@ -3578,7 +3619,7 @@ _asm nop;
 			// Disconnect
 			//////
 				if (node->prev || node->next)
-					vvm_ll_orphanize(node);
+					vvm_ll_orphanizeNode(node);
 
 
 			//////////
@@ -3634,7 +3675,7 @@ _asm nop;
 // Disconnects a node from its existing chain
 //
 //////
-	void CALLTYPE vvm_ll_orphanize(SLL* node)
+	void CALLTYPE vvm_ll_orphanizeNode(SLL* node)
 	{
 // TODO:  UNTESTED CODE
 		// Is our environment sane?
@@ -3669,7 +3710,7 @@ _asm nop;
 // Called to delete the entire chain (beginning from where it's at
 //
 //////
-	void CALLTYPE vvm_ll_deleteChain(SLL** root)
+	void CALLTYPE vvm_ll_deleteNodeChain(SLL** root)
 	{
 		SLL* node;
 		SLL* nodeNext;
@@ -3706,7 +3747,7 @@ _asm nop;
 // The callback should not delete the node, but only anything the node points to.
 //
 //////
-	void CALLTYPE vvm_ll_deleteChainWithCallback(SLLCallback* cb)
+	void CALLTYPE vvm_ll_deleteNodeChainWithCallback(SLLCallback* cb)
 	{
 		SLL* nodeNext;
 

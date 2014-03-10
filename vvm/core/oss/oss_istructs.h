@@ -154,6 +154,23 @@
 	};
 
 
+
+
 //////////
 // Note:  There are sound plugin structures in vo_plugins.h
 //////
+
+
+
+
+//////////
+// Used for cask processing on SOssLines, and SOssComps
+//////
+	struct _iSCaskNesting
+	{
+		SLL*		ll;				// Pointer up and down the cask nesting levels
+
+		u32			iCode;			// User-defined component code
+		SOssComp*	compStart;		// The comp of the opening side
+		SOssComp*	compName;		// Pointer to the cask name
+	};
