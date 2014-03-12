@@ -2895,9 +2895,10 @@ storeFirstOne:
 						thisNest = (_iSCaskNesting*)vvm_ll_appendNode(&nestRoot, thisNest, NULL, thisNest, vvm_getNextUniqueId(), sizeof(_iSCaskNesting) - sizeof(SLL));
 						if (!thisNest)
 						{
-							// Error allocating
+							// Error allocating, which is odd, but we'll report the nesting error anyway
 							*tlNestingError	= true;
 							*compError		= comp;
+							vvm_ll_deleteNodeChain(&nestRoot);
 							return(lnCount);
 						}
 
@@ -2912,55 +2913,81 @@ storeFirstOne:
 						// The current nest level must match up
 						if (!thisNest || (thisNest->iCode != _MC_ICODE_CASK_ROUND_OPEN_PARAMS && thisNest->iCode != _MC_ICODE_CASK_ROUND_OPEN))
 						{
-							// Nesting error
+							// Mismatched nesting
 							*tlNestingError	= true;
 							*compError		= comp;
+							vvm_ll_deleteNodeChain(&nestRoot);
 							return(lnCount);
 						}
-// TODO:  working here
-// Copy all of the comps between to the thisNest->compStart->ll.next and comp->ll.prev (inclusive) to thisNest-compStart->childCompsUp and childCompsDown depending on whether or not they are before the name, or after
-// Then recursively process that block for any casks.
-						thisNest = (_iSCaskNesting*)thisNest->ll.prev;
+						// Move the cask down to the child as its own new component
+						thisNest = iioss_combineAllCasks_moveToChild(thisNest, comp);
 						break;
 
 					case _MC_ICODE_CASK_SQUARE_CLOSE_PARAMS:
 					case _MC_ICODE_CASK_SQUARE_CLOSE:
 						if (!thisNest || (thisNest->iCode != _MC_ICODE_CASK_SQUARE_OPEN_PARAMS && thisNest->iCode != _MC_ICODE_CASK_SQUARE_OPEN))
 						{
-							// Nesting error
+							// Mismatched nesting
 							*tlNestingError	= true;
 							*compError		= comp;
+							vvm_ll_deleteNodeChain(&nestRoot);
 							return(lnCount);
 						}
-// TODO:  same here
-						thisNest = (_iSCaskNesting*)thisNest->ll.prev;
+						// Move the cask down to the child as its own new component
+						thisNest = iioss_combineAllCasks_moveToChild(thisNest, comp);
 						break;
 
 					case _MC_ICODE_CASK_TRIANGLE_CLOSE_PARAMS:
 					case _MC_ICODE_CASK_TRIANGLE_CLOSE:
 						if (!thisNest || (thisNest->iCode != _MC_ICODE_CASK_TRIANGLE_OPEN_PARAMS && thisNest->iCode != _MC_ICODE_CASK_SQUARE_OPEN))
 						{
-							// Nesting error
+							// Mismatched nesting
 							*tlNestingError	= true;
 							*compError		= comp;
+							vvm_ll_deleteNodeChain(&nestRoot);
 							return(lnCount);
 						}
-// TODO:  same here
-						thisNest = (_iSCaskNesting*)thisNest->ll.prev;
+						// Move the cask down to the child as its own new component
+						thisNest = iioss_combineAllCasks_moveToChild(thisNest, comp);
 						break;
 
 					case _MC_ICODE_CASK_TILDE_CLOSE_PARAMS:
 					case _MC_ICODE_CASK_TILDE_CLOSE:
 						if (!thisNest || (thisNest->iCode != _MC_ICODE_CASK_TILDE_OPEN_PARAMS && thisNest->iCode != _MC_ICODE_CASK_TILDE_OPEN))
 						{
-							// Nesting error
+							// Mismatched nesting
 							*tlNestingError	= true;
 							*compError		= comp;
+							vvm_ll_deleteNodeChain(&nestRoot);
 							return(lnCount);
 						}
-// TODO:  same here
-						thisNest = (_iSCaskNesting*)thisNest->ll.prev;
+						// Move the cask down to the child as its own new component
+						thisNest = iioss_combineAllCasks_moveToChild(thisNest, comp);
 						break;
+
+					case _MC_ICODE_PIPE_SIGN:
+						// We store the first and second pipe signs within a cask, as the pipe signs surrounding the cask name
+						if (thisNest)
+						{
+// TODO:  Need to examine the left side to see whether having each pipe sign is valid
+							if (thisNest->compPipeSign1)
+							{
+								if (thisNest->compPipeSign2)
+								{
+									// Syntax error
+// TODO:  What to do here ...
+
+								} else {
+									// Store second pipe sign
+									thisNest->compPipeSign2 = comp;
+								}
+
+							} else {
+								// Store first pipe sign
+								thisNest->compPipeSign1 = comp;
+							}
+						}
+						//else we are not inside a cask, so pipe signs are valid symbols
 
 					//default:
 					// No, it is some other cask
@@ -2973,6 +3000,30 @@ storeFirstOne:
 		}
 		// Indicate our conversion rate
 		return(lnCount);
+	}
+
+
+
+
+//////////
+//
+// Called to copy all of the components between this
+//
+//////
+	void iioss_combineAllCasks_moveToChild(_iSCaskNesting* nest, SOssComp* comp)
+	{
+		SOssComp* compNew;
+		SOssComp* compNext;
+
+
+		// Grab the next component
+		compNext = (SOssComp*)comp->ll.prev;
+
+		// Create the new component
+		compNew = 
+
+		// Indicate the next component
+		return();
 	}
 
 

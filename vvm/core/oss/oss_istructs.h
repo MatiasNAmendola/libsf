@@ -168,9 +168,20 @@
 //////
 	struct _iSCaskNesting
 	{
-		SLL*		ll;				// Pointer up and down the cask nesting levels
+		SLL*		ll;							// Pointer up and down the cask nesting levels
 
-		u32			iCode;			// User-defined component code
-		SOssComp*	compStart;		// The comp of the opening side
-		SOssComp*	compName;		// Pointer to the cask name
+		u32			iCode;						// User-defined component code
+		SOssComp*	compStart;					// The comp of the opening side
+
+
+	//////////
+	// The name is stored in one of four ways, depending on what the sides are:
+	//		(1)  (|name|)						// No return or input parameters, compPipeSign1 not used, compPipeSign2 not used
+	//		(2)  (||p|name|)					// Return parameter, compPipeSign1 used, compPipeSign2 not used
+	//		(3)  (|name|p||)					// Input parameter, compPipeSign1 used, compPipeSign2 not used
+	//		(4)  (||p|name|p||)					// Both return and input parameters, both compPipeSign1 and compPipeSign2 are used
+	//////
+		SOssComp*	compPipeSign1;				// The pipe sign before the name
+		SOssComp*	compName;					// Pointer to the cask name
+		SOssComp*	compPipeSign2;				// The pipe sign after the name
 	};
