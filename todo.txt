@@ -1,3 +1,8 @@
+Mar.31.2014 - Next big milestone will include (James 4:15):
+              (1)  A functional assembler
+			  (2)  A functional virtual machine, and
+			  (3)  A functional debugger.
+
 Mar.08.2014 - Refactor VASM's assembly language parser to use casks for all except machine code.
               Mar.09.2014 - in progress
 

@@ -1,3 +1,8 @@
+        Mar.31.2014 - RCH - All development has been moved to local LibSF servers until
+        the next milestone is achieved.  Please check back periodically.  Thank you.
+
+--------------
+
         This repository contains all source code maintained by the Liberty Software
         Foundation (LibSF).  Our talents and skills given back to God, from whom they
 		come, being used to serve His Kingdom here upon this Earth.  In much prayer and
