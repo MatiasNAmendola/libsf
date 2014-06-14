@@ -61,19 +61,36 @@ void initialize(HACCEL* hAccelTable)
 
 
 	// Load our images
-	iLoadObject(&winIface.appIcon,				cgc_appIconBmp,					cgc_appIconBmp);
-	iLoadObject(&winIface.minimize,				cgc_minimizeBmp,				cgc_minimizeOverBmp);
-	iLoadObject(&winIface.maximize,				cgc_maximizeBmp,				cgc_maximizeOverBmp);
-	iLoadObject(&winIface.close,				cgc_closeBmp,					cgc_closeOverBmp);
-	iLoadObject(&winIface.arrowUl,				cgc_arrowUlBmp,					cgc_arrowUlOverBmp);
-	iLoadObject(&winIface.arrowUr,				cgc_arrowUrBmp,					cgc_arrowUrOverBmp);
-	iLoadObject(&winIface.arrowLr,				cgc_arrowLrBmp,					cgc_arrowLrOverBmp);
-	iLoadObject(&winIface.arrowLl,				cgc_arrowLlBmp,					cgc_arrowLlOverBmp);
+	iLoadObject(&winScreen.appIcon,				cgc_appIconBmp);
+	iLoadObject(&winScreen.minimize,			cgc_minimizeBmp);
+	iLoadObject(&winScreen.maximize,			cgc_maximizeBmp);
+	iLoadObject(&winScreen.move,				cgc_moveBmp);
+	iLoadObject(&winScreen.close,				cgc_closeBmp);
+	iLoadObject(&winScreen.arrowUl,				cgc_arrowUlBmp);
+	iLoadObject(&winScreen.arrowUr,				cgc_arrowUrBmp);
+	iLoadObject(&winScreen.arrowLr,				cgc_arrowLrBmp);
+	iLoadObject(&winScreen.arrowLl,				cgc_arrowLlBmp);
+
+	iLoadObject(&winJDebi.appIcon,				cgc_jdebiAppIconBmp);
+	iLoadObject(&winJDebi.minimize,				cgc_minimizeBmp);
+	iLoadObject(&winJDebi.maximize,				cgc_maximizeBmp);
+	iLoadObject(&winJDebi.close,				cgc_closeBmp);
+	iLoadObject(&winJDebi.arrowUl,				cgc_arrowUlBmp);
+	iLoadObject(&winJDebi.arrowUr,				cgc_arrowUrBmp);
+	iLoadObject(&winJDebi.arrowLr,				cgc_arrowLrBmp);
+	iLoadObject(&winJDebi.arrowLl,				cgc_arrowLlBmp);
 
 
 	// Create our message window
 	iCreateMessageWindow();
-	iCreateInterfaceWindow();
+
+
+	// Create our main screen window
+	iCreateScreenWindow();
+
+
+	// Create our JDebi window
+	iCreateJDebiWindow();
 }
 
 
@@ -81,53 +98,9 @@ void initialize(HACCEL* hAccelTable)
 
 //////////
 //
-// Called to load a bitmap file that was loaded from disk, or simulated loaded from disk.
+// Called to convert the indicated bitmap to 32-bits if need be
 //
 //////
-	void iLoadObject(SObject* obj, const u8* bmpRawFileData, const u8* bmpRawFileDataOver)
-	{
-		BITMAPFILEHEADER*	bh;
-		BITMAPINFOHEADER*	bi;
-
-
-		//////////
-		// Grab the headers
-		//////
-			bh = (BITMAPFILEHEADER*)bmpRawFileData;
-			bi = (BITMAPINFOHEADER*)(bh + 1);
-
-
-		//////////
-		// Initialize the bitmap, and populate
-		//////
-			memset(&obj->bmp, 0, sizeof(SBitmap));
-			memcpy(&obj->bmp.bh, bh, sizeof(obj->bmp.bh));
-			memcpy(&obj->bmp.bi, bi, sizeof(obj->bmp.bi));
-			obj->bmp.bd			= (s8*)(bmpRawFileData + bh->bfOffBits);
-			obj->bmp.rowWidth	= iComputeRowWidth(&obj->bmp);
-			if (obj->bmp.bi.biBitCount == 24)
-				iConvertBitmapTo32Bits(&obj->bmp);
-
-
-		//////////
-		// Initialize the bitmap for when the mouse is over the control, and populate
-		//////
-			bh = (BITMAPFILEHEADER*)bmpRawFileDataOver;
-			bi = (BITMAPINFOHEADER*)(bh + 1);
-
-
-		//////////
-		// Initialize the bitmap and populate
-		//////
-			memset(&obj->bmpOver, 0, sizeof(SBitmap));
-			memcpy(&obj->bmpOver.bh, bh, sizeof(obj->bmpOver.bh));
-			memcpy(&obj->bmpOver.bi, bi, sizeof(obj->bmpOver.bi));
-			obj->bmpOver.bd			= (s8*)(bmpRawFileDataOver + bh->bfOffBits);
-			obj->bmpOver.rowWidth	= iComputeRowWidth(&obj->bmpOver);
-			if (obj->bmpOver.bi.biBitCount == 24)
-				iConvertBitmapTo32Bits(&obj->bmpOver);
-	}
-
 	void iConvertBitmapTo32Bits(SBitmap* bmp)
 	{
 		SBitmap bmp32;
@@ -159,16 +132,16 @@ void initialize(HACCEL* hAccelTable)
 	void iCopyBitmap24ToBitmap32(SBitmap* bmp32, SBitmap* bmp24)
 	{
 		s32		lnX, lnY;
-		SBGR*	lbgr;
-		SBGRA*	lbgra;
+		SBgr*	lbgr;
+		SBgra*	lbgra;
 
 
 		// Iterate through every row
 		for (lnY = 0; lnY < bmp24->bi.biHeight; lnY++)
 		{
 			// Grab our pointers
-			lbgr	= (SBGR*)(bmp24->bd  + ((bmp24->bi.biHeight - lnY - 1) * bmp24->rowWidth));
-			lbgra	= (SBGRA*)(bmp32->bd + ((bmp32->bi.biHeight - lnY - 1) * bmp32->rowWidth));
+			lbgr	= (SBgr*)(bmp24->bd  + ((bmp24->bi.biHeight - lnY - 1) * bmp24->rowWidth));
+			lbgra	= (SBgra*)(bmp32->bd + ((bmp32->bi.biHeight - lnY - 1) * bmp32->rowWidth));
 
 			// Iterate though every column
 			for (lnX = 0; lnX < bmp24->bi.biWidth; lnX++, lbgr++, lbgra++)
@@ -298,29 +271,6 @@ void initialize(HACCEL* hAccelTable)
 //////
 	LRESULT CALLBACK iWndProc_messageWindow(HWND hwnd, UINT m, WPARAM w, LPARAM l)
 	{
-		SWindow* win;
-
-
-		// Is it an internal message?
-		if (isValidWindow(w))
-		{
-			// Yes, explore the possibilities
-			win = (SWindow*)w;
-			if (win->slotUsed)
-			{
-// TODO:  receive message window messages
-// 				switch (m)
-// 				{
-// 					case WMU_NEW_WINDOW:
-// 						// A new window has been added from the user
-// 						iRedrawAll();			// Redraw windows, which will include this tab now
-// 						// All done!
-// 						break;
-// 				}
-			}
-			// Indicate we've processed this message
-			return 0;
-		}
 		// Call Windows' default procedure handler
 		return(DefWindowProc(hwnd, m, w, l));
 	}
@@ -333,7 +283,7 @@ void initialize(HACCEL* hAccelTable)
 // Called to find or create the KSI interface window
 //
 //////
-	HWND iCreateInterfaceWindow(void)
+	HWND iCreateScreenWindow(void)
 	{
 		s32				lnLeft, lnTop;
 		ATOM			atom;
@@ -348,7 +298,7 @@ void initialize(HACCEL* hAccelTable)
 		//////
 			while (1)
 			{
-				if (!GetClassInfoExA(ghInstance, cgcInterfaceWindowClass, &classa))
+				if (!GetClassInfoExA(ghInstance, cgcScreenWindowClass, &classa))
 				{
 					// Initialize
 					memset(&classa, 0, sizeof(classa));
@@ -357,10 +307,10 @@ void initialize(HACCEL* hAccelTable)
 					classa.cbSize				= sizeof(WNDCLASSEXA);
 					classa.hInstance			= ghInstance;
 					classa.style				= CS_OWNDC | CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-					classa.lpszClassName		= cgcInterfaceWindowClass;
+					classa.lpszClassName		= cgcScreenWindowClass;
 					classa.hIcon				= LoadIcon(ghInstance, MAKEINTRESOURCE(IDI_VJR));
-//					classa.lpszMenuName			= MAKEINTRESOURCE(IDC_VJR);
-					classa.lpfnWndProc			= &iWndProc_interfaceWindow;
+					classa.hCursor				= LoadCursor(NULL, IDC_ARROW);
+					classa.lpfnWndProc			= &iWndProc_screenWindow;
 
 					// Register
 					atom = RegisterClassExA(&classa);
@@ -372,11 +322,11 @@ void initialize(HACCEL* hAccelTable)
 			//////////
 			// Find out how big the window should be
 			//////
-				iComputeWindowClientAreaDimensions(&client);
-				iComputeWindowNonclientAreaDimensions(&nonclient);
+				iComputeScreenWindowClientAreaDimensions(&client);
+				iComputeScreenWindowNonclientAreaDimensions(&nonclient);
 				overall.width	= client.width + nonclient.width;
 				overall.height	= client.height + nonclient.width;
-				iAdjustInterfaceWindowDimensions(&overall);
+				iAdjustScreenWindowDimensions(&overall);
 
 
 			//////////
@@ -385,44 +335,141 @@ void initialize(HACCEL* hAccelTable)
 				GetWindowRect(GetDesktopWindow(), &lrc);
 				lnLeft	= ((lrc.right - lrc.left) - overall.width)  / 2;
 				lnTop	= ((lrc.bottom - lrc.top) - overall.height) / 2;
-				ghwndIface	= CreateWindowA(cgcInterfaceWindowClass, cgcTitle, WS_POPUP, lnLeft, lnTop, overall.width, overall.height, NULL, NULL, ghInstance, 0);
-				if (ghwndIface)
+				ghwndScreen	= CreateWindowA(cgcScreenWindowClass, cgcScreenTitle, WS_POPUP, lnLeft, lnTop, overall.width, overall.height, NULL, NULL, ghInstance, 0);
+				if (ghwndScreen)
 				{
 					///////////
 					// Read events from the window
 					//////
-						CreateThread(NULL, 0, &iReadEvents_interfaceWindow, 0, 0, 0);
+						CreateThread(NULL, 0, &iReadEvents_screenWindow, 0, 0, 0);
 
 
 					//////////
 					// Create the fonts
 					//////
-						font					= iCreateFont(cgcTahoma, 10,	FW_SEMIBOLD, false, false);
-						winIface.fontCaption	= iDuplicateFont(font);
-						font					= iCreateFont(cgcTahoma, 8,		FW_SEMIBOLD, false, false);
-						winIface.fontTabs		= iDuplicateFont(font);
+						font						= iCreateFont(cgcWindowTitleBarFont, 10,	FW_BOLD, false, false);
+						winScreen.font		= iDuplicateFont(font);
 
 
 					//////////
 					// Draw the initial window state
 					//////
-						iResizeInterfaceWindow(true);
+						iResizeScreenWindow(true);
 
 
 					//////////
 					// Make it visible
 					//////
-						SetWindowPos(ghwndIface, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-						ShowWindow(ghwndIface, SW_SHOW);
+						SetWindowPos(ghwndScreen, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+						ShowWindow(ghwndScreen, SW_SHOW);
 
 
 					// All done
-					return(ghwndIface);
+					return(ghwndScreen);
 				}
 				break;
 			}
 			// We should never get here
-			MessageBoxA(NULL, "Error creating KSI interface window.", "KSI - Fatal Error", MB_OK);
+			MessageBoxA(NULL, "Error creating main screen window.", "Fatal Error", MB_OK);
+			return(NULL);
+	}
+
+
+
+
+//////////
+//
+// 
+//
+//////
+	HWND iCreateJDebiWindow(void)
+	{
+		s32				lnLeft, lnTop;
+		ATOM			atom;
+		WNDCLASSEXA		classa;
+		RECT			lrc;
+		SFont*			font;
+		SSize			client, nonclient, overall;
+
+
+		//////////
+		// Register the class if need be
+		//////
+			while (1)
+			{
+				if (!GetClassInfoExA(ghInstance, cgcJDebiWindowClass, &classa))
+				{
+					// Initialize
+					memset(&classa, 0, sizeof(classa));
+
+					// Populate
+					classa.cbSize				= sizeof(WNDCLASSEXA);
+					classa.hInstance			= ghInstance;
+					classa.style				= CS_OWNDC | CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
+					classa.lpszClassName		= cgcJDebiWindowClass;
+					classa.hIcon				= LoadIcon(ghInstance, MAKEINTRESOURCE(IDI_VJR));
+					classa.hCursor				= LoadCursor(NULL, IDC_ARROW);
+					classa.lpfnWndProc			= &iWndProc_jDebiWindow;
+
+					// Register
+					atom = RegisterClassExA(&classa);
+					if (!atom)
+						break;
+				}
+
+
+			//////////
+			// Find out how big the window should be
+			//////
+				iComputeJDebiWindowClientAreaDimensions(&client);
+				iComputeJDebiWindowNonclientAreaDimensions(&nonclient);
+				overall.width	= client.width + nonclient.width;
+				overall.height	= client.height + nonclient.width;
+				iAdjustJDebiWindowDimensions(&overall);
+
+
+			//////////
+			// Physically create the interface window
+			//////
+				GetWindowRect(GetDesktopWindow(), &lrc);
+				lnLeft	= ((lrc.right - lrc.left) - overall.width)  / 2;
+				lnTop	= ((lrc.bottom - lrc.top) - overall.height) / 2;
+				ghwndJDebi = CreateWindowA(cgcJDebiWindowClass, cgcJDebiTitle, WS_POPUP, lnLeft, lnTop, overall.width, overall.height, NULL, NULL, ghInstance, 0);
+				if (ghwndJDebi)
+				{
+					///////////
+					// Read events from the window
+					//////
+						CreateThread(NULL, 0, &iReadEvents_jDebiWindow, 0, 0, 0);
+
+
+					//////////
+					// Create the font
+					//////
+						font						= iCreateFont(cgcWindowTitleBarFont, 10,	FW_BOLD, false, false);
+						winJDebi.font		= iDuplicateFont(font);
+
+
+					//////////
+					// Draw the initial window state
+					//////
+						iResizeJDebiWindow(true);
+
+
+					//////////
+					// Make it visible
+					//////
+						SetWindowPos(ghwndJDebi, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+						ShowWindow(ghwndJDebi, SW_SHOW);
+
+
+					// All done
+					return(ghwndJDebi);
+				}
+				break;
+			}
+			// We should never get here
+			MessageBoxA(NULL, "Error creating JDebi debugger window.", "Fatal Error", MB_OK);
 			return(NULL);
 	}
 
@@ -482,53 +529,38 @@ void initialize(HACCEL* hAccelTable)
 
 //////////
 //
-// Thread to handle interface window events
-//
-//////
-	DWORD WINAPI iReadEvents_interfaceWindow(LPVOID lpParameter)
-	{
-		MSG msg;
-
-
-		// Read until the message window goes bye bye
-		while (GetMessage(&msg, ghwndIface, 0, 0) > 0)
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-
-		// When we get here, we're shutting down
-		return 0;
-	}
-
-
-
-
-//////////
-//
 // Called to resize the window if need be based upon new client size settings
 //
 //////
-	void iResizeInterfaceWindow(bool tlForce)
+	void iResizeScreenWindow(bool tlForce)
 	{
+		s32		lnLeft, lnTop;
+		RECT	lrcDesktop;
 		SSize	client, nonclient, overall;
 
 
 		//////////
 		// Find out how big the window should be
 		//////
-			iComputeWindowClientAreaDimensions(&client);
-			iComputeWindowNonclientAreaDimensions(&nonclient);
+			iComputeScreenWindowClientAreaDimensions(&client);
+			iComputeScreenWindowNonclientAreaDimensions(&nonclient);
 			overall.width	= client.width + nonclient.width;
 			overall.height	= client.height + nonclient.width;
-			iAdjustInterfaceWindowDimensions(&overall);
+			iAdjustScreenWindowDimensions(&overall);
+
+
+		//////////
+		// Determine the windows desktop size
+		//////
+			GetWindowRect(GetDesktopWindow(), &lrcDesktop);
 
 		
 		//////////
 		// If the window size is different than this, we need to resize it
 		//////
-// TODO:  need to determine the window's position during the resize, for lnTop, lnLeft
-			iSetInterfaceWindowSize(0/*lnLeft*/, 0/*lnTop*/, overall.width, overall.height, tlForce);
+			lnLeft	= (lrcDesktop.right  - lrcDesktop.left)  / 16;
+			lnTop	= (lrcDesktop.bottom - lrcDesktop.top)   / 16;
+			iSetScreenWindowSize(lnLeft, lnTop, overall.width, overall.height, tlForce);
 	}
 
 
@@ -536,40 +568,87 @@ void initialize(HACCEL* hAccelTable)
 
 //////////
 //
-// Called to programmatically set the interface window size after a resize
+// Called to resize the JDebi window
 //
 //////
-	void iSetInterfaceWindowSize(s32 tnLeft, s32 tnTop, s32 tnWidth, s32 tnHeight, bool tlForce)
+	void iResizeJDebiWindow(bool tlForce)
+	{
+		s32		lnLeft, lnTop;
+		RECT	lrcDesktop;
+		SSize	client, nonclient, overall;
+		SSize	clientScreen, nonclientScreen, overallScreen;
+
+
+		//////////
+		// Find out how big the window should be
+		//////
+			iComputeJDebiWindowClientAreaDimensions(&client);
+			iComputeJDebiWindowNonclientAreaDimensions(&nonclient);
+			overall.width	= client.width + nonclient.width;
+			overall.height	= client.height + nonclient.width;
+			iAdjustJDebiWindowDimensions(&overall);
+			
+			// Main screen
+			iComputeScreenWindowClientAreaDimensions(&clientScreen);
+			iComputeScreenWindowNonclientAreaDimensions(&nonclientScreen);
+			overallScreen.width		= clientScreen.width + nonclientScreen.width;
+			overallScreen.height	= clientScreen.height + nonclientScreen.width;
+			iAdjustScreenWindowDimensions(&overallScreen);
+
+
+		//////////
+		// Determine the windows desktop size
+		//////
+			GetWindowRect(GetDesktopWindow(), &lrcDesktop);
+
+		
+		//////////
+		// If the window size is different than this, we need to resize it
+		//////
+			lnLeft	= winScreen.rc.right;
+			lnTop	= winScreen.rc.top;
+			iSetJDebiWindowSize(lnLeft, lnTop, ((lrcDesktop.right - lrcDesktop.left) - overallScreen.width) - (2 * winScreen.rc.left), overallScreen.height, tlForce);
+	}
+
+
+
+
+//////////
+//
+// Called to programmatically set the screen window size after a resize
+//
+//////
+	void iSetScreenWindowSize(s32 tnLeft, s32 tnTop, s32 tnWidth, s32 tnHeight, bool tlForce)
 	{
 		bool llChangedSomething;
 
 
 		// Do we need to resize?
-		if (!IsWindowVisible(ghwndIface) && !tlForce)
+		if (!IsWindowVisible(ghwndScreen) && !tlForce)
 			return;
 
 		// Begin resizing
-		ShowWindow(ghwndIface, SW_RESTORE);
+		ShowWindow(ghwndScreen, SW_RESTORE);
 		llChangedSomething = tlForce;
-		if (winIface.rc.right - winIface.rc.left != tnWidth || winIface.rc.bottom - winIface.rc.top != tnHeight)
+		if (winScreen.rc.right - winScreen.rc.left != tnWidth || winScreen.rc.bottom - winScreen.rc.top != tnHeight)
 		{
 			// Yes
 			llChangedSomething = true;
-			SetWindowPos(ghwndIface, NULL, 0, 0, tnWidth, tnHeight,	SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOMOVE);
+			SetWindowPos(ghwndScreen, NULL, 0, 0, tnWidth, tnHeight,	SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOMOVE);
 		}
 
 
 		// Do we need to move?
-		if (winIface.rc.left != tnLeft || winIface.rc.top != tnTop)
+		if (winScreen.rc.left != tnLeft || winScreen.rc.top != tnTop)
 		{
 			// Yes
 			llChangedSomething = true;
-			SetWindowPos(ghwndIface, NULL, tnLeft, tnTop, 0, 0, SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSIZE);
+			SetWindowPos(ghwndScreen, NULL, tnLeft, tnTop, 0, 0, SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSIZE);
 		}
 
 
 		// Get the current size
-		SetRect(&winIface.rc, tnLeft, tnTop, tnLeft + tnWidth, tnTop + tnHeight);
+		SetRect(&winScreen.rc, tnLeft, tnTop, tnLeft + tnWidth, tnTop + tnHeight);
 
 
 		// Did we change anything?
@@ -578,25 +657,94 @@ void initialize(HACCEL* hAccelTable)
 			//////////
 			// If there's already an image, release it
 			//////
-				DeleteObject((HGDIOBJ)winIface.bmp.hbmp);
-				DeleteDC(winIface.bmp.hdc);
-				memset(&winIface.bmp, 0, sizeof(SBitmap));
+				DeleteObject((HGDIOBJ)winScreen.bmp.hbmp);
+				DeleteDC(winScreen.bmp.hdc);
+				memset(&winScreen.bmp, 0, sizeof(SBitmap));
 
 
 			//////////
 			// Create the buffers for it
 			//////
-				winIface.bmp.hdc		= CreateCompatibleDC(GetDC(GetDesktopWindow()));
-				winIface.bmp.hbmp		= iCreateBitmap(winIface.bmp.hdc, tnWidth, tnHeight, 1, 32, (void**)&winIface.bmp.bd, &winIface.bmp.bh, &winIface.bmp.bi);
-				winIface.bmp.rowWidth	= iComputeRowWidth(&winIface.bmp);
-				SelectObject(winIface.bmp.hdc, winIface.bmp.hbmp);
+				winScreen.bmp.hdc		= CreateCompatibleDC(GetDC(GetDesktopWindow()));
+				winScreen.bmp.hbmp		= iCreateBitmap(winScreen.bmp.hdc, tnWidth, tnHeight, 1, 32, (void**)&winScreen.bmp.bd, &winScreen.bmp.bh, &winScreen.bmp.bi);
+				winScreen.bmp.rowWidth	= iComputeRowWidth(&winScreen.bmp);
+				SelectObject(winScreen.bmp.hdc, winScreen.bmp.hbmp);
 
 
 			//////////
 			// Redraw the window
 			//////
-				GetClientRect(ghwndIface, &winIface.rcClient);
-				iRedrawAll(&winIface);
+				GetClientRect(ghwndScreen, &winScreen.rcClient);
+				iRedrawScreen(&winScreen);
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to programmatically set the JDebi window size after a resize
+//
+//////
+	void iSetJDebiWindowSize(s32 tnLeft, s32 tnTop, s32 tnWidth, s32 tnHeight, bool tlForce)
+	{
+		bool llChangedSomething;
+
+
+		// Do we need to resize?
+		if (!IsWindowVisible(ghwndJDebi) && !tlForce)
+			return;
+
+		// Begin resizing
+		ShowWindow(ghwndJDebi, SW_RESTORE);
+		llChangedSomething = tlForce;
+		if (winJDebi.rc.right - winJDebi.rc.left != tnWidth || winJDebi.rc.bottom - winJDebi.rc.top != tnHeight)
+		{
+			// Yes
+			llChangedSomething = true;
+			SetWindowPos(ghwndJDebi, NULL, 0, 0, tnWidth, tnHeight,	SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOMOVE);
+		}
+
+
+		// Do we need to move?
+		if (winJDebi.rc.left != tnLeft || winJDebi.rc.top != tnTop)
+		{
+			// Yes
+			llChangedSomething = true;
+			SetWindowPos(ghwndJDebi, NULL, tnLeft, tnTop, 0, 0, SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSIZE);
+		}
+
+
+		// Get the current size
+		SetRect(&winJDebi.rc, tnLeft, tnTop, tnLeft + tnWidth, tnTop + tnHeight);
+
+
+		// Did we change anything?
+		if (llChangedSomething)
+		{
+			//////////
+			// If there's already an image, release it
+			//////
+				DeleteObject((HGDIOBJ)winJDebi.bmp.hbmp);
+				DeleteDC(winJDebi.bmp.hdc);
+				memset(&winJDebi.bmp, 0, sizeof(SBitmap));
+
+
+			//////////
+			// Create the buffers for it
+			//////
+				winJDebi.bmp.hdc		= CreateCompatibleDC(GetDC(GetDesktopWindow()));
+				winJDebi.bmp.hbmp		= iCreateBitmap(winJDebi.bmp.hdc, tnWidth, tnHeight, 1, 32, (void**)&winJDebi.bmp.bd, &winJDebi.bmp.bh, &winJDebi.bmp.bi);
+				winJDebi.bmp.rowWidth	= iComputeRowWidth(&winJDebi.bmp);
+				SelectObject(winJDebi.bmp.hdc, winJDebi.bmp.hbmp);
+
+
+			//////////
+			// Redraw the window
+			//////
+				GetClientRect(ghwndJDebi, &winJDebi.rcClient);
+				iRedrawJDebi(&winJDebi);
 		}
 	}
 
@@ -705,10 +853,34 @@ void initialize(HACCEL* hAccelTable)
 
 //////////
 //
+// Thread to handle interface window events
+//
+//////
+	DWORD WINAPI iReadEvents_screenWindow(LPVOID lpParameter)
+	{
+		MSG msg;
+
+
+		// Read until the message window goes bye bye
+		while (GetMessage(&msg, ghwndScreen, 0, 0) > 0)
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+		// When we get here, we're shutting down
+		return 0;
+	}
+
+
+
+
+//////////
+//
 // Processes messages from the interface window, to forward on to the original window
 //
 //////
-	LRESULT CALLBACK iWndProc_interfaceWindow(HWND h, UINT m, WPARAM w, LPARAM l)
+	LRESULT CALLBACK iWndProc_screenWindow(HWND h, UINT m, WPARAM w, LPARAM l)
 	{
 // 		s32				id, event;
 		HDC				lhdc;
@@ -719,31 +891,10 @@ void initialize(HACCEL* hAccelTable)
 		// It was one of our windows
 		switch (m)
 		{
-// 			case WM_COMMAND:
-// 				id    = LOWORD(w);
-// 				event = HIWORD(w);
-// 				// Parse the menu selections:
-// 				switch (id)
-// 				{
-// 					case IDM_ABOUT:
-// 						DialogBox(ghInstance, MAKEINTRESOURCE(IDD_ABOUTBOX), h, About);
-// 						break;
-// 
-// 					case IDM_EXIT:
-// 						if (iShutdownPolitely())
-// 							PostQuitMessage(0);
-// 						break;
-// 
-// 					default:
-// 						return DefWindowProc(h, m, w, l);
-// 				}
-// 				break;
-
 			case WM_LBUTTONDOWN:
-				PostQuitMessage(-1);
+				glMouseLeftButton = true;
+				return(iProcessMouseMessage(m, w, l));
 				break;
-// 				glMouseLeftButton = true;
-// 				return(iProcessMouseMessage(m, w, l));
 
 			case WM_LBUTTONUP:
 				if (glMoving || glResizing)
@@ -751,22 +902,27 @@ void initialize(HACCEL* hAccelTable)
 
 				glMouseLeftButton = false;
 				return(iProcessMouseMessage(m, w, l));
+				break;
 
 			case WM_RBUTTONDOWN:
 				glMouseRightButton = true;
 				return(iProcessMouseMessage(m, w, l));
+				break;
 
 			case WM_RBUTTONUP:
 				glMouseRightButton = false;
 				return(iProcessMouseMessage(m, w, l));
+				break;
 
 			case WM_MBUTTONDOWN:
 				glMouseMiddleButton = true;
 				return(iProcessMouseMessage(m, w, l));
+				break;
 
 			case WM_MBUTTONUP:
 				glMouseMiddleButton = false;
 				return(iProcessMouseMessage(m, w, l));
+				break;
 
 			case WM_RBUTTONDBLCLK:
 			case WM_LBUTTONDBLCLK:
@@ -778,6 +934,7 @@ void initialize(HACCEL* hAccelTable)
 				glMouseMiddleButton	= ((w & MK_MBUTTON) != 0);		// The middle mouse button is down
 				glMouseRightButton	= ((w & MK_RBUTTON) != 0);		// The right mouse button is down
 				return(iProcessMouseMessage(m, w, l));
+				break;
 
 			case WM_KEYDOWN:
 			case WM_KEYUP:
@@ -788,6 +945,7 @@ void initialize(HACCEL* hAccelTable)
 //			case WM_SYSCHAR:
 //			case WM_SYSDEADCHAR:
 				return 0;
+				break;
 
 			case WM_CAPTURECHANGED:
 				if (glMoving)
@@ -809,7 +967,7 @@ void initialize(HACCEL* hAccelTable)
 			case WM_PAINT:
 				// Paint it
 				lhdc = BeginPaint(h, &ps);
-				BitBlt(lhdc, 0, 0, winIface.bmp.bi.biWidth, winIface.bmp.bi.biHeight, winIface.bmp.hdc, 0, 0, SRCCOPY);
+				BitBlt(lhdc, 0, 0, winScreen.bmp.bi.biWidth, winScreen.bmp.bi.biHeight, winScreen.bmp.hdc, 0, 0, SRCCOPY);
 				EndPaint(h, &ps);
 				return 0;
 		}
@@ -818,6 +976,143 @@ void initialize(HACCEL* hAccelTable)
 		return(DefWindowProc(h, m, w, l));
 	}
 
+
+
+
+//////////
+//
+// 
+//
+//////
+	DWORD WINAPI iReadEvents_jDebiWindow(LPVOID lpParameter)
+	{
+		MSG msg;
+
+
+		// Read until the message window goes bye bye
+		while (GetMessage(&msg, ghwndJDebi, 0, 0) > 0)
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+		// When we get here, we're shutting down
+		return 0;
+	}
+
+
+
+
+//////////
+//
+// 
+//
+//////
+	LRESULT CALLBACK iWndProc_jDebiWindow(HWND h, UINT m, WPARAM w, LPARAM l)
+	{
+// 		s32				id, event;
+		HDC				lhdc;
+		PAINTSTRUCT		ps;
+
+
+		// See if we know this hwnd
+		// It was one of our windows
+		switch (m)
+		{
+			case WM_LBUTTONDOWN:
+				glMouseLeftButton = true;
+				return(iProcessMouseMessage(m, w, l));
+				break;
+
+			case WM_LBUTTONUP:
+				if (glMoving || glResizing)
+					ReleaseCapture();
+
+				glMouseLeftButton = false;
+				return(iProcessMouseMessage(m, w, l));
+				break;
+
+			case WM_RBUTTONDOWN:
+				glMouseRightButton = true;
+				return(iProcessMouseMessage(m, w, l));
+				break;
+
+			case WM_RBUTTONUP:
+				glMouseRightButton = false;
+				return(iProcessMouseMessage(m, w, l));
+				break;
+
+			case WM_MBUTTONDOWN:
+				glMouseMiddleButton = true;
+				return(iProcessMouseMessage(m, w, l));
+				break;
+
+			case WM_MBUTTONUP:
+				glMouseMiddleButton = false;
+				return(iProcessMouseMessage(m, w, l));
+				break;
+
+			case WM_RBUTTONDBLCLK:
+			case WM_LBUTTONDBLCLK:
+			case WM_MBUTTONDBLCLK:
+			case WM_MOUSEHWHEEL:
+			case WM_MOUSEWHEEL:
+			case WM_MOUSEMOVE:
+				glMouseLeftButton	= ((w & MK_LBUTTON) != 0);		// The left mouse button is down
+				glMouseMiddleButton	= ((w & MK_MBUTTON) != 0);		// The middle mouse button is down
+				glMouseRightButton	= ((w & MK_RBUTTON) != 0);		// The right mouse button is down
+				return(iProcessMouseMessage(m, w, l));
+				break;
+
+			case WM_KEYDOWN:
+			case WM_KEYUP:
+//			case WM_CHAR:
+//			case WM_DEADCHAR:
+			case WM_SYSKEYDOWN:
+			case WM_SYSKEYUP:
+//			case WM_SYSCHAR:
+//			case WM_SYSDEADCHAR:
+				return 0;
+				break;
+
+			case WM_CAPTURECHANGED:
+				if (glMoving)
+				{
+					// Stop the movement
+// TODO:					iStopMove();
+
+				} else if (glResizing) {
+					// Stop the resize
+// TODO:					iStopResize();
+
+				} else {
+					// Make sure our flags are lowered
+					glMoving	= false;
+					glResizing	= false;
+				}
+				break;
+
+			case WM_PAINT:
+				// Paint it
+				lhdc = BeginPaint(h, &ps);
+				BitBlt(lhdc, 0, 0, winJDebi.bmp.bi.biWidth, winJDebi.bmp.bi.biHeight, winJDebi.bmp.hdc, 0, 0, SRCCOPY);
+				EndPaint(h, &ps);
+				return 0;
+				break;
+		}
+
+		// Call Windows' default procedure handler
+		return(DefWindowProc(h, m, w, l));
+	}
+
+
+
+
+//////////
+//
+// Called to shutdown the system politely, closing everything that's open
+//
+//////
 	bool iShutdownPolitely(void)
 	{
 		return(true);
@@ -831,7 +1126,7 @@ void initialize(HACCEL* hAccelTable)
 // Compute the client area dimensions based on the current settings
 //
 //////
-	void iComputeWindowClientAreaDimensions(SSize* size)
+	void iComputeScreenWindowClientAreaDimensions(SSize* size)
 	{
 		RECT lrc;
 
@@ -841,14 +1136,14 @@ void initialize(HACCEL* hAccelTable)
 		//////
 			// Default to half the overall screen size
 			GetWindowRect(GetDesktopWindow(), &lrc);
-			size->width		= (lrc.right - lrc.left) / 2;
-			size->height	= (lrc.bottom - lrc.top) / 2;
+			size->width		= (lrc.right - lrc.left) * 7 / 16;
+			size->height	= (lrc.bottom - lrc.top) * 7 / 8;
 
 			// When we get here, they are set by value, either to the minimum, or to the maximum
 			// Note:  They could be hugely too large.  The caller will have to deal with that.
 	}
 
-	void iComputeWindowNonclientAreaDimensions(SSize* size)
+	void iComputeScreenWindowNonclientAreaDimensions(SSize* size)
 	{
 		//////////
 		// Set minimum dimensions
@@ -857,7 +1152,80 @@ void initialize(HACCEL* hAccelTable)
 			size->height	= 24 + 24;		// top + bottom
 	}
 
-	void iAdjustInterfaceWindowDimensions(SSize* size)
+	void iAdjustScreenWindowDimensions(SSize* size)
+	{
+		s32		lnDesktopWidth, lnDesktopHeight, lnWidthOverhang, lnHeightOverhang;
+		f32		lfWidthRatio, lfHeightRatio;
+		RECT	lrc;
+
+
+		//////////
+		// Find out how big the desktop is
+		//////
+			GetWindowRect(GetDesktopWindow(), &lrc);
+
+
+		//////////
+		// Make sure we're smaller than that
+		//////
+			lnDesktopWidth		= lrc.right - lrc.left;
+			lnDesktopHeight		= lrc.bottom - lrc.top;
+			if (size->width < lnDesktopWidth && size->height < lnDesktopHeight)
+				return;		// We're good
+
+
+		//////////
+		// Find out which size needs to be decreased the most
+		//////
+			lnWidthOverhang		= size->width  - lnDesktopWidth;
+			lnHeightOverhang	= size->height - lnDesktopHeight;
+			lfWidthRatio		= ((f32)lnWidthOverhang  + (f32)lnDesktopWidth)  / (f32)lnDesktopWidth;
+			lfHeightRatio		= ((f32)lnHeightOverhang + (f32)lnDesktopHeight) / (f32)lnDesktopHeight;
+			if (lfWidthRatio >= lfHeightRatio)
+			{
+				// Adjust down by the width's ratio
+				size->width		= lnDesktopWidth;
+				size->height	= (s32)((f32)size->height / lfWidthRatio);
+
+			} else {
+				// Adjust down by the height's ratio
+				size->width		= (s32)((f32)size->width / lfHeightRatio);
+				size->height	= lnDesktopHeight;
+			}
+	}
+
+
+
+
+//////////
+//
+// Compute the client area JDebi window dimensions
+//
+//////
+	void iComputeJDebiWindowClientAreaDimensions(SSize* size)
+	{
+		RECT lrc;
+
+
+		//////////
+		// Iterate through each item
+		//////
+			// Default to one sixth wide, one eighth tall of the overall screen size
+			GetWindowRect(GetDesktopWindow(), &lrc);
+			size->width		= (lrc.right - lrc.left) * 7 / 16;
+			size->height	= (lrc.bottom - lrc.top) * 7 / 8;
+	}
+
+	void iComputeJDebiWindowNonclientAreaDimensions(SSize* size)
+	{
+		//////////
+		// Set minimum dimensions
+		//////
+			size->width		= 8 + 8;		// left + right
+			size->height	= 24 + 24;		// top + bottom
+	}
+
+	void iAdjustJDebiWindowDimensions(SSize* size)
 	{
 		s32		lnDesktopWidth, lnDesktopHeight, lnWidthOverhang, lnHeightOverhang;
 		f32		lfWidthRatio, lfHeightRatio;
@@ -1176,7 +1544,7 @@ void initialize(HACCEL* hAccelTable)
 		//////////
 		// If we're a valid window, process the mouse
 		//////
-			if (winIface.rc.right > winIface.rc.left)
+			if (winScreen.rc.right > winScreen.rc.left)
 			{
 				// Get the mouse pointer in screen coordinates
 				if (glMoving || glResizing)
@@ -1192,7 +1560,7 @@ void initialize(HACCEL* hAccelTable)
 					return;
 
 				// Are we inside the client area?
-				if (PtInRect(&winIface.rcClient, lpt))
+				if (PtInRect(&winScreen.rcClient, lpt))
 				{
 					// We are.  We are.  We are in the client area. :-)
 					glMouseInClientArea = true;
@@ -1212,15 +1580,37 @@ void initialize(HACCEL* hAccelTable)
 
 
 //////////
+// Allocates a new structure
+//////
+	SBitmap* iBmpAllocate(void)
+	{
+		SBitmap* bmp;
+
+
+		// Allocate our new structure
+		bmp = (SBitmap*)malloc(sizeof(SBitmap));
+
+		// Initialize if successful
+		if (bmp)
+			memset(bmp, 0, sizeof(SBitmap));
+
+		// Indicate our success or failure
+		return(bmp);
+	}
+
+
+
+
+//////////
 //
 // Based on the mouseover flag, should the bmp or the bmpOver be drawn?
 //
 //////
-	SBitmap* iBmpOrBmpOver(SObject* obj, bool tlAdditionalTest)
+	SBitmap* iBmp_BmpOrBmpOver(SObject* obj, bool tlAdditionalTest)
 	{
-		if (tlAdditionalTest || obj->isMouseOver)		return(&obj->bmpOver);
-		else											return(&obj->bmp);
-
+//		if (tlAdditionalTest || obj->ev.mouse.isMouseOver)		return(obj->bmpOver);
+//		else													return(obj->bmp);
+		return(obj->bmp);
 	}
 
 
@@ -1231,9 +1621,9 @@ void initialize(HACCEL* hAccelTable)
 // Draw the indicated object
 //
 //////
-	void iBitBltObject(SBitmap* bmpDst, SObject* objSrc, SBitmap* bmpSrc)
+	void iBmpBitBltObject(SBitmap* bmpDst, SObject* objSrc, SBitmap* bmpSrc)
 	{
-		iBitBlt(bmpDst, &objSrc->rc, bmpSrc);
+		iBmpBitBlt(bmpDst, &objSrc->rc, bmpSrc);
 	}
 
 
@@ -1244,9 +1634,9 @@ void initialize(HACCEL* hAccelTable)
 // Draws all except bits with the mask color rgb(222,22,222)
 //
 //////
-	void iBitBltObjectMask(SBitmap* bmpDst, SObject* obj, SBitmap* bmpSrc)
+	void iBmpBitBltObjectMask(SBitmap* bmpDst, SObject* obj, SBitmap* bmpSrc)
 	{
-		iBitBltMask(bmpDst, &obj->rc, bmpSrc);
+		iBmpBitBltMask(bmpDst, &obj->rc, bmpSrc);
 	}
 
 
@@ -1257,14 +1647,14 @@ void initialize(HACCEL* hAccelTable)
 // Physically render the bitmap atop the bitmap
 //
 //////
-	void iBitBlt(SBitmap* bmpDst, RECT* trc, SBitmap* bmpSrc)
+	void iBmpBitBlt(SBitmap* bmpDst, RECT* trc, SBitmap* bmpSrc)
 	{
 		s32			lnY, lnX, lnYDst, lnXDst;
 		f64			lfAlp, lfMalp;
-		SBGR*		lbgrDst;
-		SBGR*		lbgrSrc;
-		SBGRA*		lbgraDst;
-		SBGRA*		lbgraSrc;
+		SBgr*		lbgrDst;
+		SBgr*		lbgrSrc;
+		SBgra*		lbgraDst;
+		SBgra*		lbgraSrc;
 
 
 		//////////
@@ -1276,10 +1666,10 @@ void initialize(HACCEL* hAccelTable)
 				if (lnYDst >= 0 && lnYDst < bmpDst->bi.biHeight)
 				{
 					// Build the pointer
-					lbgrDst		= (SBGR*)((s8*)bmpDst->bd  + ((bmpDst->bi.biHeight - lnYDst - 1) * bmpDst->rowWidth) + (trc->left * (bmpDst->bi.biBitCount / 8)));
-					lbgrSrc		= (SBGR*)((s8*)bmpSrc->bd  + ((bmpSrc->bi.biHeight - lnY    - 1) * bmpSrc->rowWidth));
-					lbgraDst	= (SBGRA*)((s8*)bmpDst->bd + ((bmpDst->bi.biHeight - lnYDst - 1) * bmpDst->rowWidth) + (trc->left * (bmpDst->bi.biBitCount / 8)));
-					lbgraSrc	= (SBGRA*)((s8*)bmpSrc->bd + ((bmpSrc->bi.biHeight - lnY    - 1) * bmpSrc->rowWidth));
+					lbgrDst		= (SBgr*)((s8*)bmpDst->bd  + ((bmpDst->bi.biHeight - lnYDst - 1) * bmpDst->rowWidth) + (trc->left * (bmpDst->bi.biBitCount / 8)));
+					lbgrSrc		= (SBgr*)((s8*)bmpSrc->bd  + ((bmpSrc->bi.biHeight - lnY    - 1) * bmpSrc->rowWidth));
+					lbgraDst	= (SBgra*)((s8*)bmpDst->bd + ((bmpDst->bi.biHeight - lnYDst - 1) * bmpDst->rowWidth) + (trc->left * (bmpDst->bi.biBitCount / 8)));
+					lbgraSrc	= (SBgra*)((s8*)bmpSrc->bd + ((bmpSrc->bi.biHeight - lnY    - 1) * bmpSrc->rowWidth));
 
 					// What exactly are we copying?
 					if (bmpSrc->bi.biBitCount == 24)
@@ -1385,14 +1775,14 @@ void initialize(HACCEL* hAccelTable)
 // Physically render the bitmap atop the bitmap, with without the mask bits rgb(222,22,222)
 //
 //////
-	void iBitBltMask(SBitmap* bmpDst, RECT* trc, SBitmap* bmpSrc)
+	void iBmpBitBltMask(SBitmap* bmpDst, RECT* trc, SBitmap* bmpSrc)
 	{
 		s32			lnY, lnX, lnYDst, lnXDst;
 		f64			lfAlp, lfMalp;
-		SBGR*		lbgrDst;
-		SBGR*		lbgrSrc;
-		SBGRA*		lbgraDst;
-		SBGRA*		lbgraSrc;
+		SBgr*		lbgrDst;
+		SBgr*		lbgrSrc;
+		SBgra*		lbgraDst;
+		SBgra*		lbgraSrc;
 
 
 		//////////
@@ -1404,10 +1794,10 @@ void initialize(HACCEL* hAccelTable)
 				if (lnYDst >= 0 && lnYDst < bmpDst->bi.biHeight)
 				{
 					// Build the pointer
-					lbgrDst		= (SBGR*)((s8*)bmpDst->bd  + ((bmpDst->bi.biHeight - lnYDst - 1) * bmpDst->rowWidth) + (trc->left * (bmpDst->bi.biBitCount / 8)));
-					lbgrSrc		= (SBGR*)((s8*)bmpSrc->bd  + ((bmpSrc->bi.biHeight - lnY    - 1) * bmpSrc->rowWidth));
-					lbgraDst	= (SBGRA*)((s8*)bmpDst->bd + ((bmpDst->bi.biHeight - lnYDst - 1) * bmpDst->rowWidth) + (trc->left * (bmpDst->bi.biBitCount / 8)));
-					lbgraSrc	= (SBGRA*)((s8*)bmpSrc->bd + ((bmpSrc->bi.biHeight - lnY    - 1) * bmpSrc->rowWidth));
+					lbgrDst		= (SBgr*)((s8*)bmpDst->bd  + ((bmpDst->bi.biHeight - lnYDst - 1) * bmpDst->rowWidth) + (trc->left * (bmpDst->bi.biBitCount / 8)));
+					lbgrSrc		= (SBgr*)((s8*)bmpSrc->bd  + ((bmpSrc->bi.biHeight - lnY    - 1) * bmpSrc->rowWidth));
+					lbgraDst	= (SBgra*)((s8*)bmpDst->bd + ((bmpDst->bi.biHeight - lnYDst - 1) * bmpDst->rowWidth) + (trc->left * (bmpDst->bi.biBitCount / 8)));
+					lbgraSrc	= (SBgra*)((s8*)bmpSrc->bd + ((bmpSrc->bi.biHeight - lnY    - 1) * bmpSrc->rowWidth));
 
 					// What exactly are we copying?
 					if (bmpSrc->bi.biBitCount == 24)
@@ -1517,66 +1907,16 @@ void initialize(HACCEL* hAccelTable)
 			}
 	}
 
-
-
-
-//////////
-//
-// Draw the icon controls
-//
-//////
-	void iDrawControls(RECT* trc)
+	void iBmpDrawPoint(SBitmap* bmp, s32 tnX, s32 tnY, SBgra color)
 	{
-		//////////
-		// Icon and controls
-		//////
-			SetRect(&winIface.appIcon.rc,		30,					1,				30 + winIface.appIcon.bmp.bi.biWidth,					1 + winIface.appIcon.bmp.bi.biHeight);
-			SetRect(&winIface.minimize.rc,		trc->right - 132,	trc->top + 1,	trc->right - 132 + winIface.minimize.bmp.bi.biWidth,	trc->top + 1 + winIface.minimize.bmp.bi.biHeight);
-			SetRect(&winIface.maximize.rc,		trc->right - 104,	trc->top + 1,	trc->right - 104 + winIface.maximize.bmp.bi.biWidth,	trc->top + 1 + winIface.maximize.bmp.bi.biHeight);
-			SetRect(&winIface.close.rc,			trc->right - 77,	trc->top + 1,	trc->right - 77  + winIface.close.bmp.bi.biWidth,		trc->top + 1 + winIface.close.bmp.bi.biHeight);
-
-			iBitBltObject(&winIface.bmp, &winIface.appIcon,		iBmpOrBmpOver(&winIface.appIcon,	false));
-			iBitBltObject(&winIface.bmp, &winIface.minimize,	iBmpOrBmpOver(&winIface.minimize,	false));
-			iBitBltObject(&winIface.bmp, &winIface.maximize,	iBmpOrBmpOver(&winIface.maximize,	false));
-			iBitBltObject(&winIface.bmp, &winIface.close,		iBmpOrBmpOver(&winIface.close,		false));
-
-
-		//////////
-		// Corner triangles
-		//////
-			// Set the areas for mouse identifying
-			SetRect(&winIface.arrowUl.rc, trc->left, trc->top, trc->left + winIface.arrowUl.bmp.bi.biWidth, trc->top + winIface.arrowUl.bmp.bi.biHeight);
-			SetRect(&winIface.arrowUr.rc, trc->right - winIface.arrowUr.bmp.bi.biWidth, trc->top, trc->right, trc->top + winIface.arrowUr.bmp.bi.biHeight);
-			SetRect(&winIface.arrowLr.rc, trc->right - winIface.arrowLr.bmp.bi.biWidth, trc->bottom - winIface.arrowLr.bmp.bi.biHeight, trc->right, trc->bottom);
-			SetRect(&winIface.arrowLl.rc, trc->left, trc->bottom - winIface.arrowLl.bmp.bi.biHeight, trc->left + winIface.arrowLl.bmp.bi.biWidth, trc->bottom);
-
-			// Draw them
-			iBitBltObjectMask(&winIface.bmp, &winIface.arrowUl, iBmpOrBmpOver(&winIface.arrowUl, false));
-			iBitBltObjectMask(&winIface.bmp, &winIface.arrowUr, iBmpOrBmpOver(&winIface.arrowUr, false));
-			iBitBltObjectMask(&winIface.bmp, &winIface.arrowLr, iBmpOrBmpOver(&winIface.arrowLr, false));
-			iBitBltObjectMask(&winIface.bmp, &winIface.arrowLl, iBmpOrBmpOver(&winIface.arrowLl, false));
-
-
-		//////////
-		// Draw the app title
-		//////
-			SetRect(&winIface.rcCaption, winIface.appIcon.rc.right + 8, winIface.appIcon.rc.top + 2, winIface.minimize.rc.left - 8, winIface.appIcon.rc.bottom);
-			SelectObject(winIface.bmp.hdc, winIface.fontCaption->hfont);
-			SetTextColor(winIface.bmp.hdc, (COLORREF)RGB(black.red, black.grn, black.blu));
-			SetBkColor(winIface.bmp.hdc, (COLORREF)RGB(light_green.red, light_green.grn, light_green.blu));
-			DrawTextA(winIface.bmp.hdc, cgcTitle, sizeof(cgcTitle) - 1, &winIface.rcCaption, DT_VCENTER | DT_END_ELLIPSIS);
-	}
-
-	void iDrawPoint(SBitmap* bmp, s32 tnX, s32 tnY, SBGRA color)
-	{
-		SBGR*	lbgr;
+		SBgr*	lbgr;
 
 
 		// Make sure our coordinates are valid
 		if (tnX >= 0 && tnX < bmp->bi.biWidth && tnY >= 0 && tnY < bmp->bi.biHeight)
 		{
 			// Get our offset
-			lbgr = (SBGR*)(bmp->bd + ((bmp->bi.biHeight - tnY - 1) * bmp->rowWidth) + (tnX * (bmp->bi.biBitCount / 8)));
+			lbgr = (SBgr*)(bmp->bd + ((bmp->bi.biHeight - tnY - 1) * bmp->rowWidth) + (tnX * (bmp->bi.biBitCount / 8)));
 
 			// Draw it
 			lbgr->red	= color.red;
@@ -1585,34 +1925,155 @@ void initialize(HACCEL* hAccelTable)
 		}
 	}
 
-	void iFillRect(SBitmap* bmp, RECT* rc, SBGRA color)
+	void iBmpFillRect(SBitmap* bmp, RECT* rc, SBgra colorNW, SBgra colorNE, SBgra colorSW, SBgra colorSE, bool tlUseGradient)
 	{
-		s32 lnY;
+		s32		lnY;
+		f32		lfRed, lfGrn, lfBlu, lfRedTo, lfGrnTo, lfBluTo, lfRedInc, lfGrnInc, lfBluInc, lfPercent, lfPercentInc, lfHeight, lfWidth;
 
 
+		//////////
 		// Fill every row
-		for (lnY = rc->top; lnY < rc->bottom; lnY++)
-			iDrawHorizontalLine(bmp, rc->left, rc->right - 1, lnY, color);
+		//////
+			lfWidth			= (f32)(rc->right  - 1 - rc->left);
+			lfHeight		= (f32)(rc->bottom - 1 - rc->top);
+			lfPercentInc	= 1.0f / lfHeight;
+			for (lfPercent = 0.0, lnY = rc->top; lnY < rc->bottom; lnY++, lfPercent += lfPercentInc)
+			{
+				if (tlUseGradient)
+				{
+					//////////
+					// Compute FROM colors
+					//////
+						lfRed		= (f32)colorNW.red + (((f32)colorSW.red - (f32)colorNW.red) * lfPercent);
+						lfGrn		= (f32)colorNW.grn + (((f32)colorSW.grn - (f32)colorNW.grn) * lfPercent);
+						lfBlu		= (f32)colorNW.blu + (((f32)colorSW.blu - (f32)colorNW.blu) * lfPercent);
+
+
+					//////////
+					// Compute TO colors
+					//////
+						lfRedTo		= (f32)colorNE.red + (((f32)colorSE.red - (f32)colorNE.red) * lfPercent);
+						lfGrnTo		= (f32)colorNE.grn + (((f32)colorSE.grn - (f32)colorNE.grn) * lfPercent);
+						lfBluTo		= (f32)colorNE.blu + (((f32)colorSE.blu - (f32)colorNE.blu) * lfPercent);
+
+
+					//////////
+					// Compute increment
+					//////
+						lfRedInc	= (lfRedTo - lfRed) / lfWidth;
+						lfGrnInc	= (lfGrnTo - lfGrn) / lfWidth;
+						lfBluInc	= (lfBluTo - lfBlu) / lfWidth;
+
+
+					//////////
+					// Draw this line with its gradient
+					//////
+						iBmpDrawHorizontalLineGradient(bmp, rc->left, rc->right - 1, lnY, lfRed, lfGrn, lfBlu, lfRedInc, lfGrnInc, lfBluInc);
+
+				} else {
+					// Draw this line with the NW color
+					iBmpDrawHorizontalLine(bmp, rc->left, rc->right - 1, lnY, colorNW);
+				}
+			}
 	}
 
-	void iFrameRect(SBitmap* bmp, RECT* rc, SBGRA color)
+	void iBmpFrameRect(SBitmap* bmp, RECT* rc, SBgra colorNW, SBgra colorNE, SBgra colorSW, SBgra colorSE, bool tlUseGradient)
 	{
-		iDrawHorizontalLine(bmp, rc->left, rc->right - 1, rc->top, color);
-		iDrawHorizontalLine(bmp, rc->left, rc->right - 1, rc->bottom - 1, color);
-		iDrawVerticalLine(bmp, rc->top, rc->bottom - 1, rc->left, color);
-		iDrawVerticalLine(bmp, rc->top, rc->bottom - 1, rc->right - 1, color);
+		f32 lfRed, lfGrn, lfBlu, lfRedTo, lfGrnTo, lfBluTo, lfRedInc, lfGrnInc, lfBluInc, lfHeight, lfWidth;
+
+
+		if (tlUseGradient)
+		{
+			// Compute standards
+			lfWidth		= (f32)(rc->right  - 1 - rc->left);
+			lfHeight	= (f32)(rc->bottom - 1 - rc->top);
+
+			//////////
+			// Top (NW to NE)
+			//////
+				// Compute FROM and TO colors
+				lfRed = (f32)colorNW.red;			lfRedTo = (f32)colorNE.red;
+				lfGrn = (f32)colorNW.grn;			lfGrnTo = (f32)colorNE.grn;
+				lfBlu = (f32)colorNW.blu;			lfBluTo = (f32)colorNE.blu;
+
+				// Compute increment
+				lfRedInc	= (lfRedTo - lfRed) / lfWidth;
+				lfGrnInc	= (lfGrnTo - lfGrn) / lfWidth;
+				lfBluInc	= (lfBluTo - lfBlu) / lfWidth;
+
+				// Draw it
+				iBmpDrawHorizontalLineGradient(bmp, rc->left, rc->right - 1, rc->top, lfRed, lfGrn, lfBlu, lfRedInc, lfGrnInc, lfBluInc);
+
+
+			//////////
+			// Bottom (SW to SE)
+			//////
+				// Compute FROM and TO colors
+				lfRed = (f32)colorSW.red;			lfRedTo = (f32)colorSE.red;
+				lfGrn = (f32)colorSW.grn;			lfGrnTo = (f32)colorSE.grn;
+				lfBlu = (f32)colorSW.blu;			lfBluTo = (f32)colorSE.blu;
+
+				// Compute increment
+				lfRedInc	= (lfRedTo - lfRed) / lfWidth;
+				lfGrnInc	= (lfGrnTo - lfGrn) / lfWidth;
+				lfBluInc	= (lfBluTo - lfBlu) / lfWidth;
+
+				// Draw it
+				iBmpDrawHorizontalLineGradient(bmp, rc->left, rc->right - 1, rc->bottom - 1, lfRed, lfGrn, lfBlu, lfRedInc, lfGrnInc, lfBluInc);
+
+
+			//////////
+			// Left (NW to SW)
+			//////
+				// Compute FROM and TO colors
+				lfRed = (f32)colorNW.red;			lfRedTo = (f32)colorSW.red;
+				lfGrn = (f32)colorNW.grn;			lfGrnTo = (f32)colorSW.grn;
+				lfBlu = (f32)colorNW.blu;			lfBluTo = (f32)colorSW.blu;
+
+				// Compute increment
+				lfRedInc	= (lfRedTo - lfRed) / lfWidth;
+				lfGrnInc	= (lfGrnTo - lfGrn) / lfWidth;
+				lfBluInc	= (lfBluTo - lfBlu) / lfWidth;
+
+				// Draw it
+				iBmpDrawVerticalLineGradient(bmp, rc->top, rc->bottom - 1, rc->left, lfRed, lfGrn, lfBlu, lfRedInc, lfGrnInc, lfBluInc);
+
+
+			//////////
+			// Right (NE to SE)
+			//////
+				// Compute FROM and TO colors
+				lfRed = (f32)colorNE.red;			lfRedTo = (f32)colorSE.red;
+				lfGrn = (f32)colorNE.grn;			lfGrnTo = (f32)colorSE.grn;
+				lfBlu = (f32)colorNE.blu;			lfBluTo = (f32)colorSE.blu;
+
+				// Compute increment
+				lfRedInc	= (lfRedTo - lfRed) / lfWidth;
+				lfGrnInc	= (lfGrnTo - lfGrn) / lfWidth;
+				lfBluInc	= (lfBluTo - lfBlu) / lfWidth;
+
+				// Draw it
+				iBmpDrawVerticalLineGradient(bmp, rc->top, rc->bottom - 1, rc->right - 1, lfRed, lfGrn, lfBlu, lfRedInc, lfGrnInc, lfBluInc);
+
+		} else {
+			// Just draw in a solid color
+			iBmpDrawHorizontalLine(bmp, rc->left, rc->right - 1, rc->top, colorNW);
+			iBmpDrawHorizontalLine(bmp, rc->left, rc->right - 1, rc->bottom - 1, colorNW);
+			iBmpDrawVerticalLine(bmp, rc->top, rc->bottom - 1, rc->left, colorNW);
+			iBmpDrawVerticalLine(bmp, rc->top, rc->bottom - 1, rc->right - 1, colorNW);
+		}
 	}
 
-	void iDrawHorizontalLine(SBitmap* bmp, s32 tnX1, s32 tnX2, s32 tnY, SBGRA color)
+	void iBmpDrawHorizontalLine(SBitmap* bmp, s32 tnX1, s32 tnX2, s32 tnY, SBgra color)
 	{
 		s32		lnX;
-		SBGR*	lbgr;
-		SBGRA*	lbgra;
+		SBgr*	lbgr;
+		SBgra*	lbgra;
 
 
 		// Get our starting point
-		lbgr	= (SBGR*)(bmp->bd  + ((bmp->bi.biHeight - tnY - 1) * bmp->rowWidth) + (tnX1 * (bmp->bi.biBitCount / 8)));
-		lbgra	= (SBGRA*)(bmp->bd + ((bmp->bi.biHeight - tnY - 1) * bmp->rowWidth) + (tnX1 * (bmp->bi.biBitCount / 8)));
+		lbgr	= (SBgr*)(bmp->bd  + ((bmp->bi.biHeight - tnY - 1) * bmp->rowWidth) + (tnX1 * (bmp->bi.biBitCount / 8)));
+		lbgra	= (SBgra*)(bmp->bd + ((bmp->bi.biHeight - tnY - 1) * bmp->rowWidth) + (tnX1 * (bmp->bi.biBitCount / 8)));
 
 		if (bmp->bi.biBitCount == 24)
 		{
@@ -1652,16 +2113,16 @@ void initialize(HACCEL* hAccelTable)
 		}
 	}
 
-	void iDrawVerticalLine(SBitmap* bmp, s32 tnY1, s32 tnY2, s32 tnX, SBGRA color)
+	void iBmpDrawVerticalLine(SBitmap* bmp, s32 tnY1, s32 tnY2, s32 tnX, SBgra color)
 	{
 		s32		lnY;
-		SBGR*	lbgr;
-		SBGRA*	lbgra;
+		SBgr*	lbgr;
+		SBgra*	lbgra;
 
 
 		// Get our starting point
-		lbgr	= (SBGR*)(bmp->bd  + ((bmp->bi.biHeight - tnY1 - 1) * bmp->rowWidth) + (tnX * (bmp->bi.biBitCount / 8)));
-		lbgra	= (SBGRA*)(bmp->bd + ((bmp->bi.biHeight - tnY1 - 1) * bmp->rowWidth) + (tnX * (bmp->bi.biBitCount / 8)));
+		lbgr	= (SBgr*)(bmp->bd  + ((bmp->bi.biHeight - tnY1 - 1) * bmp->rowWidth) + (tnX * (bmp->bi.biBitCount / 8)));
+		lbgra	= (SBgra*)(bmp->bd + ((bmp->bi.biHeight - tnY1 - 1) * bmp->rowWidth) + (tnX * (bmp->bi.biBitCount / 8)));
 
 		if (bmp->bi.biBitCount == 24)
 		{
@@ -1677,7 +2138,7 @@ void initialize(HACCEL* hAccelTable)
 					lbgr->blu	= color.blu;
 
 					// Move to next row
-					lbgr = (SBGR*)((s8*)lbgr - bmp->rowWidth);
+					lbgr = (SBgr*)((s8*)lbgr - bmp->rowWidth);
 				}
 			}
 
@@ -1689,12 +2150,13 @@ void initialize(HACCEL* hAccelTable)
 				if (lnY >= 0 && lnY < bmp->bi.biHeight)
 				{
 					// Draw the pixel
+					lbgra->alp	= 255;
 					lbgra->red	= color.red;
 					lbgra->grn	= color.grn;
 					lbgra->blu	= color.blu;
 
 					// Move to next row
-					lbgra = (SBGRA*)((s8*)lbgra - bmp->rowWidth);
+					lbgra = (SBgra*)((s8*)lbgra - bmp->rowWidth);
 				}
 			}
 		}
@@ -1705,27 +2167,957 @@ void initialize(HACCEL* hAccelTable)
 
 //////////
 //
-// Called to redraw the main window
+// Gradient line algorithms
 //
 //////
-	void iRedrawAll(SWindowIface* win)
+	void iBmpDrawHorizontalLineGradient(SBitmap* bmp, s32 tnX1, s32 tnX2, s32 tnY, f32 tfRed, f32 tfGrn, f32 tfBlu, f32 tfRedInc, f32 tfGrnInc, f32 tfBluInc)
+	{
+		s32		lnX;
+		SBgr*	lbgr;
+		SBgra*	lbgra;
+
+
+		// Get our starting point
+		lbgr	= (SBgr*)(bmp->bd  + ((bmp->bi.biHeight - tnY - 1) * bmp->rowWidth) + (tnX1 * (bmp->bi.biBitCount / 8)));
+		lbgra	= (SBgra*)(bmp->bd + ((bmp->bi.biHeight - tnY - 1) * bmp->rowWidth) + (tnX1 * (bmp->bi.biBitCount / 8)));
+
+		if (bmp->bi.biBitCount == 24)
+		{
+			// Iterate for each column
+			for (lnX = tnX1; lnX <= tnX2; lnX++, tfRed += tfRedInc, tfGrn += tfGrnInc, tfBlu += tfBluInc)
+			{
+				// Are we on the bitmap?
+				if (lnX >= 0 && lnX < bmp->bi.biWidth)
+				{
+					// Draw the pixel
+					lbgr->red	= (u8)tfRed;
+					lbgr->grn	= (u8)tfGrn;
+					lbgr->blu	= (u8)tfBlu;
+
+					// Move to next column
+					++lbgr;
+				}
+			}
+
+		} else if (bmp->bi.biBitCount == 32) {
+			// Iterate for each column
+			for (lnX = tnX1; lnX <= tnX2; lnX++, tfRed += tfRedInc, tfGrn += tfGrnInc, tfBlu += tfBluInc)
+			{
+				// Are we on the bitmap?
+				if (lnX >= 0 && lnX < bmp->bi.biWidth)
+				{
+					// Draw the pixel
+					lbgra->alp	= 255;
+					lbgra->red	= (u8)tfRed;
+					lbgra->grn	= (u8)tfGrn;
+					lbgra->blu	= (u8)tfBlu;
+
+					// Move to next column
+					++lbgra;
+				}
+			}
+		}
+	}
+
+	void iBmpDrawVerticalLineGradient(SBitmap* bmp, s32 tnY1, s32 tnY2, s32 tnX, f32 tfRed, f32 tfGrn, f32 tfBlu, f32 tfRedInc, f32 tfGrnInc, f32 tfBluInc)
+	{
+		s32		lnY;
+		SBgr*	lbgr;
+		SBgra*	lbgra;
+
+
+		// Get our starting point
+		lbgr	= (SBgr*)(bmp->bd  + ((bmp->bi.biHeight - tnY1 - 1) * bmp->rowWidth) + (tnX * (bmp->bi.biBitCount / 8)));
+		lbgra	= (SBgra*)(bmp->bd + ((bmp->bi.biHeight - tnY1 - 1) * bmp->rowWidth) + (tnX * (bmp->bi.biBitCount / 8)));
+
+		if (bmp->bi.biBitCount == 24)
+		{
+			// Iterate for each column
+			for (lnY = tnY1; lnY <= tnY2; lnY++, tfRed += tfRedInc, tfGrn += tfGrnInc, tfBlu += tfBluInc)
+			{
+				// Are we on the bitmap?
+				if (lnY >= 0 && lnY < bmp->bi.biHeight)
+				{
+					// Draw the pixel
+					lbgr->red	= (u8)tfRed;
+					lbgr->grn	= (u8)tfGrn;
+					lbgr->blu	= (u8)tfBlu;
+
+					// Move to next row
+					lbgr = (SBgr*)((s8*)lbgr - bmp->rowWidth);
+				}
+			}
+
+		} else if (bmp->bi.biBitCount == 32) {
+			// Iterate for each column
+			for (lnY = tnY1; lnY <= tnY2; lnY++, tfRed += tfRedInc, tfGrn += tfGrnInc, tfBlu += tfBluInc)
+			{
+				// Are we on the bitmap?
+				if (lnY >= 0 && lnY < bmp->bi.biHeight)
+				{
+					// Draw the pixel
+					lbgra->alp	= 255;
+					lbgra->red	= (u8)tfRed;
+					lbgra->grn	= (u8)tfGrn;
+					lbgra->blu	= (u8)tfBlu;
+
+					// Move to next row
+					lbgra = (SBgra*)((s8*)lbgra - bmp->rowWidth);
+				}
+			}
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to scale one bitmap into another.
+//
+// Note:  All of this code was adapted from the Visual FreePro.
+// Note:  See https://github.com/RickCHodgin/libsf (in vvm\core\).
+//
+//////
+	u32 iBmpScale(SBitmap* bmpDst, SBitmap* bmpSrc)
+	{
+		u32		lnResult;
+		f32		lfVertical, lfHorizontal;
+		RECT	lrc;
+
+
+		// Make sure our environment is sane
+		lnResult = -1;
+		if (bmpDst->bi.biBitCount == 24 || bmpDst->bi.biBitCount == 32)
+		{
+			if (bmpSrc->bi.biBitCount == 24 || bmpSrc->bi.biBitCount == 32)
+			{
+				// We have valid source and destination bitmaps
+				if (bmpSrc->bi.biWidth == bmpDst->bi.biWidth && bmpSrc->bi.biHeight == bmpDst->bi.biHeight)
+				{
+					// They're the same size
+					if (bmpSrc->bi.biBitCount == bmpDst->bi.biBitCount)
+					{
+						// They're the same bit counts, do a fast copy
+						memcpy(bmpDst->bd, bmpSrc->bd, bmpSrc->bi.biSizeImage);
+
+					} else {
+						// Do a bitBlt to translate bit counts
+						SetRect(&lrc, 0, 0, bmpDst->bi.biWidth, bmpDst->bi.biHeight);
+						iBmpBitBlt(bmpDst, &lrc, bmpSrc);
+					}
+					// Indicate success
+					lnResult = 1;
+
+				} else {
+					// We need to scale
+					lfVertical		= (f32)bmpSrc->bi.biHeight / (f32)bmpDst->bi.biHeight;
+					lfHorizontal	= (f32)bmpSrc->bi.biWidth  / (f32)bmpDst->bi.biWidth;
+					lnResult		= iiBmpScale_Process(bmpDst, bmpSrc, lfVertical, lfHorizontal);
+				}
+			}
+		}
+
+		// Indicate our failure or success
+		return(lnResult);
+	}
+
+
+
+
+//////////
+//
+// Takes a 24-bit bitmap, and scales it up or down to the specified size, with a
+// minimum of a 1x1 pixel size.
+//
+// Returns:
+//		-1		- Input file could not be opened
+//		-2		- Invalid input bitmap
+//		-3		- Unable to allocate memory for input bitmap
+//		-4		- Error reading input bitmap
+//		-5		- Unable to allocate memory for output bitmap
+//		-6		- Unable to create the output file
+//		-7		- Unable to write to output file
+//
+//////
+	u32 iiBmpScale_Process(SBitmap* bmpDst, SBitmap* bmpSrc, f32 tfVerticalScaler, f32 tfHorizontalScaler)
+	{
+		s32				lnY, lnX;
+		SBitmapProcess	bp;
+
+
+		// Being the scaling procedure
+		bp.src		= bmpSrc;
+		bp.ratioV	= (f32)bmpSrc->bi.biHeight	/ (f32)bmpDst->bi.biHeight;
+		bp.ratioH	= (f32)bmpSrc->bi.biWidth	/ (f32)bmpDst->bi.biWidth;
+		bp.pixels	= (SBgraf*)malloc(((u32)bp.ratioV + 16) * ((u32)bp.ratioH + 16) * sizeof(SBgraf));
+
+		// Iterate through every pixel
+		for (lnY = 0; lnY < bmpDst->bi.biHeight; lnY++)
+		{
+			// Grab the offset for this line
+			if (bmpDst->bi.biBitCount == 24)		bp.optr		= (SBgr*)( bmpDst->bd + ((bmpDst->bi.biHeight - lnY - 1) * bmpDst->rowWidth));
+			else									bp.optra	= (SBgra*)(bmpDst->bd + ((bmpDst->bi.biHeight - lnY - 1) * bmpDst->rowWidth));
+
+			// Repeat for every pixel across this row
+			for (lnX = 0; lnX < bmpDst->bi.biWidth; lnX++)
+			{
+				// Compute data for this spanned pixel
+				bp.uly	= min((f32)lnY * bp.ratioV, (f32)bmpSrc->bi.biHeight - bp.ratioV);
+				bp.ulx	= min((f32)lnX * bp.ratioH, (f32)bmpSrc->bi.biWidth  - bp.ratioH);
+				bp.lry	= bp.uly + bp.ratioV;
+				bp.lrx	= bp.ulx + bp.ratioH;
+
+				// Get all the color information for this potentially spanned pixel
+				iiBmpScale_processPixels(&bp);
+
+				// Store the color
+				if (bmpDst->bi.biBitCount == 24)
+				{
+					bp.optr->red = (u8)bp.red;
+					bp.optr->grn = (u8)bp.grn;
+					bp.optr->blu = (u8)bp.blu;
+					// Move to the next pixel
+					++bp.optr;
+
+				} else {
+					bp.optra->red = (u8)bp.red;
+					bp.optra->grn = (u8)bp.grn;
+					bp.optra->blu = (u8)bp.blu;
+					// Move to the next pixel
+					++bp.optra;
+				}
+			}
+		}
+		// When we get here, we've computed everything
+
+		// Finished, indicate the pixel count
+		return(bmpDst->bi.biHeight * bmpDst->bi.biWidth * sizeof(SBgr));
+	}
+
+
+
+
+//////////
+//
+// Get spanned pixel data, meaning the input (bii, bdi) values are scanned based on the
+// location of tnY,tnX and the relationship between bii and bio, meaning the input and
+// output sizes.  If bii is bigger, then each bio pixel maps to more than one bii pixel.
+// If they're identical, it's 1:1.  If bii is smaller, then each bio pixel maps to less
+// than one full bii pixel.  There are no other options. :-)  This algorithm should not
+// be used for 1:1 ratio conversions.
+//
+// Note that each of the above conditions applies to both width and height, meaning the
+// relationship between bii and bio is analyzed on each axis, resulting in nine possible
+// states (wider+taller, wider+equal, wider+shorter, equal+taller, equal+equal, equal+shorter,
+// narrower+taller, narrower+equal, narrower+shorter).
+//
+// This natural relationship breaks down into nine general point forms:
+//		Original pixels:			Output pixels span original pixels:
+//		 ______________ 			 ______________ 			 ______________
+//		|    |    |    |			|    |    |    |			|1   | 2  |   3|
+//		|____|____|____|			|__+--------+__|			|__+--------+__|
+//		|    |    |    |	==>		|  |        |  |	==>		|4 |   5    | 6|
+//		|____|____|____|	==>		|__|        |__|	==>		|__|        |__|
+//		|    |    |    |			|  +--------+  |			|7 +---8----+ 9|
+//		|____|____|____|			|____|____|____|			|____|____|____|
+//
+// This form is comprised of 9 general parts, eight of which may not be present in all
+// relationships, and five of which may span multiple columns, rows or both.
+//
+// These are:
+//		1	- upper-left	(always,	spans at most one pixel)
+//		2	- upper-middle	(optional,	spans at most multiple partial or full pixels)
+//		3	- upper-right	(optional,	spans at most one pixel)
+//		4	- middle-left	(optional,	spans at most multiple partial or full pixels)
+//		5	- middle-middle	(optional,	can span multiple partial or full pixels)
+//		6	- middle-right	(optional,	spans at most multiple partial or full pixels)
+//		7	- lower-left	(optional,	spans at most one pixel)
+//		8	- lower-middle	(optional,	spans at most multiple partial or full pixels)
+//		9	- lower-right	(optional,	spans at most one pixel)
+//
+//////
+	void iiBmpScale_processPixels(SBitmapProcess* bp)
+	{
+		u32		lnI;
+		f32		lfRed, lfGrn, lfBlu, lfAlp, lfAreaAccumulator;
+
+
+		// Raise the flags for which portions are valid / required
+		bp->spans2H		= (iiBmpScale_processGetIntegersBetween(bp->ulx, bp->lrx) >= 1);		// It occupies at least two pixels horizontally (itself and one more)
+		bp->spans3H		= (iiBmpScale_processGetIntegersBetween(bp->ulx, bp->lrx) >= 2);		// It occupies at least three pixels horizontally (itself, at least one in the middle, and one at the right)
+		bp->spans2V		= (iiBmpScale_processGetIntegersBetween(bp->uly, bp->lry) >= 1);		// It occupies at least two pixels vertically (itself and one more)
+		bp->spans3V		= (iiBmpScale_processGetIntegersBetween(bp->uly, bp->lry) >= 2);		// It occupies at least three pixels vertically (itself, at least one in the middle, and one at the right)
+
+		// Reset the point count
+		bp->count		= 0;
+
+		// Indicate the start of this input line
+		if (bp->src->bi.biBitCount == 24)
+		{
+			// 24-bit bitmap
+			bp->iptr		= (SBgr*)(bp->src->bd + ((bp->src->bi.biHeight - (s32)bp->uly - 1) * bp->src->rowWidth));	// current line
+			bp->iptrAnchor	= (SBgr*)(bp->src->bd + ((bp->src->bi.biHeight                   ) * bp->src->rowWidth));	// root anchor (does not include the conversion from base-1)
+
+		} else {
+			// 32-bit bitmap
+			bp->iptra		= (SBgra*)(bp->src->bd + ((bp->src->bi.biHeight - (s32)bp->uly - 1) * bp->src->rowWidth));	// current line
+			bp->iptrAnchora	= (SBgra*)(bp->src->bd + ((bp->src->bi.biHeight                   ) * bp->src->rowWidth));	// root anchor (does not include the conversion from base-1)
+		}
+
+
+		//////////
+		// The following functions (if called) update the number of pieces of picture data to add to the output
+		//////
+			//////////
+			// 1 - upper-left (always, spans at most one pixel)
+			//////
+				iiBmpScale_processSpannedPixel1(bp);
+
+			//////////
+			// 2 - upper-middle (optional, spans at most multiple partial or full pixels, but only if 1, 2 and 3 exist)
+			//////
+				if (bp->spans3H)
+					iiBmpScale_processSpannedPixel2(bp);
+
+
+			//////////
+			// 3 - upper-right (optional, spans at most one pixel, but only if 1 and 3 exist (as 1 and 2))
+			//////
+				if (bp->spans2H || bp->spans3H)
+					iiBmpScale_processSpannedPixel3(bp);
+
+
+			//////////
+			// 4 - middle-left (optional, spans at most multiple partial or full pixels)
+			//////
+				if (bp->spans3V && bp->spans2V)
+					iiBmpScale_processSpannedPixel4(bp);
+
+
+			//////////
+			// 5 - middle-middle (optional, can span multiple partial or full pixels)
+			//////
+				if (bp->spans3V && bp->spans3H)
+					iiBmpScale_processSpannedPixel5(bp);
+
+
+			//////////
+			// 6 - middle-right (optional, spans at most multiple partial or full pixels)
+			//////
+				if (bp->spans3V && (bp->spans2H || bp->spans3H))
+					iiBmpScale_processSpannedPixel6(bp);
+
+
+			//////////
+			// 7 - lower-left (optional, spans at most one pixel)
+			//////
+				if (bp->spans2V)
+					iiBmpScale_processSpannedPixel7(bp);
+
+
+			//////////
+			// 8 - lower-middle (optional, spans at most multiple partial or full pixels)
+			//////
+				if (bp->spans2V && bp->spans3H)
+					iiBmpScale_processSpannedPixel8(bp);
+
+
+			//////////
+			// 9 - lower-right (optional, spans at most one pixel)
+			//////
+				if (bp->spans2V && (bp->spans2H || bp->spans3H))
+					iiBmpScale_processSpannedPixel9(bp);
+
+
+		//////////
+		// Add up all the pixels to compute the specified value
+		//////
+			lfAreaAccumulator = 0.0;
+			for (lnI = 0; lnI < bp->count; lnI++)
+				lfAreaAccumulator += bp->pixels[lnI].area;
+
+			// Initialize
+			lfRed	= 0;
+			lfGrn	= 0;
+			lfBlu	= 0;
+			lfAlp	= 0;
+
+			// Now, compute each component as its part of the total area
+			for (lnI = 0; lnI < bp->count; lnI++)
+			{
+				// Derive this portion component
+				lfRed	+=		bp->pixels[lnI].red	*	(bp->pixels[lnI].area / lfAreaAccumulator);
+				lfGrn	+=		bp->pixels[lnI].grn	*	(bp->pixels[lnI].area / lfAreaAccumulator);
+				lfBlu	+=		bp->pixels[lnI].blu	*	(bp->pixels[lnI].area / lfAreaAccumulator);
+				lfAlp	+=		bp->pixels[lnI].alp	*	(bp->pixels[lnI].area / lfAreaAccumulator);
+			}
+
+			// When we get here, we have our values, now create the final summed up output
+			bp->red = (u8)(lfRed + 0.5);
+			bp->grn = (u8)(lfGrn + 0.5);
+			bp->blu = (u8)(lfBlu + 0.5);
+			bp->alp = (u8)(lfAlp + 0.5);
+	}
+
+
+
+
+//////////
+//
+// 1 - upper-left (see iGetSpannedPixelColors() above)
+// Upper left pixels is ALWAYS computed. It may be the ONLY one computed, but it is always computed.
+//
+//////
+	void iiBmpScale_processSpannedPixel1(SBitmapProcess* bp)
+	{
+		// Store left- and right-sides for this spanned pixel
+		bp->left			= (s32)min(bp->ulx,			bp->src->bi.biWidth - 1);
+		bp->right			= (s32)min(bp->lrx,			bp->src->bi.biWidth - 1);
+
+		// Compute the middle section in pixels
+		// Note: -2 is for -1 base 0, and -1 because we want the max value to be one before the width/height
+		bp->middleStartH	= (s32)min(bp->ulx + 1,		bp->src->bi.biWidth  - 1);		// next pixel right of upper-left
+		bp->middleFinishH	= (s32)min(bp->lrx - 1,		bp->src->bi.biWidth  - 1);		// next pixel left of upper-right (which is actually lower-right, but on this upper line)
+		bp->middleStartV	= (s32)min(bp->uly + 1,		bp->src->bi.biHeight - 1);		// next pixel right of left-side pixels
+		bp->middleFinishV	= (s32)min(bp->lry - 1,		bp->src->bi.biHeight - 1);		// next pixel left of right-side pixels
+
+		// Find out where this upper-left pixel falls
+		if (!bp->spans2H)	bp->widthLeft	=      bp->lrx          - bp->ulx;		// Entire width is within this one pixel, so it's only a portion of the pixel's overall width
+		else				bp->widthLeft	= (f32)bp->middleStartH - bp->ulx;		// It spans from where it is to the right of the pixel square
+
+ 		if (!bp->spans2V)	bp->height		=      bp->lry          - bp->uly;			// It's entire height is within this one pixel, so it's only a portion of the pixel's overall height
+		else				bp->height		= (f32)bp->middleStartV - bp->uly;			// It spans from where it is to the bottom of the pixel square
+
+		// Compute the area for this pixel component
+		bp->area = bp->widthLeft * bp->height;
+
+		// Store the colors for this point
+		if (bp->src->bi.biBitCount == 24)
+		{
+			// 24-bit bitmap
+			(bp->pixels[bp->count]).red		= (f32)(((SBgr*)((u8*)bp->iptr + (bp->left * 3)))->red);
+			(bp->pixels[bp->count]).grn		= (f32)(((SBgr*)((u8*)bp->iptr + (bp->left * 3)))->grn);
+			(bp->pixels[bp->count]).blu		= (f32)(((SBgr*)((u8*)bp->iptr + (bp->left * 3)))->blu);
+			(bp->pixels[bp->count]).area	= bp->area;
+
+		} else {
+			// 32-bit bitmap
+			(bp->pixels[bp->count]).red		= (f32)(((SBgra*)((u8*)bp->iptra + (bp->left * 4)))->red);
+			(bp->pixels[bp->count]).grn		= (f32)(((SBgra*)((u8*)bp->iptra + (bp->left * 4)))->grn);
+			(bp->pixels[bp->count]).blu		= (f32)(((SBgra*)((u8*)bp->iptra + (bp->left * 4)))->blu);
+			(bp->pixels[bp->count]).alp		= (f32)(((SBgra*)((u8*)bp->iptra + (bp->left * 4)))->alp);
+			(bp->pixels[bp->count]).area	= bp->area;
+		}
+
+		// Move over for the next point
+		++bp->count;
+	}
+
+
+
+
+//////////
+//
+// 2 - upper-middle (see iGetSpannedPixelColors() above)
+// It is known when this function is called that there is at least one, full, middle pixel
+//
+//////
+	void iiBmpScale_processSpannedPixel2(SBitmapProcess* bp)
+	{
+		s32 lnPixel;
+
+
+		// For every middle pixel, apply these values
+		for (lnPixel = bp->middleStartH; lnPixel < bp->middleFinishH; lnPixel++)
+		{
+			// Store this pixel data
+			if (bp->src->bi.biBitCount == 24)
+			{
+				// 24-bit bitmap
+				(bp->pixels[bp->count]).red		= (f32)(((SBgr*)((u8*)bp->iptr + (lnPixel * 3)))->red);
+				(bp->pixels[bp->count]).grn		= (f32)(((SBgr*)((u8*)bp->iptr + (lnPixel * 3)))->grn);
+				(bp->pixels[bp->count]).blu		= (f32)(((SBgr*)((u8*)bp->iptr + (lnPixel * 3)))->blu);
+				(bp->pixels[bp->count]).area	= bp->height;
+
+			} else {
+				// 32-bit bitmap
+				(bp->pixels[bp->count]).red		= (f32)(((SBgra*)((u8*)bp->iptra + (lnPixel * 4)))->red);
+				(bp->pixels[bp->count]).grn		= (f32)(((SBgra*)((u8*)bp->iptra + (lnPixel * 4)))->grn);
+				(bp->pixels[bp->count]).blu		= (f32)(((SBgra*)((u8*)bp->iptra + (lnPixel * 4)))->blu);
+				(bp->pixels[bp->count]).alp		= (f32)(((SBgra*)((u8*)bp->iptra + (lnPixel * 4)))->alp);
+				(bp->pixels[bp->count]).area	= bp->height;
+			}
+
+			// Move over for the next point
+			++bp->count;
+		}
+	}
+
+
+
+
+//////////
+//
+// 3 - upper-right (see iGetSpannedPixelColors() above)
+// It is known when this function is called that there is at least a second row
+//
+//////
+	void iiBmpScale_processSpannedPixel3(SBitmapProcess* bp)
+	{
+		// Find out where this upper-left pixel falls
+		bp->widthRight = bp->lrx - (f32)bp->right;		// It spans from the start of the right-most pixel to wherever it falls therein
+
+		// Compute the area for this pixel component
+		bp->area = bp->widthRight * bp->height;
+
+		// Store this pixel data
+		if (bp->src->bi.biBitCount == 24)
+		{
+			// 24-bit bitmap
+			(bp->pixels[bp->count]).red		= (f32)(((SBgr*)((u8*)bp->iptr + (bp->right * 3)))->red);
+			(bp->pixels[bp->count]).grn		= (f32)(((SBgr*)((u8*)bp->iptr + (bp->right * 3)))->grn);
+			(bp->pixels[bp->count]).blu		= (f32)(((SBgr*)((u8*)bp->iptr + (bp->right * 3)))->blu);
+			(bp->pixels[bp->count]).area	= bp->area;
+
+		} else {
+			// 32-bit bitmap
+			(bp->pixels[bp->count]).red		= (f32)(((SBgra*)((u8*)bp->iptra + (bp->right * 4)))->red);
+			(bp->pixels[bp->count]).grn		= (f32)(((SBgra*)((u8*)bp->iptra + (bp->right * 4)))->grn);
+			(bp->pixels[bp->count]).blu		= (f32)(((SBgra*)((u8*)bp->iptra + (bp->right * 4)))->blu);
+			(bp->pixels[bp->count]).alp		= (f32)(((SBgra*)((u8*)bp->iptra + (bp->right * 4)))->alp);
+			(bp->pixels[bp->count]).area	= bp->area;
+		}
+
+		// Move over for the next point
+		++bp->count;
+	}
+
+
+
+
+//////////
+//
+// 4 - middle-left (see iGetSpannedPixelColors() above)
+// It is known when this function is called that there is at least an entire second row
+//
+//////
+// 	void iValidatePoint(SBitmapProcess* bp, s32 tnX, s32 tnY)
+// 	{
+// 		if (tnX >= bp->bii->biWidth)
+// 			_asm nop;
+// 
+// 		if (tnY >= bp->bii->biHeight)
+// 			_asm nop;
+// 	}
+
+	void iiBmpScale_processSpannedPixel4(SBitmapProcess* bp)
+	{
+		s32 lnPixelY;
+
+
+		// Repeat for each middle pixel
+		for (lnPixelY = bp->middleStartV; lnPixelY <= bp->middleFinishV; lnPixelY++)
+		{
+			// Store the colors for this point
+			if (bp->src->bi.biBitCount == 24)
+			{
+				// 24-bit bitmap
+				(bp->pixels[bp->count]).red		= (f32)(((SBgr*)((u8*)bp->iptrAnchor - (lnPixelY * bp->src->rowWidth) + (bp->left * 3)))->red);
+				(bp->pixels[bp->count]).grn		= (f32)(((SBgr*)((u8*)bp->iptrAnchor - (lnPixelY * bp->src->rowWidth) + (bp->left * 3)))->grn);
+				(bp->pixels[bp->count]).blu		= (f32)(((SBgr*)((u8*)bp->iptrAnchor - (lnPixelY * bp->src->rowWidth) + (bp->left * 3)))->blu);
+				(bp->pixels[bp->count]).area	= bp->widthLeft;
+
+			} else {
+				// 32-bit bitmap
+				(bp->pixels[bp->count]).red		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - (lnPixelY * bp->src->rowWidth) + (bp->left * 4)))->red);
+				(bp->pixels[bp->count]).grn		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - (lnPixelY * bp->src->rowWidth) + (bp->left * 4)))->grn);
+				(bp->pixels[bp->count]).blu		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - (lnPixelY * bp->src->rowWidth) + (bp->left * 4)))->blu);
+				(bp->pixels[bp->count]).alp		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - (lnPixelY * bp->src->rowWidth) + (bp->left * 4)))->alp);
+				(bp->pixels[bp->count]).area	= bp->widthLeft;
+			}
+
+			// Move over for the next point
+			++bp->count;
+		}
+	}
+
+
+
+
+//////////
+//
+// 5 - middle-middle (see iGetSpannedPixelColors() above)
+// It is known when this function is called that there is at least a second row, and at least
+// one pixel in the middle
+//
+//////
+	void iiBmpScale_processSpannedPixel5(SBitmapProcess* bp)
+	{
+		s32 lnPixelY, lnPixelX;
+
+
+		// Iterate for each pixel row vertically
+		for (lnPixelY = bp->middleStartV; lnPixelY <= bp->middleFinishV; lnPixelY++)
+		{
+			// And each individual pixel horizontally
+			for (lnPixelX = bp->middleStartH; lnPixelX <= bp->middleFinishH; lnPixelX++)
+			{
+				// Store the colors for this point
+				if (bp->src->bi.biBitCount == 24)
+				{
+					// 24-bit bitmap
+					(bp->pixels[bp->count]).red		= (f32)(((SBgr*)((u8*)bp->iptrAnchor - (lnPixelY * bp->src->rowWidth) + (lnPixelX * 3)))->red);
+					(bp->pixels[bp->count]).grn		= (f32)(((SBgr*)((u8*)bp->iptrAnchor - (lnPixelY * bp->src->rowWidth) + (lnPixelX * 3)))->grn);
+					(bp->pixels[bp->count]).blu		= (f32)(((SBgr*)((u8*)bp->iptrAnchor - (lnPixelY * bp->src->rowWidth) + (lnPixelX * 3)))->blu);
+					(bp->pixels[bp->count]).area	= 1.0;
+
+				} else {
+					// 32-bit bitmap
+					(bp->pixels[bp->count]).red		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - (lnPixelY * bp->src->rowWidth) + (lnPixelX * 4)))->red);
+					(bp->pixels[bp->count]).grn		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - (lnPixelY * bp->src->rowWidth) + (lnPixelX * 4)))->grn);
+					(bp->pixels[bp->count]).blu		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - (lnPixelY * bp->src->rowWidth) + (lnPixelX * 4)))->blu);
+					(bp->pixels[bp->count]).alp		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - (lnPixelY * bp->src->rowWidth) + (lnPixelX * 4)))->alp);
+					(bp->pixels[bp->count]).area	= 1.0;
+				}
+
+				// Move over for the next point
+				++bp->count;
+			}
+		}
+	}
+
+
+
+
+//////////
+//
+// 6 - middle-right (see iGetSpannedPixelColors() above)
+// It is known when this function is called that there is at least a second row, and a right pixel
+//
+//////
+	void iiBmpScale_processSpannedPixel6(SBitmapProcess* bp)
+	{
+		s32 lnPixelY;
+
+
+		// Repeat for each middle pixel
+		for (lnPixelY = bp->middleStartV; lnPixelY <= bp->middleFinishV; lnPixelY++)
+		{
+			// Store the colors for this point
+			if (bp->src->bi.biBitCount == 24)
+			{
+				// 24-bit bitmap
+				(bp->pixels[bp->count]).red		= (f32)(((SBgr*)((u8*)bp->iptrAnchor - (lnPixelY * bp->src->rowWidth) + (bp->right * 3)))->red);
+				(bp->pixels[bp->count]).grn		= (f32)(((SBgr*)((u8*)bp->iptrAnchor - (lnPixelY * bp->src->rowWidth) + (bp->right * 3)))->grn);
+				(bp->pixels[bp->count]).blu		= (f32)(((SBgr*)((u8*)bp->iptrAnchor - (lnPixelY * bp->src->rowWidth) + (bp->right * 3)))->blu);
+				(bp->pixels[bp->count]).area	= bp->widthRight;
+
+			} else {
+				// 32-bit bitmap
+				(bp->pixels[bp->count]).red		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - (lnPixelY * bp->src->rowWidth) + (bp->right * 4)))->red);
+				(bp->pixels[bp->count]).grn		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - (lnPixelY * bp->src->rowWidth) + (bp->right * 4)))->grn);
+				(bp->pixels[bp->count]).blu		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - (lnPixelY * bp->src->rowWidth) + (bp->right * 4)))->blu);
+				(bp->pixels[bp->count]).alp		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - (lnPixelY * bp->src->rowWidth) + (bp->right * 4)))->alp);
+				(bp->pixels[bp->count]).area	= bp->widthRight;
+			}
+
+			// Move over for the next point
+			++bp->count;
+		}
+	}
+
+
+
+
+//////////
+//
+// 7 - lower-left (see iGetSpannedPixelColors() above)
+// It is known when this function is called that there is at least a second row
+//
+//////
+	void iiBmpScale_processSpannedPixel7(SBitmapProcess* bp)
+	{
+		// Compute the area
+		bp->height	= bp->lry - (f32)((s32)bp->lry);
+		bp->area	= bp->widthLeft * bp->height;
+
+		// Store the colors for this point
+		if (bp->src->bi.biBitCount == 24)
+		{
+			// 24-bit bitmap
+			(bp->pixels[bp->count]).red		= (f32)(((SBgr*)((u8*)bp->iptrAnchor - ((bp->middleFinishV + 1) * bp->src->rowWidth) + (bp->left * 3)))->red);
+			(bp->pixels[bp->count]).grn		= (f32)(((SBgr*)((u8*)bp->iptrAnchor - ((bp->middleFinishV + 1) * bp->src->rowWidth) + (bp->left * 3)))->grn);
+			(bp->pixels[bp->count]).blu		= (f32)(((SBgr*)((u8*)bp->iptrAnchor - ((bp->middleFinishV + 1) * bp->src->rowWidth) + (bp->left * 3)))->blu);
+			(bp->pixels[bp->count]).area	= bp->area;
+
+		} else {
+			// 32-bit bitmap
+			(bp->pixels[bp->count]).red		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - ((bp->middleFinishV + 1) * bp->src->rowWidth) + (bp->left * 4)))->red);
+			(bp->pixels[bp->count]).grn		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - ((bp->middleFinishV + 1) * bp->src->rowWidth) + (bp->left * 4)))->grn);
+			(bp->pixels[bp->count]).blu		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - ((bp->middleFinishV + 1) * bp->src->rowWidth) + (bp->left * 4)))->blu);
+			(bp->pixels[bp->count]).alp		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - ((bp->middleFinishV + 1) * bp->src->rowWidth) + (bp->left * 4)))->alp);
+			(bp->pixels[bp->count]).area	= bp->area;
+		}
+
+		// Move over for the next point
+		++bp->count;
+	}
+
+
+
+
+//////////
+//
+// 8 - lower-middle (see iGetSpannedPixelColors() above)
+// It is known when this function is called that there is at least a second row, and at least one
+// pixel in the middle
+//
+//////
+	void iiBmpScale_processSpannedPixel8(SBitmapProcess* bp)
+	{
+		s32 lnPixelX;
+
+
+		// For every middle pixel, apply these values
+		for (lnPixelX = bp->middleStartH; lnPixelX <= bp->middleFinishH; lnPixelX++)
+		{
+			// Store the colors for this point
+			if (bp->src->bi.biBitCount == 24)
+			{
+				// 24-bit bitmap
+				(bp->pixels[bp->count]).red		= (f32)(((SBgr*)((u8*)bp->iptrAnchor - ((bp->middleFinishV + 1) * bp->src->rowWidth) + (lnPixelX * 3)))->red);
+				(bp->pixels[bp->count]).grn		= (f32)(((SBgr*)((u8*)bp->iptrAnchor - ((bp->middleFinishV + 1) * bp->src->rowWidth) + (lnPixelX * 3)))->grn);
+				(bp->pixels[bp->count]).blu		= (f32)(((SBgr*)((u8*)bp->iptrAnchor - ((bp->middleFinishV + 1) * bp->src->rowWidth) + (lnPixelX * 3)))->blu);
+				(bp->pixels[bp->count]).area	= bp->height;
+
+			} else {
+				// 32-bit bitmap
+				(bp->pixels[bp->count]).red		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - ((bp->middleFinishV + 1) * bp->src->rowWidth) + (lnPixelX * 4)))->red);
+				(bp->pixels[bp->count]).grn		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - ((bp->middleFinishV + 1) * bp->src->rowWidth) + (lnPixelX * 4)))->grn);
+				(bp->pixels[bp->count]).blu		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - ((bp->middleFinishV + 1) * bp->src->rowWidth) + (lnPixelX * 4)))->blu);
+				(bp->pixels[bp->count]).alp		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - ((bp->middleFinishV + 1) * bp->src->rowWidth) + (lnPixelX * 4)))->alp);
+				(bp->pixels[bp->count]).area	= bp->height;
+			}
+
+			// Move over for the next point
+			++bp->count;
+		}
+	}
+
+
+
+
+//////////
+//
+// 9 - lower-right (see iGetSpannedPixelColors() above)
+// It is known when this function is called that there is at least a second row, and a right pixel
+//
+//////
+	void iiBmpScale_processSpannedPixel9(SBitmapProcess* bp)
+	{
+		// Compute the area
+		bp->area = bp->widthRight * bp->height;
+
+		// Store the colors for this point
+		if (bp->src->bi.biBitCount == 24)
+		{
+			// 24-bit bitmap
+			(bp->pixels[bp->count]).red		= (f32)(((SBgr*)((u8*)bp->iptrAnchor - ((bp->middleFinishV + 1) * bp->src->rowWidth) + (bp->right * 3)))->red);
+			(bp->pixels[bp->count]).grn		= (f32)(((SBgr*)((u8*)bp->iptrAnchor - ((bp->middleFinishV + 1) * bp->src->rowWidth) + (bp->right * 3)))->grn);
+			(bp->pixels[bp->count]).blu		= (f32)(((SBgr*)((u8*)bp->iptrAnchor - ((bp->middleFinishV + 1) * bp->src->rowWidth) + (bp->right * 3)))->blu);
+			(bp->pixels[bp->count]).area	= bp->area;
+
+		} else {
+			// 32-bit bitmap
+			(bp->pixels[bp->count]).red		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - ((bp->middleFinishV + 1) * bp->src->rowWidth) + (bp->right * 4)))->red);
+			(bp->pixels[bp->count]).grn		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - ((bp->middleFinishV + 1) * bp->src->rowWidth) + (bp->right * 4)))->grn);
+			(bp->pixels[bp->count]).blu		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - ((bp->middleFinishV + 1) * bp->src->rowWidth) + (bp->right * 4)))->blu);
+			(bp->pixels[bp->count]).alp		= (f32)(((SBgra*)((u8*)bp->iptrAnchora - ((bp->middleFinishV + 1) * bp->src->rowWidth) + (bp->right * 4)))->alp);
+			(bp->pixels[bp->count]).area	= bp->area;
+		}
+
+		// Move over for the next point
+		++bp->count;
+	}
+
+
+
+
+//////////
+//
+// Integers between means which maximum integer is touched?
+// Basically, chopping off decimals reveals the range, such that values of
+// 1.001 and 2.999 only touch integers 1 and 2, even though with rounding
+// they would go from 1 to 3.  Their numerical roots are in only integers
+// 1 and 2.
+//
+//////
+	u32 iiBmpScale_processGetIntegersBetween(f32 p1, f32 p2)
+	{
+		u32 lfMin, lfMax;
+
+
+		// Grab the integer values (without rounding)
+		lfMin = (u32)min(p1,p2);
+		lfMax = (u32)max(p1,p2);
+
+		// Indicate the number between
+		return(lfMax - lfMin);
+	}
+
+
+
+
+
+//////////
+//
+// Draw the icon controls
+//
+//////
+	void iDrawScreen(RECT* trc)
+	{
+		//////////
+		// Icon and controls
+		//////
+			SetRect(&winScreen.appIcon.rc,		30,					1,				30 + winScreen.appIcon.bmp->bi.biWidth,					1 + winScreen.appIcon.bmp->bi.biHeight);
+			SetRect(&winScreen.minimize.rc,		trc->right - 132,	trc->top + 1,	trc->right - 132 + winScreen.minimize.bmp->bi.biWidth,	trc->top + 1 + winScreen.minimize.bmp->bi.biHeight);
+			SetRect(&winScreen.maximize.rc,		trc->right - 104,	trc->top + 1,	trc->right - 104 + winScreen.maximize.bmp->bi.biWidth,	trc->top + 1 + winScreen.maximize.bmp->bi.biHeight);
+			SetRect(&winScreen.close.rc,		trc->right - 77,	trc->top + 1,	trc->right - 77  + winScreen.close.bmp->bi.biWidth,		trc->top + 1 + winScreen.close.bmp->bi.biHeight);
+
+			iBmpBitBltObject(&winScreen.bmp, &winScreen.appIcon,	iBmp_BmpOrBmpOver(&winScreen.appIcon,	false));
+			iBmpBitBltObject(&winScreen.bmp, &winScreen.minimize,	iBmp_BmpOrBmpOver(&winScreen.minimize,	false));
+			iBmpBitBltObject(&winScreen.bmp, &winScreen.maximize,	iBmp_BmpOrBmpOver(&winScreen.maximize,	false));
+			iBmpBitBltObject(&winScreen.bmp, &winScreen.close,		iBmp_BmpOrBmpOver(&winScreen.close,		false));
+
+
+		//////////
+		// Corner triangles
+		//////
+			// Set the areas for mouse identifying
+			SetRect(&winScreen.arrowUl.rc, trc->left, trc->top, trc->left + winScreen.arrowUl.bmp->bi.biWidth, trc->top + winScreen.arrowUl.bmp->bi.biHeight);
+			SetRect(&winScreen.arrowUr.rc, trc->right - winScreen.arrowUr.bmp->bi.biWidth, trc->top, trc->right, trc->top + winScreen.arrowUr.bmp->bi.biHeight);
+			SetRect(&winScreen.arrowLr.rc, trc->right - winScreen.arrowLr.bmp->bi.biWidth, trc->bottom - winScreen.arrowLr.bmp->bi.biHeight, trc->right, trc->bottom);
+			SetRect(&winScreen.arrowLl.rc, trc->left, trc->bottom - winScreen.arrowLl.bmp->bi.biHeight, trc->left + winScreen.arrowLl.bmp->bi.biWidth, trc->bottom);
+
+			// Draw them
+			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowUl, iBmp_BmpOrBmpOver(&winScreen.arrowUl, false));
+			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowUr, iBmp_BmpOrBmpOver(&winScreen.arrowUr, false));
+			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowLr, iBmp_BmpOrBmpOver(&winScreen.arrowLr, false));
+			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowLl, iBmp_BmpOrBmpOver(&winScreen.arrowLl, false));
+
+
+		//////////
+		// Draw the app title
+		//////
+			SetRect(&winScreen.rcCaption, winScreen.appIcon.rc.right + 8, winScreen.appIcon.rc.top + 2, winScreen.minimize.rc.left - 8, winScreen.appIcon.rc.bottom);
+			SelectObject(winScreen.bmp.hdc, winScreen.font->hfont);
+			SetTextColor(winScreen.bmp.hdc, (COLORREF)RGB(black.red, black.grn, black.blu));
+//			SetBkColor(winScreen.bmp.hdc, (COLORREF)RGB(light_green.red, light_green.grn, light_green.blu));
+			SetBkMode(winScreen.bmp.hdc, TRANSPARENT);
+			DrawTextA(winScreen.bmp.hdc, cgcScreenTitle, sizeof(cgcScreenTitle) - 1, &winScreen.rcCaption, DT_VCENTER | DT_END_ELLIPSIS);
+	}
+
+	void iDrawJDebi(RECT* trc)
+	{
+		//////////
+		// Icon
+		//////
+			SetRect(&winJDebi.appIcon.rc,		30,					1,				30 + winJDebi.appIcon.bmp->bi.biWidth,				1 + winJDebi.appIcon.bmp->bi.biHeight);
+			SetRect(&winJDebi.close.rc,			trc->right - 77,	trc->top + 1,	trc->right - 77  + winJDebi.close.bmp->bi.biWidth,	trc->top + 1 + winJDebi.close.bmp->bi.biHeight);
+			SetRect(&winJDebi.maximize.rc,		trc->right - 104,	trc->top + 1,	trc->right - 104 + winJDebi.maximize.bmp->bi.biWidth,	trc->top + 1 + winJDebi.maximize.bmp->bi.biHeight);
+			SetRect(&winJDebi.minimize.rc,		trc->right - 132,	trc->top + 1,	trc->right - 132 + winJDebi.minimize.bmp->bi.biWidth,	trc->top + 1 + winJDebi.minimize.bmp->bi.biHeight);
+			SetRect(&winJDebi.move.rc,			trc->right - 132,	trc->top + 1,	trc->right - 132 + winJDebi.minimize.bmp->bi.biWidth,	trc->top + 1 + winJDebi.minimize.bmp->bi.biHeight);
+
+			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.appIcon,		iBmp_BmpOrBmpOver(&winJDebi.appIcon,	false));
+			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.minimize,	iBmp_BmpOrBmpOver(&winJDebi.minimize,	false));
+			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.maximize,	iBmp_BmpOrBmpOver(&winJDebi.maximize,	false));
+			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.close,		iBmp_BmpOrBmpOver(&winJDebi.close,		false));
+
+
+		//////////
+		// Corner triangles
+		//////
+			// Set the areas for mouse identifying
+			SetRect(&winJDebi.arrowUl.rc, trc->left, trc->top, trc->left + winJDebi.arrowUl.bmp->bi.biWidth, trc->top + winJDebi.arrowUl.bmp->bi.biHeight);
+			SetRect(&winJDebi.arrowUr.rc, trc->right - winJDebi.arrowUr.bmp->bi.biWidth, trc->top, trc->right, trc->top + winJDebi.arrowUr.bmp->bi.biHeight);
+			SetRect(&winJDebi.arrowLr.rc, trc->right - winJDebi.arrowLr.bmp->bi.biWidth, trc->bottom - winJDebi.arrowLr.bmp->bi.biHeight, trc->right, trc->bottom);
+			SetRect(&winJDebi.arrowLl.rc, trc->left, trc->bottom - winJDebi.arrowLl.bmp->bi.biHeight, trc->left + winJDebi.arrowLl.bmp->bi.biWidth, trc->bottom);
+
+			// Draw them
+			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowUl, iBmp_BmpOrBmpOver(&winJDebi.arrowUl, false));
+			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowUr, iBmp_BmpOrBmpOver(&winJDebi.arrowUr, false));
+			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowLr, iBmp_BmpOrBmpOver(&winJDebi.arrowLr, false));
+			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowLl, iBmp_BmpOrBmpOver(&winJDebi.arrowLl, false));
+
+
+		//////////
+		// Draw the app title
+		//////
+			SetRect(&winJDebi.rcCaption, winJDebi.appIcon.rc.right + 8, winJDebi.appIcon.rc.top + 2, winJDebi.rcClient.right - 8, winJDebi.appIcon.rc.bottom);
+			SelectObject(winJDebi.bmp.hdc, winJDebi.font->hfont);
+			SetTextColor(winJDebi.bmp.hdc, (COLORREF)RGB(black.red, black.grn, black.blu));
+//			SetBkColor(winJDebi.bmp.hdc, (COLORREF)RGB(light_green.red, light_green.grn, light_green.blu));
+			SetBkMode(winJDebi.bmp.hdc, TRANSPARENT);
+			DrawTextA(winJDebi.bmp.hdc, cgcJDebiTitle, sizeof(cgcJDebiTitle) - 1, &winJDebi.rcCaption, DT_VCENTER | DT_END_ELLIPSIS);
+	}
+
+
+
+
+//////////
+//
+// Called to redraw the screen
+//
+//////
+	void iRedrawScreen(SWindow* win)
 	{
 //		u32		lnI;
 		RECT	lrc;
 
 
 		// White background
-		iFillRect(&winIface.bmp, &winIface.rc, light_green);
+		iBmpFillRect(&winScreen.bmp, &winScreen.rcClient, colorNW, colorNE, colorSW, colorSE, true);
 
 		// Draw the border around the whole window
-		iFrameRect(&winIface.bmp, &winIface.rc, black);
+		iBmpFrameRect(&winScreen.bmp, &winScreen.rcClient, black, black, black, black, false);
 
 		// Draw the controls
-		iDrawControls(&winIface.rc);
+		iDrawScreen(&winScreen.rcClient);
 
 		// Draw the border around the client area
-		SetRect(&lrc, 8, 24, winIface.rc.right - 8, winIface.rc.bottom - 24);
-		iFillRect(&winIface.bmp, &lrc, white);
+		SetRect(&lrc, 8, winScreen.appIcon.bmp->bi.biHeight + 2, winScreen.rcClient.right - winScreen.appIcon.bmp->bi.biHeight - 2, winScreen.rcClient.bottom - winScreen.appIcon.bmp->bi.biHeight - 2);
+		iBmpFillRect(&winScreen.bmp, &lrc, white, white, white, white, false);
 		InflateRect(&lrc, 1, 1);
-		iFrameRect(&winIface.bmp, &lrc, black);
+		iBmpFrameRect(&winScreen.bmp, &lrc, black, black, black, black, false);
+	}
+
+
+
+
+//////////
+//
+// Called to redraw the JDebi window
+//
+//////
+	void iRedrawJDebi(SWindow* win)
+	{
+//		u32		lnI;
+		RECT	lrc;
+
+
+		// White background
+		iBmpFillRect(&winJDebi.bmp, &winJDebi.rcClient, colorNW, colorNE, colorSW, colorSE, true);
+
+		// Draw the border around the whole window
+		iBmpFrameRect(&winJDebi.bmp, &winJDebi.rcClient, black, black, black, black, false);
+
+		// Draw the JDebi inner content
+		iDrawJDebi(&winJDebi.rcClient);
+
+		// Draw the border around the client area
+		SetRect(&lrc, 8, winScreen.appIcon.bmp->bi.biHeight + 2, winJDebi.rcClient.right - winScreen.appIcon.bmp->bi.biHeight - 2, winJDebi.rcClient.bottom - winScreen.appIcon.bmp->bi.biHeight - 1);
+		iBmpFillRect(&winJDebi.bmp, &lrc, white, white, white, white, false);
+		InflateRect(&lrc, 1, 1);
+		iBmpFrameRect(&winJDebi.bmp, &lrc, black, black, black, black, false);
 	}

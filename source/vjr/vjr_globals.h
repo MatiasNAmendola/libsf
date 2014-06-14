@@ -44,16 +44,27 @@
 	SBuilder*			gWindows;
 	SBuilder*			gFonts;
 	HWND				ghwndMsg;
-	HWND				ghwndIface;
-	SWindowIface		winIface;
+	HWND				ghwndScreen;
+	HWND				ghwndJDebi;
+	SWindow				winScreen;
+	SWindow				winJDebi;
 	s64					systemStartedMs;
 
 
+	// JDebi window
+	STextChainManager*	commandHistory;																// The command window history
+
+
 	// Global colors
-	const SBGRA			white								= { rgba(255, 255, 255, 255) };
-	const SBGRA			black								= { rgba(0, 0, 0, 255) };
-	const SBGRA			gray								= { rgba(192, 192, 192, 255) };
-	const SBGRA			light_green							= { rgba(235, 255, 235, 255) };
+	const SBgra			white								= { rgba(255, 255, 255, 255) };
+	const SBgra			black								= { rgba(0, 0, 0, 255) };
+	const SBgra			gray								= { rgba(192, 192, 192, 255) };
+
+	// Four-corner window color schemes (eventually these will be loaded from themes.dbf)
+	const SBgra			colorNW								= { rgba(222, 230, 255, 255) };
+	const SBgra			colorNE								= { rgba(157, 194, 214, 255) };
+	const SBgra			colorSW								= { rgba(255, 255, 255, 255) };
+	const SBgra			colorSE								= { rgba(192, 212, 255, 255) };
 
 
 	// Mouse options
