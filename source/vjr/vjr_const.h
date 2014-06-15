@@ -111,6 +111,38 @@ typedef		const f64			cf64;
 
 
 //////////
+// Textbox styles
+//////
+	const u32			_TEXTBOX_STYLE_PLAIN				= 0;
+	const u32			_TEXTBOX_STYLE_2D					= 1;
+	const u32			_TEXTBOX_STYLE_3D					= 2;
+
+
+//////////
+// Editbox styles
+//////
+	const u32			_EDITBOX_STYLE_PLAIN				= 0;
+	const u32			_EDITBOX_STYLE_2D					= 1;
+	const u32			_EDITBOX_STYLE_3D					= 2;
+
+
+//////////
+// Button styles
+//////
+	const u32			_BUTTON_STYLE_PLAIN					= 0;
+	const u32			_BUTTON_STYLE_2D					= 1;
+	const u32			_BUTTON_STYLE_3D					= 2;
+
+
+//////////
+// Checkbox styles
+//////
+	const u32			_CHECKBOX_STYLE_PLAIN				= 0;
+	const u32			_CHECKBOX_STYLE_2D					= 1;
+	const u32			_CHECKBOX_STYLE_3D					= 2;
+
+
+//////////
 // Constant strings
 //////
 	const s8			cgcMessageWindowClass[]				= "VJr.MessageWindow";

@@ -37,6 +37,7 @@
 
 // Forward definition for references
 struct SObject;
+struct SVariable;
 
 
 
@@ -143,22 +144,6 @@ struct SBitmapProcess
 	bool				spans3V;			// Spans at least 3 pixels vertically, meaning it begins somewhere in 1.x, for example, and ends somewhere beyond 3.x
 };
 
-
-struct SFont
-{
-	HDC			hdc;
-	HFONT		hfont;
-
-	s8*			name;
-	u32			nameLength;
-	s32			sizeUsedForCreateFont;
-	u32			size;
-	u32			weight;
-	u32			italics;
-	u32			underline;
-	TEXTMETRIC	tm;
-};
-
 struct SSize
 {
 	union {
@@ -183,6 +168,86 @@ struct SXYS32
 {
 	s32			x;
 	s32			y;
+};
+
+struct SDatum
+{
+	s8*			data;													// Content
+	u32			length;													// Content length
+};
+
+struct SEditChain
+{
+	SEditChain*	prev;													// Pointer backward to previous text item
+	SEditChain*	next;													// Pointer forward to next text item
+
+	u32			line;													// This line's number
+	SDatum*		d;														// The text on this line is LEFT(d.data, dPopulated)
+	u32			dPopulated;												// The actual populated length of d (d is allocated in blocks to allow for minor edits without constantly reallocating)
+
+	// General purpose extra data
+	void*		extra_info;												// Extra info that can be stored on this item
+};
+
+struct SUndo
+{
+	SEditChain*	before;													// The item before
+	SEditChain*	after;													// The item after
+
+	SEditChain*	first;													// The first SEditChain that would've gone between them
+																		// If multiple lines were deleted, the chain is moved here.
+																		// If the line was changed, the old value is here
+};
+
+struct SEditChainManager
+{
+	SEditChain*	first;													// First in the chain (first->prev is NULL)
+	SEditChain*	last;													// Last in the chain (last->next is NULL)
+
+	// For display
+	SEditChain*	top;													// Top item in the current view
+	SEditChain*	cursorLine;												// Line where the cursor is
+	SEditChain*	cursorLineLast;											// The last location before movement was made
+
+	// Selected lines
+	SEditChain*	selectedLineStart;										// First line that's selected
+	SEditChain*	selectedLineEnd;										// Last line that's selected
+	// Note:  If not isColumn or isAnchor, then it is full line select.
+	//        If isColumn, then column select mode.
+	//        If isAnchor, then anchor select mode.
+	bool		isColumn;												// If column select mode...
+	u32			selectedColumnStart;									// Column select mode start
+	u32			selectedColumnEnd;										// end
+	bool		isAnchor;												// If anchor select mode...
+	u32			selectedAnchorStart;									// Anchor select mode start
+	u32			selectedAnchorEnd;										// end
+
+	// undoHistory.extra_info holds the SUndo structure
+	SEditChainManager*	undoHistory;									// The lines affected by the undo
+};
+
+struct SFont
+{
+	HDC			hdc;						// Device context used for its creation
+
+	// Current font instance flags
+	SDatum		name;						// Name of this font
+	bool		isBold;						// Is the font bold? (Note: This is independent of the font name itself having bold in it, such as "Ubuntu Bold"
+	bool		isItalic;					// Is the font italic?
+	bool		isUnderline;				// Is the font underline?
+	bool		isStrikethrough;			// Is the font strikethrough?
+	bool		isCondensed;				// Is the font condensed?
+
+	// Handles to the current font setting
+	HFONT		hfont;
+
+	// Internal Windows settings
+	s32			_sizeUsedForCreateFont;
+	u32			_size;
+	u32			_weight;
+	u32			_italics;
+	u32			_underline;
+	TEXTMETRIC	tm;
 };
 
 struct SGeneralEvents
@@ -233,6 +298,33 @@ struct SEvents
 	SKeyboardEvent	keyboard;											// Keyboard events for the object
 };
 
+struct SCode
+{
+	SCode*		next;													// If part of a chain, then points to the next item, otherwise null
+
+	// Raw source code
+	SDatum*		sourceCode;												// Raw source code
+
+	// During compilation
+	SDatum*		compiledCode;											// Compiled code executed by the VJr interpreter
+	SVariable*	params;													// Parameters
+	SVariable*	returns;												// Returns
+	SVariable*	locals;													// Local variables (known to the compiler, or added at runtime)
+};
+
+struct SVariable
+{
+	SVariable*	next;													// If part of a chain, then points to the next item, otherwise null
+
+	u32			type;													// Variable type (see _VARIABLE_TYPE_* constants)
+	SDatum		name;													// Property name
+	SDatum		value;													// Data for this value
+
+	// If assign or access
+	SCode*		assign;													// Called when this variable is assigned
+	SCode*		access;													// Called when this variable is accessed
+};
+
 struct SObject
 {
 	u32			type;													// Object type (see _OBJECT_TYPE_* constants)
@@ -242,11 +334,17 @@ struct SObject
 	bool		isVisible;												// If it's visible
 	bool		isDirty;												// Is set if this or any child object needs re-rendered
 
+	// Data unique to this object
+	void*		obj_data;												// Varies by type
+
+	// Related position in the member hierarchy
+	SObject*	parent;													// Parent object (if available, may not be populated)
+	SObject*	firstChild;												// Pointer to child objects (all objects are containers)
+	SVariable*	firstProperty;											// Runtime-added user-defined property
+	SCode*		firstMethod;											// Runtime-added user-defined methods
+
 	// Events
 	SEvents		ev;														// Events for this object
-	void*		obj_data;												// Varies by type
-	SObject*	parent;													// Parent object (if available, may not be populated)
-	SObject*	firstObj;												// Pointer to child objects
 
 	//////////
 	// Object size in pixels
@@ -255,6 +353,7 @@ struct SObject
 		RECT		rco;												// Object's original position in its parent
 		RECT		rcp;												// Original size of parent at creation
 		u32			anchorMode;											// Method this item uses when its parent is resized
+
 
 	//////////
 	// Drawing canvas
@@ -272,127 +371,212 @@ struct SObjectEmpty
 {
 	// _OBJECT_TYPE_EMPTY
 	SObject*	parent;													// parent object this object belongs to
-	u32			data1;													// User data 1
-	u32			data2;													// User data 2
-	u32			data3;													// User data 3
 };
 
 struct SObjectForm
 {
 	// _OBJECT_TYPE_FORM
 	SObject*	parent;													// parent object this object belongs to
-	u32			data1;													// User data 1
-	u32			data2;													// User data 2
-	u32			data3;													// User data 3
+
+	SFont*		font;													// Default font instance
+	SBgra		backColor;												// Back color (only RGB() channels are used, but RGBA() channels are maintained)
+	SBgra		foreColor;												// Default text fore color
+
+	SDatum		caption;												// Caption
+	SDatum		comment;												// Comment
+	SDatum		toolTip;												// What to display if hovering
 };
 
 struct SObjectSubform
 {
 	// _OBJECT_TYPE_SUBFORM
 	SObject*	parent;													// parent object this object belongs to
-	u32			data1;													// User data 1
-	u32			data2;													// User data 2
-	u32			data3;													// User data 3
+
+	SFont*		font;													// Default font instance
+	SBgra		backColor;												// Back color (only RGB() channels are used, but RGBA() channels are maintained)
+	SBgra		foreColor;												// Default text fore color
+
+	SDatum		caption;												// Caption
+	SDatum		comment;												// Comment
+	SDatum		toolTip;												// What to display if hovering
 };
 
 struct SObjectLabel
 {
 	// _OBJECT_TYPE_LABEL
 	SObject*	parent;													// parent object this object belongs to
-	u32			data1;													// User data 1
-	u32			data2;													// User data 2
-	u32			data3;													// User data 3
+
+	SFont*		font;													// Default font instance
+	SBgra		backColor;												// Back color (only RGB() channels are used, but RGBA() channels are maintained)
+	SBgra		foreColor;												// Default text fore color
+
+	// Data
+	u32			alignment;												// 0=left, 1=right, 2=center, always centered vertically
+	SDatum		caption;												// Caption
+	SDatum		comment;												// Comment
+	SDatum		toolTip;												// What to display if hovering
+
+	// Flags for rendering
+	bool		isOpaque;												// Is the label opaque?
+	bool		isBorder;												// Is there a border?
+	SBgra		borderColor;											// Border color
+	SBgra		disabledBackColor;										// Disabled background color
+	SBgra		disabledForeColor;										// Disabled foreground color
 };
 
 struct SObjectTextbox
 {
 	// _OBJECT_TYPE_TEXTBOX
 	SObject*	parent;													// parent object this object belongs to
-	u32			data1;													// User data 1
-	u32			data2;													// User data 2
-	u32			data3;													// User data 3
+
+	SFont*		font;													// Default font instance
+	SBgra		backColor;												// Back color (only RGB() channels are used, but RGBA() channels are maintained)
+	SBgra		foreColor;												// Default text fore color
+
+	// Flags for data
+	u32			style;													// See _TEXTBOX_STYLE_* constants (plain, 2D, 3D)
+	u32			alignment;												// 0=left, 1=right, 2=center, always centered vertically
+	SDatum		value;													// Space allocated for the current value.  Note that LEFT(value, valueLength) is the actual value
+	u32			valueLength;											// Length of the field
+	SDatum		picture;												// Picture clause (value is formated to this form for input)
+	SDatum		mask;													// Only allow these input characters
+	SDatum		comment;												// Comment
+	SDatum		toolTip;												// What to display if hovering
+
+	// Flags for display and input
+	s32			cursor;													// Position of the flashing cursor, where input goes
+	s32			selectStart;											// Where does the selection begin?
+	s32			selectEnd;												// Where does the selection end?
+
+	// Flags for rendering
+	bool		isOpaque;												// Is the label opaque?
+	bool		isBorder;												// Is there a border?
+	SBgra		borderColor;											// Border color
+	SBgra		selectedBackColor;										// Selected background color
+	SBgra		selectedForeColor;										// Selected foreground color
+	SBgra		disabledBackColor;										// Disabled background color
+	SBgra		disabledForeColor;										// Disabled foreground color
 };
 
 struct SObjectButton
 {
 	// _OBJECT_TYPE_BUTTON
 	SObject*	parent;													// parent object this object belongs to
-	u32			data1;													// User data 1
-	u32			data2;													// User data 2
-	u32			data3;													// User data 3
+
+	SFont*		font;													// Default font instance
+	SBgra		backColor;												// Back color (only RGB() channels are used, but RGBA() channels are maintained)
+	SBgra		foreColor;												// Default text fore color
+
+	// Flags for data
+	u32			style;													// See _BUTTON_STYLE_* constants (plain, 2D, 3D)
+	u32			alignment;												// 0=left, 1=right, 2=center, always centered vertically
+	SDatum		comment;												// Comment
+	SDatum		toolTip;												// What to display if hovering
+
+	SBgra		disabledBackColor;										// Disabled background color
+	SBgra		disabledForeColor;										// Disabled foreground color
 };
 
 struct SObjectEditbox
 {
 	// _OBJECT_TYPE_EDITBOX
 	SObject*	parent;													// parent object this object belongs to
-	u32			data1;													// User data 1
-	u32			data2;													// User data 2
-	u32			data3;													// User data 3
+
+	SFont*		font;													// Default font instance
+	SBgra		backColor;												// Back color (only RGB() channels are used, but RGBA() channels are maintained)
+	SBgra		foreColor;												// Default text fore color
+
+	// Flags for data
+	u32			style;													// See _EDITBOX_STYLE_* constants (plain, 2D, 3D)
+	u32			alignment;												// 0=left, 1=right, 2=center, always centered vertically
+	SEditChainManager*	value;											// The content being edited
+	SDatum		comment;												// Comment
+	SDatum		toolTip;												// What to display if hovering
+
+	// Flags for display and input
+	s32			cursor;													// Position of the flashing cursor, where input goes
+	s32			selectStart;											// Where does the selection begin?
+	s32			selectEnd;												// Where does the selection end?
+
+	// Flags for rendering
+	bool		isOpaque;												// Is the label opaque?
+	bool		isBorder;												// Is there a border?
+	SBgra		borderColor;											// Border color
+	SBgra		selectedBackColor;										// Selected background color
+	SBgra		selectedForeColor;										// Selected foreground color
+	SBgra		disabledBackColor;										// Disabled background color
+	SBgra		disabledForeColor;										// Disabled foreground color
 };
 
 struct SObjectImage
 {
 	// _OBJECT_TYPE_IMAGE
 	SObject*	parent;													// parent object this object belongs to
-	u32			data1;													// User data 1
-	u32			data2;													// User data 2
-	u32			data3;													// User data 3
+
+	u32			style;													// See _EDITBOX_STYLE_* constants (plain, 2D, 3D)
+	SDatum		comment;												// Comment
+	SDatum		toolTip;												// What to display if hovering
+
+	SBitmap*	image;													// Image displayed when the mouse IS NOT over this control
+	SBitmap*	imageOver;												// Image displayed when the mouse IS over this control
 };
 
 struct SObjectCheckbox
 {
 	// _OBJECT_TYPE_CHECKBOX
 	SObject*	parent;													// parent object this object belongs to
-	u32			data1;													// User data 1
-	u32			data2;													// User data 2
-	u32			data3;													// User data 3
+
+	SFont*		font;													// Default font instance
+	SBgra		backColor;												// Back color (only RGB() channels are used, but RGBA() channels are maintained)
+	SBgra		foreColor;												// Default text fore color
+
+	// Data
+	u32			alignment;												// 0=left, 1=right, 2=center, always centered vertically
+	u32			style;													// See _CHECKBOX_STYLE_* constants (plain, 2D, 3D)
+	s32			value;													// 0=unchecked, positive=checked, negative=multiple
+	SDatum		comment;												// Comment
+	SDatum		caption;												// Caption stored for this object (if any)
+	SDatum		toolTip;												// What to display if hovering
+
+	// Flags for rendering
+	bool		isOpaque;												// Is the label opaque?
+	bool		isBorder;												// Is there a border?
+	SBgra		borderColor;											// Border color
+	SBgra		disabledBackColor;										// Disabled background color
+	SBgra		disabledForeColor;										// Disabled foreground color
 };
 
 struct SObjectOption
 {
 	// _OBJECT_TYPE_OPTION
 	SObject*	parent;													// parent object this object belongs to
-	u32			data1;													// User data 1
-	u32			data2;													// User data 2
-	u32			data3;													// User data 3
 };
 
 struct SObjectRadio
 {
 	// _OBJECT_TYPE_RADIO
 	SObject*	parent;													// parent object this object belongs to
-	u32			data1;													// User data 1
-	u32			data2;													// User data 2
-	u32			data3;													// User data 3
-};
 
-struct SDatum
-{
-	s8*			data;													// Content
-	u32			length;													// Content length
-};
+	SFont*		font;													// Default font instance
+	SBgra		backColor;												// Back color (only RGB() channels are used, but RGBA() channels are maintained)
+	SBgra		foreColor;												// Default text fore color
 
-struct STextChain
-{
-	STextChain*	prev;													// Pointer backward to previous text item
-	STextChain*	next;													// Pointer forward to next text item
+	// Data
+	u32			alignment;												// 0=left, 1=right, 2=center, always centered vertically
+	u32			style;													// See _RADIO_STYLE_* constants (radio, slider, spinner)
+	f64			value;													// Current value
+	f64			minValue;												// Minimum value to display
+	f64			maxValue;												// Maximum value to display
+	f64			roundTo;												// Round 10=tens place, 1=whole integers, 0.1=one decimal place, 0.01=two decimal places, and so on
+	SDatum		comment;												// Comment
+	SDatum		toolTip;												// What to display if hovering
 
-	// The text
-	SDatum		d;														// The text item
-
-	// General purpose extra data
-	void*		extraInfo;												// Other info that can be stored on this item
-
-	// For selected areas
-	s32			selectedStart;											// A general purpose selection, where it starts, or -1 if not used
-	s32			selectedEnd;											// Where the selection ends, or -1 if not used
-};
-
-struct STextChainManager
-{
-	STextChain*	first;													// First in the chain (first->prev is NULL)
-	STextChain*	last;													// Last in the chain (last->next is NULL)
+	// Flags for rendering
+	bool		isOpaque;												// Is the label opaque?
+	bool		isBorder;												// Is there a border?
+	SBgra		borderColor;											// Border color
+	SBgra		disabledBackColor;										// Disabled background color
+	SBgra		disabledForeColor;										// Disabled foreground color
 };
 
 struct SWindow

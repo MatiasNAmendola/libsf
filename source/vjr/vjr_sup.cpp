@@ -347,8 +347,8 @@ void initialize(HACCEL* hAccelTable)
 					//////////
 					// Create the fonts
 					//////
-						font						= iCreateFont(cgcWindowTitleBarFont, 10,	FW_BOLD, false, false);
-						winScreen.font		= iDuplicateFont(font);
+						font				= iFontCreate(cgcWindowTitleBarFont, 10,	FW_BOLD, false, false);
+						winScreen.font		= iFontDuplicate(font);
 
 
 					//////////
@@ -446,8 +446,8 @@ void initialize(HACCEL* hAccelTable)
 					//////////
 					// Create the font
 					//////
-						font						= iCreateFont(cgcWindowTitleBarFont, 10,	FW_BOLD, false, false);
-						winJDebi.font		= iDuplicateFont(font);
+						font						= iFontCreate(cgcWindowTitleBarFont, 10,	FW_BOLD, false, false);
+						winJDebi.font		= iFontDuplicate(font);
 
 
 					//////////
@@ -505,7 +505,7 @@ void initialize(HACCEL* hAccelTable)
 			bmp->bi.biCompression	= 0;
 			bmp->bi.biClrImportant	= 0;
 			bmp->bi.biClrUsed		= 0;
-			bmp->rowWidth			= iComputeRowWidth(bmp);
+			bmp->rowWidth			= iBmpComputeRowWidth(bmp);
 			bmp->bi.biSizeImage		= tnHeight * bmp->rowWidth;
 
 
@@ -667,7 +667,7 @@ void initialize(HACCEL* hAccelTable)
 			//////
 				winScreen.bmp.hdc		= CreateCompatibleDC(GetDC(GetDesktopWindow()));
 				winScreen.bmp.hbmp		= iCreateBitmap(winScreen.bmp.hdc, tnWidth, tnHeight, 1, 32, (void**)&winScreen.bmp.bd, &winScreen.bmp.bh, &winScreen.bmp.bi);
-				winScreen.bmp.rowWidth	= iComputeRowWidth(&winScreen.bmp);
+				winScreen.bmp.rowWidth	= iBmpComputeRowWidth(&winScreen.bmp);
 				SelectObject(winScreen.bmp.hdc, winScreen.bmp.hbmp);
 
 
@@ -736,7 +736,7 @@ void initialize(HACCEL* hAccelTable)
 			//////
 				winJDebi.bmp.hdc		= CreateCompatibleDC(GetDC(GetDesktopWindow()));
 				winJDebi.bmp.hbmp		= iCreateBitmap(winJDebi.bmp.hdc, tnWidth, tnHeight, 1, 32, (void**)&winJDebi.bmp.bd, &winJDebi.bmp.bh, &winJDebi.bmp.bi);
-				winJDebi.bmp.rowWidth	= iComputeRowWidth(&winJDebi.bmp);
+				winJDebi.bmp.rowWidth	= iBmpComputeRowWidth(&winJDebi.bmp);
 				SelectObject(winJDebi.bmp.hdc, winJDebi.bmp.hbmp);
 
 
@@ -789,7 +789,7 @@ void initialize(HACCEL* hAccelTable)
 			if (tbi)
 			{
 				memcpy(&bmp.bi, tbi, sizeof(bmp.bi));
-				lbi->biSizeImage		= iComputeRowWidth(&bmp) * tnHeight;
+				lbi->biSizeImage		= iBmpComputeRowWidth(&bmp) * tnHeight;
 				lbi->biXPelsPerMeter	= 3270;
 				lbi->biYPelsPerMeter	= 3270;
 			}
@@ -808,44 +808,6 @@ void initialize(HACCEL* hAccelTable)
 		//////
 			lhbmp = CreateDIBSection(thdc, (BITMAPINFO*)lbi, DIB_RGB_COLORS, tbd, NULL, 0);
 			return(lhbmp);
-	}
-
-
-
-
-//////////
-//
-// Computes the row width of the pixels using BGR format (3 bytes per pixel) then rounded up to
-// the nearest DWORD.
-//
-//////
-	int iComputeRowWidth(SBitmap* bmp)
-	{
-		int lnWidth;
-
-
-		// See the bit counts
-		if (bmp->bi.biBitCount == 24)
-		{
-			// 24-bit formats are rounded up to nearest DWORD
-			lnWidth = bmp->bi.biWidth * 3;
-			if (lnWidth % 4 == 0)
-				return(lnWidth);
-
-			// Increase the width
-			lnWidth += (4 - (lnWidth % 4));
-			return(lnWidth);
-
-
-		} else if (bmp->bi.biBitCount == 32) {
-			// 32-bit formats are also DWORD aligned, but naturally, of course. :-)
-			return(bmp->bi.biWidth * 4);
-
-
-		} else {
-			// Uh oh, spaghetti-oh!
-			return(bmp->bi.biSizeImage / bmp->bi.biHeight);
-		}
 	}
 
 
@@ -1344,7 +1306,7 @@ void initialize(HACCEL* hAccelTable)
 // Called to duplicate a font that was found from the list of known system fonts
 //
 //////
-	SFont* iDuplicateFont(SFont* fontSource)
+	SFont* iFontDuplicate(SFont* fontSource)
 	{
 		SFont* font;
 
@@ -1356,7 +1318,7 @@ void initialize(HACCEL* hAccelTable)
 			//////////
 			// Allocate a new pointer
 			//////
-				font = (SFont*)malloc(sizeof(SFont));
+				font = iFontAllocate();
 				if (!font)
 					return(font);
 
@@ -1365,14 +1327,13 @@ void initialize(HACCEL* hAccelTable)
 			// Create a copy
 			//////
 				font->hdc					= CreateCompatibleDC(GetDC(GetDesktopWindow()));
-				font->hfont					= CreateFont(fontSource->sizeUsedForCreateFont, 0, 0, 0, fontSource->weight, (fontSource->italics != 0), (fontSource->underline != 0), false, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, FF_DONTCARE, fontSource->name);
+				font->hfont					= CreateFont(fontSource->_sizeUsedForCreateFont, 0, 0, 0, fontSource->_weight, (fontSource->_italics != 0), (fontSource->_underline != 0), false, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, FF_DONTCARE, fontSource->name.data);
 				SelectObject(font->hdc, font->hfont);
-				font->name					= iDuplicateString(fontSource->name);
-				font->nameLength			= fontSource->nameLength;
-				font->size					= fontSource->size;
-				font->weight				= fontSource->weight;
-				font->italics				= fontSource->italics;
-				font->underline				= fontSource->underline;
+				iDatumDuplicate(&font->name, fontSource->name.data, fontSource->name.length);
+				font->_size					= fontSource->_size;
+				font->_weight				= fontSource->_weight;
+				font->_italics				= fontSource->_italics;
+				font->_underline			= fontSource->_underline;
 				memcpy(&font->tm, &fontSource->tm, sizeof(font->tm));
 		}
 		// Indicate our success or failure
@@ -1384,10 +1345,35 @@ void initialize(HACCEL* hAccelTable)
 
 //////////
 //
+// Allocate an empty structure
+//
+//////
+	SFont* iFontAllocate(void)
+	{
+		SFont* font;
+
+
+		// Allocate the indicated size
+		font = (SFont*)malloc(sizeof(SFont));
+
+		// If allocated, initialize it
+		if (font)
+			memset(font, 0, sizeof(SFont));
+
+		// Indicate our success or failure
+		return(font);
+	}
+
+
+
+
+
+//////////
+//
 // Create a new font
 //
 //////
-	SFont* iCreateFont(cs8* tcFontName, u32 tnFontSize, u32 tnFontWeight, u32 tnItalics, u32 tnUnderline)
+	SFont* iFontCreate(cs8* tcFontName, u32 tnFontSize, u32 tnFontWeight, u32 tnItalics, u32 tnUnderline)
 	{
 		u32		lnI, lnLength;
 		SFont*	font;
@@ -1403,8 +1389,8 @@ void initialize(HACCEL* hAccelTable)
 				font = (SFont*)(gFonts->data + lnI);
 
 				// See if it matches
-				if (font->size == tnFontSize && font->weight == tnFontWeight && font->italics == tnItalics && font->underline == tnUnderline && font->nameLength == lnLength)
-					if (_memicmp(font->name, tcFontName, lnLength) == 0)
+				if (font->_size == tnFontSize && font->_weight == tnFontWeight && font->_italics == tnItalics && font->_underline == tnUnderline && font->name.length == lnLength)
+					if (_memicmp(font->name.data, tcFontName, lnLength) == 0)
 						return(font);
 			}
 
@@ -1416,20 +1402,22 @@ void initialize(HACCEL* hAccelTable)
 			if (!font)
 				return(font);
 
+			// Initialize
+			memset(font, 0, sizeof(SFont));
+
 
 		//////////
 		// Populate
 		//////
-			font->hdc					= CreateCompatibleDC(GetDC(GetDesktopWindow()));
-			font->sizeUsedForCreateFont	= -MulDiv(tnFontSize, GetDeviceCaps(GetDC(GetDesktopWindow()), LOGPIXELSY), 72);
-			font->hfont					= CreateFont(font->sizeUsedForCreateFont, 0, 0, 0, tnFontWeight, (tnItalics != 0), (tnUnderline != 0), false, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, FF_DONTCARE, tcFontName);
+			font->hdc						= CreateCompatibleDC(GetDC(GetDesktopWindow()));
+			font->_sizeUsedForCreateFont	= -MulDiv(tnFontSize, GetDeviceCaps(GetDC(GetDesktopWindow()), LOGPIXELSY), 72);
+			font->hfont						= CreateFont(font->_sizeUsedForCreateFont, 0, 0, 0, tnFontWeight, (tnItalics != 0), (tnUnderline != 0), false, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, FF_DONTCARE, tcFontName);
 			SelectObject(font->hdc, font->hfont);
-			font->name					= iDuplicateString((s8*)tcFontName);
-			font->nameLength			= lnLength;
-			font->size					= tnFontSize;
-			font->weight				= tnFontWeight;
-			font->italics				= tnItalics;
-			font->underline				= tnUnderline;
+			iDatumDuplicate(&font->name, (s8*)tcFontName, lnLength);
+			font->_size						= tnFontSize;
+			font->_weight					= tnFontWeight;
+			font->_italics					= tnItalics;
+			font->_underline				= tnUnderline;
 
 			// Find out the text metrics
 			GetTextMetricsA(font->hdc, &font->tm);
@@ -1465,7 +1453,7 @@ void initialize(HACCEL* hAccelTable)
 		for (lnI = 0; lnI == 0 || (lnI < 200 && (s32)(tnFontSize + lnI) < (s32)(tnFontSize * 3) && lrc.bottom < (s32)((f32)tnHeightDesired * 1.25f) && lrc.right < (s32)((f32)tnWidthDesired * 1.25f)); lnI++)
 		{
 			// Grab this font
-			font = iCreateFont(tcFontName, tnFontSize + lnI, lnFontBold, tnFontItalic, tnFontUnderline);
+			font = iFontCreate(tcFontName, tnFontSize + lnI, lnFontBold, tnFontItalic, tnFontUnderline);
 
 			// Find out how big this font would be drawn for this text
 			SetRect(&lrc, 0, 0, 0, 0);
@@ -1580,6 +1568,74 @@ void initialize(HACCEL* hAccelTable)
 
 
 //////////
+//
+// EditChainManager processing
+//
+//////
+	void iEditChainManagerDuplicate(SEditChainManager** root, SEditChainManager* source)
+	{
+		// Create the master record
+		*root = (SEditChainManager*)malloc(sizeof(SEditChainManager));
+		if (*root)
+		{
+			// Initialize
+			memset(*root, 0, sizeof(SEditChainManager));
+
+// TODO:  Code the duplication
+		}
+	}
+
+
+
+
+//////////
+//
+// Datum storage
+//
+//////
+	void iDatumDuplicate(SDatum* datum, s8* data, u32 dataLength)
+	{
+		// Make sure our environment is sane
+		if (datum)
+		{
+			// Release anything that's already there
+			iiDatumFree(datum);
+
+			// Store the new data
+			datum->data = (s8*)malloc(dataLength);
+
+			// Copy over if we were successful
+			if (datum->data)
+			{
+				memcpy(datum->data, data, dataLength);
+				datum->length = dataLength;
+			}
+		}
+	}
+
+	void iDatumDuplicate(SDatum* datumDst, SDatum* datumSrc)
+	{
+		if (datumDst && datumSrc && datumSrc->data)
+			iDatumDuplicate(datumDst, datumSrc->data, datumSrc->length);
+	}
+
+	void iiDatumFree(SDatum* datum)
+	{
+		// Store the data
+		if (datum->data)
+		{
+			free(datum->data);
+			datum->data = NULL;
+		}
+
+		// Reset the length to zero
+		datum->length = 0;
+	}
+
+
+
+
+//////////
 // Allocates a new structure
 //////
 	SBitmap* iBmpAllocate(void)
@@ -1597,20 +1653,191 @@ void initialize(HACCEL* hAccelTable)
 		// Indicate our success or failure
 		return(bmp);
 	}
+;
 
 
 
 
 //////////
 //
-// Based on the mouseover flag, should the bmp or the bmpOver be drawn?
+// Called to copy a bitmap, to duplicate it completely
 //
 //////
-	SBitmap* iBmp_BmpOrBmpOver(SObject* obj, bool tlAdditionalTest)
+	SBitmap* iBmpCopy(SBitmap* bmpSrc)
 	{
-//		if (tlAdditionalTest || obj->ev.mouse.isMouseOver)		return(obj->bmpOver);
-//		else													return(obj->bmp);
-		return(obj->bmp);
+		SBitmap*	bmp;
+		RECT		lrc;
+
+
+		// Make sure our environment is sane
+		bmp = NULL;
+		if (bmpSrc && iBmpValidate(bmpSrc))
+		{
+			// Allocate a new structure
+			bmp = iBmpAllocate();
+			if (bmp)
+			{
+				// Create a bitmap of the target size
+				iBmpCreateBySize(bmp, bmpSrc->bi.biWidth, bmpSrc->bi.biHeight, bmpSrc->bi.biBitCount);
+				
+				// Copy the bitmap over
+				SetRect(&lrc, 0, 0, bmpSrc->bi.biWidth, bmpSrc->bi.biHeight);
+				iBmpBitBlt(bmp, &lrc, bmpSrc);
+			}
+		}
+
+		// Indicate our success or failure
+		return(bmp);
+	}
+
+
+
+
+//////////
+//
+// Performs basic tests on the bitmap to see if it appears to be a valid structure.
+//
+//////
+	bool iBmpValidate(SBitmap* bmp)
+	{
+		// Planes must be 1
+		if (bmp->bi.biPlanes != 1)
+			return(false);
+
+		// Bits must be 24 or 32
+		if (bmp->bi.biBitCount != 24 && bmp->bi.biBitCount != 32)
+			return(false);
+
+		// No compression (meaning default BMP file)
+		if (bmp->bi.biCompression != 0)
+			return(false);
+
+		// Make sure the biSizeImage is accurate
+		iBmpComputeRowWidth(bmp);
+		if (bmp->rowWidth * bmp->bi.biHeight != bmp->bi.biSizeImage)
+			return(false);
+
+		// Make sure the pixels per meter are set
+		if (bmp->bi.biXPelsPerMeter <= 0)			bmp->bi.biXPelsPerMeter = 2835;					// Default to 72 pixels per inch, a "twip" as it were
+		if (bmp->bi.biYPelsPerMeter <= 0)			bmp->bi.biYPelsPerMeter = 2835;
+
+		// We're good
+		return(true);
+	}
+
+
+
+
+//////////
+//
+// Computes the row width of the pixels using BGR format (3 bytes per pixel) then rounded up to
+// the nearest DWORD.
+//
+//////
+	s32 iBmpComputeRowWidth(SBitmap* bmp)
+	{
+		s32 lnWidth;
+
+
+		// See the bit counts
+		if (bmp->bi.biBitCount == 24)
+		{
+			// 24-bit formats are rounded up to nearest DWORD
+			lnWidth = bmp->bi.biWidth * 3;
+			if (lnWidth % 4 == 0)
+				return(lnWidth);
+
+			// Increase the width
+			lnWidth += (4 - (lnWidth % 4));
+			return(lnWidth);
+
+
+		} else if (bmp->bi.biBitCount == 32) {
+			// 32-bit formats are also DWORD aligned, but naturally, of course. :-)
+			return(bmp->bi.biWidth * 4);
+
+
+		} else {
+			// Uh oh, spaghetti-oh!
+			return(bmp->bi.biSizeImage / bmp->bi.biHeight);
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to create a basic bitmap by the indicated size, and initially populate it to white
+//
+//////
+	void iBmpCreateBySize(SBitmap* bmp, u32 width, u32 height, u32 tnBitCount)
+	{
+		// Populate the initial structure
+		if (tnBitCount == 24)		iBmpPopulateBitmapStructure(bmp, width, height, 24);
+		else						iBmpPopulateBitmapStructure(bmp, width, height, 32);
+
+		// Create the HDC and DIB Section
+		bmp->hdc	= CreateCompatibleDC(GetDC(GetDesktopWindow()));
+		bmp->hbmp	= CreateDIBSection(bmp->hdc, (BITMAPINFO*)&bmp->bi, DIB_RGB_COLORS, (void**)&bmp->bd, NULL, 0);
+		SelectObject(bmp->hdc, bmp->hbmp);
+
+		// Paint it white initially (the fast/easy way)
+		memset(bmp->bd, 255, bmp->bi.biSizeImage);
+	}
+
+
+
+
+//////////
+//
+// Called to create an empty 24-bit bitmap
+//
+//////
+	void iBmpPopulateBitmapStructure(SBitmap* bmp, u32 tnWidth, u32 tnHeight, u32 tnBitCount)
+	{
+		memset(&bmp->bi, 0, sizeof(bmp->bi));
+		bmp->bi.biSize				= sizeof(bmp->bi);
+		bmp->bi.biWidth				= tnWidth;
+		bmp->bi.biHeight			= tnHeight;
+		bmp->bi.biCompression		= 0;
+		bmp->bi.biPlanes			= 1;
+		bmp->bi.biBitCount			= (u16)((tnBitCount == 24 || tnBitCount == 32) ? tnBitCount : 32);
+		bmp->bi.biXPelsPerMeter		= 2835;	// Assume 72 dpi
+		bmp->bi.biYPelsPerMeter		= 2835;
+		iBmpComputeRowWidth(bmp);
+		bmp->bi.biSizeImage			= bmp->rowWidth * tnHeight;
+//////////
+// Note:  The compression formats can be:
+// 0	BI_RGB	none (most common)
+// 4	BI_JPEG	data bits following need to be fed into a JPG decoder to access bit rows, to save back to disk a JPG encoder is required, lossy compression (always loses bitmap color data)
+// 5	BI_PNG	data bits following need to be fed into a PNG decoder to access bit rows, to save back to disk a PNG encoder is required, lossless compression (always maintains original color data)
+//////
+	}
+
+
+
+
+//////////
+//
+// Called to delete the indicated bitmap and optionally free all resources.
+//
+//////
+	void iBmpDelete(SBitmap* bmp, bool tlFreeBits)
+	{
+		if (bmp)
+		{
+			// Do we need to free the internals?
+			if (tlFreeBits)
+			{
+				// Free the internal/Windows bits
+				DeleteObject((HGDIOBJ)bmp->hbmp);
+				DeleteDC(bmp->hdc);
+			}
+
+			// Release the bitmap
+			free(bmp);
+		}
 	}
 
 
@@ -2985,10 +3212,10 @@ void initialize(HACCEL* hAccelTable)
 			SetRect(&winScreen.maximize.rc,		trc->right - 104,	trc->top + 1,	trc->right - 104 + winScreen.maximize.bmp->bi.biWidth,	trc->top + 1 + winScreen.maximize.bmp->bi.biHeight);
 			SetRect(&winScreen.close.rc,		trc->right - 77,	trc->top + 1,	trc->right - 77  + winScreen.close.bmp->bi.biWidth,		trc->top + 1 + winScreen.close.bmp->bi.biHeight);
 
-			iBmpBitBltObject(&winScreen.bmp, &winScreen.appIcon,	iBmp_BmpOrBmpOver(&winScreen.appIcon,	false));
-			iBmpBitBltObject(&winScreen.bmp, &winScreen.minimize,	iBmp_BmpOrBmpOver(&winScreen.minimize,	false));
-			iBmpBitBltObject(&winScreen.bmp, &winScreen.maximize,	iBmp_BmpOrBmpOver(&winScreen.maximize,	false));
-			iBmpBitBltObject(&winScreen.bmp, &winScreen.close,		iBmp_BmpOrBmpOver(&winScreen.close,		false));
+			iBmpBitBltObject(&winScreen.bmp, &winScreen.appIcon,	winScreen.appIcon.bmp);
+			iBmpBitBltObject(&winScreen.bmp, &winScreen.minimize,	winScreen.minimize.bmp);
+			iBmpBitBltObject(&winScreen.bmp, &winScreen.maximize,	winScreen.maximize.bmp);
+			iBmpBitBltObject(&winScreen.bmp, &winScreen.close,		winScreen.close.bmp);
 
 
 		//////////
@@ -3001,10 +3228,10 @@ void initialize(HACCEL* hAccelTable)
 			SetRect(&winScreen.arrowLl.rc, trc->left, trc->bottom - winScreen.arrowLl.bmp->bi.biHeight, trc->left + winScreen.arrowLl.bmp->bi.biWidth, trc->bottom);
 
 			// Draw them
-			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowUl, iBmp_BmpOrBmpOver(&winScreen.arrowUl, false));
-			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowUr, iBmp_BmpOrBmpOver(&winScreen.arrowUr, false));
-			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowLr, iBmp_BmpOrBmpOver(&winScreen.arrowLr, false));
-			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowLl, iBmp_BmpOrBmpOver(&winScreen.arrowLl, false));
+			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowUl, winScreen.arrowUl.bmp);
+			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowUr, winScreen.arrowUr.bmp);
+			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowLr, winScreen.arrowLr.bmp);
+			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowLl, winScreen.arrowLl.bmp);
 
 
 		//////////
@@ -3029,10 +3256,10 @@ void initialize(HACCEL* hAccelTable)
 			SetRect(&winJDebi.minimize.rc,		trc->right - 132,	trc->top + 1,	trc->right - 132 + winJDebi.minimize.bmp->bi.biWidth,	trc->top + 1 + winJDebi.minimize.bmp->bi.biHeight);
 			SetRect(&winJDebi.move.rc,			trc->right - 132,	trc->top + 1,	trc->right - 132 + winJDebi.minimize.bmp->bi.biWidth,	trc->top + 1 + winJDebi.minimize.bmp->bi.biHeight);
 
-			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.appIcon,		iBmp_BmpOrBmpOver(&winJDebi.appIcon,	false));
-			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.minimize,	iBmp_BmpOrBmpOver(&winJDebi.minimize,	false));
-			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.maximize,	iBmp_BmpOrBmpOver(&winJDebi.maximize,	false));
-			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.close,		iBmp_BmpOrBmpOver(&winJDebi.close,		false));
+			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.appIcon,		winJDebi.appIcon.bmp);
+			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.minimize,		winJDebi.minimize.bmp);
+			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.maximize,		winJDebi.maximize.bmp);
+			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.close,		winJDebi.close.bmp);
 
 
 		//////////
@@ -3045,10 +3272,10 @@ void initialize(HACCEL* hAccelTable)
 			SetRect(&winJDebi.arrowLl.rc, trc->left, trc->bottom - winJDebi.arrowLl.bmp->bi.biHeight, trc->left + winJDebi.arrowLl.bmp->bi.biWidth, trc->bottom);
 
 			// Draw them
-			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowUl, iBmp_BmpOrBmpOver(&winJDebi.arrowUl, false));
-			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowUr, iBmp_BmpOrBmpOver(&winJDebi.arrowUr, false));
-			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowLr, iBmp_BmpOrBmpOver(&winJDebi.arrowLr, false));
-			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowLl, iBmp_BmpOrBmpOver(&winJDebi.arrowLl, false));
+			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowUl, winJDebi.arrowUl.bmp);
+			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowUr, winJDebi.arrowUr.bmp);
+			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowLr, winJDebi.arrowLr.bmp);
+			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowLl, winJDebi.arrowLl.bmp);
 
 
 		//////////

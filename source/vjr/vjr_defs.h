@@ -101,7 +101,6 @@
 	void					iSetScreenWindowSize					(s32 tnLeft, s32 tnTop, s32 tnWidth, s32 tnHeight, bool tlForce);
 	void					iSetJDebiWindowSize						(s32 tnLeft, s32 tnTop, s32 tnWidth, s32 tnHeight, bool tlForce);
 	HBITMAP					iCreateBitmap							(HDC thdc, int tnWidth, int tnHeight, int tnPlanes, int tnBits, void** tbd, BITMAPFILEHEADER* tbh, BITMAPINFOHEADER* tbi);
-	int						iComputeRowWidth						(SBitmap* bmp);
 	void					iComputeScreenWindowClientAreaDimensions	(SSize* size);
 	void					iComputeScreenWindowNonclientAreaDimensions	(SSize* size);
 	void					iAdjustScreenWindowDimensions				(SSize* size);
@@ -113,18 +112,32 @@
 	s64						iGetLocalTimeMs							(void);
 	s64						iDiff									(s64 tnBaseValue, s64 tnSubtractionValue);
 	s8*						iDuplicateString						(s8* tcText);
-	SFont*					iDuplicateFont							(SFont* fontSource);
-	SFont*					iCreateFont								(cs8* tcFontName, u32 tnFontSize, u32 tnFontWeight, u32 tnItalics, u32 tnUnderline);
+	SFont*					iFontAllocate							(void);
+	SFont*					iFontDuplicate							(SFont* fontSource);
+	SFont*					iFontCreate								(cs8* tcFontName, u32 tnFontSize, u32 tnFontWeight, u32 tnItalics, u32 tnUnderline);
 	u32						iFindClosestFontSizeMatch				(s8* tcText, s8* tcFontName, u32 tnFontSize, u32 tnFontBold, u32 tnFontItalic, u32 tnFontUnderline, u32 tnWidth, u32 tnHeight, u32 tnWidthDesired, u32 tnHeightDesired);
 	int						iProcessMouseMessage					(UINT m, WPARAM w, LPARAM l);
 	void					iTranslateMousePosition					(POINTS* pt);
+
+	// EditChain
+	void					iEditChainManagerDuplicate				(SEditChainManager** root, SEditChainManager* source);
+
+	// Datum
+	void					iDatumDuplicate							(SDatum* datum, s8* data, u32 dataLength);
+	void					iDatumDuplicate							(SDatum* datumDst, SDatum* datumSrc);
+	void					iiDatumFree								(SDatum* datum);
 
 
 	//////////
 	// Bitmap functions
 	//////
 		SBitmap*			iBmpAllocate							(void);
-		SBitmap*			iBmp_BmpOrBmpOver						(SObject* obj, bool tlAdditionalTest);
+		SBitmap*			iBmpCopy								(SBitmap* bmpSrc);
+		bool				iBmpValidate							(SBitmap* bmp);
+		s32					iBmpComputeRowWidth						(SBitmap* bmp);
+		void				iBmpCreateBySize						(SBitmap* bmp, u32 width, u32 height, u32 tnBitCount);
+		void				iBmpPopulateBitmapStructure				(SBitmap* bmp, u32 tnWidth, u32 tnHeight, u32 tnBitCount);
+		void				iBmpDelete								(SBitmap* bmp, bool tlFreeBits);
 		void				iBmpBitBltObject						(SBitmap* bmpDst, SObject* obj, SBitmap* bmpSrc);
 		void				iBmpBitBltObjectMask					(SBitmap* bmpDst, SObject* obj, SBitmap* bmpSrc);
 		void				iBmpBitBlt								(SBitmap* bmpDst, RECT* trc, SBitmap* bmpSrc);

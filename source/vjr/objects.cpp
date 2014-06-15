@@ -61,7 +61,7 @@
 			memcpy(&obj->bmp->bh, bh, sizeof(obj->bmp->bh));
 			memcpy(&obj->bmp->bi, bi, sizeof(obj->bmp->bi));
 			obj->bmp->bd			= (s8*)(bmpRawFileData + bh->bfOffBits);
-			obj->bmp->rowWidth	= iComputeRowWidth(obj->bmp);
+			obj->bmp->rowWidth	= iBmpComputeRowWidth(obj->bmp);
 			if (obj->bmp->bi.biBitCount == 24)
 				iConvertBitmapTo32Bits(obj->bmp);
 	}
@@ -134,9 +134,6 @@
 
 				// Initially populate
 				obj->parent	= parent;
-				obj->data1	= template_obj->data1;
-				obj->data2	= template_obj->data2;
-				obj->data3	= template_obj->data3;
 			}
 
 
@@ -174,10 +171,13 @@
 				memset(obj, 0, sizeof(SObjectForm));
 
 				// Initially populate
-				obj->parent	= parent;
-				obj->data1	= template_obj->data1;
-				obj->data2	= template_obj->data2;
-				obj->data3	= template_obj->data3;
+				obj->parent				= parent;
+				obj->font				= iFontDuplicate(template_obj->font);
+				obj->backColor.color	= template_obj->backColor.color;
+				obj->foreColor.color	= template_obj->foreColor.color;
+				iDatumDuplicate(&obj->comment, &template_obj->comment);
+				iDatumDuplicate(&obj->caption, &template_obj->caption);
+				iDatumDuplicate(&obj->toolTip, &template_obj->toolTip);
 			}
 
 
@@ -215,10 +215,13 @@
 				memset(obj, 0, sizeof(SObjectSubform));
 
 				// Initially populate
-				obj->parent	= parent;
-				obj->data1	= template_obj->data1;
-				obj->data2	= template_obj->data2;
-				obj->data3	= template_obj->data3;
+				obj->parent				= parent;
+				obj->font				= iFontDuplicate(template_obj->font);
+				obj->backColor.color	= template_obj->backColor.color;
+				obj->foreColor.color	= template_obj->foreColor.color;
+				iDatumDuplicate(&obj->comment, &template_obj->comment);
+				iDatumDuplicate(&obj->caption, &template_obj->caption);
+				iDatumDuplicate(&obj->toolTip, &template_obj->toolTip);
 			}
 
 
@@ -256,10 +259,21 @@
 				memset(obj, 0, sizeof(SObjectLabel));
 
 				// Initially populate
-				obj->parent	= parent;
-				obj->data1	= template_obj->data1;
-				obj->data2	= template_obj->data2;
-				obj->data3	= template_obj->data3;
+				obj->parent						= parent;
+				obj->font						= iFontDuplicate(template_obj->font);
+				obj->backColor.color			= template_obj->backColor.color;
+				obj->foreColor.color			= template_obj->foreColor.color;
+
+				obj->alignment					= template_obj->alignment;
+				iDatumDuplicate(&obj->comment, &template_obj->comment);
+				iDatumDuplicate(&obj->caption, &template_obj->caption);
+				iDatumDuplicate(&obj->toolTip, &template_obj->toolTip);
+
+				obj->isOpaque					= template_obj->isOpaque;
+				obj->isBorder					= template_obj->isBorder;
+				obj->borderColor.color			= template_obj->borderColor.color;
+				obj->disabledBackColor.color	= template_obj->disabledBackColor.color;
+				obj->disabledForeColor.color	= template_obj->disabledForeColor.color;
 			}
 
 
@@ -297,10 +311,31 @@
 				memset(obj, 0, sizeof(SObjectTextbox));
 
 				// Initially populate
-				obj->parent	= parent;
-				obj->data1	= template_obj->data1;
-				obj->data2	= template_obj->data2;
-				obj->data3	= template_obj->data3;
+				obj->parent						= parent;
+				obj->font						= iFontDuplicate(template_obj->font);
+				obj->backColor.color			= template_obj->backColor.color;
+				obj->foreColor.color			= template_obj->foreColor.color;
+
+				obj->style						= template_obj->style;
+				obj->alignment					= template_obj->alignment;
+				iDatumDuplicate(&obj->value,	&template_obj->value);
+				obj->valueLength				= template_obj->valueLength;
+				iDatumDuplicate(&obj->picture,	&template_obj->picture);
+				iDatumDuplicate(&obj->mask,		&template_obj->mask);
+				iDatumDuplicate(&obj->comment, &template_obj->comment);
+				iDatumDuplicate(&obj->toolTip, &template_obj->toolTip);
+
+				obj->cursor						= template_obj->cursor;
+				obj->selectStart				= template_obj->selectStart;
+				obj->selectEnd					= template_obj->selectEnd;
+
+				obj->isOpaque					= template_obj->isOpaque;
+				obj->isBorder					= template_obj->isBorder;
+				obj->borderColor.color			= template_obj->borderColor.color;
+				obj->selectedBackColor.color	= template_obj->selectedBackColor.color;
+				obj->selectedForeColor.color	= template_obj->selectedForeColor.color;
+				obj->disabledBackColor.color	= template_obj->disabledBackColor.color;
+				obj->disabledForeColor.color	= template_obj->disabledForeColor.color;
 			}
 
 
@@ -338,10 +373,18 @@
 				memset(obj, 0, sizeof(SObjectButton));
 
 				// Initially populate
-				obj->parent	= parent;
-				obj->data1	= template_obj->data1;
-				obj->data2	= template_obj->data2;
-				obj->data3	= template_obj->data3;
+				obj->parent						= parent;
+				obj->font						= iFontDuplicate(template_obj->font);
+				obj->backColor.color			= template_obj->backColor.color;
+				obj->foreColor.color			= template_obj->foreColor.color;
+
+				obj->style						= template_obj->style;
+				obj->alignment					= template_obj->alignment;
+				iDatumDuplicate(&obj->comment, &template_obj->comment);
+				iDatumDuplicate(&obj->toolTip, &template_obj->toolTip);
+
+				obj->disabledBackColor.color	= template_obj->disabledBackColor.color;
+				obj->disabledForeColor.color	= template_obj->disabledForeColor.color;
 			}
 
 
@@ -379,10 +422,28 @@
 				memset(obj, 0, sizeof(SObjectEditbox));
 
 				// Initially populate
-				obj->parent	= parent;
-				obj->data1	= template_obj->data1;
-				obj->data2	= template_obj->data2;
-				obj->data3	= template_obj->data3;
+				obj->parent						= parent;
+				obj->font						= iFontDuplicate(template_obj->font);
+				obj->backColor.color			= template_obj->backColor.color;
+				obj->foreColor.color			= template_obj->foreColor.color;
+
+				obj->style						= template_obj->style;
+				obj->alignment					= template_obj->alignment;
+				iEditChainManagerDuplicate(&obj->value, template_obj->value);
+				iDatumDuplicate(&obj->comment, &template_obj->comment);
+				iDatumDuplicate(&obj->toolTip, &template_obj->toolTip);
+
+				obj->cursor						= template_obj->cursor;
+				obj->selectStart				= template_obj->selectStart;
+				obj->selectEnd					= template_obj->selectEnd;
+
+				obj->isOpaque					= template_obj->isOpaque;
+				obj->isBorder					= template_obj->isBorder;
+				obj->borderColor.color			= template_obj->borderColor.color;
+				obj->selectedBackColor.color	= template_obj->selectedBackColor.color;
+				obj->selectedForeColor.color	= template_obj->selectedForeColor.color;
+				obj->disabledBackColor.color	= template_obj->disabledBackColor.color;
+				obj->disabledForeColor.color	= template_obj->disabledForeColor.color;
 			}
 
 
@@ -420,10 +481,12 @@
 				memset(obj, 0, sizeof(SObjectImage));
 
 				// Initially populate
-				obj->parent	= parent;
-				obj->data1	= template_obj->data1;
-				obj->data2	= template_obj->data2;
-				obj->data3	= template_obj->data3;
+				obj->parent		= parent;
+				obj->style		= template_obj->style;
+				iDatumDuplicate(&obj->comment, &template_obj->comment);
+				iDatumDuplicate(&obj->toolTip, &template_obj->toolTip);
+				obj->image		= iBmpCopy(template_obj->image);
+				obj->imageOver	= iBmpCopy(template_obj->imageOver);
 			}
 
 
@@ -461,10 +524,23 @@
 				memset(obj, 0, sizeof(SObjectCheckbox));
 
 				// Initially populate
-				obj->parent	= parent;
-				obj->data1	= template_obj->data1;
-				obj->data2	= template_obj->data2;
-				obj->data3	= template_obj->data3;
+				obj->parent						= parent;
+				obj->font						= iFontDuplicate(template_obj->font);
+				obj->backColor.color			= template_obj->backColor.color;
+				obj->foreColor.color			= template_obj->foreColor.color;
+
+				obj->alignment					= template_obj->alignment;
+				obj->style						= template_obj->style;
+				obj->value						= template_obj->value;
+				iDatumDuplicate(&obj->comment, &template_obj->comment);
+				iDatumDuplicate(&obj->caption, &template_obj->caption);
+				iDatumDuplicate(&obj->toolTip, &template_obj->toolTip);
+
+				obj->isOpaque					= template_obj->isOpaque;
+				obj->isBorder					= template_obj->isBorder;
+				obj->borderColor.color			= template_obj->borderColor.color;
+				obj->disabledBackColor.color	= template_obj->disabledBackColor.color;
+				obj->disabledForeColor.color	= template_obj->disabledForeColor.color;
 			}
 
 
@@ -503,9 +579,6 @@
 
 				// Initially populate
 				obj->parent	= parent;
-				obj->data1	= template_obj->data1;
-				obj->data2	= template_obj->data2;
-				obj->data3	= template_obj->data3;
 			}
 
 
@@ -543,10 +616,25 @@
 				memset(obj, 0, sizeof(SObjectRadio));
 
 				// Initially populate
-				obj->parent	= parent;
-				obj->data1	= template_obj->data1;
-				obj->data2	= template_obj->data2;
-				obj->data3	= template_obj->data3;
+				obj->parent						= parent;
+				obj->font						= iFontDuplicate(template_obj->font);
+				obj->backColor.color			= template_obj->backColor.color;
+				obj->foreColor.color			= template_obj->foreColor.color;
+
+				obj->alignment					= template_obj->alignment;
+				obj->style						= template_obj->style;
+				obj->value						= template_obj->value;
+				obj->minValue					= template_obj->minValue;
+				obj->maxValue					= template_obj->maxValue;
+				obj->roundTo					= template_obj->roundTo;
+				iDatumDuplicate(&obj->comment, &template_obj->comment);
+				iDatumDuplicate(&obj->toolTip, &template_obj->toolTip);
+
+				obj->isOpaque					= template_obj->isOpaque;
+				obj->isBorder					= template_obj->isBorder;
+				obj->borderColor.color			= template_obj->borderColor.color;
+				obj->disabledBackColor.color	= template_obj->disabledBackColor.color;
+				obj->disabledForeColor.color	= template_obj->disabledForeColor.color;
 			}
 
 

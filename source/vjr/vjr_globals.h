@@ -52,7 +52,7 @@
 
 
 	// JDebi window
-	STextChainManager*	commandHistory;																// The command window history
+	SEditChainManager*	commandHistory;																// The command window history
 
 
 	// Global colors
