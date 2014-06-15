@@ -60,6 +60,17 @@
 #include "graphics\h\arrow_ur.h"
 #include "graphics\h\arrow_lr.h"
 #include "graphics\h\arrow_ll.h"
+
+#include "graphics\h\checkbox_multi.h"
+#include "graphics\h\checkbox_off.h"
+#include "graphics\h\checkbox_on.h"
+
+#include "graphics\h\textbox_2d.h"
+#include "graphics\h\textbox_3d.h"
+
+#include "graphics\h\radio_off.h"
+#include "graphics\h\radio_on.h"
+
 #include "graphics\h\jdebi_app_icon.h"
 
 #include "vjr_sup.cpp"
