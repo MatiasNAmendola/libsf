@@ -61,24 +61,24 @@ void initialize(HACCEL* hAccelTable)
 
 
 	// Load our images
-	iLoadObject(&winScreen.appIcon,				cgc_appIconBmp);
-	iLoadObject(&winScreen.minimize,			cgc_minimizeBmp);
-	iLoadObject(&winScreen.maximize,			cgc_maximizeBmp);
-	iLoadObject(&winScreen.move,				cgc_moveBmp);
-	iLoadObject(&winScreen.close,				cgc_closeBmp);
-	iLoadObject(&winScreen.arrowUl,				cgc_arrowUlBmp);
-	iLoadObject(&winScreen.arrowUr,				cgc_arrowUrBmp);
-	iLoadObject(&winScreen.arrowLr,				cgc_arrowLrBmp);
-	iLoadObject(&winScreen.arrowLl,				cgc_arrowLlBmp);
+	iObjectLoad(&winScreen.appIcon,				cgc_appIconBmp);
+	iObjectLoad(&winScreen.minimize,			cgc_minimizeBmp);
+	iObjectLoad(&winScreen.maximize,			cgc_maximizeBmp);
+	iObjectLoad(&winScreen.move,				cgc_moveBmp);
+	iObjectLoad(&winScreen.close,				cgc_closeBmp);
+	iObjectLoad(&winScreen.arrowUl,				cgc_arrowUlBmp);
+	iObjectLoad(&winScreen.arrowUr,				cgc_arrowUrBmp);
+	iObjectLoad(&winScreen.arrowLr,				cgc_arrowLrBmp);
+	iObjectLoad(&winScreen.arrowLl,				cgc_arrowLlBmp);
 
-	iLoadObject(&winJDebi.appIcon,				cgc_jdebiAppIconBmp);
-	iLoadObject(&winJDebi.minimize,				cgc_minimizeBmp);
-	iLoadObject(&winJDebi.maximize,				cgc_maximizeBmp);
-	iLoadObject(&winJDebi.close,				cgc_closeBmp);
-	iLoadObject(&winJDebi.arrowUl,				cgc_arrowUlBmp);
-	iLoadObject(&winJDebi.arrowUr,				cgc_arrowUrBmp);
-	iLoadObject(&winJDebi.arrowLr,				cgc_arrowLrBmp);
-	iLoadObject(&winJDebi.arrowLl,				cgc_arrowLlBmp);
+	iObjectLoad(&winJDebi.appIcon,				cgc_jdebiAppIconBmp);
+	iObjectLoad(&winJDebi.minimize,				cgc_minimizeBmp);
+	iObjectLoad(&winJDebi.maximize,				cgc_maximizeBmp);
+	iObjectLoad(&winJDebi.close,				cgc_closeBmp);
+	iObjectLoad(&winJDebi.arrowUl,				cgc_arrowUlBmp);
+	iObjectLoad(&winJDebi.arrowUr,				cgc_arrowUrBmp);
+	iObjectLoad(&winJDebi.arrowLr,				cgc_arrowLrBmp);
+	iObjectLoad(&winJDebi.arrowLl,				cgc_arrowLlBmp);
 
 
 	// Create our message window
@@ -1572,14 +1572,20 @@ void initialize(HACCEL* hAccelTable)
 // EditChainManager processing
 //
 //////
-	void iEditChainManagerDuplicate(SEditChainManager** root, SEditChainManager* source)
+	void iEditChainManagerDuplicate(SEditChainManager** root, SEditChainManager* chain)
 	{
+		SEditChainManager* ecm;
+
+
 		// Create the master record
-		*root = (SEditChainManager*)malloc(sizeof(SEditChainManager));
-		if (*root)
+		ecm = (SEditChainManager*)malloc(sizeof(SEditChainManager));
+		if (ecm)
 		{
 			// Initialize
-			memset(*root, 0, sizeof(SEditChainManager));
+			memset(ecm, 0, sizeof(SEditChainManager));
+
+			// Update caller
+			*root = ecm;
 
 // TODO:  Code the duplication
 		}
@@ -1874,8 +1880,9 @@ void initialize(HACCEL* hAccelTable)
 // Physically render the bitmap atop the bitmap
 //
 //////
-	void iBmpBitBlt(SBitmap* bmpDst, RECT* trc, SBitmap* bmpSrc)
+	u32 iBmpBitBlt(SBitmap* bmpDst, RECT* trc, SBitmap* bmpSrc)
 	{
+		u32			lnPixelsRendered;
 		s32			lnY, lnX, lnYDst, lnXDst;
 		f64			lfAlp, lfMalp;
 		SBgr*		lbgrDst;
@@ -1887,6 +1894,7 @@ void initialize(HACCEL* hAccelTable)
 		//////////
 		// Draw it
 		//////
+			lnPixelsRendered = 0;
 			for (lnY = 0, lnYDst = trc->top; lnY < bmpSrc->bi.biHeight && lnYDst < trc->bottom; lnYDst++, lnY++)
 			{
 				// Are we on the image?
@@ -1915,6 +1923,7 @@ void initialize(HACCEL* hAccelTable)
 									lbgrDst->red	= lbgrSrc->red;
 									lbgrDst->grn	= lbgrSrc->grn;
 									lbgrDst->blu	= lbgrSrc->blu;
+									++lnPixelsRendered;
 								}
 
 								// Move to next pixel on both
@@ -1935,6 +1944,7 @@ void initialize(HACCEL* hAccelTable)
 									lbgraDst->red	= lbgrSrc->red;
 									lbgraDst->grn	= lbgrSrc->grn;
 									lbgraDst->blu	= lbgrSrc->blu;
+									++lnPixelsRendered;
 								}
 
 								// Move to next pixel on both
@@ -1960,6 +1970,7 @@ void initialize(HACCEL* hAccelTable)
 									lbgrDst->red	= (u8)min(max(((f64)lbgrDst->red * lfMalp) + (lbgraSrc->red * lfAlp), 0.0), 255.0);
 									lbgrDst->grn	= (u8)min(max(((f64)lbgrDst->grn * lfMalp) + (lbgraSrc->grn * lfAlp), 0.0), 255.0);
 									lbgrDst->blu	= (u8)min(max(((f64)lbgrDst->blu * lfMalp) + (lbgraSrc->blu * lfAlp), 0.0), 255.0);
+									++lnPixelsRendered;
 								}
 
 								// Move to next pixel on both
@@ -1982,6 +1993,7 @@ void initialize(HACCEL* hAccelTable)
 									lbgraDst->red	= (u8)min(max(((f64)lbgraDst->red * lfMalp) + (lbgraSrc->red * lfAlp), 0.0), 255.0);
 									lbgraDst->grn	= (u8)min(max(((f64)lbgraDst->grn * lfMalp) + (lbgraSrc->grn * lfAlp), 0.0), 255.0);
 									lbgraDst->blu	= (u8)min(max(((f64)lbgraDst->blu * lfMalp) + (lbgraSrc->blu * lfAlp), 0.0), 255.0);
+									++lnPixelsRendered;
 								}
 
 								// Move to next pixel on both
@@ -1992,6 +2004,12 @@ void initialize(HACCEL* hAccelTable)
 					}
 				}
 			}
+
+
+		//////////
+		// Indicate how many pixels were rendered
+		//////
+			return(lnPixelsRendered);
 	}
 
 

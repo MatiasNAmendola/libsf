@@ -327,6 +327,11 @@ struct SVariable
 
 struct SObject
 {
+	SObject*	next;													// Next object in chain (if any)
+	SObject*	parent;													// Parent object (if any)
+	SObject*	firstChild;												// Pointer to child objects (all objects are containers)
+
+	// Object flags
 	u32			type;													// Object type (see _OBJECT_TYPE_* constants)
 	bool		isEnabled;												// If it is responding to events
 	bool		hasFocus;												// Does this object have focus?
@@ -335,19 +340,18 @@ struct SObject
 	bool		isDirty;												// Is set if this or any child object needs re-rendered
 
 	// Data unique to this object
-	void*		obj_data;												// Varies by type
+	void*		obj_data;												// Varies by type, see SObject* structures below
 
 	// Related position in the member hierarchy
-	SObject*	parent;													// Parent object (if available, may not be populated)
-	SObject*	firstChild;												// Pointer to child objects (all objects are containers)
 	SVariable*	firstProperty;											// Runtime-added user-defined property
 	SCode*		firstMethod;											// Runtime-added user-defined methods
 
 	// Events
 	SEvents		ev;														// Events for this object
 
+
 	//////////
-	// Object size in pixels
+	// Object size in pixels, per the .Left, .Top, .Width, and .Height properties
 	//////
 		RECT		rc;													// Object's current position in its parent
 		RECT		rco;												// Object's original position in its parent
@@ -385,6 +389,10 @@ struct SObjectForm
 	SDatum		caption;												// Caption
 	SDatum		comment;												// Comment
 	SDatum		toolTip;												// What to display if hovering
+
+	// Events unique to this object
+	bool		(*activate)							(SObject* o);		// Called when the data changes
+	bool		(*deactivate)						(SObject* o);		// Called when the data changes
 };
 
 struct SObjectSubform
@@ -399,6 +407,10 @@ struct SObjectSubform
 	SDatum		caption;												// Caption
 	SDatum		comment;												// Comment
 	SDatum		toolTip;												// What to display if hovering
+
+	// Events unique to this object
+	bool		(*activate)							(SObject* o);		// Called when the data changes
+	bool		(*deactivate)						(SObject* o);		// Called when the data changes
 };
 
 struct SObjectLabel
@@ -422,6 +434,9 @@ struct SObjectLabel
 	SBgra		borderColor;											// Border color
 	SBgra		disabledBackColor;										// Disabled background color
 	SBgra		disabledForeColor;										// Disabled foreground color
+
+	// Used only for labels in lists, like SObjectOption
+	bool		selected;												// Is this item selected?
 };
 
 struct SObjectTextbox
@@ -456,6 +471,10 @@ struct SObjectTextbox
 	SBgra		selectedForeColor;										// Selected foreground color
 	SBgra		disabledBackColor;										// Disabled background color
 	SBgra		disabledForeColor;										// Disabled foreground color
+
+	// Events unique to this object
+	bool		(*interactiveChange)				(SObject* o);		// Called when the data changes
+	bool		(*programmaticChange)				(SObject* o);		// Called when the data changes
 };
 
 struct SObjectButton
@@ -475,6 +494,10 @@ struct SObjectButton
 
 	SBgra		disabledBackColor;										// Disabled background color
 	SBgra		disabledForeColor;										// Disabled foreground color
+
+	// Events unique to this object
+	bool		(*interactiveChange)				(SObject* o);		// Called when the data changes
+	bool		(*programmaticChange)				(SObject* o);		// Called when the data changes
 };
 
 struct SObjectEditbox
@@ -506,6 +529,10 @@ struct SObjectEditbox
 	SBgra		selectedForeColor;										// Selected foreground color
 	SBgra		disabledBackColor;										// Disabled background color
 	SBgra		disabledForeColor;										// Disabled foreground color
+
+	// Events unique to this object
+	bool		(*interactiveChange)				(SObject* o);		// Called when the data changes
+	bool		(*programmaticChange)				(SObject* o);		// Called when the data changes
 };
 
 struct SObjectImage
@@ -519,6 +546,9 @@ struct SObjectImage
 
 	SBitmap*	image;													// Image displayed when the mouse IS NOT over this control
 	SBitmap*	imageOver;												// Image displayed when the mouse IS over this control
+
+	// Events unique to this object
+	bool		(*programmaticChange)				(SObject* o);		// Called when the data changes
 };
 
 struct SObjectCheckbox
@@ -544,12 +574,35 @@ struct SObjectCheckbox
 	SBgra		borderColor;											// Border color
 	SBgra		disabledBackColor;										// Disabled background color
 	SBgra		disabledForeColor;										// Disabled foreground color
+
+	// Events unique to this object
+	bool		(*interactiveChange)				(SObject* o);		// Called when the data changes
+	bool		(*programmaticChange)				(SObject* o);		// Called when the data changes
 };
 
 struct SObjectOption
 {
 	// _OBJECT_TYPE_OPTION
 	SObject*	parent;													// parent object this object belongs to
+
+	SBgra		backColor;												// Back color (only RGB() channels are used, but RGBA() channels are maintained)
+	SBgra		foreColor;												// Default text fore color
+
+	// Data
+	u32			alignment;												// 0=left, 1=right, 2=center, always centered vertically
+	u32			style;													// See _RADIO_STYLE_* constants (radio, slider, spinner)
+	SDatum		comment;												// Comment
+	SDatum		toolTip;												// What to display if hovering
+
+	u32			optionCount;											// How many options are there?
+	SObject*	firstOption;											// Each option has its own set of properties, and each is of _OBJECT_TYPE_LABEL
+	bool		multiSelect;											// Allow multiple items to be selected?
+
+	// Events unique to this object
+	bool		(*onSelect)							(SObject* o, SObject* oItem);	// When an option is selected
+	bool		(*onDeselect)						(SObject* o, SObject* oItem);	// When an option is deselected
+	bool		(*interactiveChange)				(SObject* o);		// Called when the data changes
+	bool		(*programmaticChange)				(SObject* o);		// Called when the data changes
 };
 
 struct SObjectRadio
@@ -577,6 +630,10 @@ struct SObjectRadio
 	SBgra		borderColor;											// Border color
 	SBgra		disabledBackColor;										// Disabled background color
 	SBgra		disabledForeColor;										// Disabled foreground color
+
+	// Events unique to this object
+	bool		(*interactiveChange)				(SObject* o);		// Called when the data changes
+	bool		(*programmaticChange)				(SObject* o);		// Called when the data changes
 };
 
 struct SWindow
