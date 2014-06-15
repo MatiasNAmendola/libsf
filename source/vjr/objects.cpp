@@ -38,39 +38,6 @@
 
 //////////
 //
-// Called to load a bitmap file that was loaded from disk, or simulated loaded from disk.
-//
-//////
-	void iObjectLoad(SObject* obj, cu8* bmpRawFileData)
-	{
-		BITMAPFILEHEADER*	bh;
-		BITMAPINFOHEADER*	bi;
-
-
-		//////////
-		// Grab the headers
-		//////
-			bh = (BITMAPFILEHEADER*)bmpRawFileData;
-			bi = (BITMAPINFOHEADER*)(bh + 1);
-
-
-		//////////
-		// Initialize the bitmap, and populate
-		//////
-			obj->bmp = iBmpAllocate();
-			memcpy(&obj->bmp->bh, bh, sizeof(obj->bmp->bh));
-			memcpy(&obj->bmp->bi, bi, sizeof(obj->bmp->bi));
-			obj->bmp->bd			= (s8*)(bmpRawFileData + bh->bfOffBits);
-			obj->bmp->rowWidth	= iBmpComputeRowWidth(obj->bmp);
-			if (obj->bmp->bi.biBitCount == 24)
-				iConvertBitmapTo32Bits(obj->bmp);
-	}
-
-
-
-
-//////////
-//
 // Creates the object structure
 //
 //////
@@ -467,9 +434,15 @@
 				// Initially populate
 				subobj->parent				= parent;
 				subobj->font				= iFontDuplicate(template_subobj->font);
+				subobj->borderColorNW.color	= template_subobj->borderColorNW.color;
+				subobj->borderColorNE.color	= template_subobj->borderColorNE.color;
+				subobj->borderColorSW.color	= template_subobj->borderColorSW.color;
+				subobj->borderColorSE.color	= template_subobj->borderColorSE.color;
 				subobj->backColor.color		= template_subobj->backColor.color;
 				subobj->foreColor.color		= template_subobj->foreColor.color;
+				subobj->captionColor.color	= template_subobj->captionColor.color;
 
+				subobj->bmpIcon				= iBmpCopy(template_subobj->bmpIcon);
 				iDatumDuplicate(&subobj->comment, &template_subobj->comment);
 				iDatumDuplicate(&subobj->caption, &template_subobj->caption);
 				iDatumDuplicate(&subobj->toolTip, &template_subobj->toolTip);
@@ -517,7 +490,9 @@
 				subobj->font				= iFontDuplicate(template_subobj->font);
 				subobj->backColor.color		= template_subobj->backColor.color;
 				subobj->foreColor.color		= template_subobj->foreColor.color;
+				subobj->captionColor.color	= template_subobj->captionColor.color;
 
+				subobj->bmpIcon				= iBmpCopy(template_subobj->bmpIcon);
 				iDatumDuplicate(&subobj->comment, &template_subobj->comment);
 				iDatumDuplicate(&subobj->caption, &template_subobj->caption);
 				iDatumDuplicate(&subobj->toolTip, &template_subobj->toolTip);
@@ -1060,8 +1035,10 @@
 //////
 	u32 iSubobject_renderForm(SObject* obj, SObjectForm* subobj, bool tlRenderChildren, bool tlRenderSiblings)
 	{
-		u32			lnPixelsRendered;
-		SObject*	objSib;
+		u32				lnPixelsRendered;
+		SObject*		objSib;
+		RECT			lrc, lrc2, lrc3, lrc4;
+		HFONT			lhfontOld;
 
 
 		// Make sure our environment is sane
@@ -1078,22 +1055,91 @@
 			//////////
 			// If we need re-rendering, re-render
 			//////
+				// The entire bmp
+				SetRect(&lrc, 0, 0, obj->bmp->bi.biWidth, obj->bmp->bi.biHeight);
+
+				// Do we need to redraw?  Or can we just copy?
 				if (obj->isDirty)
 				{
-				}
+					//////////
+					// Frame it
+					//////
+						// Draw the window border
+						iBmpFillRect(obj->bmp, &lrc, subobj->borderColorNW, subobj->borderColorNE, subobj->borderColorSW, subobj->borderColorSE, true);
+
+						// Frame it
+						iBmpFrameRect(obj->bmp, &lrc, black, black, black, black, false);
+
+						// Draw the client area
+						SetRect(&lrc2, 8, winScreen.bmpWindowIcon->bi.biHeight + 2, lrc.right - winScreen.bmpWindowIcon->bi.biHeight - 2, lrc.bottom - winScreen.bmpWindowIcon->bi.biHeight - 1);
+						iBmpFillRect(&winJDebi.bmp, &lrc2, white, white, white, white, false);
+
+						// Put a border around the client area
+						InflateRect(&lrc2, 1, 1);
+						iBmpFrameRect(&winJDebi.bmp, &lrc2, black, black, black, black, false);
 
 
-			//////////
-			// Render any siblings
-			//////
-				objSib = obj->next;
-				while (objSib)
-				{
-					// Render this sibling
-					lnPixelsRendered += iObjectRender(objSib, tlRenderChildren, false);
+					//////////
+					// Form icon and standard controls
+					//////
+						// Form icon
+						SetRect(&lrc3,	winScreen.bmpArrowUl->bi.biWidth + 8, 1, winScreen.bmpArrowUl->bi.biWidth + 8 + subobj->bmpIcon->bi.biWidth, 1 + subobj->bmpIcon->bi.biHeight);
+						iBmpBitBlt(obj->bmp, &lrc3, subobj->bmpIcon);
+						// Close
+						SetRect(&lrc2,	lrc.right - winScreen.bmpArrowUr->bi.biWidth - 8 - winScreen.bmpClose->bi.biWidth, lrc.top + 1, lrc.right - winScreen.bmpArrowUr->bi.biWidth - 8, lrc.bottom - 1);
+						iBmpBitBlt(obj->bmp, &lrc2, winScreen.bmpClose);
+						// Maximize
+						SetRect(&lrc2,	lrc2.left - winScreen.bmpMaximize->bi.biWidth - 1, lrc2.top, lrc2.left - 1, lrc2.bottom);
+						iBmpBitBlt(obj->bmp, &lrc2, winScreen.bmpMaximize);
+						// Minimize
+						SetRect(&lrc2,	lrc2.left - winScreen.bmpMinimize->bi.biWidth - 1, lrc2.top, lrc2.left - 1, lrc2.bottom);
+						iBmpBitBlt(obj->bmp, &lrc2, winScreen.bmpMinimize);
+						// Move
+						SetRect(&lrc2,	lrc2.left - winScreen.bmpMove->bi.biWidth - 1, lrc2.top, lrc2.left - 1, lrc2.bottom);
+						iBmpBitBlt(obj->bmp, &lrc4, winScreen.bmpMove);
 
-					// Move to next sibling
-					objSib = objSib->next;
+
+					//////////
+					// Resizing arrows
+					//////
+						// Upper left arrow
+						SetRect(&lrc2, lrc.left, lrc.top, lrc.left + winScreen.bmpArrowUl->bi.biWidth, lrc.top + winScreen.bmpArrowUl->bi.biHeight);
+						iBmpBitBlt(obj->bmp, &lrc2, winScreen.bmpArrowUl);
+						// Upper right arrow
+						SetRect(&lrc2, lrc.right - winScreen.bmpArrowUr->bi.biWidth, lrc.top, lrc.right, lrc.top + winScreen.bmpArrowUr->bi.biHeight);
+						iBmpBitBlt(obj->bmp, &lrc2, winScreen.bmpArrowUr);
+						// Lower left arrow
+						SetRect(&lrc2, lrc.right - winScreen.bmpArrowLr->bi.biWidth, lrc.bottom - winScreen.bmpArrowLr->bi.biHeight, lrc.right, lrc.bottom);
+						iBmpBitBlt(obj->bmp, &lrc2, winScreen.bmpArrowLr);
+						// Lower right arrow
+						SetRect(&lrc2, lrc.left, lrc.bottom - winScreen.bmpArrowLl->bi.biHeight, lrc.left + winScreen.bmpArrowLl->bi.biWidth, lrc.bottom);
+						iBmpBitBlt(obj->bmp, &lrc2, winScreen.bmpArrowLl);
+
+
+					//////////
+					// Form caption
+					//////
+						SetRect(&lrc2, lrc3.right + 8, lrc3.top, lrc4.right - 8, lrc3.bottom);
+						lhfontOld = (HFONT)SelectObject(obj->bmp->hdc, winJDebi.font->hfont);
+						SetTextColor(obj->bmp->hdc, (COLORREF)RGB(subobj->captionColor.red, subobj->captionColor.grn, subobj->captionColor.blu));
+						SetBkMode(obj->bmp->hdc, TRANSPARENT);
+						DrawTextA(obj->bmp->hdc, subobj->caption.data, subobj->caption.length, &lrc2, DT_VCENTER | DT_END_ELLIPSIS);
+						SelectObject(obj->bmp->hdc, lhfontOld);
+
+
+					//////////
+					// Copy to prior rendered bitmap
+					//////
+						// Make sure our bmpPriorRendered exists
+						obj->bmpPriorRendered = iBmpVerifyCopyIsSameSize(obj->bmpPriorRendered, obj->bmp);
+
+						// Copy to the prior rendered version
+						lnPixelsRendered += iBmpBitBlt(obj->bmpPriorRendered, &lrc, obj->bmp);
+						// Right now, we can use the bmpPriorRendered for a fast copy rather than 
+
+				} else {
+					// Render from its prior rendered version
+					lnPixelsRendered += iBmpBitBlt(obj->bmp, &lrc, obj->bmpPriorRendered);
 				}
 
 
@@ -1101,6 +1147,23 @@
 			// Indicate we're no longer dirty, that we have everything
 			//////
 				obj->isDirty = false;
+
+
+			//////////
+			// Render any siblings
+			//////
+				if (tlRenderSiblings && obj->next)
+				{
+					objSib = obj->next;
+					while (objSib)
+					{
+						// Render this sibling
+						lnPixelsRendered += iObjectRender(objSib, tlRenderChildren, false);
+
+						// Move to next sibling
+						objSib = objSib->next;
+					}
+				}
 		}
 
 		// Indicate how many pixels were drawn

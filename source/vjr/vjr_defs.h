@@ -45,7 +45,6 @@
 //////////
 // objects.cpp
 //////
-	void					iObjectLoad								(SObject* obj, const u8* bmpRawFileData);
 	SObject*				iObjectCreate							(u32 tnType, void* obj_data);
 	SObject*				iObjectCopy								(SObject* template_obj, SObject* next, SObject* parent, bool tlCopyChildren, bool tlCopySubobjects, bool tlCreateSeparateBitmapBuffers);
 	u32						iObjectRender							(SObject* obj, bool tlRenderChildren, bool tlRenderSiblings);
@@ -140,6 +139,8 @@
 	//////
 		SBitmap*			iBmpAllocate							(void);
 		SBitmap*			iBmpCopy								(SBitmap* bmpSrc);
+		SBitmap*			iBmpVerifyCopyIsSameSize				(SBitmap* bmpCopy, SBitmap* bmp);
+		SBitmap*			iBmpRawLoad								(cu8* bmpRawFileData);
 		bool				iBmpValidate							(SBitmap* bmp);
 		s32					iBmpComputeRowWidth						(SBitmap* bmp);
 		void				iBmpCreateBySize						(SBitmap* bmp, u32 width, u32 height, u32 tnBitCount);

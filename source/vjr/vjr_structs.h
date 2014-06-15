@@ -363,6 +363,7 @@ struct SObject
 	// Drawing canvas
 	//////
 		SBitmap*	bmp;												// If exists, canvas for the content
+		SBitmap*	bmpPriorRendered;									// Used for speedups when not isDirty
 		// If not scaled:
 		s32			scrollOffsetX;										// If the bmp->bi coordinates are larger than its display area, the upper-left X coordinate
 		s32			scrollOffsetY;										// ...the upper-left Y coordinate
@@ -383,9 +384,15 @@ struct SObjectForm
 	SObject*	parent;													// parent object this object belongs to
 
 	SFont*		font;													// Default font instance
-	SBgra		backColor;												// Back color (only RGB() channels are used, but RGBA() channels are maintained)
+	SBgra		borderColorNW;											// Northwest back color for border
+	SBgra		borderColorNE;											// Northeast back color for border
+	SBgra		borderColorSW;											// Southwest back color for border
+	SBgra		borderColorSE;											// Southeast back color for border
+	SBgra		backColor;												// Back color for the client content
 	SBgra		foreColor;												// Default text fore color
+	SBgra		captionColor;											// Color of the caption
 
+	SBitmap*	bmpIcon;												// Icon for the form
 	SDatum		caption;												// Caption
 	SDatum		comment;												// Comment
 	SDatum		toolTip;												// What to display if hovering
@@ -403,7 +410,9 @@ struct SObjectSubform
 	SFont*		font;													// Default font instance
 	SBgra		backColor;												// Back color (only RGB() channels are used, but RGBA() channels are maintained)
 	SBgra		foreColor;												// Default text fore color
+	SBgra		captionColor;											// Color of the caption
 
+	SBitmap*	bmpIcon;												// Icon for the subform
 	SDatum		caption;												// Caption
 	SDatum		comment;												// Comment
 	SDatum		toolTip;												// What to display if hovering
@@ -640,7 +649,6 @@ struct SWindow
 {
 	RECT		rc;														// Rectangle of window's physical position
 	SBitmap		bmp;													// Bitmap data for the window
-	SObject		appIcon;												// Icon for the window
 	SFont*		font;													// Default window font (Ubuntu 10)
 
 	// Is the window scaled?
@@ -655,15 +663,18 @@ struct SWindow
 	RECT		rcCaption;												// Caption area
 	RECT		rcClient;												// Client area where content is drawn
 
+	// Icon
+	SBitmap*	bmpWindowIcon;											// Icon for the window
+
 	// For the corner triangles
-	SObject		arrowUl;
-	SObject		arrowUr;
-	SObject		arrowLr;
-	SObject		arrowLl;
+	SBitmap*	bmpArrowUl;												// Icons used for the move arrows
+	SBitmap*	bmpArrowUr;
+	SBitmap*	bmpArrowLr;
+	SBitmap*	bmpArrowLl;
 
 	// For mouse objects
-	SObject		minimize;
-	SObject		maximize;
-	SObject		close;
-	SObject		move;
+	SBitmap*	bmpMove;												// Icons used for move, minimize, maximize, close
+	SBitmap*	bmpMinimize;
+	SBitmap*	bmpMaximize;
+	SBitmap*	bmpClose;
 };

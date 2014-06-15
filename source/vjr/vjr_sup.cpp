@@ -60,25 +60,20 @@ void initialize(HACCEL* hAccelTable)
 	systemStartedMs = iGetLocalTimeMs();
 
 
+	//////////
 	// Load our images
-	iObjectLoad(&winScreen.appIcon,				cgc_appIconBmp);
-	iObjectLoad(&winScreen.minimize,			cgc_minimizeBmp);
-	iObjectLoad(&winScreen.maximize,			cgc_maximizeBmp);
-	iObjectLoad(&winScreen.move,				cgc_moveBmp);
-	iObjectLoad(&winScreen.close,				cgc_closeBmp);
-	iObjectLoad(&winScreen.arrowUl,				cgc_arrowUlBmp);
-	iObjectLoad(&winScreen.arrowUr,				cgc_arrowUrBmp);
-	iObjectLoad(&winScreen.arrowLr,				cgc_arrowLrBmp);
-	iObjectLoad(&winScreen.arrowLl,				cgc_arrowLlBmp);
+	//////
+		winScreen.bmpWindowIcon	= iBmpRawLoad(cgc_appIconBmp);
 
-	iObjectLoad(&winJDebi.appIcon,				cgc_jdebiAppIconBmp);
-	iObjectLoad(&winJDebi.minimize,				cgc_minimizeBmp);
-	iObjectLoad(&winJDebi.maximize,				cgc_maximizeBmp);
-	iObjectLoad(&winJDebi.close,				cgc_closeBmp);
-	iObjectLoad(&winJDebi.arrowUl,				cgc_arrowUlBmp);
-	iObjectLoad(&winJDebi.arrowUr,				cgc_arrowUrBmp);
-	iObjectLoad(&winJDebi.arrowLr,				cgc_arrowLrBmp);
-	iObjectLoad(&winJDebi.arrowLl,				cgc_arrowLlBmp);
+		winScreen.bmpClose		= iBmpRawLoad(cgc_closeBmp);
+		winScreen.bmpMaximize	= iBmpRawLoad(cgc_maximizeBmp);
+		winScreen.bmpMinimize	= iBmpRawLoad(cgc_minimizeBmp);
+		winScreen.bmpMove		= iBmpRawLoad(cgc_moveBmp);
+
+		winScreen.bmpArrowUl	= iBmpRawLoad(cgc_arrowUlBmp);
+		winScreen.bmpArrowUr	= iBmpRawLoad(cgc_arrowUrBmp);
+		winScreen.bmpArrowLl	= iBmpRawLoad(cgc_arrowLlBmp);
+		winScreen.bmpArrowLr	= iBmpRawLoad(cgc_arrowLrBmp);
 
 
 	// Create our message window
@@ -1701,6 +1696,97 @@ void initialize(HACCEL* hAccelTable)
 
 //////////
 //
+// Called to make sure there is a copy, and if not it creates it, and if so
+// then makes sure they are the same size, and if not then deletes the existing
+// one and creates a new copy of the same size.
+//
+// Note:  It does not bitblt into the copy, but only creates a bmp the same size.
+//
+//////
+	SBitmap* iBmpVerifyCopyIsSameSize(SBitmap* bmpCopy, SBitmap* bmp)
+	{
+		SBitmap* bmpNew;
+
+
+		// Make sure we have something that makes sense
+		if (bmp)
+		{
+			if (bmpCopy)
+			{
+				// Make sure it's the same size
+				if (bmp->bi.biWidth == bmpCopy->bi.biWidth && bmp->bi.biHeight == bmpCopy->bi.biHeight)
+					return(bmpCopy);		// They're the same
+
+				// If we get here, we need to delete the copy
+				iBmpDelete(bmpCopy, true);
+			}
+
+			// When we get here, we need to create a new one
+			bmpNew = iBmpAllocate();
+			if (bmpNew)
+				iBmpCreateBySize(bmpNew, bmp->bi.biWidth, bmp->bi.biHeight, bmp->bi.biBitCount);
+
+			// Indicate our success or failure
+			return(bmpNew);
+
+		} else {
+			// Unknown what the size is, so we just leave it the way it is
+			return(bmpCopy);
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to load a bitmap file that was loaded from disk, or simulated loaded from disk.
+//
+//////
+	SBitmap* iBmpRawLoad(cu8* bmpRawFileData)
+	{
+		BITMAPFILEHEADER*	bh;
+		BITMAPINFOHEADER*	bi;
+		SBitmap*			bmp;
+
+
+		//////////
+		// Grab the headers
+		//////
+			bh = (BITMAPFILEHEADER*)bmpRawFileData;
+			bi = (BITMAPINFOHEADER*)(bh + 1);
+
+
+		//////////
+		// Initialize the bitmap, and populate
+		//////
+			bmp = iBmpAllocate();
+			if (bmp)
+			{
+				// Copy to bmp
+				memcpy(&bmp->bh, bh, sizeof(bmp->bh));
+				memcpy(&bmp->bi, bi, sizeof(bmp->bi));
+				bmp->bd = (s8*)(bmpRawFileData + bh->bfOffBits);
+
+				// Compute the row width
+				bmp->rowWidth = iBmpComputeRowWidth(bmp);
+
+				// Convert to 32-bit if need be
+				if (bmp->bi.biBitCount == 24)
+					iConvertBitmapTo32Bits(bmp);
+			}
+
+		//////////
+		// Indicate our success or failure
+		//////
+			return(bmp);
+	}
+
+
+
+
+//////////
+//
 // Performs basic tests on the bitmap to see if it appears to be a valid structure.
 //
 //////
@@ -3222,89 +3308,89 @@ void initialize(HACCEL* hAccelTable)
 //////
 	void iDrawScreen(RECT* trc)
 	{
-		//////////
-		// Icon and controls
-		//////
-			SetRect(&winScreen.appIcon.rc,		30,					1,				30 + winScreen.appIcon.bmp->bi.biWidth,					1 + winScreen.appIcon.bmp->bi.biHeight);
-			SetRect(&winScreen.minimize.rc,		trc->right - 132,	trc->top + 1,	trc->right - 132 + winScreen.minimize.bmp->bi.biWidth,	trc->top + 1 + winScreen.minimize.bmp->bi.biHeight);
-			SetRect(&winScreen.maximize.rc,		trc->right - 104,	trc->top + 1,	trc->right - 104 + winScreen.maximize.bmp->bi.biWidth,	trc->top + 1 + winScreen.maximize.bmp->bi.biHeight);
-			SetRect(&winScreen.close.rc,		trc->right - 77,	trc->top + 1,	trc->right - 77  + winScreen.close.bmp->bi.biWidth,		trc->top + 1 + winScreen.close.bmp->bi.biHeight);
-
-			iBmpBitBltObject(&winScreen.bmp, &winScreen.appIcon,	winScreen.appIcon.bmp);
-			iBmpBitBltObject(&winScreen.bmp, &winScreen.minimize,	winScreen.minimize.bmp);
-			iBmpBitBltObject(&winScreen.bmp, &winScreen.maximize,	winScreen.maximize.bmp);
-			iBmpBitBltObject(&winScreen.bmp, &winScreen.close,		winScreen.close.bmp);
-
-
-		//////////
-		// Corner triangles
-		//////
-			// Set the areas for mouse identifying
-			SetRect(&winScreen.arrowUl.rc, trc->left, trc->top, trc->left + winScreen.arrowUl.bmp->bi.biWidth, trc->top + winScreen.arrowUl.bmp->bi.biHeight);
-			SetRect(&winScreen.arrowUr.rc, trc->right - winScreen.arrowUr.bmp->bi.biWidth, trc->top, trc->right, trc->top + winScreen.arrowUr.bmp->bi.biHeight);
-			SetRect(&winScreen.arrowLr.rc, trc->right - winScreen.arrowLr.bmp->bi.biWidth, trc->bottom - winScreen.arrowLr.bmp->bi.biHeight, trc->right, trc->bottom);
-			SetRect(&winScreen.arrowLl.rc, trc->left, trc->bottom - winScreen.arrowLl.bmp->bi.biHeight, trc->left + winScreen.arrowLl.bmp->bi.biWidth, trc->bottom);
-
-			// Draw them
-			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowUl, winScreen.arrowUl.bmp);
-			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowUr, winScreen.arrowUr.bmp);
-			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowLr, winScreen.arrowLr.bmp);
-			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowLl, winScreen.arrowLl.bmp);
-
-
-		//////////
-		// Draw the app title
-		//////
-			SetRect(&winScreen.rcCaption, winScreen.appIcon.rc.right + 8, winScreen.appIcon.rc.top + 2, winScreen.minimize.rc.left - 8, winScreen.appIcon.rc.bottom);
-			SelectObject(winScreen.bmp.hdc, winScreen.font->hfont);
-			SetTextColor(winScreen.bmp.hdc, (COLORREF)RGB(black.red, black.grn, black.blu));
-//			SetBkColor(winScreen.bmp.hdc, (COLORREF)RGB(light_green.red, light_green.grn, light_green.blu));
-			SetBkMode(winScreen.bmp.hdc, TRANSPARENT);
-			DrawTextA(winScreen.bmp.hdc, cgcScreenTitle, sizeof(cgcScreenTitle) - 1, &winScreen.rcCaption, DT_VCENTER | DT_END_ELLIPSIS);
+// 		//////////
+// 		// Icon and controls
+// 		//////
+// 			SetRect(&winScreen.appIcon.rc,		30,					1,				30 + winScreen.appIcon.bmp->bi.biWidth,					1 + winScreen.appIcon.bmp->bi.biHeight);
+// 			SetRect(&winScreen.minimize.rc,		trc->right - 132,	trc->top + 1,	trc->right - 132 + winScreen.minimize.bmp->bi.biWidth,	trc->top + 1 + winScreen.minimize.bmp->bi.biHeight);
+// 			SetRect(&winScreen.maximize.rc,		trc->right - 104,	trc->top + 1,	trc->right - 104 + winScreen.maximize.bmp->bi.biWidth,	trc->top + 1 + winScreen.maximize.bmp->bi.biHeight);
+// 			SetRect(&winScreen.close.rc,		trc->right - 77,	trc->top + 1,	trc->right - 77  + winScreen.close.bmp->bi.biWidth,		trc->top + 1 + winScreen.close.bmp->bi.biHeight);
+// 
+// 			iBmpBitBltObject(&winScreen.bmp, &winScreen.appIcon,	winScreen.appIcon.bmp);
+// 			iBmpBitBltObject(&winScreen.bmp, &winScreen.minimize,	winScreen.minimize.bmp);
+// 			iBmpBitBltObject(&winScreen.bmp, &winScreen.maximize,	winScreen.maximize.bmp);
+// 			iBmpBitBltObject(&winScreen.bmp, &winScreen.close,		winScreen.close.bmp);
+// 
+// 
+// 		//////////
+// 		// Corner triangles
+// 		//////
+// 			// Set the areas for mouse identifying
+// 			SetRect(&winScreen.arrowUl.rc, trc->left, trc->top, trc->left + winScreen.arrowUl.bmp->bi.biWidth, trc->top + winScreen.arrowUl.bmp->bi.biHeight);
+// 			SetRect(&winScreen.arrowUr.rc, trc->right - winScreen.arrowUr.bmp->bi.biWidth, trc->top, trc->right, trc->top + winScreen.arrowUr.bmp->bi.biHeight);
+// 			SetRect(&winScreen.arrowLr.rc, trc->right - winScreen.arrowLr.bmp->bi.biWidth, trc->bottom - winScreen.arrowLr.bmp->bi.biHeight, trc->right, trc->bottom);
+// 			SetRect(&winScreen.arrowLl.rc, trc->left, trc->bottom - winScreen.arrowLl.bmp->bi.biHeight, trc->left + winScreen.arrowLl.bmp->bi.biWidth, trc->bottom);
+// 
+// 			// Draw them
+// 			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowUl, winScreen.arrowUl.bmp);
+// 			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowUr, winScreen.arrowUr.bmp);
+// 			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowLr, winScreen.arrowLr.bmp);
+// 			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowLl, winScreen.arrowLl.bmp);
+// 
+// 
+// 		//////////
+// 		// Draw the app title
+// 		//////
+// 			SetRect(&winScreen.rcCaption, winScreen.appIcon.rc.right + 8, winScreen.appIcon.rc.top + 2, winScreen.minimize.rc.left - 8, winScreen.appIcon.rc.bottom);
+// 			SelectObject(winScreen.bmp.hdc, winScreen.font->hfont);
+// 			SetTextColor(winScreen.bmp.hdc, (COLORREF)RGB(black.red, black.grn, black.blu));
+// //			SetBkColor(winScreen.bmp.hdc, (COLORREF)RGB(light_green.red, light_green.grn, light_green.blu));
+// 			SetBkMode(winScreen.bmp.hdc, TRANSPARENT);
+// 			DrawTextA(winScreen.bmp.hdc, cgcScreenTitle, sizeof(cgcScreenTitle) - 1, &winScreen.rcCaption, DT_VCENTER | DT_END_ELLIPSIS);
 	}
 
 	void iDrawJDebi(RECT* trc)
 	{
-		//////////
-		// Icon
-		//////
-			SetRect(&winJDebi.appIcon.rc,		30,					1,				30 + winJDebi.appIcon.bmp->bi.biWidth,				1 + winJDebi.appIcon.bmp->bi.biHeight);
-			SetRect(&winJDebi.close.rc,			trc->right - 77,	trc->top + 1,	trc->right - 77  + winJDebi.close.bmp->bi.biWidth,	trc->top + 1 + winJDebi.close.bmp->bi.biHeight);
-			SetRect(&winJDebi.maximize.rc,		trc->right - 104,	trc->top + 1,	trc->right - 104 + winJDebi.maximize.bmp->bi.biWidth,	trc->top + 1 + winJDebi.maximize.bmp->bi.biHeight);
-			SetRect(&winJDebi.minimize.rc,		trc->right - 132,	trc->top + 1,	trc->right - 132 + winJDebi.minimize.bmp->bi.biWidth,	trc->top + 1 + winJDebi.minimize.bmp->bi.biHeight);
-			SetRect(&winJDebi.move.rc,			trc->right - 132,	trc->top + 1,	trc->right - 132 + winJDebi.minimize.bmp->bi.biWidth,	trc->top + 1 + winJDebi.minimize.bmp->bi.biHeight);
-
-			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.appIcon,		winJDebi.appIcon.bmp);
-			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.minimize,		winJDebi.minimize.bmp);
-			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.maximize,		winJDebi.maximize.bmp);
-			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.close,		winJDebi.close.bmp);
-
-
-		//////////
-		// Corner triangles
-		//////
-			// Set the areas for mouse identifying
-			SetRect(&winJDebi.arrowUl.rc, trc->left, trc->top, trc->left + winJDebi.arrowUl.bmp->bi.biWidth, trc->top + winJDebi.arrowUl.bmp->bi.biHeight);
-			SetRect(&winJDebi.arrowUr.rc, trc->right - winJDebi.arrowUr.bmp->bi.biWidth, trc->top, trc->right, trc->top + winJDebi.arrowUr.bmp->bi.biHeight);
-			SetRect(&winJDebi.arrowLr.rc, trc->right - winJDebi.arrowLr.bmp->bi.biWidth, trc->bottom - winJDebi.arrowLr.bmp->bi.biHeight, trc->right, trc->bottom);
-			SetRect(&winJDebi.arrowLl.rc, trc->left, trc->bottom - winJDebi.arrowLl.bmp->bi.biHeight, trc->left + winJDebi.arrowLl.bmp->bi.biWidth, trc->bottom);
-
-			// Draw them
-			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowUl, winJDebi.arrowUl.bmp);
-			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowUr, winJDebi.arrowUr.bmp);
-			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowLr, winJDebi.arrowLr.bmp);
-			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowLl, winJDebi.arrowLl.bmp);
-
-
-		//////////
-		// Draw the app title
-		//////
-			SetRect(&winJDebi.rcCaption, winJDebi.appIcon.rc.right + 8, winJDebi.appIcon.rc.top + 2, winJDebi.rcClient.right - 8, winJDebi.appIcon.rc.bottom);
-			SelectObject(winJDebi.bmp.hdc, winJDebi.font->hfont);
-			SetTextColor(winJDebi.bmp.hdc, (COLORREF)RGB(black.red, black.grn, black.blu));
-//			SetBkColor(winJDebi.bmp.hdc, (COLORREF)RGB(light_green.red, light_green.grn, light_green.blu));
-			SetBkMode(winJDebi.bmp.hdc, TRANSPARENT);
-			DrawTextA(winJDebi.bmp.hdc, cgcJDebiTitle, sizeof(cgcJDebiTitle) - 1, &winJDebi.rcCaption, DT_VCENTER | DT_END_ELLIPSIS);
+// 		//////////
+// 		// Icon
+// 		//////
+// 			SetRect(&winJDebi.appIcon.rc,		30,					1,				30 + winJDebi.appIcon.bmp->bi.biWidth,				1 + winJDebi.appIcon.bmp->bi.biHeight);
+// 			SetRect(&winJDebi.close.rc,			trc->right - 77,	trc->top + 1,	trc->right - 77  + winJDebi.close.bmp->bi.biWidth,	trc->top + 1 + winJDebi.close.bmp->bi.biHeight);
+// 			SetRect(&winJDebi.maximize.rc,		trc->right - 104,	trc->top + 1,	trc->right - 104 + winJDebi.maximize.bmp->bi.biWidth,	trc->top + 1 + winJDebi.maximize.bmp->bi.biHeight);
+// 			SetRect(&winJDebi.minimize.rc,		trc->right - 132,	trc->top + 1,	trc->right - 132 + winJDebi.minimize.bmp->bi.biWidth,	trc->top + 1 + winJDebi.minimize.bmp->bi.biHeight);
+// 			SetRect(&winJDebi.move.rc,			trc->right - 132,	trc->top + 1,	trc->right - 132 + winJDebi.minimize.bmp->bi.biWidth,	trc->top + 1 + winJDebi.minimize.bmp->bi.biHeight);
+// 
+// 			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.appIcon,		winJDebi.appIcon.bmp);
+// 			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.minimize,		winJDebi.minimize.bmp);
+// 			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.maximize,		winJDebi.maximize.bmp);
+// 			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.close,		winJDebi.close.bmp);
+// 
+// 
+// 		//////////
+// 		// Corner triangles
+// 		//////
+// 			// Set the areas for mouse identifying
+// 			SetRect(&winJDebi.arrowUl.rc, trc->left, trc->top, trc->left + winJDebi.arrowUl.bmp->bi.biWidth, trc->top + winJDebi.arrowUl.bmp->bi.biHeight);
+// 			SetRect(&winJDebi.arrowUr.rc, trc->right - winJDebi.arrowUr.bmp->bi.biWidth, trc->top, trc->right, trc->top + winJDebi.arrowUr.bmp->bi.biHeight);
+// 			SetRect(&winJDebi.arrowLr.rc, trc->right - winJDebi.arrowLr.bmp->bi.biWidth, trc->bottom - winJDebi.arrowLr.bmp->bi.biHeight, trc->right, trc->bottom);
+// 			SetRect(&winJDebi.arrowLl.rc, trc->left, trc->bottom - winJDebi.arrowLl.bmp->bi.biHeight, trc->left + winJDebi.arrowLl.bmp->bi.biWidth, trc->bottom);
+// 
+// 			// Draw them
+// 			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowUl, winJDebi.arrowUl.bmp);
+// 			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowUr, winJDebi.arrowUr.bmp);
+// 			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowLr, winJDebi.arrowLr.bmp);
+// 			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowLl, winJDebi.arrowLl.bmp);
+// 
+// 
+// 		//////////
+// 		// Draw the app title
+// 		//////
+// 			SetRect(&winJDebi.rcCaption, winJDebi.appIcon.rc.right + 8, winJDebi.appIcon.rc.top + 2, winJDebi.rcClient.right - 8, winJDebi.appIcon.rc.bottom);
+// 			SelectObject(winJDebi.bmp.hdc, winJDebi.font->hfont);
+// 			SetTextColor(winJDebi.bmp.hdc, (COLORREF)RGB(black.red, black.grn, black.blu));
+// //			SetBkColor(winJDebi.bmp.hdc, (COLORREF)RGB(light_green.red, light_green.grn, light_green.blu));
+// 			SetBkMode(winJDebi.bmp.hdc, TRANSPARENT);
+// 			DrawTextA(winJDebi.bmp.hdc, cgcJDebiTitle, sizeof(cgcJDebiTitle) - 1, &winJDebi.rcCaption, DT_VCENTER | DT_END_ELLIPSIS);
 	}
 
 
@@ -3318,7 +3404,7 @@ void initialize(HACCEL* hAccelTable)
 	void iRedrawScreen(SWindow* win)
 	{
 //		u32		lnI;
-		RECT	lrc;
+//		RECT	lrc;
 
 
 		// White background
@@ -3330,11 +3416,11 @@ void initialize(HACCEL* hAccelTable)
 		// Draw the controls
 		iDrawScreen(&winScreen.rcClient);
 
-		// Draw the border around the client area
-		SetRect(&lrc, 8, winScreen.appIcon.bmp->bi.biHeight + 2, winScreen.rcClient.right - winScreen.appIcon.bmp->bi.biHeight - 2, winScreen.rcClient.bottom - winScreen.appIcon.bmp->bi.biHeight - 2);
-		iBmpFillRect(&winScreen.bmp, &lrc, white, white, white, white, false);
-		InflateRect(&lrc, 1, 1);
-		iBmpFrameRect(&winScreen.bmp, &lrc, black, black, black, black, false);
+// 		// Draw the border around the client area
+// 		SetRect(&lrc, 8, winScreen.appIcon.bmp->bi.biHeight + 2, winScreen.rcClient.right - winScreen.appIcon.bmp->bi.biHeight - 2, winScreen.rcClient.bottom - winScreen.appIcon.bmp->bi.biHeight - 2);
+// 		iBmpFillRect(&winScreen.bmp, &lrc, white, white, white, white, false);
+// 		InflateRect(&lrc, 1, 1);
+// 		iBmpFrameRect(&winScreen.bmp, &lrc, black, black, black, black, false);
 	}
 
 
@@ -3348,7 +3434,7 @@ void initialize(HACCEL* hAccelTable)
 	void iRedrawJDebi(SWindow* win)
 	{
 //		u32		lnI;
-		RECT	lrc;
+//		RECT	lrc;
 
 
 		// White background
@@ -3360,9 +3446,9 @@ void initialize(HACCEL* hAccelTable)
 		// Draw the JDebi inner content
 		iDrawJDebi(&winJDebi.rcClient);
 
-		// Draw the border around the client area
-		SetRect(&lrc, 8, winScreen.appIcon.bmp->bi.biHeight + 2, winJDebi.rcClient.right - winScreen.appIcon.bmp->bi.biHeight - 2, winJDebi.rcClient.bottom - winScreen.appIcon.bmp->bi.biHeight - 1);
-		iBmpFillRect(&winJDebi.bmp, &lrc, white, white, white, white, false);
-		InflateRect(&lrc, 1, 1);
-		iBmpFrameRect(&winJDebi.bmp, &lrc, black, black, black, black, false);
+// 		// Draw the border around the client area
+// 		SetRect(&lrc, 8, winScreen.appIcon.bmp->bi.biHeight + 2, winJDebi.rcClient.right - winScreen.appIcon.bmp->bi.biHeight - 2, winJDebi.rcClient.bottom - winScreen.appIcon.bmp->bi.biHeight - 1);
+// 		iBmpFillRect(&winJDebi.bmp, &lrc, white, white, white, white, false);
+// 		InflateRect(&lrc, 1, 1);
+// 		iBmpFrameRect(&winJDebi.bmp, &lrc, black, black, black, black, false);
 	}
