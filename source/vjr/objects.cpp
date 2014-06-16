@@ -395,6 +395,16 @@
 
 				// Initially populate
 				subobj->parent	= parent;
+
+				// Initialize based on template
+				if (template_subobj)
+				{
+					// Note:  None are currently defined
+
+				} else {
+					// Use VJr defaults
+				}
+
 			}
 
 
@@ -432,23 +442,46 @@
 				memset(subobj, 0, sizeof(SObjectForm));
 
 				// Initially populate
-				subobj->parent				= parent;
-				subobj->font				= iFontDuplicate(template_subobj->font);
-				subobj->borderColorNW.color	= template_subobj->borderColorNW.color;
-				subobj->borderColorNE.color	= template_subobj->borderColorNE.color;
-				subobj->borderColorSW.color	= template_subobj->borderColorSW.color;
-				subobj->borderColorSE.color	= template_subobj->borderColorSE.color;
-				subobj->backColor.color		= template_subobj->backColor.color;
-				subobj->foreColor.color		= template_subobj->foreColor.color;
-				subobj->captionColor.color	= template_subobj->captionColor.color;
+				subobj->parent = parent;
 
-				subobj->bmpIcon				= iBmpCopy(template_subobj->bmpIcon);
-				iDatumDuplicate(&subobj->comment, &template_subobj->comment);
-				iDatumDuplicate(&subobj->caption, &template_subobj->caption);
-				iDatumDuplicate(&subobj->toolTip, &template_subobj->toolTip);
+				// Initialize based on template
+				if (template_subobj)
+				{
+					// Copy from indicated template
+					subobj->font				= iFontDuplicate(template_subobj->font);
+					subobj->borderColorNW.color	= template_subobj->borderColorNW.color;
+					subobj->borderColorNE.color	= template_subobj->borderColorNE.color;
+					subobj->borderColorSW.color	= template_subobj->borderColorSW.color;
+					subobj->borderColorSE.color	= template_subobj->borderColorSE.color;
+					subobj->backColor.color		= template_subobj->backColor.color;
+					subobj->foreColor.color		= template_subobj->foreColor.color;
+					subobj->captionColor.color	= template_subobj->captionColor.color;
 
-				*(u32*)&subobj->activate	= *(u32*)&template_subobj->activate;
-				*(u32*)&subobj->deactivate	= *(u32*)&template_subobj->deactivate;
+					subobj->bmpIcon				= iBmpCopy(template_subobj->bmpIcon);
+					iDatumDuplicate(&subobj->comment, &template_subobj->comment);
+					iDatumDuplicate(&subobj->caption, &template_subobj->caption);
+					iDatumDuplicate(&subobj->toolTip, &template_subobj->toolTip);
+
+					*(u32*)&subobj->activate	= *(u32*)&template_subobj->activate;
+					*(u32*)&subobj->deactivate	= *(u32*)&template_subobj->deactivate;
+
+				} else {
+					// Use VJr defaults
+					subobj->font				= iFontDuplicate(gsFont);
+					subobj->borderColorNW.color	= colorNW.color;
+					subobj->borderColorNE.color	= colorNE.color;
+					subobj->borderColorSW.color	= colorSW.color;
+					subobj->borderColorSE.color	= colorSE.color;
+					subobj->backColor.color		= white.color;
+					subobj->foreColor.color		= black.color;
+					subobj->captionColor.color	= black.color;
+
+					subobj->bmpIcon				= iBmpCopy(bmpVjrIcon);
+					iDatumDuplicate(&subobj->caption, "Form", 4);
+
+					*(u32*)&subobj->activate	= (u32)&iDefaultCallback_activate;
+					*(u32*)&subobj->deactivate	= (u32)&iDefaultCallback_deactivate;
+				}
 			}
 
 
@@ -486,19 +519,47 @@
 				memset(subobj, 0, sizeof(SObjectSubform));
 
 				// Initially populate
-				subobj->parent				= parent;
-				subobj->font				= iFontDuplicate(template_subobj->font);
-				subobj->backColor.color		= template_subobj->backColor.color;
-				subobj->foreColor.color		= template_subobj->foreColor.color;
-				subobj->captionColor.color	= template_subobj->captionColor.color;
+				subobj->parent = parent;
 
-				subobj->bmpIcon				= iBmpCopy(template_subobj->bmpIcon);
-				iDatumDuplicate(&subobj->comment, &template_subobj->comment);
-				iDatumDuplicate(&subobj->caption, &template_subobj->caption);
-				iDatumDuplicate(&subobj->toolTip, &template_subobj->toolTip);
+				// Initialize based on template
+				if (template_subobj)
+				{
+					// Copy from indicated template
+					subobj->font				= iFontDuplicate(template_subobj->font);
+					subobj->borderColorNW.color	= template_subobj->borderColorNW.color;
+					subobj->borderColorNE.color	= template_subobj->borderColorNE.color;
+					subobj->borderColorSW.color	= template_subobj->borderColorSW.color;
+					subobj->borderColorSE.color	= template_subobj->borderColorSE.color;
+					subobj->backColor.color		= template_subobj->backColor.color;
+					subobj->foreColor.color		= template_subobj->foreColor.color;
+					subobj->captionColor.color	= template_subobj->captionColor.color;
 
-				*(u32*)&subobj->activate	= *(u32*)&template_subobj->activate;
-				*(u32*)&subobj->deactivate	= *(u32*)&template_subobj->deactivate;
+					subobj->bmpIcon				= iBmpCopy(template_subobj->bmpIcon);
+					iDatumDuplicate(&subobj->comment, &template_subobj->comment);
+					iDatumDuplicate(&subobj->caption, &template_subobj->caption);
+					iDatumDuplicate(&subobj->toolTip, &template_subobj->toolTip);
+
+					*(u32*)&subobj->activate	= *(u32*)&template_subobj->activate;
+					*(u32*)&subobj->deactivate	= *(u32*)&template_subobj->deactivate;
+
+				} else {
+					// Use VJr defaults
+					// Copy from indicated template
+					subobj->font				= iFontDuplicate(template_subobj->font);
+					subobj->borderColorNW.color	= colorNW.color;
+					subobj->borderColorNE.color	= colorNE.color;
+					subobj->borderColorSW.color	= colorSW.color;
+					subobj->borderColorSE.color	= colorSE.color;
+					subobj->backColor.color		= white.color;
+					subobj->foreColor.color		= black.color;
+					subobj->captionColor.color	= black.color;
+
+					subobj->bmpIcon				= iBmpCopy(bmpVjrIcon);
+					iDatumDuplicate(&subobj->caption, "Subform", 7);
+
+					*(u32*)&subobj->activate	= *(u32*)&iDefaultCallback_activate;
+					*(u32*)&subobj->deactivate	= *(u32*)&iDefaultCallback_deactivate;
+				}
 			}
 
 
@@ -536,21 +597,31 @@
 				memset(subobj, 0, sizeof(SObjectLabel));
 
 				// Initially populate
-				subobj->parent						= parent;
-				subobj->font						= iFontDuplicate(template_subobj->font);
-				subobj->backColor.color				= template_subobj->backColor.color;
-				subobj->foreColor.color				= template_subobj->foreColor.color;
+				subobj->parent = parent;
 
-				subobj->alignment					= template_subobj->alignment;
-				iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
-				iDatumDuplicate(&subobj->caption,	&template_subobj->caption);
-				iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
+				// Initialize based on template
+				if (template_subobj)
+				{
+					// Copy from indicated template
+					subobj->font						= iFontDuplicate(template_subobj->font);
+					subobj->backColor.color				= template_subobj->backColor.color;
+					subobj->foreColor.color				= template_subobj->foreColor.color;
 
-				subobj->isOpaque					= template_subobj->isOpaque;
-				subobj->isBorder					= template_subobj->isBorder;
-				subobj->borderColor.color			= template_subobj->borderColor.color;
-				subobj->disabledBackColor.color		= template_subobj->disabledBackColor.color;
-				subobj->disabledForeColor.color		= template_subobj->disabledForeColor.color;
+					subobj->alignment					= template_subobj->alignment;
+					iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
+					iDatumDuplicate(&subobj->caption,	&template_subobj->caption);
+					iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
+
+					subobj->isOpaque					= template_subobj->isOpaque;
+					subobj->isBorder					= template_subobj->isBorder;
+					subobj->borderColor.color			= template_subobj->borderColor.color;
+					subobj->disabledBackColor.color		= template_subobj->disabledBackColor.color;
+					subobj->disabledForeColor.color		= template_subobj->disabledForeColor.color;
+
+				} else {
+					// Use VJr defaults
+// TODO:  working here
+				}
 			}
 
 
@@ -588,34 +659,43 @@
 				memset(subobj, 0, sizeof(SObjectTextbox));
 
 				// Initially populate
-				subobj->parent						= parent;
-				subobj->font						= iFontDuplicate(template_subobj->font);
-				subobj->backColor.color				= template_subobj->backColor.color;
-				subobj->foreColor.color				= template_subobj->foreColor.color;
+				subobj->parent = parent;
 
-				subobj->style						= template_subobj->style;
-				subobj->alignment					= template_subobj->alignment;
-				iDatumDuplicate(&subobj->value,		&template_subobj->value);
-				subobj->valueLength					= template_subobj->valueLength;
-				iDatumDuplicate(&subobj->picture,	&template_subobj->picture);
-				iDatumDuplicate(&subobj->mask,		&template_subobj->mask);
-				iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
-				iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
+				// Initialize based on template
+				if (template_subobj)
+				{
+					// Copy from indicated template
+					subobj->font						= iFontDuplicate(template_subobj->font);
+					subobj->backColor.color				= template_subobj->backColor.color;
+					subobj->foreColor.color				= template_subobj->foreColor.color;
 
-				subobj->cursor						= template_subobj->cursor;
-				subobj->selectStart					= template_subobj->selectStart;
-				subobj->selectEnd					= template_subobj->selectEnd;
+					subobj->style						= template_subobj->style;
+					subobj->alignment					= template_subobj->alignment;
+					iDatumDuplicate(&subobj->value,		&template_subobj->value);
+					subobj->valueLength					= template_subobj->valueLength;
+					iDatumDuplicate(&subobj->picture,	&template_subobj->picture);
+					iDatumDuplicate(&subobj->mask,		&template_subobj->mask);
+					iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
+					iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
 
-				subobj->isOpaque					= template_subobj->isOpaque;
-				subobj->isBorder					= template_subobj->isBorder;
-				subobj->borderColor.color			= template_subobj->borderColor.color;
-				subobj->selectedBackColor.color		= template_subobj->selectedBackColor.color;
-				subobj->selectedForeColor.color		= template_subobj->selectedForeColor.color;
-				subobj->disabledBackColor.color		= template_subobj->disabledBackColor.color;
-				subobj->disabledForeColor.color		= template_subobj->disabledForeColor.color;
+					subobj->cursor						= template_subobj->cursor;
+					subobj->selectStart					= template_subobj->selectStart;
+					subobj->selectEnd					= template_subobj->selectEnd;
 
-				*(u32*)&subobj->interactiveChange	= *(u32*)&template_subobj->interactiveChange;
-				*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
+					subobj->isOpaque					= template_subobj->isOpaque;
+					subobj->isBorder					= template_subobj->isBorder;
+					subobj->borderColor.color			= template_subobj->borderColor.color;
+					subobj->selectedBackColor.color		= template_subobj->selectedBackColor.color;
+					subobj->selectedForeColor.color		= template_subobj->selectedForeColor.color;
+					subobj->disabledBackColor.color		= template_subobj->disabledBackColor.color;
+					subobj->disabledForeColor.color		= template_subobj->disabledForeColor.color;
+
+					*(u32*)&subobj->interactiveChange	= *(u32*)&template_subobj->interactiveChange;
+					*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
+
+				} else {
+					// Use VJr defaults
+				}
 			}
 
 
@@ -653,21 +733,30 @@
 				memset(subobj, 0, sizeof(SObjectButton));
 
 				// Initially populate
-				subobj->parent						= parent;
-				subobj->font						= iFontDuplicate(template_subobj->font);
-				subobj->backColor.color				= template_subobj->backColor.color;
-				subobj->foreColor.color				= template_subobj->foreColor.color;
+				subobj->parent = parent;
 
-				subobj->style						= template_subobj->style;
-				subobj->alignment					= template_subobj->alignment;
-				iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
-				iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
+				// Initialize based on template
+				if (template_subobj)
+				{
+					// Copy from indicated template
+					subobj->font						= iFontDuplicate(template_subobj->font);
+					subobj->backColor.color				= template_subobj->backColor.color;
+					subobj->foreColor.color				= template_subobj->foreColor.color;
 
-				subobj->disabledBackColor.color		= template_subobj->disabledBackColor.color;
-				subobj->disabledForeColor.color		= template_subobj->disabledForeColor.color;
+					subobj->style						= template_subobj->style;
+					subobj->alignment					= template_subobj->alignment;
+					iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
+					iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
 
-				*(u32*)&subobj->interactiveChange	= *(u32*)&template_subobj->interactiveChange;
-				*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
+					subobj->disabledBackColor.color		= template_subobj->disabledBackColor.color;
+					subobj->disabledForeColor.color		= template_subobj->disabledForeColor.color;
+
+					*(u32*)&subobj->interactiveChange	= *(u32*)&template_subobj->interactiveChange;
+					*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
+
+				} else {
+					// Use VJr defaults
+				}
 			}
 
 
@@ -705,31 +794,40 @@
 				memset(subobj, 0, sizeof(SObjectEditbox));
 
 				// Initially populate
-				subobj->parent						= parent;
-				subobj->font						= iFontDuplicate(template_subobj->font);
-				subobj->backColor.color				= template_subobj->backColor.color;
-				subobj->foreColor.color				= template_subobj->foreColor.color;
+				subobj->parent = parent;
 
-				subobj->style						= template_subobj->style;
-				subobj->alignment					= template_subobj->alignment;
-				iEditChainManagerDuplicate(&subobj->value, template_subobj->value);
-				iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
-				iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
+				// Initialize based on template
+				if (template_subobj)
+				{
+					// Copy from indicated template
+					subobj->font						= iFontDuplicate(template_subobj->font);
+					subobj->backColor.color				= template_subobj->backColor.color;
+					subobj->foreColor.color				= template_subobj->foreColor.color;
 
-				subobj->cursor						= template_subobj->cursor;
-				subobj->selectStart					= template_subobj->selectStart;
-				subobj->selectEnd					= template_subobj->selectEnd;
+					subobj->style						= template_subobj->style;
+					subobj->alignment					= template_subobj->alignment;
+					iEditChainManagerDuplicate(&subobj->value, template_subobj->value);
+					iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
+					iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
 
-				subobj->isOpaque					= template_subobj->isOpaque;
-				subobj->isBorder					= template_subobj->isBorder;
-				subobj->borderColor.color			= template_subobj->borderColor.color;
-				subobj->selectedBackColor.color		= template_subobj->selectedBackColor.color;
-				subobj->selectedForeColor.color		= template_subobj->selectedForeColor.color;
-				subobj->disabledBackColor.color		= template_subobj->disabledBackColor.color;
-				subobj->disabledForeColor.color		= template_subobj->disabledForeColor.color;
+					subobj->cursor						= template_subobj->cursor;
+					subobj->selectStart					= template_subobj->selectStart;
+					subobj->selectEnd					= template_subobj->selectEnd;
 
-				*(u32*)&subobj->interactiveChange	= *(u32*)&template_subobj->interactiveChange;
-				*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
+					subobj->isOpaque					= template_subobj->isOpaque;
+					subobj->isBorder					= template_subobj->isBorder;
+					subobj->borderColor.color			= template_subobj->borderColor.color;
+					subobj->selectedBackColor.color		= template_subobj->selectedBackColor.color;
+					subobj->selectedForeColor.color		= template_subobj->selectedForeColor.color;
+					subobj->disabledBackColor.color		= template_subobj->disabledBackColor.color;
+					subobj->disabledForeColor.color		= template_subobj->disabledForeColor.color;
+
+					*(u32*)&subobj->interactiveChange	= *(u32*)&template_subobj->interactiveChange;
+					*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
+
+				} else {
+					// Use VJr defaults
+				}
 			}
 
 
@@ -767,14 +865,23 @@
 				memset(subobj, 0, sizeof(SObjectImage));
 
 				// Initially populate
-				subobj->parent						= parent;
-				subobj->style						= template_subobj->style;
-				iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
-				iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
-				subobj->image						= iBmpCopy(template_subobj->image);
-				subobj->imageOver					= iBmpCopy(template_subobj->imageOver);
+				subobj->parent = parent;
 
-				*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
+				// Initialize based on template
+				if (template_subobj)
+				{
+					// Copy from indicated template
+					subobj->style						= template_subobj->style;
+					iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
+					iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
+					subobj->image						= iBmpCopy(template_subobj->image);
+					subobj->imageOver					= iBmpCopy(template_subobj->imageOver);
+
+					*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
+
+				} else {
+					// Use VJr defaults
+				}
 			}
 
 
@@ -812,26 +919,35 @@
 				memset(subobj, 0, sizeof(SObjectCheckbox));
 
 				// Initially populate
-				subobj->parent						= parent;
-				subobj->font						= iFontDuplicate(template_subobj->font);
-				subobj->backColor.color				= template_subobj->backColor.color;
-				subobj->foreColor.color				= template_subobj->foreColor.color;
+				subobj->parent = parent;
 
-				subobj->alignment					= template_subobj->alignment;
-				subobj->style						= template_subobj->style;
-				subobj->value						= template_subobj->value;
-				iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
-				iDatumDuplicate(&subobj->caption,	&template_subobj->caption);
-				iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
+				// Initialize based on template
+				if (template_subobj)
+				{
+					// Copy from indicated template
+					subobj->font						= iFontDuplicate(template_subobj->font);
+					subobj->backColor.color				= template_subobj->backColor.color;
+					subobj->foreColor.color				= template_subobj->foreColor.color;
 
-				subobj->isOpaque					= template_subobj->isOpaque;
-				subobj->isBorder					= template_subobj->isBorder;
-				subobj->borderColor.color			= template_subobj->borderColor.color;
-				subobj->disabledBackColor.color		= template_subobj->disabledBackColor.color;
-				subobj->disabledForeColor.color		= template_subobj->disabledForeColor.color;
+					subobj->alignment					= template_subobj->alignment;
+					subobj->style						= template_subobj->style;
+					subobj->value						= template_subobj->value;
+					iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
+					iDatumDuplicate(&subobj->caption,	&template_subobj->caption);
+					iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
 
-				*(u32*)&subobj->interactiveChange	= *(u32*)&template_subobj->interactiveChange;
-				*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
+					subobj->isOpaque					= template_subobj->isOpaque;
+					subobj->isBorder					= template_subobj->isBorder;
+					subobj->borderColor.color			= template_subobj->borderColor.color;
+					subobj->disabledBackColor.color		= template_subobj->disabledBackColor.color;
+					subobj->disabledForeColor.color		= template_subobj->disabledForeColor.color;
+
+					*(u32*)&subobj->interactiveChange	= *(u32*)&template_subobj->interactiveChange;
+					*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
+
+				} else {
+					// Use VJr defaults
+				}
 			}
 
 
@@ -869,26 +985,35 @@
 				memset(subobj, 0, sizeof(SObjectOption));
 
 				// Initially populate
-				subobj->parent						= parent;
-				subobj->backColor.color				= template_subobj->backColor.color;
-				subobj->foreColor.color				= template_subobj->foreColor.color;
+				subobj->parent = parent;
 
-				subobj->alignment					= template_subobj->alignment;
-				subobj->style						= template_subobj->style;
-				iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
-				iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
+				// Initialize based on template
+				if (template_subobj)
+				{
+					// Copy from indicated template
+					subobj->backColor.color				= template_subobj->backColor.color;
+					subobj->foreColor.color				= template_subobj->foreColor.color;
 
-				subobj->optionCount					= template_subobj->optionCount;		// How many options are there?
-				subobj->multiSelect					= template_subobj->multiSelect;		// Can multiple items be selected?
+					subobj->alignment					= template_subobj->alignment;
+					subobj->style						= template_subobj->style;
+					iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
+					iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
 
-				// Copy the label objects
-				iObjectDuplicateChain(&subobj->firstOption, template_subobj->firstOption);	// Each option has its own set of properties, and each is of _OBJECT_TYPE_LABEL
+					subobj->optionCount					= template_subobj->optionCount;		// How many options are there?
+					subobj->multiSelect					= template_subobj->multiSelect;		// Can multiple items be selected?
 
-				// Copy the events
-				*(u32*)&subobj->onSelect			= *(u32*)&template_subobj->onSelect;
-				*(u32*)&subobj->onDeselect			= *(u32*)&template_subobj->onDeselect;
-				*(u32*)&subobj->interactiveChange	= *(u32*)&template_subobj->interactiveChange;
-				*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
+					// Copy the label objects
+					iObjectDuplicateChain(&subobj->firstOption, template_subobj->firstOption);	// Each option has its own set of properties, and each is of _OBJECT_TYPE_LABEL
+
+					// Copy the events
+					*(u32*)&subobj->onSelect			= *(u32*)&template_subobj->onSelect;
+					*(u32*)&subobj->onDeselect			= *(u32*)&template_subobj->onDeselect;
+					*(u32*)&subobj->interactiveChange	= *(u32*)&template_subobj->interactiveChange;
+					*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
+
+				} else {
+					// Use VJr defaults
+				}
 			}
 
 
@@ -926,28 +1051,37 @@
 				memset(subobj, 0, sizeof(SObjectRadio));
 
 				// Initially populate
-				subobj->parent						= parent;
-				subobj->font						= iFontDuplicate(template_subobj->font);
-				subobj->backColor.color				= template_subobj->backColor.color;
-				subobj->foreColor.color				= template_subobj->foreColor.color;
+				subobj->parent = parent;
 
-				subobj->alignment					= template_subobj->alignment;
-				subobj->style						= template_subobj->style;
-				subobj->value						= template_subobj->value;
-				subobj->minValue					= template_subobj->minValue;
-				subobj->maxValue					= template_subobj->maxValue;
-				subobj->roundTo						= template_subobj->roundTo;
-				iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
-				iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
+				// Initialize based on template
+				if (template_subobj)
+				{
+					// Copy from indicated template
+					subobj->font						= iFontDuplicate(template_subobj->font);
+					subobj->backColor.color				= template_subobj->backColor.color;
+					subobj->foreColor.color				= template_subobj->foreColor.color;
 
-				subobj->isOpaque					= template_subobj->isOpaque;
-				subobj->isBorder					= template_subobj->isBorder;
-				subobj->borderColor.color			= template_subobj->borderColor.color;
-				subobj->disabledBackColor.color		= template_subobj->disabledBackColor.color;
-				subobj->disabledForeColor.color		= template_subobj->disabledForeColor.color;
+					subobj->alignment					= template_subobj->alignment;
+					subobj->style						= template_subobj->style;
+					subobj->value						= template_subobj->value;
+					subobj->minValue					= template_subobj->minValue;
+					subobj->maxValue					= template_subobj->maxValue;
+					subobj->roundTo						= template_subobj->roundTo;
+					iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
+					iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
 
-				*(u32*)&subobj->interactiveChange	= *(u32*)&template_subobj->interactiveChange;
-				*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
+					subobj->isOpaque					= template_subobj->isOpaque;
+					subobj->isBorder					= template_subobj->isBorder;
+					subobj->borderColor.color			= template_subobj->borderColor.color;
+					subobj->disabledBackColor.color		= template_subobj->disabledBackColor.color;
+					subobj->disabledForeColor.color		= template_subobj->disabledForeColor.color;
+
+					*(u32*)&subobj->interactiveChange	= *(u32*)&template_subobj->interactiveChange;
+					*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
+
+				} else {
+					// Use VJr defaults
+				}
 			}
 
 
@@ -955,6 +1089,138 @@
 		// Indicate our success or failure
 		//////
 			return(subobj);
+	}
+
+
+
+
+//////////
+//
+// Called to delete the empty.
+//
+//////
+	void iSubobject_deleteEmpty(SObjectEmpty* subobj_empty)
+	{
+	}
+
+
+
+
+//////////
+//
+// Called to delete the form.
+//
+//////
+	void iSubobject_deleteForm(SObjectForm* subobj_form)
+	{
+	}
+
+
+
+
+//////////
+//
+// Called to delete the subform.
+//
+//////
+	void iSubobject_deleteSubform(SObjectSubform* subobj_subform)
+	{
+	}
+
+
+
+
+//////////
+//
+// Called to delete the label.
+//
+//////
+	void iSubobject_deleteLabel(SObjectLabel* subobj_label)
+	{
+	}
+
+
+
+
+//////////
+//
+// Called to delete the textbox.
+//
+//////
+	void iSubobject_deleteTextbox(SObjectTextbox* subobj_textbox)
+	{
+	}
+
+
+
+
+//////////
+//
+// Called to delete the button.
+//
+//////
+	void iSubobject_deleteButton(SObjectButton* subobj_button)
+	{
+	}
+
+
+
+
+//////////
+//
+// Called to delete the editbox.
+//
+//////
+	void iSubobject_deleteEditbox(SObjectEditbox* subobj_editbox)
+	{
+	}
+
+
+
+
+//////////
+//
+// Called to delete the image.
+//
+//////
+	void iSubobject_deleteImage(SObjectImage* subobj_image)
+	{
+	}
+
+
+
+
+//////////
+//
+// Called to delete the checkbox.
+//
+//////
+	void iSubobject_deleteCheckbox(SObjectCheckbox* subobj_checkbox)
+	{
+	}
+
+
+
+
+//////////
+//
+// Called to delete the option.
+//
+//////
+	void iSubobject_deleteOption(SObjectOption* subobj_option)
+	{
+	}
+
+
+
+
+//////////
+//
+// Called to delete the radio.
+//
+//////
+	void iSubobject_deleteRadio(SObjectRadio* subobj_radio)
+	{
 	}
 
 
@@ -1071,7 +1337,7 @@
 						iBmpFrameRect(obj->bmp, &lrc, black, black, black, black, false);
 
 						// Draw the client area
-						SetRect(&lrc2, 8, winScreen.bmpWindowIcon->bi.biHeight + 2, lrc.right - winScreen.bmpWindowIcon->bi.biHeight - 2, lrc.bottom - winScreen.bmpWindowIcon->bi.biHeight - 1);
+						SetRect(&lrc2, 8, subobj->bmpIcon->bi.biHeight + 2, lrc.right - subobj->bmpIcon->bi.biHeight - 2, lrc.bottom - subobj->bmpIcon->bi.biHeight - 1);
 						iBmpFillRect(&winJDebi.bmp, &lrc2, white, white, white, white, false);
 
 						// Put a border around the client area
@@ -1083,37 +1349,37 @@
 					// Form icon and standard controls
 					//////
 						// Form icon
-						SetRect(&lrc3,	winScreen.bmpArrowUl->bi.biWidth + 8, 1, winScreen.bmpArrowUl->bi.biWidth + 8 + subobj->bmpIcon->bi.biWidth, 1 + subobj->bmpIcon->bi.biHeight);
+						SetRect(&lrc3,	bmpArrowUl->bi.biWidth + 8, 1, bmpArrowUl->bi.biWidth + 8 + subobj->bmpIcon->bi.biWidth, 1 + subobj->bmpIcon->bi.biHeight);
 						iBmpBitBlt(obj->bmp, &lrc3, subobj->bmpIcon);
 						// Close
-						SetRect(&lrc2,	lrc.right - winScreen.bmpArrowUr->bi.biWidth - 8 - winScreen.bmpClose->bi.biWidth, lrc.top + 1, lrc.right - winScreen.bmpArrowUr->bi.biWidth - 8, lrc.bottom - 1);
-						iBmpBitBlt(obj->bmp, &lrc2, winScreen.bmpClose);
+						SetRect(&lrc2,	lrc.right - bmpArrowUr->bi.biWidth - 8 - bmpClose->bi.biWidth, lrc.top + 1, lrc.right - bmpArrowUr->bi.biWidth - 8, lrc.bottom - 1);
+						iBmpBitBlt(obj->bmp, &lrc2, bmpClose);
 						// Maximize
-						SetRect(&lrc2,	lrc2.left - winScreen.bmpMaximize->bi.biWidth - 1, lrc2.top, lrc2.left - 1, lrc2.bottom);
-						iBmpBitBlt(obj->bmp, &lrc2, winScreen.bmpMaximize);
+						SetRect(&lrc2,	lrc2.left - bmpMaximize->bi.biWidth - 1, lrc2.top, lrc2.left - 1, lrc2.bottom);
+						iBmpBitBlt(obj->bmp, &lrc2, bmpMaximize);
 						// Minimize
-						SetRect(&lrc2,	lrc2.left - winScreen.bmpMinimize->bi.biWidth - 1, lrc2.top, lrc2.left - 1, lrc2.bottom);
-						iBmpBitBlt(obj->bmp, &lrc2, winScreen.bmpMinimize);
+						SetRect(&lrc2,	lrc2.left - bmpMinimize->bi.biWidth - 1, lrc2.top, lrc2.left - 1, lrc2.bottom);
+						iBmpBitBlt(obj->bmp, &lrc2, bmpMinimize);
 						// Move
-						SetRect(&lrc2,	lrc2.left - winScreen.bmpMove->bi.biWidth - 1, lrc2.top, lrc2.left - 1, lrc2.bottom);
-						iBmpBitBlt(obj->bmp, &lrc4, winScreen.bmpMove);
+						SetRect(&lrc2,	lrc2.left - bmpMove->bi.biWidth - 1, lrc2.top, lrc2.left - 1, lrc2.bottom);
+						iBmpBitBlt(obj->bmp, &lrc4, bmpMove);
 
 
 					//////////
 					// Resizing arrows
 					//////
 						// Upper left arrow
-						SetRect(&lrc2, lrc.left, lrc.top, lrc.left + winScreen.bmpArrowUl->bi.biWidth, lrc.top + winScreen.bmpArrowUl->bi.biHeight);
-						iBmpBitBlt(obj->bmp, &lrc2, winScreen.bmpArrowUl);
+						SetRect(&lrc2, lrc.left, lrc.top, lrc.left + bmpArrowUl->bi.biWidth, lrc.top + bmpArrowUl->bi.biHeight);
+						iBmpBitBlt(obj->bmp, &lrc2, bmpArrowUl);
 						// Upper right arrow
-						SetRect(&lrc2, lrc.right - winScreen.bmpArrowUr->bi.biWidth, lrc.top, lrc.right, lrc.top + winScreen.bmpArrowUr->bi.biHeight);
-						iBmpBitBlt(obj->bmp, &lrc2, winScreen.bmpArrowUr);
+						SetRect(&lrc2, lrc.right - bmpArrowUr->bi.biWidth, lrc.top, lrc.right, lrc.top + bmpArrowUr->bi.biHeight);
+						iBmpBitBlt(obj->bmp, &lrc2, bmpArrowUr);
 						// Lower left arrow
-						SetRect(&lrc2, lrc.right - winScreen.bmpArrowLr->bi.biWidth, lrc.bottom - winScreen.bmpArrowLr->bi.biHeight, lrc.right, lrc.bottom);
-						iBmpBitBlt(obj->bmp, &lrc2, winScreen.bmpArrowLr);
+						SetRect(&lrc2, lrc.right - bmpArrowLr->bi.biWidth, lrc.bottom - bmpArrowLr->bi.biHeight, lrc.right, lrc.bottom);
+						iBmpBitBlt(obj->bmp, &lrc2, bmpArrowLr);
 						// Lower right arrow
-						SetRect(&lrc2, lrc.left, lrc.bottom - winScreen.bmpArrowLl->bi.biHeight, lrc.left + winScreen.bmpArrowLl->bi.biWidth, lrc.bottom);
-						iBmpBitBlt(obj->bmp, &lrc2, winScreen.bmpArrowLl);
+						SetRect(&lrc2, lrc.left, lrc.bottom - bmpArrowLl->bi.biHeight, lrc.left + bmpArrowLl->bi.biWidth, lrc.bottom);
+						iBmpBitBlt(obj->bmp, &lrc2, bmpArrowLl);
 
 
 					//////////

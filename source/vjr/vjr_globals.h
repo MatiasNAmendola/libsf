@@ -66,6 +66,40 @@
 	const SBgra			colorSW								= { rgba(255, 255, 255, 255) };
 	const SBgra			colorSE								= { rgba(192, 212, 255, 255) };
 
+	// For the corner triangles
+	SBitmap*			bmpArrowUl							= NULL;									// Icons used for the move arrows
+	SBitmap*			bmpArrowUr							= NULL;
+	SBitmap*			bmpArrowLr							= NULL;
+	SBitmap*			bmpArrowLl							= NULL;
+
+	// App icons
+	SBitmap*			bmpVjrIcon							= NULL;
+	SBitmap*			bmpJDebiIcon						= NULL;
+
+	// For mouse objects
+	SBitmap*			bmpMove								= NULL;									// Icons used for move, minimize, maximize, close
+	SBitmap*			bmpMinimize							= NULL;
+	SBitmap*			bmpMaximize							= NULL;
+	SBitmap*			bmpClose							= NULL;
+
+	// Default screens used by VJr
+	SObject*			gobj_screen							= NULL;
+	SObject*			gobj_jdebi							= NULL;
+
+	// Default class structures
+	SObject*			gobj_defaultEmpty					= NULL;
+	SObject*			gobj_defaultForm					= NULL;
+	SObject*			gobj_defaultSubform					= NULL;
+	SObject*			gobj_defaultLabel					= NULL;
+	SObject*			gobj_defaultTextbox					= NULL;
+	SObject*			gobj_defaultButton					= NULL;
+	SObject*			gobj_defaultImage					= NULL;
+	SObject*			gobj_defaultCheckbox				= NULL;
+	SObject*			gobj_defaultOption					= NULL;
+	SObject*			gobj_defaultRadio					= NULL;
+
+	// General defaults
+	SFont*				gsFont								= NULL;									// Default font, Ubuntu 10 pt
 
 	// Mouse options
 	bool				glMoving							= false;								// When the user clicks and drags the title bar area, the window will move

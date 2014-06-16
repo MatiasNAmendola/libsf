@@ -44,48 +44,47 @@ void initialize(HACCEL* hAccelTable)
 	// Keyboard shortcuts
 	*hAccelTable = LoadAccelerators(ghInstance, MAKEINTRESOURCE(IDC_VJR));
 
-
-
 	// Taskbar interface
 	hRes = OleInitialize(NULL);
 	CoCreateInstance(CLSID_TaskbarList, 0, CLSCTX_INPROC_SERVER, IID_ITaskbarList, (void**)&giTaskbar);
-
 
 	// Initialize our builder
 	builder_createAndInitialize(&gWindows,	-1);
 	builder_createAndInitialize(&gFonts,	-1);
 
-
 	// Get startup time
 	systemStartedMs = iGetLocalTimeMs();
 
+	// Default font
+	gsFont = iFontCreate(cgcUbuntu, 10, FW_NORMAL, 0, 0);
+
 
 	//////////
-	// Load our images
+	// Load our icons and images
 	//////
-		winScreen.bmpWindowIcon	= iBmpRawLoad(cgc_appIconBmp);
+		bmpVjrIcon	= iBmpRawLoad(cgc_appIconBmp);
+		bmpVjrIcon	= iBmpRawLoad(cgc_jdebiAppIconBmp);
 
-		winScreen.bmpClose		= iBmpRawLoad(cgc_closeBmp);
-		winScreen.bmpMaximize	= iBmpRawLoad(cgc_maximizeBmp);
-		winScreen.bmpMinimize	= iBmpRawLoad(cgc_minimizeBmp);
-		winScreen.bmpMove		= iBmpRawLoad(cgc_moveBmp);
+		bmpClose	= iBmpRawLoad(cgc_closeBmp);
+		bmpMaximize	= iBmpRawLoad(cgc_maximizeBmp);
+		bmpMinimize	= iBmpRawLoad(cgc_minimizeBmp);
+		bmpMove		= iBmpRawLoad(cgc_moveBmp);
 
-		winScreen.bmpArrowUl	= iBmpRawLoad(cgc_arrowUlBmp);
-		winScreen.bmpArrowUr	= iBmpRawLoad(cgc_arrowUrBmp);
-		winScreen.bmpArrowLl	= iBmpRawLoad(cgc_arrowLlBmp);
-		winScreen.bmpArrowLr	= iBmpRawLoad(cgc_arrowLrBmp);
+		bmpArrowUl	= iBmpRawLoad(cgc_arrowUlBmp);
+		bmpArrowUr	= iBmpRawLoad(cgc_arrowUrBmp);
+		bmpArrowLl	= iBmpRawLoad(cgc_arrowLlBmp);
+		bmpArrowLr	= iBmpRawLoad(cgc_arrowLrBmp);
 
 
 	// Create our message window
 	iCreateMessageWindow();
 
+	// Create our default objects
+	iCreateDefaultObjects();
 
 	// Create our main screen window
-	iCreateScreenWindow();
-
-
-	// Create our JDebi window
-	iCreateJDebiWindow();
+	iCreateScreenForm();
+	iCreateJDebiForm();
 }
 
 
@@ -109,7 +108,7 @@ void initialize(HACCEL* hAccelTable)
 			{
 				// We need to convert it
 				// Create the 32-bit version
-				iPopulateAndCreateBitmap(&bmp32, bmp->bi.biWidth, bmp->bi.biHeight);
+				iBmpCreateBySize(&bmp32, bmp->bi.biWidth, bmp->bi.biHeight, 32);
 
 				// Copy it
 				iCopyBitmap24ToBitmap32(&bmp32, bmp);
@@ -180,7 +179,7 @@ void initialize(HACCEL* hAccelTable)
 
 
 		//////////
-		// Register the class if need be
+		// Register the classes if need be
 		//////
 			while (1)
 			{
@@ -200,6 +199,28 @@ void initialize(HACCEL* hAccelTable)
 					if (!atom)
 						break;
 				}
+
+				// Register the general window class if need be
+				if (!GetClassInfoExA(ghInstance, cgcWindowClass, &classa))
+				{
+					// Initialize
+					memset(&classa, 0, sizeof(classa));
+
+					// Populate
+					classa.cbSize				= sizeof(WNDCLASSEXA);
+					classa.hInstance			= ghInstance;
+					classa.style				= CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
+					classa.lpszClassName		= cgcWindowClass;
+					classa.hIcon				= LoadIcon(ghInstance, MAKEINTRESOURCE(IDI_VJR));
+					classa.hCursor				= LoadCursor(NULL, IDC_ARROW);
+					classa.lpfnWndProc			= &iWndProc_screenWindow;
+
+					// Register
+					atom = RegisterClassExA(&classa);
+					if (!atom)
+						break;
+				}
+
 
 
 			//////////
@@ -275,98 +296,122 @@ void initialize(HACCEL* hAccelTable)
 
 //////////
 //
+// Loads the default settings for each object, populating them in turn.
+//
+//////
+	void iCreateDefaultObjects(void)
+	{
+		SObjectEmpty*		subobj_empty;
+		SObjectForm*		subobj_form;
+		SObjectSubform*		subobj_subform;
+		SObjectLabel*		subobj_label;
+		SObjectTextbox*		subobj_textbox;
+		SObjectButton*		subobj_button;
+		SObjectEditbox*		subobj_editbox;
+		SObjectImage*		subobj_image;
+		SObjectCheckbox*	subobj_checkbox;
+		SObjectOption*		subobj_option;
+		SObjectRadio*		subobj_radio;
+
+
+		//////////
+		// Create each initial subobj
+		//////
+			subobj_empty			= iSubobject_createEmpty(NULL, NULL);
+			subobj_form				= iSubobject_createForm(NULL, NULL);
+			subobj_subform			= iSubobject_createSubform(NULL, NULL);
+			subobj_label			= iSubobject_createLabel(NULL, NULL);
+			subobj_textbox			= iSubobject_createTextbox(NULL, NULL);
+			subobj_button			= iSubobject_createButton(NULL, NULL);
+			subobj_editbox			= iSubobject_createEditbox(NULL, NULL);
+			subobj_image			= iSubobject_createImage(NULL, NULL);
+			subobj_checkbox			= iSubobject_createCheckbox(NULL, NULL);
+			subobj_option			= iSubobject_createOption(NULL, NULL);
+			subobj_radio			= iSubobject_createRadio(NULL, NULL);
+
+
+		//////////
+		// Create each default object
+		//////
+			gobj_defaultEmpty		= iObjectCreate(_OBJECT_TYPE_EMPTY,		(void*)subobj_empty);
+			gobj_defaultForm		= iObjectCreate(_OBJECT_TYPE_FORM,		(void*)subobj_form);
+			gobj_defaultSubform		= iObjectCreate(_OBJECT_TYPE_SUBFORM,	(void*)subobj_subform);
+			gobj_defaultLabel		= iObjectCreate(_OBJECT_TYPE_LABEL,		(void*)subobj_label);
+			gobj_defaultTextbox		= iObjectCreate(_OBJECT_TYPE_TEXTBOX,	(void*)subobj_textbox);
+			gobj_defaultButton		= iObjectCreate(_OBJECT_TYPE_BUTTON,	(void*)subobj_button);
+			gobj_defaultImage		= iObjectCreate(_OBJECT_TYPE_IMAGE,		(void*)subobj_image);
+			gobj_defaultCheckbox	= iObjectCreate(_OBJECT_TYPE_CHECKBOX,	(void*)subobj_checkbox);
+			gobj_defaultOption		= iObjectCreate(_OBJECT_TYPE_OPTION,	(void*)subobj_option);
+			gobj_defaultRadio		= iObjectCreate(_OBJECT_TYPE_RADIO,		(void*)subobj_radio);
+
+
+		/////////
+		// Delete each initial subobj since they've now been copied onto the default objects
+		//////
+			iSubobject_deleteEmpty(subobj_empty);
+			iSubobject_deleteForm(subobj_form);
+			iSubobject_deleteSubform(subobj_subform);
+			iSubobject_deleteLabel(subobj_label);
+			iSubobject_deleteTextbox(subobj_textbox);
+			iSubobject_deleteButton(subobj_button);
+			iSubobject_deleteEditbox(subobj_editbox);
+			iSubobject_deleteImage(subobj_image);
+			iSubobject_deleteCheckbox(subobj_checkbox);
+			iSubobject_deleteOption(subobj_option);
+			iSubobject_deleteRadio(subobj_radio);
+	}
+
+
+
+
+//////////
+//
 // Called to find or create the KSI interface window
 //
 //////
-	HWND iCreateScreenWindow(void)
+	SObject* iCreateScreenForm(void)
 	{
 		s32				lnLeft, lnTop;
-		ATOM			atom;
-		WNDCLASSEXA		classa;
 		RECT			lrc;
 		SFont*			font;
 		SSize			client, nonclient, overall;
 
 
 		//////////
-		// Register the class if need be
+		// Create the object
 		//////
-			while (1)
-			{
-				if (!GetClassInfoExA(ghInstance, cgcScreenWindowClass, &classa))
-				{
-					// Initialize
-					memset(&classa, 0, sizeof(classa));
-
-					// Populate
-					classa.cbSize				= sizeof(WNDCLASSEXA);
-					classa.hInstance			= ghInstance;
-					classa.style				= CS_OWNDC | CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-					classa.lpszClassName		= cgcScreenWindowClass;
-					classa.hIcon				= LoadIcon(ghInstance, MAKEINTRESOURCE(IDI_VJR));
-					classa.hCursor				= LoadCursor(NULL, IDC_ARROW);
-					classa.lpfnWndProc			= &iWndProc_screenWindow;
-
-					// Register
-					atom = RegisterClassExA(&classa);
-					if (!atom)
-						break;
-				}
+			gobj_screen	= iObjectCreate(_OBJECT_TYPE_FORM, gobj_defaultForm);
 
 
-			//////////
-			// Find out how big the window should be
-			//////
-				iComputeScreenWindowClientAreaDimensions(&client);
-				iComputeScreenWindowNonclientAreaDimensions(&nonclient);
-				overall.width	= client.width + nonclient.width;
-				overall.height	= client.height + nonclient.width;
-				iAdjustScreenWindowDimensions(&overall);
+		//////////
+		// Find out how big the window should be
+		//////
+			iComputeScreenWindowClientAreaDimensions(&client);
+			iComputeScreenWindowNonclientAreaDimensions(&nonclient);
+			overall.width	= client.width + nonclient.width;
+			overall.height	= client.height + nonclient.width;
+			iAdjustScreenWindowDimensions(&overall);
 
 
-			//////////
-			// Physically create the interface window
-			//////
-				GetWindowRect(GetDesktopWindow(), &lrc);
-				lnLeft	= ((lrc.right - lrc.left) - overall.width)  / 2;
-				lnTop	= ((lrc.bottom - lrc.top) - overall.height) / 2;
-				ghwndScreen	= CreateWindowA(cgcScreenWindowClass, cgcScreenTitle, WS_POPUP, lnLeft, lnTop, overall.width, overall.height, NULL, NULL, ghInstance, 0);
-				if (ghwndScreen)
-				{
-					///////////
-					// Read events from the window
-					//////
-						CreateThread(NULL, 0, &iReadEvents_screenWindow, 0, 0, 0);
+		//////////
+		// Physically create the interface window
+		//////
+			GetWindowRect(GetDesktopWindow(), &lrc);
+			lnLeft	= ((lrc.right - lrc.left) - overall.width)  / 2;
+			lnTop	= ((lrc.bottom - lrc.top) - overall.height) / 2;
 
 
-					//////////
-					// Create the fonts
-					//////
-						font				= iFontCreate(cgcWindowTitleBarFont, 10,	FW_BOLD, false, false);
-						winScreen.font		= iFontDuplicate(font);
+		//////////
+		// Create the fonts
+		//////
+			font				= iFontCreate(cgcWindowTitleBarFont, 10,	FW_BOLD, false, false);
+			winScreen.font		= iFontDuplicate(font);
 
 
-					//////////
-					// Draw the initial window state
-					//////
-						iResizeScreenWindow(true);
-
-
-					//////////
-					// Make it visible
-					//////
-						SetWindowPos(ghwndScreen, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-						ShowWindow(ghwndScreen, SW_SHOW);
-
-
-					// All done
-					return(ghwndScreen);
-				}
-				break;
-			}
-			// We should never get here
-			MessageBoxA(NULL, "Error creating main screen window.", "Fatal Error", MB_OK);
-			return(NULL);
+		//////////
+		// Draw the initial window state
+		//////
+			iResizeScreenWindow(true);
 	}
 
 
@@ -377,40 +422,18 @@ void initialize(HACCEL* hAccelTable)
 // 
 //
 //////
-	HWND iCreateJDebiWindow(void)
+	SObject* iCreateJDebiForm(void)
 	{
 		s32				lnLeft, lnTop;
-		ATOM			atom;
-		WNDCLASSEXA		classa;
 		RECT			lrc;
 		SFont*			font;
 		SSize			client, nonclient, overall;
 
 
 		//////////
-		// Register the class if need be
+		// Create the object
 		//////
-			while (1)
-			{
-				if (!GetClassInfoExA(ghInstance, cgcJDebiWindowClass, &classa))
-				{
-					// Initialize
-					memset(&classa, 0, sizeof(classa));
-
-					// Populate
-					classa.cbSize				= sizeof(WNDCLASSEXA);
-					classa.hInstance			= ghInstance;
-					classa.style				= CS_OWNDC | CS_HREDRAW | CS_VREDRAW | CS_DBLCLKS;
-					classa.lpszClassName		= cgcJDebiWindowClass;
-					classa.hIcon				= LoadIcon(ghInstance, MAKEINTRESOURCE(IDI_VJR));
-					classa.hCursor				= LoadCursor(NULL, IDC_ARROW);
-					classa.lpfnWndProc			= &iWndProc_jDebiWindow;
-
-					// Register
-					atom = RegisterClassExA(&classa);
-					if (!atom)
-						break;
-				}
+			gobj_jdebi	= iObjectCreate(_OBJECT_TYPE_FORM, gobj_defaultForm);
 
 
 			//////////
@@ -429,94 +452,18 @@ void initialize(HACCEL* hAccelTable)
 				GetWindowRect(GetDesktopWindow(), &lrc);
 				lnLeft	= ((lrc.right - lrc.left) - overall.width)  / 2;
 				lnTop	= ((lrc.bottom - lrc.top) - overall.height) / 2;
-				ghwndJDebi = CreateWindowA(cgcJDebiWindowClass, cgcJDebiTitle, WS_POPUP, lnLeft, lnTop, overall.width, overall.height, NULL, NULL, ghInstance, 0);
-				if (ghwndJDebi)
-				{
-					///////////
-					// Read events from the window
-					//////
-						CreateThread(NULL, 0, &iReadEvents_jDebiWindow, 0, 0, 0);
+
+			//////////
+			// Create the font
+			//////
+				font				= iFontCreate(cgcWindowTitleBarFont, 10,	FW_BOLD, false, false);
+				winJDebi.font		= iFontDuplicate(font);
 
 
-					//////////
-					// Create the font
-					//////
-						font						= iFontCreate(cgcWindowTitleBarFont, 10,	FW_BOLD, false, false);
-						winJDebi.font		= iFontDuplicate(font);
-
-
-					//////////
-					// Draw the initial window state
-					//////
-						iResizeJDebiWindow(true);
-
-
-					//////////
-					// Make it visible
-					//////
-						SetWindowPos(ghwndJDebi, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
-						ShowWindow(ghwndJDebi, SW_SHOW);
-
-
-					// All done
-					return(ghwndJDebi);
-				}
-				break;
-			}
-			// We should never get here
-			MessageBoxA(NULL, "Error creating JDebi debugger window.", "Fatal Error", MB_OK);
-			return(NULL);
-	}
-
-
-
-
-//////////
-//
-// Called to create a DIB section bitmap based on size and the indicated information
-//
-//////
-	void iPopulateAndCreateBitmap(SBitmap* bmp, int tnWidth, int tnHeight)
-	{
-		//////////
-		// Header
-		//////
-			bmp->bh.bfType			= 'MB';
-			bmp->bh.bfOffBits		= sizeof(bmp->bh) + sizeof(bmp->bi);
-			bmp->bh.bfReserved1		= 0;
-			bmp->bh.bfReserved2		= 0;
-
-
-		//////////
-		// Info
-		//////
-			bmp->bi.biSize			= sizeof(bmp->bi);
-			bmp->bi.biWidth			= tnWidth;
-			bmp->bi.biHeight		= tnHeight;
-			bmp->bi.biPlanes		= 1;
-			bmp->bi.biBitCount		= 32;
-			bmp->bi.biXPelsPerMeter	= 3270;
-			bmp->bi.biYPelsPerMeter	= 3270;
-			bmp->bi.biCompression	= 0;
-			bmp->bi.biClrImportant	= 0;
-			bmp->bi.biClrUsed		= 0;
-			bmp->rowWidth			= iBmpComputeRowWidth(bmp);
-			bmp->bi.biSizeImage		= tnHeight * bmp->rowWidth;
-
-
-		///////////
-		// Set the overall size, and some parameters
-		//////
-			bmp->bh.bfSize			= bmp->bh.bfOffBits + bmp->bi.biSizeImage;
-
-
-		//////////
-		// Create handles
-		//////
-			bmp->hdc				= CreateCompatibleDC(GetDC(GetDesktopWindow()));
-			bmp->hbmp				= CreateDIBSection(bmp->hdc, (BITMAPINFO*)&bmp->bi, DIB_RGB_COLORS, (void**)&bmp->bd, NULL, 0);
-			memset(bmp->bd, 0, bmp->bi.biSizeImage);
-			SelectObject(bmp->hdc, bmp->hbmp);
+			//////////
+			// Draw the initial window state
+			//////
+				iResizeJDebiWindow(true);
 	}
 
 
@@ -931,30 +878,6 @@ void initialize(HACCEL* hAccelTable)
 
 		// Call Windows' default procedure handler
 		return(DefWindowProc(h, m, w, l));
-	}
-
-
-
-
-//////////
-//
-// 
-//
-//////
-	DWORD WINAPI iReadEvents_jDebiWindow(LPVOID lpParameter)
-	{
-		MSG msg;
-
-
-		// Read until the message window goes bye bye
-		while (GetMessage(&msg, ghwndJDebi, 0, 0) > 0)
-		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
-		}
-
-		// When we get here, we're shutting down
-		return 0;
 	}
 
 
@@ -3295,160 +3218,4 @@ void initialize(HACCEL* hAccelTable)
 
 		// Indicate the number between
 		return(lfMax - lfMin);
-	}
-
-
-
-
-
-//////////
-//
-// Draw the icon controls
-//
-//////
-	void iDrawScreen(RECT* trc)
-	{
-// 		//////////
-// 		// Icon and controls
-// 		//////
-// 			SetRect(&winScreen.appIcon.rc,		30,					1,				30 + winScreen.appIcon.bmp->bi.biWidth,					1 + winScreen.appIcon.bmp->bi.biHeight);
-// 			SetRect(&winScreen.minimize.rc,		trc->right - 132,	trc->top + 1,	trc->right - 132 + winScreen.minimize.bmp->bi.biWidth,	trc->top + 1 + winScreen.minimize.bmp->bi.biHeight);
-// 			SetRect(&winScreen.maximize.rc,		trc->right - 104,	trc->top + 1,	trc->right - 104 + winScreen.maximize.bmp->bi.biWidth,	trc->top + 1 + winScreen.maximize.bmp->bi.biHeight);
-// 			SetRect(&winScreen.close.rc,		trc->right - 77,	trc->top + 1,	trc->right - 77  + winScreen.close.bmp->bi.biWidth,		trc->top + 1 + winScreen.close.bmp->bi.biHeight);
-// 
-// 			iBmpBitBltObject(&winScreen.bmp, &winScreen.appIcon,	winScreen.appIcon.bmp);
-// 			iBmpBitBltObject(&winScreen.bmp, &winScreen.minimize,	winScreen.minimize.bmp);
-// 			iBmpBitBltObject(&winScreen.bmp, &winScreen.maximize,	winScreen.maximize.bmp);
-// 			iBmpBitBltObject(&winScreen.bmp, &winScreen.close,		winScreen.close.bmp);
-// 
-// 
-// 		//////////
-// 		// Corner triangles
-// 		//////
-// 			// Set the areas for mouse identifying
-// 			SetRect(&winScreen.arrowUl.rc, trc->left, trc->top, trc->left + winScreen.arrowUl.bmp->bi.biWidth, trc->top + winScreen.arrowUl.bmp->bi.biHeight);
-// 			SetRect(&winScreen.arrowUr.rc, trc->right - winScreen.arrowUr.bmp->bi.biWidth, trc->top, trc->right, trc->top + winScreen.arrowUr.bmp->bi.biHeight);
-// 			SetRect(&winScreen.arrowLr.rc, trc->right - winScreen.arrowLr.bmp->bi.biWidth, trc->bottom - winScreen.arrowLr.bmp->bi.biHeight, trc->right, trc->bottom);
-// 			SetRect(&winScreen.arrowLl.rc, trc->left, trc->bottom - winScreen.arrowLl.bmp->bi.biHeight, trc->left + winScreen.arrowLl.bmp->bi.biWidth, trc->bottom);
-// 
-// 			// Draw them
-// 			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowUl, winScreen.arrowUl.bmp);
-// 			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowUr, winScreen.arrowUr.bmp);
-// 			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowLr, winScreen.arrowLr.bmp);
-// 			iBmpBitBltObjectMask(&winScreen.bmp, &winScreen.arrowLl, winScreen.arrowLl.bmp);
-// 
-// 
-// 		//////////
-// 		// Draw the app title
-// 		//////
-// 			SetRect(&winScreen.rcCaption, winScreen.appIcon.rc.right + 8, winScreen.appIcon.rc.top + 2, winScreen.minimize.rc.left - 8, winScreen.appIcon.rc.bottom);
-// 			SelectObject(winScreen.bmp.hdc, winScreen.font->hfont);
-// 			SetTextColor(winScreen.bmp.hdc, (COLORREF)RGB(black.red, black.grn, black.blu));
-// //			SetBkColor(winScreen.bmp.hdc, (COLORREF)RGB(light_green.red, light_green.grn, light_green.blu));
-// 			SetBkMode(winScreen.bmp.hdc, TRANSPARENT);
-// 			DrawTextA(winScreen.bmp.hdc, cgcScreenTitle, sizeof(cgcScreenTitle) - 1, &winScreen.rcCaption, DT_VCENTER | DT_END_ELLIPSIS);
-	}
-
-	void iDrawJDebi(RECT* trc)
-	{
-// 		//////////
-// 		// Icon
-// 		//////
-// 			SetRect(&winJDebi.appIcon.rc,		30,					1,				30 + winJDebi.appIcon.bmp->bi.biWidth,				1 + winJDebi.appIcon.bmp->bi.biHeight);
-// 			SetRect(&winJDebi.close.rc,			trc->right - 77,	trc->top + 1,	trc->right - 77  + winJDebi.close.bmp->bi.biWidth,	trc->top + 1 + winJDebi.close.bmp->bi.biHeight);
-// 			SetRect(&winJDebi.maximize.rc,		trc->right - 104,	trc->top + 1,	trc->right - 104 + winJDebi.maximize.bmp->bi.biWidth,	trc->top + 1 + winJDebi.maximize.bmp->bi.biHeight);
-// 			SetRect(&winJDebi.minimize.rc,		trc->right - 132,	trc->top + 1,	trc->right - 132 + winJDebi.minimize.bmp->bi.biWidth,	trc->top + 1 + winJDebi.minimize.bmp->bi.biHeight);
-// 			SetRect(&winJDebi.move.rc,			trc->right - 132,	trc->top + 1,	trc->right - 132 + winJDebi.minimize.bmp->bi.biWidth,	trc->top + 1 + winJDebi.minimize.bmp->bi.biHeight);
-// 
-// 			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.appIcon,		winJDebi.appIcon.bmp);
-// 			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.minimize,		winJDebi.minimize.bmp);
-// 			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.maximize,		winJDebi.maximize.bmp);
-// 			iBmpBitBltObject(&winJDebi.bmp, &winJDebi.close,		winJDebi.close.bmp);
-// 
-// 
-// 		//////////
-// 		// Corner triangles
-// 		//////
-// 			// Set the areas for mouse identifying
-// 			SetRect(&winJDebi.arrowUl.rc, trc->left, trc->top, trc->left + winJDebi.arrowUl.bmp->bi.biWidth, trc->top + winJDebi.arrowUl.bmp->bi.biHeight);
-// 			SetRect(&winJDebi.arrowUr.rc, trc->right - winJDebi.arrowUr.bmp->bi.biWidth, trc->top, trc->right, trc->top + winJDebi.arrowUr.bmp->bi.biHeight);
-// 			SetRect(&winJDebi.arrowLr.rc, trc->right - winJDebi.arrowLr.bmp->bi.biWidth, trc->bottom - winJDebi.arrowLr.bmp->bi.biHeight, trc->right, trc->bottom);
-// 			SetRect(&winJDebi.arrowLl.rc, trc->left, trc->bottom - winJDebi.arrowLl.bmp->bi.biHeight, trc->left + winJDebi.arrowLl.bmp->bi.biWidth, trc->bottom);
-// 
-// 			// Draw them
-// 			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowUl, winJDebi.arrowUl.bmp);
-// 			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowUr, winJDebi.arrowUr.bmp);
-// 			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowLr, winJDebi.arrowLr.bmp);
-// 			iBmpBitBltObjectMask(&winJDebi.bmp, &winJDebi.arrowLl, winJDebi.arrowLl.bmp);
-// 
-// 
-// 		//////////
-// 		// Draw the app title
-// 		//////
-// 			SetRect(&winJDebi.rcCaption, winJDebi.appIcon.rc.right + 8, winJDebi.appIcon.rc.top + 2, winJDebi.rcClient.right - 8, winJDebi.appIcon.rc.bottom);
-// 			SelectObject(winJDebi.bmp.hdc, winJDebi.font->hfont);
-// 			SetTextColor(winJDebi.bmp.hdc, (COLORREF)RGB(black.red, black.grn, black.blu));
-// //			SetBkColor(winJDebi.bmp.hdc, (COLORREF)RGB(light_green.red, light_green.grn, light_green.blu));
-// 			SetBkMode(winJDebi.bmp.hdc, TRANSPARENT);
-// 			DrawTextA(winJDebi.bmp.hdc, cgcJDebiTitle, sizeof(cgcJDebiTitle) - 1, &winJDebi.rcCaption, DT_VCENTER | DT_END_ELLIPSIS);
-	}
-
-
-
-
-//////////
-//
-// Called to redraw the screen
-//
-//////
-	void iRedrawScreen(SWindow* win)
-	{
-//		u32		lnI;
-//		RECT	lrc;
-
-
-		// White background
-		iBmpFillRect(&winScreen.bmp, &winScreen.rcClient, colorNW, colorNE, colorSW, colorSE, true);
-
-		// Draw the border around the whole window
-		iBmpFrameRect(&winScreen.bmp, &winScreen.rcClient, black, black, black, black, false);
-
-		// Draw the controls
-		iDrawScreen(&winScreen.rcClient);
-
-// 		// Draw the border around the client area
-// 		SetRect(&lrc, 8, winScreen.appIcon.bmp->bi.biHeight + 2, winScreen.rcClient.right - winScreen.appIcon.bmp->bi.biHeight - 2, winScreen.rcClient.bottom - winScreen.appIcon.bmp->bi.biHeight - 2);
-// 		iBmpFillRect(&winScreen.bmp, &lrc, white, white, white, white, false);
-// 		InflateRect(&lrc, 1, 1);
-// 		iBmpFrameRect(&winScreen.bmp, &lrc, black, black, black, black, false);
-	}
-
-
-
-
-//////////
-//
-// Called to redraw the JDebi window
-//
-//////
-	void iRedrawJDebi(SWindow* win)
-	{
-//		u32		lnI;
-//		RECT	lrc;
-
-
-		// White background
-		iBmpFillRect(&winJDebi.bmp, &winJDebi.rcClient, colorNW, colorNE, colorSW, colorSE, true);
-
-		// Draw the border around the whole window
-		iBmpFrameRect(&winJDebi.bmp, &winJDebi.rcClient, black, black, black, black, false);
-
-		// Draw the JDebi inner content
-		iDrawJDebi(&winJDebi.rcClient);
-
-// 		// Draw the border around the client area
-// 		SetRect(&lrc, 8, winScreen.appIcon.bmp->bi.biHeight + 2, winJDebi.rcClient.right - winScreen.appIcon.bmp->bi.biHeight - 2, winJDebi.rcClient.bottom - winScreen.appIcon.bmp->bi.biHeight - 1);
-// 		iBmpFillRect(&winJDebi.bmp, &lrc, white, white, white, white, false);
-// 		InflateRect(&lrc, 1, 1);
-// 		iBmpFrameRect(&winJDebi.bmp, &lrc, black, black, black, black, false);
 	}

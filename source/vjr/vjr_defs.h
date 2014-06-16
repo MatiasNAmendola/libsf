@@ -64,6 +64,19 @@
 	SObjectOption*			iSubobject_createOption					(SObjectOption*		template_subobj, SObject* parent);
 	SObjectRadio*			iSubobject_createRadio					(SObjectRadio*		template_subobj, SObject* parent);
 
+	// Delete individual sub-objects
+	void					iSubobject_deleteEmpty					(SObjectEmpty*		subobj_empty);
+	void					iSubobject_deleteForm					(SObjectForm*		subobj_form);
+	void					iSubobject_deleteSubform				(SObjectSubform*	subobj_subform);
+	void					iSubobject_deleteLabel					(SObjectLabel*		subobj_label);
+	void					iSubobject_deleteTextbox				(SObjectTextbox*	subobj_textbox);
+	void					iSubobject_deleteButton					(SObjectButton*		subobj_button);
+	void					iSubobject_deleteEditbox				(SObjectEditbox*	subobj_editbox);
+	void					iSubobject_deleteImage					(SObjectImage*		subobj_image);
+	void					iSubobject_deleteCheckbox				(SObjectCheckbox*	subobj_checkbox);
+	void					iSubobject_deleteOption					(SObjectOption*		subobj_option);
+	void					iSubobject_deleteRadio					(SObjectRadio*		subobj_radio);
+
 	// Default render of sub-objects
 	u32						iSubobject_renderEmpty					(SObject* obj,		SObjectEmpty*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
 	u32						iSubobject_renderForm					(SObject* obj,		SObjectForm*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
@@ -79,6 +92,38 @@
 
 
 //////////
+// callbacks.cpp
+//////
+	bool					iDefaultCallback_load					(SObject* o);
+	void					iDefaultCallback_init					(SObject* o);
+	void					iDefaultCallback_created				(SObject* o);
+	void					iDefaultCallback_resize					(SObject* o, u32* widthRequired_out, u32* heightRequired_out);
+	bool					iDefaultCallback_render					(SObject* o);
+	bool					iDefaultCallback_publish				(SObject* o);
+	void					iDefaultCallback_destroy				(SObject* o);
+	void					iDefaultCallback_unload					(SObject* o);
+	bool					iDefaultCallback_gotFocus				(SObject* o);
+	bool					iDefaultCallback_lostFocus				(SObject* o);
+	bool					iDefaultCallback_clickex				(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick);
+	bool					iDefaultCallback_wheel					(SObject* o, s32 tnUnits);
+	bool					iDefaultCallback_move					(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick);
+	bool					iDefaultCallback_down					(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick, u32 tnLastClick);
+	bool					iDefaultCallback_up						(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick, u32 tnLastClick);
+	bool					iDefaultCallback_enter					(SObject* o);
+	bool					iDefaultCallback_leave					(SObject* o);
+	bool					iDefaultCallback_hover					(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick);
+	bool					iDefaultCallback_keyDown				(SObject* o, bool tlCtrl, bool tlAlt, bool tlShift, s16 tcAscii, u16 tnVKey, bool tlIsCAS, bool tlIsAscii);
+	bool					iDefaultCallback_keyUp					(SObject* o, bool tlCtrl, bool tlAlt, bool tlShift, s16 tcAscii, u16 tnVKey, bool tlIsCAS, bool tlIsAscii);
+	bool					iDefaultCallback_activate				(SObject* o);
+	bool					iDefaultCallback_deactivate				(SObject* o);
+	bool					iDefaultCallback_interactiveChange		(SObject* o);
+	bool					iDefaultCallback_programmaticChange		(SObject* o);
+	bool					iDefaultCallback_onSelect				(SObject* o, SObject* oItem);
+	bool					iDefaultCallback_onDeselect				(SObject* o, SObject* oItem);
+
+
+
+//////////
 // vjr_sup.cpp
 //////
 	void					initialize								(HACCEL* hAccelTable);
@@ -86,17 +131,14 @@
 	void					iCopyBitmap24ToBitmap32					(SBitmap* bmp32, SBitmap* bmp24);
 	void					iDeleteBitmap							(SBitmap* bmp);
 	void					iCreateMessageWindow					(void);
-	HWND					iCreateScreenWindow						(void);
-	HWND					iCreateJDebiWindow						(void);
-	void					iPopulateAndCreateBitmap				(SBitmap* bmp, int tnWidth, int tnHeight);
 	bool					isValidWindow							(u32 tnWindow);
+	void					iCreateDefaultObjects					(void);
+	SObject*				iCreateScreenForm						(void);
+	SObject*				iCreateJDebiForm						(void);
 
 	DWORD	WINAPI			iReadEvents_messageWindow				(LPVOID lpParameter);
 	LRESULT	CALLBACK		iWndProc_messageWindow					(HWND hwnd, UINT m, WPARAM w, LPARAM l);
-	DWORD	WINAPI			iReadEvents_screenWindow				(LPVOID lpParameter);
 	LRESULT	CALLBACK		iWndProc_screenWindow					(HWND hwnd, UINT m, WPARAM w, LPARAM l);
-	DWORD	WINAPI			iReadEvents_jDebiWindow					(LPVOID lpParameter);
-	LRESULT	CALLBACK		iWndProc_jDebiWindow					(HWND hwnd, UINT m, WPARAM w, LPARAM l);
 	bool					iShutdownPolitely						(void);
 
 	void					iResizeScreenWindow						(bool tlForce);
@@ -176,11 +218,6 @@
 	//////
 	// End
 	//////////
-
-	void					iDrawScreen								(RECT* trc);
-	void					iDrawJDebi								(RECT* trc);
-	void					iRedrawScreen							(SWindow* win);
-	void					iRedrawJDebi							(SWindow* win);
 
 
 //////////

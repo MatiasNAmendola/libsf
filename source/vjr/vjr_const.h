@@ -146,9 +146,9 @@ typedef		const f64			cf64;
 // Constant strings
 //////
 	const s8			cgcMessageWindowClass[]				= "VJr.MessageWindow";
-	const s8			cgcScreenWindowClass[]				= "VJr.ScreenWindow";
-	const s8			cgcJDebiWindowClass[]				= "VJr.JDebiWindow";
+	const s8			cgcWindowClass[]					= "VJr.Window";
 	const s8			cgcScreenTitle[]					= "Visual FreePro, Jr.";
 	const s8			cgcJDebiTitle[]						= "JDebi Debugger";
+	const s8			cgcUbuntu[]							= "Ubuntu";
 	const s8			cgcWindowTitleBarFont[]				= "Ubuntu";
 	const s8			cgcSubwindowTitleBarFont[]			= "Ubuntu Condensed";

@@ -262,6 +262,8 @@ struct SGeneralEvents
 	bool		(*publish)		(SObject* o);							// Called to publish the control onto the parent (which will populate bmpScale if need be)
 	void		(*destroy)		(SObject* o);							// Called when the object will be destroyed
 	void		(*unload)		(SObject* o);							// Called after the object has been destroyed, to unload anything (holds a template/skeleton object)
+	bool		(*gotFocus)		(SObject* o);							// Called when the object receives focus (note multiple items can have simultaneous focus)
+	bool		(*lostFocus)	(SObject* o);							// Called when the object loses focus
 };
 
 struct SMouseEvent
@@ -398,8 +400,8 @@ struct SObjectForm
 	SDatum		toolTip;												// What to display if hovering
 
 	// Events unique to this object
-	bool		(*activate)							(SObject* o);		// Called when the data changes
-	bool		(*deactivate)						(SObject* o);		// Called when the data changes
+	bool		(*activate)							(SObject* o);		// Called when activated
+	bool		(*deactivate)						(SObject* o);		// Called when deactivated
 };
 
 struct SObjectSubform
@@ -408,6 +410,10 @@ struct SObjectSubform
 	SObject*	parent;													// parent object this object belongs to
 
 	SFont*		font;													// Default font instance
+	SBgra		borderColorNW;											// Northwest back color for border
+	SBgra		borderColorNE;											// Northeast back color for border
+	SBgra		borderColorSW;											// Southwest back color for border
+	SBgra		borderColorSE;											// Southeast back color for border
 	SBgra		backColor;												// Back color (only RGB() channels are used, but RGBA() channels are maintained)
 	SBgra		foreColor;												// Default text fore color
 	SBgra		captionColor;											// Color of the caption
@@ -418,8 +424,8 @@ struct SObjectSubform
 	SDatum		toolTip;												// What to display if hovering
 
 	// Events unique to this object
-	bool		(*activate)							(SObject* o);		// Called when the data changes
-	bool		(*deactivate)						(SObject* o);		// Called when the data changes
+	bool		(*activate)							(SObject* o);		// Called when activated
+	bool		(*deactivate)						(SObject* o);		// Called when deactivated
 };
 
 struct SObjectLabel
@@ -662,19 +668,4 @@ struct SWindow
 	// Rectangles for non-object drawn components
 	RECT		rcCaption;												// Caption area
 	RECT		rcClient;												// Client area where content is drawn
-
-	// Icon
-	SBitmap*	bmpWindowIcon;											// Icon for the window
-
-	// For the corner triangles
-	SBitmap*	bmpArrowUl;												// Icons used for the move arrows
-	SBitmap*	bmpArrowUr;
-	SBitmap*	bmpArrowLr;
-	SBitmap*	bmpArrowLl;
-
-	// For mouse objects
-	SBitmap*	bmpMove;												// Icons used for move, minimize, maximize, close
-	SBitmap*	bmpMinimize;
-	SBitmap*	bmpMaximize;
-	SBitmap*	bmpClose;
 };
