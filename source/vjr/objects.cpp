@@ -620,7 +620,18 @@
 
 				} else {
 					// Use VJr defaults
-// TODO:  working here
+					subobj->font						= iFontDuplicate(gsFont);
+					subobj->backColor.color				= white.color;
+					subobj->foreColor.color				= black.color;
+
+					subobj->alignment					= _ALIGNMENT_LEFT;
+					iDatumDuplicate(&subobj->caption, "Label", 5);
+
+					subobj->isOpaque					= true;
+					subobj->isBorder					= false;
+					subobj->borderColor.color			= black.color;
+					subobj->disabledBackColor.color		= disabledBack.color;
+					subobj->disabledForeColor.color		= disabledFore.color;
 				}
 			}
 
@@ -695,6 +706,28 @@
 
 				} else {
 					// Use VJr defaults
+					subobj->font						= iFontDuplicate(gsFont);
+					subobj->backColor.color				= white.color;
+					subobj->foreColor.color				= black.color;
+
+					subobj->style						= _STYLE_3D;
+					subobj->alignment					= _ALIGNMENT_LEFT;
+					subobj->valueLength					= 0;
+
+					subobj->cursor						= 0;
+					subobj->selectStart					= -1;
+					subobj->selectEnd					= -1;
+
+					subobj->isOpaque					= true;
+					subobj->isBorder					= false;
+					subobj->borderColor.color			= black.color;
+					subobj->selectedBackColor.color		= selectedBack.color;
+					subobj->selectedForeColor.color		= selectedFore.color;
+					subobj->disabledBackColor.color		= disabledBack.color;
+					subobj->disabledForeColor.color		= disabledFore.color;
+
+					*(u32*)&subobj->interactiveChange	= *(u32*)&iDefaultCallback_interactiveChange;
+					*(u32*)&subobj->programmaticChange	= *(u32*)&iDefaultCallback_programmaticChange;
 				}
 			}
 
@@ -745,6 +778,7 @@
 
 					subobj->style						= template_subobj->style;
 					subobj->alignment					= template_subobj->alignment;
+					iDatumDuplicate(&subobj->caption,	&template_subobj->caption);
 					iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
 					iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
 
@@ -756,6 +790,19 @@
 
 				} else {
 					// Use VJr defaults
+					subobj->font						= iFontDuplicate(gsFont);
+					subobj->backColor.color				= white.color;
+					subobj->foreColor.color				= black.color;
+
+					subobj->style						= _STYLE_3D;
+					subobj->alignment					= _ALIGNMENT_LEFT;
+					iDatumDuplicate(&subobj->caption,	"Button", 6);
+
+					subobj->disabledBackColor.color		= disabledBack.color;
+					subobj->disabledForeColor.color		= disabledFore.color;
+
+					*(u32*)&subobj->interactiveChange	= *(u32*)&iDefaultCallback_interactiveChange;
+					*(u32*)&subobj->programmaticChange	= *(u32*)&iDefaultCallback_programmaticChange;
 				}
 			}
 
@@ -827,6 +874,27 @@
 
 				} else {
 					// Use VJr defaults
+					subobj->font						= iFontDuplicate(gsFont);
+					subobj->backColor.color				= white.color;
+					subobj->foreColor.color				= black.color;
+
+					subobj->style						= _STYLE_3D;
+					subobj->alignment					= _ALIGNMENT_LEFT;
+
+					subobj->cursor						= 0;
+					subobj->selectStart					= -1;
+					subobj->selectEnd					= -1;
+
+					subobj->isOpaque					= true;
+					subobj->isBorder					= false;
+					subobj->borderColor.color			= black.color;
+					subobj->selectedBackColor.color		= selectedBack.color;
+					subobj->selectedForeColor.color		= selectedFore.color;
+					subobj->disabledBackColor.color		= disabledBack.color;
+					subobj->disabledForeColor.color		= disabledFore.color;
+
+					*(u32*)&subobj->interactiveChange	= *(u32*)&iDefaultCallback_interactiveChange;
+					*(u32*)&subobj->programmaticChange	= *(u32*)&iDefaultCallback_programmaticChange;
 				}
 			}
 
@@ -881,6 +949,10 @@
 
 				} else {
 					// Use VJr defaults
+					subobj->style						= _IMAGE_STYLE_OPAQUE;
+					subobj->image						= iBmpCopy(bmpNoImage);
+
+					*(u32*)&subobj->programmaticChange	= *(u32*)&iDefaultCallback_programmaticChange;
 				}
 			}
 
@@ -947,6 +1019,23 @@
 
 				} else {
 					// Use VJr defaults
+					subobj->font						= iFontDuplicate(gsFont);
+					subobj->backColor.color				= white.color;
+					subobj->foreColor.color				= black.color;
+
+					subobj->alignment					= _ALIGNMENT_LEFT;
+					subobj->style						= _STYLE_3D;
+					subobj->value						= 0;
+					iDatumDuplicate(&subobj->caption, "Checkbox", 8);
+
+					subobj->isOpaque					= true;
+					subobj->isBorder					= false;
+					subobj->borderColor.color			= black.color;
+					subobj->disabledBackColor.color		= disabledBack.color;
+					subobj->disabledForeColor.color		= disabledFore.color;
+
+					*(u32*)&subobj->interactiveChange	= *(u32*)&iDefaultCallback_interactiveChange;
+					*(u32*)&subobj->programmaticChange	= *(u32*)&iDefaultCallback_programmaticChange;
 				}
 			}
 
@@ -1013,6 +1102,25 @@
 
 				} else {
 					// Use VJr defaults
+					subobj->backColor.color				= white.color;
+					subobj->foreColor.color				= black.color;
+
+					subobj->alignment					= _ALIGNMENT_LEFT;
+					subobj->style						= _STYLE_3D;
+
+					subobj->optionCount					= 2;
+					subobj->multiSelect					= false;
+
+					// Create the two objects
+					subobj->firstOption					= iObjectCreate(_OBJECT_TYPE_LABEL, NULL);
+					if (subobj->firstOption)
+						subobj->firstOption->next		= iObjectCreate(_OBJECT_TYPE_LABEL, NULL);
+
+					// Copy the events
+					*(u32*)&subobj->onSelect			= *(u32*)&iDefaultCallback_onSelect;
+					*(u32*)&subobj->onDeselect			= *(u32*)&iDefaultCallback_onDeselect;
+					*(u32*)&subobj->interactiveChange	= *(u32*)&iDefaultCallback_interactiveChange;
+					*(u32*)&subobj->programmaticChange	= *(u32*)&iDefaultCallback_programmaticChange;
 				}
 			}
 
@@ -1081,6 +1189,25 @@
 
 				} else {
 					// Use VJr defaults
+					subobj->font						= iFontDuplicate(gsFont);
+					subobj->backColor.color				= white.color;
+					subobj->foreColor.color				= white.color;
+
+					subobj->alignment					= _ALIGNMENT_LEFT;
+					subobj->style						= _STYLE_3D;
+					subobj->value						= 0;
+					subobj->minValue					= 0;
+					subobj->maxValue					= 100;
+					subobj->roundTo						= 1.0f;
+
+					subobj->isOpaque					= true;
+					subobj->isBorder					= false;
+					subobj->borderColor.color			= black.color;
+					subobj->disabledBackColor.color		= disabledBack.color;
+					subobj->disabledForeColor.color		= disabledFore.color;
+
+					*(u32*)&subobj->interactiveChange	= *(u32*)&template_subobj->interactiveChange;
+					*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
 				}
 			}
 
@@ -1099,8 +1226,13 @@
 // Called to delete the empty.
 //
 //////
-	void iSubobject_deleteEmpty(SObjectEmpty* subobj_empty)
+	void iSubobject_deleteEmpty(SObjectEmpty* subobj, bool tlFreeSelf)
 	{
+		//////////
+		// Free self
+		//////
+			if (tlFreeSelf)
+				free(subobj);
 	}
 
 
@@ -1111,8 +1243,23 @@
 // Called to delete the form.
 //
 //////
-	void iSubobject_deleteForm(SObjectForm* subobj_form)
+	void iSubobject_deleteForm(SObjectForm* subobj, bool tlFreeSelf)
 	{
+		//////////
+		// Free subobject components
+		//////
+			iFontFree(subobj->font, true);
+			iBmpDelete(subobj->bmpIcon);
+			iDatumFree(&subobj->comment, true);
+			iDatumFree(&subobj->caption, true);
+			iDatumFree(&subobj->toolTip, true);
+
+
+		//////////
+		// Free self
+		//////
+			if (tlFreeSelf)
+				free(subobj);
 	}
 
 
@@ -1123,8 +1270,23 @@
 // Called to delete the subform.
 //
 //////
-	void iSubobject_deleteSubform(SObjectSubform* subobj_subform)
+	void iSubobject_deleteSubform(SObjectSubform* subobj, bool tlFreeSelf)
 	{
+		//////////
+		// Free subobject components
+		//////
+			iFontFree(subobj->font, true);
+			iBmpDelete(subobj->bmpIcon);
+			iDatumFree(&subobj->comment, true);
+			iDatumFree(&subobj->caption, true);
+			iDatumFree(&subobj->toolTip, true);
+
+
+		//////////
+		// Free self
+		//////
+			if (tlFreeSelf)
+				free(subobj);
 	}
 
 
@@ -1135,8 +1297,22 @@
 // Called to delete the label.
 //
 //////
-	void iSubobject_deleteLabel(SObjectLabel* subobj_label)
+	void iSubobject_deleteLabel(SObjectLabel* subobj, bool tlFreeSelf)
 	{
+		//////////
+		// Free subobject components
+		//////
+			iFontFree(subobj->font, true);
+			iDatumFree(&subobj->comment, true);
+			iDatumFree(&subobj->caption, true);
+			iDatumFree(&subobj->toolTip, true);
+
+
+		//////////
+		// Free self
+		//////
+			if (tlFreeSelf)
+				free(subobj);
 	}
 
 
@@ -1147,8 +1323,24 @@
 // Called to delete the textbox.
 //
 //////
-	void iSubobject_deleteTextbox(SObjectTextbox* subobj_textbox)
+	void iSubobject_deleteTextbox(SObjectTextbox* subobj, bool tlFreeSelf)
 	{
+		//////////
+		// Free subobject components
+		//////
+			iFontFree(subobj->font, true);
+			iDatumFree(&subobj->value, true);
+			iDatumFree(&subobj->picture, true);
+			iDatumFree(&subobj->mask, true);
+			iDatumFree(&subobj->comment, true);
+			iDatumFree(&subobj->toolTip, true);
+
+
+		//////////
+		// Free self
+		//////
+			if (tlFreeSelf)
+				free(subobj);
 	}
 
 
@@ -1159,8 +1351,22 @@
 // Called to delete the button.
 //
 //////
-	void iSubobject_deleteButton(SObjectButton* subobj_button)
+	void iSubobject_deleteButton(SObjectButton* subobj, bool tlFreeSelf)
 	{
+		//////////
+		// Free subobject components
+		//////
+			iFontFree(subobj->font, true);
+			iDatumFree(&subobj->caption, true);
+			iDatumFree(&subobj->comment, true);
+			iDatumFree(&subobj->toolTip, true);
+
+
+		//////////
+		// Free self
+		//////
+			if (tlFreeSelf)
+				free(subobj);
 	}
 
 
@@ -1171,8 +1377,22 @@
 // Called to delete the editbox.
 //
 //////
-	void iSubobject_deleteEditbox(SObjectEditbox* subobj_editbox)
+	void iSubobject_deleteEditbox(SObjectEditbox* subobj, bool tlFreeSelf)
 	{
+		//////////
+		// Free subobject components
+		//////
+			iFontFree(subobj->font, true);
+			iEditChainManagerFree(&subobj->value, true);
+			iDatumFree(&subobj->comment, true);
+			iDatumFree(&subobj->toolTip, true);
+
+
+		//////////
+		// Free self
+		//////
+			if (tlFreeSelf)
+				free(subobj);
 	}
 
 
@@ -1183,8 +1403,18 @@
 // Called to delete the image.
 //
 //////
-	void iSubobject_deleteImage(SObjectImage* subobj_image)
+	void iSubobject_deleteImage(SObjectImage* subobj, bool tlFreeSelf)
 	{
+		//////////
+		// Free subobject components
+		//////
+
+
+		//////////
+		// Free self
+		//////
+			if (tlFreeSelf)
+				free(subobj);
 	}
 
 
@@ -1195,8 +1425,18 @@
 // Called to delete the checkbox.
 //
 //////
-	void iSubobject_deleteCheckbox(SObjectCheckbox* subobj_checkbox)
+	void iSubobject_deleteCheckbox(SObjectCheckbox* subobj, bool tlFreeSelf)
 	{
+		//////////
+		// Free subobject components
+		//////
+
+
+		//////////
+		// Free self
+		//////
+			if (tlFreeSelf)
+				free(subobj);
 	}
 
 
@@ -1207,8 +1447,18 @@
 // Called to delete the option.
 //
 //////
-	void iSubobject_deleteOption(SObjectOption* subobj_option)
+	void iSubobject_deleteOption(SObjectOption* subobj, bool tlFreeSelf)
 	{
+		//////////
+		// Free subobject components
+		//////
+
+
+		//////////
+		// Free self
+		//////
+			if (tlFreeSelf)
+				free(subobj);
 	}
 
 
@@ -1219,8 +1469,18 @@
 // Called to delete the radio.
 //
 //////
-	void iSubobject_deleteRadio(SObjectRadio* subobj_radio)
+	void iSubobject_deleteRadio(SObjectRadio* subobj, bool tlFreeSelf)
 	{
+		//////////
+		// Free subobject components
+		//////
+
+
+		//////////
+		// Free self
+		//////
+			if (tlFreeSelf)
+				free(subobj);
 	}
 
 

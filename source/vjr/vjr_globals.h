@@ -59,6 +59,10 @@
 	const SBgra			white								= { rgba(255, 255, 255, 255) };
 	const SBgra			black								= { rgba(0, 0, 0, 255) };
 	const SBgra			gray								= { rgba(192, 192, 192, 255) };
+	const SBgra			selectedBack						= { rgba(32, 164, 255, 255) };
+	const SBgra			selectedFore						= { rgba(255, 255, 255, 255) };
+	const SBgra			disabledBack						= { rgba(255, 255, 255, 255) };
+	const SBgra			disabledFore						= { rgba(192, 192, 230, 255) };
 
 	// Four-corner window color schemes (eventually these will be loaded from themes.dbf)
 	const SBgra			colorNW								= { rgba(222, 230, 255, 255) };
@@ -66,21 +70,24 @@
 	const SBgra			colorSW								= { rgba(255, 255, 255, 255) };
 	const SBgra			colorSE								= { rgba(192, 212, 255, 255) };
 
-	// For the corner triangles
-	SBitmap*			bmpArrowUl							= NULL;									// Icons used for the move arrows
-	SBitmap*			bmpArrowUr							= NULL;
-	SBitmap*			bmpArrowLr							= NULL;
-	SBitmap*			bmpArrowLl							= NULL;
-
 	// App icons
 	SBitmap*			bmpVjrIcon							= NULL;
 	SBitmap*			bmpJDebiIcon						= NULL;
+
+	// When there is no image
+	SBitmap*			bmpNoImage							= NULL;
 
 	// For mouse objects
 	SBitmap*			bmpMove								= NULL;									// Icons used for move, minimize, maximize, close
 	SBitmap*			bmpMinimize							= NULL;
 	SBitmap*			bmpMaximize							= NULL;
 	SBitmap*			bmpClose							= NULL;
+
+	// For the corner triangles
+	SBitmap*			bmpArrowUl							= NULL;									// Icons used for the move arrows
+	SBitmap*			bmpArrowUr							= NULL;
+	SBitmap*			bmpArrowLr							= NULL;
+	SBitmap*			bmpArrowLl							= NULL;
 
 	// Default screens used by VJr
 	SObject*			gobj_screen							= NULL;

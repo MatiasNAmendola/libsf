@@ -111,35 +111,26 @@ typedef		const f64			cf64;
 
 
 //////////
-// Textbox styles
+// Image styles
 //////
-	const u32			_TEXTBOX_STYLE_PLAIN				= 0;
-	const u32			_TEXTBOX_STYLE_2D					= 1;
-	const u32			_TEXTBOX_STYLE_3D					= 2;
+	const u32			_IMAGE_STYLE_OPAQUE					= 0;
+	const u32			_IMAGE_STYLE_TRANSPARENT			= 1;
 
 
 //////////
-// Editbox styles
+// Option styles
 //////
-	const u32			_EDITBOX_STYLE_PLAIN				= 0;
-	const u32			_EDITBOX_STYLE_2D					= 1;
-	const u32			_EDITBOX_STYLE_3D					= 2;
+	const u32			_STYLE_PLAIN						= 0;
+	const u32			_STYLE_2D							= 1;
+	const u32			_STYLE_3D							= 2;
 
 
 //////////
-// Button styles
+// Alignment modes
 //////
-	const u32			_BUTTON_STYLE_PLAIN					= 0;
-	const u32			_BUTTON_STYLE_2D					= 1;
-	const u32			_BUTTON_STYLE_3D					= 2;
-
-
-//////////
-// Checkbox styles
-//////
-	const u32			_CHECKBOX_STYLE_PLAIN				= 0;
-	const u32			_CHECKBOX_STYLE_2D					= 1;
-	const u32			_CHECKBOX_STYLE_3D					= 2;
+	const u32			_ALIGNMENT_LEFT						= 0;
+	const u32			_ALIGNMENT_RIGHT					= 1;
+	const u32			_ALIGNMENT_CENTER					= 2;
 
 
 //////////

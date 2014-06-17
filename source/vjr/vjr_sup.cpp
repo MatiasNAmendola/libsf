@@ -65,6 +65,10 @@ void initialize(HACCEL* hAccelTable)
 		bmpVjrIcon	= iBmpRawLoad(cgc_appIconBmp);
 		bmpVjrIcon	= iBmpRawLoad(cgc_jdebiAppIconBmp);
 
+		// Create a 1x1 no image bitmap placeholder
+		bmpNoImage	= iBmpAllocate();
+		iBmpCreateBySize(bmpNoImage, 1, 1, 32);
+
 		bmpClose	= iBmpRawLoad(cgc_closeBmp);
 		bmpMaximize	= iBmpRawLoad(cgc_maximizeBmp);
 		bmpMinimize	= iBmpRawLoad(cgc_minimizeBmp);
@@ -1350,6 +1354,33 @@ void initialize(HACCEL* hAccelTable)
 
 //////////
 //
+// Free the indicated font resource
+//
+//////
+	void iFontFree(SFont* font, bool tlFreeSelf)
+	{
+		if (font)
+		{
+			//////////
+			// Free components
+			//////
+				DeleteObject((HGDIOBJ)font->hfont);
+				DeleteDC(font->hdc);
+
+
+			//////////
+			// Free self
+			//////
+				if (tlFreeSelf)
+					free(font);
+		}
+	}
+
+
+
+
+//////////
+//
 // A particular font occupies a certain physical amount of text relative to the rectangle it inhabits.
 // In order for this font to be scaled up, the font dynamics will need to change somewhat as per the limitations
 // within the font design.  As such, we have to scan upward to find the closest matching font that is equal to
@@ -1506,6 +1537,106 @@ void initialize(HACCEL* hAccelTable)
 			*root = ecm;
 
 // TODO:  Code the duplication
+// TODO:  Working here
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to free the edit chain manager content, and optionally itself
+//
+//////
+	void iEditChainManagerFree(SEditChainManager** root, bool tlFreeSelf)
+	{
+		// Make sure our environment is sane
+		if (root && *root)
+		{
+			//////////
+			// Free undo history
+			//////
+				if ((*root)->undoHistory)
+					iEditChainManagerFree(&(*root)->undoHistory, true);
+
+
+			//////////
+			// Free content
+			//////
+				iEditChainFree((*root)->first, true);
+
+
+			//////////
+			// Free self
+			//////
+				if (tlFreeSelf)
+				{
+					free(*root);
+					*root = NULL;
+				}
+		}
+	}
+
+
+
+
+//////////
+//
+// Free the edit chain
+//
+//////
+	void iEditChainFree(SEditChain** root, bool tlFreeSelf)
+	{
+		SEditChain*		chain;
+		SEditChain*		chainNext;
+
+
+		// Make sure our environment is sane
+		if (root && *root)
+		{
+			// Repeat throughout the entire chain
+			chain = *root;
+			while (chain)
+			{
+				//////////
+				// Note next item in chain
+				//////
+					chainNext = chain->next;
+
+
+				//////////
+				// Delete this item's components
+				//////
+					iDatumFree(chain->d, true);
+					if (chain->extra_info)
+					{
+						free(chain->extra_info);
+						chain->extra_info_size = 0;
+					}
+
+
+				//////////
+				// Delete self
+				//////
+					free(chain);
+
+
+				//////////
+				// Move to next item in the chain
+				//////
+					chain = chainNext;
+			}
+
+
+			//////////
+			// Free self
+			//////
+				if (tlFreeSelf)
+				{
+					free(*root);
+					*root = NULL;
+				}
 		}
 	}
 
@@ -1541,6 +1672,19 @@ void initialize(HACCEL* hAccelTable)
 	{
 		if (datumDst && datumSrc && datumSrc->data)
 			iDatumDuplicate(datumDst, datumSrc->data, datumSrc->length);
+	}
+
+	void iDatumFree(SDatum* datum, bool tlFreeSelf)
+	{
+		if (datum)
+		{
+			// Delete the content
+			iiDatumFree(datum);
+
+			// Delete self if need be
+			if (tlFreeSelf)
+				free(datum);
+		}
 	}
 
 	void iiDatumFree(SDatum* datum)

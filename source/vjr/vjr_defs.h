@@ -65,17 +65,17 @@
 	SObjectRadio*			iSubobject_createRadio					(SObjectRadio*		template_subobj, SObject* parent);
 
 	// Delete individual sub-objects
-	void					iSubobject_deleteEmpty					(SObjectEmpty*		subobj_empty);
-	void					iSubobject_deleteForm					(SObjectForm*		subobj_form);
-	void					iSubobject_deleteSubform				(SObjectSubform*	subobj_subform);
-	void					iSubobject_deleteLabel					(SObjectLabel*		subobj_label);
-	void					iSubobject_deleteTextbox				(SObjectTextbox*	subobj_textbox);
-	void					iSubobject_deleteButton					(SObjectButton*		subobj_button);
-	void					iSubobject_deleteEditbox				(SObjectEditbox*	subobj_editbox);
-	void					iSubobject_deleteImage					(SObjectImage*		subobj_image);
-	void					iSubobject_deleteCheckbox				(SObjectCheckbox*	subobj_checkbox);
-	void					iSubobject_deleteOption					(SObjectOption*		subobj_option);
-	void					iSubobject_deleteRadio					(SObjectRadio*		subobj_radio);
+	void					iSubobject_deleteEmpty					(SObjectEmpty*		subobj, bool tlFreeSelf);
+	void					iSubobject_deleteForm					(SObjectForm*		subobj, bool tlFreeSelf);
+	void					iSubobject_deleteSubform				(SObjectSubform*	subobj, bool tlFreeSelf);
+	void					iSubobject_deleteLabel					(SObjectLabel*		subobj, bool tlFreeSelf);
+	void					iSubobject_deleteTextbox				(SObjectTextbox*	subobj, bool tlFreeSelf);
+	void					iSubobject_deleteButton					(SObjectButton*		subobj, bool tlFreeSelf);
+	void					iSubobject_deleteEditbox				(SObjectEditbox*	subobj, bool tlFreeSelf);
+	void					iSubobject_deleteImage					(SObjectImage*		subobj, bool tlFreeSelf);
+	void					iSubobject_deleteCheckbox				(SObjectCheckbox*	subobj, bool tlFreeSelf);
+	void					iSubobject_deleteOption					(SObjectOption*		subobj, bool tlFreeSelf);
+	void					iSubobject_deleteRadio					(SObjectRadio*		subobj, bool tlFreeSelf);
 
 	// Default render of sub-objects
 	u32						iSubobject_renderEmpty					(SObject* obj,		SObjectEmpty*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
@@ -160,6 +160,7 @@
 	SFont*					iFontAllocate							(void);
 	SFont*					iFontDuplicate							(SFont* fontSource);
 	SFont*					iFontCreate								(cs8* tcFontName, u32 tnFontSize, u32 tnFontWeight, u32 tnItalics, u32 tnUnderline);
+	void					iFontFree								(SFont* font, bool tlFreeSelf);
 	u32						iFindClosestFontSizeMatch				(s8* tcText, s8* tcFontName, u32 tnFontSize, u32 tnFontBold, u32 tnFontItalic, u32 tnFontUnderline, u32 tnWidth, u32 tnHeight, u32 tnWidthDesired, u32 tnHeightDesired);
 	int						iProcessMouseMessage					(UINT m, WPARAM w, LPARAM l);
 	void					iTranslateMousePosition					(POINTS* pt);
@@ -169,10 +170,13 @@
 
 	// EditChain
 	void					iEditChainManagerDuplicate				(SEditChainManager** root, SEditChainManager* chain);
+	void					iEditChainManagerFree					(SEditChainManager** root, bool tlFreeSelf);
+	void					iEditChainFree							(SEditChain** root, bool tlFreeSelf);
 
 	// Datum
 	void					iDatumDuplicate							(SDatum* datum, s8* data, u32 dataLength);
 	void					iDatumDuplicate							(SDatum* datumDst, SDatum* datumSrc);
+	void					iDatumFree								(SDatum* datum, bool tlFreeSelf);
 	void					iiDatumFree								(SDatum* datum);
 
 

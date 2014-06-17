@@ -187,6 +187,13 @@ struct SEditChain
 
 	// General purpose extra data
 	void*		extra_info;												// Extra info that can be stored on this item
+	u32			extra_info_size;										// Size of the extra_info allocated block
+//////////
+// TODO:  We could add a handler here to allocate and free the extra_info.
+// Note:  As it is today, we simply have a block of allocated memory which is handled like a blob.
+//	void		(*extra_info_allocate)		(SEditChainManager* chainMgr, SEditChain* chain, void* extra_info);
+//	void		(*extra_info_free)			(SEditChainManager* chainMgr, SEditChain* chain, void* extra_info);
+//////
 };
 
 struct SUndo
@@ -504,6 +511,7 @@ struct SObjectButton
 	// Flags for data
 	u32			style;													// See _BUTTON_STYLE_* constants (plain, 2D, 3D)
 	u32			alignment;												// 0=left, 1=right, 2=center, always centered vertically
+	SDatum		caption;												// Caption
 	SDatum		comment;												// Comment
 	SDatum		toolTip;												// What to display if hovering
 
