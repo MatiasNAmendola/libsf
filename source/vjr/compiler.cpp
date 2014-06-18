@@ -38,33 +38,32 @@
 
 struct SStartEnd;
 struct SMasterList;
-struct SOssComp;
+struct SComp;
 struct SOssCompCallback;
 struct SAsciiCompSearcher;
-struct SOssLine;
 struct SStartEndCallback;
 struct SLL;
+struct SLLCallback;
 
 //////////
 //
 // Forward declarations for parsing VXB-- lines and components
 //
 //////////
-	u32						compiler_breakoutAsciiTextIntoSOssLines		(s8* data, u32 fileSize, SStartEnd* seLines, u32 extraAllocSize);
- 	SOssComp*				oss_translateSOssLinesToSOssComps			(SAsciiCompSearcher* tsComps, SOssLine* line);
- 	void					oss_translateSOssCompsToOthers				(SAsciiCompSearcher* tsComps, SOssLine* line);
+ 	SComp*					iTranslateSourceLineToSComps				(SAsciiCompSearcher* tsComps, SEditChain* line);
+ 	void					oss_translateSOssCompsToOthers				(SAsciiCompSearcher* tsComps, SEditChain* line);
 // 	u32 CALLTYPE			oss_writeSOssLineSequenceToDisk				(s8* tcPathname, SStartEnd* tseLines);
 // 	u32 CALLTYPE			oss_writeSOssLineSequenceCompsToDisk		(s8* tcPathname, SStartEnd* tseLines);
 // 	u32 CALLTYPE			oss_writeSOssLineSequenceCompsDebuggingToDisk(s8* tcPathname, SStartEnd* tseLines);
 	bool					oss_findFirstOccurrenceOfAsciiCharacter		(s8* tcHaystack, u32 tnHaystackLength, s8 tcNeedle, u32* tnPosition);
-	SOssComp*				oss_findNextSOssCompBy_iCode				(SOssComp* comp, u32 tniCode, SOssComp** compLastScanned);
-	SOssComp*				oss_skipPastSOssComp_iCode					(SOssComp* comp, u32 tniCode);
-	u32						oss_combine2SOssComps						(SOssLine* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2,                     u32 tniCodeCombined);
-	u32						oss_combine3SOssComps						(SOssLine* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2, u32 tniCodeNeedle3, u32 tniCodeCombined);
-	u32						oss_combineAllBetweenSOssComps				(SOssLine* line, u32 tniCodeNeedle,                                          u32 tniCodeCombined);
-	u32						oss_combineAllAfterSOssComp					(SOssLine* line, u32 tniCodeNeedle);
+	SComp*					oss_findNextSCompBy_iCode					(SComp* comp, u32 tniCode, SComp** compLastScanned);
+	SComp*					oss_skipPastSComp_iCode						(SComp* comp, u32 tniCode);
+	u32						oss_combine2SComps							(SEditChain* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2,                     u32 tniCodeCombined);
+	u32						oss_combine3SComps							(SEditChain* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2, u32 tniCodeNeedle3, u32 tniCodeCombined);
+	u32						oss_combineAllBetweenSOssComps				(SEditChain* line, u32 tniCodeNeedle,                                          u32 tniCodeCombined);
+	u32						oss_combineAllAfterSOssComp					(SEditChain* line, u32 tniCodeNeedle);
 // 	u32 CALLTYPE			oss_combineAllCasks							(SOssComp* firstComp, bool* tlNestingError, SOssComp** compError);
-	u32						oss_removeExtraneousWhitespaceSOssComps		(SOssLine* line, u32 tniCodeWhitespace);
+	u32						oss_removeExtraneousWhitespaceSOssComps		(SEditChain* line, u32 tniCodeWhitespace);
 
 	u32						ioss_breakoutAsciiTextDataIntoLines_ScanLine(s8* tcData, u32 tnMaxLength, u32* tnLength, u32* tnWhitespaces);
 	u32						vvm_getNextUniqueId							(void);
@@ -75,18 +74,32 @@ struct SLL;
 	u32						vvm_iSkipToCarriageReturnLineFeed			(s8* tcData, u32 tnMaxLength, u32* tnCRLF_Length);
 	void					ivvm_SEChain_appendMasterList				(SStartEnd* ptrSE, SMasterList* ptrNew, u32 tnHint, u32 tnBlockSizeIfNewBlockNeeded);
 	bool					vvm_SEChain_allocateAdditionalMasterSlots	(SStartEnd* ptrSE, u32 tnBlockSize);
-	s32						ioss_translateSOssLinesToSOssCompsTest		(s8* tcHaystack, s8* tcNeedle, s32 tnLength);
+	s32						iTranslateToSCompsTest						(s8* tcHaystack, s8* tcNeedle, s32 tnLength);
 	bool					iioss_translateSOssCompsToOthersCallback	(SStartEndCallback* cb);
 	void*					vvm_SEChain_searchByCallback				(SStartEnd* ptrSE, SStartEndCallback* cb);
-	void					iioss_translateSOssCompsToOthersCallback__insertCompByCompCallback		(SOssComp* compRef, SOssComp* compNew, bool tlInsertAfter);
-	void					iioss_translateSOssCompsToOthersCallback__insertCompByParamsCallback	(SOssComp* compRef, SOssLine* line, u32 tniCode, u32 tnStart, s32 tnLength, bool tlInsertAfter);
-	void					iioss_translateSOssCompsToOthersCallback__deleteCompsCallback			(SOssComp* comp, SOssLine* line);
-	SOssComp*				iioss_translateSOssCompsToOthersCallback__cloneCompsCallback			(SOssComp* comp, SOssLine* line);
-	SOssComp*				iioss_translateSOssCompsToOthersCallback__mergeCompsCallback			(SOssComp* comp, SOssLine* line, u32 tnCount, u32 tniCodeNew);
+	void					iioss_translateSOssCompsToOthersCallback__insertCompByCompCallback		(SComp* compRef, SComp* compNew, bool tlInsertAfter);
+	void					iioss_translateSOssCompsToOthersCallback__insertCompByParamsCallback	(SComp* compRef, SEditChain* line, u32 tniCode, u32 tnStart, s32 tnLength, bool tlInsertAfter);
+	void					iioss_translateSOssCompsToOthersCallback__deleteCompsCallback			(SComp* comp, SEditChain* line);
+	SComp*					iioss_translateSOssCompsToOthersCallback__cloneCompsCallback			(SComp* comp, SEditChain* line);
+	SComp*					iioss_translateSOssCompsToOthersCallback__mergeCompsCallback			(SComp* comp, SEditChain* line, u32 tnCount, u32 tniCodeNew);
 	void					vvm_SEChain_deleteFrom						(SStartEnd* ptrSE, void* ptrCaller, bool tlDeletePointers);
 	SLL*					vvm_SEChain_completelyMigrateSLLByPtr		(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, SLL* ptr, u32 tnHint, u32 tnBlockSize);
 	SLL*					vvm_SEChain_completelyMigrateSLLByNum		(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, u32 lnSrcNum, u32 tnHint, u32 tnBlockSize);
 	SMasterList*			vvm_SEChain_migrateByNum					(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, u32 lnSrcNum, u32 tnHint, u32 tnBlockSize);
+
+	// Linked list functions
+	SLL*					vvm_ll_appendNode							(SLL** root, SLL* nodeHint, SLL* nodeNext, SLL* nodePrev, u32 tnUniqueId, u32 tnSize);
+	SLL*					vvm_ll_createNode							(                           SLL* nodePrev, SLL* nodeNext, u32 tnUniqueId, u32 tnSize);
+	void					vvm_ll_deleteNode							(SLL* node);
+	void					vvm_ll_deleteNodesWithCallback				(SLLCallback* cb);
+	bool					vvm_ll_insertNode							(SLL* node, SLL* nodeRef, bool tlAfter);
+	void					vvm_ll_orphanizeNode						(SLL* node);
+	void					vvm_ll_deleteNodeChain						(SLL** root);
+	void					vvm_ll_deleteNodeChainWithCallback			(SLLCallback* cb);
+	void					vvm_ll_iterateViaCallback					(SLLCallback* cb);
+	void					vvm_ll_iterateBackwardViaCallback			(SLLCallback* cb);
+	SLL*					vvm_ll_getFirstNode							(SLL* node);
+	SLL*					vvm_ll_getLastNode							(SLL* node);
 
 
 
@@ -108,6 +121,29 @@ struct SLL;
 		SLL*			next;					// Next entry in linked list
 		SLL*			prev;					// Previous entry in linked list
 		u32				uniqueId;				// Unique id associated with this object
+	};
+
+	struct SLLCallback
+	{
+		union
+		{
+			u32		_func;
+			bool	(*funcBool)	(SLLCallback* cb);
+			void	(*funcVoid)	(SLLCallback* cb);
+			//////
+			// Uses the following format for the callback:
+			//		void func(SLLCallback* cb)
+			//		bool func(SLLCallback* cb)
+			//////////
+		};
+
+		// Data items for this callback
+		SLL*	node;
+		union {
+			u32		extra;
+			u32		extra1;
+		};
+		u32		extra2;
 	};
 
 	struct SMasterList
@@ -137,28 +173,6 @@ struct SLL;
 		void*			extra;					// For future expansion
 	};
 
-	// Holds a line structure, one entry for every line in a file
-	struct SOssLine
-	{
-		SLL				ll;												// 2-way link list
-
-		// Information about the line
-		s8*				alternateBase;									// (Optional) If used, indicates we are not using "the associated base memory blocK" as the the reference pointer for this line, but have replaced it with our own oss_malloc allocation, if so then it will need manually freed with oss_free
-		s8*				base;											// Base for the start of this line
-		u32				start;											// Start of the line in the associated base memory block
-		u32				length;											// Length of the line (excluding trailing CR/LF combinations)
-		u32				whitespace;										// How much whitespace precedes the start of non-whitespace content on the line
-		u32				lineNumber;										// Line number when initially parsed
-
-		// Parsed / processed information about the raw source line (if used)
-		SStartEnd		comps;											// Pointer to the first component identified on this line	(SOssComp)
-		SStartEnd		compsCombined;									// When comps are combined, the first element is morphed into the new type, but any that were replaced go here	(SOssComp)
-		// Note:  components begin at (line->base + line->start + line->whitespace), which is what would be found if comp->start = 0
-
-		// For portions of the line which have been parsed
-		void*			extra;											// Extra data associated with this structure (application specific)
-	};
-
 	// Structure to search for things
 	struct SAsciiCompSearcher
 	{
@@ -182,12 +196,12 @@ struct SLL;
 	};
 
 	// Holds a component structure
-	struct SOssComp
+	struct SComp
 	{
 		SLL				ll;												// 2-way link list
 
 		// Information about the component
-		SOssLine*		line;											// The line this component relates to
+		SEditChain*		line;											// The line this component relates to
 		u32				iCode;											// Refer to _VVMMC_COMP_* structs in mc_const.h
 		u32				start;											// Start into the indicates line's source code
 		s32				length;											// Length of the component
@@ -200,7 +214,7 @@ struct SLL;
 	struct SOssCompCallback
 	{
 		union {
-			SOssComp*	comp;											// Component at start, and the component to continue processing after upon exit
+			SComp*	comp;											// Component at start, and the component to continue processing after upon exit
 			s8*			text;											// Raw text (depending on when it is being processed
 		};
 		u32				length;											// If raw text, the length of the thing being searched, otherwise 0.
@@ -209,23 +223,23 @@ struct SLL;
 		// Callback callbacks for adjustment
 		union {
 			u32			_insertCompByComp;
-			void		(*insertCompByComp)		(SOssComp* compRef, SOssComp* compNew, bool tlInsertAfter);
+			void		(*insertCompByComp)		(SComp* compRef, SComp* compNew, bool tlInsertAfter);
 		};
 		union {
 			u32			_insertCompByParams;
-			void		(*insertCompByParams)	(SOssComp* compRef, SOssLine* line, u32 tniCode, u32 tnStart, s32 tnLength, bool tlInsertAfter);
+			void		(*insertCompByParams)	(SComp* compRef, SEditChain* line, u32 tniCode, u32 tnStart, s32 tnLength, bool tlInsertAfter);
 		};
 		union {
 			u32			_deleteComps;
-			void		(*deleteComps)			(SOssComp* comp, SOssLine* line);
+			void		(*deleteComps)			(SComp* comp, SEditChain* line);
 		};
 		union {
 			u32			_cloneComps;
-			SOssComp*	(*cloneComps)			(SOssComp* comp, SOssLine* line);
+			SComp*		(*cloneComps)			(SComp* comp, SEditChain* line);
 		};
 		union {
 			u32			_mergeComps;
-			SOssComp*	(*mergeComps)			(SOssComp* comp, SOssLine* line, u32 tnCount, u32 tniCodeNew);
+			SComp*		(*mergeComps)			(SComp* comp, SEditChain* line, u32 tnCount, u32 tniCodeNew);
 		};
 	};
 
@@ -500,99 +514,6 @@ struct SLL;
 
 
 
-
-
-
-
-//////////
-//
-// Called to parse the indicated block of text data.  It converts every combination of an ASCII-13,
-// ASCII-10, or groupings in any order of ASCII-13+ASCII-10 into end-of-line entries.
-//
-// Returns:
-//		NULL	- error
-//		Pointer to the first SOssLine entry
-//		Note:  Every reference in SOssLine points to a location within tcData, so if tcData is freed, then all references are lost
-//
-//////
-	u32 compiler_breakoutAsciiTextIntoSOssLines(s8* data, u32 fileSize, SStartEnd* seLines, u32 extraAllocSize)
-	{
-		u32			lnOffset, lnTotalLineLength, lnLineCount;
-		SOssLine*	linePrev;
-		SOssLine*	line;
-
-
-		// Make sure our environment is sane
-		lnLineCount = 0;
-		if (data && fileSize != 0 && extraAllocSize <= 0xffffffff)
-		{
-			// Initialize our variables
-			lnOffset	= 0;
-			lnLineCount	= 0;
-			linePrev	= NULL;
-			goto storeFirstOne;
-
-			// Iterate through every byte of the source data until all lines are broken out
-			while (line && lnOffset < fileSize)
-			{
-				// Mark the start of this line
-				lnTotalLineLength	= ioss_breakoutAsciiTextDataIntoLines_ScanLine(data + lnOffset, fileSize - lnOffset, &line->length, &line->whitespace);
-
-				// Make sure we still have more to go
-				lnOffset += lnTotalLineLength;
-				if (lnOffset <= fileSize)
-				{
-					// Create the next line
-					linePrev = line;
-
-storeFirstOne:
-					//////////
-					// Allocate this entry
-					///////
-						line = (SOssLine*)vvm_SEChain_append(seLines, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SOssLine), _COMMON_START_END_BLOCK_SIZE, NULL);
-
-
-					//////////
-					// Populate the line with specified information
-					//////
-						//
-						//////
-							if (line)
-							{
-								// Update our link lists
-								if (linePrev)		linePrev->ll.next	= (SLL*)line;
-								line->ll.prev		= (SLL*)linePrev;
-
-								// Indicate where this next line will/would start
-								line->start			= lnOffset;
-								line->base			= data;
-								line->lineNumber	= lnLineCount + 1;						// Store the number as base-1, not base-0
-
-								// Allocate the extra block if we have one to do
-								if (extraAllocSize != 0)
-								{
-									// Allocate the memory block for this extra associated item
-									line->extra = malloc((u32)extraAllocSize);
-
-									// Initialize it to its empty state
-									if (line->extra)		memset((s8*)line->extra, 0, extraAllocSize);
-								}
-
-								// Increase our line count
-								++lnLineCount;
-							}
-						//////
-						//
-					//////
-					// END
-					//////////
-				}
-			}
-			// IF we get here, failure
-		}
-		// If we get here, we do not have any lines
-		return(lnLineCount);
-	}
 
 
 
@@ -944,13 +865,13 @@ _asm int 3;
 //		The first component created (if any)
 //
 //////
-	SOssComp* oss_translateSOssLinesToSOssComps(SAsciiCompSearcher* tsComps, SOssLine* line)
+	SComp* iTranslateSourceLineToSComps(SAsciiCompSearcher* tsComps, SEditChain* line)
 	{
 		s32						lnI, lnMaxLength, lnStart, lnLength, lnLacsLength;
 		bool					llSigned, llResult;
-		SOssComp*				compFirst;
-		SOssComp*				compLast;
-		SOssComp*				comp;
+		SComp*					compFirst;
+		SComp*					compLast;
+		SComp*					comp;
 		s8*						lcData;
 		SAsciiCompSearcher*		lacs;
 		SOssCompCallback		lccb;
@@ -961,11 +882,11 @@ _asm int 3;
 		if (tsComps && line)
 		{
 			// Scan starting at the beginning of the line
-			lcData = line->base + line->start + line->whitespace;
+			lcData = line->d->data;
 
 			// Iterate through every byte identifying every component we can
 			compLast	= NULL;
-			lnMaxLength	= line->length;
+			lnMaxLength	= line->dPopulated;
 			for (lnI = 0; lnI < lnMaxLength; )
 			{
 				// Search through the tsComps list one by one
@@ -982,7 +903,7 @@ _asm int 3;
 					{
 						// There is enough room for this component to be examined
 						// See if it matches
-						if (ioss_translateSOssLinesToSOssCompsTest((s8*)lacs->keyword, lcData + lnI, lacs->length) == 0)
+						if (iTranslateToSCompsTest((s8*)lacs->keyword, lcData + lnI, lacs->length) == 0)
 						{
 							// It matches
 							// Is there a secondary validation?
@@ -1016,7 +937,7 @@ _asm int 3;
 								if (lacs->repeats)
 								{
 									while (	lnStart + lnLength + lnLacsLength <= lnMaxLength
-											&& ioss_translateSOssLinesToSOssCompsTest((s8*)lacs->keyword, lcData + lnStart + lnLength, lacs->length) == 0)
+											&& iTranslateToSCompsTest((s8*)lacs->keyword, lcData + lnStart + lnLength, lacs->length) == 0)
 									{
 										// We found another repeated entry
 										lnLength += lnLacsLength;
@@ -1029,7 +950,7 @@ _asm int 3;
 								//////////
 								// Allocate this entry
 								///////
-									comp = (SOssComp*)vvm_SEChain_append(&line->comps, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SOssComp), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
+									comp = (SComp*)vvm_ll_appendNode((SLL**)&line->firstComp, (SLL*)compLast, NULL, (SLL*)compLast, vvm_getNextUniqueId(), sizeof(SComp));
 
 
 								//////////
@@ -1101,7 +1022,7 @@ _asm int 3;
 //		!0		= does not tmach
 //
 //////
-	s32 ioss_translateSOssLinesToSOssCompsTest(s8* tcHaystack, s8* tcNeedle, s32 tnLength)
+	s32 iTranslateToSCompsTest(s8* tcHaystack, s8* tcNeedle, s32 tnLength)
 	{
 		u32		lnI;
 		bool	llSigned;
@@ -1154,14 +1075,15 @@ _asm int 3;
 // alpha/alphanumeric/numeric forms to other forms.
 //
 //////
-	void oss_translateSOssCompsToOthers(SAsciiCompSearcher* tsComps, SOssLine* line)
+	void oss_translateSOssCompsToOthers(SAsciiCompSearcher* tsComps, SEditChain* line)
 	{
 		SStartEndCallback cb;
 
 
 		cb._func	= (u32)iioss_translateSOssCompsToOthersCallback;
 		cb.extra	= (u32)tsComps;
-		vvm_SEChain_searchByCallback(&line->comps, &cb);
+// TODO:  need to bring this callback code into this algorithm
+//		vvm_SEChain_searchByCallback(&line->comps, &cb);
 	}
 
 
@@ -1221,7 +1143,7 @@ _asm int 3;
 //		If NULL, the compLastScanned indicates the last component that was searched where it wasn't found
 //
 //////
-	SOssComp* oss_findNextSOssCompBy_iCode(SOssComp* comp, u32 tniCode, SOssComp** compLastScanned)
+	SComp* oss_findNextSCompBy_iCode(SComp* comp, u32 tniCode, SComp** compLastScanned)
 	{
 		// Initially indicate failure
 		if (compLastScanned)
@@ -1239,7 +1161,7 @@ _asm int 3;
 				break;		// It is, we're done
 
 			// Move to the next component
-			comp = (SOssComp*)comp->ll.next;
+			comp = (SComp*)comp->ll.next;
 		}
 		// When we get here, we either found it or not
 		// Store our results
@@ -1254,12 +1176,12 @@ _asm int 3;
 // Searches for the next non-whitespace component, including itself
 //
 //////
-	SOssComp* oss_skipPastSOssComp_iCode(SOssComp* comp, u32 tniCode)
+	SComp* oss_skipPastSComp_iCode(SComp* comp, u32 tniCode)
 	{
 		while (comp && comp->iCode == tniCode)
 		{
 			// Move to next component
-			comp = (SOssComp*)comp->ll.next;
+			comp = (SComp*)comp->ll.next;
 		}
 		// When we get here, we're sitting on either no valid component, or the one which does not match the specified type
 		return(comp);
@@ -1278,27 +1200,27 @@ _asm int 3;
 // After:		[define][whitespace][user32][whitespace][something][here]
 //
 //////
-	u32 oss_combine2SOssComps(SOssLine* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2, u32 tniCodeCombined)
+	u32 oss_combine2SComps(SEditChain* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2, u32 tniCodeCombined)
 	{
-		u32			lnCount;
-		SOssComp*	compNext;
-		SOssComp*	comp;
-		SOssComp*	comp1;
-		SOssComp*	comp2;
+		u32		lnCount;
+		SComp*	compNext;
+		SComp*	comp;
+		SComp*	comp1;
+		SComp*	comp2;
 
 
 		// Make sure our environment is sane
 		lnCount = 0;
-		if (line && line->comps.root)
+		if (line && line->firstComp)
 		{
 			// Grab the first component
-			comp = (SOssComp*)line->comps.root->ptr;
+			comp = line->firstComp;
 
 			// Continue until we get ... to ... the ... end ... (imagine you were reading that like in a baseball stadium with lots of loud echoes)
 			while (comp)
 			{
 				// Grab the next component sequentially
-				compNext = (SOssComp*)comp->ll.next;
+				compNext = (SComp*)comp->ll.next;
 
 				// Make sure there's something to do
 				if (!compNext)
@@ -1306,7 +1228,7 @@ _asm int 3;
 
 				// Grab the one after that
 				comp1 = comp;
-				comp2 = (SOssComp*)comp1->ll.next;
+				comp2 = (SComp*)comp1->ll.next;
 				if (!comp2)
 					return(lnCount);	// We're done
 
@@ -1322,18 +1244,20 @@ _asm int 3;
 						// Gentlemen, we have a job to do.  Now, let's get to it!
 						++lnCount;
 
+
 						//////////
 						// Combine these into one
 						//////
 							// Increase comp1's length, then move comp2 from line->comps to line->compsCombined
 							comp1->length	+= comp2->length;
 							comp1->iCode	= tniCodeCombined;
-							vvm_SEChain_completelyMigrateSLLByPtr(&line->compsCombined, &line->comps, (SLL*)comp2, 0, _COMMON_START_END_BLOCK_SIZE);
+							vvm_ll_deleteNode((SLL*)comp2);
+
 
 						//////////
 						// Point to the new next thing, which is now the thing after what previously had been comp2, but is now simply comp->ll.next (which could now be nothing)
 						//////
-							compNext = (SOssComp*)comp->ll.next;
+							compNext = (SComp*)comp->ll.next;
 					}
 				}
 				// Move to the next component
@@ -1358,29 +1282,29 @@ _asm int 3;
 // After:		[sadf32][whitespace][a][comma][20.50]
 //
 //////
-	u32 oss_combine3SOssComps(SOssLine* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2, u32 tniCodeNeedle3, u32 tniCodeCombined)
+	u32 oss_combine3SComps(SEditChain* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2, u32 tniCodeNeedle3, u32 tniCodeCombined)
 	{
-		u32			lnCount;
-		SOssComp*	compNext;
-		SOssComp*	comp;
-		SOssComp*	comp1;
-		SOssComp*	comp2;
-		SOssComp*	comp3;
+		u32		lnCount;
+		SComp*	compNext;
+		SComp*	comp;
+		SComp*	comp1;
+		SComp*	comp2;
+		SComp*	comp3;
 
 
 // UNTESTED CODE:  breakpoint and examine
 		// Make sure our environment is sane
 		lnCount = 0;
-		if (line && line->comps.root)
+		if (line && line->firstComp)
 		{
 			// Grab the first component
-			comp = (SOssComp*)line->comps.root->ptr;
+			comp = line->firstComp;
 
 			// Continue until we get ... to ... the ... end ... (imagine you were reading that like in a baseball stadium with lots of loud echoes)
 			while (comp)
 			{
 				// Grab the next component sequentially
-				compNext = (SOssComp*)comp->ll.next;
+				compNext = (SComp*)comp->ll.next;
 
 				// Make sure there's something to do
 				if (!compNext)
@@ -1388,12 +1312,12 @@ _asm int 3;
 
 				// Grab the one after that
 				comp1 = compNext;
-				comp2 = (SOssComp*)comp1->ll.next;
+				comp2 = (SComp*)comp1->ll.next;
 				if (!comp2)
 					return(lnCount);	// We're done
 
 				// Grab the one after that
-				comp3 = (SOssComp*)comp2->ll.next;
+				comp3 = (SComp*)comp2->ll.next;
 				if (!comp3)
 					return(lnCount);	// We're done
 
@@ -1413,13 +1337,14 @@ _asm int 3;
 							// Increase comp1's length, then move comp2 from line->comps to line->compsCombined
 							comp1->length	+= comp2->length + comp3->length;
 							comp1->iCode	= tniCodeCombined;
-							vvm_SEChain_completelyMigrateSLLByPtr(&line->compsCombined, &line->comps, (SLL*)comp2, 0, _COMMON_START_END_BLOCK_SIZE);
-							vvm_SEChain_completelyMigrateSLLByPtr(&line->compsCombined, &line->comps, (SLL*)comp3, 0, _COMMON_START_END_BLOCK_SIZE);
+							vvm_ll_deleteNode((SLL*)comp2);
+							vvm_ll_deleteNode((SLL*)comp3);
+
 
 						//////////
 						// Point to the new next thing, which is now the thing after what previously had been comp2, but is now simply comp->ll.next (which could now be nothing)
 						//////
-							compNext = (SOssComp*)comp->ll.next;
+							compNext = (SComp*)comp->ll.next;
 					}
 				}
 				// Move to the next component
@@ -1444,27 +1369,27 @@ _asm int 3;
 // After:		[u8][whitespace][name][left bracket][right bracket][whitespace][equal][whitespace][double quote text]
 //
 //////
-	u32 oss_combineAllBetweenSOssComps(SOssLine* line, u32 tniCodeNeedle, u32 tniCodeCombined)
+	u32 oss_combineAllBetweenSOssComps(SEditChain* line, u32 tniCodeNeedle, u32 tniCodeCombined)
 	{
-		u32			lnCount;
-		SOssComp*	compNext;
-		SOssComp*	comp;
-		SOssComp*	compSearcher;
+		u32		lnCount;
+		SComp*	compNext;
+		SComp*	comp;
+		SComp*	compSearcher;
 
 
 // UNTESTED CODE:  breakpoint and examine
 		// Make sure our environment is sane
 		lnCount = 0;
-		if (line && line->comps.root)
+		if (line && line->firstComp)
 		{
 			// Grab the first component
-			comp = (SOssComp*)line->comps.root->ptr;
+			comp = line->firstComp;
 
 			// Continue until we get ... to ... the ... end ... (imagine you were reading that like in a baseball stadium with lots of loud echoes)
 			while (comp)
 			{
 				// Grab the next component sequentially
-				compNext = (SOssComp*)comp->ll.next;
+				compNext = (SComp*)comp->ll.next;
 
 				// Make sure there's something to do
 				if (!compNext)
@@ -1489,27 +1414,27 @@ _asm int 3;
 								// Increase our count
 								++lnCount;
 
-								// Migrate this one (as it was technically merged above with the comp->length = line)
-								vvm_SEChain_completelyMigrateSLLByPtr(&line->compsCombined, &line->comps, (SLL*)compNext, 0, _COMMON_START_END_BLOCK_SIZE);
+								// Delete this one (as it was technically merged above with the comp->length = line)
+								vvm_ll_deleteNode((SLL*)compNext);
 
 								// See if we're done
 								if (compNext == compSearcher)
 									break;		// This was the last one, we're done
 
 								// Move to the next component (which is the comp->ll.next component again, because we just migrated the previous compNext
-								compNext = (SOssComp*)comp->ll.next;
+								compNext = (SComp*)comp->ll.next;
 							}
 							// When we get here, everything's migrated
 
 							// Grab the new next, which is the one after the matched entry
-							compNext = (SOssComp*)comp->ll.next;
+							compNext = (SComp*)comp->ll.next;
 
 							// Continue looking for more combinations on this line
 							break;
 						}
 
 						// Move to the next component
-						compSearcher = (SOssComp*)compSearcher->ll.next;
+						compSearcher = (SComp*)compSearcher->ll.next;
 					}
 				}
 				// Move to the next component
@@ -1534,26 +1459,26 @@ _asm int 3;
 // After:		[u8][asterisk][whitespace][name][whitespace][comment]
 //
 //////
-	u32 oss_combineAllAfterSOssComp(SOssLine* line, u32 tniCodeNeedle)
+	u32 oss_combineAllAfterSOssComp(SEditChain* line, u32 tniCodeNeedle)
 	{
-		u32			lnCount;
-		SOssComp*	compNext;
-		SOssComp*	comp;
+		u32		lnCount;
+		SComp*	compNext;
+		SComp*	comp;
 
 
 // UNTESTED CODE:  breakpoint and examine
 		// Make sure our environment is sane
 		lnCount = 0;
-		if (line && line->comps.root)
+		if (line && line->firstComp)
 		{
 			// Grab the first component
-			comp = (SOssComp*)line->comps.root->ptr;
+			comp = (SComp*)line->firstComp;
 
 			// Continue until we get ... to ... the ... end ... (imagine you were reading that like in a baseball stadium with lots of loud echoes)
 			while (comp)
 			{
 				// Grab the next component sequentially
-				compNext = (SOssComp*)comp->ll.next;
+				compNext = (SComp*)comp->ll.next;
 
 				// Make sure there's something to do
 				if (!compNext)
@@ -1566,18 +1491,17 @@ _asm int 3;
 					// Combine from here on out into one
 					//////
 						// Increase the original component to the line's whole length
-						comp->length = line->length - comp->start;
-						
+						comp->length = line->dPopulated - comp->start;
 						while (compNext)
 						{
 							// Indicate the number combined
 							++lnCount;
 
 							// Move this one along
-							vvm_SEChain_completelyMigrateSLLByPtr(&line->compsCombined, &line->comps, (SLL*)compNext, 0, _COMMON_START_END_BLOCK_SIZE);
+							vvm_ll_deleteNode((SLL*)compNext);
 
 							// Move to next component (which is now again the comp->ll.next entry, because we've just migrated the prior compNext entry to compsCombined)
-							compNext = (SOssComp*)comp->ll.next;
+							compNext = (SComp*)comp->ll.next;
 						}
 						// When we get here, we're done
 						break;
@@ -1604,7 +1528,7 @@ _asm int 3;
 // After:		[u8][asterisk][whitespace][name][whitespace][comment]
 //
 //////
-	u32 oss_removeExtraneousWhitespaceSOssComps(SOssLine* line, u32 tniCodeWhitespace)
+	u32 oss_removeExtraneousWhitespaceSOssComps(SEditChain* line, u32 tniCodeWhitespace)
 	{
 		return(0);
 	}
@@ -1622,7 +1546,7 @@ _asm int 3;
 	{
 		bool					llResult;
 		s32						lnLacsLength;
-		SOssComp*				comp;
+		SComp*				comp;
 		SAsciiCompSearcher*		lacs;
 		SOssCompCallback		lccb;
 
@@ -1631,7 +1555,7 @@ _asm int 3;
 		if (cb && cb->ptr)
 		{
 			// Grab our pointers into recognizable thingamajigs
-			comp	= (SOssComp*)cb->ptr;
+			comp	= (SComp*)cb->ptr;
 			lacs	= (SAsciiCompSearcher*)cb->extra;
 
 			// Iterate through this item to see if any match
@@ -1650,9 +1574,9 @@ _asm int 3;
 					if (!lacs->firstOnLine || comp->start == 0)
 					{
 						// Physically conduct the exact comparison
-						if (ioss_translateSOssLinesToSOssCompsTest((s8*)lacs->keyword, 
-																	comp->line->base + comp->line->start + comp->line->whitespace + comp->start, 
-																	lacs->length) == 0)
+						if (iTranslateToSCompsTest((s8*)lacs->keyword, 
+														comp->line->d->data + comp->start, 
+														lacs->length) == 0)
 						{
 							// This is a match
 							// Is there a secondary test?
@@ -1743,7 +1667,7 @@ _asm int 3;
 //        then it will need to be either manually added to the line->comps, or manually tended to.
 //
 //////
-	void iioss_translateSOssCompsToOthersCallback__insertCompByCompCallback(SOssComp* compRef, SOssComp* compNew, bool tlInsertAfter)
+	void iioss_translateSOssCompsToOthersCallback__insertCompByCompCallback(SComp* compRef, SComp* compNew, bool tlInsertAfter)
 	{
 // TODO:  untested code, breakpoint and examine
 _asm int 3;
@@ -1781,10 +1705,9 @@ _asm int 3;
 // Called as a callback from the custom handler callback function, to do some manual insertion.
 //
 //////
-	void iioss_translateSOssCompsToOthersCallback__insertCompByParamsCallback(SOssComp* compRef, SOssLine* line, u32 tniCode, u32 tnStart, s32 tnLength, bool tlInsertAfter)
+	void iioss_translateSOssCompsToOthersCallback__insertCompByParamsCallback(SComp* compRef, SEditChain* line, u32 tniCode, u32 tnStart, s32 tnLength, bool tlInsertAfter)
 	{
-		bool		llResult;
-		SOssComp*	compNew;
+		SComp* compNew;
 
 
 // TODO:  untested code, breakpoint and examine
@@ -1793,11 +1716,11 @@ _asm int 3;
 		if (compRef && line)
 		{
 			// Allocate a new pointer
-			compNew = (SOssComp*)vvm_SEChain_append(&line->comps, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SOssComp), -1, &llResult);
+			compNew = (SComp*)vvm_ll_appendNode((SLL**)&line->firstComp, NULL, NULL, NULL, vvm_getNextUniqueId(), sizeof(SComp));
 			if (compNew)
 			{
 				// Initialize it
-				memset(compNew, 0, sizeof(SOssComp));
+				memset(compNew, 0, sizeof(SComp));
 
 				// Populate it
 				compNew->line		= line;
@@ -1820,7 +1743,7 @@ _asm int 3;
 // indicated component.
 //
 //////
-	void iioss_translateSOssCompsToOthersCallback__deleteCompsCallback(SOssComp* comp, SOssLine* line)
+	void iioss_translateSOssCompsToOthersCallback__deleteCompsCallback(SComp* comp, SEditChain* line)
 	{
 // TODO:  untested code, breakpoint and examine
 _asm int 3;
@@ -1843,7 +1766,7 @@ _asm int 3;
 			if (line)
 			{
 				// Delete the entry from line->comps
-				vvm_SEChain_deleteFrom(&line->comps, comp, true);
+				vvm_ll_deleteNode((SLL*)comp);
 
 			} else {
 				// Free the rogue entry
@@ -1860,10 +1783,9 @@ _asm int 3;
 // component.  If line is not NULL, the component is automatically added to line->comps;
 //
 //////
-	SOssComp* iioss_translateSOssCompsToOthersCallback__cloneCompsCallback(SOssComp* comp, SOssLine* line)
+	SComp* iioss_translateSOssCompsToOthersCallback__cloneCompsCallback(SComp* comp, SEditChain* line)
 	{
-		bool		llResult;
-		SOssComp*	compNew;
+		SComp* compNew;
 
 
 // TODO:  untested code, breakpoint and examine
@@ -1875,18 +1797,18 @@ _asm int 3;
 			if (line)
 			{
 				// Add the new component to line->comps
-				compNew = (SOssComp*)vvm_SEChain_append(&line->comps, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SOssComp), -1, &llResult);
+				compNew = (SComp*)vvm_ll_appendNode((SLL**)&line->firstComp, NULL, NULL, NULL, vvm_getNextUniqueId(), sizeof(SComp));
 
 			} else {
 				// Just create a rogue one
-				compNew = (SOssComp*)malloc(sizeof(SOssComp));
+				compNew = (SComp*)malloc(sizeof(SComp));
 			}
 
 			// Was it valid?
 			if (compNew)
 			{
 				// Initialize it
-				memset(compNew, 0, sizeof(SOssComp));
+				memset(compNew, 0, sizeof(SComp));
 
 				// Populate it
 				compNew->line		= line;
@@ -1916,10 +1838,10 @@ _asm int 3;
 //        handle that condition.
 //
 //////
-	SOssComp* iioss_translateSOssCompsToOthersCallback__mergeCompsCallback(SOssComp* comp, SOssLine* line, u32 tnCount, u32 tniCodeNew)
+	SComp* iioss_translateSOssCompsToOthersCallback__mergeCompsCallback(SComp* comp, SEditChain* line, u32 tnCount, u32 tniCodeNew)
 	{
 		u32			lnI;
-		SOssComp*	compThis;
+		SComp*	compThis;
 
 
 // TODO:  untested code, breakpoint and examine
@@ -1928,7 +1850,7 @@ _asm int 3;
 		if (comp)
 		{
 			// Iterate for each merging
-			for (lnI = 1, compThis = (SOssComp*)comp->ll.next; compThis && lnI < tnCount; lnI++, compThis = (SOssComp*)comp->ll.next)
+			for (lnI = 1, compThis = (SComp*)comp->ll.next; compThis && lnI < tnCount; lnI++, compThis = (SComp*)comp->ll.next)
 			{
 				// Absorb compThis's length into comp's "collective"
 				comp->length += compThis->length;
@@ -2203,4 +2125,422 @@ _asm int 3;
 		}
 		// If we get here, error
 		return(NULL);
+	}
+
+
+
+
+//////////
+//
+// Append a new node to the list, and return the pointer.
+// The nodeHint is provided and can be used to find the end of the chain faster than iterating
+// from the root.  Typically it is the last returned node.  However, if NULL, this process will
+// iterate from the root node forward.
+//
+//////
+	SLL* vvm_ll_appendNode(SLL** root, SLL* nodeHint, SLL* nodeNext, SLL* nodePrev, u32 tnUniqueId, u32 tnSize)
+	{
+		SLL* node;
+
+
+		// Make sure our environment is sane
+		node = NULL;
+		if (root)
+		{
+			// Create a new node
+			node = vvm_ll_createNode(nodePrev, nodeNext, tnUniqueId, tnSize);
+			
+			// Append it to the chain
+			if (*root)
+			{
+				// There is already data
+				if (!nodeHint)
+					nodeHint = *root;
+
+				// Iterate forward until we reach the end
+				while (nodeHint->next)
+					nodeHint = nodeHint->next;
+
+				// Append as the next item from where we are
+				nodeHint->next = node;
+
+			} else {
+				// This will be the first entry
+				*root = node;
+			}
+		}
+		// Indicate our success or failure
+		return(node);
+	}
+
+
+
+
+//////////
+//
+// Creates a new 2-way linked list with optional nodePrev and nodeNext info, using
+// the indicated size for the allocation (which is beyond the SLL portion at the head).
+//////
+	SLL* vvm_ll_createNode(SLL* nodePrev, SLL* nodeNext, u32 tnUniqueId, u32 tnSize)
+	{
+		SLL* node;
+
+
+		// Allocate the size
+		node = (SLL*)malloc(sizeof(SLL) + tnSize);
+		if (node)
+		{
+			// We're good
+			memset(node, 0, tnSize);
+			
+			// Store a unique id
+			node->uniqueId	= tnUniqueId;
+
+			// Update our pointers
+			node->prev		= nodePrev;
+			node->next		= nodeNext;
+		}
+
+		// Indicate our success or failure
+		return(node);
+	}
+
+
+
+
+//////////
+//
+// Called to delete a link list node.  If need be it orphanizes the node first.
+//
+//////
+	void vvm_ll_deleteNode(SLL* node)
+	{
+		if (node)
+		{
+			//////////
+			// Disconnect
+			//////
+				if (node->prev || node->next)
+					vvm_ll_orphanizeNode(node);
+
+
+			//////////
+			// Delete the node
+			//////
+				free(node);
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to delete a link list node with a callback.  If need be it orphanizes the node first.
+//
+//////
+	void vvm_ll_deleteNodesWithCallback(SLLCallback* cb)
+	{
+		if (cb && cb->node)
+		{
+			//////////
+			// Disconnect
+			//////
+				if (cb->node->prev || cb->node->next)
+					vvm_ll_orphanizeNode(cb->node);
+
+
+			//////////
+			// Let the user say their goodbyes
+			//////
+				if (cb->_func)
+					cb->funcVoid(cb);
+
+
+			//////////
+			// Delete the node
+			//////
+				free(cb->node);
+		}
+	}
+
+
+
+
+//////////
+//
+// Inserts a 2-way linked relative to the nodeRef, either before or after.  If the
+// node is already connected, it is disconnected.
+//
+//////
+	bool vvm_ll_insertNode(SLL* node,  SLL* nodeRef,  bool tlAfter)
+	{
+// TODO:  UNTESTED CODE
+		// Is our environment sane?
+		if (node && nodeRef)
+		{
+			//////////
+			// Disconnect
+			//////
+				if (node->prev || node->next)
+					vvm_ll_orphanizeNode(node);
+
+
+			//////////
+			// Is it going before or after?
+			//////
+				if (tlAfter)
+				{
+					// Point the one after this back to node to be inserted
+					if (nodeRef->next)
+						nodeRef->next->prev	= node;		// The one after points back to the node we're inserting
+
+					// Are we updating to a valid node?
+					if (node)
+					{
+						// The node is valid, so we can update relative pointers
+						// Point this node to the one that will be after
+						node->next = nodeRef->next;
+						node->prev = nodeRef;
+					}
+
+					// Store the pointer to the node
+					nodeRef->next = node;
+
+
+				} else {
+					// Positioning this node before
+					// Point the one before this forward to the node to be inserted
+					if (nodeRef->prev)
+						nodeRef->prev->next = node;
+
+					// Are we updating to a valid node?
+					if (node)
+					{
+						// The node is valid, so we can update relative pointers
+						// Point this node to the one that will be after
+						node->prev = nodeRef->prev;
+						node->next = nodeRef;
+					}
+
+					// Store the pointer to the node
+					nodeRef->prev = node;
+				}
+		}
+		// Failure
+		return(false);
+	}
+
+
+
+
+//////////
+//
+// Disconnects a node from its existing chain
+//
+//////
+	void vvm_ll_orphanizeNode(SLL* node)
+	{
+// TODO:  UNTESTED CODE
+		// Is our environment sane?
+		if (node)
+		{
+
+			//////////
+			// Is there one before?
+			//////
+				if (node->prev)
+					node->prev->next = node->next;		// Make the one before point to the one after
+
+			//////////
+			// Is there one after?
+			//////
+				if (node->next)
+					node->next->prev = node->prev;		// Make the one after point to the one before
+
+			//////////
+			// Free up all parts
+			//////
+				node->next	= NULL;
+				node->prev	= NULL;
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to delete the entire chain (beginning from where it's at
+//
+//////
+	void vvm_ll_deleteNodeChain(SLL** root)
+	{
+		SLL* node;
+		SLL* nodeNext;
+
+
+		// Make sure the environment is sane
+		if (root)
+		{
+			// Iterate through deleting each entry
+			node = *root;
+			while (node)
+			{
+				// Grab the next node
+				nodeNext = node->next;
+				
+				// Delete the node
+				free(node);
+
+				// Move to next item
+				node = nodeNext;
+			}
+
+			// Reset the pointer
+			*root = NULL;
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to delete the entire chain (beginning from where it's at on) using an optional callback.
+// The callback should not delete the node, but only anything the node points to.
+//
+//////
+	void vvm_ll_deleteNodeChainWithCallback(SLLCallback* cb)
+	{
+		SLL* nodeNext;
+
+
+		// Make sure the environment is sane
+		if (cb)
+		{
+			// Iterate through deleting each entry
+			while (cb->node)
+			{
+				// Grab the next node
+				nodeNext = cb->node->next;
+
+				// Perform the callback
+				if (cb->_func)
+					cb->funcVoid(cb);
+
+				// Delete the node
+				free(cb->node);
+
+				// Move to next node
+				cb->node = nodeNext;
+			}
+			// All done
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to compute the SHA-1 of the current node as a 64-bit quantity
+//
+//////
+	void vvm_ll_iterateViaCallback(SLLCallback* cb)
+	{
+		//////////
+		// For each node, process its portion
+		//////
+			while (cb->node)
+			{
+
+				//////////
+				// Callback to compute the SHA1 on this item
+				//////
+					cb->funcVoid(cb);
+					//vvm_sha1ComputeSha1_ProcessThisData(context, (s8*)node, tnSize);
+
+
+				//////////
+				// Move to next node
+				//////
+					cb->node = cb->node->next;
+			}
+	}
+
+
+
+
+//////////
+//
+// Called to iterate from the indicated node backwards
+//
+//////
+	void vvm_ll_iterateBackwardViaCallback(SLLCallback* cb)
+	{
+		//////////
+		// For each node, process its portion
+		//////
+			while (cb->node)
+			{
+
+				//////////
+				// Callback to compute the SHA1 on this item
+				//////
+					cb->funcVoid(cb);
+					//vvm_sha1ComputeSha1_ProcessThisData(context, (s8*)node, tnSize);
+
+
+				//////////
+				// Move to next node
+				//////
+					cb->node = cb->node->prev;
+			}
+	}
+
+
+
+
+//////////
+//
+// Called to compute the SHA-1 of the current node as a 64-bit quantity
+//
+//////
+	SLL* vvm_ll_getFirstNode(SLL* node)
+	{
+		// Make sure the environment is sane
+		if (node)
+		{
+			// Iterate backwards to the top
+			while (node->prev)
+				node = node->prev;
+		}
+
+		// Indicate where we are
+		return(node);
+	}
+
+
+
+
+//////////
+//
+// Called to compute the SHA-1 of the current node as a 64-bit quantity
+//
+// The parameters in the callback are:
+//		ptr			-- LL node
+//////
+	SLL* vvm_ll_getLastNode(SLL* node)
+	{
+		// Make sure the environment is sane
+		if (node)
+		{
+			// Iterate forwards to the end
+			while (node->next)
+				node = node->next;
+		}
+
+		// Indicate where we are
+		return(node);
 	}

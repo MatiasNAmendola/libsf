@@ -40,6 +40,7 @@ struct SObject;
 struct SVariable;
 struct SEditChainManager;
 struct SEditChain;
+struct SComp;
 
 
 
@@ -253,6 +254,9 @@ struct SEditChain
 	u32			line;													// This line's number
 	SDatum*		d;														// The text on this line is LEFT(d.data, dPopulated)
 	u32			dPopulated;												// The actual populated length of d (d is allocated in blocks to allow for minor edits without constantly reallocating)
+
+	// Compiler information
+	SComp*		firstComp;												// Pointer to the first component identified on this line	(SComp)
 
 	// General purpose extra data
 	SExtraInfo*	extra_info;												// Extra information about this item in the chain
