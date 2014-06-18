@@ -44,31 +44,13 @@
 	SBuilder*			gWindows;
 	SBuilder*			gFonts;
 	HWND				ghwndMsg;
-	HWND				ghwndScreen;
-	HWND				ghwndJDebi;
-	SWindow				winScreen;
-	SWindow				winJDebi;
+	CRITICAL_SECTION	gcsUniqueIdAccess;
+	u32					gnNextUniqueId						= 0;
 	s64					systemStartedMs;
 
 
-	// JDebi window
+	// JDebi window items
 	SEditChainManager*	commandHistory;																// The command window history
-
-
-	// Global colors
-	const SBgra			white								= { rgba(255, 255, 255, 255) };
-	const SBgra			black								= { rgba(0, 0, 0, 255) };
-	const SBgra			gray								= { rgba(192, 192, 192, 255) };
-	const SBgra			selectedBack						= { rgba(32, 164, 255, 255) };
-	const SBgra			selectedFore						= { rgba(255, 255, 255, 255) };
-	const SBgra			disabledBack						= { rgba(255, 255, 255, 255) };
-	const SBgra			disabledFore						= { rgba(192, 192, 230, 255) };
-
-	// Four-corner window color schemes (eventually these will be loaded from themes.dbf)
-	const SBgra			colorNW								= { rgba(222, 230, 255, 255) };
-	const SBgra			colorNE								= { rgba(157, 194, 214, 255) };
-	const SBgra			colorSW								= { rgba(255, 255, 255, 255) };
-	const SBgra			colorSE								= { rgba(192, 212, 255, 255) };
 
 	// App icons
 	SBitmap*			bmpVjrIcon							= NULL;
@@ -105,25 +87,43 @@
 	SObject*			gobj_defaultOption					= NULL;
 	SObject*			gobj_defaultRadio					= NULL;
 
+	//////////
 	// General defaults
-	SFont*				gsFont								= NULL;									// Default font, Ubuntu 10 pt
+	//////
+		SFont*			gsFont								= NULL;									// Default font, Ubuntu 10 pt
+		// Global colors
+		const SBgra		white								= { rgba(255, 255, 255, 255) };
+		const SBgra		black								= { rgba(0, 0, 0, 255) };
+		const SBgra		gray								= { rgba(192, 192, 192, 255) };
+		const SBgra		selectedBackColor					= { rgba(32, 164, 255, 255) };
+		const SBgra		selectedForeColor					= { rgba(255, 255, 255, 255) };
+		const SBgra		disabledBackColor					= { rgba(255, 255, 255, 255) };
+		const SBgra		disabledForeColor					= { rgba(192, 192, 230, 255) };
+		// Four-corner window color schemes (eventually these will be loaded from themes.dbf)
+		const SBgra		NwColor								= { rgba(222, 230, 255, 255) };
+		const SBgra		NeColor								= { rgba(157, 194, 214, 255) };
+		const SBgra		SwColor								= { rgba(255, 255, 255, 255) };
+		const SBgra		SeColor								= { rgba(192, 212, 255, 255) };
 
+
+	//////////
 	// Mouse options
-	bool				glMoving							= false;								// When the user clicks and drags the title bar area, the window will move
-	bool				glResizing							= false;								// When the user clicks and drags the corner triangle areas, the window will resize, resulting in larger or smaller scaling
-	u32					gnResizingFrom						= 0;									// The _UPPER_LEFT.._LOWER_LEFT constants from below
-// 	RECT				grcMoveStart						= { 0, 0, 0, 0 };
-// 	RECT				grcResizeStart						= { 0, 0, 0, 0 };
-	SXYS32				gMousePositionMoveStart				= { -1, -1 };							// Mouse position when the move started
-	SXYS32				gMousePositionMoveEnd				= { -1, -1 };							// Mouse position when the move ended
-	SXYS32				gMousePositionResizeStart			= { -1, -1 };							// Mouse position when the resize started
-	SXYS32				gMousePositionResizeEnd				= { -1, -1 };							// Mouse position when the resize ended
+	//////
+		bool			glMoving							= false;								// When the user clicks and drags the title bar area, the window will move
+		bool			glResizing							= false;								// When the user clicks and drags the corner triangle areas, the window will resize, resulting in larger or smaller scaling
+		u32				gnResizingFrom						= 0;									// The _UPPER_LEFT.._LOWER_LEFT constants from below
+// 		RECT			grcMoveStart						= { 0, 0, 0, 0 };
+// 		RECT			grcResizeStart						= { 0, 0, 0, 0 };
+		SXYS32			gMousePositionMoveStart				= { -1, -1 };							// Mouse position when the move started
+		SXYS32			gMousePositionMoveEnd				= { -1, -1 };							// Mouse position when the move ended
+		SXYS32			gMousePositionResizeStart			= { -1, -1 };							// Mouse position when the resize started
+		SXYS32			gMousePositionResizeEnd				= { -1, -1 };							// Mouse position when the resize ended
 
-	SXYS32				gMousePosition						= { -1, -1 };							// Mouse position indicated by windows in the interface window
-	bool				glMouseInClientArea					= false;								// When the mouse is in the client area, this flag is raised
-	SXYS32				gMousePositionClientArea			= { -1, -1 };							// Mouse position in the client area of the interface window
-	SXYS32				gnMouseDelta						= { 0, 0 };								// Change in position
-	bool				glMouseLeftButton					= false;
-	bool				glMouseMiddleButton					= false;
-	bool				glMouseRightButton					= false;
+		SXYS32			gMousePosition						= { -1, -1 };							// Mouse position indicated by windows in the interface window
+		bool			glMouseInClientArea					= false;								// When the mouse is in the client area, this flag is raised
+		SXYS32			gMousePositionClientArea			= { -1, -1 };							// Mouse position in the client area of the interface window
+		SXYS32			gnMouseDelta						= { 0, 0 };								// Change in position
+		bool			glMouseLeftButton					= false;
+		bool			glMouseMiddleButton					= false;
+		bool			glMouseRightButton					= false;
 

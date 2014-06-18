@@ -38,6 +38,8 @@
 // Forward definition for references
 struct SObject;
 struct SVariable;
+struct SEditChainManager;
+struct SEditChain;
 
 
 
@@ -144,6 +146,14 @@ struct SBitmapProcess
 	bool				spans3V;			// Spans at least 3 pixels vertically, meaning it begins somewhere in 1.x, for example, and ends somewhere beyond 3.x
 };
 
+struct SWindow
+{
+	SWindow*	next;													// Pointer to next window in the chain
+	HWND		hwnd;													// The window's hwnd
+	RECT		rc;														// Rectangle of window's physical position
+	SObject*	form;													// The object iself
+};
+
 struct SSize
 {
 	union {
@@ -176,30 +186,82 @@ struct SDatum
 	u32			length;													// Content length
 };
 
+struct STranslate
+{
+	void*		p1;														// Pointer 1
+	void*		p2;														// Pointer 2
+};
+
+// struct STranslateExtra
+// {
+// 	void*		p1;														// Pointer 1
+// 	void*		p2;														// Pointer 2
+// 
+// 	// Extra information
+// 	union {
+// 		struct {
+// 			u8		u8Data1;
+// 			u8		u8Data2;
+// 			u8		u8Data3;
+// 			u8		u8Data4;
+// 		};
+// 		struct {
+// 			s8		s8Data1;
+// 			s8		s8Data2;
+// 			s8		s8Data3;
+// 			s8		s8Data4;
+// 		};
+// 		struct {
+// 			u16		u16Data1;
+// 			u16		u16Data2;
+// 		};
+// 		struct {
+// 			s16		s16Data1;
+// 			s16		s16Data2;
+// 		};
+// 		u32		u32Data;
+// 		s32		s32Data;
+// 		bool	used;
+// 		void*	extra;
+// 	};
+// };
+
+struct SExtraInfo
+{
+	SExtraInfo* next;													// Next extra info item in chain (if any)
+
+	u32			type;													// Application defined type, identifies what's stored in this.info.data
+	SDatum		info;													// The extra info
+
+	// Functions to use to access this extra info block
+	void		(*onAccess)					(SEditChainManager* chainMgr, SEditChain* chain, SExtraInfo* extra_info);	// When the parent chain is accessed
+	void		(*onArrival)				(SEditChainManager* chainMgr, SEditChain* chain, SExtraInfo* extra_info);	// When the target implementation is sitting on the chain record
+	void		(*onUpdate)					(SEditChainManager* chainMgr, SEditChain* chain, SExtraInfo* extra_info);	// When the parent chain is updated
+
+	// Functions called before freeing, and after allocating, the this.info datum
+	SExtraInfo*	(*extra_info_allocate)		(SEditChainManager* chainMgr, SEditChain* chain, SExtraInfo* extra_info);	// Called to allocate this.info per needs
+	SExtraInfo*	(*extra_info_duplicate)		(SEditChainManager* chainMgr, SEditChain* chain, SExtraInfo* extra_info);	// Called when a chain is duplicated, determines what if any of the source's data needs to be duplicated as well
+	SExtraInfo*	(*extra_info_free)			(SEditChainManager* chainMgr, SEditChain* chain, SExtraInfo* extra_info);	// Called to free any data in this.info
+};
+
 struct SEditChain
 {
 	SEditChain*	prev;													// Pointer backward to previous text item
 	SEditChain*	next;													// Pointer forward to next text item
+	u32			uid;													// Unique id for this line, used for undos and identifying individual lines which may move about
 
 	u32			line;													// This line's number
 	SDatum*		d;														// The text on this line is LEFT(d.data, dPopulated)
 	u32			dPopulated;												// The actual populated length of d (d is allocated in blocks to allow for minor edits without constantly reallocating)
 
 	// General purpose extra data
-	void*		extra_info;												// Extra info that can be stored on this item
-	u32			extra_info_size;										// Size of the extra_info allocated block
-//////////
-// TODO:  We could add a handler here to allocate and free the extra_info.
-// Note:  As it is today, we simply have a block of allocated memory which is handled like a blob.
-//	void		(*extra_info_allocate)		(SEditChainManager* chainMgr, SEditChain* chain, void* extra_info);
-//	void		(*extra_info_free)			(SEditChainManager* chainMgr, SEditChain* chain, void* extra_info);
-//////
+	SExtraInfo*	extra_info;												// Extra information about this item in the chain
 };
 
 struct SUndo
 {
-	SEditChain*	before;													// The item before
-	SEditChain*	after;													// The item after
+	u32			uidBefore;												// The item before
+	u32			uidAfter;												// The item after
 
 	SEditChain*	first;													// The first SEditChain that would've gone between them
 																		// If multiple lines were deleted, the chain is moved here.
@@ -208,29 +270,50 @@ struct SUndo
 
 struct SEditChainManager
 {
-	SEditChain*	first;													// First in the chain (first->prev is NULL)
-	SEditChain*	last;													// Last in the chain (last->next is NULL)
+	SEditChain*		ecFirst;											// First in the chain (first->prev is NULL)
+	SEditChain*		ecLast;												// Last in the chain (last->next is NULL)
 
+
+	//////////
 	// For display
-	SEditChain*	top;													// Top item in the current view
-	SEditChain*	cursorLine;												// Line where the cursor is
-	SEditChain*	cursorLineLast;											// The last location before movement was made
+	//////
+		SEditChain*		ecTop;											// Top item in the current view
+		SEditChain*		ecCursorLine;									// Line where the cursor is
+		SEditChain*		ecCursorLineLast;								// The last location before movement was made
 
+
+	//////////
 	// Selected lines
-	SEditChain*	selectedLineStart;										// First line that's selected
-	SEditChain*	selectedLineEnd;										// Last line that's selected
+	//////
+		SEditChain*		ecSelectedLineStart;							// First line that's selected
+		SEditChain*		ecSelectedLineEnd;								// Last line that's selected
+
+
+	//////////
 	// Note:  If not isColumn or isAnchor, then it is full line select.
 	//        If isColumn, then column select mode.
 	//        If isAnchor, then anchor select mode.
-	bool		isColumn;												// If column select mode...
-	u32			selectedColumnStart;									// Column select mode start
-	u32			selectedColumnEnd;										// end
-	bool		isAnchor;												// If anchor select mode...
-	u32			selectedAnchorStart;									// Anchor select mode start
-	u32			selectedAnchorEnd;										// end
+	//////
+		bool			isColumn;										// If column select mode...
+		u32				selectedColumnStart;							// Column select mode start
+		u32				selectedColumnEnd;								// end
+		bool			isAnchor;										// If anchor select mode...
+		u32				selectedAnchorStart;							// Anchor select mode start
+		u32				selectedAnchorEnd;								// end
 
-	// undoHistory.extra_info holds the SUndo structure
-	SEditChainManager*	undoHistory;									// The lines affected by the undo
+
+	//////////
+	// The undo history operates in two levels:
+	// (1) When going through ecm-> it is undoHistory.
+	// (2) If accessing ecm->undoHistory-> then it is theUndo, which holds the undo information for that operation.
+	//////
+		union {
+			// If referenced through ecm-> then undoHistory is the undo history for this sec
+			SEditChainManager*	undoHistory;							// The lines affected by the undo
+
+			// If referenced through ecm->undoHistory, then theUndo is the one in use here
+			SUndo*				theUndo;								// If referenced through ecm->undoHistory-> then it only uses theUndo
+		};
 };
 
 struct SFont
@@ -340,8 +423,13 @@ struct SObject
 	SObject*	parent;													// Parent object (if any)
 	SObject*	firstChild;												// Pointer to child objects (all objects are containers)
 
+	// If a user defined class, class information
+	SDatum		className;												// The class this
+	SObject*	objClass;												// Pointer to the class object
+
 	// Object flags
-	u32			type;													// Object type (see _OBJECT_TYPE_* constants)
+	SDatum		name;													// If a user object, this object's name
+	u32			baseType;												// Object base type/class (see _OBJECT_TYPE_* constants)
 	bool		isEnabled;												// If it is responding to events
 	bool		hasFocus;												// Does this object have focus?
 	bool		isRendered;												// Is it rendered (can be rendered even if it's not visible)?
@@ -393,10 +481,10 @@ struct SObjectForm
 	SObject*	parent;													// parent object this object belongs to
 
 	SFont*		font;													// Default font instance
-	SBgra		borderColorNW;											// Northwest back color for border
-	SBgra		borderColorNE;											// Northeast back color for border
-	SBgra		borderColorSW;											// Southwest back color for border
-	SBgra		borderColorSE;											// Southeast back color for border
+	SBgra		borderNwColor;											// Northwest back color for border
+	SBgra		borderNeColor;											// Northeast back color for border
+	SBgra		borderSwColor;											// Southwest back color for border
+	SBgra		borderSeColor;											// Southeast back color for border
 	SBgra		backColor;												// Back color for the client content
 	SBgra		foreColor;												// Default text fore color
 	SBgra		captionColor;											// Color of the caption
@@ -417,10 +505,10 @@ struct SObjectSubform
 	SObject*	parent;													// parent object this object belongs to
 
 	SFont*		font;													// Default font instance
-	SBgra		borderColorNW;											// Northwest back color for border
-	SBgra		borderColorNE;											// Northeast back color for border
-	SBgra		borderColorSW;											// Southwest back color for border
-	SBgra		borderColorSE;											// Southeast back color for border
+	SBgra		borderNwColor;											// Northwest back color for border
+	SBgra		borderNeColor;											// Northeast back color for border
+	SBgra		borderSwColor;											// Southwest back color for border
+	SBgra		borderSeColor;											// Southeast back color for border
 	SBgra		backColor;												// Back color (only RGB() channels are used, but RGBA() channels are maintained)
 	SBgra		foreColor;												// Default text fore color
 	SBgra		captionColor;											// Color of the caption
@@ -659,21 +747,3 @@ struct SObjectRadio
 	bool		(*programmaticChange)				(SObject* o);		// Called when the data changes
 };
 
-struct SWindow
-{
-	RECT		rc;														// Rectangle of window's physical position
-	SBitmap		bmp;													// Bitmap data for the window
-	SFont*		font;													// Default window font (Ubuntu 10)
-
-	// Is the window scaled?
-	bool		isScaled;												// If it's scaled, meaning bmp->bi is larger than rc
-	SBitmap*	bmpScaled;												// Holds scaled window content
-
-	// User-based flags
-	bool		isMaximized;											// Is the window maximized?
-	RECT		rcBeforeMaximize;										// Used when switching to/from maximized size, holds the window rectangle before the maximize
-
-	// Rectangles for non-object drawn components
-	RECT		rcCaption;												// Caption area
-	RECT		rcClient;												// Client area where content is drawn
-};

@@ -31,6 +31,19 @@
 // Thank you.  And may The Lord bless you richly as you lift up your life, your
 // talents, your gifts, your praise, unto Him.  In Jesus' name I pray.  Amen.
 //
+//////
+//
+// Jun.17.2014
+// Note:  The function definitions below use a naming convention to indicate some of
+//        their functionality.  All functions prefixed with "i" are internal functions.
+//        If you see one with "ii" or "iii" they bypass standard checks (like null pointers)
+//        and are only called from the internal functions.  In general, always use the
+//        "i" functions if you are unsure if something will be populated or not.  If you
+//        have already tested it and know it's populated, then it is safe to call an "ii"
+//        function.
+//
+//////
+//
 //
 
 
@@ -45,10 +58,12 @@
 //////////
 // objects.cpp
 //////
-	SObject*				iObjectCreate							(u32 tnType, void* obj_data);
+	SObject*				iObjectCreate							(u32 tnBaseType, void* obj_data);
 	SObject*				iObjectCopy								(SObject* template_obj, SObject* next, SObject* parent, bool tlCopyChildren, bool tlCopySubobjects, bool tlCreateSeparateBitmapBuffers);
 	u32						iObjectRender							(SObject* obj, bool tlRenderChildren, bool tlRenderSiblings);
+	void					iObject_renderChildrenAndSiblings		(SObject* obj, bool tlRenderChildren, bool tlRenderSiblings);
 	u32						iObjectPublish							(SBitmap* bmpDst, RECT* trc, SObject* obj, bool tlPublishChildren, bool tlPublishSiblings);
+	void					iObjectDuplicateChain					(SObject** root, SObject* chain);
 
 	// Creation of individual sub-objects
 	void*					iSubobjectCopy							(SObject* template_obj);
@@ -145,13 +160,14 @@
 	void					iResizeJDebiWindow						(bool tlForce);
 	void					iSetScreenWindowSize					(s32 tnLeft, s32 tnTop, s32 tnWidth, s32 tnHeight, bool tlForce);
 	void					iSetJDebiWindowSize						(s32 tnLeft, s32 tnTop, s32 tnWidth, s32 tnHeight, bool tlForce);
-	HBITMAP					iCreateBitmap							(HDC thdc, int tnWidth, int tnHeight, int tnPlanes, int tnBits, void** tbd, BITMAPFILEHEADER* tbh, BITMAPINFOHEADER* tbi);
 	void					iComputeScreenWindowClientAreaDimensions	(SSize* size);
 	void					iComputeScreenWindowNonclientAreaDimensions	(SSize* size);
 	void					iAdjustScreenWindowDimensions				(SSize* size);
 	void					iComputeJDebiWindowClientAreaDimensions		(SSize* size);
 	void					iComputeJDebiWindowNonclientAreaDimensions	(SSize* size);
 	void					iAdjustJDebiWindowDimensions				(SSize* size);
+
+	HBITMAP					iCreateBitmap							(HDC thdc, int tnWidth, int tnHeight, int tnPlanes, int tnBits, void** tbd, BITMAPFILEHEADER* tbh, BITMAPINFOHEADER* tbi);
 	s64						iComputeTimeMilliseconds				(SYSTEMTIME* time);
 	s64						iGetSystemTimeMs						(void);
 	s64						iGetLocalTimeMs							(void);
@@ -165,13 +181,17 @@
 	int						iProcessMouseMessage					(UINT m, WPARAM w, LPARAM l);
 	void					iTranslateMousePosition					(POINTS* pt);
 
-	// Object chain duplication
-	void					iObjectDuplicateChain					(SObject** root, SObject* chain);
-
 	// EditChain
-	void					iEditChainManagerDuplicate				(SEditChainManager** root, SEditChainManager* chain);
+	bool					iEditChainManagerDuplicate				(SEditChainManager** root, SEditChainManager* chain, bool tlIncludeUndoHistory);
 	void					iEditChainManagerFree					(SEditChainManager** root, bool tlFreeSelf);
 	void					iEditChainFree							(SEditChain** root, bool tlFreeSelf);
+
+	// Translate
+	void*					iTranslate_p1_to_p2						(SBuilder* root, void* ptr);
+	void*					iTranslate_p2_to_p1						(SBuilder* root, void* ptr);
+
+	// ExtraInfo
+	void					iExtraInfoFree							(SEditChainManager* ecm, SEditChain* ec, SExtraInfo** root, bool tlFreeSelf);
 
 	// Datum
 	void					iDatumDuplicate							(SDatum* datum, s8* data, u32 dataLength);
@@ -180,32 +200,34 @@
 	void					iiDatumFree								(SDatum* datum);
 
 
-	//////////
-	// Bitmap functions
-	//////
-		SBitmap*			iBmpAllocate							(void);
-		SBitmap*			iBmpCopy								(SBitmap* bmpSrc);
-		SBitmap*			iBmpVerifyCopyIsSameSize				(SBitmap* bmpCopy, SBitmap* bmp);
-		SBitmap*			iBmpRawLoad								(cu8* bmpRawFileData);
-		bool				iBmpValidate							(SBitmap* bmp);
-		s32					iBmpComputeRowWidth						(SBitmap* bmp);
-		void				iBmpCreateBySize						(SBitmap* bmp, u32 width, u32 height, u32 tnBitCount);
-		void				iBmpPopulateBitmapStructure				(SBitmap* bmp, u32 tnWidth, u32 tnHeight, u32 tnBitCount);
-		void				iBmpDelete								(SBitmap* bmp, bool tlFreeBits);
-		void				iBmpBitBltObject						(SBitmap* bmpDst, SObject* obj, SBitmap* bmpSrc);
-		void				iBmpBitBltObjectMask					(SBitmap* bmpDst, SObject* obj, SBitmap* bmpSrc);
-		u32					iBmpBitBlt								(SBitmap* bmpDst, RECT* trc, SBitmap* bmpSrc);
+//////////
+// bitmaps.cpp
+//////
+	SBitmap*				iBmpAllocate							(void);
+	SBitmap*				iBmpCopy								(SBitmap* bmpSrc);
+	SBitmap*				iBmpVerifyCopyIsSameSize				(SBitmap* bmpCopy, SBitmap* bmp);
+	SBitmap*				iBmpRawLoad								(cu8* bmpRawFileData);
+	bool					iBmpValidate							(SBitmap* bmp);
+	s32						iBmpComputeRowWidth						(SBitmap* bmp);
+	void					iBmpCreateBySize						(SBitmap* bmp, u32 width, u32 height, u32 tnBitCount);
+	void					iBmpPopulateBitmapStructure				(SBitmap* bmp, u32 tnWidth, u32 tnHeight, u32 tnBitCount);
+	void					iBmpDelete								(SBitmap* bmp, bool tlFreeBits);
+	void					iBmpBitBltObject						(SBitmap* bmpDst, SObject* obj, SBitmap* bmpSrc);
+	void					iBmpBitBltObjectMask					(SBitmap* bmpDst, SObject* obj, SBitmap* bmpSrc);
+	u32						iBmpBitBlt								(SBitmap* bmpDst, RECT* trc, SBitmap* bmpSrc);
 // TODO:  The following void functions need to be changed to u32 and indicate how many pixels were rendered
-		void				iBmpBitBltMask							(SBitmap* bmpDst, RECT* trc, SBitmap* bmpSrc);
-		void				iBmpDrawPoint							(SBitmap* bmp, s32 tnX, s32 tnY, SBgra color);
-		void				iBmpFillRect							(SBitmap* bmp, RECT* rc, SBgra colorNW, SBgra colorNE, SBgra colorSW, SBgra colorSE, bool tlUseGradient);
-		void				iBmpFrameRect							(SBitmap* bmp, RECT* rc, SBgra colorNW, SBgra colorNE, SBgra colorSW, SBgra colorSE, bool tlUseGradient);
-		void				iBmpDrawHorizontalLine					(SBitmap* bmp, s32 tnX1, s32 tnX2, s32 tnY, SBgra color);
-		void				iBmpDrawVerticalLine					(SBitmap* bmp, s32 tnY1, s32 tnY2, s32 tnX, SBgra color);
-		void				iBmpDrawHorizontalLineGradient			(SBitmap* bmp, s32 tnX1, s32 tnX2, s32 tnY, f32 tfRed, f32 tfGrn, f32 tfBlu, f32 tfRedInc, f32 tfGrnInc, f32 tfBluInc);
-		void				iBmpDrawVerticalLineGradient			(SBitmap* bmp, s32 tnY1, s32 tnY2, s32 tnX, f32 tfRed, f32 tfGrn, f32 tfBlu, f32 tfRedInc, f32 tfGrnInc, f32 tfBluInc);
-	
-		// For scaling
+	void					iBmpBitBltMask							(SBitmap* bmpDst, RECT* trc, SBitmap* bmpSrc);
+	void					iBmpDrawPoint							(SBitmap* bmp, s32 tnX, s32 tnY, SBgra color);
+	void					iBmpFillRect							(SBitmap* bmp, RECT* rc, SBgra colorNW, SBgra colorNE, SBgra colorSW, SBgra colorSE, bool tlUseGradient);
+	void					iBmpFrameRect							(SBitmap* bmp, RECT* rc, SBgra colorNW, SBgra colorNE, SBgra colorSW, SBgra colorSE, bool tlUseGradient);
+	void					iBmpDrawHorizontalLine					(SBitmap* bmp, s32 tnX1, s32 tnX2, s32 tnY, SBgra color);
+	void					iBmpDrawVerticalLine					(SBitmap* bmp, s32 tnY1, s32 tnY2, s32 tnX, SBgra color);
+	void					iBmpDrawHorizontalLineGradient			(SBitmap* bmp, s32 tnX1, s32 tnX2, s32 tnY, f32 tfRed, f32 tfGrn, f32 tfBlu, f32 tfRedInc, f32 tfGrnInc, f32 tfBluInc);
+	void					iBmpDrawVerticalLineGradient			(SBitmap* bmp, s32 tnY1, s32 tnY2, s32 tnX, f32 tfRed, f32 tfGrn, f32 tfBlu, f32 tfRedInc, f32 tfGrnInc, f32 tfBluInc);
+
+	//////////
+	// For scaling
+	//////
 		u32					iBmpScale								(SBitmap* bmpScaled, SBitmap* bmp);
 		u32					iiBmpScale_Process						(SBitmap* bmpDst, SBitmap* bmpSrc, f32 tfVerticalScaler, f32 tfHorizontalScaler);
 		void				iiBmpScale_processPixels				(SBitmapProcess* bp);

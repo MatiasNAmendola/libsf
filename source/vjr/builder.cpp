@@ -66,14 +66,14 @@ struct SBuilder
 // Returns:  
 //		Pointer to the point in the buffer where the
 //////
-	void builder_createAndInitialize(SBuilder** buffRoot, u32 tnAllocationBlockSize)
+	void iBuilder_createAndInitialize(SBuilder** buffRoot, u32 tnAllocationBlockSize)
 	{
 		SBuilder*	buffNew;
 
 
 		// See if they want to use the default size
 		if (tnAllocationBlockSize == -1)
-			tnAllocationBlockSize = 16384;
+			tnAllocationBlockSize = 16384;		// Default to a 16KB allocation size
 
 		// Make sure our environment is sane
 		if (buffRoot && tnAllocationBlockSize != 0)
@@ -120,7 +120,7 @@ struct SBuilder
 //		Pointer to the point in the buffer where the text was inserted, can be used
 //		for a furthering or continuance of this function embedded in a higher call.
 //////
-	s8* builder_appendData(SBuilder* buffRoot, s8* tcData, u32 tnDataLength)
+	s8* iBuilder_appendData(SBuilder* buffRoot, s8* tcData, u32 tnDataLength)
 	{
 		// Make sure our environment is sane
 		if (buffRoot)
@@ -154,7 +154,7 @@ struct SBuilder
 // Called to allocate bytes in the builder, but not yet populate them with anything
 //
 //////
-	s8* builder_allocateBytes(SBuilder* buffRoot, u32 tnDataLength)
+	s8* iBuilder_allocateBytes(SBuilder* buffRoot, u32 tnDataLength)
 	{
 		// Make sure our environment is sane
 		if (buffRoot)
@@ -182,7 +182,7 @@ struct SBuilder
 // per the allocated block size.
 //
 //////
-	void builder_setSize(SBuilder* buffRoot, u32 tnBufferLength)
+	void iBuilder_setSize(SBuilder* buffRoot, u32 tnBufferLength)
 	{
 		s8* lcNew;
 
@@ -247,7 +247,7 @@ struct SBuilder
 // Releases the buffer allocated for the SBuilder structure
 //
 //////
-	void builder_freeAndRelease(SBuilder** buffRoot)
+	void iBuilder_freeAndRelease(SBuilder** buffRoot)
 	{
 		SBuilder* buffDelete;
 
@@ -286,7 +286,7 @@ struct SBuilder
 // Called to write out the indicated builder file as an 8-bit ASCII file
 //
 //////
-	u32 builder_asciiWriteOutFile(SBuilder* buffRoot, s8* tcFilename)
+	u32 iBuilder_asciiWriteOutFile(SBuilder* buffRoot, s8* tcFilename)
 	{
 		FILE* lfh;
 
@@ -322,7 +322,7 @@ struct SBuilder
 // Called to compact data
 //
 //////
-	void builder_compactData(SBuilder* buffRoot, u32 tnStart, u32 tnStride, u32 tnCompactCallbackFunction)
+	void iBuilder_compactData(SBuilder* buffRoot, u32 tnStart, u32 tnStride, u32 tnCompactCallbackFunction)
 	{
 		u32 lnI, lnCopyTo;
 		union
@@ -355,7 +355,7 @@ struct SBuilder
 			}
 			// When we get here, everything's been compacted
 			if (lnCopyTo < buffRoot->populatedLength)
-				builder_setSize(buffRoot, lnCopyTo);
+				iBuilder_setSize(buffRoot, lnCopyTo);
 		}
 	}
 
@@ -367,7 +367,7 @@ struct SBuilder
 // Called to insert bytes at the indicated location.
 //
 //////
-	s8* builder_insertBytes(SBuilder* buffRoot, u32 tnStart, u32 tnLength)
+	s8* iBuilder_insertBytes(SBuilder* buffRoot, u32 tnStart, u32 tnLength)
 	{
 		u32		lnI, lnStop;
 		s8*		buffNew;
@@ -385,14 +385,14 @@ struct SBuilder
 				// Are we adding to the end?
 				//////
 					if (buffRoot->populatedLength == tnStart)
-						return(builder_allocateBytes(buffRoot, tnLength));		// We're appending to the end
+						return(iBuilder_allocateBytes(buffRoot, tnLength));		// We're appending to the end
 
 
 				//////////
 				// If we get here, we're inserting in the middle
 				// We go ahead and allocate the new bytes
 				//////
-					buffNew = builder_allocateBytes(buffRoot, tnLength);
+					buffNew = iBuilder_allocateBytes(buffRoot, tnLength);
 					if (buffNew)
 					{
 						//////////
@@ -431,7 +431,7 @@ struct SBuilder
 //
 //////
 // TODO:  A speedup for this algorithm would be to test tnDataLength and if it's 32-bit or 64-bit, then do integer searches rather than string compare searches
-	u32 builder_binarySearch(SBuilder* haystack, s8* tcNeedle, u32 tnNeedleLength, bool* tlFound, bool tlInsertIfNotFound)
+	u32 iBuilder_binarySearch(SBuilder* haystack, s8* tcNeedle, u32 tnNeedleLength, bool* tlFound, bool tlInsertIfNotFound)
 	{
 		s32		lnResult;
 		s32		lnTop, lnMid, lnBot;
@@ -493,7 +493,7 @@ struct SBuilder
 					if (tlInsertIfNotFound)
 					{
 						// We will insert it where lnMid is
-						buffNew = builder_insertBytes(haystack, lnMid * tnNeedleLength, tnNeedleLength);
+						buffNew = iBuilder_insertBytes(haystack, lnMid * tnNeedleLength, tnNeedleLength);
 						if (buffNew)
 						{
 							// We can copy over and insert it

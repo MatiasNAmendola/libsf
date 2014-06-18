@@ -41,7 +41,7 @@
 // Creates the object structure
 //
 //////
-	SObject* iObjectCreate(u32 tnType, void* obj_data)
+	SObject* iObjectCreate(u32 tnBaseType, void* obj_data)
 	{
 		SObject* obj;
 
@@ -61,7 +61,7 @@
 				memset(obj, 0, sizeof(SObject));
 
 				// Initially populate
-				obj->type		= tnType;
+				obj->baseType	= tnBaseType;
 				obj->obj_data	= obj_data;
 			}
 
@@ -150,7 +150,7 @@
 		lnPixelsRendered = 0;
 		if (obj)
 		{
-			switch (obj->type)
+			switch (obj->baseType)
 			{
 				case _OBJECT_TYPE_EMPTY:		// Empty, used as a placeholder object that is not drawn
 					lnPixelsRendered += iSubobject_renderEmpty(obj, (SObjectEmpty*)obj->obj_data, tlRenderChildren, tlRenderSiblings);
@@ -205,6 +205,44 @@
 		// Indicate how many pixels were rendered
 		return(lnPixelsRendered);
 	}
+
+
+
+
+//////////
+//
+// Called from subobjects to render any object children and sibling they may have based on flags
+//
+//////
+	void iObject_renderChildrenAndSiblings(SObject* obj, bool tlRenderChildren, bool tlRenderSiblings)
+	{
+		SObject* objSib;
+
+
+		//////////
+		// Render any children
+		//////
+			if (tlRenderChildren && obj->firstChild)
+				iObjectRender(obj->firstChild, true, true);
+
+
+		//////////
+		// Render any siblings
+		//////
+			if (tlRenderSiblings && obj->next)
+			{
+				objSib = obj->next;
+				while (objSib)
+				{
+					// Render this sibling
+					iObjectRender(objSib, true, true);
+
+					// Move to next sibling
+					objSib = objSib->next;
+				}
+			}
+	}
+
 
 
 
@@ -298,6 +336,51 @@
 
 //////////
 //
+// Duplicate the chain of ObjectLabels, so the destination has a copy of each.
+//
+//////
+	void iObjectDuplicateChain(SObject** root, SObject* chain)
+	{
+		SObject*		obj;
+		SObject**		oPrevPtr;
+		void**			objDataPtr;
+
+
+		// Create the master record
+		if (root)
+		{
+			// Repeat adding as many entries as there are
+			oPrevPtr = root;
+			while (chain)
+			{
+				// Create this object
+				obj = iObjectCopy(chain, NULL, chain, true, true, true);
+				if (obj)
+				{
+					// Update the duplicate object's forward pointer in the chain
+					*oPrevPtr = obj;
+
+					// Setup the next forward pointer
+					oPrevPtr = &obj->next;
+
+					// Get the location of our sub-object update pointer
+					objDataPtr = &obj->obj_data;
+
+					// Copy the sub-object
+					obj->obj_data = iSubobjectCopy(chain);
+				}
+
+				// Move to next item in the chain
+				chain = chain->next;
+			}
+		}
+	}
+
+
+
+
+//////////
+//
 // Called to copy the sub-object based on type
 //
 //////
@@ -310,7 +393,7 @@
 		if (template_obj)
 		{
 			// Update the sub-object data
-			switch (template_obj->type)
+			switch (template_obj->baseType)
 			{
 				case _OBJECT_TYPE_EMPTY:		// Empty, used as a placeholder object that is not drawn
 					ptr = (void*)iSubobject_createEmpty((SObjectEmpty*)template_obj->obj_data, template_obj);
@@ -449,10 +532,10 @@
 				{
 					// Copy from indicated template
 					subobj->font				= iFontDuplicate(template_subobj->font);
-					subobj->borderColorNW.color	= template_subobj->borderColorNW.color;
-					subobj->borderColorNE.color	= template_subobj->borderColorNE.color;
-					subobj->borderColorSW.color	= template_subobj->borderColorSW.color;
-					subobj->borderColorSE.color	= template_subobj->borderColorSE.color;
+					subobj->borderNwColor.color	= template_subobj->borderNwColor.color;
+					subobj->borderNeColor.color	= template_subobj->borderNeColor.color;
+					subobj->borderSwColor.color	= template_subobj->borderSwColor.color;
+					subobj->borderSeColor.color	= template_subobj->borderSeColor.color;
 					subobj->backColor.color		= template_subobj->backColor.color;
 					subobj->foreColor.color		= template_subobj->foreColor.color;
 					subobj->captionColor.color	= template_subobj->captionColor.color;
@@ -468,10 +551,10 @@
 				} else {
 					// Use VJr defaults
 					subobj->font				= iFontDuplicate(gsFont);
-					subobj->borderColorNW.color	= colorNW.color;
-					subobj->borderColorNE.color	= colorNE.color;
-					subobj->borderColorSW.color	= colorSW.color;
-					subobj->borderColorSE.color	= colorSE.color;
+					subobj->borderNwColor.color	= NwColor.color;
+					subobj->borderNeColor.color	= NeColor.color;
+					subobj->borderSwColor.color	= SwColor.color;
+					subobj->borderSeColor.color	= SeColor.color;
 					subobj->backColor.color		= white.color;
 					subobj->foreColor.color		= black.color;
 					subobj->captionColor.color	= black.color;
@@ -526,10 +609,10 @@
 				{
 					// Copy from indicated template
 					subobj->font				= iFontDuplicate(template_subobj->font);
-					subobj->borderColorNW.color	= template_subobj->borderColorNW.color;
-					subobj->borderColorNE.color	= template_subobj->borderColorNE.color;
-					subobj->borderColorSW.color	= template_subobj->borderColorSW.color;
-					subobj->borderColorSE.color	= template_subobj->borderColorSE.color;
+					subobj->borderNwColor.color	= template_subobj->borderNwColor.color;
+					subobj->borderNeColor.color	= template_subobj->borderNeColor.color;
+					subobj->borderSwColor.color	= template_subobj->borderSwColor.color;
+					subobj->borderSeColor.color	= template_subobj->borderSeColor.color;
 					subobj->backColor.color		= template_subobj->backColor.color;
 					subobj->foreColor.color		= template_subobj->foreColor.color;
 					subobj->captionColor.color	= template_subobj->captionColor.color;
@@ -546,10 +629,10 @@
 					// Use VJr defaults
 					// Copy from indicated template
 					subobj->font				= iFontDuplicate(template_subobj->font);
-					subobj->borderColorNW.color	= colorNW.color;
-					subobj->borderColorNE.color	= colorNE.color;
-					subobj->borderColorSW.color	= colorSW.color;
-					subobj->borderColorSE.color	= colorSE.color;
+					subobj->borderNwColor.color	= NwColor.color;
+					subobj->borderNeColor.color	= NeColor.color;
+					subobj->borderSwColor.color	= SwColor.color;
+					subobj->borderSeColor.color	= SeColor.color;
 					subobj->backColor.color		= white.color;
 					subobj->foreColor.color		= black.color;
 					subobj->captionColor.color	= black.color;
@@ -630,8 +713,8 @@
 					subobj->isOpaque					= true;
 					subobj->isBorder					= false;
 					subobj->borderColor.color			= black.color;
-					subobj->disabledBackColor.color		= disabledBack.color;
-					subobj->disabledForeColor.color		= disabledFore.color;
+					subobj->disabledBackColor.color		= disabledBackColor.color;
+					subobj->disabledForeColor.color		= disabledForeColor.color;
 				}
 			}
 
@@ -721,10 +804,10 @@
 					subobj->isOpaque					= true;
 					subobj->isBorder					= false;
 					subobj->borderColor.color			= black.color;
-					subobj->selectedBackColor.color		= selectedBack.color;
-					subobj->selectedForeColor.color		= selectedFore.color;
-					subobj->disabledBackColor.color		= disabledBack.color;
-					subobj->disabledForeColor.color		= disabledFore.color;
+					subobj->selectedBackColor.color		= selectedBackColor.color;
+					subobj->selectedForeColor.color		= selectedForeColor.color;
+					subobj->disabledBackColor.color		= disabledBackColor.color;
+					subobj->disabledForeColor.color		= disabledForeColor.color;
 
 					*(u32*)&subobj->interactiveChange	= *(u32*)&iDefaultCallback_interactiveChange;
 					*(u32*)&subobj->programmaticChange	= *(u32*)&iDefaultCallback_programmaticChange;
@@ -798,8 +881,8 @@
 					subobj->alignment					= _ALIGNMENT_LEFT;
 					iDatumDuplicate(&subobj->caption,	"Button", 6);
 
-					subobj->disabledBackColor.color		= disabledBack.color;
-					subobj->disabledForeColor.color		= disabledFore.color;
+					subobj->disabledBackColor.color		= disabledBackColor.color;
+					subobj->disabledForeColor.color		= disabledForeColor.color;
 
 					*(u32*)&subobj->interactiveChange	= *(u32*)&iDefaultCallback_interactiveChange;
 					*(u32*)&subobj->programmaticChange	= *(u32*)&iDefaultCallback_programmaticChange;
@@ -853,7 +936,7 @@
 
 					subobj->style						= template_subobj->style;
 					subobj->alignment					= template_subobj->alignment;
-					iEditChainManagerDuplicate(&subobj->value, template_subobj->value);
+					iEditChainManagerDuplicate(&subobj->value, template_subobj->value, true);
 					iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
 					iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
 
@@ -888,10 +971,10 @@
 					subobj->isOpaque					= true;
 					subobj->isBorder					= false;
 					subobj->borderColor.color			= black.color;
-					subobj->selectedBackColor.color		= selectedBack.color;
-					subobj->selectedForeColor.color		= selectedFore.color;
-					subobj->disabledBackColor.color		= disabledBack.color;
-					subobj->disabledForeColor.color		= disabledFore.color;
+					subobj->selectedBackColor.color		= selectedBackColor.color;
+					subobj->selectedForeColor.color		= selectedForeColor.color;
+					subobj->disabledBackColor.color		= disabledBackColor.color;
+					subobj->disabledForeColor.color		= disabledForeColor.color;
 
 					*(u32*)&subobj->interactiveChange	= *(u32*)&iDefaultCallback_interactiveChange;
 					*(u32*)&subobj->programmaticChange	= *(u32*)&iDefaultCallback_programmaticChange;
@@ -1031,8 +1114,8 @@
 					subobj->isOpaque					= true;
 					subobj->isBorder					= false;
 					subobj->borderColor.color			= black.color;
-					subobj->disabledBackColor.color		= disabledBack.color;
-					subobj->disabledForeColor.color		= disabledFore.color;
+					subobj->disabledBackColor.color		= disabledBackColor.color;
+					subobj->disabledForeColor.color		= disabledForeColor.color;
 
 					*(u32*)&subobj->interactiveChange	= *(u32*)&iDefaultCallback_interactiveChange;
 					*(u32*)&subobj->programmaticChange	= *(u32*)&iDefaultCallback_programmaticChange;
@@ -1203,8 +1286,8 @@
 					subobj->isOpaque					= true;
 					subobj->isBorder					= false;
 					subobj->borderColor.color			= black.color;
-					subobj->disabledBackColor.color		= disabledBack.color;
-					subobj->disabledForeColor.color		= disabledFore.color;
+					subobj->disabledBackColor.color		= disabledBackColor.color;
+					subobj->disabledForeColor.color		= disabledForeColor.color;
 
 					*(u32*)&subobj->interactiveChange	= *(u32*)&template_subobj->interactiveChange;
 					*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
@@ -1249,7 +1332,7 @@
 		// Free subobject components
 		//////
 			iFontFree(subobj->font, true);
-			iBmpDelete(subobj->bmpIcon);
+			iBmpDelete(subobj->bmpIcon, true);
 			iDatumFree(&subobj->comment, true);
 			iDatumFree(&subobj->caption, true);
 			iDatumFree(&subobj->toolTip, true);
@@ -1276,7 +1359,7 @@
 		// Free subobject components
 		//////
 			iFontFree(subobj->font, true);
-			iBmpDelete(subobj->bmpIcon);
+			iBmpDelete(subobj->bmpIcon, true);
 			iDatumFree(&subobj->comment, true);
 			iDatumFree(&subobj->caption, true);
 			iDatumFree(&subobj->toolTip, true);
@@ -1488,60 +1571,24 @@
 
 //////////
 //
-// Duplicate the chain of ObjectLabels, so the destination has a copy of each.
-//
-//////
-	void iObjectDuplicateChain(SObject** root, SObject* chain)
-	{
-		SObject*		obj;
-		SObject**		oPrevPtr;
-		void**			objDataPtr;
-
-
-		// Create the master record
-		if (root)
-		{
-			// Repeat adding as many entries as there are
-			oPrevPtr = root;
-			while (chain)
-			{
-				// Create this object
-				obj = iObjectCopy(chain, NULL, chain, true, true, true);
-				if (obj)
-				{
-					// Update the duplicate object's forward pointer in the chain
-					*oPrevPtr = obj;
-
-					// Setup the next forward pointer
-					oPrevPtr = &obj->next;
-
-					// Get the location of our sub-object update pointer
-					objDataPtr = &obj->obj_data;
-
-					// Copy the sub-object
-					obj->obj_data = iSubobjectCopy(chain);
-				}
-
-				// Move to next item in the chain
-				chain = chain->next;
-			}
-		}
-	}
-
-
-
-
-//////////
-//
 // Renders an empty.  Note, empty objects are not rendered.  This control, however,
-// can be subclassed or can be used as a trigger object for the operation.  As such,
-// calls are made to it.
+// can have controls within which are rendered to off-screen buffers, used for whatever
+// non-visual purposes exist.  As such, render calls are still made to it.
 //
 //////
 	u32 iSubobject_renderEmpty(SObject* obj, SObjectEmpty* subobj, bool tlRenderChildren, bool tlRenderSiblings)
 	{
-		obj->isDirty = false;
-		return(0);
+		//////////
+		// Do any requisite processing
+		//////
+			iObject_renderChildrenAndSiblings(obj, tlRenderChildren, tlRenderSiblings);
+
+
+		//////////
+		// Success!
+		//////
+			obj->isDirty = false;
+			return(0);		// Indicate that nothing was rendered which will affect the screen
 	}
 
 
@@ -1567,6 +1614,8 @@
 		HFONT			lhfontOld;
 
 
+// TODO:  COMPLETELY UNTESTED.  BREAKPOINT AND EXAMINE.
+_asm int 3;
 		// Make sure our environment is sane
 		lnPixelsRendered = 0;
 		if (obj && subobj)
@@ -1591,18 +1640,18 @@
 					// Frame it
 					//////
 						// Draw the window border
-						iBmpFillRect(obj->bmp, &lrc, subobj->borderColorNW, subobj->borderColorNE, subobj->borderColorSW, subobj->borderColorSE, true);
+						iBmpFillRect(obj->bmp, &lrc, subobj->borderNwColor, subobj->borderNeColor, subobj->borderSwColor, subobj->borderSeColor, true);
 
 						// Frame it
 						iBmpFrameRect(obj->bmp, &lrc, black, black, black, black, false);
 
 						// Draw the client area
 						SetRect(&lrc2, 8, subobj->bmpIcon->bi.biHeight + 2, lrc.right - subobj->bmpIcon->bi.biHeight - 2, lrc.bottom - subobj->bmpIcon->bi.biHeight - 1);
-						iBmpFillRect(&winJDebi.bmp, &lrc2, white, white, white, white, false);
+						iBmpFillRect(obj->bmp, &lrc2, white, white, white, white, false);
 
 						// Put a border around the client area
 						InflateRect(&lrc2, 1, 1);
-						iBmpFrameRect(&winJDebi.bmp, &lrc2, black, black, black, black, false);
+						iBmpFrameRect(obj->bmp, &lrc2, black, black, black, black, false);
 
 
 					//////////
@@ -1646,7 +1695,7 @@
 					// Form caption
 					//////
 						SetRect(&lrc2, lrc3.right + 8, lrc3.top, lrc4.right - 8, lrc3.bottom);
-						lhfontOld = (HFONT)SelectObject(obj->bmp->hdc, winJDebi.font->hfont);
+						lhfontOld = (HFONT)SelectObject(obj->bmp->hdc, subobj->font->hfont);
 						SetTextColor(obj->bmp->hdc, (COLORREF)RGB(subobj->captionColor.red, subobj->captionColor.grn, subobj->captionColor.blu));
 						SetBkMode(obj->bmp->hdc, TRANSPARENT);
 						DrawTextA(obj->bmp->hdc, subobj->caption.data, subobj->caption.length, &lrc2, DT_VCENTER | DT_END_ELLIPSIS);
