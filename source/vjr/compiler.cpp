@@ -38,27 +38,33 @@
 
 struct SStartEnd;
 struct SMasterList;
+struct SOssComp;
+struct SOssCompCallback;
+struct SAsciiCompSearcher;
+struct SOssLine;
+struct SStartEndCallback;
+struct SLL;
 
 //////////
 //
 // Forward declarations for parsing VXB-- lines and components
 //
 //////////
-	u32						compiler_breakoutAsciiTextIntoSOssLines		(s8* tcData, u32 tnFileSize, SStartEnd* tseLines, u32 tnAllocSize);
-// 	SOssComp* CALLTYPE		oss_translateSOssLinesToSOssComps			(SAsciiCompSearcher* tsComps, SOssLine* line);
-// 	void CALLTYPE			oss_translateSOssCompsToOthers				(SAsciiCompSearcher* tsComps, SOssLine* line);
+	u32						compiler_breakoutAsciiTextIntoSOssLines		(s8* data, u32 fileSize, SStartEnd* seLines, u32 extraAllocSize);
+ 	SOssComp*				oss_translateSOssLinesToSOssComps			(SAsciiCompSearcher* tsComps, SOssLine* line);
+ 	void					oss_translateSOssCompsToOthers				(SAsciiCompSearcher* tsComps, SOssLine* line);
 // 	u32 CALLTYPE			oss_writeSOssLineSequenceToDisk				(s8* tcPathname, SStartEnd* tseLines);
 // 	u32 CALLTYPE			oss_writeSOssLineSequenceCompsToDisk		(s8* tcPathname, SStartEnd* tseLines);
 // 	u32 CALLTYPE			oss_writeSOssLineSequenceCompsDebuggingToDisk(s8* tcPathname, SStartEnd* tseLines);
-// 	bool CALLTYPE			oss_findFirstOccurrenceOfAsciiCharacter		(s8* tcHaystack, u32 tnHaystackLength, s8 tcNeedle, u32* tnPosition);
-// 	SOssComp* CALLTYPE		oss_findNextSOssCompBy_iCode				(SOssComp* comp, u32 tniCode, SOssComp** compLastScanned);
-// 	SOssComp* CALLTYPE		oss_skipPastSOssComp_iCode					(SOssComp* comp, u32 tniCode);
-// 	u32 CALLTYPE			oss_combine2SOssComps						(SOssLine* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2,                     u32 tniCodeCombined);
-// 	u32 CALLTYPE			oss_combine3SOssComps						(SOssLine* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2, u32 tniCodeNeedle3, u32 tniCodeCombined);
-// 	u32 CALLTYPE			oss_combineAllBetweenSOssComps				(SOssLine* line, u32 tniCodeNeedle,                                          u32 tniCodeCombined);
-// 	u32 CALLTYPE			oss_combineAllAfterSOssComp					(SOssLine* line, u32 tniCodeNeedle);
+	bool					oss_findFirstOccurrenceOfAsciiCharacter		(s8* tcHaystack, u32 tnHaystackLength, s8 tcNeedle, u32* tnPosition);
+	SOssComp*				oss_findNextSOssCompBy_iCode				(SOssComp* comp, u32 tniCode, SOssComp** compLastScanned);
+	SOssComp*				oss_skipPastSOssComp_iCode					(SOssComp* comp, u32 tniCode);
+	u32						oss_combine2SOssComps						(SOssLine* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2,                     u32 tniCodeCombined);
+	u32						oss_combine3SOssComps						(SOssLine* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2, u32 tniCodeNeedle3, u32 tniCodeCombined);
+	u32						oss_combineAllBetweenSOssComps				(SOssLine* line, u32 tniCodeNeedle,                                          u32 tniCodeCombined);
+	u32						oss_combineAllAfterSOssComp					(SOssLine* line, u32 tniCodeNeedle);
 // 	u32 CALLTYPE			oss_combineAllCasks							(SOssComp* firstComp, bool* tlNestingError, SOssComp** compError);
-// 	u32 CALLTYPE			oss_removeExtraneousWhitespaceSOssComps		(SOssLine* line, u32 tniCodeWhitespace);
+	u32						oss_removeExtraneousWhitespaceSOssComps		(SOssLine* line, u32 tniCodeWhitespace);
 
 	u32						ioss_breakoutAsciiTextDataIntoLines_ScanLine(s8* tcData, u32 tnMaxLength, u32* tnLength, u32* tnWhitespaces);
 	u32						vvm_getNextUniqueId							(void);
@@ -69,6 +75,19 @@ struct SMasterList;
 	u32						vvm_iSkipToCarriageReturnLineFeed			(s8* tcData, u32 tnMaxLength, u32* tnCRLF_Length);
 	void					ivvm_SEChain_appendMasterList				(SStartEnd* ptrSE, SMasterList* ptrNew, u32 tnHint, u32 tnBlockSizeIfNewBlockNeeded);
 	bool					vvm_SEChain_allocateAdditionalMasterSlots	(SStartEnd* ptrSE, u32 tnBlockSize);
+	s32						ioss_translateSOssLinesToSOssCompsTest		(s8* tcHaystack, s8* tcNeedle, s32 tnLength);
+	bool					iioss_translateSOssCompsToOthersCallback	(SStartEndCallback* cb);
+	void*					vvm_SEChain_searchByCallback				(SStartEnd* ptrSE, SStartEndCallback* cb);
+	void					iioss_translateSOssCompsToOthersCallback__insertCompByCompCallback		(SOssComp* compRef, SOssComp* compNew, bool tlInsertAfter);
+	void					iioss_translateSOssCompsToOthersCallback__insertCompByParamsCallback	(SOssComp* compRef, SOssLine* line, u32 tniCode, u32 tnStart, s32 tnLength, bool tlInsertAfter);
+	void					iioss_translateSOssCompsToOthersCallback__deleteCompsCallback			(SOssComp* comp, SOssLine* line);
+	SOssComp*				iioss_translateSOssCompsToOthersCallback__cloneCompsCallback			(SOssComp* comp, SOssLine* line);
+	SOssComp*				iioss_translateSOssCompsToOthersCallback__mergeCompsCallback			(SOssComp* comp, SOssLine* line, u32 tnCount, u32 tniCodeNew);
+	void					vvm_SEChain_deleteFrom						(SStartEnd* ptrSE, void* ptrCaller, bool tlDeletePointers);
+	SLL*					vvm_SEChain_completelyMigrateSLLByPtr		(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, SLL* ptr, u32 tnHint, u32 tnBlockSize);
+	SLL*					vvm_SEChain_completelyMigrateSLLByNum		(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, u32 lnSrcNum, u32 tnHint, u32 tnBlockSize);
+	SMasterList*			vvm_SEChain_migrateByNum					(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, u32 lnSrcNum, u32 tnHint, u32 tnBlockSize);
+
 
 
 //////////
@@ -140,6 +159,343 @@ struct SMasterList;
 		void*			extra;											// Extra data associated with this structure (application specific)
 	};
 
+	// Structure to search for things
+	struct SAsciiCompSearcher
+	{
+		const s8*		keyword;										// Text keyword being searched
+		s32				length;											// Length of the keyword (negative for case sensitive, positive case insensitive, 0 for termination entry)
+		bool			repeats;										// Can this item repeat?  Or is this a one-shot keyword?
+		u32				iCode;											// An associated code to store when this entry is found
+		bool			firstOnLine;									// Should this item ONLY be the first on line?
+
+		// Used for an explicit callback to validate if this match (as by text) is really a match (as by context)
+		union {
+			u32			_validate;
+			bool		(*validate)(SOssCompCallback* val);
+		};
+
+		// Used for an explicit callback to handle this component or text
+		union {
+			u32			_custom;
+			void		(*custom)(void);
+		};
+	};
+
+	// Holds a component structure
+	struct SOssComp
+	{
+		SLL				ll;												// 2-way link list
+
+		// Information about the component
+		SOssLine*		line;											// The line this component relates to
+		u32				iCode;											// Refer to _VVMMC_COMP_* structs in mc_const.h
+		u32				start;											// Start into the indicates line's source code
+		s32				length;											// Length of the component
+
+		// If this component has sub-components, they go here
+		SStartEnd		childCompsUp;									// Pointer to any child components before the cask name
+		SStartEnd		childCompsDown;									// Pointer to any child components after the cask name
+	};
+
+	struct SOssCompCallback
+	{
+		union {
+			SOssComp*	comp;											// Component at start, and the component to continue processing after upon exit
+			s8*			text;											// Raw text (depending on when it is being processed
+		};
+		u32				length;											// If raw text, the length of the thing being searched, otherwise 0.
+		u32				iCode;											// The iCode being queried
+
+		// Callback callbacks for adjustment
+		union {
+			u32			_insertCompByComp;
+			void		(*insertCompByComp)		(SOssComp* compRef, SOssComp* compNew, bool tlInsertAfter);
+		};
+		union {
+			u32			_insertCompByParams;
+			void		(*insertCompByParams)	(SOssComp* compRef, SOssLine* line, u32 tniCode, u32 tnStart, s32 tnLength, bool tlInsertAfter);
+		};
+		union {
+			u32			_deleteComps;
+			void		(*deleteComps)			(SOssComp* comp, SOssLine* line);
+		};
+		union {
+			u32			_cloneComps;
+			SOssComp*	(*cloneComps)			(SOssComp* comp, SOssLine* line);
+		};
+		union {
+			u32			_mergeComps;
+			SOssComp*	(*mergeComps)			(SOssComp* comp, SOssLine* line, u32 tnCount, u32 tniCodeNew);
+		};
+	};
+
+	struct SStartEndCallback
+	{
+		union
+		{
+			u32		_func;
+			bool	(*funcBool)	(SStartEndCallback* cb);	// This callback should return false to continue searching, or true when the item is found
+			void	(*funcVoid)	(SStartEndCallback* cb);
+			//////
+			// Uses the following format for the callback:
+			//		bool func(SStartEndCallback* cb)
+			//////////
+		};
+
+		// Data items for this callback
+		// Primary pointer
+		void*		ptr;
+
+		union {
+			// Extra1
+			u32			ex1;
+			u32			extra1;
+			u32			extra;
+			u32			count1;
+			union {
+				u32		count1_1;
+				u32		count1_2;
+			};
+			void*		ex1Ptr;
+		};
+
+		union {
+			// Extra2
+			u32			ex2;
+			u32			extra2;
+			u32			count2;
+			union {
+				u32		count2_1;
+				u32		count2_2;
+			};
+			void*		ex2Ptr;
+		};
+	};
+
+
+//////////
+// Known operators to the system
+//////
+	const s8		cgcCaskRoundOpenParams[]						= "(||";
+	const s8		cgcCaskRoundCloseParams[]						= "||)";
+	const s8		cgcCaskSquareOpenParams[]						= "[||";
+	const s8		cgcCaskSquareCloseParams[]						= "||]";
+	const s8		cgcCaskTriangleOpenParams[]						= "<||";
+	const s8		cgcCaskTriangleCloseParams[]					= "||>";
+	const s8		cgcCaskTildeOpenParams[]						= "~||";
+	const s8		cgcCaskTildeCloseParams[]						= "||~";
+	const s8		cgcCaskRoundOpen[]								= "(|";
+	const s8		cgcCaskRoundClose[]								= "|)";
+	const s8		cgcCaskSquareOpen[]								= "[|";
+	const s8		cgcCaskSquareClose[]							= "|]";
+	const s8		cgcCaskTriangleOpen[]							= "<|";
+	const s8		cgcCaskTriangleClose[]							= "|>";
+	const s8		cgcCaskTildeOpen[]								= "~|";
+	const s8		cgcCaskTildeClose[]								= "|~";
+
+	const u32		_ICODE_CASK_ROUND_OPEN_PARAMS					= 1000001;
+	const u32		_ICODE_CASK_ROUND_CLOSE_PARAMS					= 1000002;
+	const u32		_ICODE_CASK_SQUARE_OPEN_PARAMS					= 1000003;
+	const u32		_ICODE_CASK_SQUARE_CLOSE_PARAMS					= 1000004;
+	const u32		_ICODE_CASK_TRIANGLE_OPEN_PARAMS				= 1000005;
+	const u32		_ICODE_CASK_TRIANGLE_CLOSE_PARAMS				= 1000006;
+	const u32		_ICODE_CASK_TILDE_OPEN_PARAMS					= 1000007;
+	const u32		_ICODE_CASK_TILDE_CLOSE_PARAMS					= 1000008;
+	const u32		_ICODE_CASK_ROUND_OPEN							= 1000009;
+	const u32		_ICODE_CASK_ROUND_CLOSE							= 1000010;
+	const u32		_ICODE_CASK_SQUARE_OPEN							= 1000011;
+	const u32		_ICODE_CASK_SQUARE_CLOSE						= 1000012;
+	const u32		_ICODE_CASK_TRIANGLE_OPEN						= 1000013;
+	const u32		_ICODE_CASK_TRIANGLE_CLOSE						= 1000014;
+	const u32		_ICODE_CASK_TILDE_OPEN							= 1000015;
+	const u32		_ICODE_CASK_TILDE_CLOSE							= 1000016;
+
+	// Standard types
+	const u32		_ICODE_UNKNOWN									= 0;
+	const u32		_ICODE_ALPHA									= 1;
+	const u32		_ICODE_ALPHANUMERIC								= 2;
+	const u32		_ICODE_NUMERIC									= 3;
+	const u32		_ICODE_OPERATOR									= 4;
+	const u32		_ICODE_WHITESPACE								= 5;
+	const u32		_ICODE_PLUS										= 6;
+	const u32		_ICODE_MINU										= 7;
+	const u32		_ICODE_ASTERISK									= 8;
+	const u32		_ICODE_BACKSLASH								= 9;
+	const u32		_ICODE_DOUBLE_QUOTE								= 10;
+	const u32		_ICODE_SINGLE_QUOTE								= 11;
+	const u32		_ICODE_TILDE									= 12;
+	const u32		_ICODE_DOT										= 13;
+	const u32		_ICODE_COLON									= 14;
+	const u32		_ICODE_COMMA									= 15;
+	const u32		_ICODE_UNDERSCORE								= 16;
+	const u32		_ICODE_AT_SIGN									= 17;
+	const u32		_ICODE_QUESTION_MARK							= 18;
+	const u32		_ICODE_EXCLAMATION_MARK							= 19;
+	const u32		_ICODE_POUND_SIGN								= 20;
+	const u32		_ICODE_PERCENT_SIGN								= 21;
+	const u32		_ICODE_CARET									= 22;
+	const u32		_ICODE_AMPERSAND								= 23;
+	const u32		_ICODE_EQUAL_SIGN								= 24;
+	const u32		_ICODE_PIPE_SIGN								= 25;
+	const u32		_ICODE_REVERSE_QUOTE							= 26;
+	const u32		_ICODE_SEMICOLON								= 27;
+	const u32		_ICODE_GREATER_THAN								= 28;
+	const u32		_ICODE_LESS_THAN								= 30;
+	const u32		_ICODE_LEFT_PARENTHESIS							= 31;
+	const u32		_ICODE_RIGHT_PARENTHESIS						= 32;
+	const u32		_ICODE_LEFT_BRACKET								= 33;
+	const u32		_ICODE_RIGHT_BRACKET							= 34;
+	const u32		_ICODE_LEFT_BRACE								= 35;
+	const u32		_ICODE_RIGHT_BRACE								= 36;
+	const u32		_ICODE_SLASH									= 37;
+	const u32		_ICODE_DOLLAR_SIGN								= 38;
+	// Preprocessor
+	const u32		_ICODE_INCLUDE									= 100;
+	const u32		_ICODE_DEFINE									= 101;
+	// Keywords
+	const u32		_ICODE_WITH										= 200;
+	const u32		_ICODE_ENDWITH									= 201;
+	const u32		_ICODE_IF										= 202;
+	const u32		_ICODE_ENDIF									= 203;
+	const u32		_ICODE_FUNCTION									= 204;
+	const u32		_ICODE_ENDFUNC									= 205;
+	const u32		_ICODE_PUBLIC									= 206;
+	const u32		_ICODE_LOCAL									= 207;
+	const u32		_ICODE_NOT										= 208;
+	const u32		_ICODE_AND										= 209;
+	const u32		_ICODE_OR										= 210;
+	const u32		_ICODE_OVJR										= 211;
+	const u32		_ICODE_RGB										= 212;
+	const u32		_ICODE_MIN										= 213;
+	const u32		_ICODE_MAX										= 214;
+	const u32		_ICODE_INT										= 215;
+	const u32		_ICODE_SYSMETRIC								= 216;
+	const u32		_ICODE_VERSION									= 217;
+	const u32		_ICODE_FLAGS									= 218;
+	const u32		_ICODE_JDEBI									= 219;
+	const u32		_ICODE_INHERIT									= 220;
+	const u32		_ICODE_ADDOBJECT								= 221;
+	const u32		_ICODE_LEFT										= 222;
+	const u32		_ICODE_TOP										= 223;
+	const u32		_ICODE_RIGHT									= 224;
+	const u32		_ICODE_BOTTOM									= 225;
+	const u32		_ICODE_WIDTH									= 226;
+	const u32		_ICODE_HEIGHT									= 227;
+	const u32		_ICODE_VISIBLE									= 228;
+	const u32		_ICODE_PROTECTED								= 229;
+	const u32		_ICODE_MAIN										= 230;
+	const u32		_ICODE_LOAD_LAST_FROM_VJR_USER_DBF				= 231;
+
+
+	SAsciiCompSearcher	cgcKeywordOperators[] =
+	{
+		// keyword					length		repeats?	extra (type)							first on line?		validate handler,		custom handler
+		{ cgcCaskRoundOpenParams,	3,			false,		_ICODE_CASK_ROUND_OPEN_PARAMS,			false,				NULL,					NULL },
+		{ cgcCaskRoundCloseParams,	3,			false,		_ICODE_CASK_ROUND_CLOSE_PARAMS,			false,				NULL,					NULL },
+		{ cgcCaskSquareOpenParams,	3,			false,		_ICODE_CASK_SQUARE_OPEN_PARAMS,			false,				NULL,					NULL },
+		{ cgcCaskSquareCloseParams,	3,			false,		_ICODE_CASK_SQUARE_CLOSE_PARAMS,		false,				NULL,					NULL },
+		{ cgcCaskTriangleOpenParams,3,			false,		_ICODE_CASK_TRIANGLE_OPEN_PARAMS,		false,				NULL,					NULL },
+		{ cgcCaskTriangleCloseParams,3,			false,		_ICODE_CASK_TRIANGLE_CLOSE_PARAMS,		false,				NULL,					NULL },
+		{ cgcCaskTildeOpenParams,	3,			false,		_ICODE_CASK_TILDE_OPEN_PARAMS,			false,				NULL,					NULL },
+		{ cgcCaskTildeCloseParams,	3,			false,		_ICODE_CASK_TILDE_CLOSE_PARAMS,			false,				NULL,					NULL },
+		{ cgcCaskRoundOpen,			2,			false,		_ICODE_CASK_ROUND_OPEN,					false,				NULL,					NULL },
+		{ cgcCaskRoundClose,		2,			false,		_ICODE_CASK_ROUND_CLOSE,				false,				NULL,					NULL },
+		{ cgcCaskSquareOpen,		2,			false,		_ICODE_CASK_SQUARE_OPEN,				false,				NULL,					NULL },
+		{ cgcCaskSquareClose,		2,			false,		_ICODE_CASK_SQUARE_CLOSE,				false,				NULL,					NULL },
+		{ cgcCaskTriangleOpen,		2,			false,		_ICODE_CASK_TRIANGLE_OPEN,				false,				NULL,					NULL },
+		{ cgcCaskTriangleClose,		2,			false,		_ICODE_CASK_TRIANGLE_CLOSE,				false,				NULL,					NULL },
+		{ cgcCaskTildeOpen,			2,			false,		_ICODE_CASK_TILDE_OPEN,					false,				NULL,					NULL },
+		{ cgcCaskTildeClose,		2,			false,		_ICODE_CASK_TILDE_CLOSE,				false,				NULL,					NULL },
+		{ "_azAZ__\000\000",		1,			true,		_ICODE_ALPHA,							false,				NULL,					NULL },
+		{ "_09\000\000",			1,			true,		_ICODE_NUMERIC,							false,				NULL,					NULL },
+		{ " ",						1,			true,		_ICODE_WHITESPACE,						false,				NULL,					NULL },
+		{ "\t",						1,			true,		_ICODE_WHITESPACE,						false,				NULL,					NULL },
+		{ "___",					1,			false,		_ICODE_UNDERSCORE,						false,				NULL,					NULL },
+		{ "(",						1,			false,		_ICODE_LEFT_PARENTHESIS,				false,				NULL,					NULL },
+		{ ")",						1,			false,		_ICODE_RIGHT_PARENTHESIS,				false,				NULL,					NULL },
+		{ "[",						1,			false,		_ICODE_LEFT_BRACKET,					false,				NULL,					NULL },
+		{ "]",						1,			false,		_ICODE_RIGHT_BRACKET,					false,				NULL,					NULL },
+		{ "{",						1,			false,		_ICODE_LEFT_BRACE,						false,				NULL,					NULL },
+		{ "}",						1,			false,		_ICODE_RIGHT_BRACE,						false,				NULL,					NULL },
+		{ "+",						1,			false,		_ICODE_PLUS,							false,				NULL,					NULL },
+		{ "-",						1,			false,		_ICODE_MINU,							false,				NULL,					NULL },
+		{ "*",						1,			true,		_ICODE_ASTERISK,						false,				NULL,					NULL },
+		{ "\\",						1,			true,		_ICODE_SLASH,							false,				NULL,					NULL },
+		{ "/",						1,			true,		_ICODE_BACKSLASH,						false,				NULL,					NULL },
+		{ "\"",						1,			false,		_ICODE_DOUBLE_QUOTE,					false,				NULL,					NULL },
+		{ "'",						1,			false,		_ICODE_SINGLE_QUOTE,					false,				NULL,					NULL },
+		{ ".",						1,			false,		_ICODE_DOT,								false,				NULL,					NULL },
+		{ ",",						1,			false,		_ICODE_COMMA,							false,				NULL,					NULL },
+		{ ":",						1,			false,		_ICODE_COLON,							false,				NULL,					NULL },
+		{ "_",						1,			false,		_ICODE_UNDERSCORE,						false,				NULL,					NULL },
+		{ "~",						1,			false,		_ICODE_TILDE,							false,				NULL,					NULL },
+		{ "@",						1,			false,		_ICODE_AT_SIGN,							false,				NULL,					NULL },
+		{ "?",						1,			false,		_ICODE_QUESTION_MARK,					false,				NULL,					NULL },
+		{ "!",						1,			false,		_ICODE_EXCLAMATION_MARK,				false,				NULL,					NULL },
+		{ "#",						1,			false,		_ICODE_POUND_SIGN,						false,				NULL,					NULL },
+		{ "$",						1,			false,		_ICODE_DOLLAR_SIGN,						false,				NULL,					NULL },
+		{ "%",						1,			false,		_ICODE_PERCENT_SIGN,					false,				NULL,					NULL },
+		{ "^",						1,			false,		_ICODE_CARET,							false,				NULL,					NULL },
+		{ "&",						1,			false,		_ICODE_AMPERSAND,						false,				NULL,					NULL },
+		{ "=",						1,			false,		_ICODE_EQUAL_SIGN,						false,				NULL,					NULL },
+		{ "|",						1,			false,		_ICODE_PIPE_SIGN,						false,				NULL,					NULL },
+		{ "`",						1,			false,		_ICODE_REVERSE_QUOTE,					false,				NULL,					NULL },
+		{ ";",						1,			false,		_ICODE_SEMICOLON,						false,				NULL,					NULL },
+		{ ">",						1,			false,		_ICODE_GREATER_THAN,					false,				NULL,					NULL },
+		{ "<",						1,			false,		_ICODE_LESS_THAN,						false,				NULL,					NULL },
+		/* As a last-case condition, we tag every character that we didn't previously identify with the unknown tag */                      	
+		{ "_\000\377\000\000",		1,			true,		_ICODE_UNKNOWN,							false,				NULL,					NULL },
+		{ 0,						0,			0,			0,										0,					0,						0 }
+	};
+
+	// Zeroeth-pass keywords
+	SAsciiCompSearcher	cgcKeywordKeywords0[] =
+	{
+		// keyword					length		repeats?	extra (type)							first on line?		validate handler		custom handler
+		{ "include",				7,			false,		_ICODE_INCLUDE,							true,				NULL,					NULL },
+		{ "define",					6,			false,		_ICODE_DEFINE,							true,				NULL,					NULL },
+		{ 0,						0,			0,			0,										0,					0,						0 }
+	};
+
+	// First-pass keywords
+	SAsciiCompSearcher	cgcKeywordKeywords1[] =
+	{
+		// keyword					length		repeats?	extra (type)							first on line?		validate handler		custom handler
+		{ "with",					4,			false,		_ICODE_WITH,							true,				NULL,					NULL },
+		{ "endwith",				7,			false,		_ICODE_ENDWITH,							true,				NULL,					NULL },
+		{ "if",						2,			false,		_ICODE_IF,								true,				NULL,					NULL },
+		{ "endif",					5,			false,		_ICODE_ENDIF,							true,				NULL,					NULL },
+		{ "function",				8,			false,		_ICODE_FUNCTION,						true,				NULL,					NULL },
+		{ "endfunc",				7,			false,		_ICODE_ENDFUNC,							true,				NULL,					NULL },
+		{ "public",					6,			false,		_ICODE_PUBLIC,							true,				NULL,					NULL },
+		{ "local",					5,			false,		_ICODE_LOCAL,							true,				NULL,					NULL },
+		{ "not",					3,			false,		_ICODE_NOT,								false,				NULL,					NULL },
+		{ "and",					3,			false,		_ICODE_AND,								false,				NULL,					NULL },
+		{ "or",						2,			false,		_ICODE_OR,								false,				NULL,					NULL },
+		{ "_vjr",					4,			false,		_ICODE_OVJR,							false,				NULL,					NULL },
+		{ "rgb",					3,			false,		_ICODE_RGB,								false,				NULL,					NULL },
+		{ "min",					3,			false,		_ICODE_MIN,								false,				NULL,					NULL },
+		{ "max",					3,			false,		_ICODE_MAX,								false,				NULL,					NULL },
+		{ "int",					3,			false,		_ICODE_INT,								false,				NULL,					NULL },
+		{ "sysmetric",				9,			false,		_ICODE_SYSMETRIC,						false,				NULL,					NULL },
+		{ "version",				7,			false,		_ICODE_VERSION,							false,				NULL,					NULL },
+		{ "flags",					5,			false,		_ICODE_FLAGS,							false,				NULL,					NULL },
+		{ "jdebi",					5,			false,		_ICODE_JDEBI,							false,				NULL,					NULL },
+		{ "inherit",				7,			false,		_ICODE_INHERIT,							false,				NULL,					NULL },
+		{ "addobject",				9,			false,		_ICODE_ADDOBJECT,						false,				NULL,					NULL },
+		{ "left",					4,			false,		_ICODE_LEFT,							false,				NULL,					NULL },
+		{ "top",					3,			false,		_ICODE_TOP,								false,				NULL,					NULL },
+		{ "right",					5,			false,		_ICODE_RIGHT,							false,				NULL,					NULL },
+		{ "bottom",					6,			false,		_ICODE_BOTTOM,							false,				NULL,					NULL },
+		{ "width",					5,			false,		_ICODE_WIDTH,							false,				NULL,					NULL },
+		{ "height",					6,			false,		_ICODE_HEIGHT,							false,				NULL,					NULL },
+		{ "visible",				7,			false,		_ICODE_VISIBLE,							false,				NULL,					NULL },
+		{ "protected",				9,			false,		_ICODE_PROTECTED,						false,				NULL,					NULL },
+		{ "main",					4,			false,		_ICODE_MAIN,							false,				NULL,					NULL },
+		{ "loadlastfromvjruserdbf", 22,			false,		_ICODE_LOAD_LAST_FROM_VJR_USER_DBF,		false,				NULL,					NULL },
+		{ 0,						0,			0,			0,										0,					0,						0 }
+	};
+
 
 
 
@@ -159,7 +515,7 @@ struct SMasterList;
 //		Note:  Every reference in SOssLine points to a location within tcData, so if tcData is freed, then all references are lost
 //
 //////
-	u32 compiler_breakoutAsciiTextIntoSOssLines(s8* tcData, u32 tnFileSize, SStartEnd* tseLines, u32 tnAllocSize)
+	u32 compiler_breakoutAsciiTextIntoSOssLines(s8* data, u32 fileSize, SStartEnd* seLines, u32 extraAllocSize)
 	{
 		u32			lnOffset, lnTotalLineLength, lnLineCount;
 		SOssLine*	linePrev;
@@ -168,7 +524,7 @@ struct SMasterList;
 
 		// Make sure our environment is sane
 		lnLineCount = 0;
-		if (tcData && tnFileSize != 0 && tnAllocSize <= 0xffffffff)
+		if (data && fileSize != 0 && extraAllocSize <= 0xffffffff)
 		{
 			// Initialize our variables
 			lnOffset	= 0;
@@ -177,14 +533,14 @@ struct SMasterList;
 			goto storeFirstOne;
 
 			// Iterate through every byte of the source data until all lines are broken out
-			while (line && lnOffset < tnFileSize)
+			while (line && lnOffset < fileSize)
 			{
 				// Mark the start of this line
-				lnTotalLineLength	= ioss_breakoutAsciiTextDataIntoLines_ScanLine(tcData + lnOffset, tnFileSize - lnOffset, &line->length, &line->whitespace);
+				lnTotalLineLength	= ioss_breakoutAsciiTextDataIntoLines_ScanLine(data + lnOffset, fileSize - lnOffset, &line->length, &line->whitespace);
 
 				// Make sure we still have more to go
 				lnOffset += lnTotalLineLength;
-				if (lnOffset <= tnFileSize)
+				if (lnOffset <= fileSize)
 				{
 					// Create the next line
 					linePrev = line;
@@ -193,7 +549,7 @@ storeFirstOne:
 					//////////
 					// Allocate this entry
 					///////
-						line = (SOssLine*)vvm_SEChain_append(tseLines, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SOssLine), _COMMON_START_END_BLOCK_SIZE, NULL);
+						line = (SOssLine*)vvm_SEChain_append(seLines, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SOssLine), _COMMON_START_END_BLOCK_SIZE, NULL);
 
 
 					//////////
@@ -209,17 +565,17 @@ storeFirstOne:
 
 								// Indicate where this next line will/would start
 								line->start			= lnOffset;
-								line->base			= tcData;
+								line->base			= data;
 								line->lineNumber	= lnLineCount + 1;						// Store the number as base-1, not base-0
 
 								// Allocate the extra block if we have one to do
-								if (tnAllocSize != 0)
+								if (extraAllocSize != 0)
 								{
 									// Allocate the memory block for this extra associated item
-									line->extra = malloc((u32)tnAllocSize);
+									line->extra = malloc((u32)extraAllocSize);
 
 									// Initialize it to its empty state
-									if (line->extra)		memset((s8*)line->extra, 0, tnAllocSize);
+									if (line->extra)		memset((s8*)line->extra, 0, extraAllocSize);
 								}
 
 								// Increase our line count
@@ -573,4 +929,1278 @@ _asm int 3;
 		}
 		// If we get here, failure
 		return(llResult);
+	}
+
+
+
+
+//////////
+//
+// Called to search the SAsciiCompSearcher format list of text item keywords.
+//
+// Note:  If the length column of the SAsciiCompSearcher entry is negative, it is a case-sensitive search.
+//
+// Returns:
+//		The first component created (if any)
+//
+//////
+	SOssComp* oss_translateSOssLinesToSOssComps(SAsciiCompSearcher* tsComps, SOssLine* line)
+	{
+		s32						lnI, lnMaxLength, lnStart, lnLength, lnLacsLength;
+		bool					llSigned, llResult;
+		SOssComp*				compFirst;
+		SOssComp*				compLast;
+		SOssComp*				comp;
+		s8*						lcData;
+		SAsciiCompSearcher*		lacs;
+		SOssCompCallback		lccb;
+
+
+		// Make sure the environment's sane
+		compFirst = NULL;
+		if (tsComps && line)
+		{
+			// Scan starting at the beginning of the line
+			lcData = line->base + line->start + line->whitespace;
+
+			// Iterate through every byte identifying every component we can
+			compLast	= NULL;
+			lnMaxLength	= line->length;
+			for (lnI = 0; lnI < lnMaxLength; )
+			{
+				// Search through the tsComps list one by one
+				for (	lacs = tsComps;
+						lacs->length != 0;
+						lacs++)
+				{
+					// Find out our signed status and get normalized length
+					llSigned		= (lacs->length < 0);
+					lnLacsLength	= abs(lacs->length);
+
+					// Process through this entry
+					if ((!lacs->firstOnLine || lnI == 0) && lnLacsLength <= lnMaxLength - lnI)
+					{
+						// There is enough room for this component to be examined
+						// See if it matches
+						if (ioss_translateSOssLinesToSOssCompsTest((s8*)lacs->keyword, lcData + lnI, lacs->length) == 0)
+						{
+							// It matches
+							// Is there a secondary validation?
+							if (lacs->_validate)
+							{
+								// Yes, make sure it validates there as well
+								lccb.text					= lcData + lnI;
+								lccb.length					= lacs->length;
+								lccb.iCode					= lacs->iCode;
+								lccb._insertCompByComp		= NULL;
+								lccb._insertCompByParams	= NULL;
+								lccb._deleteComps			= NULL;
+								lccb._cloneComps			= NULL;
+								lccb._mergeComps			= NULL;
+
+								// Perform the validation
+								llResult = lacs->validate(&lccb);
+
+							} else {
+								// If there is no extra validation, we just pass through
+								llResult = true;
+							}
+							
+							// Are we still good?
+							if (llResult)
+							{
+								// mark its current condition
+								lnStart		= lnI;
+								lnLength	= lnLacsLength;
+								// See if it's allowed to repeat
+								if (lacs->repeats)
+								{
+									while (	lnStart + lnLength + lnLacsLength <= lnMaxLength
+											&& ioss_translateSOssLinesToSOssCompsTest((s8*)lacs->keyword, lcData + lnStart + lnLength, lacs->length) == 0)
+									{
+										// We found another repeated entry
+										lnLength += lnLacsLength;
+									}
+									// When we get here, every repeated entry has been found (if any)
+								}
+								// When we get here, we have the starting point and the full length (including any repeats)
+
+
+								//////////
+								// Allocate this entry
+								///////
+									comp = (SOssComp*)vvm_SEChain_append(&line->comps, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SOssComp), _COMMON_START_END_SMALL_BLOCK_SIZE, NULL);
+
+
+								//////////
+								// Populate the component with specified information
+								//////
+									//
+									//////
+										if (comp)
+										{
+											// Update the back links
+											if (compLast)	compLast->ll.next = (SLL*)comp;			// Previous one points to this one
+											comp->ll.prev	= (SLL*)compLast;						// This one points back to previous one
+
+											// Update the component's information
+											comp->line		= line;
+											comp->start		= lnStart;
+											comp->length	= lnLength;
+											comp->iCode		= lacs->iCode;
+
+											// Update our first component (if it's not updated already)
+											if (!compFirst)	compFirst = comp;
+
+											// All done
+											compLast = comp;
+										}
+									//////
+									//
+								//////
+								// END
+								//////////
+
+
+								//////////
+								// Move beyond this entry, and continue on search again afterward
+								//////
+									lnI += lnLength;
+									break;		// leaves lnJ loop, continues with lnI loop
+							}
+						}
+						//else it doesn't match, this isn't a good find
+					}
+				}
+				// When we get here, we've processed through everything here
+				if (lacs->length == 0)
+					lnI++;			// We didn't find anything at that character, continue on to the next
+			}
+			// When we get here, lnI has been updated to its new location,
+			// and any indicated components have been added
+		}
+		// Return the count
+		return(compFirst);
+	}
+
+
+
+
+//////////
+//
+// Search the haystack for the needle, the haystack can be tupels, as in "_az" meaning
+// (is it between "a" and "z" inclusive?)  To set this condition, use a length of 1,
+// a leading "_" in tcHaystack, and two characters (one of which must NOT be NULL) after.
+// Examples:
+//		_az		= lower-case a to z inclusive
+//		_AZ		= upper-case a to z inclusive
+//		_09		= numeric 0 to 9 inclusive
+//
+// Returns:
+//		0		= matches
+//		!0		= does not tmach
+//
+//////
+	s32 ioss_translateSOssLinesToSOssCompsTest(s8* tcHaystack, s8* tcNeedle, s32 tnLength)
+	{
+		u32		lnI;
+		bool	llSigned;
+
+
+		// Make sure our environment is sane
+		if (tnLength != 0)
+		{
+			// See if we're a signed or unsigned compare
+			if (tnLength < 0)
+			{
+				// Case sensitive compare
+				tnLength	= -tnLength;
+				llSigned	= true;
+
+			} else {
+				// Case insensitive compare
+				llSigned = false;
+			}
+
+			// See if we're looking for a tuple, or a regular compare
+			if (tcHaystack[0] == '_' && tnLength == 1)
+			{
+				// It's an explicit match of a range (this is ALWAYS subject to case as it is an explicit range)
+				for (lnI = 1; tcHaystack[lnI] != 0 || tcHaystack[lnI + 1] != 0; lnI += 2)
+				{
+					//		within the range low			.........			up to the range high
+					if (tcNeedle[0] >= tcHaystack[lnI]			&&		tcNeedle[0] <= tcHaystack[lnI + 1])
+						return(0);		// It's a match, needle is in the range
+				}
+				// Not a match, will fall through to below
+
+			} else {
+				// Just a regular compare
+				if (llSigned)	return(  memcmp(tcHaystack, tcNeedle, tnLength));
+				else			return(_memicmp(tcHaystack, tcNeedle, tnLength));
+			}
+		}
+		// If we get here, no match
+		return(-1);
+	}
+
+
+
+
+//////////
+//
+// Called to search the already parsed SAsciiCompSearcher list of components, looking for
+// combinations which relate to other component types.  The primary translations here are
+// alpha/alphanumeric/numeric forms to other forms.
+//
+//////
+	void oss_translateSOssCompsToOthers(SAsciiCompSearcher* tsComps, SOssLine* line)
+	{
+		SStartEndCallback cb;
+
+
+		cb._func	= (u32)iioss_translateSOssCompsToOthersCallback;
+		cb.extra	= (u32)tsComps;
+		vvm_SEChain_searchByCallback(&line->comps, &cb);
+	}
+
+
+
+
+//////////
+//
+// Searches the haystack for the indicated needle, and reports the position if found
+//
+// Returns:
+//		true	- found, tnPosition is updated
+//		false	- not found, tnPosition unchanged
+//
+//////
+	bool oss_findFirstOccurrenceOfAsciiCharacter(s8* tcHaystack, u32 tnHaystackLength, s8 tcNeedle, u32* tnPosition)
+	{
+		u32		lnI;
+		bool	llFound;
+
+
+		// Make sure our environment is sane
+		llFound = false;
+		if (tcHaystack && tnHaystackLength != 0)
+		{
+			// Repeat for the length of the string
+			for (lnI = 0; lnI < tnHaystackLength; lnI++)
+			{
+				// See if this is the character we're after
+				if (tcHaystack[lnI] == tcNeedle)
+				{
+					// We found it
+					llFound = true;
+
+					// Update caller's pointer if need be
+					if (tnPosition)
+						*tnPosition = lnI;
+
+					// All done
+					break;
+				}
+			}
+			// When we get here, either found or not
+		}
+		// Indicate our found condition
+		return(llFound);
+	}
+
+
+
+
+//////////
+//
+// Searches forward to find the indicated component by the indicated type.
+//
+// Returns:
+//		The matching component
+//		If NULL, the compLastScanned indicates the last component that was searched where it wasn't found
+//
+//////
+	SOssComp* oss_findNextSOssCompBy_iCode(SOssComp* comp, u32 tniCode, SOssComp** compLastScanned)
+	{
+		// Initially indicate failure
+		if (compLastScanned)
+			*compLastScanned = comp;
+
+		// Continue while the environment is sane
+		while (comp)
+		{
+			// Store the component we're scanning
+			if (compLastScanned)
+				*compLastScanned = comp;
+
+			// See if this is it
+			if (comp->iCode == tniCode)
+				break;		// It is, we're done
+
+			// Move to the next component
+			comp = (SOssComp*)comp->ll.next;
+		}
+		// When we get here, we either found it or not
+		// Store our results
+		return(comp);
+	}
+
+
+
+
+//////////
+//
+// Searches for the next non-whitespace component, including itself
+//
+//////
+	SOssComp* oss_skipPastSOssComp_iCode(SOssComp* comp, u32 tniCode)
+	{
+		while (comp && comp->iCode == tniCode)
+		{
+			// Move to next component
+			comp = (SOssComp*)comp->ll.next;
+		}
+		// When we get here, we're sitting on either no valid component, or the one which does not match the specified type
+		return(comp);
+	}
+
+
+
+
+//////////
+//
+// Called to combine two components which are touching into one.
+//
+// Source:		define user32		something here
+// Example:		[define][whitespace][user][32][whitespace][something][here]
+// Search:		[alpha][numeric], convert to [alphanumeric]
+// After:		[define][whitespace][user32][whitespace][something][here]
+//
+//////
+	u32 oss_combine2SOssComps(SOssLine* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2, u32 tniCodeCombined)
+	{
+		u32			lnCount;
+		SOssComp*	compNext;
+		SOssComp*	comp;
+		SOssComp*	comp1;
+		SOssComp*	comp2;
+
+
+		// Make sure our environment is sane
+		lnCount = 0;
+		if (line && line->comps.root)
+		{
+			// Grab the first component
+			comp = (SOssComp*)line->comps.root->ptr;
+
+			// Continue until we get ... to ... the ... end ... (imagine you were reading that like in a baseball stadium with lots of loud echoes)
+			while (comp)
+			{
+				// Grab the next component sequentially
+				compNext = (SOssComp*)comp->ll.next;
+
+				// Make sure there's something to do
+				if (!compNext)
+					return(lnCount);	// We're done
+
+				// Grab the one after that
+				comp1 = comp;
+				comp2 = (SOssComp*)comp1->ll.next;
+				if (!comp2)
+					return(lnCount);	// We're done
+
+				// When we get here, we have needle-1 and needle-2 candidates.
+				// Are they touching?
+				if (comp1->start + comp1->length == comp2->start)
+				{
+					// Uh ... yes.  Can we get a chaperon over here, please?  Thank you!
+					// Are they our requested?
+					if (comp1->iCode == tniCodeNeedle1 && comp2->iCode == tniCodeNeedle2)
+					{
+						// YES!  This is the moment we've been waiting for. THIS is why we showed up for work today. THIS is why we came!
+						// Gentlemen, we have a job to do.  Now, let's get to it!
+						++lnCount;
+
+						//////////
+						// Combine these into one
+						//////
+							// Increase comp1's length, then move comp2 from line->comps to line->compsCombined
+							comp1->length	+= comp2->length;
+							comp1->iCode	= tniCodeCombined;
+							vvm_SEChain_completelyMigrateSLLByPtr(&line->compsCombined, &line->comps, (SLL*)comp2, 0, _COMMON_START_END_BLOCK_SIZE);
+
+						//////////
+						// Point to the new next thing, which is now the thing after what previously had been comp2, but is now simply comp->ll.next (which could now be nothing)
+						//////
+							compNext = (SOssComp*)comp->ll.next;
+					}
+				}
+				// Move to the next component
+				comp = compNext;
+			}
+			// When we get here, we're good
+		}
+		// Indicate the success rate at which we operated hitherto
+		return(lnCount);
+	}
+
+
+
+
+//////////
+//
+// Called to combine three components which are touching into one.
+//
+// Source:		saddf32		a,20.50
+// Example:		[saddf32][whitespace][a][comma][20][period][50]
+// Search:		[numeric][period][numeric], convert to [numeric]
+// After:		[sadf32][whitespace][a][comma][20.50]
+//
+//////
+	u32 oss_combine3SOssComps(SOssLine* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2, u32 tniCodeNeedle3, u32 tniCodeCombined)
+	{
+		u32			lnCount;
+		SOssComp*	compNext;
+		SOssComp*	comp;
+		SOssComp*	comp1;
+		SOssComp*	comp2;
+		SOssComp*	comp3;
+
+
+// UNTESTED CODE:  breakpoint and examine
+		// Make sure our environment is sane
+		lnCount = 0;
+		if (line && line->comps.root)
+		{
+			// Grab the first component
+			comp = (SOssComp*)line->comps.root->ptr;
+
+			// Continue until we get ... to ... the ... end ... (imagine you were reading that like in a baseball stadium with lots of loud echoes)
+			while (comp)
+			{
+				// Grab the next component sequentially
+				compNext = (SOssComp*)comp->ll.next;
+
+				// Make sure there's something to do
+				if (!compNext)
+					return(lnCount);	// We're done
+
+				// Grab the one after that
+				comp1 = compNext;
+				comp2 = (SOssComp*)comp1->ll.next;
+				if (!comp2)
+					return(lnCount);	// We're done
+
+				// Grab the one after that
+				comp3 = (SOssComp*)comp2->ll.next;
+				if (!comp3)
+					return(lnCount);	// We're done
+
+				// When we get here, we have needle-1, needle-2, and needle-3 candidates.
+				// Are they touching?
+				if (comp1->start + comp1->length == comp2->start && comp2->start + comp2->length == comp3->start)
+				{
+					// Are they our requested?
+					if (comp1->iCode == tniCodeNeedle1 && comp2->iCode == tniCodeNeedle2 && comp3->iCode == tniCodeNeedle3)
+					{
+						// It's a match
+						lnCount += 2;
+
+						//////////
+						// Combine these into one
+						//////
+							// Increase comp1's length, then move comp2 from line->comps to line->compsCombined
+							comp1->length	+= comp2->length + comp3->length;
+							comp1->iCode	= tniCodeCombined;
+							vvm_SEChain_completelyMigrateSLLByPtr(&line->compsCombined, &line->comps, (SLL*)comp2, 0, _COMMON_START_END_BLOCK_SIZE);
+							vvm_SEChain_completelyMigrateSLLByPtr(&line->compsCombined, &line->comps, (SLL*)comp3, 0, _COMMON_START_END_BLOCK_SIZE);
+
+						//////////
+						// Point to the new next thing, which is now the thing after what previously had been comp2, but is now simply comp->ll.next (which could now be nothing)
+						//////
+							compNext = (SOssComp*)comp->ll.next;
+					}
+				}
+				// Move to the next component
+				comp = compNext;
+			}
+			// When we get here, we're good
+		}
+		// Indicate the success rate at which we operated hitherto
+		return(lnCount);
+	}
+
+
+
+
+//////////
+//
+// Called to combine everything between two components
+//
+// Source:		u8 name[] = "foo"
+// Example:		[u8][whitespace][name][left bracket][right bracket][whitespace][equal][whitespace][double quote][foo][double quote]
+// Search:		[double quote], replace with [double quoted text]
+// After:		[u8][whitespace][name][left bracket][right bracket][whitespace][equal][whitespace][double quote text]
+//
+//////
+	u32 oss_combineAllBetweenSOssComps(SOssLine* line, u32 tniCodeNeedle, u32 tniCodeCombined)
+	{
+		u32			lnCount;
+		SOssComp*	compNext;
+		SOssComp*	comp;
+		SOssComp*	compSearcher;
+
+
+// UNTESTED CODE:  breakpoint and examine
+		// Make sure our environment is sane
+		lnCount = 0;
+		if (line && line->comps.root)
+		{
+			// Grab the first component
+			comp = (SOssComp*)line->comps.root->ptr;
+
+			// Continue until we get ... to ... the ... end ... (imagine you were reading that like in a baseball stadium with lots of loud echoes)
+			while (comp)
+			{
+				// Grab the next component sequentially
+				compNext = (SOssComp*)comp->ll.next;
+
+				// Make sure there's something to do
+				if (!compNext)
+					return(lnCount);	// We're done
+
+				// Is this our intended?
+				if (comp->iCode == tniCodeNeedle)
+				{
+					// Search forward to see if there is a matching entry
+					compSearcher = compNext;
+					while (compSearcher)
+					{
+						if (compSearcher->iCode == tniCodeNeedle)
+						{
+							// This is the match, combine everything between
+							comp->length	= (compSearcher->start + compSearcher->length) - comp->start;
+							comp->iCode		= tniCodeCombined;
+
+							// Iterate and merge in
+							while (compNext)
+							{
+								// Increase our count
+								++lnCount;
+
+								// Migrate this one (as it was technically merged above with the comp->length = line)
+								vvm_SEChain_completelyMigrateSLLByPtr(&line->compsCombined, &line->comps, (SLL*)compNext, 0, _COMMON_START_END_BLOCK_SIZE);
+
+								// See if we're done
+								if (compNext == compSearcher)
+									break;		// This was the last one, we're done
+
+								// Move to the next component (which is the comp->ll.next component again, because we just migrated the previous compNext
+								compNext = (SOssComp*)comp->ll.next;
+							}
+							// When we get here, everything's migrated
+
+							// Grab the new next, which is the one after the matched entry
+							compNext = (SOssComp*)comp->ll.next;
+
+							// Continue looking for more combinations on this line
+							break;
+						}
+
+						// Move to the next component
+						compSearcher = (SOssComp*)compSearcher->ll.next;
+					}
+				}
+				// Move to the next component
+				comp = compNext;
+			}
+			// When we get here, we're good
+		}
+		// Indicate the success rate at which we operated hitherto
+		return(lnCount);
+	}
+
+
+
+
+//////////
+//
+// Called to combine everything after the indicated component
+//
+// Source:		u8* name		// user name
+// Example:		[u8][asterisk][whitespace][name][whitespace][comment][whitespace][user][whitespace][name]
+// Search:		[comment]
+// After:		[u8][asterisk][whitespace][name][whitespace][comment]
+//
+//////
+	u32 oss_combineAllAfterSOssComp(SOssLine* line, u32 tniCodeNeedle)
+	{
+		u32			lnCount;
+		SOssComp*	compNext;
+		SOssComp*	comp;
+
+
+// UNTESTED CODE:  breakpoint and examine
+		// Make sure our environment is sane
+		lnCount = 0;
+		if (line && line->comps.root)
+		{
+			// Grab the first component
+			comp = (SOssComp*)line->comps.root->ptr;
+
+			// Continue until we get ... to ... the ... end ... (imagine you were reading that like in a baseball stadium with lots of loud echoes)
+			while (comp)
+			{
+				// Grab the next component sequentially
+				compNext = (SOssComp*)comp->ll.next;
+
+				// Make sure there's something to do
+				if (!compNext)
+					return(lnCount);	// We're done
+
+				// Is this our intended?
+				if (comp->iCode == tniCodeNeedle)
+				{
+					//////////
+					// Combine from here on out into one
+					//////
+						// Increase the original component to the line's whole length
+						comp->length = line->length - comp->start;
+						
+						while (compNext)
+						{
+							// Indicate the number combined
+							++lnCount;
+
+							// Move this one along
+							vvm_SEChain_completelyMigrateSLLByPtr(&line->compsCombined, &line->comps, (SLL*)compNext, 0, _COMMON_START_END_BLOCK_SIZE);
+
+							// Move to next component (which is now again the comp->ll.next entry, because we've just migrated the prior compNext entry to compsCombined)
+							compNext = (SOssComp*)comp->ll.next;
+						}
+						// When we get here, we're done
+						break;
+				}
+				// Move to the next component
+				comp = compNext;
+			}
+			// When we get here, we're good
+		}
+		// Indicate the success rate at which we operated hitherto
+		return(lnCount);
+	}
+
+
+
+
+//////////
+//
+// Called to remove extraneous whitespaces
+//
+// Source:		u8* name		// user name
+// Example:		[u8][asterisk][whitespace][name][whitespace][comment][whitespace][user][whitespace][name]
+// Search:		[comment]
+// After:		[u8][asterisk][whitespace][name][whitespace][comment]
+//
+//////
+	u32 oss_removeExtraneousWhitespaceSOssComps(SOssLine* line, u32 tniCodeWhitespace)
+	{
+		return(0);
+	}
+
+
+
+
+//////////
+//
+// Callback, used to translate existing components into other components
+// Note:  Always returns false, so it will continue being fed every component
+//
+//////
+	bool iioss_translateSOssCompsToOthersCallback(SStartEndCallback* cb)
+	{
+		bool					llResult;
+		s32						lnLacsLength;
+		SOssComp*				comp;
+		SAsciiCompSearcher*		lacs;
+		SOssCompCallback		lccb;
+
+
+		// Make sure the environment is sane
+		if (cb && cb->ptr)
+		{
+			// Grab our pointers into recognizable thingamajigs
+			comp	= (SOssComp*)cb->ptr;
+			lacs	= (SAsciiCompSearcher*)cb->extra;
+
+			// Iterate through this item to see if any match
+			for (	/* lacs is initialize above */;
+					lacs->length != 0;
+					lacs++		)
+			{
+				// Grab the normalized length
+				lnLacsLength = abs(lacs->length);
+
+				// We only test if they're the same length
+				if (lnLacsLength == comp->length || (lacs->repeats && lnLacsLength <= comp->length))
+				{
+					// We only test if this item is not the first item on line, or if must be the first
+					// item on the line, then this component must be the first component on the line.  Simple, yes? :-)
+					if (!lacs->firstOnLine || comp->start == 0)
+					{
+						// Physically conduct the exact comparison
+						if (ioss_translateSOssLinesToSOssCompsTest((s8*)lacs->keyword, 
+																	comp->line->base + comp->line->start + comp->line->whitespace + comp->start, 
+																	lacs->length) == 0)
+						{
+							// This is a match
+							// Is there a secondary test?
+							if (lacs->_validate)
+							{
+								// Yes, make sure it validates there as well
+								lccb.comp					= comp;
+								lccb.length					= 0;
+								lccb.iCode					= lacs->iCode;
+								lccb._insertCompByComp		= (u32)&iioss_translateSOssCompsToOthersCallback__insertCompByCompCallback;
+								lccb._insertCompByParams	= (u32)&iioss_translateSOssCompsToOthersCallback__insertCompByParamsCallback;
+								lccb._deleteComps			= (u32)&iioss_translateSOssCompsToOthersCallback__deleteCompsCallback;
+								lccb._cloneComps			= (u32)&iioss_translateSOssCompsToOthersCallback__cloneCompsCallback;
+								lccb._mergeComps			= (u32)&iioss_translateSOssCompsToOthersCallback__mergeCompsCallback;
+
+								// Perform the validation
+								llResult = lacs->validate(&lccb);
+
+							} else {
+								// No, just let it fall through
+								llResult = true;
+							}
+							
+							if (llResult)
+							{
+								// Convert it, translate it, whatever you want to call it, just make it be the new code, per the user's request, got it? :-)
+								comp->iCode = lacs->iCode;
+								// All done with this component
+								break;
+							}
+						}
+					}
+				}
+			}
+
+		}
+		// We always simulate a false condition so we'll keep receiving each item
+		return(false);
+	}
+
+
+
+
+//////////
+//
+// Search for the indicated record in the chain by using a user-defined callback on the pointer.
+// Callback function should return true when found, false to continue sending other items back.
+//
+// Returns:
+//		NULL if error
+//		The associated pointer if found
+//
+//////
+	void* vvm_SEChain_searchByCallback(SStartEnd* ptrSE, SStartEndCallback* cb)
+	{
+		u32 lnI;
+
+
+		// Make sure the environment is sane
+		if (ptrSE)
+		{
+			// Iterate through the master list until we find the associated entry
+			for (lnI = 0; lnI < ptrSE->masterCount; lnI++)
+			{
+				// Ask the caller if this is it
+				if (ptrSE->master[lnI] && ptrSE->master[lnI]->used)
+				{
+					// Store the pointer for the caller
+					cb->ptr = ptrSE->master[lnI]->ptr;
+
+					// Perform the call
+					if (cb->funcBool(cb))
+						return(ptrSE->master[lnI]->ptr);	// We've found our man
+				}
+			}
+		}
+		// If we get here, failure
+		return(NULL);
+	}
+
+
+
+
+//////////
+//
+// Called as a callback from the custom handler callback function, to do some manual insertion.
+// Note:  If a rogue component is inserted here, one not already defined in the ref's SOssLine parent,
+//        then it will need to be either manually added to the line->comps, or manually tended to.
+//
+//////
+	void iioss_translateSOssCompsToOthersCallback__insertCompByCompCallback(SOssComp* compRef, SOssComp* compNew, bool tlInsertAfter)
+	{
+// TODO:  untested code, breakpoint and examine
+_asm int 3;
+		// Make sure our environment is sane
+		if (compRef && compNew)
+		{
+			// Before or after?
+			if (tlInsertAfter)
+			{
+				// Add the new comp after the reference comp
+				if (compRef->ll.next)
+					compRef->ll.next->prev	= (SLL*)compNew;	// One originally after ref points back to new
+
+				compNew->ll.next	= compRef->ll.next;			// New points forward to the one originally after ref
+				compNew->ll.prev	= (SLL*)compRef;			// New points back to ref
+				compRef->ll.next	= (SLL*)compNew;			// Ref points forward to new
+
+			} else {
+				// Add the new comp before the reference comp
+				if (compRef->ll.prev)
+					compRef->ll.prev->next	= (SLL*)compNew;	// One originally before ref points forward to new
+
+				compNew->ll.next	= (SLL*)compRef;			// New points forward to ref
+				compNew->ll.prev	= compRef->ll.prev;			// New points back to the one originally before ref
+				compRef->ll.prev	= (SLL*)compNew;			// Ref points back to new
+			}
+		}
+	}
+
+
+
+
+//////////
+//
+// Called as a callback from the custom handler callback function, to do some manual insertion.
+//
+//////
+	void iioss_translateSOssCompsToOthersCallback__insertCompByParamsCallback(SOssComp* compRef, SOssLine* line, u32 tniCode, u32 tnStart, s32 tnLength, bool tlInsertAfter)
+	{
+		bool		llResult;
+		SOssComp*	compNew;
+
+
+// TODO:  untested code, breakpoint and examine
+_asm int 3;
+		// Make sure our environment is sane
+		if (compRef && line)
+		{
+			// Allocate a new pointer
+			compNew = (SOssComp*)vvm_SEChain_append(&line->comps, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SOssComp), -1, &llResult);
+			if (compNew)
+			{
+				// Initialize it
+				memset(compNew, 0, sizeof(SOssComp));
+
+				// Populate it
+				compNew->line		= line;
+				compNew->iCode		= tniCode;
+				compNew->start		= tnStart;
+				compNew->length		= tnLength;
+
+				// Add the new component as a component
+				iioss_translateSOssCompsToOthersCallback__insertCompByCompCallback(compRef, compNew, tlInsertAfter);
+			}
+		}
+	}
+
+
+
+
+//////////
+//
+// Called as a callback from the custom handler callback function, to do delete the
+// indicated component.
+//
+//////
+	void iioss_translateSOssCompsToOthersCallback__deleteCompsCallback(SOssComp* comp, SOssLine* line)
+	{
+// TODO:  untested code, breakpoint and examine
+_asm int 3;
+		//////////
+		// Disconnect the component from its siblings
+		//////
+			// Make the one before point forward to one after
+			if (comp->ll.prev)
+				comp->ll.prev->next = comp->ll.next;
+
+			// Make the one after point back to the one before
+			if (comp->ll.next)
+				comp->ll.next->prev = comp->ll.prev;
+
+
+		//////////
+		// Delete it from the list of known components.
+		// Component go bye bye. :-)
+		//////
+			if (line)
+			{
+				// Delete the entry from line->comps
+				vvm_SEChain_deleteFrom(&line->comps, comp, true);
+
+			} else {
+				// Free the rogue entry
+				free(comp);
+			}
+	}
+
+
+
+
+//////////
+//
+// Called as a callback from the custom handler callback function, to clone the indicated
+// component.  If line is not NULL, the component is automatically added to line->comps;
+//
+//////
+	SOssComp* iioss_translateSOssCompsToOthersCallback__cloneCompsCallback(SOssComp* comp, SOssLine* line)
+	{
+		bool		llResult;
+		SOssComp*	compNew;
+
+
+// TODO:  untested code, breakpoint and examine
+_asm int 3;
+		// Make sure our environment is sane
+		if (comp)
+		{
+			// Are we adding to to a line?
+			if (line)
+			{
+				// Add the new component to line->comps
+				compNew = (SOssComp*)vvm_SEChain_append(&line->comps, vvm_getNextUniqueId(), vvm_getNextUniqueId(), sizeof(SOssComp), -1, &llResult);
+
+			} else {
+				// Just create a rogue one
+				compNew = (SOssComp*)malloc(sizeof(SOssComp));
+			}
+
+			// Was it valid?
+			if (compNew)
+			{
+				// Initialize it
+				memset(compNew, 0, sizeof(SOssComp));
+
+				// Populate it
+				compNew->line		= line;
+				compNew->iCode		= comp->iCode;
+				compNew->start		= comp->start;
+				compNew->length		= comp->length;
+
+				// All done!
+			}
+		}
+
+		// Return our new one, no matter if it was a success or not
+		return(compNew);
+	}
+
+
+
+
+//////////
+//
+// Called as a callback from the custom handler callback function, to do merge components into
+// a new one, and delete the one(s) which were merged.
+//
+// NOTE:  It's theoretically possible that there could be a gap here, such as a component next to
+//        another component where there used to be a whitespace inbetween (or anything else), so
+//        the components are no longer right by each other.  The caller will have to manually
+//        handle that condition.
+//
+//////
+	SOssComp* iioss_translateSOssCompsToOthersCallback__mergeCompsCallback(SOssComp* comp, SOssLine* line, u32 tnCount, u32 tniCodeNew)
+	{
+		u32			lnI;
+		SOssComp*	compThis;
+
+
+// TODO:  untested code, breakpoint and examine
+_asm int 3;
+		// Make sure our environment is sane
+		if (comp)
+		{
+			// Iterate for each merging
+			for (lnI = 1, compThis = (SOssComp*)comp->ll.next; compThis && lnI < tnCount; lnI++, compThis = (SOssComp*)comp->ll.next)
+			{
+				// Absorb compThis's length into comp's "collective"
+				comp->length += compThis->length;
+
+				// Delete this component
+				iioss_translateSOssCompsToOthersCallback__deleteCompsCallback(compThis, comp->line);
+
+				// Note:  compThis is always assigned comp->ll.next, because its next component keeps being updated after the delete
+			}
+			// When we get here, everything's merged
+		}
+		// Return the original component as a pass through (in case this is used as an intermediate function)
+		return(comp);
+	}
+
+
+
+
+//////////
+//
+// Delete the indicated item from the chain
+//
+//////
+	void vvm_SEChain_deleteFrom(SStartEnd* ptrSE, void* ptrCaller, bool tlDeletePointers)
+	{
+		u32				lnI;
+		SMasterList*	ptrDel;
+		SMasterList**	master;
+
+
+		// See where we are
+// UNTESTED CODE:  Breakpoint and examine!
+		if (ptrSE)
+		{
+			if (!ptrSE->root)
+			{
+				// There are no existing items, nothing to do, why are they messing around with our brains? :-)
+				return;
+			}
+
+			// Iterate through the master list to find the matching record to delete in the chain
+			master = ptrSE->master;
+			for (lnI = 0; lnI < ptrSE->masterCount; lnI++)
+			{
+				// See if this item matches
+				ptrDel = master[lnI];
+				if (ptrDel && ptrDel->used && ptrDel->ptr == ptrCaller)
+				{
+					// Mark it as not being used
+					ptrDel->used = false;
+
+					// Remove it from its chain
+					if (ptrDel == ptrSE->root)
+					{
+//////////
+// This is the first item
+//////
+						// We are deleting the first item in the list
+						if (ptrDel == ptrSE->last)
+						{
+							// Which is also the last item in the list
+							ptrSE->root = NULL;
+							ptrSE->last = NULL;
+							// No items exist after this
+
+						} else {
+							// It's just the first item in a chain
+							ptrSE->root = (SMasterList*)ptrDel->ll.next;
+						}
+
+
+					} else if (ptrDel == ptrSE->last) {
+//////////
+// This is the last item
+//////
+						// We are deleting the last item in the list
+						ptrSE->last									= (SMasterList*)ptrDel->ll.prev;	// This will never be NULL because we've already checked the first condition
+						((SMasterList*)(ptrDel->ll.prev))->ll.next	= NULL;								// Make the one before this point to nothing, because it is now the last item
+
+
+					} else {
+//////////
+// This is an entry in the middle somewhere
+//////
+						// We are deleting an entry in the middle somewhere
+						((SMasterList*)(ptrDel->ll.prev))->ll.next	= ptrDel->ll.next;		// Make the one before this point to the one after this
+						((SMasterList*)(ptrDel->ll.next))->ll.prev	= ptrDel->ll.prev;		// Make the one after this point to the one before this
+					}
+					// When we get here, the start/end chain is updated
+
+
+					// Release our SMasterList pointer
+					free(ptrDel);
+					master[lnI] = NULL;
+
+
+					// Release the caller's memory (or not if they want to keep it)
+					if (tlDeletePointers)
+						free(ptrCaller);		// Delete this pointer
+					// All done
+				}
+			}
+		}
+		//else not found
+	}
+
+
+
+
+//////////
+//
+// Migrate the existing SMasterList item, and its associated SLL item, from one Start/end chain
+// to another, by either pointer or physical position number.
+//
+//////
+	SLL* vvm_SEChain_completelyMigrateSLLByPtr(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, SLL* ptr, u32 tnHint, u32 tnBlockSize)
+	{
+		u32 lnI;
+
+
+		// Make sure our environment is sane
+		if (ptrSEDst && ptrSESrc && ptrSESrc->masterCount >= 1)
+		{
+			for (lnI = 0; lnI < ptrSESrc->masterCount; lnI++)
+			{
+				// Is this our pointer?
+				if (ptrSESrc->master[lnI] && ptrSESrc->master[lnI]->ptr == (void*)ptr)
+				{
+					// This is our man, migrate it
+// TODO:  (enhancement) we want some kind of better hinting algorithm here, such as the end of the list - common block size, for now we'll just pass 0
+					return(vvm_SEChain_completelyMigrateSLLByNum(ptrSEDst, ptrSESrc, lnI, 0, tnBlockSize));
+				}
+			}
+			// If we get here, not found
+		}
+		// Indicate failure
+		return(NULL);
+	}
+
+	SLL* vvm_SEChain_completelyMigrateSLLByNum(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, u32 lnSrcNum, u32 tnHint, u32 tnBlockSize)
+	{
+		SLL*			lllPrev;
+		SLL*			lllNext;
+		SLL*			lll;
+		SMasterList*	lml;
+
+
+		// Make sure our environment is sane
+		if (ptrSEDst && ptrSESrc && lnSrcNum < ptrSESrc->masterCount && lnSrcNum <= ptrSESrc->masterCount)
+		{
+			// Migrate it, and get its SMasterList entry
+			lml = vvm_SEChain_migrateByNum(ptrSEDst, ptrSESrc, lnSrcNum, tnHint, tnBlockSize);
+			if (lml && lml->ptr)
+			{
+				// Grab the pointer to the SLL entry
+				lll = (SLL*)lml->ptr;
+				// Right now, lll points to the SLL* object from ptrSESrc
+
+				// Grab ptrSESrc's preceding, and following objects (if any)
+				lllPrev	= lll->prev;
+				lllNext = lll->next;
+
+
+				//////////
+				// Update the ptrSESrc entry, to remove this lll entry from its lists
+				//////
+					// Update the pointer for the preceding entry
+					if (lllPrev)
+						lllPrev->next = lllNext;
+					// Update the pointer for the following entry
+					if (lllNext)
+						lllNext->prev = lllPrev;
+					// Right now, lllPrev points forward past lll, and lllNext points backward past lll
+
+
+				//////////
+				// lll is currently an orphan entry that thinks it's not orphaned because it still has prev and next pointers potentially pointing off somewhere
+				//////
+					// Update lll's prev and next entries to point nowhere
+					lll->next = NULL;
+					lll->prev = NULL;
+					// At this point, lll is only pointed to by its lml entry.
+
+
+				// All done!
+				return(lll);
+			}
+		}
+		// If we get here, invalid environment
+		return(NULL);
+	}
+
+	SMasterList* vvm_SEChain_migrateByNum(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, u32 lnSrcNum, u32 tnHint, u32 tnBlockSize)
+	{
+		u32				lnI;
+		SMasterList*	lml;
+
+
+		// Make sure our environment is sane
+		if (ptrSEDst && ptrSESrc && lnSrcNum < ptrSESrc->masterCount && lnSrcNum <= ptrSESrc->masterCount)
+		{
+			// We enter an infinite loop in case we have to
+			while (1)
+			{
+				// Find an empty slot in the destination
+				for (lnI = tnHint; lnI < ptrSEDst->masterCount; lnI++)
+				{
+					if (!ptrSEDst->master[lnI] || !ptrSEDst->master[lnI]->used)
+					{
+						// We found an empty slot, migrate it
+						lml							= ptrSESrc->master[lnSrcNum];
+						ptrSEDst->master[lnI]		= lml;
+
+						// Clear out the source slot
+						ptrSESrc->master[lnSrcNum]	= NULL;
+
+						// See if the thing that was pointed to was the first or last entry (or both (only entry))
+						if (ptrSESrc->root == lml)
+						{
+							// This was the first entry
+							if (ptrSESrc->last == lml)
+							{
+								// And it was the last entry, making it the ONLY entry
+								ptrSESrc->root = NULL;
+								ptrSESrc->last = NULL;
+
+							} else {
+								// It was just the first entry
+								ptrSESrc->root = (SMasterList*)lml->ll.next;
+							}
+
+						} else if (ptrSESrc->last == lml) {
+							// It was the last entry
+							ptrSESrc->last = (SMasterList*)lml->ll.prev;
+						}
+						//else it's just one in the middle, so no worries
+
+						// Detach from its former list (former's previous points to former's next, former's next points to former's previous, basically they both skip over this item)
+						if (lml->ll.prev)	((SMasterList*)(lml->ll.prev))->ll.next = lml->ll.next;
+						if (lml->ll.next)	((SMasterList*)(lml->ll.next))->ll.prev = lml->ll.prev;
+						// Right now, lml is an orphan, but it has pointers to its old slots
+
+						// Append it to the new list, and update its pointers to its new home
+						if (!ptrSEDst->root)
+						{
+							// This is the first item in the destination
+							ptrSEDst->root	= lml;
+							ptrSEDst->last	= lml;
+							lml->ll.prev	= NULL;
+
+						} else {
+							// Append it to the end of the chain
+							ptrSEDst->last->ll.next = (SLL*)lml;
+							lml->ll.prev			= (SLL*)ptrSEDst->last;
+							ptrSEDst->last			= lml;
+						}
+						// Make the newly migrated item now point to nothing, because it is the last item
+						lml->ll.next = NULL;
+
+						// All done!
+						return(lml);
+					}
+				}
+				// If we get here, no empty slots. Allocate some, rinse, and repeat. :-)
+				vvm_SEChain_allocateAdditionalMasterSlots(ptrSEDst, tnBlockSize);
+
+				// Process through again beginning at the newly added portion
+				tnHint = lnI;
+				// We'll never break out of this loop because we will always return above
+			}
+			// Control will never get here
+		}
+		// If we get here, error
+		return(NULL);
 	}
