@@ -1598,8 +1598,8 @@ _asm int 3;
 					//////////
 					// Duplicate its data
 					//////
-						ecNew->d = NULL;
-						iDatumDuplicate(ecNew->d, ecSource->d);
+						ecNew->sourceCode = NULL;
+						iDatumDuplicate(ecNew->sourceCode, ecSource->sourceCode);
 
 
 					//////////
@@ -1774,7 +1774,7 @@ _asm int 3;
 				//////////
 				// Delete this item's components
 				//////
-					iDatumFree(chain->d, true);
+					iDatumFree(chain->sourceCode, true);
 
 
 				//////////

@@ -134,6 +134,39 @@ typedef		const f64			cf64;
 
 
 //////////
+// Variable types
+//////
+	// Note:  Lower-bit is a flag:	0-variable, 1-reference to a variable
+	const u32			_VARIABLE_TYPE_LOGICAL				= 0;						// Logical values are 0=.F., others=.T., and explicit values for 2=.O., 3=.P., 4=.X., 5=.Y., and 6=.Z. through SETLOGICALX() and GETLOGICALX()
+	const u32			_VARIABLE_TYPE_NUMERIC				= 1 << 1;					// Maintains its value in converted-to-text form, but is numeric
+	const u32			_VARIABLE_TYPE_CHARACTER			= 2 << 1;					// A character string
+	const u32			_VARIABLE_TYPE_F32					= 3 << 1;					// A 32-bit floating point value with length and decimals
+	const u32			_VARIABLE_TYPE_F64					= 4 << 1;					// A 64-bit floating point value with length and decimals
+	const u32			_VARIABLE_TYPE_S8					= 5 << 1;					// An 8-bit signed integer
+	const u32			_VARIABLE_TYPE_U8					= 6 << 1;					// An 8-bit unsigned integer
+	const u32			_VARIABLE_TYPE_S16					= 7 << 1;					// A 16-bit signed integer
+	const u32			_VARIABLE_TYPE_U16					= 8 << 1;					// A 16-bit unsigned integer
+	const u32			_VARIABLE_TYPE_S32					= 9 << 1;					// A 32-bit signed integer
+	const u32			_VARIABLE_TYPE_U32					= 10 << 1;					// A 32-bit unsigned integer
+	const u32			_VARIABLE_TYPE_S64					= 11 << 1;					// A 64-bit signed integer
+	const u32			_VARIABLE_TYPE_U64					= 12 << 1;					// A 64-bit unsigned integer
+	const u32			_VARIABLE_TYPE_CURRENCY				= 13 << 1;					// A 64-bit signed integer with fixed length and decimals
+	const u32			_VARIABLE_TYPE_DATE					= 14 << 1;					// A date
+	const u32			_VARIABLE_TYPE_DATETIME				= 15 << 1;					// A datetime
+	const u32			_VARIABLE_TYPE_DATETIMEX			= 16 << 1;					// A datetimex
+	const u32			_VARIABLE_TYPE_BI					= 17 << 1;					// Big integer with length
+	const u32			_VARIABLE_TYPE_BFP					= 18 << 1;					// Big floating with length and decimals
+	const u32			_VARIABLE_TYPE_COLOR				= 19 << 1;					// An RGB() color
+	const u32			_VARIABLE_TYPE_COLORA				= 20 << 1;					// An RGBA() color
+	const u32			_VARIABLE_TYPE_ARRAY				= 80 << 1;					// Indicates the variable is an array
+	const u32			_VARIABLE_TYPE_GUID8				= 90 << 1;					// GUID-8 byte form (automatically coordinated data across multiple physical locations of an application, even when offline)
+	const u32			_VARIABLE_TYPE_GUID16				= 91 << 1;					// GUID-16 byte form (a form allowing for more unique records)
+	const u32			_VARIABLE_TYPE_OBJECT				= 100 << 1;					// An object (class structure)
+	const u32			_VARIABLE_TYPE_THISCODE				= 200 << 1;					// thisCode reference
+	const u32			_VARIABLE_TYPE_FIELD				= 1000 << 1;				// A field from something with an alias
+
+
+//////////
 // Constant strings
 //////
 	const s8			cgcMessageWindowClass[]				= "VJr.MessageWindow";

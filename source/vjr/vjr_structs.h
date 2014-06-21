@@ -252,11 +252,11 @@ struct SEditChain
 	u32			uid;													// Unique id for this line, used for undos and identifying individual lines which may move about
 
 	u32			line;													// This line's number
-	SDatum*		d;														// The text on this line is LEFT(d.data, dPopulated)
-	u32			dPopulated;												// The actual populated length of d (d is allocated in blocks to allow for minor edits without constantly reallocating)
+	SDatum*		sourceCode;												// The text on this line is LEFT(d.data, dPopulated)
+	u32			sourceCodePopulated;									// The actual populated length of d (d is allocated in blocks to allow for minor edits without constantly reallocating)
 
-	// Compiler information
-	SComp*		firstComp;												// Pointer to the first component identified on this line	(SComp)
+	// Compiler information (see compiler.cpp)
+	SCompiler*	compilerInfo;											// Information about the last time this line was compiled
 
 	// General purpose extra data
 	SExtraInfo*	extra_info;												// Extra information about this item in the chain
@@ -270,6 +270,21 @@ struct SUndo
 	SEditChain*	first;													// The first SEditChain that would've gone between them
 																		// If multiple lines were deleted, the chain is moved here.
 																		// If the line was changed, the old value is here
+};
+
+struct SFunction
+{
+	SFunction*		next;												// Next function in the chain
+	SDatum			name;												// Function name (Note that code appearing at the top of a program without being enclosed in a function will have the source code line "FUNCTION top_of_program" automatically inserted at compile time
+
+	// Knowns identified during compilation
+	SVariable*		params;												// The first parameter in the function
+	SVariable*		locals;												// The first local variable declared
+	SVariable*		returns;											// The first return variable declared
+	SVariable*		temps;												// The first temporary variable needed by the function
+
+	// Where the function began in source code as of last compile
+	SEditChain*		funcFirst;											// First line of the function
 };
 
 struct SEditChainManager
@@ -304,6 +319,12 @@ struct SEditChainManager
 		bool			isAnchor;										// If anchor select mode...
 		u32				selectedAnchorStart;							// Anchor select mode start
 		u32				selectedAnchorEnd;								// end
+
+
+	//////////
+	// For compiled programs
+	//////
+		SFunction*		firstFunction;									// The first function in the code block
 
 
 	//////////
@@ -394,31 +415,27 @@ struct SEvents
 	SKeyboardEvent	keyboard;											// Keyboard events for the object
 };
 
-struct SCode
-{
-	SCode*		next;													// If part of a chain, then points to the next item, otherwise null
-
-	// Raw source code
-	SDatum*		sourceCode;												// Raw source code
-
-	// During compilation
-	SDatum*		compiledCode;											// Compiled code executed by the VJr interpreter
-	SVariable*	params;													// Parameters
-	SVariable*	returns;												// Returns
-	SVariable*	locals;													// Local variables (known to the compiler, or added at runtime)
-};
-
 struct SVariable
 {
 	SVariable*	next;													// If part of a chain, then points to the next item, otherwise null
+	SDatum*		name;													// Name of this variable
+	u32			uid;													// Names may change during edit-and-continue, but the references they possess remain the same
 
+	// If non-NULL, this variable is an indirect reference to an underlying variable
+	SVariable*	indirect;												// If it's an indirect reference, the variable it references
+
+	// Variable content based on type
 	u32			type;													// Variable type (see _VARIABLE_TYPE_* constants)
-	SDatum		name;													// Property name
-	SDatum		value;													// Data for this value
+	union {
+		SVariable*		reference;										// If the lower-bit of type is set (BIT0=1), it is a reference to this variable
+		SObject*		obj;											// If the lower-bit of type is clear, and it's an object, the object it relates to
+		SDatum			value;											// If the lower-bit of type is clear, the actual data value based on its type
+		SFunction*		thisCode;										// Pointer to the code block this relates to
+	};
 
 	// If assign or access
-	SCode*		assign;													// Called when this variable is assigned
-	SCode*		access;													// Called when this variable is accessed
+	SEditChainManager*	assign;											// Source code executed whenever this variable is assigned
+	SEditChainManager*	access;											// Source code executed whenever this variable is accessed
 };
 
 struct SObject
@@ -444,8 +461,8 @@ struct SObject
 	void*		obj_data;												// Varies by type, see SObject* structures below
 
 	// Related position in the member hierarchy
-	SVariable*	firstProperty;											// Runtime-added user-defined property
-	SCode*		firstMethod;											// Runtime-added user-defined methods
+	SVariable*			firstProperty;									// Runtime-added user-defined property
+	SEditChainManager*	firstMethod;									// Runtime-added user-defined methods
 
 	// Events
 	SEvents		ev;														// Events for this object
