@@ -1956,6 +1956,24 @@ _asm int 3;
 			iDatumDuplicate(datumDst, datumSrc->data, datumSrc->length);
 	}
 
+	// Returns -1, 0, or 1 (indicating left is less than, equal to, or greater than right)
+	s32 iDatumCompare(SDatum* datumLeft, SDatum* datumRight)
+	{
+		s32 lnResult;
+
+
+		// Default to invalid data
+		lnResult = -2;
+		if (datumLeft && datumRight)
+		{
+			// Do a standard compare
+			lnResult = memcmp(datumLeft->data, datumRight->data, min(datumLeft->length, datumRight->length));
+		}
+
+		// Indicate our result
+		return(lnResult);
+	}
+
 	void iDatumFree(SDatum* datum, bool tlFreeSelf)
 	{
 		if (datum)

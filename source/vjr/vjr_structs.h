@@ -41,6 +41,7 @@ struct SVariable;
 struct SEditChainManager;
 struct SEditChain;
 struct SComp;
+struct SCompiler;
 
 
 
@@ -245,31 +246,14 @@ struct SExtraInfo
 	SExtraInfo*	(*extra_info_free)			(SEditChainManager* chainMgr, SEditChain* chain, SExtraInfo* extra_info);	// Called to free any data in this.info
 };
 
-struct SEditChain
-{
-	SEditChain*	prev;													// Pointer backward to previous text item
-	SEditChain*	next;													// Pointer forward to next text item
-	u32			uid;													// Unique id for this line, used for undos and identifying individual lines which may move about
-
-	u32			line;													// This line's number
-	SDatum*		sourceCode;												// The text on this line is LEFT(d.data, dPopulated)
-	u32			sourceCodePopulated;									// The actual populated length of d (d is allocated in blocks to allow for minor edits without constantly reallocating)
-
-	// Compiler information (see compiler.cpp)
-	SCompiler*	compilerInfo;											// Information about the last time this line was compiled
-
-	// General purpose extra data
-	SExtraInfo*	extra_info;												// Extra information about this item in the chain
-};
-
 struct SUndo
 {
 	u32			uidBefore;												// The item before
 	u32			uidAfter;												// The item after
 
 	SEditChain*	first;													// The first SEditChain that would've gone between them
-																		// If multiple lines were deleted, the chain is moved here.
-																		// If the line was changed, the old value is here
+	// If multiple lines were deleted, the chain is moved here.
+	// If the line was changed, the old value is here
 };
 
 struct SFunction
@@ -285,6 +269,23 @@ struct SFunction
 
 	// Where the function began in source code as of last compile
 	SEditChain*		funcFirst;											// First line of the function
+};
+
+struct SEditChain
+{
+	SEditChain*	prev;													// Pointer backward to previous text item
+	SEditChain*	next;													// Pointer forward to next text item
+	u32			uid;													// Unique id for this line, used for undos and identifying individual lines which may move about
+
+	u32			line;													// This line's number
+	SDatum*		sourceCode;												// The text on this line is LEFT(d.data, dPopulated)
+	u32			sourceCodePopulated;									// The actual populated length of d (d is allocated in blocks to allow for minor edits without constantly reallocating)
+
+	// Compiler information (see compiler.cpp)
+	SCompiler*	compilerInfo;											// Information about the last time this line was compiled
+
+	// General purpose extra data
+	SExtraInfo*	extra_info;												// Extra information about this item in the chain
 };
 
 struct SEditChainManager

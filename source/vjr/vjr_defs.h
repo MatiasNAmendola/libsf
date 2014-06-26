@@ -196,6 +196,7 @@
 	// Datum
 	void					iDatumDuplicate							(SDatum* datum, s8* data, u32 dataLength);
 	void					iDatumDuplicate							(SDatum* datumDst, SDatum* datumSrc);
+	s32						iDatumCompare							(SDatum* datumLeft, SDatum* datumRight);
 	void					iDatumFree								(SDatum* datum, bool tlFreeSelf);
 	void					iiDatumFree								(SDatum* datum);
 
