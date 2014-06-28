@@ -46,6 +46,7 @@ struct SAsciiCompSearcher;
 struct SStartEndCallback;
 struct SLL;
 struct SLLCallback;
+struct SVariable;
 
 //////////
 //
@@ -213,13 +214,89 @@ struct SLLCallback;
 		};
 	};
 
+	struct SFunction
+	{
+		SFunction*		next;												// Next function in the chain
+		SDatum			name;												// Function name (Note that code appearing at the top of a program without being enclosed in a function will have the source code line "FUNCTION top_of_program" automatically inserted at compile time
+
+		// Knowns identified during compilation
+		SVariable*		params;												// The first parameter in the function
+		SVariable*		locals;												// The first local variable declared
+		SVariable*		returns;											// The first return variable declared
+		SVariable*		temps;												// The first temporary variable needed by the function
+
+		// Where the function began in source code as of last compile
+		SEditChain*		funcFirst;											// First line of the function
+	};
+
+	struct SVariable
+	{
+		SVariable*	next;													// If part of a chain, then points to the next item, otherwise null
+		SDatum		name;													// Name of this variable
+		u32			uid;													// Names may change during edit-and-continue, but the references they possess remain the same
+		SVariable*	indirect;												// If non-NULL, this variable is an indirect reference to an underlying variable
+
+		// Variable content based on type
+		u32			type;													// Variable type (see _VARIABLE_TYPE_* constants)
+		union {
+			SVariable*		indirect;										// If the lower-bit of type is set (BIT0=1), it is an indirect reference to another variable
+			SObject*		obj;											// If the lower-bit of type is clear, and it's an object, the object it relates to
+			SDatum			value;											// If the lower-bit of type is clear, the actual data value based on its type
+			SFunction*		thisCode;										// Pointer to the code block this relates to
+		};
+
+		// If assign or access
+		SEditChainManager*	assign;											// Source code executed whenever this variable is assigned
+		SEditChainManager*	access;											// Source code executed whenever this variable is accessed
+	};
+
+//////////
+//
+// Sub-instructions are components of a source code line broken out into individual tasks.
+//
+// They conduct those individual operations only, being part of the larger computation
+// taking place across multiple sub-instructions.
+//
+// This structure is used for two operations in VJr.  One is for parsing source code into
+// sub-instructions, the second is for generating actual sub-instruction lists for faster
+// execution by the processing engine while still retaining edit-and-continue abilities.
+//
+//                      ______
+//                     |parent|
+//                     |______|
+//                        ^
+//                        |
+//                     ___|___
+//       _____        | Sub-  |        _____
+//      | prev|<------| Instr |------>|next |
+//      |_____|       |_______|       |_____|
+//                    /       \
+//                   /         \
+//               ___/_         _\___
+//              |left |       |right|
+//              |_____|       |_____|
+//
+//////
+	struct SSubInstr
+	{
+		SSubInstr*		parent;											// Up to the higher node
+		SSubInstr*		prev;											// Previous item in the horizontal chain
+		SSubInstr*		next;											// Next item in the horizontal chain
+		SSubInstr*		left;											// Left node
+		SSubInstr*		right;											// Right node
+		u32				uid;											// Unique ID for this sub-instruction
+
+		// Operation layer/level and instruction at that level
+		s32				sub_level;										// The sub-instruction operation level related to the bigger picture
+		s32				sub_instr;										// The sub-instruction being executed, such as "+" in "2 + 4", see _SUB_INSTR_* constants
+		SOp*			op;												// Any operand data for this node (if it is a terminating node)
+		SVariable*		variable;										// As results are computed or referenced, they are stored in scoped/temporary variables
+	};
+
 	struct SOp
 	{
-		// A logic test based upon whether or not this operation is required
-		bool			isRequired;										// Is this operation required?
-
-		// Based upon its context, 
 		u32				op_type;										// The type of operand, see _OP_TYPE_* constants
+		SVariable*		variable;										// The actual local variable contents (if it is a converted type at compile time, such as "2" being converted to the integer, referenced as a fixed variable)
 
 		// Pointer to first (if there is a succession)
 		union {
@@ -232,59 +309,6 @@ struct SLLCallback;
 		};
 		// Number thereafter
 		s32				count;											// The number of components (in comp or other) as input
-	};
-
-	// Sub-instructions are components of an xbase source code line.
-	// They conduct individual operations only, being part of the larger computation across multiple sub-instructions.
-	// This structure is used for two operations, one for parsing source code into sub-instructions, the second for
-	// generating actual sub-instructions for execution by the processing engine.
-	struct SSubInstr
-	{
-		SSubInstr*		parent;											// Up to the higher level
-		SSubInstr*		prev;											// Previous item in the chain
-		SSubInstr*		next;											// Next item in the chain
-
-		// Operation layer/level and instruction at that level
-		s32				operation;										// The sub-instruction operation related to the bigger picture
-		s32				sub_instr;										// The sub-instruction being executed, such as "+" in "2 + 4", see _SUB_INSTR_* constants
-
-		// Operands used for the sub-instruction
-		SOp				left;											// The left operand, such as "2" in "2 + 4"
-		SOp				right;											// The right operand, such as "4" in "2 + 4"
-
-		// Used when generating actual sub-instructions for execution by the processing engine
-		SVariable*		result;											// Where the result is stored
-	};
-
-	// For warnings, errors, and notes
-	struct SCompileNote
-	{
-		SCompileNote*	next;											// The next compile note in this chain
-
-		SDatum*			msg;											// The message
-		u32				number;											// Related number
-		SComp*			relatesTo;										// Column the note occurred on
-	};
-
-	// Holds compiler data
-	struct SCompiler
-	{
-		// EC was designed with source code in mind, and that means a tight compiler relationship
-		SEditChain*		parent;											// The EC this belongs to (parent->parent points back to ECM)
-
-		// The last source code line
-		SDatum*			sourceCode;										// Copy at last compile of LEFT(parent->sourceCode.data, parent->sourceCodePopulated)
-
-		// Components compiled in prior compiler passes
-		SComp*			firstComp;										// Pointer to the first component identified on this line
-
-		// Executable code
-		SSubInstr**		subInstr;										// Low-level executable code (sub instructions) for this line
-		u32				subInstrCount;									// How many sub-instructions there are
-
-		// Results of compilation
-		SCompileNote*	errors;											// Noted error
-		SCompileNote*	warnings;										// Noted warning
 	};
 
 	// Holds a component structure
@@ -376,6 +400,37 @@ struct SLLCallback;
 			};
 			void*		ex2Ptr;
 		};
+	};
+
+	// For warnings, errors, and notes
+	struct SCompileNote
+	{
+		SCompileNote*	next;											// The next compile note in this chain
+
+		SDatum*			msg;											// The message
+		u32				number;											// Related number
+		SComp*			relatesTo;										// Column the note occurred on
+	};
+
+	// Holds compiler data
+	struct SCompiler
+	{
+		// EC was designed with source code in mind, and that means a tight compiler relationship
+		SEditChain*		parent;											// The EC this belongs to (parent->parent points back to ECM)
+
+		// The last source code line
+		SDatum*			sourceCode;										// Copy at last compile of LEFT(parent->sourceCode.data, parent->sourceCodePopulated)
+
+		// Components compiled in prior compiler passes
+		SComp*			firstComp;										// Pointer to the first component identified on this line
+
+		// Executable code
+		SSubInstr**		subInstr;										// Low-level executable code (sub instructions) for this line
+		u32				subInstrCount;									// How many sub-instructions there are
+
+		// Results of compilation
+		SCompileNote*	errors;											// Noted error
+		SCompileNote*	warnings;										// Noted warning
 	};
 
 
@@ -497,6 +552,10 @@ struct SLLCallback;
 	const u32		_ICODE_GREATER_THAN_OR_EQUAL_TO					= 43;
 	const u32		_ICODE_EXACTLY_EQUAL_TO							= 44;
 	const u32		_ICODE_NOT_FOUND_IN								= 45;
+	const u32		_ICODE_SHIFT_LEFT								= 46;
+	const u32		_ICODE_SHIFT_RIGHT								= 47;
+	const u32		_ICODE_SHIFT_LEFT_ASSIGNMENT					= 48;
+	const u32		_ICODE_SHIFT_RIGHT_ASSIGNMENT					= 49;
 
 	// Combined items
 	const u32		_ICODE_SINGLE_QUOTED_TEXT						= 90;
@@ -531,6 +590,28 @@ struct SLLCallback;
 	const u32		_ICODE_FLOWTO									= 217;
 	const u32		_ICODE_FLOWOUT									= 218;
 	const u32		_ICODE_RGBA										= 219;
+    const u32       _ICODE_LOBJECT								    = 220;
+	const u32		_ICODE_PARAMS									= 221;
+	const u32		_ICODE_RETURNS									= 222;
+	const u32		_ICODE_AS										= 223;
+	const u32		_ICODE_CHARACTER								= 224;
+	const u32		_ICODE_INTEGER									= 225;
+	const u32		_ICODE_FLOAT									= 226;
+	const u32		_ICODE_DOUBLE									= 227;
+	const u32		_ICODE_LOGICAL									= 228;
+	const u32		_ICODE_S32										= 229;
+	const u32		_ICODE_S64										= 230;
+	const u32		_ICODE_U32										= 231;
+	const u32		_ICODE_U64										= 232;
+	const u32		_ICODE_F32										= 233;
+	const u32		_ICODE_F64										= 234;
+	const u32		_ICODE_BI										= 235;
+	const u32		_ICODE_BFP										= 236;
+	const u32		_ICODE_S16										= 237;
+	const u32		_ICODE_S8										= 238;
+	const u32		_ICODE_U16										= 239;
+	const u32		_ICODE_U8										= 240;
+
 
 	// Logical operators
 	const u32		_ICODE_NOT										= 500;
@@ -1306,6 +1387,10 @@ struct SLLCallback;
 		{ "|",						1,			false,		_ICODE_PIPE_SIGN,						false,				NULL,					NULL },
 		{ "`",						1,			false,		_ICODE_REVERSE_QUOTE,					false,				NULL,					NULL },
 		{ ";",						1,			false,		_ICODE_SEMICOLON,						false,				NULL,					NULL },
+		{ "<<=",					3,			false,		_ICODE_SHIFT_LEFT_ASSIGNMENT,			false,				NULL,					NULL },
+		{ "<<",						2,			false,		_ICODE_SHIFT_LEFT,						false,				NULL,					NULL },
+		{ ">>=",					3,			false,		_ICODE_SHIFT_RIGHT_ASSIGNMENT,			false,				NULL,					NULL },
+		{ ">>",						2,			false,		_ICODE_SHIFT_RIGHT,						false,				NULL,					NULL },
 		{ "<=",						2,			false,		_ICODE_LESS_THAN_OR_EQUAL_TO,			false,				NULL,					NULL },
 		{ ">=",						2,			false,		_ICODE_GREATER_THAN_OR_EQUAL_TO,		false,				NULL,					NULL },
 		{ "<>",                     2,          false,      _ICODE_NOT_EQUAL,                       false,              NULL,                   NULL },
@@ -2099,6 +2184,30 @@ struct SLLCallback;
 		{ "flow",					4,			false,		_ICODE_FLOW,							false,				NULL,					NULL },
 		{ "subflow",				7,			false,		_ICODE_SUBFLOW,							false,				NULL,					NULL },
 		{ "rgba",					4,			false,		_ICODE_RGBA,							false,				NULL,					NULL },
+		{ "lobject",				7,			false,		_ICODE_LOBJECT,							true,				NULL,					NULL },
+		{ "params",					7,			false,		_ICODE_PARAMS,							true,				NULL,					NULL },
+		{ "returns",				7,			false,		_ICODE_RETURNS,							true,				NULL,					NULL },
+		{ "as",						2,			false,		_ICODE_AS,								false,				NULL,					NULL },
+		{ "character",				9,			false,		_ICODE_CHARACTER,						false,				NULL,					NULL },
+		{ "integer",				7,			false,		_ICODE_INTEGER,							false,				NULL,					NULL },
+		{ "float",					5,			false,		_ICODE_FLOAT,							false,				NULL,					NULL },
+		{ "double",					6,			false,		_ICODE_DOUBLE,							false,				NULL,					NULL },
+		{ "logical",				7,			false,		_ICODE_LOGICAL,							false,				NULL,					NULL },
+//		{ "date",					4,			false,		_ICODE_DATE,							false,				NULL,					NULL },
+//		{ "datetime",				8,			false,		_ICODE_DATETIME,						false,				NULL,					NULL },
+//		{ "currency",				8,			false,		_ICODE_CURRENCY,						false,				NULL,					NULL },
+		{ "s32",					3,			false,		_ICODE_S32,								false,				NULL,					NULL },
+		{ "s64",					3,			false,		_ICODE_S64,								false,				NULL,					NULL },
+		{ "u32",					3,			false,		_ICODE_U32,								false,				NULL,					NULL },
+		{ "u64",					3,			false,		_ICODE_U64,								false,				NULL,					NULL },
+		{ "f32",					3,			false,		_ICODE_F32,								false,				NULL,					NULL },
+		{ "f64",					3,			false,		_ICODE_F64,								false,				NULL,					NULL },
+		{ "bi",						2,			false,		_ICODE_BI,								false,				NULL,					NULL },
+		{ "bfp",					3,			false,		_ICODE_BFP,								false,				NULL,					NULL },
+		{ "s16",					3,			false,		_ICODE_S16,								false,				NULL,					NULL },
+		{ "s8",						2,			false,		_ICODE_S8,								false,				NULL,					NULL },
+		{ "u16",					3,			false,		_ICODE_U16,								false,				NULL,					NULL },
+		{ "u8",						2,			false,		_ICODE_U8,								false,				NULL,					NULL },
 
 		{ 0,						0,			0,			0,										0,					0,						0 }
 	};
@@ -2253,32 +2362,55 @@ struct SLLCallback;
 			//////
 				switch (comp->iCode)
 				{
-					// ( or )
+					// (
 					case _ICODE_PARENTHESIS_LEFT:
+						break;
+
+					// )
 					case _ICODE_PARENTHESIS_RIGHT:
 						break;
 
-					// [ or ]
+					// [
 					case _ICODE_BRACKET_LEFT:
+						break;
+
+					// ]
 					case _ICODE_BRACKET_RIGHT:
 						break;
 
-					// { or }
+					// {
 					case _ICODE_BRACE_LEFT:
+						break;
+
+					// }
 					case _ICODE_BRACE_RIGHT:
+						break;
+
+					// <<
+					case _ICODE_SHIFT_LEFT:
+						break;
+
+					// >>
+					case _ICODE_SHIFT_RIGHT:
 						break;
 
 					// ^ or **
 					case _ICODE_EXPONENT:
 						break;
 
-					// ++ or --
+					// ++
 					case _ICODE_PLUS_PLUS:
+						break;
+
+					// --
 					case _ICODE_MINUS_MINUS:
 						break;
 
-					// * or /
+					// *
 					case _ICODE_ASTERISK:
+						break;
+
+					// /
 					case _ICODE_SLASH:
 						break;
 
@@ -2286,8 +2418,11 @@ struct SLLCallback;
 					case _ICODE_PERCENT_SIGN:
 						break;
 
-					// + or -
+					// +
 					case _ICODE_PLUS:
+						break;
+
+					// -
 					case _ICODE_HYPHEN:
 						break;
 
@@ -2312,16 +2447,24 @@ struct SLLCallback;
 					case _ICODE_OR:
 						break;
 
+					// <<=
+					case _ICODE_SHIFT_LEFT_ASSIGNMENT:
+						break;
+
+					// >>=
+					case _ICODE_SHIFT_RIGHT_ASSIGNMENT:
+						break;
+
+					// =
+					case _ICODE_EQUAL_SIGN:
+						break;
+
 					// <
 					case _ICODE_LESS_THAN:
 						break;
 
 					// >
 					case _ICODE_GREATER_THAN:
-						break;
-
-					// =
-					case _ICODE_EQUAL_SIGN:
 						break;
 
 					// <>, #, !=
@@ -3236,11 +3379,7 @@ struct SLLCallback;
 				{
 					// We found the operation
 					// Did we find appropriate components?
-					if (!si.left.comp && si.left.isRequired)
-					{
-						// Syntax error, we expected a valid component to the left
 // TODO:  Working here
-					}
 
 				} else {
 					// The sub_instruction is not valid, which means were done
@@ -3293,7 +3432,7 @@ struct SLLCallback;
 		//////
 			memset(si, 0, sizeof(SSubInstr));
 			si->sub_instr	= -1;			// Indicate failure initially (until something is found)
-			si->operation	= -1;			// Unused during parsing
+			si->sub_level	= -1;			// Unused during parsing
 
 
 		//////////
@@ -3309,38 +3448,28 @@ struct SLLCallback;
 					if (comp->iCode == _ICODE_EXPONENT)
 					{
 						// Exponent
-						si->sub_instr			= _SUB_INSTR_EXPONENT;
-						si->left.isRequired		= true;
-						si->right.isRequired	= true;
-						llFound					= true;
+						si->sub_instr	= _SUB_INSTR_EXPONENT;
+						llFound			= true;
 
 					} else if (comp->iCode == _ICODE_SLASH) {
 						// Division
-						si->sub_instr			= _SUB_INSTR_DIVIDE;
-						si->left.isRequired		= true;
-						si->right.isRequired	= true;
-						llFound					= true;
+						si->sub_instr	= _SUB_INSTR_DIVIDE;
+						llFound			= true;
 
 					} else if (comp->iCode == _ICODE_ASTERISK) {
 						// Multiplication
-						si->sub_instr			= _SUB_INSTR_MULTIPLY;
-						si->left.isRequired		= true;
-						si->right.isRequired	= true;
-						llFound					= true;
+						si->sub_instr	= _SUB_INSTR_MULTIPLY;
+						llFound			= true;
 
 					} else if (comp->iCode == _ICODE_PLUS) {
 						// Addition
-						si->sub_instr			= _SUB_INSTR_ADD;
-						si->left.isRequired		= true;
-						si->right.isRequired	= true;
-						llFound					= true;
+						si->sub_instr	= _SUB_INSTR_ADD;
+						llFound			= true;
 
 					} else if (comp->iCode == _ICODE_HYPHEN) {
 						// Subtraction
-						si->sub_instr			= _SUB_INSTR_SUBTRACT;
-						si->left.isRequired		= true;
-						si->right.isRequired	= true;
-						llFound					= true;
+						si->sub_instr	= _SUB_INSTR_SUBTRACT;
+						llFound			= true;
 					}
 
 
@@ -3351,8 +3480,9 @@ struct SLLCallback;
 					{
 						// Search for something to the left of the exponent, like the "someTable.someField" in "k = someTable.someField ^ xyz"
 						// Search for something to the right of the exponent, like the "thisForm.someObject.someProperty" in "k = xyz ^ thisForm.someObject.someProperty"
-						iiTranslateSCompsToSubInstr_findStartOfComponent	((SComp*)comp->ll.prev,		&si->left);
-						iiTranslateSCompsToSubInstr_findFullComponent		((SComp*)comp->ll.next,		&si->right);
+// TODO:  Refactor for left and right nodes
+						iiTranslateSCompsToSubInstr_findStartOfComponent	((SComp*)comp->ll.prev, si->op);
+						iiTranslateSCompsToSubInstr_findFullComponent		((SComp*)comp->ll.next, si->op);
 
 						// When we get here, si has been populated if there are operations there.
 						// If they are null, then it is a syntax error

@@ -42,6 +42,7 @@ struct SEditChainManager;
 struct SEditChain;
 struct SComp;
 struct SCompiler;
+struct SFunction;
 
 
 
@@ -256,21 +257,6 @@ struct SUndo
 	// If the line was changed, the old value is here
 };
 
-struct SFunction
-{
-	SFunction*		next;												// Next function in the chain
-	SDatum			name;												// Function name (Note that code appearing at the top of a program without being enclosed in a function will have the source code line "FUNCTION top_of_program" automatically inserted at compile time
-
-	// Knowns identified during compilation
-	SVariable*		params;												// The first parameter in the function
-	SVariable*		locals;												// The first local variable declared
-	SVariable*		returns;											// The first return variable declared
-	SVariable*		temps;												// The first temporary variable needed by the function
-
-	// Where the function began in source code as of last compile
-	SEditChain*		funcFirst;											// First line of the function
-};
-
 struct SEditChain
 {
 	SEditChain*	prev;													// Pointer backward to previous text item
@@ -414,29 +400,6 @@ struct SEvents
 	SGeneralEvents	general;											// General object events
 	SMouseEvent		mouse;												// Mouse events for the object
 	SKeyboardEvent	keyboard;											// Keyboard events for the object
-};
-
-struct SVariable
-{
-	SVariable*	next;													// If part of a chain, then points to the next item, otherwise null
-	SDatum*		name;													// Name of this variable
-	u32			uid;													// Names may change during edit-and-continue, but the references they possess remain the same
-
-	// If non-NULL, this variable is an indirect reference to an underlying variable
-	SVariable*	indirect;												// If it's an indirect reference, the variable it references
-
-	// Variable content based on type
-	u32			type;													// Variable type (see _VARIABLE_TYPE_* constants)
-	union {
-		SVariable*		reference;										// If the lower-bit of type is set (BIT0=1), it is a reference to this variable
-		SObject*		obj;											// If the lower-bit of type is clear, and it's an object, the object it relates to
-		SDatum			value;											// If the lower-bit of type is clear, the actual data value based on its type
-		SFunction*		thisCode;										// Pointer to the code block this relates to
-	};
-
-	// If assign or access
-	SEditChainManager*	assign;											// Source code executed whenever this variable is assigned
-	SEditChainManager*	access;											// Source code executed whenever this variable is accessed
 };
 
 struct SObject
