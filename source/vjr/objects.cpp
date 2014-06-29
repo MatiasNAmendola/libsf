@@ -41,7 +41,7 @@
 // Creates the object structure
 //
 //////
-	SObject* iObjectCreate(u32 tnBaseType, void* obj_data)
+	SObject* iObj_create(u32 tnBaseType, void* obj_data)
 	{
 		SObject* obj;
 
@@ -62,7 +62,7 @@
 
 				// Initially populate
 				obj->baseType	= tnBaseType;
-				obj->obj_data	= obj_data;
+				obj->sub_obj	= obj_data;
 			}
 
 
@@ -80,7 +80,7 @@
 // Copy the indicated object
 //
 //////
-	SObject* iObjectCopy(SObject* template_obj, SObject* next, SObject* parent, bool tlCopyChildren, bool tlCopySubobjects, bool tlCreateSeparateBitmapBuffers)
+	SObject* iObj_copy(SObject* template_obj, SObject* next, SObject* parent, bool tlCopyChildren, bool tlCopySubobjects, bool tlCreateSeparateBitmapBuffers)
 	{
 		SObject* obj;
 
@@ -117,15 +117,15 @@
 				{
 					// Duplicate the bitmap buffer if need be
 					if (tlCreateSeparateBitmapBuffers)
-						obj->bmp = iBmpCopy(template_obj->bmp);
+						obj->bmp = iBmp_copy(template_obj->bmp);
 
 					// Copy subobject data
 					if (tlCopySubobjects)
-						obj->obj_data = iSubobjectCopy(template_obj);
+						obj->sub_obj = iSubobj_copy(template_obj);
 
 					// Copy children if need be
 					if (tlCopyChildren && template_obj->firstChild)
-						obj->firstChild = iObjectCopy(template_obj->firstChild, NULL, obj, true, true, tlCreateSeparateBitmapBuffers);
+						obj->firstChild = iObj_copy(template_obj->firstChild, NULL, obj, true, true, tlCreateSeparateBitmapBuffers);
 				}
 		}
 
@@ -138,10 +138,27 @@
 
 //////////
 //
+// Delete the indicated object.
+//
+//////
+	void iObj_delete(SObject* obj, bool tlDeleteSelf)
+	{
+		// Make sure our environment is sane
+		if (obj)
+		{
+// TODO:  write this code
+		}
+	}
+
+
+
+
+//////////
+//
 // Called to render the indicated object
 //
 //////
-	u32 iObjectRender(SObject* obj, bool tlRenderChildren, bool tlRenderSiblings)
+	u32 iObj_render(SObject* obj, bool tlRenderChildren, bool tlRenderSiblings)
 	{
 		u32 lnPixelsRendered;
 
@@ -153,47 +170,47 @@
 			switch (obj->baseType)
 			{
 				case _OBJECT_TYPE_EMPTY:		// Empty, used as a placeholder object that is not drawn
-					lnPixelsRendered += iSubobject_renderEmpty(obj, (SObjectEmpty*)obj->obj_data, tlRenderChildren, tlRenderSiblings);
+					lnPixelsRendered += iSubobj_renderEmpty(obj, (SSubObjEmpty*)obj->sub_obj, tlRenderChildren, tlRenderSiblings);
 					break;
 
 				case _OBJECT_TYPE_FORM:			// Form class, the main outer window the OS sees
-					lnPixelsRendered += iSubobject_renderForm(obj, (SObjectForm*)obj->obj_data, tlRenderChildren, tlRenderSiblings);
+					lnPixelsRendered += iSubobj_renderForm(obj, (SSubObjForm*)obj->sub_obj, tlRenderChildren, tlRenderSiblings);
 					break;
 
 				case _OBJECT_TYPE_SUBFORM:		// A new class which has its own drawing content and can be moved about using UI features
-					lnPixelsRendered += iSubobject_renderSubform(obj, (SObjectSubform*)obj->obj_data, tlRenderChildren, tlRenderSiblings);
+					lnPixelsRendered += iSubobj_renderSubform(obj, (SSubObjSubform*)obj->sub_obj, tlRenderChildren, tlRenderSiblings);
 					break;
 
 				case _OBJECT_TYPE_LABEL:		// A label
-					lnPixelsRendered += iSubobject_renderLabel(obj, (SObjectLabel*)obj->obj_data, tlRenderChildren, tlRenderSiblings);
+					lnPixelsRendered += iSubobj_renderLabel(obj, (SSubObjLabel*)obj->sub_obj, tlRenderChildren, tlRenderSiblings);
 					break;
 
 				case _OBJECT_TYPE_TEXTBOX:		// An input textbox
-					lnPixelsRendered += iSubobject_renderTextbox(obj, (SObjectTextbox*)obj->obj_data, tlRenderChildren, tlRenderSiblings);
+					lnPixelsRendered += iSubobj_renderTextbox(obj, (SSubObjTextbox*)obj->sub_obj, tlRenderChildren, tlRenderSiblings);
 					break;
 
 				case _OBJECT_TYPE_BUTTON:		// A push button
-					lnPixelsRendered += iSubobject_renderButton(obj, (SObjectButton*)obj->obj_data, tlRenderChildren, tlRenderSiblings);
+					lnPixelsRendered += iSubobj_renderButton(obj, (SSubObjButton*)obj->sub_obj, tlRenderChildren, tlRenderSiblings);
 					break;
 
 				case _OBJECT_TYPE_EDITBOX:		// An input multi-line editbox
-					lnPixelsRendered += iSubobject_renderEditbox(obj, (SObjectEditbox*)obj->obj_data, tlRenderChildren, tlRenderSiblings);
+					lnPixelsRendered += iSubobj_renderEditbox(obj, (SSubObjEditbox*)obj->sub_obj, tlRenderChildren, tlRenderSiblings);
 					break;
 
 				case _OBJECT_TYPE_IMAGE:		// A graphical image
-					lnPixelsRendered += iSubobject_renderImage(obj, (SObjectImage*)obj->obj_data, tlRenderChildren, tlRenderSiblings);
+					lnPixelsRendered += iSubobj_renderImage(obj, (SSubObjImage*)obj->sub_obj, tlRenderChildren, tlRenderSiblings);
 					break;
 
 				case _OBJECT_TYPE_CHECKBOX:		// A checkbox
-					lnPixelsRendered += iSubobject_renderCheckbox(obj, (SObjectCheckbox*)obj->obj_data, tlRenderChildren, tlRenderSiblings);
+					lnPixelsRendered += iSubobj_renderCheckbox(obj, (SSubObjCheckbox*)obj->sub_obj, tlRenderChildren, tlRenderSiblings);
 					break;
 
 				case _OBJECT_TYPE_OPTION:		// A combination selection
-					lnPixelsRendered += iSubobject_renderOption(obj, (SObjectOption*)obj->obj_data, tlRenderChildren, tlRenderSiblings);
+					lnPixelsRendered += iSubobj_renderOption(obj, (SSubObjOption*)obj->sub_obj, tlRenderChildren, tlRenderSiblings);
 					break;
 
 				case _OBJECT_TYPE_RADIO:		// A radio dial, which can also present as a slider or spinner
-					lnPixelsRendered += iSubobject_renderRadio(obj, (SObjectRadio*)obj->obj_data, tlRenderChildren, tlRenderSiblings);
+					lnPixelsRendered += iSubobj_renderRadio(obj, (SSubObjRadio*)obj->sub_obj, tlRenderChildren, tlRenderSiblings);
 					break;
 
 				default:
@@ -214,7 +231,7 @@
 // Called from subobjects to render any object children and sibling they may have based on flags
 //
 //////
-	void iObject_renderChildrenAndSiblings(SObject* obj, bool tlRenderChildren, bool tlRenderSiblings)
+	void iObj_renderChildrenAndSiblings(SObject* obj, bool tlRenderChildren, bool tlRenderSiblings)
 	{
 		SObject* objSib;
 
@@ -223,7 +240,7 @@
 		// Render any children
 		//////
 			if (tlRenderChildren && obj->firstChild)
-				iObjectRender(obj->firstChild, true, true);
+				iObj_render(obj->firstChild, true, true);
 
 
 		//////////
@@ -235,7 +252,7 @@
 				while (objSib)
 				{
 					// Render this sibling
-					iObjectRender(objSib, true, true);
+					iObj_render(objSib, true, true);
 
 					// Move to next sibling
 					objSib = objSib->next;
@@ -253,7 +270,7 @@
 // and overlays them where they should be
 //
 //////
-	u32 iObjectPublish(SBitmap* bmpDst, RECT* trc, SObject* obj, bool tlPublishChildren, bool tlPublishSiblings)
+	u32 iObj_publish(SBitmap* bmpDst, RECT* trc, SObject* obj, bool tlPublishChildren, bool tlPublishSiblings)
 	{
 		u32			lnWidth, lnHeight, lnPixelsRendered;
 		RECT		lrc;
@@ -271,7 +288,7 @@
 		// Publish any children
 		//////
 			if (tlPublishChildren && obj->firstChild)
-				lnPixelsRendered += iObjectPublish(bmpDst, &lrc, obj->firstChild, true, true);
+				lnPixelsRendered += iObj_publish(bmpDst, &lrc, obj->firstChild, true, true);
 
 
 		//////////
@@ -287,23 +304,23 @@
 				if (!obj->bmpScaled || lnWidth != obj->bmpScaled->bi.biWidth || lnHeight != obj->bmpScaled->bi.biHeight)
 				{
 					// Delete any existing bitmap
-					iBmpDelete(obj->bmpScaled, true);
+					iBmp_delete(obj->bmpScaled, true);
 
 					// Create the new one
-					obj->bmpScaled = iBmpAllocate();
-					iBmpCreateBySize(obj->bmpScaled, lnWidth, lnHeight, 32);
+					obj->bmpScaled = iBmp_allocate();
+					iBmp_createBySize(obj->bmpScaled, lnWidth, lnHeight, 32);
 					// Now when we scale into it, it will be the right size
 				}
 
 				// Perform the scale
-				iBmpScale(obj->bmpScaled, obj->bmp);
+				iBmp_scale(obj->bmpScaled, obj->bmp);
 
 				// Perform the bitblt
-				lnPixelsRendered += iBmpBitBlt(bmpDst, &lrc, obj->bmpScaled);
+				lnPixelsRendered += iBmp_bitBlt(bmpDst, &lrc, obj->bmpScaled);
 
 			} else {
 				// We can just copy
-				lnPixelsRendered += iBmpBitBlt(bmpDst, &lrc, obj->bmp);
+				lnPixelsRendered += iBmp_bitBlt(bmpDst, &lrc, obj->bmp);
 			}
 
 
@@ -317,7 +334,7 @@
 				while (objSib)
 				{
 					// Render this sibling
-					lnPixelsRendered += iObjectPublish(bmpDst, trc, objSib, tlPublishChildren, false);
+					lnPixelsRendered += iObj_publish(bmpDst, trc, objSib, tlPublishChildren, false);
 
 					// Move to next sibling
 					objSib = objSib->next;
@@ -339,7 +356,7 @@
 // Duplicate the chain of ObjectLabels, so the destination has a copy of each.
 //
 //////
-	void iObjectDuplicateChain(SObject** root, SObject* chain)
+	void iObj_duplicateChain(SObject** root, SObject* chain)
 	{
 		SObject*		obj;
 		SObject**		oPrevPtr;
@@ -354,7 +371,7 @@
 			while (chain)
 			{
 				// Create this object
-				obj = iObjectCopy(chain, NULL, chain, true, true, true);
+				obj = iObj_copy(chain, NULL, chain, true, true, true);
 				if (obj)
 				{
 					// Update the duplicate object's forward pointer in the chain
@@ -364,10 +381,10 @@
 					oPrevPtr = &obj->next;
 
 					// Get the location of our sub-object update pointer
-					objDataPtr = &obj->obj_data;
+					objDataPtr = &obj->sub_obj;
 
 					// Copy the sub-object
-					obj->obj_data = iSubobjectCopy(chain);
+					obj->sub_obj = iSubobj_copy(chain);
 				}
 
 				// Move to next item in the chain
@@ -384,7 +401,7 @@
 // Called to copy the sub-object based on type
 //
 //////
-	void* iSubobjectCopy(SObject* template_obj)
+	void* iSubobj_copy(SObject* template_obj)
 	{
 		void* ptr;
 
@@ -396,47 +413,47 @@
 			switch (template_obj->baseType)
 			{
 				case _OBJECT_TYPE_EMPTY:		// Empty, used as a placeholder object that is not drawn
-					ptr = (void*)iSubobject_createEmpty((SObjectEmpty*)template_obj->obj_data, template_obj);
+					ptr = (void*)iSubobj_createEmpty((SSubObjEmpty*)template_obj->sub_obj, template_obj);
 					break;
 
 				case _OBJECT_TYPE_FORM:			// Form class, the main outer window the OS sees
-					ptr = (void*)iSubobject_createForm((SObjectForm*)template_obj->obj_data, template_obj);
+					ptr = (void*)iSubobj_createForm((SSubObjForm*)template_obj->sub_obj, template_obj);
 					break;
 
 				case _OBJECT_TYPE_SUBFORM:		// A new class which has its own drawing content and can be moved about using UI features
-					ptr = (void*)iSubobject_createSubform((SObjectSubform*)template_obj->obj_data, template_obj);
+					ptr = (void*)iSubobj_createSubform((SSubObjSubform*)template_obj->sub_obj, template_obj);
 					break;
 
 				case _OBJECT_TYPE_LABEL:		// A label
-					ptr = (void*)iSubobject_createLabel((SObjectLabel*)template_obj->obj_data, template_obj);
+					ptr = (void*)iSubobj_createLabel((SSubObjLabel*)template_obj->sub_obj, template_obj);
 					break;
 
 				case _OBJECT_TYPE_TEXTBOX:		// An input textbox
-					ptr = (void*)iSubobject_createTextbox((SObjectTextbox*)template_obj->obj_data, template_obj);
+					ptr = (void*)iSubobj_createTextbox((SSubObjTextbox*)template_obj->sub_obj, template_obj);
 					break;
 
 				case _OBJECT_TYPE_BUTTON:		// A push button
-					ptr = (void*)iSubobject_createButton((SObjectButton*)template_obj->obj_data, template_obj);
+					ptr = (void*)iSubobj_createButton((SSubObjButton*)template_obj->sub_obj, template_obj);
 					break;
 
 				case _OBJECT_TYPE_EDITBOX:		// An input multi-line editbox
-					ptr = (void*)iSubobject_createEditbox((SObjectEditbox*)template_obj->obj_data, template_obj);
+					ptr = (void*)iSubobj_createEditbox((SSubObjEditbox*)template_obj->sub_obj, template_obj);
 					break;
 
 				case _OBJECT_TYPE_IMAGE:		// A graphical image
-					ptr = (void*)iSubobject_createImage((SObjectImage*)template_obj->obj_data, template_obj);
+					ptr = (void*)iSubobj_createImage((SSubObjImage*)template_obj->sub_obj, template_obj);
 					break;
 
 				case _OBJECT_TYPE_CHECKBOX:		// A checkbox
-					ptr = (void*)iSubobject_createCheckbox((SObjectCheckbox*)template_obj->obj_data, template_obj);
+					ptr = (void*)iSubobj_createCheckbox((SSubObjCheckbox*)template_obj->sub_obj, template_obj);
 					break;
 
 				case _OBJECT_TYPE_OPTION:		// A combination selection
-					ptr = (void*)iSubobject_createOption((SObjectOption*)template_obj->obj_data, template_obj);
+					ptr = (void*)iSubobj_createOption((SSubObjOption*)template_obj->sub_obj, template_obj);
 					break;
 
 				case _OBJECT_TYPE_RADIO:		// A radio dial, which can also present as a slider or spinner
-					ptr = (void*)iSubobject_createRadio((SObjectRadio*)template_obj->obj_data, template_obj);
+					ptr = (void*)iSubobj_createRadio((SSubObjRadio*)template_obj->sub_obj, template_obj);
 					break;
 
 				default:
@@ -457,15 +474,15 @@
 // Creates the empty object structure
 //
 //////
-	SObjectEmpty* iSubobject_createEmpty(SObjectEmpty* template_subobj, SObject* parent)
+	SSubObjEmpty* iSubobj_createEmpty(SSubObjEmpty* template_subobj, SObject* parent)
 	{
-		SObjectEmpty* subobj;
+		SSubObjEmpty* subobj;
 
 
 		//////////
 		// Create the indicated item
 		//////
-			subobj = (SObjectEmpty*)malloc(sizeof(SObjectEmpty));
+			subobj = (SSubObjEmpty*)malloc(sizeof(SSubObjEmpty));
 
 
 		//////////
@@ -474,7 +491,7 @@
 			if (subobj)
 			{
 				// Initialize
-				memset(subobj, 0, sizeof(SObjectEmpty));
+				memset(subobj, 0, sizeof(SSubObjEmpty));
 
 				// Initially populate
 				subobj->parent	= parent;
@@ -505,15 +522,15 @@
 // Creates the form object structure
 //
 //////
-	SObjectForm* iSubobject_createForm(SObjectForm* template_subobj, SObject* parent)
+	SSubObjForm* iSubobj_createForm(SSubObjForm* template_subobj, SObject* parent)
 	{
-		SObjectForm* subobj;
+		SSubObjForm* subobj;
 
 
 		//////////
 		// Create the indicated item
 		//////
-			subobj = (SObjectForm*)malloc(sizeof(SObjectForm));
+			subobj = (SSubObjForm*)malloc(sizeof(SSubObjForm));
 
 
 		//////////
@@ -522,7 +539,7 @@
 			if (subobj)
 			{
 				// Initialize
-				memset(subobj, 0, sizeof(SObjectForm));
+				memset(subobj, 0, sizeof(SSubObjForm));
 
 				// Initially populate
 				subobj->parent = parent;
@@ -540,10 +557,10 @@
 					subobj->foreColor.color		= template_subobj->foreColor.color;
 					subobj->captionColor.color	= template_subobj->captionColor.color;
 
-					subobj->bmpIcon				= iBmpCopy(template_subobj->bmpIcon);
-					iDatumDuplicate(&subobj->comment, &template_subobj->comment);
-					iDatumDuplicate(&subobj->caption, &template_subobj->caption);
-					iDatumDuplicate(&subobj->toolTip, &template_subobj->toolTip);
+					subobj->bmpIcon				= iBmp_copy(template_subobj->bmpIcon);
+					iDatum_duplicate(&subobj->comment, &template_subobj->comment);
+					iDatum_duplicate(&subobj->caption, &template_subobj->caption);
+					iDatum_duplicate(&subobj->toolTip, &template_subobj->toolTip);
 
 					*(u32*)&subobj->activate	= *(u32*)&template_subobj->activate;
 					*(u32*)&subobj->deactivate	= *(u32*)&template_subobj->deactivate;
@@ -559,8 +576,8 @@
 					subobj->foreColor.color		= black.color;
 					subobj->captionColor.color	= black.color;
 
-					subobj->bmpIcon				= iBmpCopy(bmpVjrIcon);
-					iDatumDuplicate(&subobj->caption, "Form", 4);
+					subobj->bmpIcon				= iBmp_copy(bmpVjrIcon);
+					iDatum_duplicate(&subobj->caption, "Form", 4);
 
 					*(u32*)&subobj->activate	= (u32)&iDefaultCallback_activate;
 					*(u32*)&subobj->deactivate	= (u32)&iDefaultCallback_deactivate;
@@ -582,15 +599,15 @@
 // Creates the subform object structure
 //
 //////
-	SObjectSubform* iSubobject_createSubform(SObjectSubform* template_subobj, SObject* parent)
+	SSubObjSubform* iSubobj_createSubform(SSubObjSubform* template_subobj, SObject* parent)
 	{
-		SObjectSubform* subobj;
+		SSubObjSubform* subobj;
 
 
 		//////////
 		// Create the indicated item
 		//////
-			subobj = (SObjectSubform*)malloc(sizeof(SObjectSubform));
+			subobj = (SSubObjSubform*)malloc(sizeof(SSubObjSubform));
 
 
 		//////////
@@ -599,7 +616,7 @@
 			if (subobj)
 			{
 				// Initialize
-				memset(subobj, 0, sizeof(SObjectSubform));
+				memset(subobj, 0, sizeof(SSubObjSubform));
 
 				// Initially populate
 				subobj->parent = parent;
@@ -617,10 +634,10 @@
 					subobj->foreColor.color		= template_subobj->foreColor.color;
 					subobj->captionColor.color	= template_subobj->captionColor.color;
 
-					subobj->bmpIcon				= iBmpCopy(template_subobj->bmpIcon);
-					iDatumDuplicate(&subobj->comment, &template_subobj->comment);
-					iDatumDuplicate(&subobj->caption, &template_subobj->caption);
-					iDatumDuplicate(&subobj->toolTip, &template_subobj->toolTip);
+					subobj->bmpIcon				= iBmp_copy(template_subobj->bmpIcon);
+					iDatum_duplicate(&subobj->comment, &template_subobj->comment);
+					iDatum_duplicate(&subobj->caption, &template_subobj->caption);
+					iDatum_duplicate(&subobj->toolTip, &template_subobj->toolTip);
 
 					*(u32*)&subobj->activate	= *(u32*)&template_subobj->activate;
 					*(u32*)&subobj->deactivate	= *(u32*)&template_subobj->deactivate;
@@ -637,8 +654,8 @@
 					subobj->foreColor.color		= black.color;
 					subobj->captionColor.color	= black.color;
 
-					subobj->bmpIcon				= iBmpCopy(bmpVjrIcon);
-					iDatumDuplicate(&subobj->caption, "Subform", 7);
+					subobj->bmpIcon				= iBmp_copy(bmpVjrIcon);
+					iDatum_duplicate(&subobj->caption, "Subform", 7);
 
 					*(u32*)&subobj->activate	= *(u32*)&iDefaultCallback_activate;
 					*(u32*)&subobj->deactivate	= *(u32*)&iDefaultCallback_deactivate;
@@ -660,15 +677,15 @@
 // Creates the label object structure
 //
 //////
-	SObjectLabel* iSubobject_createLabel(SObjectLabel* template_subobj, SObject* parent)
+	SSubObjLabel* iSubobj_createLabel(SSubObjLabel* template_subobj, SObject* parent)
 	{
-		SObjectLabel* subobj;
+		SSubObjLabel* subobj;
 
 
 		//////////
 		// Create the indicated item
 		//////
-			subobj = (SObjectLabel*)malloc(sizeof(SObjectLabel));
+			subobj = (SSubObjLabel*)malloc(sizeof(SSubObjLabel));
 
 
 		//////////
@@ -677,7 +694,7 @@
 			if (subobj)
 			{
 				// Initialize
-				memset(subobj, 0, sizeof(SObjectLabel));
+				memset(subobj, 0, sizeof(SSubObjLabel));
 
 				// Initially populate
 				subobj->parent = parent;
@@ -691,9 +708,9 @@
 					subobj->foreColor.color				= template_subobj->foreColor.color;
 
 					subobj->alignment					= template_subobj->alignment;
-					iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
-					iDatumDuplicate(&subobj->caption,	&template_subobj->caption);
-					iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
+					iDatum_duplicate(&subobj->comment,	&template_subobj->comment);
+					iDatum_duplicate(&subobj->caption,	&template_subobj->caption);
+					iDatum_duplicate(&subobj->toolTip,	&template_subobj->toolTip);
 
 					subobj->isOpaque					= template_subobj->isOpaque;
 					subobj->isBorder					= template_subobj->isBorder;
@@ -708,7 +725,7 @@
 					subobj->foreColor.color				= black.color;
 
 					subobj->alignment					= _ALIGNMENT_LEFT;
-					iDatumDuplicate(&subobj->caption, "Label", 5);
+					iDatum_duplicate(&subobj->caption, "Label", 5);
 
 					subobj->isOpaque					= true;
 					subobj->isBorder					= false;
@@ -733,15 +750,15 @@
 // Creates the textbox object structure
 //
 //////
-	SObjectTextbox* iSubobject_createTextbox(SObjectTextbox* template_subobj, SObject* parent)
+	SSubObjTextbox* iSubobj_createTextbox(SSubObjTextbox* template_subobj, SObject* parent)
 	{
-		SObjectTextbox* subobj;
+		SSubObjTextbox* subobj;
 
 
 		//////////
 		// Create the indicated item
 		//////
-			subobj = (SObjectTextbox*)malloc(sizeof(SObjectTextbox));
+			subobj = (SSubObjTextbox*)malloc(sizeof(SSubObjTextbox));
 
 
 		//////////
@@ -750,7 +767,7 @@
 			if (subobj)
 			{
 				// Initialize
-				memset(subobj, 0, sizeof(SObjectTextbox));
+				memset(subobj, 0, sizeof(SSubObjTextbox));
 
 				// Initially populate
 				subobj->parent = parent;
@@ -765,12 +782,12 @@
 
 					subobj->style						= template_subobj->style;
 					subobj->alignment					= template_subobj->alignment;
-					iDatumDuplicate(&subobj->value,		&template_subobj->value);
+					iDatum_duplicate(&subobj->value,		&template_subobj->value);
 					subobj->valueLength					= template_subobj->valueLength;
-					iDatumDuplicate(&subobj->picture,	&template_subobj->picture);
-					iDatumDuplicate(&subobj->mask,		&template_subobj->mask);
-					iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
-					iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
+					iDatum_duplicate(&subobj->picture,	&template_subobj->picture);
+					iDatum_duplicate(&subobj->mask,		&template_subobj->mask);
+					iDatum_duplicate(&subobj->comment,	&template_subobj->comment);
+					iDatum_duplicate(&subobj->toolTip,	&template_subobj->toolTip);
 
 					subobj->cursor						= template_subobj->cursor;
 					subobj->selectStart					= template_subobj->selectStart;
@@ -829,15 +846,15 @@
 // Creates the button object structure
 //
 //////
-	SObjectButton* iSubobject_createButton(SObjectButton* template_subobj, SObject* parent)
+	SSubObjButton* iSubobj_createButton(SSubObjButton* template_subobj, SObject* parent)
 	{
-		SObjectButton* subobj;
+		SSubObjButton* subobj;
 
 
 		//////////
 		// Create the indicated item
 		//////
-			subobj = (SObjectButton*)malloc(sizeof(SObjectButton));
+			subobj = (SSubObjButton*)malloc(sizeof(SSubObjButton));
 
 
 		//////////
@@ -846,7 +863,7 @@
 			if (subobj)
 			{
 				// Initialize
-				memset(subobj, 0, sizeof(SObjectButton));
+				memset(subobj, 0, sizeof(SSubObjButton));
 
 				// Initially populate
 				subobj->parent = parent;
@@ -861,9 +878,9 @@
 
 					subobj->style						= template_subobj->style;
 					subobj->alignment					= template_subobj->alignment;
-					iDatumDuplicate(&subobj->caption,	&template_subobj->caption);
-					iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
-					iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
+					iDatum_duplicate(&subobj->caption,	&template_subobj->caption);
+					iDatum_duplicate(&subobj->comment,	&template_subobj->comment);
+					iDatum_duplicate(&subobj->toolTip,	&template_subobj->toolTip);
 
 					subobj->disabledBackColor.color		= template_subobj->disabledBackColor.color;
 					subobj->disabledForeColor.color		= template_subobj->disabledForeColor.color;
@@ -879,7 +896,7 @@
 
 					subobj->style						= _STYLE_3D;
 					subobj->alignment					= _ALIGNMENT_LEFT;
-					iDatumDuplicate(&subobj->caption,	"Button", 6);
+					iDatum_duplicate(&subobj->caption,	"Button", 6);
 
 					subobj->disabledBackColor.color		= disabledBackColor.color;
 					subobj->disabledForeColor.color		= disabledForeColor.color;
@@ -904,15 +921,15 @@
 // Creates the editbox object structure
 //
 //////
-	SObjectEditbox* iSubobject_createEditbox(SObjectEditbox* template_subobj, SObject* parent)
+	SSubObjEditbox* iSubobj_createEditbox(SSubObjEditbox* template_subobj, SObject* parent)
 	{
-		SObjectEditbox* subobj;
+		SSubObjEditbox* subobj;
 
 
 		//////////
 		// Create the indicated item
 		//////
-			subobj = (SObjectEditbox*)malloc(sizeof(SObjectEditbox));
+			subobj = (SSubObjEditbox*)malloc(sizeof(SSubObjEditbox));
 
 
 		//////////
@@ -921,7 +938,7 @@
 			if (subobj)
 			{
 				// Initialize
-				memset(subobj, 0, sizeof(SObjectEditbox));
+				memset(subobj, 0, sizeof(SSubObjEditbox));
 
 				// Initially populate
 				subobj->parent = parent;
@@ -936,9 +953,9 @@
 
 					subobj->style						= template_subobj->style;
 					subobj->alignment					= template_subobj->alignment;
-					iEditChainManagerDuplicate(&subobj->value, template_subobj->value, true);
-					iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
-					iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
+					iEditChainManager_duplicate(&subobj->value, template_subobj->value, true);
+					iDatum_duplicate(&subobj->comment,	&template_subobj->comment);
+					iDatum_duplicate(&subobj->toolTip,	&template_subobj->toolTip);
 
 					subobj->cursor						= template_subobj->cursor;
 					subobj->selectStart					= template_subobj->selectStart;
@@ -996,15 +1013,15 @@
 // Creates the image object structure
 //
 //////
-	SObjectImage* iSubobject_createImage(SObjectImage* template_subobj, SObject* parent)
+	SSubObjImage* iSubobj_createImage(SSubObjImage* template_subobj, SObject* parent)
 	{
-		SObjectImage* subobj;
+		SSubObjImage* subobj;
 
 
 		//////////
 		// Create the indicated item
 		//////
-			subobj = (SObjectImage*)malloc(sizeof(SObjectImage));
+			subobj = (SSubObjImage*)malloc(sizeof(SSubObjImage));
 
 
 		//////////
@@ -1013,7 +1030,7 @@
 			if (subobj)
 			{
 				// Initialize
-				memset(subobj, 0, sizeof(SObjectImage));
+				memset(subobj, 0, sizeof(SSubObjImage));
 
 				// Initially populate
 				subobj->parent = parent;
@@ -1023,17 +1040,17 @@
 				{
 					// Copy from indicated template
 					subobj->style						= template_subobj->style;
-					iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
-					iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
-					subobj->image						= iBmpCopy(template_subobj->image);
-					subobj->imageOver					= iBmpCopy(template_subobj->imageOver);
+					iDatum_duplicate(&subobj->comment,	&template_subobj->comment);
+					iDatum_duplicate(&subobj->toolTip,	&template_subobj->toolTip);
+					subobj->image						= iBmp_copy(template_subobj->image);
+					subobj->imageOver					= iBmp_copy(template_subobj->imageOver);
 
 					*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
 
 				} else {
 					// Use VJr defaults
 					subobj->style						= _IMAGE_STYLE_OPAQUE;
-					subobj->image						= iBmpCopy(bmpNoImage);
+					subobj->image						= iBmp_copy(bmpNoImage);
 
 					*(u32*)&subobj->programmaticChange	= *(u32*)&iDefaultCallback_programmaticChange;
 				}
@@ -1054,15 +1071,15 @@
 // Creates the checkbox object structure
 //
 //////
-	SObjectCheckbox* iSubobject_createCheckbox(SObjectCheckbox* template_subobj, SObject* parent)
+	SSubObjCheckbox* iSubobj_createCheckbox(SSubObjCheckbox* template_subobj, SObject* parent)
 	{
-		SObjectCheckbox* subobj;
+		SSubObjCheckbox* subobj;
 
 
 		//////////
 		// Create the indicated item
 		//////
-			subobj = (SObjectCheckbox*)malloc(sizeof(SObjectCheckbox));
+			subobj = (SSubObjCheckbox*)malloc(sizeof(SSubObjCheckbox));
 
 
 		//////////
@@ -1071,7 +1088,7 @@
 			if (subobj)
 			{
 				// Initialize
-				memset(subobj, 0, sizeof(SObjectCheckbox));
+				memset(subobj, 0, sizeof(SSubObjCheckbox));
 
 				// Initially populate
 				subobj->parent = parent;
@@ -1087,9 +1104,9 @@
 					subobj->alignment					= template_subobj->alignment;
 					subobj->style						= template_subobj->style;
 					subobj->value						= template_subobj->value;
-					iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
-					iDatumDuplicate(&subobj->caption,	&template_subobj->caption);
-					iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
+					iDatum_duplicate(&subobj->comment,	&template_subobj->comment);
+					iDatum_duplicate(&subobj->caption,	&template_subobj->caption);
+					iDatum_duplicate(&subobj->toolTip,	&template_subobj->toolTip);
 
 					subobj->isOpaque					= template_subobj->isOpaque;
 					subobj->isBorder					= template_subobj->isBorder;
@@ -1109,7 +1126,7 @@
 					subobj->alignment					= _ALIGNMENT_LEFT;
 					subobj->style						= _STYLE_3D;
 					subobj->value						= 0;
-					iDatumDuplicate(&subobj->caption, "Checkbox", 8);
+					iDatum_duplicate(&subobj->caption, "Checkbox", 8);
 
 					subobj->isOpaque					= true;
 					subobj->isBorder					= false;
@@ -1137,15 +1154,15 @@
 // Creates the combo object structure
 //
 //////
-	SObjectOption* iSubobject_createOption(SObjectOption* template_subobj, SObject* parent)
+	SSubObjOption* iSubobj_createOption(SSubObjOption* template_subobj, SObject* parent)
 	{
-		SObjectOption* subobj;
+		SSubObjOption* subobj;
 
 
 		//////////
 		// Create the indicated item
 		//////
-			subobj = (SObjectOption*)malloc(sizeof(SObjectOption));
+			subobj = (SSubObjOption*)malloc(sizeof(SSubObjOption));
 
 
 		//////////
@@ -1154,7 +1171,7 @@
 			if (subobj)
 			{
 				// Initialize
-				memset(subobj, 0, sizeof(SObjectOption));
+				memset(subobj, 0, sizeof(SSubObjOption));
 
 				// Initially populate
 				subobj->parent = parent;
@@ -1168,14 +1185,14 @@
 
 					subobj->alignment					= template_subobj->alignment;
 					subobj->style						= template_subobj->style;
-					iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
-					iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
+					iDatum_duplicate(&subobj->comment,	&template_subobj->comment);
+					iDatum_duplicate(&subobj->toolTip,	&template_subobj->toolTip);
 
 					subobj->optionCount					= template_subobj->optionCount;		// How many options are there?
 					subobj->multiSelect					= template_subobj->multiSelect;		// Can multiple items be selected?
 
 					// Copy the label objects
-					iObjectDuplicateChain(&subobj->firstOption, template_subobj->firstOption);	// Each option has its own set of properties, and each is of _OBJECT_TYPE_LABEL
+					iObj_duplicateChain(&subobj->firstOption, template_subobj->firstOption);	// Each option has its own set of properties, and each is of _OBJECT_TYPE_LABEL
 
 					// Copy the events
 					*(u32*)&subobj->onSelect			= *(u32*)&template_subobj->onSelect;
@@ -1195,9 +1212,9 @@
 					subobj->multiSelect					= false;
 
 					// Create the two objects
-					subobj->firstOption					= iObjectCreate(_OBJECT_TYPE_LABEL, NULL);
+					subobj->firstOption					= iObj_create(_OBJECT_TYPE_LABEL, NULL);
 					if (subobj->firstOption)
-						subobj->firstOption->next		= iObjectCreate(_OBJECT_TYPE_LABEL, NULL);
+						subobj->firstOption->next		= iObj_create(_OBJECT_TYPE_LABEL, NULL);
 
 					// Copy the events
 					*(u32*)&subobj->onSelect			= *(u32*)&iDefaultCallback_onSelect;
@@ -1222,15 +1239,15 @@
 // Creates the radio object structure
 //
 //////
-	SObjectRadio* iSubobject_createRadio(SObjectRadio* template_subobj, SObject* parent)
+	SSubObjRadio* iSubobj_createRadio(SSubObjRadio* template_subobj, SObject* parent)
 	{
-		SObjectRadio* subobj;
+		SSubObjRadio* subobj;
 
 
 		//////////
 		// Create the indicated item
 		//////
-			subobj = (SObjectRadio*)malloc(sizeof(SObjectRadio));
+			subobj = (SSubObjRadio*)malloc(sizeof(SSubObjRadio));
 
 
 		//////////
@@ -1239,7 +1256,7 @@
 			if (subobj)
 			{
 				// Initialize
-				memset(subobj, 0, sizeof(SObjectRadio));
+				memset(subobj, 0, sizeof(SSubObjRadio));
 
 				// Initially populate
 				subobj->parent = parent;
@@ -1258,8 +1275,8 @@
 					subobj->minValue					= template_subobj->minValue;
 					subobj->maxValue					= template_subobj->maxValue;
 					subobj->roundTo						= template_subobj->roundTo;
-					iDatumDuplicate(&subobj->comment,	&template_subobj->comment);
-					iDatumDuplicate(&subobj->toolTip,	&template_subobj->toolTip);
+					iDatum_duplicate(&subobj->comment,	&template_subobj->comment);
+					iDatum_duplicate(&subobj->toolTip,	&template_subobj->toolTip);
 
 					subobj->isOpaque					= template_subobj->isOpaque;
 					subobj->isBorder					= template_subobj->isBorder;
@@ -1309,7 +1326,7 @@
 // Called to delete the empty.
 //
 //////
-	void iSubobject_deleteEmpty(SObjectEmpty* subobj, bool tlFreeSelf)
+	void iSubobj_deleteEmpty(SSubObjEmpty* subobj, bool tlFreeSelf)
 	{
 		//////////
 		// Free self
@@ -1326,16 +1343,16 @@
 // Called to delete the form.
 //
 //////
-	void iSubobject_deleteForm(SObjectForm* subobj, bool tlFreeSelf)
+	void iSubobj_deleteForm(SSubObjForm* subobj, bool tlFreeSelf)
 	{
 		//////////
 		// Free subobject components
 		//////
 			iFontFree(subobj->font, true);
-			iBmpDelete(subobj->bmpIcon, true);
-			iDatumFree(&subobj->comment, true);
-			iDatumFree(&subobj->caption, true);
-			iDatumFree(&subobj->toolTip, true);
+			iBmp_delete(subobj->bmpIcon, true);
+			iDatum_free(&subobj->comment, true);
+			iDatum_free(&subobj->caption, true);
+			iDatum_free(&subobj->toolTip, true);
 
 
 		//////////
@@ -1353,16 +1370,16 @@
 // Called to delete the subform.
 //
 //////
-	void iSubobject_deleteSubform(SObjectSubform* subobj, bool tlFreeSelf)
+	void iSubobj_deleteSubform(SSubObjSubform* subobj, bool tlFreeSelf)
 	{
 		//////////
 		// Free subobject components
 		//////
 			iFontFree(subobj->font, true);
-			iBmpDelete(subobj->bmpIcon, true);
-			iDatumFree(&subobj->comment, true);
-			iDatumFree(&subobj->caption, true);
-			iDatumFree(&subobj->toolTip, true);
+			iBmp_delete(subobj->bmpIcon, true);
+			iDatum_free(&subobj->comment, true);
+			iDatum_free(&subobj->caption, true);
+			iDatum_free(&subobj->toolTip, true);
 
 
 		//////////
@@ -1380,15 +1397,15 @@
 // Called to delete the label.
 //
 //////
-	void iSubobject_deleteLabel(SObjectLabel* subobj, bool tlFreeSelf)
+	void iSubobj_deleteLabel(SSubObjLabel* subobj, bool tlFreeSelf)
 	{
 		//////////
 		// Free subobject components
 		//////
 			iFontFree(subobj->font, true);
-			iDatumFree(&subobj->comment, true);
-			iDatumFree(&subobj->caption, true);
-			iDatumFree(&subobj->toolTip, true);
+			iDatum_free(&subobj->comment, true);
+			iDatum_free(&subobj->caption, true);
+			iDatum_free(&subobj->toolTip, true);
 
 
 		//////////
@@ -1406,17 +1423,17 @@
 // Called to delete the textbox.
 //
 //////
-	void iSubobject_deleteTextbox(SObjectTextbox* subobj, bool tlFreeSelf)
+	void iSubobj_deleteTextbox(SSubObjTextbox* subobj, bool tlFreeSelf)
 	{
 		//////////
 		// Free subobject components
 		//////
 			iFontFree(subobj->font, true);
-			iDatumFree(&subobj->value, true);
-			iDatumFree(&subobj->picture, true);
-			iDatumFree(&subobj->mask, true);
-			iDatumFree(&subobj->comment, true);
-			iDatumFree(&subobj->toolTip, true);
+			iDatum_free(&subobj->value, true);
+			iDatum_free(&subobj->picture, true);
+			iDatum_free(&subobj->mask, true);
+			iDatum_free(&subobj->comment, true);
+			iDatum_free(&subobj->toolTip, true);
 
 
 		//////////
@@ -1434,15 +1451,15 @@
 // Called to delete the button.
 //
 //////
-	void iSubobject_deleteButton(SObjectButton* subobj, bool tlFreeSelf)
+	void iSubobj_deleteButton(SSubObjButton* subobj, bool tlFreeSelf)
 	{
 		//////////
 		// Free subobject components
 		//////
 			iFontFree(subobj->font, true);
-			iDatumFree(&subobj->caption, true);
-			iDatumFree(&subobj->comment, true);
-			iDatumFree(&subobj->toolTip, true);
+			iDatum_free(&subobj->caption, true);
+			iDatum_free(&subobj->comment, true);
+			iDatum_free(&subobj->toolTip, true);
 
 
 		//////////
@@ -1460,15 +1477,15 @@
 // Called to delete the editbox.
 //
 //////
-	void iSubobject_deleteEditbox(SObjectEditbox* subobj, bool tlFreeSelf)
+	void iSubobj_deleteEditbox(SSubObjEditbox* subobj, bool tlFreeSelf)
 	{
 		//////////
 		// Free subobject components
 		//////
 			iFontFree(subobj->font, true);
-			iEditChainManagerFree(&subobj->value, true);
-			iDatumFree(&subobj->comment, true);
-			iDatumFree(&subobj->toolTip, true);
+			iEditChainManager_free(&subobj->value, true);
+			iDatum_free(&subobj->comment, true);
+			iDatum_free(&subobj->toolTip, true);
 
 
 		//////////
@@ -1486,7 +1503,7 @@
 // Called to delete the image.
 //
 //////
-	void iSubobject_deleteImage(SObjectImage* subobj, bool tlFreeSelf)
+	void iSubobj_deleteImage(SSubObjImage* subobj, bool tlFreeSelf)
 	{
 		//////////
 		// Free subobject components
@@ -1508,7 +1525,7 @@
 // Called to delete the checkbox.
 //
 //////
-	void iSubobject_deleteCheckbox(SObjectCheckbox* subobj, bool tlFreeSelf)
+	void iSubobj_deleteCheckbox(SSubObjCheckbox* subobj, bool tlFreeSelf)
 	{
 		//////////
 		// Free subobject components
@@ -1530,7 +1547,7 @@
 // Called to delete the option.
 //
 //////
-	void iSubobject_deleteOption(SObjectOption* subobj, bool tlFreeSelf)
+	void iSubobj_deleteOption(SSubObjOption* subobj, bool tlFreeSelf)
 	{
 		//////////
 		// Free subobject components
@@ -1552,7 +1569,7 @@
 // Called to delete the radio.
 //
 //////
-	void iSubobject_deleteRadio(SObjectRadio* subobj, bool tlFreeSelf)
+	void iSubobj_deleteRadio(SSubObjRadio* subobj, bool tlFreeSelf)
 	{
 		//////////
 		// Free subobject components
@@ -1576,12 +1593,12 @@
 // non-visual purposes exist.  As such, render calls are still made to it.
 //
 //////
-	u32 iSubobject_renderEmpty(SObject* obj, SObjectEmpty* subobj, bool tlRenderChildren, bool tlRenderSiblings)
+	u32 iSubobj_renderEmpty(SObject* obj, SSubObjEmpty* subobj, bool tlRenderChildren, bool tlRenderSiblings)
 	{
 		//////////
 		// Do any requisite processing
 		//////
-			iObject_renderChildrenAndSiblings(obj, tlRenderChildren, tlRenderSiblings);
+			iObj_renderChildrenAndSiblings(obj, tlRenderChildren, tlRenderSiblings);
 
 
 		//////////
@@ -1606,7 +1623,7 @@
 //        network resource.
 //
 //////
-	u32 iSubobject_renderForm(SObject* obj, SObjectForm* subobj, bool tlRenderChildren, bool tlRenderSiblings)
+	u32 iSubobj_renderForm(SObject* obj, SSubObjForm* subobj, bool tlRenderChildren, bool tlRenderSiblings)
 	{
 		u32				lnPixelsRendered;
 		SObject*		objSib;
@@ -1624,7 +1641,7 @@ _asm int 3;
 			// Traverse and render any children
 			//////
 				if (tlRenderChildren && obj->firstChild)
-					lnPixelsRendered += iObjectRender(obj->firstChild, true, tlRenderSiblings);
+					lnPixelsRendered += iObj_render(obj->firstChild, true, tlRenderSiblings);
 
 
 			//////////
@@ -1640,18 +1657,18 @@ _asm int 3;
 					// Frame it
 					//////
 						// Draw the window border
-						iBmpFillRect(obj->bmp, &lrc, subobj->borderNwColor, subobj->borderNeColor, subobj->borderSwColor, subobj->borderSeColor, true);
+						iBmp_fillRect(obj->bmp, &lrc, subobj->borderNwColor, subobj->borderNeColor, subobj->borderSwColor, subobj->borderSeColor, true);
 
 						// Frame it
-						iBmpFrameRect(obj->bmp, &lrc, black, black, black, black, false);
+						iBmp_frameRect(obj->bmp, &lrc, black, black, black, black, false);
 
 						// Draw the client area
 						SetRect(&lrc2, 8, subobj->bmpIcon->bi.biHeight + 2, lrc.right - subobj->bmpIcon->bi.biHeight - 2, lrc.bottom - subobj->bmpIcon->bi.biHeight - 1);
-						iBmpFillRect(obj->bmp, &lrc2, white, white, white, white, false);
+						iBmp_fillRect(obj->bmp, &lrc2, white, white, white, white, false);
 
 						// Put a border around the client area
 						InflateRect(&lrc2, 1, 1);
-						iBmpFrameRect(obj->bmp, &lrc2, black, black, black, black, false);
+						iBmp_frameRect(obj->bmp, &lrc2, black, black, black, black, false);
 
 
 					//////////
@@ -1659,19 +1676,19 @@ _asm int 3;
 					//////
 						// Form icon
 						SetRect(&lrc3,	bmpArrowUl->bi.biWidth + 8, 1, bmpArrowUl->bi.biWidth + 8 + subobj->bmpIcon->bi.biWidth, 1 + subobj->bmpIcon->bi.biHeight);
-						iBmpBitBlt(obj->bmp, &lrc3, subobj->bmpIcon);
+						iBmp_bitBlt(obj->bmp, &lrc3, subobj->bmpIcon);
 						// Close
 						SetRect(&lrc2,	lrc.right - bmpArrowUr->bi.biWidth - 8 - bmpClose->bi.biWidth, lrc.top + 1, lrc.right - bmpArrowUr->bi.biWidth - 8, lrc.bottom - 1);
-						iBmpBitBlt(obj->bmp, &lrc2, bmpClose);
+						iBmp_bitBlt(obj->bmp, &lrc2, bmpClose);
 						// Maximize
 						SetRect(&lrc2,	lrc2.left - bmpMaximize->bi.biWidth - 1, lrc2.top, lrc2.left - 1, lrc2.bottom);
-						iBmpBitBlt(obj->bmp, &lrc2, bmpMaximize);
+						iBmp_bitBlt(obj->bmp, &lrc2, bmpMaximize);
 						// Minimize
 						SetRect(&lrc2,	lrc2.left - bmpMinimize->bi.biWidth - 1, lrc2.top, lrc2.left - 1, lrc2.bottom);
-						iBmpBitBlt(obj->bmp, &lrc2, bmpMinimize);
+						iBmp_bitBlt(obj->bmp, &lrc2, bmpMinimize);
 						// Move
 						SetRect(&lrc2,	lrc2.left - bmpMove->bi.biWidth - 1, lrc2.top, lrc2.left - 1, lrc2.bottom);
-						iBmpBitBlt(obj->bmp, &lrc4, bmpMove);
+						iBmp_bitBlt(obj->bmp, &lrc4, bmpMove);
 
 
 					//////////
@@ -1679,16 +1696,16 @@ _asm int 3;
 					//////
 						// Upper left arrow
 						SetRect(&lrc2, lrc.left, lrc.top, lrc.left + bmpArrowUl->bi.biWidth, lrc.top + bmpArrowUl->bi.biHeight);
-						iBmpBitBlt(obj->bmp, &lrc2, bmpArrowUl);
+						iBmp_bitBlt(obj->bmp, &lrc2, bmpArrowUl);
 						// Upper right arrow
 						SetRect(&lrc2, lrc.right - bmpArrowUr->bi.biWidth, lrc.top, lrc.right, lrc.top + bmpArrowUr->bi.biHeight);
-						iBmpBitBlt(obj->bmp, &lrc2, bmpArrowUr);
+						iBmp_bitBlt(obj->bmp, &lrc2, bmpArrowUr);
 						// Lower left arrow
 						SetRect(&lrc2, lrc.right - bmpArrowLr->bi.biWidth, lrc.bottom - bmpArrowLr->bi.biHeight, lrc.right, lrc.bottom);
-						iBmpBitBlt(obj->bmp, &lrc2, bmpArrowLr);
+						iBmp_bitBlt(obj->bmp, &lrc2, bmpArrowLr);
 						// Lower right arrow
 						SetRect(&lrc2, lrc.left, lrc.bottom - bmpArrowLl->bi.biHeight, lrc.left + bmpArrowLl->bi.biWidth, lrc.bottom);
-						iBmpBitBlt(obj->bmp, &lrc2, bmpArrowLl);
+						iBmp_bitBlt(obj->bmp, &lrc2, bmpArrowLl);
 
 
 					//////////
@@ -1706,15 +1723,15 @@ _asm int 3;
 					// Copy to prior rendered bitmap
 					//////
 						// Make sure our bmpPriorRendered exists
-						obj->bmpPriorRendered = iBmpVerifyCopyIsSameSize(obj->bmpPriorRendered, obj->bmp);
+						obj->bmpPriorRendered = iBmp_verifyCopyIsSameSize(obj->bmpPriorRendered, obj->bmp);
 
 						// Copy to the prior rendered version
-						lnPixelsRendered += iBmpBitBlt(obj->bmpPriorRendered, &lrc, obj->bmp);
+						lnPixelsRendered += iBmp_bitBlt(obj->bmpPriorRendered, &lrc, obj->bmp);
 						// Right now, we can use the bmpPriorRendered for a fast copy rather than 
 
 				} else {
 					// Render from its prior rendered version
-					lnPixelsRendered += iBmpBitBlt(obj->bmp, &lrc, obj->bmpPriorRendered);
+					lnPixelsRendered += iBmp_bitBlt(obj->bmp, &lrc, obj->bmpPriorRendered);
 				}
 
 
@@ -1733,7 +1750,7 @@ _asm int 3;
 					while (objSib)
 					{
 						// Render this sibling
-						lnPixelsRendered += iObjectRender(objSib, tlRenderChildren, false);
+						lnPixelsRendered += iObj_render(objSib, tlRenderChildren, false);
 
 						// Move to next sibling
 						objSib = objSib->next;
@@ -1756,7 +1773,7 @@ _asm int 3;
 // Note:  See "Note" on iRenderForm().
 //
 //////
-	u32 iSubobject_renderSubform(SObject* obj, SObjectSubform* subobj, bool tlRenderChildren, bool tlRenderSiblings)
+	u32 iSubobj_renderSubform(SObject* obj, SSubObjSubform* subobj, bool tlRenderChildren, bool tlRenderSiblings)
 	{
 
 
@@ -1777,7 +1794,7 @@ _asm int 3;
 // Note:  See "Note" on iRenderForm().
 //
 //////
-	u32 iSubobject_renderLabel(SObject* obj, SObjectLabel* subobj, bool tlRenderChildren, bool tlRenderSiblings)
+	u32 iSubobj_renderLabel(SObject* obj, SSubObjLabel* subobj, bool tlRenderChildren, bool tlRenderSiblings)
 	{
 
 
@@ -1798,7 +1815,7 @@ _asm int 3;
 // Note:  See "Note" on iRenderForm().
 //
 //////
-	u32 iSubobject_renderTextbox(SObject* obj, SObjectTextbox* subobj, bool tlRenderChildren, bool tlRenderSiblings)
+	u32 iSubobj_renderTextbox(SObject* obj, SSubObjTextbox* subobj, bool tlRenderChildren, bool tlRenderSiblings)
 	{
 
 
@@ -1819,7 +1836,7 @@ _asm int 3;
 // Note:  See "Note" on iRenderForm().
 //
 //////
-	u32 iSubobject_renderButton(SObject* obj, SObjectButton* subobj, bool tlRenderChildren, bool tlRenderSiblings)
+	u32 iSubobj_renderButton(SObject* obj, SSubObjButton* subobj, bool tlRenderChildren, bool tlRenderSiblings)
 	{
 
 
@@ -1840,7 +1857,7 @@ _asm int 3;
 // Note:  See "Note" on iRenderForm().
 //
 //////
-	u32 iSubobject_renderEditbox(SObject* obj, SObjectEditbox* subobj, bool tlRenderChildren, bool tlRenderSiblings)
+	u32 iSubobj_renderEditbox(SObject* obj, SSubObjEditbox* subobj, bool tlRenderChildren, bool tlRenderSiblings)
 	{
 
 
@@ -1861,7 +1878,7 @@ _asm int 3;
 // Note:  See "Note" on iRenderForm().
 //
 //////
-	u32 iSubobject_renderImage(SObject* obj, SObjectImage* subobj, bool tlRenderChildren, bool tlRenderSiblings)
+	u32 iSubobj_renderImage(SObject* obj, SSubObjImage* subobj, bool tlRenderChildren, bool tlRenderSiblings)
 	{
 
 
@@ -1882,7 +1899,7 @@ _asm int 3;
 // Note:  See "Note" on iRenderForm().
 //
 //////
-	u32 iSubobject_renderCheckbox(SObject* obj, SObjectCheckbox* subobj, bool tlRenderChildren, bool tlRenderSiblings)
+	u32 iSubobj_renderCheckbox(SObject* obj, SSubObjCheckbox* subobj, bool tlRenderChildren, bool tlRenderSiblings)
 	{
 
 
@@ -1903,7 +1920,7 @@ _asm int 3;
 // Note:  See "Note" on iRenderForm().
 //
 //////
-	u32 iSubobject_renderOption(SObject* obj, SObjectOption* subobj, bool tlRenderChildren, bool tlRenderSiblings)
+	u32 iSubobj_renderOption(SObject* obj, SSubObjOption* subobj, bool tlRenderChildren, bool tlRenderSiblings)
 	{
 
 
@@ -1924,7 +1941,7 @@ _asm int 3;
 // Note:  See "Note" on iRenderForm().
 //
 //////
-	u32 iSubobject_renderRadio(SObject* obj, SObjectRadio* subobj, bool tlRenderChildren, bool tlRenderSiblings)
+	u32 iSubobj_renderRadio(SObject* obj, SSubObjRadio* subobj, bool tlRenderChildren, bool tlRenderSiblings)
 	{
 
 

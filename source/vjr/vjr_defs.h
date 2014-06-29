@@ -58,52 +58,53 @@
 //////////
 // objects.cpp
 //////
-	SObject*				iObjectCreate							(u32 tnBaseType, void* obj_data);
-	SObject*				iObjectCopy								(SObject* template_obj, SObject* next, SObject* parent, bool tlCopyChildren, bool tlCopySubobjects, bool tlCreateSeparateBitmapBuffers);
-	u32						iObjectRender							(SObject* obj, bool tlRenderChildren, bool tlRenderSiblings);
-	void					iObject_renderChildrenAndSiblings		(SObject* obj, bool tlRenderChildren, bool tlRenderSiblings);
-	u32						iObjectPublish							(SBitmap* bmpDst, RECT* trc, SObject* obj, bool tlPublishChildren, bool tlPublishSiblings);
-	void					iObjectDuplicateChain					(SObject** root, SObject* chain);
+	SObject*				iObj_create								(u32 tnBaseType, void* obj_data);
+	SObject*				iObj_copy								(SObject* template_obj, SObject* next, SObject* parent, bool tlCopyChildren, bool tlCopySubobjects, bool tlCreateSeparateBitmapBuffers);
+	void					iObj_delete								(SObject* obj, bool tlDeleteSelf);
+	u32						iObj_render								(SObject* obj, bool tlRenderChildren, bool tlRenderSiblings);
+	void					iObj_renderChildrenAndSiblings			(SObject* obj, bool tlRenderChildren, bool tlRenderSiblings);
+	u32						iObj_publish							(SBitmap* bmpDst, RECT* trc, SObject* obj, bool tlPublishChildren, bool tlPublishSiblings);
+	void					iObj_duplicateChain						(SObject** root, SObject* chain);
 
 	// Creation of individual sub-objects
-	void*					iSubobjectCopy							(SObject* template_obj);
-	SObjectEmpty*			iSubobject_createEmpty					(SObjectEmpty*		template_subobj, SObject* parent);
-	SObjectForm*			iSubobject_createForm					(SObjectForm*		template_subobj, SObject* parent);
-	SObjectSubform*			iSubobject_createSubform				(SObjectSubform*	template_subobj, SObject* parent);
-	SObjectLabel*			iSubobject_createLabel					(SObjectLabel*		template_subobj, SObject* parent);
-	SObjectTextbox*			iSubobject_createTextbox				(SObjectTextbox*	template_subobj, SObject* parent);
-	SObjectButton*			iSubobject_createButton					(SObjectButton*		template_subobj, SObject* parent);
-	SObjectEditbox*			iSubobject_createEditbox				(SObjectEditbox*	template_subobj, SObject* parent);
-	SObjectImage*			iSubobject_createImage					(SObjectImage*		template_subobj, SObject* parent);
-	SObjectCheckbox*		iSubobject_createCheckbox				(SObjectCheckbox*	template_subobj, SObject* parent);
-	SObjectOption*			iSubobject_createOption					(SObjectOption*		template_subobj, SObject* parent);
-	SObjectRadio*			iSubobject_createRadio					(SObjectRadio*		template_subobj, SObject* parent);
+	void*					iSubobj_copy							(SObject* template_obj);
+	SSubObjEmpty*			iSubobj_createEmpty						(SSubObjEmpty*		template_subobj, SObject* parent);
+	SSubObjForm*			iSubobj_createForm						(SSubObjForm*		template_subobj, SObject* parent);
+	SSubObjSubform*			iSubobj_createSubform					(SSubObjSubform*	template_subobj, SObject* parent);
+	SSubObjLabel*			iSubobj_createLabel						(SSubObjLabel*		template_subobj, SObject* parent);
+	SSubObjTextbox*			iSubobj_createTextbox					(SSubObjTextbox*	template_subobj, SObject* parent);
+	SSubObjButton*			iSubobj_createButton					(SSubObjButton*		template_subobj, SObject* parent);
+	SSubObjEditbox*			iSubobj_createEditbox					(SSubObjEditbox*	template_subobj, SObject* parent);
+	SSubObjImage*			iSubobj_createImage						(SSubObjImage*		template_subobj, SObject* parent);
+	SSubObjCheckbox*		iSubobj_createCheckbox					(SSubObjCheckbox*	template_subobj, SObject* parent);
+	SSubObjOption*			iSubobj_createOption					(SSubObjOption*		template_subobj, SObject* parent);
+	SSubObjRadio*			iSubobj_createRadio						(SSubObjRadio*		template_subobj, SObject* parent);
 
 	// Delete individual sub-objects
-	void					iSubobject_deleteEmpty					(SObjectEmpty*		subobj, bool tlFreeSelf);
-	void					iSubobject_deleteForm					(SObjectForm*		subobj, bool tlFreeSelf);
-	void					iSubobject_deleteSubform				(SObjectSubform*	subobj, bool tlFreeSelf);
-	void					iSubobject_deleteLabel					(SObjectLabel*		subobj, bool tlFreeSelf);
-	void					iSubobject_deleteTextbox				(SObjectTextbox*	subobj, bool tlFreeSelf);
-	void					iSubobject_deleteButton					(SObjectButton*		subobj, bool tlFreeSelf);
-	void					iSubobject_deleteEditbox				(SObjectEditbox*	subobj, bool tlFreeSelf);
-	void					iSubobject_deleteImage					(SObjectImage*		subobj, bool tlFreeSelf);
-	void					iSubobject_deleteCheckbox				(SObjectCheckbox*	subobj, bool tlFreeSelf);
-	void					iSubobject_deleteOption					(SObjectOption*		subobj, bool tlFreeSelf);
-	void					iSubobject_deleteRadio					(SObjectRadio*		subobj, bool tlFreeSelf);
+	void					iSubobj_deleteEmpty						(SSubObjEmpty*		subobj, bool tlFreeSelf);
+	void					iSubobj_deleteForm						(SSubObjForm*		subobj, bool tlFreeSelf);
+	void					iSubobj_deleteSubform					(SSubObjSubform*	subobj, bool tlFreeSelf);
+	void					iSubobj_deleteLabel						(SSubObjLabel*		subobj, bool tlFreeSelf);
+	void					iSubobj_deleteTextbox					(SSubObjTextbox*	subobj, bool tlFreeSelf);
+	void					iSubobj_deleteButton					(SSubObjButton*		subobj, bool tlFreeSelf);
+	void					iSubobj_deleteEditbox					(SSubObjEditbox*	subobj, bool tlFreeSelf);
+	void					iSubobj_deleteImage						(SSubObjImage*		subobj, bool tlFreeSelf);
+	void					iSubobj_deleteCheckbox					(SSubObjCheckbox*	subobj, bool tlFreeSelf);
+	void					iSubobj_deleteOption					(SSubObjOption*		subobj, bool tlFreeSelf);
+	void					iSubobj_deleteRadio						(SSubObjRadio*		subobj, bool tlFreeSelf);
 
 	// Default render of sub-objects
-	u32						iSubobject_renderEmpty					(SObject* obj,		SObjectEmpty*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
-	u32						iSubobject_renderForm					(SObject* obj,		SObjectForm*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
-	u32						iSubobject_renderSubform				(SObject* obj,		SObjectSubform*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
-	u32						iSubobject_renderLabel					(SObject* obj,		SObjectLabel*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
-	u32						iSubobject_renderTextbox				(SObject* obj,		SObjectTextbox*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
-	u32						iSubobject_renderButton					(SObject* obj,		SObjectButton*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
-	u32						iSubobject_renderEditbox				(SObject* obj,		SObjectEditbox*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
-	u32						iSubobject_renderImage					(SObject* obj,		SObjectImage*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
-	u32						iSubobject_renderCheckbox				(SObject* obj,		SObjectCheckbox*	subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
-	u32						iSubobject_renderOption					(SObject* obj,		SObjectOption*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
-	u32						iSubobject_renderRadio					(SObject* obj,		SObjectRadio*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
+	u32						iSubobj_renderEmpty						(SObject* obj,		SSubObjEmpty*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
+	u32						iSubobj_renderForm						(SObject* obj,		SSubObjForm*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
+	u32						iSubobj_renderSubform					(SObject* obj,		SSubObjSubform*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
+	u32						iSubobj_renderLabel						(SObject* obj,		SSubObjLabel*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
+	u32						iSubobj_renderTextbox					(SObject* obj,		SSubObjTextbox*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
+	u32						iSubobj_renderButton					(SObject* obj,		SSubObjButton*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
+	u32						iSubobj_renderEditbox					(SObject* obj,		SSubObjEditbox*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
+	u32						iSubobj_renderImage						(SObject* obj,		SSubObjImage*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
+	u32						iSubobj_renderCheckbox					(SObject* obj,		SSubObjCheckbox*	subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
+	u32						iSubobj_renderOption					(SObject* obj,		SSubObjOption*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
+	u32						iSubobj_renderRadio						(SObject* obj,		SSubObjRadio*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
 
 
 //////////
@@ -181,67 +182,70 @@
 	int						iProcessMouseMessage					(UINT m, WPARAM w, LPARAM l);
 	void					iTranslateMousePosition					(POINTS* pt);
 
-	// EditChain
-	bool					iEditChainManagerDuplicate				(SEditChainManager** root, SEditChainManager* chain, bool tlIncludeUndoHistory);
-	void					iEditChainManagerFree					(SEditChainManager** root, bool tlFreeSelf);
-	void					iEditChainFree							(SEditChain** root, bool tlFreeSelf);
+	// EditChainManager
+	bool					iEditChainManager_duplicate				(SEditChainManager** root, SEditChainManager* chain, bool tlIncludeUndoHistory);
+	void					iEditChainManager_free					(SEditChainManager** root, bool tlFreeSelf);
+
+	// Edit Chain
+	void					iEditChain_free							(SEditChain** root, bool tlFreeSelf);
 
 	// Translate
 	void*					iTranslate_p1_to_p2						(SBuilder* root, void* ptr);
 	void*					iTranslate_p2_to_p1						(SBuilder* root, void* ptr);
 
 	// ExtraInfo
-	void					iExtraInfoFree							(SEditChainManager* ecm, SEditChain* ec, SExtraInfo** root, bool tlFreeSelf);
+	void					iExtraInfo_free							(SEditChainManager* ecm, SEditChain* ec, SExtraInfo** root, bool tlFreeSelf);
 
 	// Datum
-	void					iDatumDuplicate							(SDatum* datum, s8* data, u32 dataLength);
-	void					iDatumDuplicate							(SDatum* datumDst, SDatum* datumSrc);
-	s32						iDatumCompare							(SDatum* datumLeft, SDatum* datumRight);
-	void					iDatumFree								(SDatum* datum, bool tlFreeSelf);
-	void					iiDatumFree								(SDatum* datum);
+	SDatum*					iDatum_allocate							(               s8* data, u32 dataLength);
+	void					iDatum_duplicate						(SDatum* datum, s8* data, u32 dataLength);
+	void					iDatum_duplicate						(SDatum* datumDst, SDatum* datumSrc);
+	s32						iDatum_compare							(SDatum* datumLeft, SDatum* datumRight);
+	void					iDatum_free								(SDatum* datum, bool tlFreeSelf);
+	void					iiDatum_free							(SDatum* datum);
 
 
 //////////
 // bitmaps.cpp
 //////
-	SBitmap*				iBmpAllocate							(void);
-	SBitmap*				iBmpCopy								(SBitmap* bmpSrc);
-	SBitmap*				iBmpVerifyCopyIsSameSize				(SBitmap* bmpCopy, SBitmap* bmp);
-	SBitmap*				iBmpRawLoad								(cu8* bmpRawFileData);
-	bool					iBmpValidate							(SBitmap* bmp);
-	s32						iBmpComputeRowWidth						(SBitmap* bmp);
-	void					iBmpCreateBySize						(SBitmap* bmp, u32 width, u32 height, u32 tnBitCount);
-	void					iBmpPopulateBitmapStructure				(SBitmap* bmp, u32 tnWidth, u32 tnHeight, u32 tnBitCount);
-	void					iBmpDelete								(SBitmap* bmp, bool tlFreeBits);
-	void					iBmpBitBltObject						(SBitmap* bmpDst, SObject* obj, SBitmap* bmpSrc);
-	void					iBmpBitBltObjectMask					(SBitmap* bmpDst, SObject* obj, SBitmap* bmpSrc);
-	u32						iBmpBitBlt								(SBitmap* bmpDst, RECT* trc, SBitmap* bmpSrc);
+	SBitmap*				iBmp_allocate							(void);
+	SBitmap*				iBmp_copy								(SBitmap* bmpSrc);
+	SBitmap*				iBmp_verifyCopyIsSameSize				(SBitmap* bmpCopy, SBitmap* bmp);
+	SBitmap*				iBmp_rawLoad							(cu8* bmpRawFileData);
+	bool					iBmp_validate							(SBitmap* bmp);
+	s32						iBmp_computeRowWidth					(SBitmap* bmp);
+	void					iBmp_createBySize						(SBitmap* bmp, u32 width, u32 height, u32 tnBitCount);
+	void					iBmp_populateBitmapStructure			(SBitmap* bmp, u32 tnWidth, u32 tnHeight, u32 tnBitCount);
+	void					iBmp_delete								(SBitmap* bmp, bool tlFreeBits);
+	void					iBmp_bitBltObject						(SBitmap* bmpDst, SObject* obj, SBitmap* bmpSrc);
+	void					iBmp_bitBltObjectMask					(SBitmap* bmpDst, SObject* obj, SBitmap* bmpSrc);
+	u32						iBmp_bitBlt								(SBitmap* bmpDst, RECT* trc, SBitmap* bmpSrc);
 // TODO:  The following void functions need to be changed to u32 and indicate how many pixels were rendered
-	void					iBmpBitBltMask							(SBitmap* bmpDst, RECT* trc, SBitmap* bmpSrc);
-	void					iBmpDrawPoint							(SBitmap* bmp, s32 tnX, s32 tnY, SBgra color);
-	void					iBmpFillRect							(SBitmap* bmp, RECT* rc, SBgra colorNW, SBgra colorNE, SBgra colorSW, SBgra colorSE, bool tlUseGradient);
-	void					iBmpFrameRect							(SBitmap* bmp, RECT* rc, SBgra colorNW, SBgra colorNE, SBgra colorSW, SBgra colorSE, bool tlUseGradient);
-	void					iBmpDrawHorizontalLine					(SBitmap* bmp, s32 tnX1, s32 tnX2, s32 tnY, SBgra color);
-	void					iBmpDrawVerticalLine					(SBitmap* bmp, s32 tnY1, s32 tnY2, s32 tnX, SBgra color);
-	void					iBmpDrawHorizontalLineGradient			(SBitmap* bmp, s32 tnX1, s32 tnX2, s32 tnY, f32 tfRed, f32 tfGrn, f32 tfBlu, f32 tfRedInc, f32 tfGrnInc, f32 tfBluInc);
-	void					iBmpDrawVerticalLineGradient			(SBitmap* bmp, s32 tnY1, s32 tnY2, s32 tnX, f32 tfRed, f32 tfGrn, f32 tfBlu, f32 tfRedInc, f32 tfGrnInc, f32 tfBluInc);
+	void					iBmp_bitBltMask							(SBitmap* bmpDst, RECT* trc, SBitmap* bmpSrc);
+	void					iBmp_drawPoint							(SBitmap* bmp, s32 tnX, s32 tnY, SBgra color);
+	void					iBmp_fillRect							(SBitmap* bmp, RECT* rc, SBgra colorNW, SBgra colorNE, SBgra colorSW, SBgra colorSE, bool tlUseGradient);
+	void					iBmp_frameRect							(SBitmap* bmp, RECT* rc, SBgra colorNW, SBgra colorNE, SBgra colorSW, SBgra colorSE, bool tlUseGradient);
+	void					iBmp_drawHorizontalLine					(SBitmap* bmp, s32 tnX1, s32 tnX2, s32 tnY, SBgra color);
+	void					iBmp_drawVerticalLine					(SBitmap* bmp, s32 tnY1, s32 tnY2, s32 tnX, SBgra color);
+	void					iBmp_drawHorizontalLineGradient			(SBitmap* bmp, s32 tnX1, s32 tnX2, s32 tnY, f32 tfRed, f32 tfGrn, f32 tfBlu, f32 tfRedInc, f32 tfGrnInc, f32 tfBluInc);
+	void					iBmp_drawVerticalLineGradient			(SBitmap* bmp, s32 tnY1, s32 tnY2, s32 tnX, f32 tfRed, f32 tfGrn, f32 tfBlu, f32 tfRedInc, f32 tfGrnInc, f32 tfBluInc);
 
 	//////////
 	// For scaling
 	//////
-		u32					iBmpScale								(SBitmap* bmpScaled, SBitmap* bmp);
-		u32					iiBmpScale_Process						(SBitmap* bmpDst, SBitmap* bmpSrc, f32 tfVerticalScaler, f32 tfHorizontalScaler);
-		void				iiBmpScale_processPixels				(SBitmapProcess* bp);
-		void				iiBmpScale_processSpannedPixel1			(SBitmapProcess* bp);
-		void				iiBmpScale_processSpannedPixel2			(SBitmapProcess* bp);
-		void				iiBmpScale_processSpannedPixel3			(SBitmapProcess* bp);
-		void				iiBmpScale_processSpannedPixel4			(SBitmapProcess* bp);
-		void				iiBmpScale_processSpannedPixel5			(SBitmapProcess* bp);
-		void				iiBmpScale_processSpannedPixel6			(SBitmapProcess* bp);
-		void				iiBmpScale_processSpannedPixel7			(SBitmapProcess* bp);
-		void				iiBmpScale_processSpannedPixel8			(SBitmapProcess* bp);
-		void				iiBmpScale_processSpannedPixel9			(SBitmapProcess* bp);
-		u32					iiBmpScale_processGetIntegersBetween	(f32 p1, f32 p2);
+		u32					iBmp_scale								(SBitmap* bmpScaled, SBitmap* bmp);
+		u32					iiBmp_scale_Process						(SBitmap* bmpDst, SBitmap* bmpSrc, f32 tfVerticalScaler, f32 tfHorizontalScaler);
+		void				iiBmp_scale_processPixels				(SBitmapProcess* bp);
+		void				iiBmp_scale_processSpannedPixel1		(SBitmapProcess* bp);
+		void				iiBmp_scale_processSpannedPixel2		(SBitmapProcess* bp);
+		void				iiBmp_scale_processSpannedPixel3		(SBitmapProcess* bp);
+		void				iiBmp_scale_processSpannedPixel4		(SBitmapProcess* bp);
+		void				iiBmp_scale_processSpannedPixel5		(SBitmapProcess* bp);
+		void				iiBmp_scale_processSpannedPixel6		(SBitmapProcess* bp);
+		void				iiBmp_scale_processSpannedPixel7		(SBitmapProcess* bp);
+		void				iiBmp_scale_processSpannedPixel8		(SBitmapProcess* bp);
+		void				iiBmp_scale_processSpannedPixel9		(SBitmapProcess* bp);
+		u32					iiBmp_scale_processGetIntegersBetween	(f32 p1, f32 p2);
 	//////
 	// End
 	//////////

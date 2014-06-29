@@ -65,22 +65,22 @@ void initialize(HACCEL* hAccelTable)
 	//////////
 	// Load our icons and images
 	//////
-		bmpVjrIcon	= iBmpRawLoad(cgc_appIconBmp);
-		bmpVjrIcon	= iBmpRawLoad(cgc_jdebiAppIconBmp);
+		bmpVjrIcon	= iBmp_rawLoad(cgc_appIconBmp);
+		bmpVjrIcon	= iBmp_rawLoad(cgc_jdebiAppIconBmp);
 
 		// Create a 1x1 no image bitmap placeholder
-		bmpNoImage	= iBmpAllocate();
-		iBmpCreateBySize(bmpNoImage, 1, 1, 32);
+		bmpNoImage	= iBmp_allocate();
+		iBmp_createBySize(bmpNoImage, 1, 1, 32);
 
-		bmpClose	= iBmpRawLoad(cgc_closeBmp);
-		bmpMaximize	= iBmpRawLoad(cgc_maximizeBmp);
-		bmpMinimize	= iBmpRawLoad(cgc_minimizeBmp);
-		bmpMove		= iBmpRawLoad(cgc_moveBmp);
+		bmpClose	= iBmp_rawLoad(cgc_closeBmp);
+		bmpMaximize	= iBmp_rawLoad(cgc_maximizeBmp);
+		bmpMinimize	= iBmp_rawLoad(cgc_minimizeBmp);
+		bmpMove		= iBmp_rawLoad(cgc_moveBmp);
 
-		bmpArrowUl	= iBmpRawLoad(cgc_arrowUlBmp);
-		bmpArrowUr	= iBmpRawLoad(cgc_arrowUrBmp);
-		bmpArrowLl	= iBmpRawLoad(cgc_arrowLlBmp);
-		bmpArrowLr	= iBmpRawLoad(cgc_arrowLrBmp);
+		bmpArrowUl	= iBmp_rawLoad(cgc_arrowUlBmp);
+		bmpArrowUr	= iBmp_rawLoad(cgc_arrowUrBmp);
+		bmpArrowLl	= iBmp_rawLoad(cgc_arrowLlBmp);
+		bmpArrowLr	= iBmp_rawLoad(cgc_arrowLrBmp);
 
 
 	// Create our message window
@@ -115,7 +115,7 @@ void initialize(HACCEL* hAccelTable)
 			{
 				// We need to convert it
 				// Create the 32-bit version
-				iBmpCreateBySize(&bmp32, bmp->bi.biWidth, bmp->bi.biHeight, 32);
+				iBmp_createBySize(&bmp32, bmp->bi.biWidth, bmp->bi.biHeight, 32);
 
 				// Copy it
 				iCopyBitmap24ToBitmap32(&bmp32, bmp);
@@ -308,64 +308,64 @@ void initialize(HACCEL* hAccelTable)
 //////
 	void iCreateDefaultObjects(void)
 	{
-		SObjectEmpty*		subobj_empty;
-		SObjectForm*		subobj_form;
-		SObjectSubform*		subobj_subform;
-		SObjectLabel*		subobj_label;
-		SObjectTextbox*		subobj_textbox;
-		SObjectButton*		subobj_button;
-		SObjectEditbox*		subobj_editbox;
-		SObjectImage*		subobj_image;
-		SObjectCheckbox*	subobj_checkbox;
-		SObjectOption*		subobj_option;
-		SObjectRadio*		subobj_radio;
+		SSubObjEmpty*		subobj_empty;
+		SSubObjForm*		subobj_form;
+		SSubObjSubform*		subobj_subform;
+		SSubObjLabel*		subobj_label;
+		SSubObjTextbox*		subobj_textbox;
+		SSubObjButton*		subobj_button;
+		SSubObjEditbox*		subobj_editbox;
+		SSubObjImage*		subobj_image;
+		SSubObjCheckbox*	subobj_checkbox;
+		SSubObjOption*		subobj_option;
+		SSubObjRadio*		subobj_radio;
 
 
 		//////////
 		// Create each initial subobj
 		//////
-			subobj_empty			= iSubobject_createEmpty(NULL, NULL);
-			subobj_form				= iSubobject_createForm(NULL, NULL);
-			subobj_subform			= iSubobject_createSubform(NULL, NULL);
-			subobj_label			= iSubobject_createLabel(NULL, NULL);
-			subobj_textbox			= iSubobject_createTextbox(NULL, NULL);
-			subobj_button			= iSubobject_createButton(NULL, NULL);
-			subobj_editbox			= iSubobject_createEditbox(NULL, NULL);
-			subobj_image			= iSubobject_createImage(NULL, NULL);
-			subobj_checkbox			= iSubobject_createCheckbox(NULL, NULL);
-			subobj_option			= iSubobject_createOption(NULL, NULL);
-			subobj_radio			= iSubobject_createRadio(NULL, NULL);
+			subobj_empty			= iSubobj_createEmpty(NULL, NULL);
+			subobj_form				= iSubobj_createForm(NULL, NULL);
+			subobj_subform			= iSubobj_createSubform(NULL, NULL);
+			subobj_label			= iSubobj_createLabel(NULL, NULL);
+			subobj_textbox			= iSubobj_createTextbox(NULL, NULL);
+			subobj_button			= iSubobj_createButton(NULL, NULL);
+			subobj_editbox			= iSubobj_createEditbox(NULL, NULL);
+			subobj_image			= iSubobj_createImage(NULL, NULL);
+			subobj_checkbox			= iSubobj_createCheckbox(NULL, NULL);
+			subobj_option			= iSubobj_createOption(NULL, NULL);
+			subobj_radio			= iSubobj_createRadio(NULL, NULL);
 
 
 		//////////
 		// Create each default object
 		//////
-			gobj_defaultEmpty		= iObjectCreate(_OBJECT_TYPE_EMPTY,		(void*)subobj_empty);
-			gobj_defaultForm		= iObjectCreate(_OBJECT_TYPE_FORM,		(void*)subobj_form);
-			gobj_defaultSubform		= iObjectCreate(_OBJECT_TYPE_SUBFORM,	(void*)subobj_subform);
-			gobj_defaultLabel		= iObjectCreate(_OBJECT_TYPE_LABEL,		(void*)subobj_label);
-			gobj_defaultTextbox		= iObjectCreate(_OBJECT_TYPE_TEXTBOX,	(void*)subobj_textbox);
-			gobj_defaultButton		= iObjectCreate(_OBJECT_TYPE_BUTTON,	(void*)subobj_button);
-			gobj_defaultImage		= iObjectCreate(_OBJECT_TYPE_IMAGE,		(void*)subobj_image);
-			gobj_defaultCheckbox	= iObjectCreate(_OBJECT_TYPE_CHECKBOX,	(void*)subobj_checkbox);
-			gobj_defaultOption		= iObjectCreate(_OBJECT_TYPE_OPTION,	(void*)subobj_option);
-			gobj_defaultRadio		= iObjectCreate(_OBJECT_TYPE_RADIO,		(void*)subobj_radio);
+			gobj_defaultEmpty		= iObj_create(_OBJECT_TYPE_EMPTY,		(void*)subobj_empty);
+			gobj_defaultForm		= iObj_create(_OBJECT_TYPE_FORM,		(void*)subobj_form);
+			gobj_defaultSubform		= iObj_create(_OBJECT_TYPE_SUBFORM,	(void*)subobj_subform);
+			gobj_defaultLabel		= iObj_create(_OBJECT_TYPE_LABEL,		(void*)subobj_label);
+			gobj_defaultTextbox		= iObj_create(_OBJECT_TYPE_TEXTBOX,	(void*)subobj_textbox);
+			gobj_defaultButton		= iObj_create(_OBJECT_TYPE_BUTTON,	(void*)subobj_button);
+			gobj_defaultImage		= iObj_create(_OBJECT_TYPE_IMAGE,		(void*)subobj_image);
+			gobj_defaultCheckbox	= iObj_create(_OBJECT_TYPE_CHECKBOX,	(void*)subobj_checkbox);
+			gobj_defaultOption		= iObj_create(_OBJECT_TYPE_OPTION,	(void*)subobj_option);
+			gobj_defaultRadio		= iObj_create(_OBJECT_TYPE_RADIO,		(void*)subobj_radio);
 
 
 		/////////
 		// Delete each initial subobj since they've now been copied onto the default objects
 		//////
-			iSubobject_deleteEmpty		(subobj_empty,		true);
-			iSubobject_deleteForm		(subobj_form,		true);
-			iSubobject_deleteSubform	(subobj_subform,	true);
-			iSubobject_deleteLabel		(subobj_label,		true);
-			iSubobject_deleteTextbox	(subobj_textbox,	true);
-			iSubobject_deleteButton		(subobj_button,		true);
-			iSubobject_deleteEditbox	(subobj_editbox,	true);
-			iSubobject_deleteImage		(subobj_image,		true);
-			iSubobject_deleteCheckbox	(subobj_checkbox,	true);
-			iSubobject_deleteOption		(subobj_option,		true);
-			iSubobject_deleteRadio		(subobj_radio,		true);
+			iSubobj_deleteEmpty		(subobj_empty,		true);
+			iSubobj_deleteForm		(subobj_form,		true);
+			iSubobj_deleteSubform	(subobj_subform,	true);
+			iSubobj_deleteLabel		(subobj_label,		true);
+			iSubobj_deleteTextbox	(subobj_textbox,	true);
+			iSubobj_deleteButton		(subobj_button,		true);
+			iSubobj_deleteEditbox	(subobj_editbox,	true);
+			iSubobj_deleteImage		(subobj_image,		true);
+			iSubobj_deleteCheckbox	(subobj_checkbox,	true);
+			iSubobj_deleteOption		(subobj_option,		true);
+			iSubobj_deleteRadio		(subobj_radio,		true);
 	}
 
 
@@ -740,7 +740,7 @@ void initialize(HACCEL* hAccelTable)
 			if (tbi)
 			{
 				memcpy(&bmp.bi, tbi, sizeof(bmp.bi));
-				lbi->biSizeImage		= iBmpComputeRowWidth(&bmp) * tnHeight;
+				lbi->biSizeImage		= iBmp_computeRowWidth(&bmp) * tnHeight;
 				lbi->biXPelsPerMeter	= 3270;
 				lbi->biYPelsPerMeter	= 3270;
 			}
@@ -1234,7 +1234,7 @@ void initialize(HACCEL* hAccelTable)
 				font->hdc					= CreateCompatibleDC(GetDC(GetDesktopWindow()));
 				font->hfont					= CreateFont(fontSource->_sizeUsedForCreateFont, 0, 0, 0, fontSource->_weight, (fontSource->_italics != 0), (fontSource->_underline != 0), false, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, FF_DONTCARE, fontSource->name.data);
 				SelectObject(font->hdc, font->hfont);
-				iDatumDuplicate(&font->name, fontSource->name.data, fontSource->name.length);
+				iDatum_duplicate(&font->name, fontSource->name.data, fontSource->name.length);
 				font->_size					= fontSource->_size;
 				font->_weight				= fontSource->_weight;
 				font->_italics				= fontSource->_italics;
@@ -1318,7 +1318,7 @@ void initialize(HACCEL* hAccelTable)
 			font->_sizeUsedForCreateFont	= -MulDiv(tnFontSize, GetDeviceCaps(GetDC(GetDesktopWindow()), LOGPIXELSY), 72);
 			font->hfont						= CreateFont(font->_sizeUsedForCreateFont, 0, 0, 0, tnFontWeight, (tnItalics != 0), (tnUnderline != 0), false, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, FF_DONTCARE, tcFontName);
 			SelectObject(font->hdc, font->hfont);
-			iDatumDuplicate(&font->name, (s8*)tcFontName, lnLength);
+			iDatum_duplicate(&font->name, (s8*)tcFontName, lnLength);
 			font->_size						= tnFontSize;
 			font->_weight					= tnFontWeight;
 			font->_italics					= tnItalics;
@@ -1504,7 +1504,7 @@ void initialize(HACCEL* hAccelTable)
 // EditChainManager processing
 //
 //////
-	bool iEditChainManagerDuplicate(SEditChainManager** root, SEditChainManager* ecmSource, bool tlIncludeUndoHistory)
+	bool iEditChainManager_duplicate(SEditChainManager** root, SEditChainManager* ecmSource, bool tlIncludeUndoHistory)
 	{
 		SEditChainManager*	ecmNew;
 		SEditChain*			ecSource;
@@ -1599,7 +1599,7 @@ _asm int 3;
 					// Duplicate its data
 					//////
 						ecNew->sourceCode = NULL;
-						iDatumDuplicate(ecNew->sourceCode, ecSource->sourceCode);
+						iDatum_duplicate(ecNew->sourceCode, ecSource->sourceCode);
 
 
 					//////////
@@ -1632,7 +1632,7 @@ _asm int 3;
 
 											// Clear, and then duplicate the info datum
 											memset(&eiNew->info, 0, sizeof(eiNew->info));
-											iDatumDuplicate(&eiNew->info, &eiSource->info);
+											iDatum_duplicate(&eiNew->info, &eiSource->info);
 
 										} else {
 											// Should not happen
@@ -1705,7 +1705,7 @@ _asm int 3;
 // Called to free the edit chain manager content, and optionally itself
 //
 //////
-	void iEditChainManagerFree(SEditChainManager** root, bool tlFreeSelf)
+	void iEditChainManager_free(SEditChainManager** root, bool tlFreeSelf)
 	{
 // TODO:  COMPLETELY UNTESTED.  BREAKPOINT AND EXAMINE.
 _asm int 3;
@@ -1716,13 +1716,13 @@ _asm int 3;
 			// Free undo history
 			//////
 				if ((*root)->undoHistory)
-					iEditChainManagerFree(&(*root)->undoHistory, true);
+					iEditChainManager_free(&(*root)->undoHistory, true);
 
 
 			//////////
 			// Free content
 			//////
-				iEditChainFree(&(*root)->ecFirst, true);
+				iEditChain_free(&(*root)->ecFirst, true);
 
 
 			//////////
@@ -1744,7 +1744,7 @@ _asm int 3;
 // Free the edit chain
 //
 //////
-	void iEditChainFree(SEditChain** root, bool tlFreeSelf)
+	void iEditChain_free(SEditChain** root, bool tlFreeSelf)
 	{
 		SEditChain*		chain;
 		SEditChain*		chainNext;
@@ -1768,13 +1768,13 @@ _asm int 3;
 				//////////
 				// Delete any extra information associated with this chain entry
 				//////
-					iExtraInfoFree(NULL, chain, &chain->extra_info, true);
+					iExtraInfo_free(NULL, chain, &chain->extra_info, true);
 
 
 				//////////
 				// Delete this item's components
 				//////
-					iDatumFree(chain->sourceCode, true);
+					iDatum_free(chain->sourceCode, true);
 
 
 				//////////
@@ -1871,7 +1871,7 @@ _asm int 3;
 // Called to free the extra info associated with this entry
 //
 //////
-	void iExtraInfoFree(SEditChainManager* ecm, SEditChain* ec, SExtraInfo** root, bool tlFreeSelf)
+	void iExtraInfo_free(SEditChainManager* ecm, SEditChain* ec, SExtraInfo** root, bool tlFreeSelf)
 	{
 		SExtraInfo*		ei;
 		SExtraInfo*		eiNext;
@@ -1904,7 +1904,7 @@ _asm int 3;
 					}
 
 					// Now, manually free the actual info block itself
-					iDatumFree(&ei->info, false);
+					iDatum_free(&ei->info, false);
 
 
 				//////////
@@ -1930,13 +1930,37 @@ _asm int 3;
 // Datum storage
 //
 //////
-	void iDatumDuplicate(SDatum* datum, s8* data, u32 dataLength)
+	SDatum* iDatum_allocate(s8* data, u32 dataLength)
+	{
+		SDatum* datumNew;
+
+
+		// Allocate our new datum
+		datumNew = (SDatum*)malloc(sizeof(SDatum));
+		if (datumNew)
+		{
+			// Initialize
+			memset(datumNew, 0, sizeof(SDatum));
+
+			// Populate
+			iDatum_duplicate(datumNew, data, dataLength);
+		}
+
+		// Indicate our status
+		return(datumNew);
+	}
+
+	void iDatum_duplicate(SDatum* datum, s8* data, u32 dataLength)
 	{
 		// Make sure our environment is sane
-		if (datum)
+		if (datum && data)
 		{
+			// We may need to set the length
+			if (dataLength == -1)
+				dataLength = strlen(data);
+
 			// Release anything that's already there
-			iiDatumFree(datum);
+			iiDatum_free(datum);
 
 			// Store the new data
 			datum->data = (s8*)malloc(dataLength);
@@ -1950,14 +1974,14 @@ _asm int 3;
 		}
 	}
 
-	void iDatumDuplicate(SDatum* datumDst, SDatum* datumSrc)
+	void iDatum_duplicate(SDatum* datumDst, SDatum* datumSrc)
 	{
 		if (datumDst && datumSrc && datumSrc->data)
-			iDatumDuplicate(datumDst, datumSrc->data, datumSrc->length);
+			iDatum_duplicate(datumDst, datumSrc->data, datumSrc->length);
 	}
 
 	// Returns -1, 0, or 1 (indicating left is less than, equal to, or greater than right)
-	s32 iDatumCompare(SDatum* datumLeft, SDatum* datumRight)
+	s32 iDatum_compare(SDatum* datumLeft, SDatum* datumRight)
 	{
 		s32 lnResult;
 
@@ -1974,12 +1998,12 @@ _asm int 3;
 		return(lnResult);
 	}
 
-	void iDatumFree(SDatum* datum, bool tlFreeSelf)
+	void iDatum_free(SDatum* datum, bool tlFreeSelf)
 	{
 		if (datum)
 		{
 			// Delete the content
-			iiDatumFree(datum);
+			iiDatum_free(datum);
 
 			// Delete self if need be
 			if (tlFreeSelf)
@@ -1987,7 +2011,7 @@ _asm int 3;
 		}
 	}
 
-	void iiDatumFree(SDatum* datum)
+	void iiDatum_free(SDatum* datum)
 	{
 		// Store the data
 		if (datum->data)

@@ -39,7 +39,7 @@
 //////////
 // Allocates a new structure
 //////
-	SBitmap* iBmpAllocate(void)
+	SBitmap* iBmp_allocate(void)
 	{
 		SBitmap* bmp;
 
@@ -64,7 +64,7 @@
 // Called to copy a bitmap, to duplicate it completely
 //
 //////
-	SBitmap* iBmpCopy(SBitmap* bmpSrc)
+	SBitmap* iBmp_copy(SBitmap* bmpSrc)
 	{
 		SBitmap*	bmp;
 		RECT		lrc;
@@ -72,18 +72,18 @@
 
 		// Make sure our environment is sane
 		bmp = NULL;
-		if (bmpSrc && iBmpValidate(bmpSrc))
+		if (bmpSrc && iBmp_validate(bmpSrc))
 		{
 			// Allocate a new structure
-			bmp = iBmpAllocate();
+			bmp = iBmp_allocate();
 			if (bmp)
 			{
 				// Create a bitmap of the target size
-				iBmpCreateBySize(bmp, bmpSrc->bi.biWidth, bmpSrc->bi.biHeight, bmpSrc->bi.biBitCount);
+				iBmp_createBySize(bmp, bmpSrc->bi.biWidth, bmpSrc->bi.biHeight, bmpSrc->bi.biBitCount);
 				
 				// Copy the bitmap over
 				SetRect(&lrc, 0, 0, bmpSrc->bi.biWidth, bmpSrc->bi.biHeight);
-				iBmpBitBlt(bmp, &lrc, bmpSrc);
+				iBmp_bitBlt(bmp, &lrc, bmpSrc);
 			}
 		}
 
@@ -103,7 +103,7 @@
 // Note:  It does not bitblt into the copy, but only creates a bmp the same size.
 //
 //////
-	SBitmap* iBmpVerifyCopyIsSameSize(SBitmap* bmpCopy, SBitmap* bmp)
+	SBitmap* iBmp_verifyCopyIsSameSize(SBitmap* bmpCopy, SBitmap* bmp)
 	{
 		SBitmap* bmpNew;
 
@@ -118,13 +118,13 @@
 					return(bmpCopy);		// They're the same
 
 				// If we get here, we need to delete the copy
-				iBmpDelete(bmpCopy, true);
+				iBmp_delete(bmpCopy, true);
 			}
 
 			// When we get here, we need to create a new one
-			bmpNew = iBmpAllocate();
+			bmpNew = iBmp_allocate();
 			if (bmpNew)
-				iBmpCreateBySize(bmpNew, bmp->bi.biWidth, bmp->bi.biHeight, bmp->bi.biBitCount);
+				iBmp_createBySize(bmpNew, bmp->bi.biWidth, bmp->bi.biHeight, bmp->bi.biBitCount);
 
 			// Indicate our success or failure
 			return(bmpNew);
@@ -143,7 +143,7 @@
 // Called to load a bitmap file that was loaded from disk, or simulated loaded from disk.
 //
 //////
-	SBitmap* iBmpRawLoad(cu8* bmpRawFileData)
+	SBitmap* iBmp_rawLoad(cu8* bmpRawFileData)
 	{
 		BITMAPFILEHEADER*	bh;
 		BITMAPINFOHEADER*	bi;
@@ -160,7 +160,7 @@
 		//////////
 		// Initialize the bitmap, and populate
 		//////
-			bmp = iBmpAllocate();
+			bmp = iBmp_allocate();
 			if (bmp)
 			{
 				// Copy to bmp
@@ -169,7 +169,7 @@
 				bmp->bd = (s8*)(bmpRawFileData + bh->bfOffBits);
 
 				// Compute the row width
-				bmp->rowWidth = iBmpComputeRowWidth(bmp);
+				bmp->rowWidth = iBmp_computeRowWidth(bmp);
 
 				// Convert to 32-bit if need be
 				if (bmp->bi.biBitCount == 24)
@@ -190,7 +190,7 @@
 // Performs basic tests on the bitmap to see if it appears to be a valid structure.
 //
 //////
-	bool iBmpValidate(SBitmap* bmp)
+	bool iBmp_validate(SBitmap* bmp)
 	{
 		// Planes must be 1
 		if (bmp->bi.biPlanes != 1)
@@ -205,7 +205,7 @@
 			return(false);
 
 		// Make sure the biSizeImage is accurate
-		iBmpComputeRowWidth(bmp);
+		iBmp_computeRowWidth(bmp);
 		if (bmp->rowWidth * bmp->bi.biHeight != bmp->bi.biSizeImage)
 			return(false);
 
@@ -226,7 +226,7 @@
 // the nearest DWORD.
 //
 //////
-	s32 iBmpComputeRowWidth(SBitmap* bmp)
+	s32 iBmp_computeRowWidth(SBitmap* bmp)
 	{
 		s32 lnWidth;
 
@@ -263,11 +263,11 @@
 // Called to create a basic bitmap by the indicated size, and initially populate it to white
 //
 //////
-	void iBmpCreateBySize(SBitmap* bmp, u32 width, u32 height, u32 tnBitCount)
+	void iBmp_createBySize(SBitmap* bmp, u32 width, u32 height, u32 tnBitCount)
 	{
 		// Populate the initial structure
-		if (tnBitCount == 24)		iBmpPopulateBitmapStructure(bmp, width, height, 24);
-		else						iBmpPopulateBitmapStructure(bmp, width, height, 32);
+		if (tnBitCount == 24)		iBmp_populateBitmapStructure(bmp, width, height, 24);
+		else						iBmp_populateBitmapStructure(bmp, width, height, 32);
 
 		// Create the HDC and DIB Section
 		bmp->hdc	= CreateCompatibleDC(GetDC(GetDesktopWindow()));
@@ -286,7 +286,7 @@
 // Called to create an empty 24-bit bitmap
 //
 //////
-	void iBmpPopulateBitmapStructure(SBitmap* bmp, u32 tnWidth, u32 tnHeight, u32 tnBitCount)
+	void iBmp_populateBitmapStructure(SBitmap* bmp, u32 tnWidth, u32 tnHeight, u32 tnBitCount)
 	{
 		memset(&bmp->bi, 0, sizeof(bmp->bi));
 		bmp->bi.biSize				= sizeof(bmp->bi);
@@ -297,7 +297,7 @@
 		bmp->bi.biBitCount			= (u16)((tnBitCount == 24 || tnBitCount == 32) ? tnBitCount : 32);
 		bmp->bi.biXPelsPerMeter		= 2835;	// Assume 72 dpi
 		bmp->bi.biYPelsPerMeter		= 2835;
-		iBmpComputeRowWidth(bmp);
+		iBmp_computeRowWidth(bmp);
 		bmp->bi.biSizeImage			= bmp->rowWidth * tnHeight;
 //////////
 // Note:  The compression formats can be:
@@ -317,7 +317,7 @@
 //        the container SBitmap being deleted, but not the bits and related data within.
 //
 //////
-	void iBmpDelete(SBitmap* bmp, bool tlFreeBits)
+	void iBmp_delete(SBitmap* bmp, bool tlFreeBits)
 	{
 		if (bmp)
 		{
@@ -342,9 +342,9 @@
 // Draw the indicated object
 //
 //////
-	void iBmpBitBltObject(SBitmap* bmpDst, SObject* objSrc, SBitmap* bmpSrc)
+	void iBmp_bitBltObject(SBitmap* bmpDst, SObject* objSrc, SBitmap* bmpSrc)
 	{
-		iBmpBitBlt(bmpDst, &objSrc->rc, bmpSrc);
+		iBmp_bitBlt(bmpDst, &objSrc->rc, bmpSrc);
 	}
 
 
@@ -355,9 +355,9 @@
 // Draws all except bits with the mask color rgb(222,22,222)
 //
 //////
-	void iBmpBitBltObjectMask(SBitmap* bmpDst, SObject* obj, SBitmap* bmpSrc)
+	void iBmp_bitBltObjectMask(SBitmap* bmpDst, SObject* obj, SBitmap* bmpSrc)
 	{
-		iBmpBitBltMask(bmpDst, &obj->rc, bmpSrc);
+		iBmp_bitBltMask(bmpDst, &obj->rc, bmpSrc);
 	}
 
 
@@ -368,7 +368,7 @@
 // Physically render the bitmap atop the bitmap
 //
 //////
-	u32 iBmpBitBlt(SBitmap* bmpDst, RECT* trc, SBitmap* bmpSrc)
+	u32 iBmp_bitBlt(SBitmap* bmpDst, RECT* trc, SBitmap* bmpSrc)
 	{
 		u32			lnPixelsRendered;
 		s32			lnY, lnX, lnYDst, lnXDst;
@@ -508,7 +508,7 @@
 // Physically render the bitmap atop the bitmap, with without the mask bits rgb(222,22,222)
 //
 //////
-	void iBmpBitBltMask(SBitmap* bmpDst, RECT* trc, SBitmap* bmpSrc)
+	void iBmp_bitBltMask(SBitmap* bmpDst, RECT* trc, SBitmap* bmpSrc)
 	{
 		s32			lnY, lnX, lnYDst, lnXDst;
 		f64			lfAlp, lfMalp;
@@ -640,7 +640,7 @@
 			}
 	}
 
-	void iBmpDrawPoint(SBitmap* bmp, s32 tnX, s32 tnY, SBgra color)
+	void iBmp_drawPoint(SBitmap* bmp, s32 tnX, s32 tnY, SBgra color)
 	{
 		SBgr*	lbgr;
 
@@ -658,7 +658,7 @@
 		}
 	}
 
-	void iBmpFillRect(SBitmap* bmp, RECT* rc, SBgra colorNW, SBgra colorNE, SBgra colorSW, SBgra colorSE, bool tlUseGradient)
+	void iBmp_fillRect(SBitmap* bmp, RECT* rc, SBgra colorNW, SBgra colorNE, SBgra colorSW, SBgra colorSE, bool tlUseGradient)
 	{
 		s32		lnY;
 		f32		lfRed, lfGrn, lfBlu, lfRedTo, lfGrnTo, lfBluTo, lfRedInc, lfGrnInc, lfBluInc, lfPercent, lfPercentInc, lfHeight, lfWidth;
@@ -701,16 +701,16 @@
 					//////////
 					// Draw this line with its gradient
 					//////
-						iBmpDrawHorizontalLineGradient(bmp, rc->left, rc->right - 1, lnY, lfRed, lfGrn, lfBlu, lfRedInc, lfGrnInc, lfBluInc);
+						iBmp_drawHorizontalLineGradient(bmp, rc->left, rc->right - 1, lnY, lfRed, lfGrn, lfBlu, lfRedInc, lfGrnInc, lfBluInc);
 
 				} else {
 					// Draw this line with the NW color
-					iBmpDrawHorizontalLine(bmp, rc->left, rc->right - 1, lnY, colorNW);
+					iBmp_drawHorizontalLine(bmp, rc->left, rc->right - 1, lnY, colorNW);
 				}
 			}
 	}
 
-	void iBmpFrameRect(SBitmap* bmp, RECT* rc, SBgra colorNW, SBgra colorNE, SBgra colorSW, SBgra colorSE, bool tlUseGradient)
+	void iBmp_frameRect(SBitmap* bmp, RECT* rc, SBgra colorNW, SBgra colorNE, SBgra colorSW, SBgra colorSE, bool tlUseGradient)
 	{
 		f32 lfRed, lfGrn, lfBlu, lfRedTo, lfGrnTo, lfBluTo, lfRedInc, lfGrnInc, lfBluInc, lfHeight, lfWidth;
 
@@ -735,7 +735,7 @@
 				lfBluInc	= (lfBluTo - lfBlu) / lfWidth;
 
 				// Draw it
-				iBmpDrawHorizontalLineGradient(bmp, rc->left, rc->right - 1, rc->top, lfRed, lfGrn, lfBlu, lfRedInc, lfGrnInc, lfBluInc);
+				iBmp_drawHorizontalLineGradient(bmp, rc->left, rc->right - 1, rc->top, lfRed, lfGrn, lfBlu, lfRedInc, lfGrnInc, lfBluInc);
 
 
 			//////////
@@ -752,7 +752,7 @@
 				lfBluInc	= (lfBluTo - lfBlu) / lfWidth;
 
 				// Draw it
-				iBmpDrawHorizontalLineGradient(bmp, rc->left, rc->right - 1, rc->bottom - 1, lfRed, lfGrn, lfBlu, lfRedInc, lfGrnInc, lfBluInc);
+				iBmp_drawHorizontalLineGradient(bmp, rc->left, rc->right - 1, rc->bottom - 1, lfRed, lfGrn, lfBlu, lfRedInc, lfGrnInc, lfBluInc);
 
 
 			//////////
@@ -769,7 +769,7 @@
 				lfBluInc	= (lfBluTo - lfBlu) / lfWidth;
 
 				// Draw it
-				iBmpDrawVerticalLineGradient(bmp, rc->top, rc->bottom - 1, rc->left, lfRed, lfGrn, lfBlu, lfRedInc, lfGrnInc, lfBluInc);
+				iBmp_drawVerticalLineGradient(bmp, rc->top, rc->bottom - 1, rc->left, lfRed, lfGrn, lfBlu, lfRedInc, lfGrnInc, lfBluInc);
 
 
 			//////////
@@ -786,18 +786,18 @@
 				lfBluInc	= (lfBluTo - lfBlu) / lfWidth;
 
 				// Draw it
-				iBmpDrawVerticalLineGradient(bmp, rc->top, rc->bottom - 1, rc->right - 1, lfRed, lfGrn, lfBlu, lfRedInc, lfGrnInc, lfBluInc);
+				iBmp_drawVerticalLineGradient(bmp, rc->top, rc->bottom - 1, rc->right - 1, lfRed, lfGrn, lfBlu, lfRedInc, lfGrnInc, lfBluInc);
 
 		} else {
 			// Just draw in a solid color
-			iBmpDrawHorizontalLine(bmp, rc->left, rc->right - 1, rc->top, colorNW);
-			iBmpDrawHorizontalLine(bmp, rc->left, rc->right - 1, rc->bottom - 1, colorNW);
-			iBmpDrawVerticalLine(bmp, rc->top, rc->bottom - 1, rc->left, colorNW);
-			iBmpDrawVerticalLine(bmp, rc->top, rc->bottom - 1, rc->right - 1, colorNW);
+			iBmp_drawHorizontalLine(bmp, rc->left, rc->right - 1, rc->top, colorNW);
+			iBmp_drawHorizontalLine(bmp, rc->left, rc->right - 1, rc->bottom - 1, colorNW);
+			iBmp_drawVerticalLine(bmp, rc->top, rc->bottom - 1, rc->left, colorNW);
+			iBmp_drawVerticalLine(bmp, rc->top, rc->bottom - 1, rc->right - 1, colorNW);
 		}
 	}
 
-	void iBmpDrawHorizontalLine(SBitmap* bmp, s32 tnX1, s32 tnX2, s32 tnY, SBgra color)
+	void iBmp_drawHorizontalLine(SBitmap* bmp, s32 tnX1, s32 tnX2, s32 tnY, SBgra color)
 	{
 		s32		lnX;
 		SBgr*	lbgr;
@@ -846,7 +846,7 @@
 		}
 	}
 
-	void iBmpDrawVerticalLine(SBitmap* bmp, s32 tnY1, s32 tnY2, s32 tnX, SBgra color)
+	void iBmp_drawVerticalLine(SBitmap* bmp, s32 tnY1, s32 tnY2, s32 tnX, SBgra color)
 	{
 		s32		lnY;
 		SBgr*	lbgr;
@@ -903,7 +903,7 @@
 // Gradient line algorithms
 //
 //////
-	void iBmpDrawHorizontalLineGradient(SBitmap* bmp, s32 tnX1, s32 tnX2, s32 tnY, f32 tfRed, f32 tfGrn, f32 tfBlu, f32 tfRedInc, f32 tfGrnInc, f32 tfBluInc)
+	void iBmp_drawHorizontalLineGradient(SBitmap* bmp, s32 tnX1, s32 tnX2, s32 tnY, f32 tfRed, f32 tfGrn, f32 tfBlu, f32 tfRedInc, f32 tfGrnInc, f32 tfBluInc)
 	{
 		s32		lnX;
 		SBgr*	lbgr;
@@ -952,7 +952,7 @@
 		}
 	}
 
-	void iBmpDrawVerticalLineGradient(SBitmap* bmp, s32 tnY1, s32 tnY2, s32 tnX, f32 tfRed, f32 tfGrn, f32 tfBlu, f32 tfRedInc, f32 tfGrnInc, f32 tfBluInc)
+	void iBmp_drawVerticalLineGradient(SBitmap* bmp, s32 tnY1, s32 tnY2, s32 tnX, f32 tfRed, f32 tfGrn, f32 tfBlu, f32 tfRedInc, f32 tfGrnInc, f32 tfBluInc)
 	{
 		s32		lnY;
 		SBgr*	lbgr;
@@ -1012,7 +1012,7 @@
 // Note:  See https://github.com/RickCHodgin/libsf (in vvm\core\).
 //
 //////
-	u32 iBmpScale(SBitmap* bmpDst, SBitmap* bmpSrc)
+	u32 iBmp_scale(SBitmap* bmpDst, SBitmap* bmpSrc)
 	{
 		u32		lnResult;
 		f32		lfVertical, lfHorizontal;
@@ -1037,7 +1037,7 @@
 					} else {
 						// Do a bitBlt to translate bit counts
 						SetRect(&lrc, 0, 0, bmpDst->bi.biWidth, bmpDst->bi.biHeight);
-						iBmpBitBlt(bmpDst, &lrc, bmpSrc);
+						iBmp_bitBlt(bmpDst, &lrc, bmpSrc);
 					}
 					// Indicate success
 					lnResult = 1;
@@ -1046,7 +1046,7 @@
 					// We need to scale
 					lfVertical		= (f32)bmpSrc->bi.biHeight / (f32)bmpDst->bi.biHeight;
 					lfHorizontal	= (f32)bmpSrc->bi.biWidth  / (f32)bmpDst->bi.biWidth;
-					lnResult		= iiBmpScale_Process(bmpDst, bmpSrc, lfVertical, lfHorizontal);
+					lnResult		= iiBmp_scale_Process(bmpDst, bmpSrc, lfVertical, lfHorizontal);
 				}
 			}
 		}
@@ -1073,7 +1073,7 @@
 //		-7		- Unable to write to output file
 //
 //////
-	u32 iiBmpScale_Process(SBitmap* bmpDst, SBitmap* bmpSrc, f32 tfVerticalScaler, f32 tfHorizontalScaler)
+	u32 iiBmp_scale_Process(SBitmap* bmpDst, SBitmap* bmpSrc, f32 tfVerticalScaler, f32 tfHorizontalScaler)
 	{
 		s32				lnY, lnX;
 		SBitmapProcess	bp;
@@ -1102,7 +1102,7 @@
 				bp.lrx	= bp.ulx + bp.ratioH;
 
 				// Get all the color information for this potentially spanned pixel
-				iiBmpScale_processPixels(&bp);
+				iiBmp_scale_processPixels(&bp);
 
 				// Store the color
 				if (bmpDst->bi.biBitCount == 24)
@@ -1170,17 +1170,17 @@
 //		9	- lower-right	(optional,	spans at most one pixel)
 //
 //////
-	void iiBmpScale_processPixels(SBitmapProcess* bp)
+	void iiBmp_scale_processPixels(SBitmapProcess* bp)
 	{
 		u32		lnI;
 		f32		lfRed, lfGrn, lfBlu, lfAlp, lfAreaAccumulator;
 
 
 		// Raise the flags for which portions are valid / required
-		bp->spans2H		= (iiBmpScale_processGetIntegersBetween(bp->ulx, bp->lrx) >= 1);		// It occupies at least two pixels horizontally (itself and one more)
-		bp->spans3H		= (iiBmpScale_processGetIntegersBetween(bp->ulx, bp->lrx) >= 2);		// It occupies at least three pixels horizontally (itself, at least one in the middle, and one at the right)
-		bp->spans2V		= (iiBmpScale_processGetIntegersBetween(bp->uly, bp->lry) >= 1);		// It occupies at least two pixels vertically (itself and one more)
-		bp->spans3V		= (iiBmpScale_processGetIntegersBetween(bp->uly, bp->lry) >= 2);		// It occupies at least three pixels vertically (itself, at least one in the middle, and one at the right)
+		bp->spans2H		= (iiBmp_scale_processGetIntegersBetween(bp->ulx, bp->lrx) >= 1);		// It occupies at least two pixels horizontally (itself and one more)
+		bp->spans3H		= (iiBmp_scale_processGetIntegersBetween(bp->ulx, bp->lrx) >= 2);		// It occupies at least three pixels horizontally (itself, at least one in the middle, and one at the right)
+		bp->spans2V		= (iiBmp_scale_processGetIntegersBetween(bp->uly, bp->lry) >= 1);		// It occupies at least two pixels vertically (itself and one more)
+		bp->spans3V		= (iiBmp_scale_processGetIntegersBetween(bp->uly, bp->lry) >= 2);		// It occupies at least three pixels vertically (itself, at least one in the middle, and one at the right)
 
 		// Reset the point count
 		bp->count		= 0;
@@ -1205,62 +1205,62 @@
 			//////////
 			// 1 - upper-left (always, spans at most one pixel)
 			//////
-				iiBmpScale_processSpannedPixel1(bp);
+				iiBmp_scale_processSpannedPixel1(bp);
 
 			//////////
 			// 2 - upper-middle (optional, spans at most multiple partial or full pixels, but only if 1, 2 and 3 exist)
 			//////
 				if (bp->spans3H)
-					iiBmpScale_processSpannedPixel2(bp);
+					iiBmp_scale_processSpannedPixel2(bp);
 
 
 			//////////
 			// 3 - upper-right (optional, spans at most one pixel, but only if 1 and 3 exist (as 1 and 2))
 			//////
 				if (bp->spans2H || bp->spans3H)
-					iiBmpScale_processSpannedPixel3(bp);
+					iiBmp_scale_processSpannedPixel3(bp);
 
 
 			//////////
 			// 4 - middle-left (optional, spans at most multiple partial or full pixels)
 			//////
 				if (bp->spans3V && bp->spans2V)
-					iiBmpScale_processSpannedPixel4(bp);
+					iiBmp_scale_processSpannedPixel4(bp);
 
 
 			//////////
 			// 5 - middle-middle (optional, can span multiple partial or full pixels)
 			//////
 				if (bp->spans3V && bp->spans3H)
-					iiBmpScale_processSpannedPixel5(bp);
+					iiBmp_scale_processSpannedPixel5(bp);
 
 
 			//////////
 			// 6 - middle-right (optional, spans at most multiple partial or full pixels)
 			//////
 				if (bp->spans3V && (bp->spans2H || bp->spans3H))
-					iiBmpScale_processSpannedPixel6(bp);
+					iiBmp_scale_processSpannedPixel6(bp);
 
 
 			//////////
 			// 7 - lower-left (optional, spans at most one pixel)
 			//////
 				if (bp->spans2V)
-					iiBmpScale_processSpannedPixel7(bp);
+					iiBmp_scale_processSpannedPixel7(bp);
 
 
 			//////////
 			// 8 - lower-middle (optional, spans at most multiple partial or full pixels)
 			//////
 				if (bp->spans2V && bp->spans3H)
-					iiBmpScale_processSpannedPixel8(bp);
+					iiBmp_scale_processSpannedPixel8(bp);
 
 
 			//////////
 			// 9 - lower-right (optional, spans at most one pixel)
 			//////
 				if (bp->spans2V && (bp->spans2H || bp->spans3H))
-					iiBmpScale_processSpannedPixel9(bp);
+					iiBmp_scale_processSpannedPixel9(bp);
 
 
 		//////////
@@ -1302,7 +1302,7 @@
 // Upper left pixels is ALWAYS computed. It may be the ONLY one computed, but it is always computed.
 //
 //////
-	void iiBmpScale_processSpannedPixel1(SBitmapProcess* bp)
+	void iiBmp_scale_processSpannedPixel1(SBitmapProcess* bp)
 	{
 		// Store left- and right-sides for this spanned pixel
 		bp->left			= (s32)min(bp->ulx,			bp->src->bi.biWidth - 1);
@@ -1356,7 +1356,7 @@
 // It is known when this function is called that there is at least one, full, middle pixel
 //
 //////
-	void iiBmpScale_processSpannedPixel2(SBitmapProcess* bp)
+	void iiBmp_scale_processSpannedPixel2(SBitmapProcess* bp)
 	{
 		s32 lnPixel;
 
@@ -1396,7 +1396,7 @@
 // It is known when this function is called that there is at least a second row
 //
 //////
-	void iiBmpScale_processSpannedPixel3(SBitmapProcess* bp)
+	void iiBmp_scale_processSpannedPixel3(SBitmapProcess* bp)
 	{
 		// Find out where this upper-left pixel falls
 		bp->widthRight = bp->lrx - (f32)bp->right;		// It spans from the start of the right-most pixel to wherever it falls therein
@@ -1444,7 +1444,7 @@
 // 			_asm nop;
 // 	}
 
-	void iiBmpScale_processSpannedPixel4(SBitmapProcess* bp)
+	void iiBmp_scale_processSpannedPixel4(SBitmapProcess* bp)
 	{
 		s32 lnPixelY;
 
@@ -1485,7 +1485,7 @@
 // one pixel in the middle
 //
 //////
-	void iiBmpScale_processSpannedPixel5(SBitmapProcess* bp)
+	void iiBmp_scale_processSpannedPixel5(SBitmapProcess* bp)
 	{
 		s32 lnPixelY, lnPixelX;
 
@@ -1529,7 +1529,7 @@
 // It is known when this function is called that there is at least a second row, and a right pixel
 //
 //////
-	void iiBmpScale_processSpannedPixel6(SBitmapProcess* bp)
+	void iiBmp_scale_processSpannedPixel6(SBitmapProcess* bp)
 	{
 		s32 lnPixelY;
 
@@ -1569,7 +1569,7 @@
 // It is known when this function is called that there is at least a second row
 //
 //////
-	void iiBmpScale_processSpannedPixel7(SBitmapProcess* bp)
+	void iiBmp_scale_processSpannedPixel7(SBitmapProcess* bp)
 	{
 		// Compute the area
 		bp->height	= bp->lry - (f32)((s32)bp->lry);
@@ -1607,7 +1607,7 @@
 // pixel in the middle
 //
 //////
-	void iiBmpScale_processSpannedPixel8(SBitmapProcess* bp)
+	void iiBmp_scale_processSpannedPixel8(SBitmapProcess* bp)
 	{
 		s32 lnPixelX;
 
@@ -1647,7 +1647,7 @@
 // It is known when this function is called that there is at least a second row, and a right pixel
 //
 //////
-	void iiBmpScale_processSpannedPixel9(SBitmapProcess* bp)
+	void iiBmp_scale_processSpannedPixel9(SBitmapProcess* bp)
 	{
 		// Compute the area
 		bp->area = bp->widthRight * bp->height;
@@ -1686,7 +1686,7 @@
 // 1 and 2.
 //
 //////
-	u32 iiBmpScale_processGetIntegersBetween(f32 p1, f32 p2)
+	u32 iiBmp_scale_processGetIntegersBetween(f32 p1, f32 p2)
 	{
 		u32 lfMin, lfMax;
 

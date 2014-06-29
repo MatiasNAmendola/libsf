@@ -232,7 +232,7 @@ struct STranslate
 struct SExtraInfo
 {
 	SExtraInfo* next;													// Next extra info item in chain (if any)
-
+	u32			use_identifier;											// A registered identifier with the system for this extra info block
 	u32			type;													// Application defined type, identifies what's stored in this.info.data
 	SDatum		info;													// The extra info
 
@@ -268,6 +268,7 @@ struct SEditChain
 	u32			sourceCodePopulated;									// The actual populated length of d (d is allocated in blocks to allow for minor edits without constantly reallocating)
 
 	// Compiler information (see compiler.cpp)
+	bool		forceRecompile;											// A flag that if set forces a recompile of this line
 	SCompiler*	compilerInfo;											// Information about the last time this line was compiled
 
 	// General purpose extra data
@@ -311,6 +312,7 @@ struct SEditChainManager
 	//////////
 	// For compiled programs
 	//////
+		SFunction*		pseudoFunction;									// If the function has no head, we point here to create a bogus one
 		SFunction*		firstFunction;									// The first function in the code block
 
 
@@ -422,7 +424,7 @@ struct SObject
 	bool		isDirty;												// Is set if this or any child object needs re-rendered
 
 	// Data unique to this object
-	void*		obj_data;												// Varies by type, see SObject* structures below
+	void*		sub_obj;												// Varies by type, see SObject* structures below
 
 	// Related position in the member hierarchy
 	SVariable*			firstProperty;									// Runtime-added user-defined property
@@ -454,13 +456,13 @@ struct SObject
 		SBitmap*	bmpScaled;											// The bmp scaled into RC's size
 };
 
-struct SObjectEmpty
+struct SSubObjEmpty
 {
 	// _OBJECT_TYPE_EMPTY
 	SObject*	parent;													// parent object this object belongs to
 };
 
-struct SObjectForm
+struct SSubObjForm
 {
 	// _OBJECT_TYPE_FORM
 	SObject*	parent;													// parent object this object belongs to
@@ -484,7 +486,7 @@ struct SObjectForm
 	bool		(*deactivate)						(SObject* o);		// Called when deactivated
 };
 
-struct SObjectSubform
+struct SSubObjSubform
 {
 	// _OBJECT_TYPE_SUBFORM
 	SObject*	parent;													// parent object this object belongs to
@@ -508,7 +510,7 @@ struct SObjectSubform
 	bool		(*deactivate)						(SObject* o);		// Called when deactivated
 };
 
-struct SObjectLabel
+struct SSubObjLabel
 {
 	// _OBJECT_TYPE_LABEL
 	SObject*	parent;													// parent object this object belongs to
@@ -534,7 +536,7 @@ struct SObjectLabel
 	bool		selected;												// Is this item selected?
 };
 
-struct SObjectTextbox
+struct SSubObjTextbox
 {
 	// _OBJECT_TYPE_TEXTBOX
 	SObject*	parent;													// parent object this object belongs to
@@ -572,7 +574,7 @@ struct SObjectTextbox
 	bool		(*programmaticChange)				(SObject* o);		// Called when the data changes
 };
 
-struct SObjectButton
+struct SSubObjButton
 {
 	// _OBJECT_TYPE_BUTTON
 	SObject*	parent;													// parent object this object belongs to
@@ -596,7 +598,7 @@ struct SObjectButton
 	bool		(*programmaticChange)				(SObject* o);		// Called when the data changes
 };
 
-struct SObjectEditbox
+struct SSubObjEditbox
 {
 	// _OBJECT_TYPE_EDITBOX
 	SObject*	parent;													// parent object this object belongs to
@@ -631,7 +633,7 @@ struct SObjectEditbox
 	bool		(*programmaticChange)				(SObject* o);		// Called when the data changes
 };
 
-struct SObjectImage
+struct SSubObjImage
 {
 	// _OBJECT_TYPE_IMAGE
 	SObject*	parent;													// parent object this object belongs to
@@ -647,7 +649,7 @@ struct SObjectImage
 	bool		(*programmaticChange)				(SObject* o);		// Called when the data changes
 };
 
-struct SObjectCheckbox
+struct SSubObjCheckbox
 {
 	// _OBJECT_TYPE_CHECKBOX
 	SObject*	parent;													// parent object this object belongs to
@@ -676,7 +678,7 @@ struct SObjectCheckbox
 	bool		(*programmaticChange)				(SObject* o);		// Called when the data changes
 };
 
-struct SObjectOption
+struct SSubObjOption
 {
 	// _OBJECT_TYPE_OPTION
 	SObject*	parent;													// parent object this object belongs to
@@ -701,7 +703,7 @@ struct SObjectOption
 	bool		(*programmaticChange)				(SObject* o);		// Called when the data changes
 };
 
-struct SObjectRadio
+struct SSubObjRadio
 {
 	// _OBJECT_TYPE_RADIO
 	SObject*	parent;													// parent object this object belongs to

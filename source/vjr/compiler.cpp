@@ -40,33 +40,40 @@ struct SStartEnd;
 struct SMasterList;
 struct SComp;
 struct SCompCallback;
-struct SSubInstr;
+struct SNode;
 struct SOp;
 struct SAsciiCompSearcher;
 struct SStartEndCallback;
 struct SLL;
 struct SLLCallback;
 struct SVariable;
+struct SCompileContext;
+struct SCompileNote;
 
 //////////
 //
 // Forward declarations for parsing VXB-- lines and components
 //
 //////////
-	u32						compile_Vxbmm								(SEditChainManager* codeBlock, bool tlEditAndContinue);
-	void					iiTranslateSOpsToSubInstr					(SEditChain* line, SSubInstr** siRoot);
- 	SComp*					iTranslateSourceLineToSComps				(SAsciiCompSearcher* tsComps, SEditChain* line);
- 	bool					iTranslateSCompsToOthers					(SAsciiCompSearcher* tsComps, SEditChain* line);
-	s32						iTranslateSCompsToOthers_test				(s8* tcHaystack, s8* tcNeedle, s32 tnLength);
-	bool					iFindFirstOccurrenceOfAsciiCharacter		(s8* tcHaystack, u32 tnHaystackLength, s8 tcNeedle, u32* tnPosition);
-	SComp*					iFindNextSCompBy_iCode						(SComp* comp, u32 tniCode, SComp** compLastScanned);
-	SComp*					iSkipPastSComp_iCode						(SComp* comp, u32 tniCode);
-	u32						iCombine2SComps								(SEditChain* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2,                     u32 tniCodeCombined);
-	u32						iCombine3SComps								(SEditChain* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2, u32 tniCodeNeedle3, u32 tniCodeCombined);
-	u32						iCombineAllBetweenSComps					(SEditChain* line, u32 tniCodeNeedle,                                          u32 tniCodeCombined);
-	u32						iCombineAllAfterSComp						(SEditChain* line, u32 tniCodeNeedle);
-	u32						iRemoveExtraneousWhitespaceSComps			(SEditChain* line, u32 tniCodeWhitespace);
-	void					iTranslateSCompsToNaturalGroupings			(SEditChain* line);
+	u32						compile_Vxbmm								(SEditChainManager* codeBlock, SCompileContext* ccData, bool tlEditAndContinue);
+
+	SFunction*				iiComps_xlatToFunction						(SEditChainManager* codeBlock, SEditChain* line);
+	bool					iiComps_xlatToNodes							(SEditChain* line, SCompiler* compiler);
+	SNode*					iiComps_xlatToNodes_parenthesis_left		(SNode** root, SNode* active, SComp* comp);
+	SNode*					iiComps_xlatToNodes_parenthesis_right		(SNode** root, SNode* active, SComp* comp);
+
+ 	SComp*					iComps_translateSourceLineTo				(SAsciiCompSearcher* tsComps, SEditChain* line);
+ 	bool					iComps_translateToOthers					(SAsciiCompSearcher* tsComps, SEditChain* line);
+	s32						iComps_translateToOthers_test				(s8* tcHaystack, s8* tcNeedle, s32 tnLength);
+	SComp*					iComps_findNextBy_iCode						(SComp* comp, u32 tniCode, SComp** compLastScanned);
+	SComp*					iComps_skipPast_iCode						(SComp* comp, u32 tniCode);
+	u32						iComps_combine2								(SEditChain* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2,                     u32 tniCodeCombined);
+	u32						iComps_combine3								(SEditChain* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2, u32 tniCodeNeedle3, u32 tniCodeCombined);
+	u32						iComps_CombineAllBetween					(SEditChain* line, u32 tniCodeNeedle,                                          u32 tniCodeCombined);
+	u32						iComps_combineAllAfter						(SEditChain* line, u32 tniCodeNeedle);
+	u32						iComps_removeWhitespaces					(SEditChain* line);
+	void					iComps_removeStartEndComments				(SEditChain* line);
+	void					iComps_xlatNaturalGroupings					(SEditChain* line);
 
 //////////
 // Jun.25.2014 -- This block of code was originally created before I began working on
@@ -74,17 +81,18 @@ struct SVariable;
 // refactored or deleted.
 // BEGIN
 //////
-	void					iiTranslateSCompsToSubInstr					(SEditChain* line);
-	SComp*					iiTranslateSCompsToSubInstr_findInmostExpression	(SSubInstr* si, SEditChain* line);
-	void					iiTranslateSCompsToSubInstr_findStartOfComponent	(SComp* compRoot, SOp* op);
-	void					iiTranslateSCompsToSubInstr_findFullComponent		(SComp* compRoot, SOp* op);
-	bool					iiTranslateSCompsToSubInstr_isEqualAssignment		(SEditChain* line);
-	s32						iiCharactersBetweenSComps							(SComp* compLeft, SComp* compRight);
+	void					iiComps_xlatToSubInstr						(SEditChain* line);
+	SComp*					iiComps_xlatToSubInstr_findInmostExpression	(SNode* si, SEditChain* line);
+	void					iiComps_xlatToSubInstr_findStartOfComponent	(SComp* compRoot, SOp* op);
+	void					iiComps_xlatToSubInstr_findFullComponent	(SComp* compRoot, SOp* op);
+	bool					iiComps_xlatToSubInstr_isEqualAssignment	(SEditChain* line);
+	s32						iiComps_charactersBetween					(SComp* compLeft, SComp* compRight);
 //////
 // END
 //////////
 
 	u32						iBreakoutAsciiTextDataIntoLines_ScanLine	(s8* tcData, u32 tnMaxLength, u32* tnLength, u32* tnWhitespaces);
+	bool					iFindFirstOccurrenceOfAsciiCharacter		(s8* tcHaystack, u32 tnHaystackLength, s8 tcNeedle, u32* tnPosition);
 	u32						iGetNextUid									(void);
 	void*					iSEChain_prepend							(SStartEnd* ptrSE, u32 tnUniqueId, u32 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool* tlResult);
 	void*					iSEChain_append								(SStartEnd* ptrSE, u32 tnUniqueId, u32 tnUniqueIdExtra, u32 tnSize, u32 tnBlockSizeIfNewBlockNeeded, bool* tlResult);
@@ -93,14 +101,14 @@ struct SVariable;
 	u32						iSkipToCarriageReturnLineFeed				(s8* tcData, u32 tnMaxLength, u32* tnCRLF_Length);
 	void					iSEChain_appendMasterList					(SStartEnd* ptrSE, SMasterList* ptrNew, u32 tnHint, u32 tnBlockSizeIfNewBlockNeeded);
 	bool					iSEChain_allocateAdditionalMasterSlots		(SStartEnd* ptrSE, u32 tnBlockSize);
-	s32						iTranslateToSCompsTest						(s8* tcHaystack, s8* tcNeedle, s32 tnLength);
-	bool					iioss_translateSCompsToOthersCallback	(SStartEndCallback* cb);
+	s32						iTranslateToCompsTest						(s8* tcHaystack, s8* tcNeedle, s32 tnLength);
+	bool					iioss_translateCompsToOthersCallback		(SStartEndCallback* cb);
 	void*					iSEChain_searchByCallback					(SStartEnd* ptrSE, SStartEndCallback* cb);
-	void					iiTranslateSCompsToOthersCallback__insertCompByCompCallback		(SComp* compRef, SComp* compNew, bool tlInsertAfter);
-	void					iiTranslateSCompsToOthersCallback__insertCompByParamsCallback	(SComp* compRef, SEditChain* line, u32 tniCode, u32 tnStart, s32 tnLength, bool tlInsertAfter);
-	void					iiTranslateSCompsToOthersCallback__deleteCompsCallback			(SComp* comp, SEditChain* line);
-	SComp*					iiTranslateSCompsToOthersCallback__cloneCompsCallback			(SComp* comp, SEditChain* line);
-	SComp*					iiTranslateSCompsToOthersCallback__mergeCompsCallback			(SComp* comp, SEditChain* line, u32 tnCount, u32 tniCodeNew);
+	void					iiComps_xlatToOthersCallback__insertCompByCompCallback		(SComp* compRef, SComp* compNew, bool tlInsertAfter);
+	void					iiComps_xlatToOthersCallback__insertCompByParamsCallback	(SComp* compRef, SEditChain* line, u32 tniCode, u32 tnStart, s32 tnLength, bool tlInsertAfter);
+	void					iiComps_xlatToOthersCallback__deleteCompsCallback			(SComp* comp, SEditChain* line);
+	SComp*					iiComps_xlatToOthersCallback__cloneCompsCallback			(SComp* comp, SEditChain* line);
+	SComp*					iiComps_xlatToOthersCallback__mergeCompsCallback			(SComp* comp, SEditChain* line, u32 tnCount, u32 tniCodeNew);
 	void					iSEChain_deleteFrom							(SStartEnd* ptrSE, void* ptrCaller, bool tlDeletePointers);
 	SLL*					iSEChain_completelyMigrateSLLByPtr			(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, SLL* ptr, u32 tnHint, u32 tnBlockSize);
 	SLL*					iSEChain_completelyMigrateSLLByNum			(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, u32 lnSrcNum, u32 tnHint, u32 tnBlockSize);
@@ -109,7 +117,8 @@ struct SVariable;
 	// Linked list functions
 	SLL*					iLl_appendNode								(SLL** root, SLL* nodeHint, SLL* nodeNext, SLL* nodePrev, u32 tnUniqueId, u32 tnSize);
 	SLL*					iLl_createNode								(                           SLL* nodePrev, SLL* nodeNext, u32 tnUniqueId, u32 tnSize);
-	void					iLl_deleteNode								(SLL* node);
+	SLL*					iLl_appendNodeAtEnd							(SLL** root, u32 tnSize);
+	SLL*					iLl_deleteNode								(SLL* node, bool tlDeleteSelf);
 	void					iLl_deleteNodesWithCallback					(SLLCallback* cb);
 	bool					iLl_insertNode								(SLL* node, SLL* nodeRef, bool tlAfter);
 	void					iLl_orphanizeNode							(SLL* node);
@@ -119,6 +128,40 @@ struct SVariable;
 	void					iLl_iterateBackwardViaCallback				(SLLCallback* cb);
 	SLL*					iLl_getFirstNode							(SLL* node);
 	SLL*					iLl_getLastNode								(SLL* node);
+
+	// Node functions
+	SNode*					iNode_create								(SNode** root, SNode* hint, u32 tnDirection, SNode* parent, SNode* prev, SNode* next, SNode* left, SNode* right);
+	SNode*					iNode_insertBetween							(SNode** root, SNode* node1, SNode* node2, u32 tnNode1Direction, u32 tnNode2Direction);
+	void					iNode_politelyDeleteAll						(SNode** root, bool tlDeleteSelf, bool tlTraversePrev, bool tlTraverseNext, bool tlTraverseLeft, bool tlTraverseRight);
+
+	// Function functions (LOL)
+	SFunction*				iFunction_create							(s8* tcFuncName);
+	SVariable*				iFunction_addVariable_scoped				(SFunction* func);
+	void					iFunction_politelyDelete					(SFunction* func, bool tlDeleteSelf);
+
+	// Variable functions
+	SVariable*				iVariable_create							(void);
+	void					iVariable_delete							(SVariable* var, bool tlDeleteSelf);
+	void					iVariable_politelyDeleteChain				(SVariable** root);
+	void					iVariable_politelyDeleteChain_callback		(SLLCallback* cb);
+
+	// Op functions
+	bool					iOp_setNull									(SOp* op);
+	bool					iOp_setVariable_param						(SOp* op, SVariable* var, bool isOpAllocated);
+	bool					iOp_setVariable_local						(SOp* op, SVariable* var, bool isOpAllocated);
+	bool					iOp_setVariable_scoped						(SOp* op, SVariable* var, bool isOpAllocated);
+	bool					iOp_setVariable_return						(SOp* op, SVariable* var, bool isOpAllocated);
+	void					iOp_politelyDelete							(SOp* op, bool tlDeleteSelf);
+
+	// Error functions
+	void					iComp_appendError							(SComp* comp, u32 tnErrorNum, s8* tcMessage);
+
+	// Line functions
+	void					iLine_appendError							(SEditChain* line, u32 tnErrorNum, s8* tcMessage, u32 tnStartColumn, u32 tnLength);
+
+	// Compiler note functions
+	SCompileNote*			iCompileNote_create							(u32 tnStart, u32 tnEnd, u32 tnNumber, s8* tcMessage);
+	SCompileNote*			iCompileNote_appendMessage					(SCompileNote** noteRoot, u32 tnStartColumn, u32 tnEndColumn, u32 tnNumber, s8* tcMessage);
 
 
 
@@ -223,31 +266,78 @@ struct SVariable;
 		SVariable*		params;												// The first parameter in the function
 		SVariable*		locals;												// The first local variable declared
 		SVariable*		returns;											// The first return variable declared
-		SVariable*		temps;												// The first temporary variable needed by the function
+		SVariable*		scoped;												// The first scoped/temporary variable needed by the function
+		SFunction*		firstAdhoc;											// First ADHOC function contained within this function
 
 		// Where the function began in source code as of last compile
-		SEditChain*		funcFirst;											// First line of the function
+		SEditChain*		firstLine;											// First line of the function
+		SEditChain*		lastLine;											// Last line of the function
+	};
+
+	struct SCompileContext
+	{
+		// Counters
+		u32			sourceLines;
+		u32			blankLines;
+		u32			commentLines;
+
+		u32			functions;
+		u32			params;
+		u32			locals;
+		u32			scoped;
+		u32			returns;
+
+		u32			errors;
+		u32			warnings;
 	};
 
 	struct SVariable
 	{
-		SVariable*	next;													// If part of a chain, then points to the next item, otherwise null
-		SDatum		name;													// Name of this variable
+		SVariable*	next;
+		SLL*		ll;
 		u32			uid;													// Names may change during edit-and-continue, but the references they possess remain the same
 		SVariable*	indirect;												// If non-NULL, this variable is an indirect reference to an underlying variable
 
+		// Variable data
+		SDatum		name;													// Name of this variable
+
 		// Variable content based on type
-		u32			type;													// Variable type (see _VARIABLE_TYPE_* constants)
+		u32			var_type;												// Variable type (see _VAR_TYPE_* constants)
+		bool		isVarAllocated;											// If true, this variable was allocated. If false, it references an object allocated elsewhere.
 		union {
-			SVariable*		indirect;										// If the lower-bit of type is set (BIT0=1), it is an indirect reference to another variable
 			SObject*		obj;											// If the lower-bit of type is clear, and it's an object, the object it relates to
-			SDatum			value;											// If the lower-bit of type is clear, the actual data value based on its type
 			SFunction*		thisCode;										// Pointer to the code block this relates to
+			SDatum			value;											// If the lower-bit of type is clear, the actual data value based on its type
 		};
 
 		// If assign or access
-		SEditChainManager*	assign;											// Source code executed whenever this variable is assigned
-		SEditChainManager*	access;											// Source code executed whenever this variable is accessed
+		SFunction*	assign;													// Source code executed whenever this variable is assigned
+		SFunction*	access;													// Source code executed whenever this variable is accessed
+	};
+
+	struct SOp
+	{
+		u32				op_type;										// The type of operand, see _OP_TYPE_* constants
+
+		// Pointer to first (if there is a succession)
+		bool			isOpDataAllocated;								// Is the op below allocated?  If false, then it points to one allocated elsewhere
+		union {
+			// Used as a general test to see if something exists (if (op_data != 0))
+			u32			op_data;
+
+			// Actual data items based on op_type
+			SComp*		comp;											// The first component
+			SVariable*	variable;										// Generic access to (param, local, scoped, other)
+			SVariable*	param;											// A parameter variable or reference
+			SVariable*	local;											// A local variable or reference
+			SVariable*	scoped;											// A scoped/temporary variable or reference used for inter-source-code-line processing
+			SVariable*	returns;										// A returns variable or reference
+			SVariable*	other;											// Unknown item which must be looked up in the context of the runtime environment
+			SObject*	obj;											// An object reference
+			SFunction*	func;											// A function reference
+		};
+		// Number thereafter
+		s32				count;											// The number of components (in comp or other) as input
 	};
 
 //////////
@@ -277,38 +367,24 @@ struct SVariable;
 //              |_____|       |_____|
 //
 //////
-	struct SSubInstr
+	struct SNode
 	{
-		SSubInstr*		parent;											// Up to the higher node
-		SSubInstr*		prev;											// Previous item in the horizontal chain
-		SSubInstr*		next;											// Next item in the horizontal chain
-		SSubInstr*		left;											// Left node
-		SSubInstr*		right;											// Right node
+		SNode*			parent;											// Up to the higher node
+		SNode*			prev;											// Previous item in the horizontal chain
+		SNode*			next;											// Next item in the horizontal chain
+		SNode*			left;											// Left node
+		SNode*			right;											// Right node
 		u32				uid;											// Unique ID for this sub-instruction
 
 		// Operation layer/level and instruction at that level
 		s32				sub_level;										// The sub-instruction operation level related to the bigger picture
 		s32				sub_instr;										// The sub-instruction being executed, such as "+" in "2 + 4", see _SUB_INSTR_* constants
-		SOp*			op;												// Any operand data for this node (if it is a terminating node)
-		SVariable*		variable;										// As results are computed or referenced, they are stored in scoped/temporary variables
-	};
+		SOp				op;												// Any operand data for this node (if it is a terminating node)
 
-	struct SOp
-	{
-		u32				op_type;										// The type of operand, see _OP_TYPE_* constants
-		SVariable*		variable;										// The actual local variable contents (if it is a converted type at compile time, such as "2" being converted to the integer, referenced as a fixed variable)
-
-		// Pointer to first (if there is a succession)
-		union {
-			SComp*		comp;											// The first component
-			SVariable*	param;											// A parameter reference
-			SVariable*	local;											// A local variable reference
-			SVariable*	scoped;											// A temporary variable reference used for inter-source-code-line processing
-			SVariable*	other;											// Unknown item which must be looked up in the context of the runtime environment
-			void*		ptr;											// A general test to see if it exists
-		};
-		// Number thereafter
-		s32				count;											// The number of components (in comp or other) as input
+		// Note that in some cases there can be multiple return variables.
+		// When this happens, the left-most result is always the firstVariable, with each return result being then at x->next until the end
+		SVariable*		firstVariable;									// As results are computed or referenced, they are stored in scoped/temporary variables
+		u32				variable_count;									// The number of variables
 	};
 
 	// Holds a component structure
@@ -406,10 +482,11 @@ struct SVariable;
 	struct SCompileNote
 	{
 		SCompileNote*	next;											// The next compile note in this chain
+		u32				start;											// Column the note begins on
+		u32				end;											// Column the note ends on
 
-		SDatum*			msg;											// The message
 		u32				number;											// Related number
-		SComp*			relatesTo;										// Column the note occurred on
+		SDatum*			msg;											// The message
 	};
 
 	// Holds compiler data
@@ -425,8 +502,8 @@ struct SVariable;
 		SComp*			firstComp;										// Pointer to the first component identified on this line
 
 		// Executable code
-		SSubInstr**		subInstr;										// Low-level executable code (sub instructions) for this line
-		u32				subInstrCount;									// How many sub-instructions there are
+		SNode*			firstNode;										// Low-level executable code (nodes, or sub instructions) for this line
+		u32				nodeArrayCount;									// How many sub-instructions there are
 
 		// Results of compilation
 		SCompileNote*	errors;											// Noted error
@@ -466,11 +543,50 @@ struct SVariable;
 	const u32		_SUB_INSTR_ERROR								= 1000;			// An error was encountered and we stop at this source code line
 	const u32		_SUB_INSTR_FLAGS								= 1001;			// A flag was given for this line
 
+	const u32		_OP_TYPE_NULL									= 0;			// A NULL type, indicating a compile error occurred on this control
 	const u32		_OP_TYPE_COMP									= 1;			// A component
 	const u32		_OP_TYPE_PARAM									= 2;			// A parameter
 	const u32		_OP_TYPE_LOCAL									= 3;			// A local variable
 	const u32		_OP_TYPE_SCOPED									= 4;			// A scoped / temporary variable
-	const u32		_OP_TYPE_OTHER									= 5;			// A different variable
+	const u32		_OP_TYPE_RETURNS								= 5;			// A returns variable
+	const u32		_OP_TYPE_OTHER									= 6;			// Some other variable which is always referenced
+	const u32		_OP_TYPE_FUNCTION								= 7;			// A function
+	const u32		_OP_TYPE_OBJECT									= 8;			// An object
+	const u32		_OP_TYPE_PARENTHESIS_LEFT						= 9;			// (Temporary) A left parenthesis
+
+	const u32		_NODE_NONE										= 0;
+	const u32		_NODE_PARENT									= 1;
+	const u32		_NODE_PREV										= 2;
+	const u32		_NODE_NEXT										= 3;
+	const u32		_NODE_LEFT										= 4;
+	const u32		_NODE_RIGHT										= 5;
+
+	const u32		_VAR_TYPE_NULL									= 0;
+	const u32		_VAR_TYPE_EMPTYOBJECT							= 1;
+	const u32		_VAR_TYPE_THISCODE								= 2;
+	const u32		_VAR_TYPE_CHARACTER								= 3;
+	const u32		_VAR_TYPE_INTEGER								= 4;
+	const u32		_VAR_TYPE_FLOAT									= 5;
+	const u32		_VAR_TYPE_DOUBLE								= 6;
+	const u32		_VAR_TYPE_LOGICAL								= 7;
+	const u32		_VAR_TYPE_S32									= 8;
+	const u32		_VAR_TYPE_S64									= 9;
+	const u32		_VAR_TYPE_U32									= 10;
+	const u32		_VAR_TYPE_U64									= 11;
+	const u32		_VAR_TYPE_F32									= 12;
+	const u32		_VAR_TYPE_F64									= 13;
+	const u32		_VAR_TYPE_BI									= 14;
+	const u32		_VAR_TYPE_BFP									= 15;
+	const u32		_VAR_TYPE_S16									= 16;
+	const u32		_VAR_TYPE_S8									= 17;
+	const u32		_VAR_TYPE_U16									= 18;
+	const u32		_VAR_TYPE_U8									= 19;
+	const u32		_VAR_TYPE_DATE									= 20;
+	const u32		_VAR_TYPE_DATETIME								= 21;
+
+	const u32		_ERROR_OUT_OF_MEMORY							= 1;
+
+	const s8		cgcOutOfMemory[]								= "out of memory";
 	
 	const s8		cgcCaskRoundOpenParams[]						= "(||";
 	const s8		cgcCaskRoundCloseParams[]						= "||)";
@@ -488,6 +604,8 @@ struct SVariable;
 	const s8		cgcCaskTriangleClose[]							= "|>";
 	const s8		cgcCaskTildeOpen[]								= "~|";
 	const s8		cgcCaskTildeClose[]								= "|~";
+
+	const s8		cgcPseudoFunctionName[]							= "__top_of_code_block";
 
 	const u32		_ICODE_CASK_ROUND_OPEN_PARAMS					= 1000001;
 	const u32		_ICODE_CASK_ROUND_CLOSE_PARAMS					= 1000002;
@@ -568,6 +686,8 @@ struct SVariable;
 	// Miscellaneous
 	const u32		_ICODE_COMMENT									= 103;
 	const u32		_ICODE_LINE_COMMENT								= 104;
+	const u32		_ICODE_COMMENT_START							= 105;
+	const u32		_ICODE_COMMENT_END								= 106;
 
 	// VJr-specific Keywords
 	const u32		_ICODE_VJR										= 200;
@@ -611,6 +731,8 @@ struct SVariable;
 	const u32		_ICODE_S8										= 238;
 	const u32		_ICODE_U16										= 239;
 	const u32		_ICODE_U8										= 240;
+	const u32		_ICODE_ADHOC									= 241;
+	const u32		_ICODE_ENDADHOC									= 242;
 
 
 	// Logical operators
@@ -1325,7 +1447,7 @@ struct SVariable;
 	const u32       _ICODE_WITH                                     = 2270;
 	const u32       _ICODE_ZAP                                      = 2271;
 
-	SAsciiCompSearcher	cgcKeywordOperators[] =
+	SAsciiCompSearcher	cgcFundamentalSymbols[] =
 	{
 		// keyword					length		repeats?	extra (type)							first on line?		validate handler,		custom handler
 		{ cgcCaskRoundOpenParams,	3,			false,		_ICODE_CASK_ROUND_OPEN_PARAMS,			false,				NULL,					NULL },
@@ -1362,6 +1484,8 @@ struct SVariable;
 		{ "*",						1,			true,		_ICODE_COMMENT,							true,				NULL,					NULL },
 		{ "&&",						2,			false,		_ICODE_LINE_COMMENT,					false,				NULL,					NULL },
 		{ "*",						1,			true,		_ICODE_ASTERISK,						false,				NULL,					NULL },
+		{ "/*",						2,			true,		_ICODE_COMMENT_START,					false,				NULL,					NULL },
+		{ "*\\",					2,			true,		_ICODE_COMMENT_END,					false,				NULL,					NULL },
 		{ "\\",						1,			true,		_ICODE_SLASH,							false,				NULL,					NULL },
 		{ "/",						1,			true,		_ICODE_BACKSLASH,						false,				NULL,					NULL },
 		{ "\"",						1,			false,		_ICODE_DOUBLE_QUOTE,					false,				NULL,					NULL },
@@ -1417,7 +1541,7 @@ struct SVariable;
 	};
 
 	// First-pass keywords
-	SAsciiCompSearcher	cgcKeywordKeywords1[] =
+	SAsciiCompSearcher	cgcKeywordKeywords[] =
 	{
 		// keyword					length		repeats?	extra (type)							first on line?		validate handler		custom handler
 		{ "not",                    3,          false,      _ICODE_NOT,                             false,              NULL,                   NULL },
@@ -2208,7 +2332,9 @@ struct SVariable;
 		{ "s8",						2,			false,		_ICODE_S8,								false,				NULL,					NULL },
 		{ "u16",					3,			false,		_ICODE_U16,								false,				NULL,					NULL },
 		{ "u8",						2,			false,		_ICODE_U8,								false,				NULL,					NULL },
-
+		{ "adhoc",					5,			false,		_ICODE_ADHOC,							true,				NULL,					NULL },
+		{ "endadhoc",				8,			false,		_ICODE_ENDADHOC,						true,				NULL,					NULL },
+		
 		{ 0,						0,			0,			0,										0,					0,						0 }
 	};
 
@@ -2230,20 +2356,33 @@ struct SVariable;
 // start over.
 //
 //////
-	u32 compile_Vxbmm(SEditChainManager* codeBlock, bool tlEditAndContinue)
+	u32 compile_Vxbmm(SEditChainManager* codeBlock, SCompileContext* ccData, bool tlEditAndContinue)
 	{
-		u32				lnCompiledLines;
-		bool			llProcessThisLine;
-		SEditChain*		line;
+		bool				llProcessThisLine;
+		SCompileContext		ccDataLocal;
+		SEditChain*			line;
+		SFunction*			func;
+		SFunction*			currentFunction;
+		SComp*				comp;
+
+
+		//////////
+		// Initialize everything to 0s
+		//////
+			if (!ccData)	ccData = &ccDataLocal;
+			memset(ccData, 0, sizeof(SCompileContext));
 
 
 		// Make sure our environment is sane
-		lnCompiledLines = 0;
 		if (codeBlock && codeBlock->ecFirst)
 		{
-			line = codeBlock->ecFirst;
+			currentFunction	= NULL;
+			line			= codeBlock->ecFirst;
 			while (line)
 			{
+				// Increase our line count
+				++ccData->sourceLines;
+
 				// Is there anything to parse on this line?
 				if (line->sourceCode && line->sourceCodePopulated > 0)
 				{
@@ -2253,7 +2392,7 @@ struct SVariable;
 						if (tlEditAndContinue)
 						{
 							// We only process this line if its contents have changed
-							if (!line->compilerInfo || !line->compilerInfo->sourceCode)
+							if (!line->compilerInfo || !line->compilerInfo->sourceCode || line->forceRecompile)
 							{
 								// This line has not yet been compiled.
 								// This line needs to be compiled.
@@ -2264,7 +2403,7 @@ struct SVariable;
 								// This line needs to be compiled.
 								llProcessThisLine = true;
 
-							} else if (iDatumCompare(line->sourceCode, line->compilerInfo->sourceCode) != 0) {
+							} else if (iDatum_compare(line->sourceCode, line->compilerInfo->sourceCode) != 0) {
 								// The source code contents have changed.
 								// This line needs to be compiled.
 								llProcessThisLine = true;
@@ -2282,26 +2421,115 @@ struct SVariable;
 					//////////
 					// Should we process this line?
 					//////
-						while (llProcessThisLine)
+						if (!llProcessThisLine)
 						{
-							// Convert raw source code to known character sequences
-							iTranslateSourceLineToSComps(&cgcKeywordOperators[0], line);
+							if (tlEditAndContinue)
+							{
+								// In an edit-and-continue environment, we have to track functions so we maintain the
+								// current function we are in, even if the source code for those functions didn't change.
+								if (line->compilerInfo && line->compilerInfo->firstComp && line->compilerInfo->firstComp->iCode == _ICODE_FUNCTION)
+								{
+									// We've moved into another function
+									func = codeBlock->firstFunction;
+									while (func)
+									{
+										// Is this the function relating to this source code line?
+										if (func->firstLine == line)
+										{
+											// We found our match
+											currentFunction = func;
+											break;
+										}
 
-							// If it's a comment, we don't need to process it
-							if (line->compilerInfo->firstComp->iCode == _ICODE_COMMENT || line->compilerInfo->firstComp->iCode == _ICODE_LINE_COMMENT)
+										// Move to next 
+										func = func->next;
+									}
+								}
+							}
+
+						} else {
+							// Note:  This is a while block so it can be exited politely with break.  It does not loop.
+							while (1)
+							{
+								//////////
+								// We need to clear out anything from the prior compile
+								//////
+
+								//////////
+								// Convert raw source code to known character sequences
+								//////
+									iComps_translateSourceLineTo(&cgcFundamentalSymbols[0], line);
+									if (!line->compilerInfo->firstComp)
+									{
+										++ccData->blankLines;
+										break;		// Nothing to compile on this line
+									}
+									comp = line->compilerInfo->firstComp;
+
+
+								//////////
+								// If it's a line comment, we don't need to process it
+								//////
+									if (line->compilerInfo->firstComp->iCode == _ICODE_COMMENT || line->compilerInfo->firstComp->iCode == _ICODE_LINE_COMMENT)
+									{
+										++ccData->commentLines;
+										break;
+									}
+
+
+								//////////
+								// Perform fixups
+								//////
+									iComps_removeStartEndComments(line);			// Remove /* comments */
+									iComps_xlatNaturalGroupings(line);				// Fixup natural groupings
+									iComps_removeWhitespaces(line);					// Remove whitespaces
+
+
+								//////////
+								// Translate sequences to known keywords
+								//////
+									iComps_translateToOthers(&cgcKeywordKeywords[0], line);
+
+
+								//////////
+								// Process this line based upon what it is
+								//////
+									if (comp->iCode == _ICODE_FUNCTION)
+									{
+										// They are adding another function
+										currentFunction = iiComps_xlatToFunction(codeBlock, line);
+
+
+									} else if (comp->iCode == _ICODE_ADHOC) {
+										// They are adding an adhoc function
+// TODO:  working here
+//										iiComps_xlatToAdhoc(&codeBlock, line);
+
+
+									} else if (comp->iCode == _ICODE_PARAMS) {
+										// They are adding parameters
+										// Process the PARAMS line
+// TODO:  working here
+//										iiComps_xlatToParams(&codeBlock, line);
+
+
+									} else if (comp->iCode == _ICODE_LOBJECT) {
+										// They are adding parameters via an object
+										// Process the LOBJECT line
+// TODO:  working here
+//										iiComps_xlatToLobject(&codeBlock, line);
+
+
+									} else {
+										// Translate into operations
+										iiComps_xlatToNodes(line, line->compilerInfo);
+										// Note:  Right now, line->errors and line->warnings have notes attached to them about the compilation of this line
+									}
+
+
+								// All done with this line
 								break;
-
-							// Fixup natural groupings
-							iTranslateSCompsToNaturalGroupings(line);
-
-							// Convert character sequences to known keywords
-							iTranslateSCompsToOthers(&cgcKeywordKeywords1[0], line);
-
-							// Translate into operations
-							iiTranslateSOpsToSubInstr(line, line->compilerInfo->subInstr);
-
-							// All done
-							break;
+							}
 						}
 				}
 
@@ -2314,7 +2542,7 @@ struct SVariable;
 		}
 
 		// Indicate our result
-		return(lnCompiledLines);
+		return(ccData->sourceLines);
 	}
 
 
@@ -2322,39 +2550,57 @@ struct SVariable;
 
 //////////
 //
-// Break things out vertically to determine operation order.
+// Called to handle a FUNCTION line.
 //
-// Example:  k = 2 + 4
-//		Converts to:
-//			00:   =
-//			01: k     +
-//			02:     2   4
+//////
+	SFunction* iiComps_xlatToFunction(SEditChainManager* codeBlock, SEditChain* line)
+	{
+		SComp*		comp;
+		SComp*		compName;
+		SFunction*	func;
+
+
+		// Make sure our environment is sane
+		func = NULL;
+		if (codeBlock && line && line->compilerInfo)
+		{
+			// The syntax must be FUNCTION functionName
+			comp = line->compilerInfo->firstComp;
+			if (comp && comp->iCode == _ICODE_FUNCTION)
+			{
+				// It is a function, but does it have a correct syntax?
+				compName = (SComp*)comp->ll.next;
+				if (compName->iCode == _ICODE_ALPHA || compName->iCode == _ICODE_ALPHANUMERIC)
+				{
+					// It contains a valid name
+// TODO:  Working here
+				}
+			}
+		}
+
+		// Indicate our status
+		return(func);
+	}
+
+
+
+
+//////////
 //
-//		Order of operations:
-//			+
-//			=
-//
-//		For +:  Load 2 as left, 4 as right, add, and create t0, resulting in:
-//			00:   =
-//			01: k   t0
-//
-//		For =:  Load k as left, 4 as right, and store right to left.
+// Translates components into a sequence of sub-instruction operations.
 //
 /////
-	void iiTranslateSOpsToSubInstr(SEditChain* line, SSubInstr** siRoot)
+	bool iiComps_xlatToNodes(SEditChain* line, SCompiler* compiler)
 	{
 		SComp*		comp;
 		SComp*		compLast;
-		SComp*		compFirstEqual;
-//		SSubInstr*	si;
-		SSubInstr**	siPrev;
+		SNode*		nodeActive;			// Current active node
 
 
 		// Iterate through every component building the operations as we go
-		comp			= line->compilerInfo->firstComp;
-		compLast		= comp;
-		compFirstEqual	= NULL;
-		siPrev			= siRoot;
+		comp		= line->compilerInfo->firstComp;
+		compLast	= comp;
+		nodeActive	= iNode_create(&compiler->firstNode, NULL, 0, NULL, NULL, NULL, NULL, NULL);
 		while (comp)
 		{
 			//////////
@@ -2364,10 +2610,12 @@ struct SVariable;
 				{
 					// (
 					case _ICODE_PARENTHESIS_LEFT:
+						nodeActive = iiComps_xlatToNodes_parenthesis_left(&compiler->firstNode, nodeActive, comp);
 						break;
 
 					// )
 					case _ICODE_PARENTHESIS_RIGHT:
+						nodeActive = iiComps_xlatToNodes_parenthesis_right(&compiler->firstNode, nodeActive, comp);
 						break;
 
 					// [
@@ -2491,11 +2739,93 @@ struct SVariable;
 
 
 			//////////
+			// Are we in error?  If so, we stop compiling this line.
+			//////
+				if (nodeActive->op.op_type == _OP_TYPE_NULL)
+				{
+					// We are in error
+					return(false);
+				}
+
+
+			//////////
 			// Move to next component
 			//////
 				compLast	= comp;
 				comp		= (SComp*)comp->ll.next;
 		}
+
+		// If we get here everything was processed properly
+		return(true);
+	}
+
+
+
+
+//////////
+//
+// Processes the left parenthesis.  Takes an existing item like this (note the [?] is the active node):
+//     x = (a + b) + c
+//      / \
+//     x  [?]
+//
+// And translates it into this:
+//     x = (a + b) + c
+//      / \
+//     x   (
+//          \
+//          [?]
+//
+//////
+	SNode* iiComps_xlatToNodes_parenthesis_left(SNode** root, SNode* active, SComp* comp)
+	{
+		SNode*		node;
+		SVariable*	var;
+
+
+		// Insert a parenthesis node at the active node, and direct the active node to the right
+		node = iNode_insertBetween(root, active->parent, active, _NODE_PARENT, _NODE_RIGHT);
+		if (node)
+		{
+			//////////
+			// Update its operation to our parenthesis
+			//////
+				node->op.op_type	= _OP_TYPE_PARENTHESIS_LEFT;
+				node->op.comp		= comp;
+
+
+			//////////
+			// Indicate we'll need a temporary variable for our result
+			//////
+				var = iVariable_create();
+				if (var)
+				{
+					// Append the temporary variable
+					iOp_setVariable_scoped(&node->op, var, true);
+
+				} else {
+					// Internal compile error
+					iComp_appendError(comp, _ERROR_OUT_OF_MEMORY, (s8*)cgcOutOfMemory);
+					iOp_setNull(&node->op);
+				}
+		}
+
+		// Indicate our status
+		return(node);
+	}
+
+
+
+
+//////////
+//
+// Process the right parenthesis.
+//
+//////
+	SNode* iiComps_xlatToNodes_parenthesis_right(SNode** root, SNode* active, SComp* comp)
+	{
+// TODO:  Working here
+		return(NULL);
 	}
 
 
@@ -2511,7 +2841,7 @@ struct SVariable;
 //		The first component created (if any)
 //
 //////
-	SComp* iTranslateSourceLineToSComps(SAsciiCompSearcher* tsComps, SEditChain* line)
+	SComp* iComps_translateSourceLineTo(SAsciiCompSearcher* tsComps, SEditChain* line)
 	{
 		s32						lnI, lnMaxLength, lnStart, lnLength, lnLacsLength;
 		bool					llSigned, llResult;
@@ -2549,7 +2879,7 @@ struct SVariable;
 					{
 						// There is enough room for this component to be examined
 						// See if it matches
-						if (iTranslateToSCompsTest((s8*)lacs->keyword, lcData + lnI, lacs->length) == 0)
+						if (iTranslateToCompsTest((s8*)lacs->keyword, lcData + lnI, lacs->length) == 0)
 						{
 							// It matches
 							// Is there a secondary validation?
@@ -2583,7 +2913,7 @@ struct SVariable;
 								if (lacs->repeats)
 								{
 									while (	lnStart + lnLength + lnLacsLength <= lnMaxLength
-											&& iTranslateToSCompsTest((s8*)lacs->keyword, lcData + lnStart + lnLength, lacs->length) == 0)
+											&& iTranslateToCompsTest((s8*)lacs->keyword, lcData + lnStart + lnLength, lacs->length) == 0)
 									{
 										// We found another repeated entry
 										lnLength += lnLacsLength;
@@ -2660,7 +2990,7 @@ struct SVariable;
 // alpha/alphanumeric/numeric forms to other forms.
 //
 //////
-	bool iTranslateSCompsToOthers(SAsciiCompSearcher* tacs, SEditChain* line)
+	bool iComps_translateToOthers(SAsciiCompSearcher* tacs, SEditChain* line)
 	{
 		bool			llResult;
 		s32				lnTacsLength;
@@ -2689,7 +3019,7 @@ struct SVariable;
 					if (!tacs->firstOnLine || comp->start == 0)
 					{
 						// Physically conduct the exact comparison
-						if (iTranslateSCompsToOthers_test((s8*)tacs->keyword, comp->line->sourceCode->data + comp->start, tacs->length) == 0)
+						if (iComps_translateToOthers_test((s8*)tacs->keyword, comp->line->sourceCode->data + comp->start, tacs->length) == 0)
 						{
 							// This is a match
 							// Is there a secondary test?
@@ -2700,11 +3030,11 @@ struct SVariable;
 								lccb.length					= 0;
 								lccb.iCode					= tacs->iCode;
 								// Setup the functions the custom handler would require
-								lccb._insertCompByComp		= (u64)&iiTranslateSCompsToOthersCallback__insertCompByCompCallback;
-								lccb._insertCompByParams	= (u64)&iiTranslateSCompsToOthersCallback__insertCompByParamsCallback;
-								lccb._deleteComps			= (u64)&iiTranslateSCompsToOthersCallback__deleteCompsCallback;
-								lccb._cloneComps			= (u64)&iiTranslateSCompsToOthersCallback__cloneCompsCallback;
-								lccb._mergeComps			= (u64)&iiTranslateSCompsToOthersCallback__mergeCompsCallback;
+								lccb._insertCompByComp		= (u64)&iiComps_xlatToOthersCallback__insertCompByCompCallback;
+								lccb._insertCompByParams	= (u64)&iiComps_xlatToOthersCallback__insertCompByParamsCallback;
+								lccb._deleteComps			= (u64)&iiComps_xlatToOthersCallback__deleteCompsCallback;
+								lccb._cloneComps			= (u64)&iiComps_xlatToOthersCallback__cloneCompsCallback;
+								lccb._mergeComps			= (u64)&iiComps_xlatToOthersCallback__mergeCompsCallback;
 
 								// Perform the validation
 								llResult = tacs->validate(&lccb);
@@ -2749,7 +3079,7 @@ struct SVariable;
 //		!0		= does not tmach
 //
 //////
-	s32 iTranslateSCompsToOthers_test(s8* tcHaystack, s8* tcNeedle, s32 tnLength)
+	s32 iComps_translateToOthers_test(s8* tcHaystack, s8* tcNeedle, s32 tnLength)
 	{
 		u32		lnI;
 		bool	llSigned;
@@ -2837,51 +3167,6 @@ struct SVariable;
 
 //////////
 //
-// Searches the haystack for the indicated needle, and reports the position if found
-//
-// Returns:
-//		true	- found, tnPosition is updated
-//		false	- not found, tnPosition unchanged
-//
-//////
-	bool iFindFirstOccurrenceOfAsciiCharacter(s8* tcHaystack, u32 tnHaystackLength, s8 tcNeedle, u32* tnPosition)
-	{
-		u32		lnI;
-		bool	llFound;
-
-
-		// Make sure our environment is sane
-		llFound = false;
-		if (tcHaystack && tnHaystackLength != 0)
-		{
-			// Repeat for the length of the string
-			for (lnI = 0; lnI < tnHaystackLength; lnI++)
-			{
-				// See if this is the character we're after
-				if (tcHaystack[lnI] == tcNeedle)
-				{
-					// We found it
-					llFound = true;
-
-					// Update caller's pointer if need be
-					if (tnPosition)
-						*tnPosition = lnI;
-
-					// All done
-					break;
-				}
-			}
-			// When we get here, either found or not
-		}
-		// Indicate our found condition
-		return(llFound);
-	}
-
-
-
-
-//////////
-//
 // Searches forward to find the indicated component by the indicated type.
 //
 // Returns:
@@ -2889,7 +3174,7 @@ struct SVariable;
 //		If NULL, the compLastScanned indicates the last component that was searched where it wasn't found
 //
 //////
-	SComp* iFindNextSCompBy_iCode(SComp* comp, u32 tniCode, SComp** compLastScanned)
+	SComp* iComps_findNextBy_iCode(SComp* comp, u32 tniCode, SComp** compLastScanned)
 	{
 		// Initially indicate failure
 		if (compLastScanned)
@@ -2919,10 +3204,10 @@ struct SVariable;
 
 //////////
 //
-// Searches for the next non-whitespace component, including itself
+// Searches for the next non-indicated component, including itself
 //
 //////
-	SComp* iSkipPastSComp_iCode(SComp* comp, u32 tniCode)
+	SComp* iComps_skipPast_iCode(SComp* comp, u32 tniCode)
 	{
 		while (comp && comp->iCode == tniCode)
 		{
@@ -2946,7 +3231,7 @@ struct SVariable;
 // After:		[define][whitespace][user32][whitespace][something][here]
 //
 //////
-	u32 iCombine2SComps(SEditChain* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2, u32 tniCodeCombined)
+	u32 iComps_combine2(SEditChain* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2, u32 tniCodeCombined)
 	{
 		u32		lnCount;
 		SComp*	compNext;
@@ -2997,7 +3282,7 @@ struct SVariable;
 							// Increase comp1's length, then move comp2 from line->comps to line->compsCombined
 							comp1->length	+= comp2->length;
 							comp1->iCode	= tniCodeCombined;
-							iLl_deleteNode((SLL*)comp2);
+							iLl_deleteNode((SLL*)comp2, true);
 
 
 						//////////
@@ -3028,7 +3313,7 @@ struct SVariable;
 // After:		[sadf32][whitespace][a][comma][20.50]
 //
 //////
-	u32 iCombine3SComps(SEditChain* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2, u32 tniCodeNeedle3, u32 tniCodeCombined)
+	u32 iComps_combine3(SEditChain* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2, u32 tniCodeNeedle3, u32 tniCodeCombined)
 	{
 		u32		lnCount;
 		SComp*	compNext;
@@ -3083,8 +3368,8 @@ struct SVariable;
 							// Increase comp1's length, then move comp2 from line->comps to line->compsCombined
 							comp1->length	+= comp2->length + comp3->length;
 							comp1->iCode	= tniCodeCombined;
-							iLl_deleteNode((SLL*)comp2);
-							iLl_deleteNode((SLL*)comp3);
+							iLl_deleteNode((SLL*)comp2, true);
+							iLl_deleteNode((SLL*)comp3, true);
 
 
 						//////////
@@ -3115,7 +3400,7 @@ struct SVariable;
 // After:		[u8][whitespace][name][left bracket][right bracket][whitespace][equal][whitespace][double quote text]
 //
 //////
-	u32 iCombineAllBetweenSComps(SEditChain* line, u32 tniCodeNeedle, u32 tniCodeCombined)
+	u32 iComps_CombineAllBetween(SEditChain* line, u32 tniCodeNeedle, u32 tniCodeCombined)
 	{
 		u32		lnCount;
 		SComp*	compNext;
@@ -3161,7 +3446,7 @@ struct SVariable;
 								++lnCount;
 
 								// Delete this one (as it was technically merged above with the comp->length = line)
-								iLl_deleteNode((SLL*)compNext);
+								iLl_deleteNode((SLL*)compNext, true);
 
 								// See if we're done
 								if (compNext == compSearcher)
@@ -3205,7 +3490,7 @@ struct SVariable;
 // After:		[u8][asterisk][whitespace][name][whitespace][comment]
 //
 //////
-	u32 iCombineAllAfterSComp(SEditChain* line, u32 tniCodeNeedle)
+	u32 iComps_combineAllAfter(SEditChain* line, u32 tniCodeNeedle)
 	{
 		u32		lnCount;
 		SComp*	compNext;
@@ -3244,7 +3529,7 @@ struct SVariable;
 							++lnCount;
 
 							// Move this one along
-							iLl_deleteNode((SLL*)compNext);
+							iLl_deleteNode((SLL*)compNext, true);
 
 							// Move to next component (which is now again the comp->ll.next entry, because we've just migrated the prior compNext entry to compsCombined)
 							compNext = (SComp*)comp->ll.next;
@@ -3266,17 +3551,93 @@ struct SVariable;
 
 //////////
 //
-// Called to remove extraneous whitespaces
-//
-// Source:		u8* name		// user name
-// Example:		[u8][asterisk][whitespace][name][whitespace][comment][whitespace][user][whitespace][name]
-// Search:		[comment]
-// After:		[u8][asterisk][whitespace][name][whitespace][comment]
+// Called to remove whitespaces.
+// Note:  By the time this function is called, natural groupings should've already been
+//        processed, such that all quoted text items are already combined into a single icode.
 //
 //////
-	u32 iRemoveExtraneousWhitespaceSComps(SEditChain* line, u32 tniCodeWhitespace)
+	u32 iComps_removeWhitespaces(SEditChain* line)
 	{
-		return(0);
+		u32		lnRemoved;
+		SComp*	comp;
+//		SComp*	compNext;
+
+
+		// Make sure our environment is sane
+		lnRemoved = 0;
+		if (line && line->compilerInfo)
+		{
+			// Iterate through all looking for _ICODE_COMMENT_START
+			comp = line->compilerInfo->firstComp;
+			while (comp)
+			{
+				//////////
+				// Is this a whitespace?
+				//////
+					while (comp && comp->iCode == _ICODE_WHITESPACE)
+					{
+						comp = (SComp*)iLl_deleteNode((SLL*)comp, true);
+						++lnRemoved;
+					}
+
+
+				//////////
+				// Continue on to next component
+				//////
+					if (comp)
+						comp = (SComp*)comp->ll.next;
+			}
+		}
+
+		// Indicate how many we removed
+		return(lnRemoved);
+	}
+
+
+
+
+//////////
+//
+// Called to remove any /* comments */ from the current chain of comps.
+//
+//////
+	void iComps_removeStartEndComments(SEditChain* line)
+	{
+		SComp* comp;
+
+
+		// Make sure our environment is sane
+		if (line && line->compilerInfo)
+		{
+			// Iterate through all looking for _ICODE_COMMENT_START
+			comp = line->compilerInfo->firstComp;
+			while (comp)
+			{
+				//////////
+				// Is this a start?
+				//////
+					if (comp->iCode == _ICODE_COMMENT_START)
+					{
+						// Delete everything forward until we reach _ICODE_COMMENT_END or the last comp
+						while (comp && comp->iCode != _ICODE_COMMENT_END)
+						{
+							// Delete this component
+							comp = (SComp*)iLl_deleteNode((SLL*)comp, true);
+						}
+
+						// When we get here, we're sitting on the _ICODE_COMMENT_END
+						if (comp && comp->iCode == _ICODE_COMMENT_END)
+							comp = (SComp*)iLl_deleteNode((SLL*)comp, true);
+					}
+
+
+				//////////
+				// Continue on to next component
+				//////
+					if (comp)
+						comp = (SComp*)comp->ll.next;
+			}
+		}
 	}
 
 
@@ -3287,31 +3648,31 @@ struct SVariable;
 // Fixes up common things found in VXB-- source code.
 //
 //////
-	void iTranslateSCompsToNaturalGroupings(SEditChain* line)
+	void iComps_xlatNaturalGroupings(SEditChain* line)
 	{
 		//////////
 		// Combine standard things
 		//////
 			// _0
-			iCombine2SComps			(line,	_ICODE_UNDERSCORE,		_ICODE_NUMERIC,			_ICODE_ALPHANUMERIC);
+			iComps_combine2			(line,	_ICODE_UNDERSCORE,		_ICODE_NUMERIC,			_ICODE_ALPHANUMERIC);
 			// a_
-			iCombine2SComps			(line,	_ICODE_ALPHA,			_ICODE_UNDERSCORE,		_ICODE_ALPHA);
+			iComps_combine2			(line,	_ICODE_ALPHA,			_ICODE_UNDERSCORE,		_ICODE_ALPHA);
 			// _a
-			iCombine2SComps			(line,	_ICODE_UNDERSCORE,		_ICODE_ALPHA,			_ICODE_ALPHA);
+			iComps_combine2			(line,	_ICODE_UNDERSCORE,		_ICODE_ALPHA,			_ICODE_ALPHA);
 			// a0
-			iCombine2SComps			(line,	_ICODE_ALPHA,			_ICODE_NUMERIC,			_ICODE_ALPHANUMERIC);
+			iComps_combine2			(line,	_ICODE_ALPHA,			_ICODE_NUMERIC,			_ICODE_ALPHANUMERIC);
 			// a9_
-			iCombine2SComps			(line,	_ICODE_ALPHANUMERIC,	_ICODE_UNDERSCORE,		_ICODE_ALPHANUMERIC);
+			iComps_combine2			(line,	_ICODE_ALPHANUMERIC,	_ICODE_UNDERSCORE,		_ICODE_ALPHANUMERIC);
 			// 0.0
-			iCombine3SComps			(line,	_ICODE_NUMERIC,			_ICODE_DOT,				_ICODE_NUMERIC,			_ICODE_NUMERIC);
+			iComps_combine3			(line,	_ICODE_NUMERIC,			_ICODE_DOT,				_ICODE_NUMERIC,			_ICODE_NUMERIC);
 
 
 		//////////
 		// Fixup quotes, comments
 		//////
-			iCombineAllBetweenSComps(line, _ICODE_SINGLE_QUOTE,		_ICODE_SINGLE_QUOTED_TEXT);
-			iCombineAllBetweenSComps(line, _ICODE_DOUBLE_QUOTE,		_ICODE_DOUBLE_QUOTED_TEXT);
-			iCombineAllAfterSComp	(line, _ICODE_LINE_COMMENT);
+			iComps_CombineAllBetween(line, _ICODE_SINGLE_QUOTE,		_ICODE_SINGLE_QUOTED_TEXT);
+			iComps_CombineAllBetween(line, _ICODE_DOUBLE_QUOTE,		_ICODE_DOUBLE_QUOTED_TEXT);
+			iComps_combineAllAfter	(line, _ICODE_LINE_COMMENT);
 	}
 
 
@@ -3354,12 +3715,57 @@ struct SVariable;
 
 //////////
 //
+// Searches the haystack for the indicated needle, and reports the position if found
+//
+// Returns:
+//		true	- found, tnPosition is updated
+//		false	- not found, tnPosition unchanged
+//
+//////
+	bool iFindFirstOccurrenceOfAsciiCharacter(s8* tcHaystack, u32 tnHaystackLength, s8 tcNeedle, u32* tnPosition)
+	{
+		u32		lnI;
+		bool	llFound;
+
+
+		// Make sure our environment is sane
+		llFound = false;
+		if (tcHaystack && tnHaystackLength != 0)
+		{
+			// Repeat for the length of the string
+			for (lnI = 0; lnI < tnHaystackLength; lnI++)
+			{
+				// See if this is the character we're after
+				if (tcHaystack[lnI] == tcNeedle)
+				{
+					// We found it
+					llFound = true;
+
+					// Update caller's pointer if need be
+					if (tnPosition)
+						*tnPosition = lnI;
+
+					// All done
+					break;
+				}
+			}
+			// When we get here, either found or not
+		}
+		// Indicate our found condition
+		return(llFound);
+	}
+
+
+
+
+//////////
+//
 // Called to translate the indicated keywords into their corresponding operation.
 //
 //////
-	void iiTranslateSCompsToSubInstr(SEditChain* line)
+	void iiComps_xlatToSubInstr(SEditChain* line)
 	{
-		SSubInstr	si;
+		SNode	si;
 		SComp*		saveComps;
 
 
@@ -3372,7 +3778,7 @@ struct SVariable;
 		//////////
 		// Find the inmost expression
 		//////
-			while (iiTranslateSCompsToSubInstr_findInmostExpression(&si, line))
+			while (iiComps_xlatToSubInstr_findInmostExpression(&si, line))
 			{
 				// Was it a valid operation?
 				if (si.sub_instr >= 0)
@@ -3394,7 +3800,7 @@ struct SVariable;
 		// There are no more "inner" expressions.
 		// Now we parse out by keyword.
 		//////
-			if (iiTranslateSCompsToSubInstr_isEqualAssignment(line))
+			if (iiComps_xlatToSubInstr_isEqualAssignment(line))
 			{
 				// It's something like x = y, but it could be x,y,z = a(b,c)
 
@@ -3421,7 +3827,7 @@ struct SVariable;
 //		(6)		
 //
 //////
-	SComp* iiTranslateSCompsToSubInstr_findInmostExpression(SSubInstr* si, SEditChain* line)
+	SComp* iiComps_xlatToSubInstr_findInmostExpression(SNode* si, SEditChain* line)
 	{
 		bool	llFound;
 		SComp*	comp;
@@ -3430,7 +3836,7 @@ struct SVariable;
 		//////////
 		// Initially indicate that we did not find an inmost expression
 		//////
-			memset(si, 0, sizeof(SSubInstr));
+			memset(si, 0, sizeof(SNode));
 			si->sub_instr	= -1;			// Indicate failure initially (until something is found)
 			si->sub_level	= -1;			// Unused during parsing
 
@@ -3481,8 +3887,8 @@ struct SVariable;
 						// Search for something to the left of the exponent, like the "someTable.someField" in "k = someTable.someField ^ xyz"
 						// Search for something to the right of the exponent, like the "thisForm.someObject.someProperty" in "k = xyz ^ thisForm.someObject.someProperty"
 // TODO:  Refactor for left and right nodes
-						iiTranslateSCompsToSubInstr_findStartOfComponent	((SComp*)comp->ll.prev, si->op);
-						iiTranslateSCompsToSubInstr_findFullComponent		((SComp*)comp->ll.next, si->op);
+// 						iiComps_xlatToSubInstr_findStartOfComponent	((SComp*)comp->ll.prev, si->op);
+// 						iiComps_xlatToSubInstr_findFullComponent	((SComp*)comp->ll.next, si->op);
 
 						// When we get here, si has been populated if there are operations there.
 						// If they are null, then it is a syntax error
@@ -3506,7 +3912,7 @@ struct SVariable;
 // We scan backwards until we get to any component other than a period or exclamation point.
 //
 //////
-	void iiTranslateSCompsToSubInstr_findStartOfComponent(SComp* compRoot, SOp* op)
+	void iiComps_xlatToSubInstr_findStartOfComponent(SComp* compRoot, SOp* op)
 	{
 		SComp*	comp;
 		SComp*	compPrev;
@@ -3517,7 +3923,7 @@ struct SVariable;
 		//////
 			comp		= compRoot;
 			op->count	= 0;
-			while (comp && comp->ll.prev && iiCharactersBetweenSComps((SComp*)comp->ll.prev, comp) == 0)
+			while (comp && comp->ll.prev && iiComps_charactersBetween((SComp*)comp->ll.prev, comp) == 0)
 			{
 				//////////
 				// Previous component
@@ -3555,7 +3961,7 @@ struct SVariable;
 // immediately adjacent.
 //
 //////
-	void iiTranslateSCompsToSubInstr_findFullComponent(SComp* compRoot, SOp* op)
+	void iiComps_xlatToSubInstr_findFullComponent(SComp* compRoot, SOp* op)
 	{
 		SComp*	comp;
 		SComp*	compNext;
@@ -3566,7 +3972,7 @@ struct SVariable;
 		//////
 			comp		= compRoot;
 			op->count	= 0;
-			while (comp && comp->ll.next && iiCharactersBetweenSComps(comp, (SComp*)comp->ll.next) == 0)
+			while (comp && comp->ll.next && iiComps_charactersBetween(comp, (SComp*)comp->ll.next) == 0)
 			{
 				//////////
 				// Next component
@@ -3604,7 +4010,7 @@ struct SVariable;
 //		x = y
 //
 //////
-	bool iiTranslateSCompsToSubInstr_isEqualAssignment(SEditChain* line)
+	bool iiComps_xlatToSubInstr_isEqualAssignment(SEditChain* line)
 	{
 // TODO:  Write this function :-)
 		return(false);
@@ -3618,7 +4024,7 @@ struct SVariable;
 // Returns the number of characters between two components.
 //
 //////
-	s32 iiCharactersBetweenSComps(SComp* compLeft, SComp* compRight)
+	s32 iiComps_charactersBetween(SComp* compLeft, SComp* compRight)
 	{
 		// Start of right component and end of left component
 		return(compRight->start - (compLeft->start + compLeft->length));
@@ -3944,7 +4350,7 @@ _asm int 3;
 //		!0		= does not tmach
 //
 //////
-	s32 iTranslateToSCompsTest(s8* tcHaystack, s8* tcNeedle, s32 tnLength)
+	s32 iTranslateToCompsTest(s8* tcHaystack, s8* tcNeedle, s32 tnLength)
 	{
 		u32		lnI;
 		bool	llSigned;
@@ -3996,7 +4402,7 @@ _asm int 3;
 // Note:  Always returns false, so it will continue being fed every component
 //
 //////
-	bool iioss_translateSCompsToOthersCallback(SStartEndCallback* cb)
+	bool iioss_translateCompsToOthersCallback(SStartEndCallback* cb)
 	{
 		bool					llResult;
 		s32						lnLacsLength;
@@ -4028,7 +4434,7 @@ _asm int 3;
 					if (!lacs->firstOnLine || comp->start == 0)
 					{
 						// Physically conduct the exact comparison
-						if (iTranslateToSCompsTest((s8*)lacs->keyword, 
+						if (iTranslateToCompsTest((s8*)lacs->keyword, 
 														comp->line->sourceCode->data + comp->start, 
 														lacs->length) == 0)
 						{
@@ -4040,11 +4446,11 @@ _asm int 3;
 								lccb.comp					= comp;
 								lccb.length					= 0;
 								lccb.iCode					= lacs->iCode;
-								lccb._insertCompByComp		= (u32)&iiTranslateSCompsToOthersCallback__insertCompByCompCallback;
-								lccb._insertCompByParams	= (u32)&iiTranslateSCompsToOthersCallback__insertCompByParamsCallback;
-								lccb._deleteComps			= (u32)&iiTranslateSCompsToOthersCallback__deleteCompsCallback;
-								lccb._cloneComps			= (u32)&iiTranslateSCompsToOthersCallback__cloneCompsCallback;
-								lccb._mergeComps			= (u32)&iiTranslateSCompsToOthersCallback__mergeCompsCallback;
+								lccb._insertCompByComp		= (u32)&iiComps_xlatToOthersCallback__insertCompByCompCallback;
+								lccb._insertCompByParams	= (u32)&iiComps_xlatToOthersCallback__insertCompByParamsCallback;
+								lccb._deleteComps			= (u32)&iiComps_xlatToOthersCallback__deleteCompsCallback;
+								lccb._cloneComps			= (u32)&iiComps_xlatToOthersCallback__cloneCompsCallback;
+								lccb._mergeComps			= (u32)&iiComps_xlatToOthersCallback__mergeCompsCallback;
 
 								// Perform the validation
 								llResult = lacs->validate(&lccb);
@@ -4121,7 +4527,7 @@ _asm int 3;
 //        then it will need to be either manually added to the line->comps, or manually tended to.
 //
 //////
-	void iiTranslateSCompsToOthersCallback__insertCompByCompCallback(SComp* compRef, SComp* compNew, bool tlInsertAfter)
+	void iiComps_xlatToOthersCallback__insertCompByCompCallback(SComp* compRef, SComp* compNew, bool tlInsertAfter)
 	{
 // TODO:  untested code, breakpoint and examine
 _asm int 3;
@@ -4159,7 +4565,7 @@ _asm int 3;
 // Called as a callback from the custom handler callback function, to do some manual insertion.
 //
 //////
-	void iiTranslateSCompsToOthersCallback__insertCompByParamsCallback(SComp* compRef, SEditChain* line, u32 tniCode, u32 tnStart, s32 tnLength, bool tlInsertAfter)
+	void iiComps_xlatToOthersCallback__insertCompByParamsCallback(SComp* compRef, SEditChain* line, u32 tniCode, u32 tnStart, s32 tnLength, bool tlInsertAfter)
 	{
 		SComp* compNew;
 
@@ -4183,7 +4589,7 @@ _asm int 3;
 				compNew->length		= tnLength;
 
 				// Add the new component as a component
-				iiTranslateSCompsToOthersCallback__insertCompByCompCallback(compRef, compNew, tlInsertAfter);
+				iiComps_xlatToOthersCallback__insertCompByCompCallback(compRef, compNew, tlInsertAfter);
 			}
 		}
 	}
@@ -4197,7 +4603,7 @@ _asm int 3;
 // indicated component.
 //
 //////
-	void iiTranslateSCompsToOthersCallback__deleteCompsCallback(SComp* comp, SEditChain* line)
+	void iiComps_xlatToOthersCallback__deleteCompsCallback(SComp* comp, SEditChain* line)
 	{
 // TODO:  untested code, breakpoint and examine
 _asm int 3;
@@ -4220,7 +4626,7 @@ _asm int 3;
 			if (line)
 			{
 				// Delete the entry from line->comps
-				iLl_deleteNode((SLL*)comp);
+				iLl_deleteNode((SLL*)comp, true);
 
 			} else {
 				// Free the rogue entry
@@ -4237,7 +4643,7 @@ _asm int 3;
 // component.  If line is not NULL, the component is automatically added to line->comps;
 //
 //////
-	SComp* iiTranslateSCompsToOthersCallback__cloneCompsCallback(SComp* comp, SEditChain* line)
+	SComp* iiComps_xlatToOthersCallback__cloneCompsCallback(SComp* comp, SEditChain* line)
 	{
 		SComp* compNew;
 
@@ -4292,7 +4698,7 @@ _asm int 3;
 //        handle that condition.
 //
 //////
-	SComp* iiTranslateSCompsToOthersCallback__mergeCompsCallback(SComp* comp, SEditChain* line, u32 tnCount, u32 tniCodeNew)
+	SComp* iiComps_xlatToOthersCallback__mergeCompsCallback(SComp* comp, SEditChain* line, u32 tnCount, u32 tniCodeNew)
 	{
 		u32			lnI;
 		SComp*	compThis;
@@ -4310,7 +4716,7 @@ _asm int 3;
 				comp->length += compThis->length;
 
 				// Delete this component
-				iiTranslateSCompsToOthersCallback__deleteCompsCallback(compThis, comp->line);
+				iiComps_xlatToOthersCallback__deleteCompsCallback(compThis, comp->line);
 
 				// Note:  compThis is always assigned comp->ll.next, because its next component keeps being updated after the delete
 			}
@@ -4664,16 +5070,72 @@ _asm int 3;
 
 //////////
 //
-// Called to delete a link list node.  If need be it orphanizes the node first.
+// Called to append the node at the end of the chain
 //
 //////
-	void iLl_deleteNode(SLL* node)
+	SLL* iLl_appendNodeAtEnd(SLL** root, u32 tnSize)
 	{
+		SLL* node;
+		SLL* nodeNew;
+
+
+		// Make sure our environment is sane
+		nodeNew = NULL;
+		if (root)
+		{
+			// Allocate new
+			nodeNew = (SLL*)malloc(tnSize);
+			if (nodeNew)
+			{
+				// Initialize
+				memset(nodeNew, 0, tnSize);
+
+				// Determine where it goes
+				if (!*root)
+				{
+					// First entry
+					*root = nodeNew;
+
+				} else {
+					// Append to end
+					node = *root;
+					while (node->next)
+						node = node->next;
+
+					// Append here
+					node->next		= nodeNew;		// Previous points here
+					nodeNew->prev	= node;			// We point back to previous
+				}
+			}
+		}
+
+		// Indicate our status
+		return(nodeNew);
+	}
+
+
+
+
+//////////
+//
+// Called to delete a link list node from the chain.  It orphanizes the node first.
+// It will fully delete it if tlDeleteSelf is true.  The return value is either the
+// orphan node, or the node->next value if the node was fully deleted.
+//
+//////
+	SLL* iLl_deleteNode(SLL* node, bool tlDeleteSelf)
+	{
+		SLL* nodeNext;
+
+
+		// Make sure our environment is sane
+		nodeNext = NULL;
 		if (node)
 		{
 			//////////
 			// Disconnect
 			//////
+				nodeNext = node->next;
 				if (node->prev || node->next)
 					iLl_orphanizeNode(node);
 
@@ -4681,8 +5143,12 @@ _asm int 3;
 			//////////
 			// Delete the node
 			//////
-				free(node);
+				if (tlDeleteSelf)		free(node);
+				else					nodeNext = node;
 		}
+
+		// Indicate our status
+		return(nodeNext);
 	}
 
 
@@ -4997,4 +5463,722 @@ _asm int 3;
 
 		// Indicate where we are
 		return(node);
+	}
+
+
+
+
+//////////
+//
+// Called to create a new node and attach it to the hint as indicated.
+//
+//////
+	SNode* iNode_create(SNode** root, SNode* hint, u32 tnDirection, SNode* parent, SNode* prev, SNode* next, SNode* left, SNode* right)
+	{
+		SNode*		nodeNew;
+		SNode**		nodePrev;
+		SNode*		nodeOrphan;
+
+
+		// Make sure our environment is sane
+		nodeNew = NULL;
+		if (root)
+		{
+			if (!*root)
+			{
+				// This is the first item
+				nodePrev = root;
+
+			} else {
+				// We're adding to the hint
+				if (!hint)
+				{
+					// No hint, we are creating an orphan
+					nodePrev = &nodeOrphan;
+
+				} else {
+					// Relates to hint in some way
+					switch (tnDirection)
+					{
+						default:
+						case _NODE_NONE:
+							// Create an orphan node
+							nodePrev = &nodeOrphan;
+							break;
+
+						case _NODE_PARENT:
+							// Connecting to hint->parent
+							nodePrev = &hint->parent;
+							break;
+
+						case _NODE_PREV:
+							// Connecting to hint->prev
+							nodePrev = &hint->prev;
+							break;
+
+						case _NODE_NEXT:
+							// Connecting to hint->next
+							nodePrev = &hint->next;
+							break;
+
+						case _NODE_LEFT:
+							// Connecting to hint->left
+							nodePrev = &hint->left;
+							break;
+
+						case _NODE_RIGHT:
+							// Connecting to hint->right
+							nodePrev = &hint->right;
+							break;
+					}
+				}
+			}
+
+
+			//////////
+			// Add the new node
+			//////
+				nodeNew = (SNode*)malloc(sizeof(SNode));
+				if (nodeNew)
+				{
+					// Initialize
+					memset(nodeNew, 0, sizeof(SNode));
+
+					// Update the link from previous
+					*nodePrev			= nodeNew;
+
+					// Connect our new node
+					nodeNew->parent		= parent;
+					nodeNew->prev		= prev;
+					nodeNew->next		= next;
+					nodeNew->left		= left;
+					nodeNew->right		= right;
+				}
+
+
+		}
+
+		// Indicate our status
+		return(nodeNew);
+	}
+
+
+
+
+//////////
+//
+// Creates a new node and inserts it where node1 currently points to node2.
+//
+//////
+	SNode* iNode_insertBetween(SNode** root, SNode* node1, SNode* node2, u32 tnNode1Direction, u32 tnNode2Direction)
+	{
+		u32		lnNode1Direction, lnNode2Direction;
+		SNode*	nodeNew;
+
+
+		// Make sure our environment is sane
+		nodeNew = NULL;
+		if (root)
+		{
+			//////////
+			// Find out where we're going node1 to node2
+			//////
+				if (node1)
+				{
+					if (node1->parent == node2)			lnNode1Direction = _NODE_PARENT;		// We're going up
+					else if (node1->prev == node2)		lnNode1Direction = _NODE_PREV;			// We're going to previous
+					else if (node1->next == node2)		lnNode1Direction = _NODE_NEXT;			// We're going to next
+					else if (node1->left == node2)		lnNode1Direction = _NODE_LEFT;			// We're going left
+					else if (node1->right == node2)		lnNode1Direction = _NODE_RIGHT;			// We're going to right
+					else								lnNode1Direction = _NODE_NONE;			// Failure, they are not connected
+
+				} else {
+					// No node1
+					lnNode1Direction = tnNode1Direction;
+				}
+
+
+			//////////
+			// Find out where we're going node2 to node1
+			//////
+				if (node2)
+				{
+					if (node2->parent == node1)			lnNode2Direction = _NODE_PARENT;		// We're going up
+					else if (node2->prev == node1)		lnNode2Direction = _NODE_PREV;			// We're going to previous
+					else if (node2->next == node1)		lnNode2Direction = _NODE_NEXT;			// We're going to next
+					else if (node2->left == node1)		lnNode2Direction = _NODE_LEFT;			// We're going left
+					else if (node2->right == node1)		lnNode2Direction = _NODE_RIGHT;			// We're going to right
+					else								lnNode2Direction = _NODE_NONE;			// They are not connected in this direction
+
+				} else {
+					// No node2
+					lnNode2Direction = tnNode2Direction;
+				}
+
+
+			// Create an orphan node
+			nodeNew = iNode_create(root, NULL, 0, NULL, NULL, NULL, NULL, NULL);
+			if (nodeNew)
+			{
+				//////////
+				// Hook it up to node1
+				//////
+					switch (lnNode1Direction)
+					{
+						case _NODE_PARENT:
+							// It's going up from node1 to node2
+							nodeNew->parent	= node2;		// Hook the new node up to where node1 used to point (node2)
+							node1->parent	= nodeNew;		// Make node1 now point to our inserted node (nodeNew)
+							break;
+
+						case _NODE_PREV:
+							// It's going up from node1 to node2
+							nodeNew->prev	= node2;		// Hook the new node up to where node1 used to point (node2)
+							node1->prev		= nodeNew;		// Make node1 now point to our inserted node (nodeNew)
+							break;
+
+						case _NODE_NEXT:
+							// It's going up from node1 to node2
+							nodeNew->next	= node2;		// Hook the new node up to where node1 used to point (node2)
+							node1->next		= nodeNew;		// Make node1 now point to our inserted node (nodeNew)
+							break;
+
+						case _NODE_LEFT:
+							// It's going up from node1 to node2
+							nodeNew->left	= node2;		// Hook the new node up to where node1 used to point (node2)
+							node1->left		= nodeNew;		// Make node1 now point to our inserted node (nodeNew)
+							break;
+
+						case _NODE_RIGHT:
+							// It's going up from node1 to node2
+							nodeNew->right	= node2;		// Hook the new node up to where node1 used to point (node2)
+							node1->right	= nodeNew;		// Make node1 now point to our inserted node (nodeNew)
+							break;
+					}
+
+
+				//////////
+				// Hook it up to node2
+				//////
+					switch (lnNode2Direction)
+					{
+						case _NODE_PARENT:
+							// It's going up from node2 to node1
+							nodeNew->parent	= node1;		// Hook the new node up to where node2 used to point (node1)
+							node2->parent	= nodeNew;		// Make node2 now point to our inserted node (nodeNew)
+							break;
+
+						case _NODE_PREV:
+							// It's going prev from node2 to node1
+							nodeNew->prev	= node1;		// Hook the new node up to where node2 used to point (node1)
+							node2->prev		= nodeNew;		// Make node2 now point to our inserted node (nodeNew)
+							break;
+
+						case _NODE_NEXT:
+							// It's going next from node2 to node1
+							nodeNew->next	= node1;		// Hook the new node up to where node2 used to point (node1)
+							node2->next		= nodeNew;		// Make node2 now point to our inserted node (nodeNew)
+							break;
+
+						case _NODE_LEFT:
+							// It's going left from node2 to node1
+							nodeNew->left	= node1;		// Hook the new node up to where node2 used to point (node1)
+							node2->left		= nodeNew;		// Make node2 now point to our inserted node (nodeNew)
+							break;
+
+						case _NODE_RIGHT:
+							// It's going right from node2 to node1
+							nodeNew->right	= node1;		// Hook the new node up to where node2 used to point (node1)
+							node2->right	= nodeNew;		// Make node2 now point to our inserted node (nodeNew)
+							break;
+					}
+			}
+		}
+
+		// Indicate our status
+		return(nodeNew);
+	}
+
+
+
+
+//////////
+//
+// Called to create an empty function
+//
+//////
+	SFunction* iFunction_create(s8* tcFuncName)
+	{
+		SFunction* funcNew;
+
+
+		funcNew = (SFunction*)malloc(sizeof(SFunction));
+		if (funcNew)
+		{
+			// Initialize
+			memset(funcNew, 0, sizeof(SFunction));
+
+			// Store name if provided
+			if (tcFuncName)
+				iDatum_duplicate(&funcNew->name, tcFuncName, -1);
+		}
+
+		// Indicate our status
+		return(funcNew);
+	}
+
+
+
+
+//////////
+//
+// Called to add a scoped variable to the function
+//
+//////
+	SVariable* iFunction_addVariable_scoped(SFunction* func)
+	{
+		SVariable*	varNew;
+
+
+		// Make sure our environment is sane
+		varNew = NULL;
+		if (func)
+		{
+			// We create an empty variable slot, one which will receive the variable content/value at some later time during computation
+			varNew = (SVariable*)iLl_appendNodeAtEnd((SLL**)&func->scoped, sizeof(SVariable));		// Create a new variable
+		}
+
+		// Indicate our status
+		return(varNew);
+	}
+
+
+
+
+//////////
+//
+// Politely deletes everything contained in a function definition.  This also mandates
+//
+//////
+	void iFunction_politelyDelete(SFunction* func, bool tlDeleteSelf)
+	{
+		u32				lnI;
+		SEditChain*		line;
+		SNode*			node;
+		SNode*			nodeNext;
+
+
+		// Make sure our environment is sane
+		if (func)
+		{
+			//////////
+			// Disconnect everything in its source code lines from the function
+			//////
+				line = func->firstLine;
+				while (line)
+				{
+					// See if there is anything on this line of code
+					if (line->compilerInfo)
+					{
+						//////////
+						// Delete all of its nodes
+						//////
+							for (lnI = 0, node = line->compilerInfo->firstNode; node && lnI < line->compilerInfo->nodeArrayCount != 0; lnI++, node = nodeNext)
+							{
+								//////////
+								// Note the next node
+								//////
+									nodeNext = node->next;
+
+
+								//////////
+								// Delete its op
+								//////
+									iOp_politelyDelete(&node->op, false);
+
+
+								//////////
+								// Delete any variables
+								//////
+									if (node->firstVariable)
+										iVariable_politelyDeleteChain(&node->firstVariable);
+
+
+								//////////
+								// Delete self
+								//////
+									free(node);
+							}
+
+
+						//////////
+						// Delete its node array
+						//////
+							free(line->compilerInfo->firstNode);
+							line->compilerInfo->firstNode = false;
+
+
+						// Mark it so it's re-compiled
+						line->forceRecompile = true;
+					}
+
+					// Move to next line
+					line = line->next;
+				}
+
+
+			//////////
+			// Should we delete everything?
+			//////
+				if (tlDeleteSelf)
+					free(func);
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to create a new variable.  It is an orphan and initialized, but has
+// no identity.
+//
+//////
+	SVariable* iVariable_create(void)
+	{
+		SVariable* varNew;
+
+
+		// Create it
+		varNew = (SVariable*)malloc(sizeof(SVariable));
+
+		// Initialize it
+		if (varNew)
+			memset(varNew, 0, sizeof(SVariable));
+
+		// Indicate our status
+		return(varNew);
+	}
+
+
+
+
+//////////
+//
+// Called to delete the indicated variable
+//
+//////
+	void iVariable_delete(SVariable* var, bool tlDeleteSelf)
+	{
+		// Make sure our environment is sane
+		if (var && !var->indirect)
+		{
+			//////////
+			// Do we need to delete this item?
+			//////
+				if (var->isVarAllocated)
+				{
+					// We only delete the empty objects, or hard values
+					switch (var->var_type)
+					{
+						case _VAR_TYPE_EMPTYOBJECT:
+							// Delete the object
+							iObj_delete(var->obj, true);
+							break;
+
+// 						case _VAR_TYPE_THISCODE:
+// 							// All thisCodes are references
+// 							break;
+
+						default:
+							// Delete the datum
+							iDatum_free(&var->value, false);
+							memset(&var->value, 0, sizeof(SDatum));
+							break;
+					}
+				}
+
+
+			//////////
+			// Remote the self if need be
+			//////
+				if (tlDeleteSelf)
+				{
+					// "Bye bye, Hathaway."
+					iLl_deleteNode((SLL*)var, true);
+
+				} else {
+					// We just need to reset its values as this variable slot will persist
+					var->var_type		= _VAR_TYPE_NULL;
+					var->isVarAllocated	= false;
+				}
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to delete the variable, and if it has any other variables in the chain,
+// to delete all of them
+//
+//////
+	void iVariable_politelyDeleteChain(SVariable** root)
+	{
+		SLLCallback	cb;
+
+
+		// Make sure our environment is sane
+		if (root && *root)
+		{
+			// Use the linked list functions, which will callback repeatedly for every entry
+			cb._func	= (u32)&iVariable_politelyDeleteChain_callback;
+			cb.node		= (SLL*)*root;
+			iLl_deleteNodeChainWithCallback(&cb);
+
+			// Mark the variables there empty
+			*root = NULL;
+		}
+	}
+
+	void iVariable_politelyDeleteChain_callback(SLLCallback* cb)
+	{
+		// Delete this variable appropriately
+		iVariable_delete((SVariable*)cb->node, false);
+	}
+
+
+
+
+//////////
+//
+// Called to set the op type.
+//
+//////
+	bool iOp_setNull(SOp* op)
+	{
+		if (op)
+		{
+			op->op_type = _OP_TYPE_NULL;
+			return(true);
+		}
+
+		// If we get here, failure
+		return(false);
+	}
+
+	bool iOp_setVariable_param(SOp* op, SVariable* var, bool isOpAllocated)
+	{
+		if (op)
+		{
+			op->variable		= var;
+			op->op_type			= _OP_TYPE_PARAM;
+			op->isOpDataAllocated	= isOpAllocated;
+			return(true);
+		}
+
+		// If we get here, failure
+		return(false);
+	}
+
+	bool iOp_setVariable_local(SOp* op, SVariable* var, bool isOpAllocated)
+	{
+		if (op)
+		{
+			op->variable		= var;
+			op->op_type			= _OP_TYPE_LOCAL;
+			op->isOpDataAllocated	= isOpAllocated;
+			return(true);
+		}
+
+		// If we get here, failure
+		return(false);
+	}
+
+	bool iOp_setVariable_scoped(SOp* op, SVariable* var, bool isOpAllocated)
+	{
+		if (op)
+		{
+			op->variable		= var;
+			op->op_type			= _OP_TYPE_SCOPED;
+			op->isOpDataAllocated	= isOpAllocated;
+			return(true);
+		}
+
+		// If we get here, failure
+		return(false);
+	}
+
+	bool iOp_setVariable_return(SOp* op, SVariable* var, bool isOpAllocated)
+	{
+		if (op)
+		{
+			op->variable		= var;
+			op->op_type			= _OP_TYPE_RETURNS;
+			op->isOpDataAllocated	= isOpAllocated;
+			return(true);
+		}
+
+		// If we get here, failure
+		return(false);
+	}
+
+
+
+
+//////////
+//
+// Called to delete anything on the op, and optionally the op itself.
+//
+//////
+	void iOp_politelyDelete(SOp* op, bool tlDeleteSelf)
+	{
+		// Make sure our environment is sane
+		if (op && op->isOpDataAllocated)
+		{
+			//////////
+			// Is it something to delete?
+			//////
+				if (op->op_data != 0 && op->isOpDataAllocated)
+				{
+					// Based on the type, delete it appropriately
+					switch (op->op_type)
+					{
+						case _OP_TYPE_PARAM:
+							iVariable_delete(op->param, true);
+							break;
+
+						case _OP_TYPE_LOCAL:
+							iVariable_delete(op->local, true);
+							break;
+
+						case _OP_TYPE_SCOPED:
+							iVariable_delete(op->scoped, true);
+							break;
+
+						case _OP_TYPE_RETURNS:
+							iVariable_delete(op->returns, true);
+							break;
+
+						case _OP_TYPE_OBJECT:
+							iObj_delete(op->obj, true);
+							break;
+
+// These types are only referenced
+						case _OP_TYPE_COMP:
+						case _OP_TYPE_OTHER:
+						case _OP_TYPE_FUNCTION:
+							break;
+					}
+				}
+
+
+			//////////
+			// Delete self if need be
+			//////
+				if (tlDeleteSelf)
+					free(op);
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to append an error to the indicated component
+//
+//////
+	void iComp_appendError(SComp* comp, u32 tnErrorNum, s8* tcMessage)
+	{
+		if (comp && comp->line)
+			iLine_appendError(comp->line, tnErrorNum, tcMessage, comp->start, comp->length);
+	}
+
+
+
+
+//////////
+//
+// Called to append an error the indicated source code line
+//
+//////
+	void iLine_appendError(SEditChain* line, u32 tnErrorNum, s8* tcMessage, u32 tnStartColumn, u32 tnLength)
+	{
+		if (line && line->compilerInfo)
+		{
+			iCompileNote_appendMessage(&line->compilerInfo->errors, tnStartColumn, tnStartColumn + tnLength, tnErrorNum, tcMessage);
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to create a new note
+//
+//////
+	SCompileNote* iCompileNote_create(u32 tnStart, u32 tnEnd, u32 tnNumber, s8* tcMessage)
+	{
+		SCompileNote* note;
+
+
+		// Create the new note
+		note = (SCompileNote*)malloc(sizeof(SCompileNote));
+		if (note)
+		{
+			// Initialize it
+			memset(note, 0, sizeof(SCompileNote));
+
+			// Populate it
+			note->start		= tnStart;
+			note->end		= tnEnd;
+			note->number	= tnNumber;
+			note->msg		= iDatum_allocate(tcMessage, -1);
+		}
+
+		// Indicate our status
+		return(note);
+	}
+
+
+
+//////////
+//
+// Called to append a compiler note
+//
+//////
+	SCompileNote* iCompileNote_appendMessage(SCompileNote** noteRoot, u32 tnStartColumn, u32 tnEndColumn, u32 tnNumber, s8* tcMessage)
+	{
+		SCompileNote*	note;
+		SCompileNote*	noteNew;
+
+
+		// Make sure our environment is sane
+		if (noteRoot)
+		{
+			// Create the new note
+			noteNew = iCompileNote_create(tnStartColumn, tnEndColumn, tnNumber, tcMessage);
+
+			// Find out where it goes
+			if (!*noteRoot)
+			{
+				// First one
+				*noteRoot = noteNew;
+
+			} else {
+				// Append to the end of the chain
+				note = *noteRoot;
+				while (note->next)
+					note = note->next;
+
+				// Append it
+				note->next = noteNew;
+			}
+		}
+
+		// Indicate our status
+		return(noteNew);
 	}
