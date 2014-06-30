@@ -304,7 +304,7 @@
 				if (!obj->bmpScaled || lnWidth != obj->bmpScaled->bi.biWidth || lnHeight != obj->bmpScaled->bi.biHeight)
 				{
 					// Delete any existing bitmap
-					iBmp_delete(obj->bmpScaled, true);
+					iBmp_delete(obj->bmpScaled, true, true);
 
 					// Create the new one
 					obj->bmpScaled = iBmp_allocate();
@@ -548,7 +548,7 @@
 				if (template_subobj)
 				{
 					// Copy from indicated template
-					subobj->font				= iFontDuplicate(template_subobj->font);
+					subobj->font				= iFont_duplicate(template_subobj->font);
 					subobj->borderNwColor.color	= template_subobj->borderNwColor.color;
 					subobj->borderNeColor.color	= template_subobj->borderNeColor.color;
 					subobj->borderSwColor.color	= template_subobj->borderSwColor.color;
@@ -567,7 +567,7 @@
 
 				} else {
 					// Use VJr defaults
-					subobj->font				= iFontDuplicate(gsFont);
+					subobj->font				= iFont_duplicate(gsFont);
 					subobj->borderNwColor.color	= NwColor.color;
 					subobj->borderNeColor.color	= NeColor.color;
 					subobj->borderSwColor.color	= SwColor.color;
@@ -625,7 +625,7 @@
 				if (template_subobj)
 				{
 					// Copy from indicated template
-					subobj->font				= iFontDuplicate(template_subobj->font);
+					subobj->font				= iFont_duplicate(template_subobj->font);
 					subobj->borderNwColor.color	= template_subobj->borderNwColor.color;
 					subobj->borderNeColor.color	= template_subobj->borderNeColor.color;
 					subobj->borderSwColor.color	= template_subobj->borderSwColor.color;
@@ -645,7 +645,7 @@
 				} else {
 					// Use VJr defaults
 					// Copy from indicated template
-					subobj->font				= iFontDuplicate(template_subobj->font);
+					subobj->font				= iFont_duplicate(template_subobj->font);
 					subobj->borderNwColor.color	= NwColor.color;
 					subobj->borderNeColor.color	= NeColor.color;
 					subobj->borderSwColor.color	= SwColor.color;
@@ -703,7 +703,7 @@
 				if (template_subobj)
 				{
 					// Copy from indicated template
-					subobj->font						= iFontDuplicate(template_subobj->font);
+					subobj->font						= iFont_duplicate(template_subobj->font);
 					subobj->backColor.color				= template_subobj->backColor.color;
 					subobj->foreColor.color				= template_subobj->foreColor.color;
 
@@ -720,7 +720,7 @@
 
 				} else {
 					// Use VJr defaults
-					subobj->font						= iFontDuplicate(gsFont);
+					subobj->font						= iFont_duplicate(gsFont);
 					subobj->backColor.color				= white.color;
 					subobj->foreColor.color				= black.color;
 
@@ -776,7 +776,7 @@
 				if (template_subobj)
 				{
 					// Copy from indicated template
-					subobj->font						= iFontDuplicate(template_subobj->font);
+					subobj->font						= iFont_duplicate(template_subobj->font);
 					subobj->backColor.color				= template_subobj->backColor.color;
 					subobj->foreColor.color				= template_subobj->foreColor.color;
 
@@ -806,7 +806,7 @@
 
 				} else {
 					// Use VJr defaults
-					subobj->font						= iFontDuplicate(gsFont);
+					subobj->font						= iFont_duplicate(gsFont);
 					subobj->backColor.color				= white.color;
 					subobj->foreColor.color				= black.color;
 
@@ -872,7 +872,7 @@
 				if (template_subobj)
 				{
 					// Copy from indicated template
-					subobj->font						= iFontDuplicate(template_subobj->font);
+					subobj->font						= iFont_duplicate(template_subobj->font);
 					subobj->backColor.color				= template_subobj->backColor.color;
 					subobj->foreColor.color				= template_subobj->foreColor.color;
 
@@ -890,7 +890,7 @@
 
 				} else {
 					// Use VJr defaults
-					subobj->font						= iFontDuplicate(gsFont);
+					subobj->font						= iFont_duplicate(gsFont);
 					subobj->backColor.color				= white.color;
 					subobj->foreColor.color				= black.color;
 
@@ -947,7 +947,7 @@
 				if (template_subobj)
 				{
 					// Copy from indicated template
-					subobj->font						= iFontDuplicate(template_subobj->font);
+					subobj->font						= iFont_duplicate(template_subobj->font);
 					subobj->backColor.color				= template_subobj->backColor.color;
 					subobj->foreColor.color				= template_subobj->foreColor.color;
 
@@ -974,7 +974,7 @@
 
 				} else {
 					// Use VJr defaults
-					subobj->font						= iFontDuplicate(gsFont);
+					subobj->font						= iFont_duplicate(gsFont);
 					subobj->backColor.color				= white.color;
 					subobj->foreColor.color				= black.color;
 
@@ -1097,7 +1097,7 @@
 				if (template_subobj)
 				{
 					// Copy from indicated template
-					subobj->font						= iFontDuplicate(template_subobj->font);
+					subobj->font						= iFont_duplicate(template_subobj->font);
 					subobj->backColor.color				= template_subobj->backColor.color;
 					subobj->foreColor.color				= template_subobj->foreColor.color;
 
@@ -1119,7 +1119,7 @@
 
 				} else {
 					// Use VJr defaults
-					subobj->font						= iFontDuplicate(gsFont);
+					subobj->font						= iFont_duplicate(gsFont);
 					subobj->backColor.color				= white.color;
 					subobj->foreColor.color				= black.color;
 
@@ -1265,7 +1265,7 @@
 				if (template_subobj)
 				{
 					// Copy from indicated template
-					subobj->font						= iFontDuplicate(template_subobj->font);
+					subobj->font						= iFont_duplicate(template_subobj->font);
 					subobj->backColor.color				= template_subobj->backColor.color;
 					subobj->foreColor.color				= template_subobj->foreColor.color;
 
@@ -1289,7 +1289,7 @@
 
 				} else {
 					// Use VJr defaults
-					subobj->font						= iFontDuplicate(gsFont);
+					subobj->font						= iFont_duplicate(gsFont);
 					subobj->backColor.color				= white.color;
 					subobj->foreColor.color				= white.color;
 
@@ -1348,8 +1348,8 @@
 		//////////
 		// Free subobject components
 		//////
-			iFontFree(subobj->font, true);
-			iBmp_delete(subobj->bmpIcon, true);
+			iFont_free(subobj->font, true);
+			iBmp_delete(subobj->bmpIcon, true, true);
 			iDatum_free(&subobj->comment, true);
 			iDatum_free(&subobj->caption, true);
 			iDatum_free(&subobj->toolTip, true);
@@ -1375,8 +1375,8 @@
 		//////////
 		// Free subobject components
 		//////
-			iFontFree(subobj->font, true);
-			iBmp_delete(subobj->bmpIcon, true);
+			iFont_free(subobj->font, true);
+			iBmp_delete(subobj->bmpIcon, true, true);
 			iDatum_free(&subobj->comment, true);
 			iDatum_free(&subobj->caption, true);
 			iDatum_free(&subobj->toolTip, true);
@@ -1402,7 +1402,7 @@
 		//////////
 		// Free subobject components
 		//////
-			iFontFree(subobj->font, true);
+			iFont_free(subobj->font, true);
 			iDatum_free(&subobj->comment, true);
 			iDatum_free(&subobj->caption, true);
 			iDatum_free(&subobj->toolTip, true);
@@ -1428,7 +1428,7 @@
 		//////////
 		// Free subobject components
 		//////
-			iFontFree(subobj->font, true);
+			iFont_free(subobj->font, true);
 			iDatum_free(&subobj->value, true);
 			iDatum_free(&subobj->picture, true);
 			iDatum_free(&subobj->mask, true);
@@ -1456,7 +1456,7 @@
 		//////////
 		// Free subobject components
 		//////
-			iFontFree(subobj->font, true);
+			iFont_free(subobj->font, true);
 			iDatum_free(&subobj->caption, true);
 			iDatum_free(&subobj->comment, true);
 			iDatum_free(&subobj->toolTip, true);
@@ -1482,7 +1482,7 @@
 		//////////
 		// Free subobject components
 		//////
-			iFontFree(subobj->font, true);
+			iFont_free(subobj->font, true);
 			iEditChainManager_free(&subobj->value, true);
 			iDatum_free(&subobj->comment, true);
 			iDatum_free(&subobj->toolTip, true);

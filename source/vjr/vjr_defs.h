@@ -143,14 +143,11 @@
 // vjr_sup.cpp
 //////
 	void					initialize								(HACCEL* hAccelTable);
-	void					iConvertBitmapTo32Bits					(SBitmap* bmp);
-	void					iCopyBitmap24ToBitmap32					(SBitmap* bmp32, SBitmap* bmp24);
-	void					iDeleteBitmap							(SBitmap* bmp);
-	void					iCreateMessageWindow					(void);
+	void					iInit_createMessageWindow				(void);
 	bool					isValidWindow							(u32 tnWindow);
-	void					iCreateDefaultObjects					(void);
-	SObject*				iCreateScreenForm						(void);
-	SObject*				iCreateJDebiForm						(void);
+	void					iInit_createDefaultObjects				(void);
+	SObject*				iInit_createScreenForm					(void);
+	SObject*				iInit_createJDebiForm					(void);
 
 	DWORD	WINAPI			iReadEvents_messageWindow				(LPVOID lpParameter);
 	LRESULT	CALLBACK		iWndProc_messageWindow					(HWND hwnd, UINT m, WPARAM w, LPARAM l);
@@ -168,17 +165,16 @@
 	void					iComputeJDebiWindowNonclientAreaDimensions	(SSize* size);
 	void					iAdjustJDebiWindowDimensions				(SSize* size);
 
-	HBITMAP					iCreateBitmap							(HDC thdc, int tnWidth, int tnHeight, int tnPlanes, int tnBits, void** tbd, BITMAPFILEHEADER* tbh, BITMAPINFOHEADER* tbi);
-	s64						iComputeTimeMilliseconds				(SYSTEMTIME* time);
-	s64						iGetSystemTimeMs						(void);
-	s64						iGetLocalTimeMs							(void);
-	s64						iDiff									(s64 tnBaseValue, s64 tnSubtractionValue);
+	s64						iTime_computeMilliseconds				(SYSTEMTIME* time);
+	s64						iTime_getSystemMs						(void);
+	s64						iTime_getLocalMs						(void);
+	s64						iMath_delta								(s64 tnBaseValue, s64 tnSubtractionValue);
 	s8*						iDuplicateString						(s8* tcText);
-	SFont*					iFontAllocate							(void);
-	SFont*					iFontDuplicate							(SFont* fontSource);
-	SFont*					iFontCreate								(cs8* tcFontName, u32 tnFontSize, u32 tnFontWeight, u32 tnItalics, u32 tnUnderline);
-	void					iFontFree								(SFont* font, bool tlFreeSelf);
-	u32						iFindClosestFontSizeMatch				(s8* tcText, s8* tcFontName, u32 tnFontSize, u32 tnFontBold, u32 tnFontItalic, u32 tnFontUnderline, u32 tnWidth, u32 tnHeight, u32 tnWidthDesired, u32 tnHeightDesired);
+	SFont*					iFont_allocate							(void);
+	SFont*					iFont_duplicate							(SFont* fontSource);
+	SFont*					iFont_create							(cs8* tcFontName, u32 tnFontSize, u32 tnFontWeight, u32 tnItalics, u32 tnUnderline);
+	void					iFont_free								(SFont* font, bool tlFreeSelf);
+	u32						iFont_findClosestSizeMatch				(s8* tcText, s8* tcFontName, u32 tnFontSize, u32 tnFontBold, u32 tnFontItalic, u32 tnFontUnderline, u32 tnWidth, u32 tnHeight, u32 tnWidthDesired, u32 tnHeightDesired);
 	int						iProcessMouseMessage					(UINT m, WPARAM w, LPARAM l);
 	void					iTranslateMousePosition					(POINTS* pt);
 
@@ -212,11 +208,13 @@
 	SBitmap*				iBmp_copy								(SBitmap* bmpSrc);
 	SBitmap*				iBmp_verifyCopyIsSameSize				(SBitmap* bmpCopy, SBitmap* bmp);
 	SBitmap*				iBmp_rawLoad							(cu8* bmpRawFileData);
+	void					iBmp_convertTo32Bits					(SBitmap* bmp);
+	void					iBmp_copy24To32							(SBitmap* bmp32, SBitmap* bmp24);
 	bool					iBmp_validate							(SBitmap* bmp);
 	s32						iBmp_computeRowWidth					(SBitmap* bmp);
 	void					iBmp_createBySize						(SBitmap* bmp, u32 width, u32 height, u32 tnBitCount);
 	void					iBmp_populateBitmapStructure			(SBitmap* bmp, u32 tnWidth, u32 tnHeight, u32 tnBitCount);
-	void					iBmp_delete								(SBitmap* bmp, bool tlFreeBits);
+	void					iBmp_delete								(SBitmap* bmp, bool tlFreeBits, bool tlFreeSelf);
 	void					iBmp_bitBltObject						(SBitmap* bmpDst, SObject* obj, SBitmap* bmpSrc);
 	void					iBmp_bitBltObjectMask					(SBitmap* bmpDst, SObject* obj, SBitmap* bmpSrc);
 	u32						iBmp_bitBlt								(SBitmap* bmpDst, RECT* trc, SBitmap* bmpSrc);

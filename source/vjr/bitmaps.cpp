@@ -115,10 +115,11 @@
 			{
 				// Make sure it's the same size
 				if (bmp->bi.biWidth == bmpCopy->bi.biWidth && bmp->bi.biHeight == bmpCopy->bi.biHeight)
-					return(bmpCopy);		// They're the same
+					return(bmpCopy);		// They're the same already
 
 				// If we get here, we need to delete the copy
-				iBmp_delete(bmpCopy, true);
+				iBmp_delete(bmpCopy, true, true);
+				// Note:  From now on we use bmpNew, and return that
 			}
 
 			// When we get here, we need to create a new one
@@ -173,13 +174,85 @@
 
 				// Convert to 32-bit if need be
 				if (bmp->bi.biBitCount == 24)
-					iConvertBitmapTo32Bits(bmp);
+					iBmp_convertTo32Bits(bmp);
 			}
 
 		//////////
 		// Indicate our success or failure
 		//////
 			return(bmp);
+	}
+
+
+
+
+//////////
+//
+// Called to convert the indicated bitmap to 32-bits if need be
+//
+//////
+	void iBmp_convertTo32Bits(SBitmap* bmp)
+	{
+		SBitmap bmp32;
+
+
+		// Are we already there?
+		if (bmp && bmp->bi.biBitCount != 32)
+		{
+			// No, but we only know how to handle 24-bit bitmaps
+			if (bmp->bi.biBitCount == 24)
+			{
+				// We need to convert it
+				// Create the 32-bit version
+				iBmp_createBySize(&bmp32, bmp->bi.biWidth, bmp->bi.biHeight, 32);
+
+				// Copy it
+				iBmp_copy24To32(&bmp32, bmp);
+
+				// Free the (now old) bitmap
+				iBmp_delete(bmp, true, false);
+
+				// Copy our bitmap to the destination
+				memcpy(bmp, &bmp32, sizeof(SBitmap));
+			}
+		}
+	}
+
+
+
+
+//////////
+//
+// Copies the 24-bit bitmap to a 32-bit bitmap.
+// Note:  This function is no longer needed, but may be faster for equal sized
+//        bitmaps that are known to be 24-bit and 32-bit.  The iBmp_bitBlt()
+//        function now handles arbitrary 24-bit and 32-bit sources and destinations.
+//
+//////
+	void iBmp_copy24To32(SBitmap* bmp32, SBitmap* bmp24)
+	{
+		s32		lnX, lnY;
+		SBgr*	lbgr;
+		SBgra*	lbgra;
+
+
+		// Iterate through every row
+		for (lnY = 0; lnY < bmp24->bi.biHeight; lnY++)
+		{
+			// Grab our pointers
+			lbgr	= (SBgr*)(bmp24->bd  + ((bmp24->bi.biHeight - lnY - 1) * bmp24->rowWidth));
+			lbgra	= (SBgra*)(bmp32->bd + ((bmp32->bi.biHeight - lnY - 1) * bmp32->rowWidth));
+
+			// Iterate though every column
+			for (lnX = 0; lnX < bmp24->bi.biWidth; lnX++, lbgr++, lbgra++)
+			{
+				// Copy the pixel
+				lbgra->alp	= 255;
+				lbgra->red	= lbgr->red;
+				lbgra->grn	= lbgr->grn;
+				lbgra->blu	= lbgr->blu;
+			}
+		}
 	}
 
 
@@ -317,7 +390,7 @@
 //        the container SBitmap being deleted, but not the bits and related data within.
 //
 //////
-	void iBmp_delete(SBitmap* bmp, bool tlFreeBits)
+	void iBmp_delete(SBitmap* bmp, bool tlFreeBits, bool tlFreeSelf)
 	{
 		if (bmp)
 		{
@@ -330,7 +403,8 @@
 			}
 
 			// Release the bitmap
-			free(bmp);
+			if (tlFreeSelf)
+				free(bmp);
 		}
 	}
 

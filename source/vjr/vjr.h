@@ -47,6 +47,13 @@
 
 #include "builder.cpp"
 
+#include "vjr_structs0.h"
+
+#include "compiler_const.h"
+#include "compiler_structs.h"
+#include "compiler_defs.h"
+#include "compiler_globals.h"
+
 #include "vjr_structs.h"
 #include "vjr_defs.h"
 #include "vjr_globals.h"

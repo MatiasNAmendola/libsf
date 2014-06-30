@@ -232,26 +232,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\compiler.cpp"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\objects.cpp"
 				>
 				<FileConfiguration
@@ -321,6 +301,10 @@
 				RelativePath=".\vjr_structs.h"
 				>
 			</File>
+			<File
+				RelativePath=".\vjr_structs0.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
@@ -337,6 +321,46 @@
 			</File>
 			<File
 				RelativePath=".\vjr.rc"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="compiler"
+			>
+			<File
+				RelativePath=".\compiler.cpp"
+				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\compiler_const.h"
+				>
+			</File>
+			<File
+				RelativePath=".\compiler_defs.h"
+				>
+			</File>
+			<File
+				RelativePath=".\compiler_globals.h"
+				>
+			</File>
+			<File
+				RelativePath=".\compiler_structs.h"
 				>
 			</File>
 		</Filter>

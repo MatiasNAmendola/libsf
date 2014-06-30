@@ -56,10 +56,10 @@ void initialize(HACCEL* hAccelTable)
 	InitializeCriticalSection(&gcsUniqueIdAccess);
 
 	// Get startup time
-	systemStartedMs = iGetLocalTimeMs();
+	systemStartedMs = iTime_getLocalMs();
 
 	// Default font
-	gsFont = iFontCreate(cgcUbuntu, 10, FW_NORMAL, 0, 0);
+	gsFont = iFont_create(cgcUbuntu, 10, FW_NORMAL, 0, 0);
 
 
 	//////////
@@ -84,92 +84,15 @@ void initialize(HACCEL* hAccelTable)
 
 
 	// Create our message window
-	iCreateMessageWindow();
+	iInit_createMessageWindow();
 
 	// Create our default objects
-	iCreateDefaultObjects();
+	iInit_createDefaultObjects();
 
 	// Create our main screen window
-	iCreateScreenForm();
-	iCreateJDebiForm();
+	iInit_createScreenForm();
+	iInit_createJDebiForm();
 }
-
-
-
-
-//////////
-//
-// Called to convert the indicated bitmap to 32-bits if need be
-//
-//////
-	void iConvertBitmapTo32Bits(SBitmap* bmp)
-	{
-		SBitmap bmp32;
-
-
-		// Are we already there?
-		if (bmp && bmp->bi.biBitCount != 32)
-		{
-			// No, but we only know how to handle 24-bit bitmaps
-			if (bmp->bi.biBitCount == 24)
-			{
-				// We need to convert it
-				// Create the 32-bit version
-				iBmp_createBySize(&bmp32, bmp->bi.biWidth, bmp->bi.biHeight, 32);
-
-				// Copy it
-				iCopyBitmap24ToBitmap32(&bmp32, bmp);
-
-				// Free the (now old) bitmap
-				iDeleteBitmap(bmp);
-
-				// Copy our bitmap to the destination
-				memcpy(bmp, &bmp32, sizeof(SBitmap));
-			}
-		}
-	}
-
-	// Assumes both bitmaps are the same size
-	void iCopyBitmap24ToBitmap32(SBitmap* bmp32, SBitmap* bmp24)
-	{
-		s32		lnX, lnY;
-		SBgr*	lbgr;
-		SBgra*	lbgra;
-
-
-		// Iterate through every row
-		for (lnY = 0; lnY < bmp24->bi.biHeight; lnY++)
-		{
-			// Grab our pointers
-			lbgr	= (SBgr*)(bmp24->bd  + ((bmp24->bi.biHeight - lnY - 1) * bmp24->rowWidth));
-			lbgra	= (SBgra*)(bmp32->bd + ((bmp32->bi.biHeight - lnY - 1) * bmp32->rowWidth));
-
-			// Iterate though every column
-			for (lnX = 0; lnX < bmp24->bi.biWidth; lnX++, lbgr++, lbgra++)
-			{
-				// Copy the pixel
-				lbgra->alp	= 255;
-				lbgra->red	= lbgr->red;
-				lbgra->grn	= lbgr->grn;
-				lbgra->blu	= lbgr->blu;
-			}
-		}
-	}
-
-	void iDeleteBitmap(SBitmap* bmp)
-	{
-		if (bmp->hbmp)
-		{
-			DeleteObject((HGDIOBJ)bmp->hbmp);
-			bmp->hbmp = NULL;
-		}
-
-		if (bmp->hdc)
-		{
-			DeleteDC(bmp->hdc);
-			bmp->hdc = NULL;
-		}
-	}
 
 
 
@@ -179,7 +102,7 @@ void initialize(HACCEL* hAccelTable)
 // Creates the message window used for communicating actions
 //
 //////
-	void iCreateMessageWindow(void)
+	void iInit_createMessageWindow(void)
 	{
 		ATOM			atom;
 		WNDCLASSEXA		classa;
@@ -306,7 +229,7 @@ void initialize(HACCEL* hAccelTable)
 // Loads the default settings for each object, populating them in turn.
 //
 //////
-	void iCreateDefaultObjects(void)
+	void iInit_createDefaultObjects(void)
 	{
 		SSubObjEmpty*		subobj_empty;
 		SSubObjForm*		subobj_form;
@@ -376,7 +299,7 @@ void initialize(HACCEL* hAccelTable)
 // Called to find or create the KSI interface window
 //
 //////
-	SObject* iCreateScreenForm(void)
+	SObject* iInit_createScreenForm(void)
 	{
 // 		s32				lnLeft, lnTop;
 // 		RECT			lrc;
@@ -430,7 +353,7 @@ void initialize(HACCEL* hAccelTable)
 // 
 //
 //////
-	SObject* iCreateJDebiForm(void)
+	SObject* iInit_createJDebiForm(void)
 	{
 // 		s32				lnLeft, lnTop;
 // 		RECT			lrc;
@@ -697,68 +620,6 @@ void initialize(HACCEL* hAccelTable)
 // 				GetClientRect(ghwndJDebi, &winJDebi.rcClient);
 // 				iRedrawJDebi(&winJDebi);
 // 		}
-	}
-
-
-
-
-//////////
-//
-// Create a bitmap of the indicated size, and create a DIB section for it
-//
-//////
-	HBITMAP iCreateBitmap(HDC thdc, int tnWidth, int tnHeight, int tnPlanes, int tnBits, void** tbd, BITMAPFILEHEADER* tbh, BITMAPINFOHEADER* tbi)
-	{
-		BITMAPFILEHEADER	bf;
-		BITMAPINFOHEADER	bi;
-		BITMAPINFOHEADER*	lbi;
-		HBITMAP				lhbmp;
-		SBitmap				bmp;
-
-
-		//////////
-		// Use remote or local
-		//////
-			if (tbi)		lbi = tbi;		// Use caller's
-			else			lbi = &bi;		// Use ours
-
-
-		//////////
-		// Create a new DIB (these parts are required for CreateDIBSection to work)
-		//////
-			memset(lbi, 0, sizeof(BITMAPINFOHEADER));
-			lbi->biSize			= sizeof(BITMAPINFOHEADER);
-			lbi->biWidth		= tnWidth;
-			lbi->biHeight		= tnHeight;
-			lbi->biPlanes		= tnPlanes;
-			lbi->biBitCount		= tnBits;
-
-
-		//////////
-		// Populate caller parts (these parts are also required for disk files)
-		//////
-			if (tbi)
-			{
-				memcpy(&bmp.bi, tbi, sizeof(bmp.bi));
-				lbi->biSizeImage		= iBmp_computeRowWidth(&bmp) * tnHeight;
-				lbi->biXPelsPerMeter	= 3270;
-				lbi->biYPelsPerMeter	= 3270;
-			}
-			if (tbh)
-			{
-				tbh->bfType				= 'MB';
-				tbh->bfReserved1		= 0;
-				tbh->bfReserved2		= 0;
-				tbh->bfOffBits			= sizeof(bf) + sizeof(bi);
-				tbh->bfSize				= tbh->bfOffBits + tbi->biSizeImage;
-			}
-
-
-		//////////
-		// Physically create the bitmap
-		//////
-			lhbmp = CreateDIBSection(thdc, (BITMAPINFO*)lbi, DIB_RGB_COLORS, tbd, NULL, 0);
-			return(lhbmp);
 	}
 
 
@@ -1142,7 +1003,7 @@ void initialize(HACCEL* hAccelTable)
 // Time functions
 //
 //////
-	s64 iComputeTimeMilliseconds(SYSTEMTIME* time)
+	s64 iTime_computeMilliseconds(SYSTEMTIME* time)
 	{
 		s64 lnMs;
 		
@@ -1158,21 +1019,21 @@ void initialize(HACCEL* hAccelTable)
 		return(lnMs);
 	}
 
-	s64 iGetSystemTimeMs(void)
+	s64 iTime_getSystemMs(void)
 	{
 		SYSTEMTIME time;
 		GetSystemTime(&time);
-		return(iComputeTimeMilliseconds(&time));
+		return(iTime_computeMilliseconds(&time));
 	}
 
-	s64 iGetLocalTimeMs(void)
+	s64 iTime_getLocalMs(void)
 	{
 		SYSTEMTIME time;
 		GetLocalTime(&time);
-		return(iComputeTimeMilliseconds(&time));
+		return(iTime_computeMilliseconds(&time));
 	}
 
-	s64 iDiff(s64 tnBaseValue, s64 tnSubtractionValue)
+	s64 iMath_delta(s64 tnBaseValue, s64 tnSubtractionValue)
 	{
 		return(tnBaseValue - tnSubtractionValue);
 	}
@@ -1211,7 +1072,7 @@ void initialize(HACCEL* hAccelTable)
 // Called to duplicate a font that was found from the list of known system fonts
 //
 //////
-	SFont* iFontDuplicate(SFont* fontSource)
+	SFont* iFont_duplicate(SFont* fontSource)
 	{
 		SFont* font;
 
@@ -1223,7 +1084,7 @@ void initialize(HACCEL* hAccelTable)
 			//////////
 			// Allocate a new pointer
 			//////
-				font = iFontAllocate();
+				font = iFont_allocate();
 				if (!font)
 					return(font);
 
@@ -1253,7 +1114,7 @@ void initialize(HACCEL* hAccelTable)
 // Allocate an empty structure
 //
 //////
-	SFont* iFontAllocate(void)
+	SFont* iFont_allocate(void)
 	{
 		SFont* font;
 
@@ -1278,7 +1139,7 @@ void initialize(HACCEL* hAccelTable)
 // Create a new font
 //
 //////
-	SFont* iFontCreate(cs8* tcFontName, u32 tnFontSize, u32 tnFontWeight, u32 tnItalics, u32 tnUnderline)
+	SFont* iFont_create(cs8* tcFontName, u32 tnFontSize, u32 tnFontWeight, u32 tnItalics, u32 tnUnderline)
 	{
 		u32		lnI, lnLength;
 		SFont*	font;
@@ -1340,7 +1201,7 @@ void initialize(HACCEL* hAccelTable)
 // Free the indicated font resource
 //
 //////
-	void iFontFree(SFont* font, bool tlFreeSelf)
+	void iFont_free(SFont* font, bool tlFreeSelf)
 	{
 		if (font)
 		{
@@ -1370,7 +1231,7 @@ void initialize(HACCEL* hAccelTable)
 // or less than the ratios indicated at the current size, yet for the desired size.
 //
 //////
-	u32 iFindClosestFontSizeMatch(s8* tcText, s8* tcFontName, u32 tnFontSize, u32 tnFontBold, u32 tnFontItalic, u32 tnFontUnderline, u32 tnWidth, u32 tnHeight, u32 tnWidthDesired, u32 tnHeightDesired)
+	u32 iFont_findClosestSizeMatch(s8* tcText, s8* tcFontName, u32 tnFontSize, u32 tnFontBold, u32 tnFontItalic, u32 tnFontUnderline, u32 tnWidth, u32 tnHeight, u32 tnWidthDesired, u32 tnHeightDesired)
 	{
 		s32			lnI, lnJ, lnTextLength, lnFontBold;
 		f64			lfRatioH, lfRatioV, lfRatioHThis, lfRatioVThis;
@@ -1385,7 +1246,7 @@ void initialize(HACCEL* hAccelTable)
 		for (lnI = 0; lnI == 0 || (lnI < 200 && (s32)(tnFontSize + lnI) < (s32)(tnFontSize * 3) && lrc.bottom < (s32)((f32)tnHeightDesired * 1.25f) && lrc.right < (s32)((f32)tnWidthDesired * 1.25f)); lnI++)
 		{
 			// Grab this font
-			font = iFontCreate(tcFontName, tnFontSize + lnI, lnFontBold, tnFontItalic, tnFontUnderline);
+			font = iFont_create(tcFontName, tnFontSize + lnI, lnFontBold, tnFontItalic, tnFontUnderline);
 
 			// Find out how big this font would be drawn for this text
 			SetRect(&lrc, 0, 0, 0, 0);
