@@ -3650,7 +3650,7 @@ _asm int 3;
 			//////
 				if (tlTraverseNext && node->next)
 				{
-					iNode_politelyDeleteAll(node->next, node->prev->prev != node, node->prev->next != node, node->prev->left != node, node->prev->right != node);
+					iNode_politelyDeleteAll(node->next, node->next->prev != node, node->next->next != node, node->next->left != node, node->next->right != node);
 					node->next = NULL;
 				}
 
@@ -3660,7 +3660,7 @@ _asm int 3;
 			//////
 				if (tlTraverseLeft && node->left)
 				{
-					iNode_politelyDeleteAll(node->left, node->prev->prev != node, node->prev->next != node, node->prev->left != node, node->prev->right != node);
+					iNode_politelyDeleteAll(node->left, node->left->prev != node, node->left->next != node, node->left->left != node, node->left->right != node);
 					node->left = NULL;
 				}
 
@@ -3670,7 +3670,7 @@ _asm int 3;
 			//////
 				if (tlTraverseRight && node->right)
 				{
-					iNode_politelyDeleteAll(node->right, node->prev->prev != node, node->prev->next != node, node->prev->left != node, node->prev->right != node);
+					iNode_politelyDeleteAll(node->right, node->right->prev != node, node->right->next != node, node->right->left != node, node->right->right != node);
 					node->right = NULL;
 				}
 
