@@ -71,23 +71,34 @@
 		// Make sure our environment is sane
 		if (codeBlock && codeBlock->ecFirst)
 		{
-			currentFunction	= NULL;
+			currentFunction	= &codeBlock->firstFunction;
 			line			= codeBlock->ecFirst;
 			while (line)
 			{
+				//////////
 				// Increase our line count
-				++ccData->sourceLines;
+				//////
+					++ccData->sourceLines;
+
+
+				//////////
+				// Make sure we have a compilerInfo object
+				//////
+					if (!line->compilerInfo)
+						line->compilerInfo = iCompiler_allocate(line);
+
 
 				// Is there anything to parse on this line?
 				if (line->sourceCode && line->sourceCodePopulated > 0)
 				{
 					//////////
-					// Breakout this line
+					// Determine if this line needs compiled
 					//////
 						if (tlEditAndContinue)
 						{
-							// We only process this line if its contents have changed
-							if (!line->compilerInfo || !line->compilerInfo->sourceCode || line->forceRecompile)
+							// We are in edit-and-continue mode, which means we only process this line
+							// if its contents have changed.  Otherwise, we use what was already compiled.
+							if (!line->compilerInfo->sourceCode || line->forceRecompile)
 							{
 								// This line has not yet been compiled.
 								// This line needs to be compiled.
@@ -122,7 +133,7 @@
 							{
 								// In an edit-and-continue environment, we have to track functions so we maintain the
 								// current function we are in, even if the source code for those functions didn't change.
-								if (line->compilerInfo && line->compilerInfo->firstComp && line->compilerInfo->firstComp->iCode == _ICODE_FUNCTION)
+								if (line->compilerInfo->firstComp && line->compilerInfo->firstComp->iCode == _ICODE_FUNCTION)
 								{
 									// We've moved into another function
 									func = &codeBlock->firstFunction;
@@ -149,6 +160,9 @@
 								//////////
 								// We need to clear out anything from the prior compile
 								//////
+									iComps_removeAll(line);
+									iNode_politelyDeleteAll(&line);
+
 
 								//////////
 								// Convert raw source code to known character sequences
@@ -521,6 +535,27 @@
 	{
 // TODO:  Working here
 		return(NULL);
+	}
+;
+
+
+
+
+//////////
+//
+// Called to remove all components for this line
+//
+//////
+	void iComps_removeAll(SEditChain* line)
+	{
+		if (line && line->compilerInfo)
+		{
+			// Delete all components
+			iLl_deleteNodeChain((SLL**)line->compilerInfo->firstComp);
+
+			// Reset the pointer
+			line->compilerInfo->firstComp = NULL;
+		}
 	}
 
 
@@ -918,6 +953,66 @@
 
 //////////
 //
+// Called to combine two components into one.  If tnNewICode is > 0 then the
+// iCode is updated as well.
+//
+//////
+	u32 iComps_combineNextN(SComp* comp, u32 tnCount, s32 tnNewICode)
+	{
+		u32		lnCount;
+		SComp*	compNext;
+
+
+		// Make sure our environment is sane
+		if (comp)
+		{
+			//////////
+			// Combine the next N items
+			//////
+				for (lnCount = 0; lnCount < tnCount; lnCount++)
+				{
+					// Grab the next component
+					compNext = (SComp*)comp->ll.next;
+
+					// Combine it into this one
+					if (compNext)
+					{
+						// Add in the length of the next component, plus any spaces between them
+						comp->length += compNext + iiComps_charactersBetween(comp, compNext);
+
+						// Delete the next component
+						iLl_deleteNode(compNext, true);
+
+					} else {
+						// We're done, perhaps prematurely, but there are no more components
+						break;
+					}
+				}
+
+
+			//////////
+			// Mark it as the new iCode
+			//////
+				if (tnNewICode > 0)
+					comp->iCode = tnNewICode;
+
+
+			//////////
+			// Indicate how many we merged
+			//////
+				return(lnCount);
+
+		} else {
+			// Indicate failure
+			return(0);
+		}
+	}
+
+
+
+
+//////////
+//
 // Called to combine two components which are touching into one.
 //
 // Source:		define user32		something here
@@ -1080,6 +1175,133 @@
 		}
 		// Indicate the success rate at which we operated hitherto
 		return(lnCount);
+	}
+
+
+
+
+//////////
+//
+// Called to combine adjacent combinations of underscore, alpha, numeric, or alphanumeric,
+// which begin with an underscore, alpha, or alphanumeric, into one component that is then
+// branded as alphanumeric.
+//
+//////
+	u32 iComps_CombineAdjacentAlphanumeric(SEditChain* line)
+	{
+		SComp* comp;
+		SComp* compNext;
+
+
+		// Make sure our environment is sane
+		if (line && line->compilerInfo)
+		{
+			// Begin at the beginning and check across all components
+			comp = line->compilerInfo->firstComp;
+			while (comp)
+			{
+				// Grab the next component
+				compNext = (SComp*)comp->ll.next;
+				if (compNext)
+				{
+					// Is this an underscore, alpha, or alphanumeric?
+					if (comp->iCode == _ICODE_UNDERSCORE || comp->iCode == _ICODE_ALPHA || comp->iCode == _ICODE_ALPHANUMERIC)
+					{
+						// Combine so long as the following are immediately adjacent, and are one of underscore, alpha, numeric, alphanumeric
+						while (	(compNext = (SComp*)comp->ll.next)
+								&& iiComps_charactersBetween(comp, compNext) == 0
+								&& (	compNext->iCode == _ICODE_UNDERSCORE
+									||	compNext->iCode == _ICODE_ALPHA
+									||	compNext->iCode == _ICODE_NUMERIC
+									||	compNext->iCode == _ICODE_ALPHANUMERIC
+								)
+							)
+							// Combine this comp and the next one into one
+							iComps_combineNextN(comp, 1, _ICODE_ALPHANUMERIC);
+					}
+				}
+
+
+				// Move to the next component
+				comp = (SComp*)comp->ll.next;
+			}
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to combine numeric combinations, such as [999][.][99] into [999.99] as
+// a single numeric.  In addition, if a leading plus or negative is immediately
+// adjacent, it is included as well.
+//
+//////
+	u32 iComps_CombineAdjacentNumeric(SEditChain* line)
+	{
+		SComp* comp;
+		SComp* compNext1;
+		SComp* compNext2;
+		SComp* compNext3;
+
+
+		// Make sure our environment is sane
+		if (line && line->compilerInfo)
+		{
+			// Begin at the beginning and check across all components
+			comp = line->compilerInfo->firstComp;
+			while (comp)
+			{
+				// Grab the next component
+				compNext1 = (SComp*)comp->ll.next;
+				if (compNext1 && iiComps_charactersBetween(comp, compNext1) == 0)
+				{
+					// Is this an underscore, alpha, or alphanumeric?
+					if ((comp->iCode == _ICODE_PLUS || comp->iCode == _ICODE_HYPHEN) && compNext1->iCode == _ICODE_NUMERIC)
+					{
+						// We have +-999
+						compNext2 = (SComp*)compNext1->ll.next;
+						if (compNext2 && compNext2->iCode == _ICODE_DOT)
+						{
+							// We have +-999.
+							compNext3 = (SComp*)compNext2->ll.next;
+							if (compNext3 && compNext3->iCode == _ICODE_NUMERIC)
+							{
+								// We have +-999.99
+								iComps_combineNextN(comp, 3, _ICODE_NUMERIC);
+
+							} else {
+								// Combine the +- with the 999 and the .
+								iComps_combineNextN(comp, 2, _ICODE_NUMERIC);
+							}
+
+						} else {
+							// Combine the +- with the 999 into one
+							iComps_combineNextN(comp, 1, _ICODE_NUMERIC);
+						}
+
+					} else if (comp->iCode == _ICODE_NUMERIC) {
+						// We have 999
+						compNext2 = (SComp*)compNext1->ll.next;
+						if (compNext2 && compNext2->iCode == _ICODE_DOT)
+						{
+							// We have 999.
+							compNext3 = (SComp*)compNext2->ll.next;
+							if (compNext3 && compNext3->iCode == _ICODE_NUMERIC)
+							{
+								// We have 999.99
+								iComps_combineNextN(comp, 2, _ICODE_NUMERIC);
+							}
+						}
+					}
+				}
+
+
+				// Move to the next component
+				comp = (SComp*)comp->ll.next;
+			}
+		}
 	}
 
 
@@ -1345,29 +1567,41 @@
 //////
 	void iComps_xlatNaturalGroupings(SEditChain* line)
 	{
-		//////////
-		// Combine standard things
-		//////
-			// _0
-			iComps_combine2			(line,	_ICODE_UNDERSCORE,		_ICODE_NUMERIC,			_ICODE_ALPHANUMERIC);
-			// a_
-			iComps_combine2			(line,	_ICODE_ALPHA,			_ICODE_UNDERSCORE,		_ICODE_ALPHA);
-			// _a
-			iComps_combine2			(line,	_ICODE_UNDERSCORE,		_ICODE_ALPHA,			_ICODE_ALPHA);
-			// a0
-			iComps_combine2			(line,	_ICODE_ALPHA,			_ICODE_NUMERIC,			_ICODE_ALPHANUMERIC);
-			// a9_
-			iComps_combine2			(line,	_ICODE_ALPHANUMERIC,	_ICODE_UNDERSCORE,		_ICODE_ALPHANUMERIC);
-			// 0.0
-			iComps_combine3			(line,	_ICODE_NUMERIC,			_ICODE_DOT,				_ICODE_NUMERIC,			_ICODE_NUMERIC);
+		SComp* comp;
 
 
-		//////////
-		// Fixup quotes, comments
-		//////
-			iComps_CombineAllBetween(line, _ICODE_SINGLE_QUOTE,		_ICODE_SINGLE_QUOTED_TEXT);
-			iComps_CombineAllBetween(line, _ICODE_DOUBLE_QUOTE,		_ICODE_DOUBLE_QUOTED_TEXT);
-			iComps_combineAllAfter	(line, _ICODE_LINE_COMMENT);
+		if (line && line->compilerInfo && line->compilerInfo->firstComp)
+		{
+			//////////
+			// Search for combinations which are adjacent sequences beginning with an underscore or alpha,
+			// which then alternate in some form of alpha, numeric, underscore, etc., and translate to
+			// alphanumeric.
+			//////
+				iComps_CombineAdjacentAlphanumeric(line);
+				iComps_CombineAdjacentNumeric(line);
+
+
+			//////////
+			// Fixup quotes, comments
+			//////
+				iComps_CombineAllBetween(line, _ICODE_SINGLE_QUOTE,		_ICODE_SINGLE_QUOTED_TEXT);
+				iComps_CombineAllBetween(line, _ICODE_DOUBLE_QUOTE,		_ICODE_DOUBLE_QUOTED_TEXT);
+				iComps_combineAllAfter	(line, _ICODE_LINE_COMMENT);
+		}
+	}
+
+
+
+
+//////////
+//
+// Returns the number of characters between two components.
+//
+//////
+	s32 iiComps_charactersBetween(SComp* compLeft, SComp* compRight)
+	{
+		// Start of right component and end of left component
+		return(compRight->start - (compLeft->start + compLeft->length));
 	}
 
 
@@ -1709,20 +1943,6 @@
 	{
 // TODO:  Write this function :-)
 		return(false);
-	}
-
-
-
-
-//////////
-//
-// Returns the number of characters between two components.
-//
-//////
-	s32 iiComps_charactersBetween(SComp* compLeft, SComp* compRight)
-	{
-		// Start of right component and end of left component
-		return(compRight->start - (compLeft->start + compLeft->length));
 	}
 
 
@@ -3399,14 +3619,103 @@ _asm int 3;
 
 //////////
 //
+// Called to delete the entire node change recursively
+//
+//////
+	void iNode_politelyDeleteAll(SNode** root, bool tlDeleteSelf, bool tlTraversePrev, bool tlTraverseNext, bool tlTraverseLeft, bool tlTraverseRight)
+	{
+		SNode* node;
+
+
+		if (root && *root)
+		{
+			//////////
+			// Grab the node
+			//////
+				node = *root;
+
+
+			//////////
+			// Traverse prev
+			//////
+				if (tlTraversePrev && node->prev && node->prev->next != node)
+				{
+					iNode_politelyDeleteAll(node->next, true, true, true, true, true);
+					node->prev = NULL;
+				}
+
+
+			//////////
+			// Traverse next
+			//////
+				if (tlTraverseNext && node->next && node->next->prev != node)
+				{
+					iNode_politelyDeleteAll(node->next, true, true, true, true, true);
+					node->next = NULL;
+				}
+
+
+			//////////
+			// Traverse left
+			//////
+				if (tlTraverseLeft && node->left && node->left->parent != node)
+				{
+					iNode_politelyDeleteAll(node->left, true, true, true, true, true);
+					node->left = NULL;
+				}
+
+
+			//////////
+			// Traverse right
+			//////
+				if (tlTraverseRight && node->right && node->right->parent != node)
+				{
+					iNode_politelyDeleteAll(node->right, true, true, true, true, true);
+					node->right = NULL;
+				}
+
+
+			//////////
+			// Delete self
+			//////
+				if (tlDeleteSelf)
+				{
+					//////////
+					// Delete the op if need be
+					//////
+						iOp_politelyDelete(&node->op, false);
+
+
+					//////////
+					// Delete the variable chain
+					//////
+						if (node->firstVariable)
+							iVariable_politelyDeleteChain(&node->firstVariable);
+
+
+					//////////
+					// Free self
+					//////
+						free(node);
+						*root = NULL;
+				}
+		}
+	}
+
+
+
+
+//////////
+//
 // Called to create an empty function
 //
 //////
-	SFunction* iFunction_create(s8* tcFuncName)
+	SFunction* iFunction_allocate(s8* tcFuncName)
 	{
 		SFunction* funcNew;
 
 
+		// Create the function
 		funcNew = (SFunction*)malloc(sizeof(SFunction));
 		if (funcNew)
 		{
@@ -3453,9 +3762,11 @@ _asm int 3;
 //////////
 //
 // Politely deletes everything contained in a function definition.  This also mandates
+// that every line be marked for a forced recompile as it will lose all previously compiled
+// information, including all variables that were found.
 //
 //////
-	void iFunction_politelyDelete(SFunction* func, bool tlDeleteSelf)
+	void iFunction_politelyDeleteCompiledInfo(SFunction* func, bool tlDeleteSelf)
 	{
 		u32				lnI;
 		SEditChain*		line;
@@ -3472,53 +3783,23 @@ _asm int 3;
 				line = func->firstLine;
 				while (line)
 				{
+					//////////
 					// See if there is anything on this line of code
-					if (line->compilerInfo)
-					{
-						//////////
-						// Delete all of its nodes
-						//////
-							for (lnI = 0, node = line->compilerInfo->firstNode; node && lnI < line->compilerInfo->nodeArrayCount != 0; lnI++, node = nodeNext)
-							{
-								//////////
-								// Note the next node
-								//////
-									nodeNext = node->next;
+					//////
+						if (line->compilerInfo && line->compilerInfo->firstNode)
+						{
+							// Delete every node
+							iNode_politelyDeleteAll(&line->compilerInfo->firstNode, true, true, true, true, true);
+
+							// Mark it so it will be re-compiled
+							line->forceRecompile = true;
+						}
 
 
-								//////////
-								// Delete its op
-								//////
-									iOp_politelyDelete(&node->op, false);
-
-
-								//////////
-								// Delete any variables
-								//////
-									if (node->firstVariable)
-										iVariable_politelyDeleteChain(&node->firstVariable);
-
-
-								//////////
-								// Delete self
-								//////
-									free(node);
-							}
-
-
-						//////////
-						// Delete its node array
-						//////
-							free(line->compilerInfo->firstNode);
-							line->compilerInfo->firstNode = false;
-
-
-						// Mark it so it's re-compiled
-						line->forceRecompile = true;
-					}
-
+					//////////
 					// Move to next line
-					line = line->next;
+					//////
+						line = line->next;
 				}
 
 
@@ -3544,15 +3825,23 @@ _asm int 3;
 		SVariable* varNew;
 
 
+		//////////
 		// Create it
-		varNew = (SVariable*)malloc(sizeof(SVariable));
+		//////
+			varNew = (SVariable*)malloc(sizeof(SVariable));
 
+
+		//////////
 		// Initialize it
-		if (varNew)
-			memset(varNew, 0, sizeof(SVariable));
+		//////
+			if (varNew)
+				memset(varNew, 0, sizeof(SVariable));
 
+
+		//////////
 		// Indicate our status
-		return(varNew);
+		//////
+			return(varNew);
 	}
 
 
@@ -3805,6 +4094,44 @@ _asm int 3;
 		{
 			iCompileNote_appendMessage(&line->compilerInfo->errors, tnStartColumn, tnStartColumn + tnLength, tnErrorNum, tcMessage);
 		}
+	}
+
+
+
+
+//////////
+//
+// Allocates an SCompiler structure.  Initializes it to all NULLs.
+//
+//////
+	SCompiler* iCompiler_allocate(SEditChain* parent)
+	{
+		SCompiler* compilerNew;
+
+
+		//////////
+		// Allocate
+		//////
+			compilerNew = (SCompiler*)malloc(sizeof(SCompiler));
+
+
+		//////////
+		// Initialize
+		//////
+			if (compilerNew)
+			{
+				// Initialize
+				memset(compilerNew, 0, sizeof(SCompiler));
+
+				// Populate
+				compilerNew->parent = parent;
+			}
+
+
+		//////////
+		// Indicate our status
+		//////
+			return(compilerNew);
 	}
 
 

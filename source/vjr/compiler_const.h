@@ -39,11 +39,11 @@
 //////////
 // Constant integers
 //////
-	cu32					_COMMON_START_END_BLOCK_SIZE			= 32;			// Allocate 32 entries/slots at a time (Start/end)
-	cu32					_COMMON_START_END_SMALL_BLOCK_SIZE		= 4;			// Allocate 4 entries/slots at a time (Start/end)
-	cu32					_COMMON_START_END_BIG_BLOCK_SIZE		= 256;			// Allocate 256 entries/slots at a time (Start/end)
-	cu32					_COMMON_BUILDER_BLOCK_SIZE				= 16384;		// Allocate 16KB at a time
-	cu32					_COMMON_BUILDER_BLOCK_SIZE_BIG			= 10240000;		// Allocate 1MB at a time
+	cu32			_COMMON_START_END_BLOCK_SIZE					= 32;			// Allocate 32 entries/slots at a time (Start/end)
+	cu32			_COMMON_START_END_SMALL_BLOCK_SIZE				= 4;			// Allocate 4 entries/slots at a time (Start/end)
+	cu32			_COMMON_START_END_BIG_BLOCK_SIZE				= 256;			// Allocate 256 entries/slots at a time (Start/end)
+	cu32			_COMMON_BUILDER_BLOCK_SIZE						= 16384;		// Allocate 16KB at a time
+	cu32			_COMMON_BUILDER_BLOCK_SIZE_BIG					= 10240000;		// Allocate 1MB at a time
 
 
 //////////
@@ -209,6 +209,7 @@
 	const u32		_ICODE_SHIFT_RIGHT								= 47;
 	const u32		_ICODE_SHIFT_LEFT_ASSIGNMENT					= 48;
 	const u32		_ICODE_SHIFT_RIGHT_ASSIGNMENT					= 49;
+	const u32		_ICODE_RANGE									= 50;
 
 	// Combined items
 	const u32		_ICODE_SINGLE_QUOTED_TEXT						= 90;

@@ -82,6 +82,7 @@
 		{ "/",						1,			true,		_ICODE_BACKSLASH,						false,				NULL,					NULL },
 		{ "\"",						1,			false,		_ICODE_DOUBLE_QUOTE,					false,				NULL,					NULL },
 		{ "'",						1,			false,		_ICODE_SINGLE_QUOTE,					false,				NULL,					NULL },
+		{ "..",						2,			false,		_ICODE_RANGE,							false,				NULL,					NULL },
 		{ ".",						1,			false,		_ICODE_DOT,								false,				NULL,					NULL },
 		{ ",",						1,			false,		_ICODE_COMMA,							false,				NULL,					NULL },
 		{ ":",						1,			false,		_ICODE_COLON,							false,				NULL,					NULL },

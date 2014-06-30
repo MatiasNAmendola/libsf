@@ -65,18 +65,23 @@ struct SVariable;
 	SNode*					iiComps_xlatToNodes_parenthesis_left		(SNode** root, SNode* active, SComp* comp);
 	SNode*					iiComps_xlatToNodes_parenthesis_right		(SNode** root, SNode* active, SComp* comp);
 
+	void					iComps_removeAll							(SEditChain* line);
  	SComp*					iComps_translateSourceLineTo				(SAsciiCompSearcher* tsComps, SEditChain* line);
  	bool					iComps_translateToOthers					(SAsciiCompSearcher* tsComps, SEditChain* line);
 	s32						iComps_translateToOthers_test				(s8* tcHaystack, s8* tcNeedle, s32 tnLength);
 	SComp*					iComps_findNextBy_iCode						(SComp* comp, u32 tniCode, SComp** compLastScanned);
 	SComp*					iComps_skipPast_iCode						(SComp* comp, u32 tniCode);
+	u32						iComps_combineNextN							(SComp* comp, u32 tnCount, s32 tnNewICode);
 	u32						iComps_combine2								(SEditChain* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2,                     u32 tniCodeCombined);
 	u32						iComps_combine3								(SEditChain* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2, u32 tniCodeNeedle3, u32 tniCodeCombined);
+	u32						iComps_CombineAdjacentAlphanumeric			(SEditChain* line);
+	u32						iComps_CombineAdjacentNumeric				(SEditChain* line);
 	u32						iComps_CombineAllBetween					(SEditChain* line, u32 tniCodeNeedle,                                          u32 tniCodeCombined);
 	u32						iComps_combineAllAfter						(SEditChain* line, u32 tniCodeNeedle);
 	u32						iComps_removeWhitespaces					(SEditChain* line);
 	void					iComps_removeStartEndComments				(SEditChain* line);
 	void					iComps_xlatNaturalGroupings					(SEditChain* line);
+	s32						iiComps_charactersBetween					(SComp* compLeft, SComp* compRight);
 
 //////////
 // Jun.25.2014 -- This block of code was originally created before I began working on
@@ -89,7 +94,6 @@ struct SVariable;
 	void					iiComps_xlatToSubInstr_findStartOfComponent	(SComp* compRoot, SOp* op);
 	void					iiComps_xlatToSubInstr_findFullComponent	(SComp* compRoot, SOp* op);
 	bool					iiComps_xlatToSubInstr_isEqualAssignment	(SEditChain* line);
-	s32						iiComps_charactersBetween					(SComp* compLeft, SComp* compRight);
 //////
 // END
 //////////
@@ -138,9 +142,9 @@ struct SVariable;
 	void					iNode_politelyDeleteAll						(SNode** root, bool tlDeleteSelf, bool tlTraversePrev, bool tlTraverseNext, bool tlTraverseLeft, bool tlTraverseRight);
 
 	// Function functions (LOL)
-	SFunction*				iFunction_create							(s8* tcFuncName);
+	SFunction*				iFunction_allocate							(s8* tcFuncName);
 	SVariable*				iFunction_addVariable_scoped				(SFunction* func);
-	void					iFunction_politelyDelete					(SFunction* func, bool tlDeleteSelf);
+	void					iFunction_politelyDeleteCompiledInfo		(SFunction* func, bool tlDeleteSelf);
 
 	// Variable functions
 	SVariable*				iVariable_create							(void);
@@ -162,6 +166,9 @@ struct SVariable;
 	// Line functions
 	void					iLine_appendError							(SEditChain* line, u32 tnErrorNum, s8* tcMessage, u32 tnStartColumn, u32 tnLength);
 
-	// Compiler note functions
+	// Compiler functions
+	SCompiler*				iCompiler_allocate							(void);
+
+	// Compile note functions
 	SCompileNote*			iCompileNote_create							(u32 tnStart, u32 tnEnd, u32 tnNumber, s8* tcMessage);
 	SCompileNote*			iCompileNote_appendMessage					(SCompileNote** noteRoot, u32 tnStartColumn, u32 tnEndColumn, u32 tnNumber, s8* tcMessage);

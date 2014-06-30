@@ -265,7 +265,7 @@ struct SCompileNote;
 		u32				variable_count;									// The number of variables
 	};
 
-	// Holds a component structure
+	// A component structure
 	struct SComp
 	{
 		SLL				ll;												// 2-way link list
@@ -275,16 +275,12 @@ struct SCompileNote;
 		u32				iCode;											// Refer to _VVMMC_COMP_* structs in mc_const.h
 		u32				start;											// Start into the indicates line's source code
 		s32				length;											// Length of the component
-
-		// If this component has sub-components, they go here
-		SStartEnd		childCompsUp;									// Pointer to any child components before the cask name
-		SStartEnd		childCompsDown;									// Pointer to any child components after the cask name
 	};
 
 	struct SCompCallback
 	{
 		union {
-			SComp*	comp;											// Component at start, and the component to continue processing after upon exit
+			SComp*		comp;											// Component at start, and the component to continue processing after upon exit
 			s8*			text;											// Raw text (depending on when it is being processed
 		};
 		u32				length;											// If raw text, the length of the thing being searched, otherwise 0.
