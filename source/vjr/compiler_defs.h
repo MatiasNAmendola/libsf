@@ -139,7 +139,7 @@ struct SVariable;
 	// Node functions
 	SNode*					iNode_create								(SNode** root, SNode* hint, u32 tnDirection, SNode* parent, SNode* prev, SNode* next, SNode* left, SNode* right);
 	SNode*					iNode_insertBetween							(SNode** root, SNode* node1, SNode* node2, u32 tnNode1Direction, u32 tnNode2Direction);
-	void					iNode_politelyDeleteAll						(SNode** root, bool tlDeleteSelf, bool tlTraversePrev, bool tlTraverseNext, bool tlTraverseLeft, bool tlTraverseRight);
+	void					iNode_politelyDeleteAll						(SNode** root, bool tlDeleteSelf, bool tlTraverseParent, bool tlTraversePrev, bool tlTraverseNext, bool tlTraverseLeft, bool tlTraverseRight);
 
 	// Function functions (LOL)
 	SFunction*				iFunction_allocate							(s8* tcFuncName);
@@ -167,7 +167,7 @@ struct SVariable;
 	void					iLine_appendError							(SEditChain* line, u32 tnErrorNum, s8* tcMessage, u32 tnStartColumn, u32 tnLength);
 
 	// Compiler functions
-	SCompiler*				iCompiler_allocate							(void);
+	SCompiler*				iCompiler_allocate							(SEditChain* parent);
 
 	// Compile note functions
 	SCompileNote*			iCompileNote_create							(u32 tnStart, u32 tnEnd, u32 tnNumber, s8* tcMessage);

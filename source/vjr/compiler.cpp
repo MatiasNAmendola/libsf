@@ -75,18 +75,12 @@
 			line			= codeBlock->ecFirst;
 			while (line)
 			{
-				//////////
 				// Increase our line count
-				//////
-					++ccData->sourceLines;
+				++ccData->sourceLines;
 
-
-				//////////
 				// Make sure we have a compilerInfo object
-				//////
-					if (!line->compilerInfo)
-						line->compilerInfo = iCompiler_allocate(line);
-
+				if (!line->compilerInfo)
+					line->compilerInfo = iCompiler_allocate(line);
 
 				// Is there anything to parse on this line?
 				if (line->sourceCode && line->sourceCodePopulated > 0)
@@ -98,7 +92,7 @@
 						{
 							// We are in edit-and-continue mode, which means we only process this line
 							// if its contents have changed.  Otherwise, we use what was already compiled.
-							if (!line->compilerInfo->sourceCode || line->forceRecompile)
+							if (!line->compilerInfo->sourceCode || line->forceRecompile || !line->compilerInfo->firstComp)
 							{
 								// This line has not yet been compiled.
 								// This line needs to be compiled.
@@ -154,14 +148,15 @@
 							}
 
 						} else {
-							// Note:  This is a while block so it can be exited politely with break.  It does not loop.
+							// Note:  This while block exists so it can be exited politely with break.
+							// Note:  It does not loop.
 							while (1)
 							{
 								//////////
 								// We need to clear out anything from the prior compile
 								//////
 									iComps_removeAll(line);
-									iNode_politelyDeleteAll(&line);
+									iNode_politelyDeleteAll(&line->compilerInfo->firstNode, true, true, true, true, true, true);
 
 
 								//////////
@@ -978,10 +973,10 @@
 					if (compNext)
 					{
 						// Add in the length of the next component, plus any spaces between them
-						comp->length += compNext + iiComps_charactersBetween(comp, compNext);
+						comp->length += (compNext->length + iiComps_charactersBetween(comp, compNext));
 
 						// Delete the next component
-						iLl_deleteNode(compNext, true);
+						iLl_deleteNode((SLL*)compNext, true);
 
 					} else {
 						// We're done, perhaps prematurely, but there are no more components
@@ -1189,11 +1184,13 @@
 //////
 	u32 iComps_CombineAdjacentAlphanumeric(SEditChain* line)
 	{
-		SComp* comp;
-		SComp* compNext;
+		u32		lnCombined;
+		SComp*	comp;
+		SComp*	compNext;
 
 
 		// Make sure our environment is sane
+		lnCombined = 0;
 		if (line && line->compilerInfo)
 		{
 			// Begin at the beginning and check across all components
@@ -1216,8 +1213,11 @@
 									||	compNext->iCode == _ICODE_ALPHANUMERIC
 								)
 							)
+						{
 							// Combine this comp and the next one into one
 							iComps_combineNextN(comp, 1, _ICODE_ALPHANUMERIC);
+							++lnCombined;
+						}
 					}
 				}
 
@@ -1226,6 +1226,9 @@
 				comp = (SComp*)comp->ll.next;
 			}
 		}
+
+		// Indicate how many we combined
+		return(lnCombined);
 	}
 
 
@@ -1240,13 +1243,15 @@
 //////
 	u32 iComps_CombineAdjacentNumeric(SEditChain* line)
 	{
-		SComp* comp;
-		SComp* compNext1;
-		SComp* compNext2;
-		SComp* compNext3;
+		u32		lnCombined;
+		SComp*	comp;
+		SComp*	compNext1;
+		SComp*	compNext2;
+		SComp*	compNext3;
 
 
 		// Make sure our environment is sane
+		lnCombined = 0;
 		if (line && line->compilerInfo)
 		{
 			// Begin at the beginning and check across all components
@@ -1254,44 +1259,48 @@
 			while (comp)
 			{
 				// Grab the next component
-				compNext1 = (SComp*)comp->ll.next;
-				if (compNext1 && iiComps_charactersBetween(comp, compNext1) == 0)
+				if ((compNext1 = (SComp*)comp->ll.next) && iiComps_charactersBetween(comp, compNext1) == 0)
 				{
 					// Is this an underscore, alpha, or alphanumeric?
 					if ((comp->iCode == _ICODE_PLUS || comp->iCode == _ICODE_HYPHEN) && compNext1->iCode == _ICODE_NUMERIC)
 					{
 						// We have +-999
-						compNext2 = (SComp*)compNext1->ll.next;
-						if (compNext2 && compNext2->iCode == _ICODE_DOT)
+						if ((compNext2 = (SComp*)compNext1->ll.next) && compNext2->iCode == _ICODE_DOT)
 						{
 							// We have +-999.
-							compNext3 = (SComp*)compNext2->ll.next;
-							if (compNext3 && compNext3->iCode == _ICODE_NUMERIC)
+							if ((compNext3 = (SComp*)compNext2->ll.next) && compNext3->iCode == _ICODE_NUMERIC)
 							{
 								// We have +-999.99
 								iComps_combineNextN(comp, 3, _ICODE_NUMERIC);
+								lnCombined += 3;
 
 							} else {
 								// Combine the +- with the 999 and the .
 								iComps_combineNextN(comp, 2, _ICODE_NUMERIC);
+								lnCombined += 2;
 							}
 
 						} else {
 							// Combine the +- with the 999 into one
 							iComps_combineNextN(comp, 1, _ICODE_NUMERIC);
+							++lnCombined;
 						}
 
 					} else if (comp->iCode == _ICODE_NUMERIC) {
 						// We have 999
-						compNext2 = (SComp*)compNext1->ll.next;
-						if (compNext2 && compNext2->iCode == _ICODE_DOT)
+						if ((compNext2 = (SComp*)compNext1->ll.next) && compNext2->iCode == _ICODE_DOT)
 						{
 							// We have 999.
-							compNext3 = (SComp*)compNext2->ll.next;
-							if (compNext3 && compNext3->iCode == _ICODE_NUMERIC)
+							if ((compNext3 = (SComp*)compNext2->ll.next) && compNext3->iCode == _ICODE_NUMERIC)
 							{
 								// We have 999.99
 								iComps_combineNextN(comp, 2, _ICODE_NUMERIC);
+								lnCombined += 2;
+
+							} else {
+								// We just have 999.
+								iComps_combineNextN(comp, 1, _ICODE_NUMERIC);
+								++lnCombined;
 							}
 						}
 					}
@@ -1302,6 +1311,9 @@
 				comp = (SComp*)comp->ll.next;
 			}
 		}
+
+		// Indicate how many we combined
+		return(lnCombined);
 	}
 
 
@@ -1567,26 +1579,23 @@
 //////
 	void iComps_xlatNaturalGroupings(SEditChain* line)
 	{
-		SComp* comp;
-
-
 		if (line && line->compilerInfo && line->compilerInfo->firstComp)
 		{
-			//////////
-			// Search for combinations which are adjacent sequences beginning with an underscore or alpha,
-			// which then alternate in some form of alpha, numeric, underscore, etc., and translate to
-			// alphanumeric.
-			//////
-				iComps_CombineAdjacentAlphanumeric(line);
-				iComps_CombineAdjacentNumeric(line);
-
-
 			//////////
 			// Fixup quotes, comments
 			//////
 				iComps_CombineAllBetween(line, _ICODE_SINGLE_QUOTE,		_ICODE_SINGLE_QUOTED_TEXT);
 				iComps_CombineAllBetween(line, _ICODE_DOUBLE_QUOTE,		_ICODE_DOUBLE_QUOTED_TEXT);
 				iComps_combineAllAfter	(line, _ICODE_LINE_COMMENT);
+
+
+			//////////
+			// Search for combinations which are adjacent sequences beginning with an underscore or alpha,
+			// which then alternate in some form of alpha, numeric, underscore, etc., and translate to
+			// alphanumeric.  For numeric it looks for +-999.99 completely adjacent, and combines into one.
+			//////
+				iComps_CombineAdjacentAlphanumeric(line);
+				iComps_CombineAdjacentNumeric(line);
 		}
 	}
 
@@ -3264,7 +3273,7 @@ _asm int 3;
 				if (cb->_func)
 					cb->funcVoid(cb);
 
-				// Delete the node
+				// Delete the node itself
 				free(cb->node);
 
 				// Move to next node
@@ -3622,7 +3631,7 @@ _asm int 3;
 // Called to delete the entire node change recursively
 //
 //////
-	void iNode_politelyDeleteAll(SNode** root, bool tlDeleteSelf, bool tlTraversePrev, bool tlTraverseNext, bool tlTraverseLeft, bool tlTraverseRight)
+	void iNode_politelyDeleteAll(SNode** root, bool tlDeleteSelf, bool tlTraverseParent, bool tlTraversePrev, bool tlTraverseNext, bool tlTraverseLeft, bool tlTraverseRight)
 	{
 		SNode* node;
 
@@ -3636,11 +3645,21 @@ _asm int 3;
 
 
 			//////////
+			// Traverse parent
+			//////
+				if (tlTraverseParent && node->parent)
+				{
+					iNode_politelyDeleteAll(&node->parent, true, node->parent->parent != node, node->prev->prev != node, node->prev->next != node, node->prev->left != node, node->prev->right != node);
+					node->prev = NULL;
+				}
+
+
+			//////////
 			// Traverse prev
 			//////
 				if (tlTraversePrev && node->prev)
 				{
-					iNode_politelyDeleteAll(node->next, true, node->prev->prev != node, node->prev->next != node, node->prev->left != node, node->prev->right != node);
+					iNode_politelyDeleteAll(&node->prev, true, node->parent->parent != node, node->prev->prev != node, node->prev->next != node, node->prev->left != node, node->prev->right != node);
 					node->prev = NULL;
 				}
 
@@ -3650,7 +3669,7 @@ _asm int 3;
 			//////
 				if (tlTraverseNext && node->next)
 				{
-					iNode_politelyDeleteAll(node->next, node->next->prev != node, node->next->next != node, node->next->left != node, node->next->right != node);
+					iNode_politelyDeleteAll(&node->next, true, node->parent->parent != node, node->next->prev != node, node->next->next != node, node->next->left != node, node->next->right != node);
 					node->next = NULL;
 				}
 
@@ -3660,7 +3679,7 @@ _asm int 3;
 			//////
 				if (tlTraverseLeft && node->left)
 				{
-					iNode_politelyDeleteAll(node->left, node->left->prev != node, node->left->next != node, node->left->left != node, node->left->right != node);
+					iNode_politelyDeleteAll(&node->left, true, node->parent->parent != node, node->left->prev != node, node->left->next != node, node->left->left != node, node->left->right != node);
 					node->left = NULL;
 				}
 
@@ -3670,9 +3689,22 @@ _asm int 3;
 			//////
 				if (tlTraverseRight && node->right)
 				{
-					iNode_politelyDeleteAll(node->right, node->right->prev != node, node->right->next != node, node->right->left != node, node->right->right != node);
+					iNode_politelyDeleteAll(&node->right, true, node->parent->parent != node, node->right->prev != node, node->right->next != node, node->right->left != node, node->right->right != node);
 					node->right = NULL;
 				}
+
+
+			//////////
+			// Delete the op if need be
+			//////
+				iOp_politelyDelete(&node->op, false);
+
+
+			//////////
+			// Delete the variable chain
+			//////
+				if (node->firstVariable)
+					iVariable_politelyDeleteChain(&node->firstVariable);
 
 
 			//////////
@@ -3680,24 +3712,9 @@ _asm int 3;
 			//////
 				if (tlDeleteSelf)
 				{
-					//////////
-					// Delete the op if need be
-					//////
-						iOp_politelyDelete(&node->op, false);
-
-
-					//////////
-					// Delete the variable chain
-					//////
-						if (node->firstVariable)
-							iVariable_politelyDeleteChain(&node->firstVariable);
-
-
-					//////////
 					// Free self
-					//////
-						free(node);
-						*root = NULL;
+					free(node);
+					*root = NULL;
 				}
 		}
 	}
@@ -3768,46 +3785,34 @@ _asm int 3;
 //////
 	void iFunction_politelyDeleteCompiledInfo(SFunction* func, bool tlDeleteSelf)
 	{
-		u32				lnI;
-		SEditChain*		line;
-		SNode*			node;
-		SNode*			nodeNext;
+		SEditChain* line;
+		SEditChain* lineLast;
 
 
 		// Make sure our environment is sane
-		if (func)
+		if (func && func->firstLine)
 		{
-			//////////
 			// Disconnect everything in its source code lines from the function
-			//////
-				line = func->firstLine;
-				while (line)
-				{
-					//////////
-					// See if there is anything on this line of code
-					//////
-						if (line->compilerInfo && line->compilerInfo->firstNode)
-						{
-							// Delete every node
-							iNode_politelyDeleteAll(&line->compilerInfo->firstNode, true, true, true, true, true);
+			line = func->firstLine;
 
-							// Mark it so it will be re-compiled
-							line->forceRecompile = true;
-						}
+			// Always process the first line, even if it's the same as the last line
+			do {
+				// Delete every node if need be
+				if (line->compilerInfo && line->compilerInfo->firstNode)
+					iNode_politelyDeleteAll(&line->compilerInfo->firstNode, true, true, true, true, true, true);
 
+				// Mark it so it will be re-compiled
+				line->forceRecompile = true;
 
-					//////////
-					// Move to next line
-					//////
-						line = line->next;
-				}
+				// Move to next line
+				lineLast	= line;
+				line		= line->next;
 
+			} while (lineLast != func->lastLine && line);
 
-			//////////
-			// Should we delete everything?
-			//////
-				if (tlDeleteSelf)
-					free(func);
+			// Should we delete self?
+			if (tlDeleteSelf)
+				free(func);
 		}
 	}
 
@@ -3926,6 +3931,7 @@ _asm int 3;
 		}
 	}
 
+	// Note:  cb->node is the SVariable* we're deleting
 	void iVariable_politelyDeleteChain_callback(SLLCallback* cb)
 	{
 		// Delete this variable appropriately
