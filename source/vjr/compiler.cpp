@@ -3638,9 +3638,9 @@ _asm int 3;
 			//////////
 			// Traverse prev
 			//////
-				if (tlTraversePrev && node->prev && node->prev->next != node)
+				if (tlTraversePrev && node->prev)
 				{
-					iNode_politelyDeleteAll(node->next, true, true, true, true, true);
+					iNode_politelyDeleteAll(node->next, true, node->prev->prev != node, node->prev->next != node, node->prev->left != node, node->prev->right != node);
 					node->prev = NULL;
 				}
 
@@ -3648,9 +3648,9 @@ _asm int 3;
 			//////////
 			// Traverse next
 			//////
-				if (tlTraverseNext && node->next && node->next->prev != node)
+				if (tlTraverseNext && node->next)
 				{
-					iNode_politelyDeleteAll(node->next, true, true, true, true, true);
+					iNode_politelyDeleteAll(node->next, node->prev->prev != node, node->prev->next != node, node->prev->left != node, node->prev->right != node);
 					node->next = NULL;
 				}
 
@@ -3658,9 +3658,9 @@ _asm int 3;
 			//////////
 			// Traverse left
 			//////
-				if (tlTraverseLeft && node->left && node->left->parent != node)
+				if (tlTraverseLeft && node->left)
 				{
-					iNode_politelyDeleteAll(node->left, true, true, true, true, true);
+					iNode_politelyDeleteAll(node->left, node->prev->prev != node, node->prev->next != node, node->prev->left != node, node->prev->right != node);
 					node->left = NULL;
 				}
 
@@ -3668,9 +3668,9 @@ _asm int 3;
 			//////////
 			// Traverse right
 			//////
-				if (tlTraverseRight && node->right && node->right->parent != node)
+				if (tlTraverseRight && node->right)
 				{
-					iNode_politelyDeleteAll(node->right, true, true, true, true, true);
+					iNode_politelyDeleteAll(node->right, node->prev->prev != node, node->prev->next != node, node->prev->left != node, node->prev->right != node);
 					node->right = NULL;
 				}
 
