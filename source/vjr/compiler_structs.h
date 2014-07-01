@@ -169,6 +169,24 @@ struct SCompileNote;
 		u32			warnings;
 	};
 
+	// Used in the compile_Vxbmm() functions so one parameter is passed rather than multiple
+	struct SCompileVxbmmContext
+	{
+		// Parameters
+		SEditChainManager*	codeBlock;
+		SCompileContext*	ccData;
+		bool				editAndContinue;
+
+		bool				llProcessThisLine;
+		SCompileContext		ccDataLocal;
+		SEditChain*			line;
+		SFunction*			func;
+		SFunction*			currentFunction;
+		SFunction*			adhoc;
+		SFunction*			currentAdhoc;
+		SComp*				comp;
+	};
+
 	struct SVariable
 	{
 		SVariable*	next;

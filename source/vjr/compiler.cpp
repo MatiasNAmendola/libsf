@@ -51,272 +51,333 @@
 // start over.
 //
 //////
-	u32 compile_Vxbmm(SEditChainManager* codeBlock, SCompileContext* ccData, bool tlEditAndContinue)
+	u32 compile_Vxbmm(SEditChainManager* codeBlock_, SCompileContext* ccData_, bool tlEditAndContinue_)
 	{
-		bool				llProcessThisLine;
-		SCompileContext		ccDataLocal;
-		SEditChain*			line;
-		SFunction*			func;
-		SFunction*			currentFunction;
-		SFunction*			adhoc;
-		SFunction*			currentAdhoc;
-		SComp*				comp;
+		SCompileVxbmmContext	cvc;
 
 
 		//////////
-		// Initialize everything to 0s
+		// Initialize our compile context to 0s
 		//////
-			if (!ccData)	ccData = &ccDataLocal;
-			memset(ccData, 0, sizeof(SCompileContext));
+			memset(&cvc, 0, sizeof(SCompileVxbmmContext));
+			cvc.codeBlock		= codeBlock_;
+			cvc.ccData			= ccData_;
+			cvc.editAndContinue	= tlEditAndContinue_;
+
+			if (!cvc.ccData)
+				cvc.ccData = &cvc.ccDataLocal;
+
+			memset(cvc.ccData, 0, sizeof(SCompileContext));
 
 
+		//////////
 		// Make sure our environment is sane
-		if (codeBlock && codeBlock->ecFirst)
-		{
-			currentFunction	= &codeBlock->firstFunction;
-			currentAdhoc	= NULL;
-			line			= codeBlock->ecFirst;
-			while (line)
+		//////
+			if (cvc.codeBlock && cvc.codeBlock->ecFirst)
 			{
-				// Increase our line count
-				++ccData->sourceLines;
+				// Before compilation, we need to remove any dependencies on things that have changed
+				iiCompile_Vxbmm_precompile(&cvc);
 
-				// Make sure we have a compilerInfo object
-				if (!line->compilerInfo)
-					line->compilerInfo = iCompiler_allocate(line);
+				// Physically compile
+				iiCompile_Vxbmm_compile(&cvc);
+			}
 
-				// Is there anything to parse on this line?
-				if (line->sourceCode && line->sourceCodePopulated > 0)
-				{
-					//////////
-					// Determine if this line needs compiled
-					//////
-						if (tlEditAndContinue)
+
+		//////////
+		// Indicate our result
+		//////
+			return(cvc.ccData->sourceLines);
+	}
+
+
+
+
+//////////
+//
+// Called before compilation to remove any references to any lines that have
+// changed, so all of those lines will be recompiled as well.  The references
+// are things like FUNCTION definitions, PARAMS, LOBJECT, LPARAMETERS, LOCALS,
+// RETURNS, ADHOC, anything that defines functions or variables.  As each of
+// those are removed a list is built, and then each source code line is searched
+// exhaustively to find out if any component on those lines references the now
+// removed variable.  If so, it will be marked for recompilation as well so it
+// references what will become the new function, new adhoc, or new variable.
+//
+//////
+	void iiCompile_Vxbmm_precompile(SCompileVxbmmContext* cvc)
+	{
+		if (cvc->editAndContinue)
+		{
+			// Determine what will now be stale in this code block, and needs recompiling.
+
+		} else {
+			// Everything is stale.
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to physically compile each line of source code.
+//
+//////
+	void iiCompile_Vxbmm_compile(SCompileVxbmmContext* cvc)
+	{
+		// Begin compiling
+		cvc->currentFunction	= &cvc->codeBlock->firstFunction;
+		cvc->currentAdhoc	= NULL;
+		cvc->line			= cvc->codeBlock->ecFirst;
+		while (cvc->line)
+		{
+			// Increase our line count
+			++cvc->ccData->sourceLines;
+
+			// Make sure we have a compilerInfo object
+			if (!cvc->line->compilerInfo)
+				cvc->line->compilerInfo = iCompiler_allocate(cvc->line);
+
+			// Is there anything to parse on this line?
+			if (cvc->line->sourceCode && cvc->line->sourceCodePopulated > 0)
+			{
+				//////////
+				// Determine if this line needs compiled
+				//////
+					if (cvc->editAndContinue)
+					{
+						// We are in edit-and-continue mode, which means we only process this line
+						// if its contents have changed.  Otherwise, we use what was already compiled.
+						if (!cvc->line->compilerInfo->sourceCode || cvc->line->forceRecompile || !cvc->line->compilerInfo->firstComp)
 						{
-							// We are in edit-and-continue mode, which means we only process this line
-							// if its contents have changed.  Otherwise, we use what was already compiled.
-							if (!line->compilerInfo->sourceCode || line->forceRecompile || !line->compilerInfo->firstComp)
-							{
-								// This line has not yet been compiled.
-								// This line needs to be compiled.
-								llProcessThisLine = true;
+							// This line has not yet been compiled.
+							// This line needs to be compiled.
+							cvc->llProcessThisLine = true;
 
-							} else if (line->sourceCode->length != line->compilerInfo->sourceCode->length) {
-								// The lines are no longer the same length.  Something has changed.
-								// This line needs to be compiled.
-								llProcessThisLine = true;
+						} else if (cvc->line->sourceCode->length != cvc->line->compilerInfo->sourceCode->length) {
+							// The lines are no longer the same length.  Something has changed.
+							// This line needs to be compiled.
+							cvc->llProcessThisLine = true;
 
-							} else if (iDatum_compare(line->sourceCode, line->compilerInfo->sourceCode) != 0) {
-								// The source code contents have changed.
-								// This line needs to be compiled.
-								llProcessThisLine = true;
+						} else if (iDatum_compare(cvc->line->sourceCode, cvc->line->compilerInfo->sourceCode) != 0) {
+							// The source code contents have changed.
+							// This line needs to be compiled.
+							cvc->llProcessThisLine = true;
 
-							} else if (line->compilerInfo->warnings || line->compilerInfo->errors) {
-								// The source code line has warnings or errors, it needs recompiled
-								llProcessThisLine = true;
-
-							} else {
-								// The lines are identical.  Does not need re-compiled.
-								llProcessThisLine = false;
-							}
+						} else if (cvc->line->compilerInfo->warnings || cvc->line->compilerInfo->errors) {
+							// The source code line has warnings or errors, it needs recompiled
+							cvc->llProcessThisLine = true;
 
 						} else {
-							llProcessThisLine = true;
+							// The lines are identical.  Does not need re-compiled.
+							cvc->llProcessThisLine = false;
 						}
 
+					} else {
+						cvc->llProcessThisLine = true;
+					}
 
-					//////////
-					// Should we process this line?
-					//////
-						if (!llProcessThisLine)
+
+				//////////
+				// Should we process this line?
+				//////
+					if (!cvc->llProcessThisLine)
+					{
+						if (cvc->editAndContinue)
 						{
-							if (tlEditAndContinue)
+							// In an edit-and-continue environment, we have to track functions so we maintain the
+							// current function we are in, even if the source code for those functions didn't change.
+							if (cvc->line->compilerInfo->firstComp)
 							{
-								// In an edit-and-continue environment, we have to track functions so we maintain the
-								// current function we are in, even if the source code for those functions didn't change.
-								if (line->compilerInfo->firstComp)
-								{
-									// We need to track certain things through on non-compiled lines
+								// We need to track certain things through on non-compiled lines
 
-								//////////
-								// FUNCTION
-								//////
-									if (line->compilerInfo->firstComp->iCode == _ICODE_FUNCTION)
+							//////////
+							// FUNCTION
+							//////
+								if (cvc->line->compilerInfo->firstComp->iCode == _ICODE_FUNCTION)
+								{
+									// We've moved into another function
+									cvc->currentFunction = NULL;
+									cvc->func = &cvc->codeBlock->firstFunction;
+									while (cvc->func)
 									{
-										// We've moved into another function
-										currentFunction = NULL;
-										func = &codeBlock->firstFunction;
-										while (func)
+										// Is this the function relating to this source code line?
+										if (cvc->func->firstLine == cvc->line)
+										{
+											cvc->currentFunction = cvc->func;		// We found our match
+											break;
+										}
+
+										// Move to next 
+										cvc->func = cvc->func->next;
+									}
+									if (!cvc->currentFunction)
+									{
+										// We didn't find a match for the indicated function.  Something has changed.
+										// We need a full recompile to sort it out at this point.
+										iLine_appendError(cvc->line, _ERROR_CONTEXT_HAS_CHANGED,		(s8*)cgcContextHasChanged,		cvc->line->compilerInfo->firstComp->start, cvc->line->compilerInfo->firstComp->length);
+										iLine_appendError(cvc->line, _ERROR_FULL_RECOMPILE_REQUIRED,	(s8*)cgcFullRecompileRequired,	cvc->line->compilerInfo->firstComp->start, cvc->line->compilerInfo->firstComp->length);
+									}
+
+							//////////
+							// ADHOC
+							//////
+								} else if (cvc->line->compilerInfo->firstComp->iCode == _ICODE_ADHOC) {
+									// We've moved into an adhoc
+									if (cvc->currentFunction)
+									{
+										// Iterate to see where this adhoc is
+										cvc->adhoc = cvc->currentFunction->firstAdhoc;
+										while (cvc->adhoc)
 										{
 											// Is this the function relating to this source code line?
-											if (func->firstLine == line)
+											if (cvc->adhoc->firstLine == cvc->line)
 											{
-												currentFunction = func;		// We found our match
+												// We found our match
+												cvc->currentAdhoc = cvc->adhoc;
 												break;
 											}
 
 											// Move to next 
-											func = func->next;
+											cvc->adhoc = cvc->adhoc->next;
 										}
-										if (!currentFunction)
-										{
-											// We didn't find a match for the indicated function.  Something has changed.
-											// We need a full recompile to sort it out at this point.
-											iLine_appendError(line, _ERROR_CONTEXT_HAS_CHANGED,		(s8*)cgcContextHasChanged,		line->compilerInfo->firstComp->start, line->compilerInfo->firstComp->length);
-											iLine_appendError(line, _ERROR_FULL_RECOMPILE_REQUIRED,	(s8*)cgcFullRecompileRequired,	line->compilerInfo->firstComp->start, line->compilerInfo->firstComp->length);
-										}
-
-								//////////
-								// ADHOC
-								//////
-									} else if (line->compilerInfo->firstComp->iCode == _ICODE_ADHOC) {
-										// We've moved into an adhoc
-										if (currentFunction)
-										{
-											// Iterate to see where this adhoc is
-											adhoc = currentFunction->firstAdhoc;
-											while (adhoc)
-											{
-												// Is this the function relating to this source code line?
-												if (adhoc->firstLine == line)
-												{
-													// We found our match
-													currentAdhoc = adhoc;
-													break;
-												}
-
-												// Move to next 
-												adhoc = adhoc->next;
-											}
-
-										} else {
-											// We're not in a function and they're adding an ADHOC.
-											// Unexpected command
-											iLine_appendError(line, _ERROR_UNEXPECTED_COMMAND, (s8*)cgcUnexpectedCommand, line->compilerInfo->firstComp->start, line->compilerInfo->firstComp->length);
-										}
-
-									} else if (line->compilerInfo->firstComp->iCode == _ICODE_ENDADHOC) {
-										// We've moved out of the adhoc
-										currentAdhoc = NULL;
-									}
-								}
-							}
-
-						} else {
-							// Note:  This while block exists so it can be exited politely with break.
-							// Note:  It does not loop.
-							while (1)
-							{
-								//////////
-								// We need to clear out anything from any prior compile
-								//////
-									iComps_removeAll(line);
-									iCompileNote_removeAll(&line->compilerInfo->warnings);
-									iCompileNote_removeAll(&line->compilerInfo->errors);
-									iNode_politelyDeleteAll(&line->compilerInfo->firstNode, true, true, true, true, true, true);
-
-
-								//////////
-								// Convert raw source code to known character sequences
-								//////
-									iComps_translateSourceLineTo(&cgcFundamentalSymbols[0], line);
-									if (!line->compilerInfo->firstComp)
-									{
-										++ccData->blankLines;
-										break;		// Nothing to compile on this line
-									}
-									comp = line->compilerInfo->firstComp;
-
-
-								//////////
-								// If it's a line comment, we don't need to process it
-								//////
-									if (line->compilerInfo->firstComp->iCode == _ICODE_COMMENT || line->compilerInfo->firstComp->iCode == _ICODE_LINE_COMMENT)
-									{
-										++ccData->commentLines;
-										break;
-									}
-
-
-								//////////
-								// Perform fixups
-								//////
-									iComps_removeStartEndComments(line);			// Remove /* comments */
-									iComps_fixupNaturalGroupings(line);				// Fixup natural groupings
-									iComps_removeWhitespaces(line);					// Remove whitespaces
-
-
-								//////////
-								// Translate sequences to known keywords
-								//////
-									iComps_translateToOthers(&cgcKeywordKeywords[0], line);
-
-
-								//////////
-								// Process this line based upon what it is
-								//////
-									if (comp->iCode == _ICODE_FUNCTION)
-									{
-										// They are adding another function
-										currentFunction = iiComps_decodeSyntax_function(codeBlock, line);
-
-
-									} else if (comp->iCode == _ICODE_ADHOC) {
-										// They are adding an adhoc function
-										iiComps_decodeSyntax_adhoc(codeBlock, line);
-
-
-									} else if (comp->iCode == _ICODE_PARAMS) {
-										// They are adding parameters
-										// Process the PARAMS line
-// TODO:  working here
-										iiComps_decodeSyntax_params(&codeBlock, line);
-
-
-									} else if (comp->iCode == _ICODE_LOBJECT) {
-										// They are adding parameters via an object
-										// Process the LOBJECT line
-// TODO:  working here
-										iiComps_decodeSyntax_lobject(&codeBlock, line);
-
-
-									} else if (comp->iCode == _ICODE_LPARAMETERS) {
-										// They are adding lparameters
-										// Process the LPARAMETERS line
-// TODO:  working here
-										iiComps_decodeSyntax_lparameters(&codeBlock, line);
-
-
-									} else if (comp->iCode == _ICODE_RETURNS) {
-										// They are specifying returns
-										// Process the RETURNS line
-// TODO:  working here
-										iiComps_decodeSyntax_returns(&codeBlock, line);
-
 
 									} else {
-										// Translate into operations
-										iiComps_xlatToNodes(line, line->compilerInfo);
-										// Note:  Right now, line->errors and line->warnings have notes attached to them about the compilation of this line
+										// We're not in a function and they're adding an ADHOC.
+										// Unexpected command
+										iLine_appendError(cvc->line, _ERROR_UNEXPECTED_COMMAND, (s8*)cgcUnexpectedCommand, cvc->line->compilerInfo->firstComp->start, cvc->line->compilerInfo->firstComp->length);
 									}
 
-
-								// All done with this line
-								break;
+								} else if (cvc->line->compilerInfo->firstComp->iCode == _ICODE_ENDADHOC) {
+									// We've moved out of the adhoc
+									cvc->currentAdhoc = NULL;
+								}
 							}
 						}
+
+					} else {
+						// Note:  This while block exists so it can be exited politely with break.
+						// Note:  It does not loop.
+						while (1)
+						{
+							//////////
+							// We need to clear out anything from any prior compile
+							//////
+								iComps_removeAll(cvc->line);
+								iCompileNote_removeAll(&cvc->line->compilerInfo->warnings);
+								iCompileNote_removeAll(&cvc->line->compilerInfo->errors);
+								iNode_politelyDeleteAll(&cvc->line->compilerInfo->firstNode, true, true, true, true, true, true);
+
+
+							//////////
+							// Convert raw source code to known character sequences
+							//////
+								iComps_translateSourceLineTo(&cgcFundamentalSymbols[0], cvc->line);
+								if (!cvc->line->compilerInfo->firstComp)
+								{
+									++cvc->ccData->blankLines;
+									break;		// Nothing to compile on this line
+								}
+								cvc->comp = cvc->line->compilerInfo->firstComp;
+
+
+							//////////
+							// If it's a line comment, we don't need to process it
+							//////
+								if (cvc->line->compilerInfo->firstComp->iCode == _ICODE_COMMENT || cvc->line->compilerInfo->firstComp->iCode == _ICODE_LINE_COMMENT)
+								{
+									++cvc->ccData->commentLines;
+									break;
+								}
+
+
+							//////////
+							// Perform fixups
+							//////
+								iComps_removeStartEndComments(cvc->line);			// Remove /* comments */
+								iComps_fixupNaturalGroupings(cvc->line);			// Fixup natural groupings [_][aaa][999] becomes [_aaa999], [999][.][99] becomes [999.99], etc.
+								iComps_removeWhitespaces(cvc->line);				// Remove whitespaces [use][whitespace][foo] becomes [use][foo]
+
+
+							//////////
+							// Translate sequences to known keywords
+							//////
+								iComps_translateToOthers(&cgcKeywordKeywords[0], cvc->line);
+
+
+							//////////
+							// Process this line based upon what it is
+							//////
+								if (cvc->comp->iCode == _ICODE_FUNCTION)
+								{
+									// They are adding another function
+									cvc->currentFunction = iiComps_decodeSyntax_function(cvc);
+
+
+								} else if (cvc->comp->iCode == _ICODE_ADHOC) {
+									// They are adding an adhoc function
+									iiComps_decodeSyntax_adhoc(cvc);
+
+
+								} else if (cvc->comp->iCode == _ICODE_PARAMS) {
+									// They are adding parameters
+									// Process the PARAMS line
+// TODO:  working here
+									iiComps_decodeSyntax_params(cvc);
+
+
+								} else if (cvc->comp->iCode == _ICODE_LOBJECT) {
+									// They are adding parameters via an object
+									// Process the LOBJECT line
+// TODO:  working here
+									iiComps_decodeSyntax_lobject(cvc);
+
+
+								} else if (cvc->comp->iCode == _ICODE_LPARAMETERS) {
+									// They are adding lparameters
+									// Process the LPARAMETERS line
+// TODO:  working here
+									iiComps_decodeSyntax_lparameters(cvc);
+
+
+								} else if (cvc->comp->iCode == _ICODE_RETURNS) {
+									// They are specifying returns
+									// Process the RETURNS line
+// TODO:  working here
+									iiComps_decodeSyntax_returns(cvc);
+
+
+								} else {
+									// Translate into operations
+									iiComps_xlatToNodes(cvc->line, cvc->line->compilerInfo);
+									// Note:  Right now, line->errors and line->warnings have notes attached to them about the compilation of this line
+								}
+
+
+							// All done with this line
+							break;
+						}
+					}
 				}
 
 
-				//////////
-				// Move to the next line
-				//////
-					line = line->next;
-			}
+			//////////
+			// Move to the next line
+			//////
+				cvc->line = cvc->line->next;
 		}
+	}
 
-		// Indicate our result
-		return(ccData->sourceLines);
+
+
+
+//////////
+//
+// Called to post-compile, primarily to flag variables that are not referenced
+// 
+//////
+	void iiCompile_Vxbmm_postcompile(SEditChainManager* codeBlock, SCompileContext* ccData, bool tlEditAndContinue)
+	{
 	}
 
 
@@ -329,7 +390,7 @@
 // Syntax:	FUNCTION cFunctionName
 //
 //////
-	SFunction* iiComps_decodeSyntax_function(SEditChainManager* codeBlock, SEditChain* line)
+	SFunction* iiComps_decodeSyntax_function(SCompileVxbmmContext* cvc)
 	{
 		SComp*		comp;
 		SComp*		compName;
@@ -338,10 +399,10 @@
 
 		// Make sure our environment is sane
 		func = NULL;
-		if (codeBlock && line && line->compilerInfo)
+		if (cvc->codeBlock && cvc->line && cvc->line->compilerInfo)
 		{
 			// The syntax must be [FUNCTION][cFunctionName]
-			if ((comp = line->compilerInfo->firstComp) && comp->iCode == _ICODE_FUNCTION)
+			if ((comp = cvc->line->compilerInfo->firstComp) && comp->iCode == _ICODE_FUNCTION)
 			{
 				// [FUNCTION]
 				if (comp->ll.next)
@@ -356,8 +417,8 @@
 						func = iFunction_allocate(compName);
 
 						// Indicate information about this function
-						func->firstLine	= line;
-						func->lastLine	= line;
+						func->firstLine	= cvc->line;
+						func->lastLine	= cvc->line;
 
 // TODO:  Needs added to the current function chain
 
@@ -382,7 +443,7 @@
 // Syntax:	ADHOC cAdhocName
 //
 //////
-	SFunction* iiComps_decodeSyntax_adhoc(SEditChainManager* codeBlock, SEditChain* line)
+	SFunction* iiComps_decodeSyntax_adhoc(SCompileVxbmmContext* cvc)
 	{
 		SComp*		comp;
 		SComp*		compName;
@@ -391,10 +452,10 @@
 
 		// Make sure our environment is sane
 		adhoc = NULL;
-		if (codeBlock && line && line->compilerInfo)
+		if (cvc->codeBlock && cvc->line && cvc->line->compilerInfo)
 		{
 			// The syntax must be [ADHOC][cAdhocName]
-			if ((comp = line->compilerInfo->firstComp) && comp->iCode == _ICODE_ADHOC)
+			if ((comp = cvc->line->compilerInfo->firstComp) && comp->iCode == _ICODE_ADHOC)
 			{
 				// [ADHOC]
 				if (comp->ll.next)
@@ -409,8 +470,8 @@
 						adhoc = iFunction_allocate(compName);
 
 						// Indicate information about this adhoc
-						adhoc->firstLine	= line;
-						adhoc->lastLine		= line;
+						adhoc->firstLine	= cvc->line;
+						adhoc->lastLine		= cvc->line;
 
 // TODO:  Needs added to the current function
 
@@ -428,22 +489,22 @@
 
 
 
-void iiComps_decodeSyntax_params(SEditChainManager* codeBlock, SEditChain* line)
+void iiComps_decodeSyntax_params(SCompileVxbmmContext* cvc)
 {
 // TODO:  write this function
 }
 
-void iiComps_decodeSyntax_lobject(SEditChainManager* codeBlock, SEditChain* line)
+void iiComps_decodeSyntax_lobject(SCompileVxbmmContext* cvc)
 {
 // TODO:  write this function
 }
 
-void iiComps_decodeSyntax_lparameters(SEditChainManager* codeBlock, SEditChain* line)
+void iiComps_decodeSyntax_lparameters(SCompileVxbmmContext* cvc)
 {
 // TODO:  write this function
 }
 
-void iiComps_decodeSyntax_returns(SEditChainManager* codeBlock, SEditChain* line)
+void iiComps_decodeSyntax_returns(SCompileVxbmmContext* cvc)
 {
 // TODO:  write this function
 }

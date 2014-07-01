@@ -58,14 +58,17 @@ struct SVariable;
 //////////
 // compiler.cpp
 //////////
-	u32						compile_Vxbmm								(SEditChainManager* codeBlock, SCompileContext* ccData, bool tlEditAndContinue);
+	u32						compile_Vxbmm								(SEditChainManager* codeBlock_, SCompileContext* ccData_, bool tlEditAndContinue_);
+	void					iiCompile_Vxbmm_precompile					(SCompileVxbmmContext* cvc);
+	void					iiCompile_Vxbmm_compile						(SCompileVxbmmContext* cvc);
+	void					iiCompile_Vxbmm_postcompile					(SCompileVxbmmContext* cvc);
 
-	SFunction*				iiComps_decodeSyntax_function				(SEditChainManager* codeBlock, SEditChain* line);
-	SFunction*				iiComps_decodeSyntax_adhoc					(SEditChainManager* codeBlock, SEditChain* line);
-	void					iiComps_decodeSyntax_params					(SEditChainManager* codeBlock, SEditChain* line);
-	void					iiComps_decodeSyntax_lobject				(SEditChainManager* codeBlock, SEditChain* line);
-	void					iiComps_decodeSyntax_lparameters			(SEditChainManager* codeBlock, SEditChain* line);
-	void					iiComps_decodeSyntax_returns				(SEditChainManager* codeBlock, SEditChain* line);
+	SFunction*				iiComps_decodeSyntax_function				(SCompileVxbmmContext* cvc);
+	SFunction*				iiComps_decodeSyntax_adhoc					(SCompileVxbmmContext* cvc);
+	void					iiComps_decodeSyntax_params					(SCompileVxbmmContext* cvc);
+	void					iiComps_decodeSyntax_lobject				(SCompileVxbmmContext* cvc);
+	void					iiComps_decodeSyntax_lparameters			(SCompileVxbmmContext* cvc);
+	void					iiComps_decodeSyntax_returns				(SCompileVxbmmContext* cvc);
 
 	bool					iiComps_xlatToNodes							(SEditChain* line, SCompiler* compiler);
 	SNode*					iiComps_xlatToNodes_parenthesis_left		(SNode** root, SNode* active, SComp* comp);
