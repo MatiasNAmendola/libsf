@@ -62,6 +62,10 @@ struct SVariable;
 
 	SFunction*				iiComps_decodeSyntax_function				(SEditChainManager* codeBlock, SEditChain* line);
 	SFunction*				iiComps_decodeSyntax_adhoc					(SEditChainManager* codeBlock, SEditChain* line);
+	void					iiComps_decodeSyntax_params					(SEditChainManager* codeBlock, SEditChain* line);
+	void					iiComps_decodeSyntax_lobject				(SEditChainManager* codeBlock, SEditChain* line);
+	void					iiComps_decodeSyntax_lparameters			(SEditChainManager* codeBlock, SEditChain* line);
+	void					iiComps_decodeSyntax_returns				(SEditChainManager* codeBlock, SEditChain* line);
 
 	bool					iiComps_xlatToNodes							(SEditChain* line, SCompiler* compiler);
 	SNode*					iiComps_xlatToNodes_parenthesis_left		(SNode** root, SNode* active, SComp* comp);

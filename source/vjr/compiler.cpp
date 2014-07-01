@@ -270,14 +270,28 @@
 										// They are adding parameters
 										// Process the PARAMS line
 // TODO:  working here
-//										iiComps_xlatToParams(&codeBlock, line);
+										iiComps_decodeSyntax_params(&codeBlock, line);
 
 
 									} else if (comp->iCode == _ICODE_LOBJECT) {
 										// They are adding parameters via an object
 										// Process the LOBJECT line
 // TODO:  working here
-//										iiComps_xlatToLobject(&codeBlock, line);
+										iiComps_decodeSyntax_lobject(&codeBlock, line);
+
+
+									} else if (comp->iCode == _ICODE_LPARAMETERS) {
+										// They are adding lparameters
+										// Process the LPARAMETERS line
+// TODO:  working here
+										iiComps_decodeSyntax_lparameters(&codeBlock, line);
+
+
+									} else if (comp->iCode == _ICODE_RETURNS) {
+										// They are specifying returns
+										// Process the RETURNS line
+// TODO:  working here
+										iiComps_decodeSyntax_returns(&codeBlock, line);
 
 
 									} else {
@@ -335,7 +349,7 @@
 					// [FUNCTION][something after]
 					if ((compName = (SComp*)comp->ll.next) && (compName->iCode == _ICODE_ALPHA || compName->iCode == _ICODE_ALPHANUMERIC))
 					{
-						// [FUNCTION][cName]
+						// [FUNCTION][cFuncionName]
 // TODO:  We need to do a lookup on this name to see if we're replacing a function, or adding a new one
 
 						// Create the new function
@@ -379,7 +393,7 @@
 		adhoc = NULL;
 		if (codeBlock && line && line->compilerInfo)
 		{
-			// The syntax must be [FUNCTION][cFunctionName]
+			// The syntax must be [ADHOC][cAdhocName]
 			if ((comp = line->compilerInfo->firstComp) && comp->iCode == _ICODE_ADHOC)
 			{
 				// [ADHOC]
@@ -388,7 +402,7 @@
 					// [ADHOC][something after]
 					if ((compName = (SComp*)comp->ll.next) && (compName->iCode == _ICODE_ALPHA || compName->iCode == _ICODE_ALPHANUMERIC))
 					{
-						// [ADHOC][cName]
+						// [ADHOC][cAdhocName]
 // TODO:  We need to do a lookup on this name to see if we're replacing an adhoc, or adding a new one
 
 						// Create the new adhoc
@@ -410,6 +424,29 @@
 		// Indicate our status
 		return(adhoc);
 	}
+
+
+
+
+void iiComps_decodeSyntax_params(SEditChainManager* codeBlock, SEditChain* line)
+{
+// TODO:  write this function
+}
+
+void iiComps_decodeSyntax_lobject(SEditChainManager* codeBlock, SEditChain* line)
+{
+// TODO:  write this function
+}
+
+void iiComps_decodeSyntax_lparameters(SEditChainManager* codeBlock, SEditChain* line)
+{
+// TODO:  write this function
+}
+
+void iiComps_decodeSyntax_returns(SEditChainManager* codeBlock, SEditChain* line)
+{
+// TODO:  write this function
+}
 
 
 
