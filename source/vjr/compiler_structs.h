@@ -355,7 +355,7 @@ struct SCompileNote;
 	// For warnings, errors, and notes
 	struct SCompileNote
 	{
-		SCompileNote*	next;											// The next compile note in this chain
+		SLL*			ll;
 		u32				start;											// Column the note begins on
 		u32				end;											// Column the note ends on
 
@@ -382,4 +382,5 @@ struct SCompileNote;
 		// Results of compilation
 		SCompileNote*	errors;											// Noted error
 		SCompileNote*	warnings;										// Noted warning
+		SCompileNote*	notes;											// Noted notes (LOL)
 	};

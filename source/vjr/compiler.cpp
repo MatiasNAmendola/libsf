@@ -58,6 +58,8 @@
 		SEditChain*			line;
 		SFunction*			func;
 		SFunction*			currentFunction;
+		SFunction*			adhoc;
+		SFunction*			currentAdhoc;
 		SComp*				comp;
 
 
@@ -72,6 +74,7 @@
 		if (codeBlock && codeBlock->ecFirst)
 		{
 			currentFunction	= &codeBlock->firstFunction;
+			currentAdhoc	= NULL;
 			line			= codeBlock->ecFirst;
 			while (line)
 			{
@@ -108,6 +111,10 @@
 								// This line needs to be compiled.
 								llProcessThisLine = true;
 
+							} else if (line->compilerInfo->warnings || line->compilerInfo->errors) {
+								// The source code line has warnings or errors, it needs recompiled
+								llProcessThisLine = true;
+
 							} else {
 								// The lines are identical.  Does not need re-compiled.
 								llProcessThisLine = false;
@@ -127,22 +134,70 @@
 							{
 								// In an edit-and-continue environment, we have to track functions so we maintain the
 								// current function we are in, even if the source code for those functions didn't change.
-								if (line->compilerInfo->firstComp && line->compilerInfo->firstComp->iCode == _ICODE_FUNCTION)
+								if (line->compilerInfo->firstComp)
 								{
-									// We've moved into another function
-									func = &codeBlock->firstFunction;
-									while (func)
+									// We need to track certain things through on non-compiled lines
+
+								//////////
+								// FUNCTION
+								//////
+									if (line->compilerInfo->firstComp->iCode == _ICODE_FUNCTION)
 									{
-										// Is this the function relating to this source code line?
-										if (func->firstLine == line)
+										// We've moved into another function
+										currentFunction = NULL;
+										func = &codeBlock->firstFunction;
+										while (func)
 										{
-											// We found our match
-											currentFunction = func;
-											break;
+											// Is this the function relating to this source code line?
+											if (func->firstLine == line)
+											{
+												currentFunction = func;		// We found our match
+												break;
+											}
+
+											// Move to next 
+											func = func->next;
+										}
+										if (!currentFunction)
+										{
+											// We didn't find a match for the indicated function.  Something has changed.
+											// We need a full recompile to sort it out at this point.
+											iLine_appendError(line, _ERROR_CONTEXT_HAS_CHANGED,		(s8*)cgcContextHasChanged,		line->compilerInfo->firstComp->start, line->compilerInfo->firstComp->length);
+											iLine_appendError(line, _ERROR_FULL_RECOMPILE_REQUIRED,	(s8*)cgcFullRecompileRequired,	line->compilerInfo->firstComp->start, line->compilerInfo->firstComp->length);
 										}
 
-										// Move to next 
-										func = func->next;
+								//////////
+								// ADHOC
+								//////
+									} else if (line->compilerInfo->firstComp->iCode == _ICODE_ADHOC) {
+										// We've moved into an adhoc
+										if (currentFunction)
+										{
+											// Iterate to see where this adhoc is
+											adhoc = currentFunction->firstAdhoc;
+											while (adhoc)
+											{
+												// Is this the function relating to this source code line?
+												if (adhoc->firstLine == line)
+												{
+													// We found our match
+													currentAdhoc = adhoc;
+													break;
+												}
+
+												// Move to next 
+												adhoc = adhoc->next;
+											}
+
+										} else {
+											// We're not in a function and they're adding an ADHOC.
+											// Unexpected command
+											iLine_appendError(line, _ERROR_UNEXPECTED_COMMAND, (s8*)cgcUnexpectedCommand, line->compilerInfo->firstComp->start, line->compilerInfo->firstComp->length);
+										}
+
+									} else if (line->compilerInfo->firstComp->iCode == _ICODE_ENDADHOC) {
+										// We've moved out of the adhoc
+										currentAdhoc = NULL;
 									}
 								}
 							}
@@ -153,9 +208,11 @@
 							while (1)
 							{
 								//////////
-								// We need to clear out anything from the prior compile
+								// We need to clear out anything from any prior compile
 								//////
 									iComps_removeAll(line);
+									iCompileNote_removeAll(&line->compilerInfo->warnings);
+									iCompileNote_removeAll(&line->compilerInfo->errors);
 									iNode_politelyDeleteAll(&line->compilerInfo->firstNode, true, true, true, true, true, true);
 
 
@@ -185,7 +242,7 @@
 								// Perform fixups
 								//////
 									iComps_removeStartEndComments(line);			// Remove /* comments */
-									iComps_xlatNaturalGroupings(line);				// Fixup natural groupings
+									iComps_fixupNaturalGroupings(line);				// Fixup natural groupings
 									iComps_removeWhitespaces(line);					// Remove whitespaces
 
 
@@ -201,13 +258,12 @@
 									if (comp->iCode == _ICODE_FUNCTION)
 									{
 										// They are adding another function
-										currentFunction = iiComps_xlatToFunction(codeBlock, line);
+										currentFunction = iiComps_decodeSyntax_function(codeBlock, line);
 
 
 									} else if (comp->iCode == _ICODE_ADHOC) {
 										// They are adding an adhoc function
-// TODO:  working here
-//										iiComps_xlatToAdhoc(&codeBlock, line);
+										iiComps_decodeSyntax_adhoc(codeBlock, line);
 
 
 									} else if (comp->iCode == _ICODE_PARAMS) {
@@ -254,10 +310,12 @@
 
 //////////
 //
-// Called to handle a FUNCTION line.
+// Called to handle a FUNCTION source code line.
+//
+// Syntax:	FUNCTION cFunctionName
 //
 //////
-	SFunction* iiComps_xlatToFunction(SEditChainManager* codeBlock, SEditChain* line)
+	SFunction* iiComps_decodeSyntax_function(SEditChainManager* codeBlock, SEditChain* line)
 	{
 		SComp*		comp;
 		SComp*		compName;
@@ -268,22 +326,89 @@
 		func = NULL;
 		if (codeBlock && line && line->compilerInfo)
 		{
-			// The syntax must be FUNCTION functionName
-			comp = line->compilerInfo->firstComp;
-			if (comp && comp->iCode == _ICODE_FUNCTION)
+			// The syntax must be [FUNCTION][cFunctionName]
+			if ((comp = line->compilerInfo->firstComp) && comp->iCode == _ICODE_FUNCTION)
 			{
-				// It is a function, but does it have a correct syntax?
-				compName = (SComp*)comp->ll.next;
-				if (compName->iCode == _ICODE_ALPHA || compName->iCode == _ICODE_ALPHANUMERIC)
+				// [FUNCTION]
+				if (comp->ll.next)
 				{
-					// It contains a valid name
-// TODO:  Working here
+					// [FUNCTION][something after]
+					if ((compName = (SComp*)comp->ll.next) && (compName->iCode == _ICODE_ALPHA || compName->iCode == _ICODE_ALPHANUMERIC))
+					{
+						// [FUNCTION][cName]
+// TODO:  We need to do a lookup on this name to see if we're replacing a function, or adding a new one
+
+						// Create the new function
+						func = iFunction_allocate(compName);
+
+						// Indicate information about this function
+						func->firstLine	= line;
+						func->lastLine	= line;
+
+// TODO:  Needs added to the current function chain
+
+						// Generate warnings for ignored components if any appear after
+						iComp_reportWarningsOnRemainder((SComp*)compName->ll.next, _WARNING_SPURIOUS_COMPONENTS_IGNORED, (s8*)cgcSpuriousIgnored);
+					}
 				}
 			}
 		}
 
 		// Indicate our status
 		return(func);
+	}
+
+
+
+
+//////////
+//
+// Called to handle an ADHOC source code line.
+//
+// Syntax:	ADHOC cAdhocName
+//
+//////
+	SFunction* iiComps_decodeSyntax_adhoc(SEditChainManager* codeBlock, SEditChain* line)
+	{
+		SComp*		comp;
+		SComp*		compName;
+		SFunction*	adhoc;
+
+
+		// Make sure our environment is sane
+		adhoc = NULL;
+		if (codeBlock && line && line->compilerInfo)
+		{
+			// The syntax must be [FUNCTION][cFunctionName]
+			if ((comp = line->compilerInfo->firstComp) && comp->iCode == _ICODE_ADHOC)
+			{
+				// [ADHOC]
+				if (comp->ll.next)
+				{
+					// [ADHOC][something after]
+					if ((compName = (SComp*)comp->ll.next) && (compName->iCode == _ICODE_ALPHA || compName->iCode == _ICODE_ALPHANUMERIC))
+					{
+						// [ADHOC][cName]
+// TODO:  We need to do a lookup on this name to see if we're replacing an adhoc, or adding a new one
+
+						// Create the new adhoc
+						adhoc = iFunction_allocate(compName);
+
+						// Indicate information about this adhoc
+						adhoc->firstLine	= line;
+						adhoc->lastLine		= line;
+
+// TODO:  Needs added to the current function
+
+						// Generate warnings for ignored components if any appear after
+						iComp_reportWarningsOnRemainder((SComp*)compName->ll.next, _WARNING_SPURIOUS_COMPONENTS_IGNORED, (s8*)cgcSpuriousIgnored);
+					}
+				}
+			}
+		}
+
+		// Indicate our status
+		return(adhoc);
 	}
 
 
@@ -1182,7 +1307,7 @@
 // branded as alphanumeric.
 //
 //////
-	u32 iComps_CombineAdjacentAlphanumeric(SEditChain* line)
+	u32 iComps_combineAdjacentAlphanumeric(SEditChain* line)
 	{
 		u32		lnCombined;
 		SComp*	comp;
@@ -1241,7 +1366,7 @@
 // adjacent, it is included as well.
 //
 //////
-	u32 iComps_CombineAdjacentNumeric(SEditChain* line)
+	u32 iComps_combineAdjacentNumeric(SEditChain* line)
 	{
 		u32		lnCombined;
 		SComp*	comp;
@@ -1329,7 +1454,7 @@
 // After:		[u8][whitespace][name][left bracket][right bracket][whitespace][equal][whitespace][double quote text]
 //
 //////
-	u32 iComps_CombineAllBetween(SEditChain* line, u32 tniCodeNeedle, u32 tniCodeCombined)
+	u32 iComps_combineAllBetween(SEditChain* line, u32 tniCodeNeedle, u32 tniCodeCombined)
 	{
 		u32		lnCount;
 		SComp*	compNext;
@@ -1411,68 +1536,100 @@
 
 //////////
 //
-// Called to combine everything after the indicated component
-//
-// Source:		u8* name		// user name
-// Example:		[u8][asterisk][whitespace][name][whitespace][comment][whitespace][user][whitespace][name]
-// Search:		[comment]
-// After:		[u8][asterisk][whitespace][name][whitespace][comment]
+// Called to combine everything after the indicated component into that one component.
 //
 //////
 	u32 iComps_combineAllAfter(SEditChain* line, u32 tniCodeNeedle)
 	{
-		u32		lnCount;
-		SComp*	compNext;
+		u32		lnCombined;
 		SComp*	comp;
 
 
-// UNTESTED CODE:  breakpoint and examine
 		// Make sure our environment is sane
-		lnCount = 0;
+		lnCombined = 0;
 		if (line && line->compilerInfo && line->compilerInfo->firstComp)
 		{
 			// Grab the first component
 			comp = (SComp*)line->compilerInfo->firstComp;
 
-			// Continue until we get ... to ... the ... end ... (imagine you were reading that like in a baseball stadium with lots of loud echoes)
+			// Iterate forward through all components
 			while (comp)
 			{
-				// Grab the next component sequentially
-				compNext = (SComp*)comp->ll.next;
-
-				// Make sure there's something to do
-				if (!compNext)
-					return(lnCount);	// We're done
-
 				// Is this our intended?
 				if (comp->iCode == tniCodeNeedle)
 				{
-					//////////
-					// Combine from here on out into one
-					//////
-						// Increase the original component to the line's whole length
-						comp->length = line->sourceCodePopulated - comp->start;
-						while (compNext)
-						{
-							// Indicate the number combined
-							++lnCount;
+					// Combine from here on out
+					while (comp->ll.next)
+					{
+						// Combine
+						iComps_combineNextN(comp, 1, tniCodeNeedle);
 
-							// Move this one along
-							iLl_deleteNode((SLL*)compNext, true);
-
-							// Move to next component (which is now again the comp->ll.next entry, because we've just migrated the prior compNext entry to compsCombined)
-							compNext = (SComp*)comp->ll.next;
-						}
-						// When we get here, we're done
-						break;
+						// Indicate the number combined
+						++lnCombined;
+					}
 				}
+
 				// Move to the next component
-				comp = compNext;
+				comp = (SComp*)comp->ll.next;
 			}
 			// When we get here, we're good
 		}
 		// Indicate the success rate at which we operated hitherto
-		return(lnCount);
+		return(lnCombined);
+	}
+
+
+
+
+//////////
+//
+// Called to delete everything after the indicated component
+//
+//////
+	u32 iComps_deleteAllAfter(SEditChain* line, u32 tniCodeNeedle)
+	{
+		u32		lnDeleted;
+		SComp*	comp;
+		SComp**	compLast;
+
+
+		// Make sure our environment is sane
+		lnDeleted = 0;
+		if (line && line->compilerInfo && line->compilerInfo->firstComp)
+		{
+			// Grab the first component
+			comp		= (SComp*)line->compilerInfo->firstComp;
+			compLast	= (SComp**)&line->compilerInfo->firstComp;
+
+			// Iterate forward through all components
+			while (comp)
+			{
+				// Is this our intended?
+				if (comp->iCode == tniCodeNeedle)
+				{
+					// Combine from here on out
+					while (comp)
+					{
+						// Indicate the number combined
+						++lnDeleted;
+
+						// Move to the next component
+						comp = (SComp*)comp->ll.next;
+					}
+
+					// Delete from here on out
+					iLl_deleteNodeChain((SLL**)compLast);
+					break;
+				}
+
+				// Move to the next component
+				compLast	= (SComp**)&comp->ll.next;
+				comp		= (SComp*)comp->ll.next;
+			}
+			// When we get here, we're good
+		}
+		// Indicate the success rate at which we operated hitherto
+		return(lnDeleted);
 	}
 
 
@@ -1577,16 +1734,16 @@
 // Fixes up common things found in VXB-- source code.
 //
 //////
-	void iComps_xlatNaturalGroupings(SEditChain* line)
+	void iComps_fixupNaturalGroupings(SEditChain* line)
 	{
 		if (line && line->compilerInfo && line->compilerInfo->firstComp)
 		{
 			//////////
 			// Fixup quotes, comments
 			//////
-				iComps_CombineAllBetween(line, _ICODE_SINGLE_QUOTE,		_ICODE_SINGLE_QUOTED_TEXT);
-				iComps_CombineAllBetween(line, _ICODE_DOUBLE_QUOTE,		_ICODE_DOUBLE_QUOTED_TEXT);
-				iComps_combineAllAfter	(line, _ICODE_LINE_COMMENT);
+				iComps_combineAllBetween(line, _ICODE_SINGLE_QUOTE,		_ICODE_SINGLE_QUOTED_TEXT);
+				iComps_combineAllBetween(line, _ICODE_DOUBLE_QUOTE,		_ICODE_DOUBLE_QUOTED_TEXT);
+				iComps_deleteAllAfter	(line, _ICODE_LINE_COMMENT);
 
 
 			//////////
@@ -1594,8 +1751,8 @@
 			// which then alternate in some form of alpha, numeric, underscore, etc., and translate to
 			// alphanumeric.  For numeric it looks for +-999.99 completely adjacent, and combines into one.
 			//////
-				iComps_CombineAdjacentAlphanumeric(line);
-				iComps_CombineAdjacentNumeric(line);
+				iComps_combineAdjacentAlphanumeric(line);
+				iComps_combineAdjacentNumeric(line);
 		}
 	}
 
@@ -3380,13 +3537,45 @@ _asm int 3;
 		// Make sure the environment is sane
 		if (node)
 		{
-			// Iterate forwards to the end
+			// Iterate toward the end
 			while (node->next)
 				node = node->next;
 		}
 
 		// Indicate where we are
 		return(node);
+	}
+
+
+
+
+//////////
+//
+// Called to count the nodes to the end
+//
+//////
+	u32 iLl_countNodesToEnd(SLL* node)
+	{
+		u32 lnCount;
+
+
+		// Make sure the environment is sane
+		lnCount = 0;
+		if (node)
+		{
+			// Iterate toward the end
+			while (node)
+			{
+				// Increase our count
+				++lnCount;
+
+				// Continue on so long as we have nodes
+				node = node->next;
+			}
+		}
+
+		// Indicate how many we found
+		return(lnCount);
 	}
 
 
@@ -3724,9 +3913,40 @@ _asm int 3;
 
 //////////
 //
-// Called to create an empty function
+// Called to create an empty function with a name.
 //
 //////
+	SFunction* iFunction_allocate(SComp* compName)
+	{
+		SFunction* funcNew;
+
+
+		// Create the function
+		funcNew = (SFunction*)malloc(sizeof(SFunction));
+		if (funcNew)
+		{
+			// Initialize
+			memset(funcNew, 0, sizeof(SFunction));
+
+			// Store name if provided
+			if (compName && compName->line && compName->line->sourceCode && compName->line->sourceCode->data)
+			{
+				// There is a component, a line, and source code exists
+				// Does the component exist properly?
+				if (compName->start + compName->length <= compName->line->sourceCodePopulated)
+				{
+					// Yes, store the name
+					iDatum_duplicate(	&funcNew->name, 
+										compName->line->sourceCode->data + compName->start,
+										compName->length);
+				}
+			}
+		}
+
+		// Indicate our status
+		return(funcNew);
+	}
+
 	SFunction* iFunction_allocate(s8* tcFuncName)
 	{
 		SFunction* funcNew;
@@ -4091,6 +4311,40 @@ _asm int 3;
 
 //////////
 //
+// Called to append a warning to the indicated component
+//
+//////
+	void iComp_appendWarning(SComp* comp, u32 tnWarningNum, s8* tcMessage)
+	{
+		if (comp && comp->line)
+			iLine_appendWarning(comp->line, tnWarningNum, tcMessage, comp->start, comp->length);
+	}
+
+
+
+
+//////////
+//
+// Called to report the indicated message 
+//
+//////
+	void iComp_reportWarningsOnRemainder(SComp* comp, u32 tnWarningNum, s8* tcMessage)
+	{
+		while (comp)
+		{
+			// Append the warning
+			iComp_appendWarning(comp, tnWarningNum, ((tcMessage) ? tcMessage : (s8*)cgcUnspecifiedWarning));
+
+			// Move to next component
+			comp = (SComp*)comp->ll.next;
+		}
+	}
+
+
+
+
+//////////
+//
 // Called to append an error the indicated source code line
 //
 //////
@@ -4099,6 +4353,22 @@ _asm int 3;
 		if (line && line->compilerInfo)
 		{
 			iCompileNote_appendMessage(&line->compilerInfo->errors, tnStartColumn, tnStartColumn + tnLength, tnErrorNum, tcMessage);
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to append a warning to the indicated source code line
+//
+//////
+	void iLine_appendWarning(SEditChain* line, u32 tnWarningNum, s8* tcMessage, u32 tnStartColumn, u32 tnLength)
+	{
+		if (line && line->compilerInfo)
+		{
+			iCompileNote_appendMessage(&line->compilerInfo->errors, tnStartColumn, tnStartColumn + tnLength, tnWarningNum, tcMessage);
 		}
 	}
 
@@ -4148,13 +4418,13 @@ _asm int 3;
 // Called to create a new note
 //
 //////
-	SCompileNote* iCompileNote_create(u32 tnStart, u32 tnEnd, u32 tnNumber, s8* tcMessage)
+	SCompileNote* iCompileNote_create(SCompileNote** noteRoot, u32 tnStart, u32 tnEnd, u32 tnNumber, s8* tcMessage)
 	{
 		SCompileNote* note;
 
 
 		// Create the new note
-		note = (SCompileNote*)malloc(sizeof(SCompileNote));
+		note = (SCompileNote*)iLl_appendNodeAtEnd((SLL**)noteRoot, sizeof(SCompileNote));
 		if (note)
 		{
 			// Initialize it
@@ -4180,33 +4450,31 @@ _asm int 3;
 //////
 	SCompileNote* iCompileNote_appendMessage(SCompileNote** noteRoot, u32 tnStartColumn, u32 tnEndColumn, u32 tnNumber, s8* tcMessage)
 	{
-		SCompileNote*	note;
-		SCompileNote*	noteNew;
+		SCompileNote* noteNew;
 
 
 		// Make sure our environment is sane
-		if (noteRoot)
+		if (noteRoot && tcMessage)
 		{
 			// Create the new note
-			noteNew = iCompileNote_create(tnStartColumn, tnEndColumn, tnNumber, tcMessage);
-
-			// Find out where it goes
-			if (!*noteRoot)
-			{
-				// First one
-				*noteRoot = noteNew;
-
-			} else {
-				// Append to the end of the chain
-				note = *noteRoot;
-				while (note->next)
-					note = note->next;
-
-				// Append it
-				note->next = noteNew;
-			}
+			noteNew = iCompileNote_create(noteRoot, tnStartColumn, tnEndColumn, tnNumber, tcMessage);
 		}
 
 		// Indicate our status
 		return(noteNew);
+	}
+
+
+
+
+//////////
+//
+// Called to remove all compile notes in the chain
+//
+//////
+	void iCompileNote_removeAll(SCompileNote** noteRoot)
+	{
+		// Make sure our environment is sane
+		if (noteRoot && *noteRoot)
+			iLl_deleteNodeChain((SLL**)noteRoot);
 	}

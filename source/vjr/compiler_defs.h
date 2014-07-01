@@ -60,7 +60,9 @@ struct SVariable;
 //////////
 	u32						compile_Vxbmm								(SEditChainManager* codeBlock, SCompileContext* ccData, bool tlEditAndContinue);
 
-	SFunction*				iiComps_xlatToFunction						(SEditChainManager* codeBlock, SEditChain* line);
+	SFunction*				iiComps_decodeSyntax_function				(SEditChainManager* codeBlock, SEditChain* line);
+	SFunction*				iiComps_decodeSyntax_adhoc					(SEditChainManager* codeBlock, SEditChain* line);
+
 	bool					iiComps_xlatToNodes							(SEditChain* line, SCompiler* compiler);
 	SNode*					iiComps_xlatToNodes_parenthesis_left		(SNode** root, SNode* active, SComp* comp);
 	SNode*					iiComps_xlatToNodes_parenthesis_right		(SNode** root, SNode* active, SComp* comp);
@@ -74,13 +76,14 @@ struct SVariable;
 	u32						iComps_combineNextN							(SComp* comp, u32 tnCount, s32 tnNewICode);
 	u32						iComps_combine2								(SEditChain* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2,                     u32 tniCodeCombined);
 	u32						iComps_combine3								(SEditChain* line, u32 tniCodeNeedle1, u32 tniCodeNeedle2, u32 tniCodeNeedle3, u32 tniCodeCombined);
-	u32						iComps_CombineAdjacentAlphanumeric			(SEditChain* line);
-	u32						iComps_CombineAdjacentNumeric				(SEditChain* line);
-	u32						iComps_CombineAllBetween					(SEditChain* line, u32 tniCodeNeedle,                                          u32 tniCodeCombined);
+	u32						iComps_combineAdjacentAlphanumeric			(SEditChain* line);
+	u32						iComps_combineAdjacentNumeric				(SEditChain* line);
+	u32						iComps_combineAllBetween					(SEditChain* line, u32 tniCodeNeedle,                                          u32 tniCodeCombined);
 	u32						iComps_combineAllAfter						(SEditChain* line, u32 tniCodeNeedle);
+	u32						iComps_deleteAllAfter						(SEditChain* line, u32 tniCodeNeedle);
 	u32						iComps_removeWhitespaces					(SEditChain* line);
 	void					iComps_removeStartEndComments				(SEditChain* line);
-	void					iComps_xlatNaturalGroupings					(SEditChain* line);
+	void					iComps_fixupNaturalGroupings				(SEditChain* line);
 	s32						iiComps_charactersBetween					(SComp* compLeft, SComp* compRight);
 
 //////////
@@ -135,6 +138,7 @@ struct SVariable;
 	void					iLl_iterateBackwardViaCallback				(SLLCallback* cb);
 	SLL*					iLl_getFirstNode							(SLL* node);
 	SLL*					iLl_getLastNode								(SLL* node);
+	u32						iLl_countNodesToEnd							(SLL* node);
 
 	// Node functions
 	SNode*					iNode_create								(SNode** root, SNode* hint, u32 tnDirection, SNode* parent, SNode* prev, SNode* next, SNode* left, SNode* right);
@@ -142,6 +146,7 @@ struct SVariable;
 	void					iNode_politelyDeleteAll						(SNode** root, bool tlDeleteSelf, bool tlTraverseParent, bool tlTraversePrev, bool tlTraverseNext, bool tlTraverseLeft, bool tlTraverseRight);
 
 	// Function functions (LOL)
+	SFunction*				iFunction_allocate							(SComp* compName);
 	SFunction*				iFunction_allocate							(s8* tcFuncName);
 	SVariable*				iFunction_addVariable_scoped				(SFunction* func);
 	void					iFunction_politelyDeleteCompiledInfo		(SFunction* func, bool tlDeleteSelf);
@@ -160,15 +165,20 @@ struct SVariable;
 	bool					iOp_setVariable_return						(SOp* op, SVariable* var, bool isOpAllocated);
 	void					iOp_politelyDelete							(SOp* op, bool tlDeleteSelf);
 
-	// Error functions
-	void					iComp_appendError							(SComp* comp, u32 tnErrorNum, s8* tcMessage);
+	// Error and warning functions
+	void					iComp_appendError							(SComp* comp, u32 tnErrorNum,   s8* tcMessage);
+	void					iComp_appendWarning							(SComp* comp, u32 tnWarningNum, s8* tcMessage);
+	void					iComp_reportWarningsOnRemainder				(SComp* comp, u32 tnWarningNum, s8* tcMessage);
+
 
 	// Line functions
-	void					iLine_appendError							(SEditChain* line, u32 tnErrorNum, s8* tcMessage, u32 tnStartColumn, u32 tnLength);
+	void					iLine_appendError							(SEditChain* line, u32 tnErrorNum,   s8* tcMessage, u32 tnStartColumn, u32 tnLength);
+	void					iLine_appendWarning							(SEditChain* line, u32 tnWarningNum, s8* tcMessage, u32 tnStartColumn, u32 tnLength);
 
 	// Compiler functions
 	SCompiler*				iCompiler_allocate							(SEditChain* parent);
 
 	// Compile note functions
-	SCompileNote*			iCompileNote_create							(u32 tnStart, u32 tnEnd, u32 tnNumber, s8* tcMessage);
+	SCompileNote*			iCompileNote_create							(SCompileNote** noteRoot, u32 tnStart, u32 tnEnd, u32 tnNumber, s8* tcMessage);
 	SCompileNote*			iCompileNote_appendMessage					(SCompileNote** noteRoot, u32 tnStartColumn, u32 tnEndColumn, u32 tnNumber, s8* tcMessage);
+	void					iCompileNote_removeAll						(SCompileNote** noteRoot);

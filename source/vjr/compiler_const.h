@@ -119,10 +119,36 @@
 	const u32		_VAR_TYPE_DATE									= 20;
 	const u32		_VAR_TYPE_DATETIME								= 21;
 
-	const u32		_ERROR_OUT_OF_MEMORY							= 1;
 
+//////////
+// Warnings
+//////
+	const u32		_WARNING_SPURIOUS_COMPONENTS_IGNORED			= 1;
+	const u32		_WARNING_UNSPECIFIED_WARNING					= 2;
+
+	// Messages
+	const s8		cgcSpuriousIgnored[]							= "spurious, ignored";
+	const s8		cgcUnspecifiedWarning[]							= "warning";
+
+
+//////////
+// Errors
+//////
+	const u32		_ERROR_OUT_OF_MEMORY							= 1;
+	const u32		_ERROR_UNEXPECTED_COMMAND						= 2;
+	const u32		_ERROR_CONTEXT_HAS_CHANGED						= 3;
+	const u32		_ERROR_FULL_RECOMPILE_REQUIRED					= 4;
+
+	// Messages
 	const s8		cgcOutOfMemory[]								= "out of memory";
+	const s8		cgcUnexpectedCommand[]							= "unexpected command";
+	const s8		cgcContextHasChanged[]							= "context has changed";
+	const s8		cgcFullRecompileRequired[]						= "full recompile required";
 	
+
+//////////
+// Casks
+//////
 	const s8		cgcCaskRoundOpenParams[]						= "(||";
 	const s8		cgcCaskRoundCloseParams[]						= "||)";
 	const s8		cgcCaskSquareOpenParams[]						= "[||";
