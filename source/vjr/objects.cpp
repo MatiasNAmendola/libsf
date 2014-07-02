@@ -398,6 +398,76 @@
 
 //////////
 //
+// Called to set the object size
+//
+//////
+	void iObj_setSize(SObject* obj, s32 tnLeft, s32 tnTop, s32 tnWidth, s32 tnHeight)
+	{
+		// Resize if need be
+		obj->bmp = iBmp_verifySizeOrResize(obj->bmp, tnWidth, tnHeight);
+
+		// Position and size its rectangle
+		SetRect(&obj->rc, tnLeft, tnTop, tnLeft + tnWidth, tnTop + tnHeight);
+
+		// Mark it dirty for a full re-render
+		obj->isDirty = true;
+	}
+
+
+
+
+//////////
+//
+// Called to create the Windows-side window for the form.  The normal bit buffer is
+// rendered regardless of whether or not the form is presented outwardly.  It can be
+// used as an off-screen buffer in that way.
+//
+//////
+	SWindow* iObj_createWindowForForm(SObject* obj_form)
+	{
+		SWindow* win;
+
+
+		// Make sure our environment is sane
+		win = NULL;
+		if (obj_form)
+			win = iWindow_createForObject(obj_form);
+
+		// Indicate our status
+		return(win);
+	}
+
+
+
+
+//////////
+//
+// Called to set the visible status of the indicated object.
+// Returns the previous visible status.
+//
+//////
+	bool iObj_setVisible(SObject* obj, bool tlNewVisible)
+	{
+		bool llOldVisible;
+
+
+		// Make sure our environment is sane
+		llOldVisible = false;
+		if (obj)
+		{
+			llOldVisible	= obj->isVisible;
+			obj->isVisible	= tlNewVisible;
+		}
+
+		// Indicate our status
+		return(false);
+	}
+
+
+
+
+//////////
+//
 // Called to copy the sub-object based on type
 //
 //////
@@ -549,10 +619,10 @@
 				{
 					// Copy from indicated template
 					subobj->font				= iFont_duplicate(template_subobj->font);
-					subobj->borderNwColor.color	= template_subobj->borderNwColor.color;
-					subobj->borderNeColor.color	= template_subobj->borderNeColor.color;
-					subobj->borderSwColor.color	= template_subobj->borderSwColor.color;
-					subobj->borderSeColor.color	= template_subobj->borderSeColor.color;
+					subobj->nwRgba.color		= template_subobj->nwRgba.color;
+					subobj->neRgba.color		= template_subobj->neRgba.color;
+					subobj->swRgba.color		= template_subobj->swRgba.color;
+					subobj->seRgba.color		= template_subobj->seRgba.color;
 					subobj->backColor.color		= template_subobj->backColor.color;
 					subobj->foreColor.color		= template_subobj->foreColor.color;
 					subobj->captionColor.color	= template_subobj->captionColor.color;
@@ -568,10 +638,10 @@
 				} else {
 					// Use VJr defaults
 					subobj->font				= iFont_duplicate(gsFont);
-					subobj->borderNwColor.color	= NwColor.color;
-					subobj->borderNeColor.color	= NeColor.color;
-					subobj->borderSwColor.color	= SwColor.color;
-					subobj->borderSeColor.color	= SeColor.color;
+					subobj->nwRgba.color		= NwColor.color;
+					subobj->neRgba.color		= NeColor.color;
+					subobj->swRgba.color		= SwColor.color;
+					subobj->seRgba.color		= SeColor.color;
 					subobj->backColor.color		= white.color;
 					subobj->foreColor.color		= black.color;
 					subobj->captionColor.color	= black.color;
@@ -645,7 +715,7 @@
 				} else {
 					// Use VJr defaults
 					// Copy from indicated template
-					subobj->font				= iFont_duplicate(template_subobj->font);
+					subobj->font				= iFont_duplicate(gsFont);
 					subobj->borderNwColor.color	= NwColor.color;
 					subobj->borderNeColor.color	= NeColor.color;
 					subobj->borderSwColor.color	= SwColor.color;
@@ -953,7 +1023,7 @@
 
 					subobj->style						= template_subobj->style;
 					subobj->alignment					= template_subobj->alignment;
-					iEditChainManager_duplicate(&subobj->value, template_subobj->value, true);
+					iEditChainManager_duplicate(&subobj->codeBlock, template_subobj->codeBlock, true);
 					iDatum_duplicate(&subobj->comment,	&template_subobj->comment);
 					iDatum_duplicate(&subobj->toolTip,	&template_subobj->toolTip);
 
@@ -1306,8 +1376,8 @@
 					subobj->disabledBackColor.color		= disabledBackColor.color;
 					subobj->disabledForeColor.color		= disabledForeColor.color;
 
-					*(u32*)&subobj->interactiveChange	= *(u32*)&template_subobj->interactiveChange;
-					*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
+					*(u32*)&subobj->interactiveChange	= *(u32*)&iDefaultCallback_interactiveChange;
+					*(u32*)&subobj->programmaticChange	= *(u32*)&iDefaultCallback_programmaticChange;
 				}
 			}
 
@@ -1316,6 +1386,179 @@
 		// Indicate our success or failure
 		//////
 			return(subobj);
+	}
+
+
+
+
+//////////
+//
+// Called to set the form's icon
+//
+//////
+	void iSubobj_form_setIcon(SObject* obj, SBitmap* bmp)
+	{
+		SSubObjForm* subobj;
+
+
+		// Make sure our environment is sane
+		if (obj && bmp && obj->baseType == _OBJECT_TYPE_FORM)
+		{
+			// Grab the form data
+			subobj = (SSubObjForm*)obj->sub_obj;
+
+			// Delete the old icon if any
+			if (subobj->bmpIcon)
+				iBmp_delete(subobj->bmpIcon, true, true);
+
+			// Create a new icon that is 24x24
+			subobj->bmpIcon = iBmp_allocate();
+			iBmp_createBySize(subobj->bmpIcon, 24, 24, 32);
+
+			// Scale the indicated icon into this one
+			iBmp_scale(subobj->bmpIcon, bmp);
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to set the caption for the form
+//
+//////
+	void iSubobj_form_setCaption(SObject* obj, s8* tcCaption, u32 tnCaptionLength)
+	{
+		SSubObjForm* subobj;
+
+
+		// Make sure our environment is sane
+		if (obj && obj->baseType == _OBJECT_TYPE_FORM)
+		{
+			// Grab the form data
+			subobj = (SSubObjForm*)obj->sub_obj;
+
+			// Set the caption
+			iDatum_duplicate(&subobj->caption, tcCaption, tnCaptionLength);
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to set the border colors for the indicated form
+//
+//////
+	void iSubobj_form_setBorderRgba(SObject* obj, u32 tnNwRgba, u32 tnNeRgba, u32 tnSwRgba, u32 tnSeRgba)
+	{
+		SSubObjForm* subobj;
+
+
+		// Make sure our environment is sane
+		if (obj && obj->baseType == _OBJECT_TYPE_FORM)
+		{
+			// Grab the form data
+			subobj = (SSubObjForm*)obj->sub_obj;
+
+			// Set the colors
+			subobj->nwRgba.color	= tnNwRgba;
+			subobj->neRgba.color	= tnNeRgba;
+			subobj->swRgba.color	= tnSwRgba;
+			subobj->seRgba.color	= tnSeRgba;
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to set the back color for the indicated form
+//
+//////
+	u32 iSubobj_form_setBackColor(SObject* obj, u32 tnRgba)
+	{
+		u32				lnOldColor;
+		SSubObjForm*	subobj;
+
+
+		// Make sure our environment is sane
+		lnOldColor = 0;
+		if (obj && obj->baseType == _OBJECT_TYPE_FORM)
+		{
+			// Grab the form data
+			subobj = (SSubObjForm*)obj->sub_obj;
+
+			// SEt the color
+			lnOldColor				= subobj->backColor.color;
+			subobj->backColor.color	= tnRgba;
+		}
+
+		// Indicate the old color
+		return(lnOldColor);
+	}
+
+
+
+
+//////////
+//
+// Called to set the fore color for the indicated form
+//
+//////
+	u32 iSubobj_form_setForeColor(SObject* obj, u32 tnRgba)
+	{
+		u32				lnOldColor;
+		SSubObjForm*	subobj;
+
+
+		// Make sure our environment is sane
+		lnOldColor = 0;
+		if (obj && obj->baseType == _OBJECT_TYPE_FORM)
+		{
+			// Grab the form data
+			subobj = (SSubObjForm*)obj->sub_obj;
+
+			// SEt the color
+			lnOldColor				= subobj->foreColor.color;
+			subobj->foreColor.color	= tnRgba;
+		}
+
+		// Indicate the old color
+		return(lnOldColor);
+	}
+
+
+
+
+//////////
+//
+// Called to set the form's caption color
+//
+//////
+	u32 iSubobj_form_setCaptionColor(SObject* obj, u32 tnRgba)
+	{
+		u32				lnOldColor;
+		SSubObjForm*	subobj;
+
+
+		// Make sure our environment is sane
+		lnOldColor = 0;
+		if (obj && obj->baseType == _OBJECT_TYPE_FORM)
+		{
+			// Grab the form data
+			subobj = (SSubObjForm*)obj->sub_obj;
+
+			// SEt the color
+			lnOldColor					= subobj->captionColor.color;
+			subobj->captionColor.color	= tnRgba;
+		}
+
+		// Indicate the old color
+		return(lnOldColor);
 	}
 
 
@@ -1350,9 +1593,9 @@
 		//////
 			iFont_free(subobj->font, true);
 			iBmp_delete(subobj->bmpIcon, true, true);
-			iDatum_free(&subobj->comment, true);
-			iDatum_free(&subobj->caption, true);
-			iDatum_free(&subobj->toolTip, true);
+			iDatum_free(&subobj->comment, false);
+			iDatum_free(&subobj->caption, false);
+			iDatum_free(&subobj->toolTip, false);
 
 
 		//////////
@@ -1377,9 +1620,9 @@
 		//////
 			iFont_free(subobj->font, true);
 			iBmp_delete(subobj->bmpIcon, true, true);
-			iDatum_free(&subobj->comment, true);
-			iDatum_free(&subobj->caption, true);
-			iDatum_free(&subobj->toolTip, true);
+			iDatum_free(&subobj->comment, false);
+			iDatum_free(&subobj->caption, false);
+			iDatum_free(&subobj->toolTip, false);
 
 
 		//////////
@@ -1403,9 +1646,9 @@
 		// Free subobject components
 		//////
 			iFont_free(subobj->font, true);
-			iDatum_free(&subobj->comment, true);
-			iDatum_free(&subobj->caption, true);
-			iDatum_free(&subobj->toolTip, true);
+			iDatum_free(&subobj->comment, false);
+			iDatum_free(&subobj->caption, false);
+			iDatum_free(&subobj->toolTip, false);
 
 
 		//////////
@@ -1429,11 +1672,11 @@
 		// Free subobject components
 		//////
 			iFont_free(subobj->font, true);
-			iDatum_free(&subobj->value, true);
-			iDatum_free(&subobj->picture, true);
-			iDatum_free(&subobj->mask, true);
-			iDatum_free(&subobj->comment, true);
-			iDatum_free(&subobj->toolTip, true);
+			iDatum_free(&subobj->value, false);
+			iDatum_free(&subobj->picture, false);
+			iDatum_free(&subobj->mask, false);
+			iDatum_free(&subobj->comment, false);
+			iDatum_free(&subobj->toolTip, false);
 
 
 		//////////
@@ -1457,9 +1700,9 @@
 		// Free subobject components
 		//////
 			iFont_free(subobj->font, true);
-			iDatum_free(&subobj->caption, true);
-			iDatum_free(&subobj->comment, true);
-			iDatum_free(&subobj->toolTip, true);
+			iDatum_free(&subobj->caption, false);
+			iDatum_free(&subobj->comment, false);
+			iDatum_free(&subobj->toolTip, false);
 
 
 		//////////
@@ -1483,9 +1726,9 @@
 		// Free subobject components
 		//////
 			iFont_free(subobj->font, true);
-			iEditChainManager_free(&subobj->value, true);
-			iDatum_free(&subobj->comment, true);
-			iDatum_free(&subobj->toolTip, true);
+			iEditChainManager_free(&subobj->codeBlock, true);
+			iDatum_free(&subobj->comment, false);
+			iDatum_free(&subobj->toolTip, false);
 
 
 		//////////
@@ -1631,8 +1874,6 @@
 		HFONT			lhfontOld;
 
 
-// TODO:  COMPLETELY UNTESTED.  BREAKPOINT AND EXAMINE.
-_asm int 3;
 		// Make sure our environment is sane
 		lnPixelsRendered = 0;
 		if (obj && subobj)
@@ -1657,7 +1898,7 @@ _asm int 3;
 					// Frame it
 					//////
 						// Draw the window border
-						iBmp_fillRect(obj->bmp, &lrc, subobj->borderNwColor, subobj->borderNeColor, subobj->borderSwColor, subobj->borderSeColor, true);
+						iBmp_fillRect(obj->bmp, &lrc, subobj->nwRgba, subobj->neRgba, subobj->swRgba, subobj->seRgba, true);
 
 						// Frame it
 						iBmp_frameRect(obj->bmp, &lrc, black, black, black, black, false);
@@ -1687,7 +1928,7 @@ _asm int 3;
 						SetRect(&lrc2,	lrc2.left - bmpMinimize->bi.biWidth - 1, lrc2.top, lrc2.left - 1, lrc2.bottom);
 						iBmp_bitBlt(obj->bmp, &lrc2, bmpMinimize);
 						// Move
-						SetRect(&lrc2,	lrc2.left - bmpMove->bi.biWidth - 1, lrc2.top, lrc2.left - 1, lrc2.bottom);
+						SetRect(&lrc4,	lrc2.left - bmpMove->bi.biWidth - 1, lrc2.top, lrc2.left - 1, lrc2.bottom);
 						iBmp_bitBlt(obj->bmp, &lrc4, bmpMove);
 
 
@@ -1696,22 +1937,22 @@ _asm int 3;
 					//////
 						// Upper left arrow
 						SetRect(&lrc2, lrc.left, lrc.top, lrc.left + bmpArrowUl->bi.biWidth, lrc.top + bmpArrowUl->bi.biHeight);
-						iBmp_bitBlt(obj->bmp, &lrc2, bmpArrowUl);
+						iBmp_bitBltMask(obj->bmp, &lrc2, bmpArrowUl);
 						// Upper right arrow
 						SetRect(&lrc2, lrc.right - bmpArrowUr->bi.biWidth, lrc.top, lrc.right, lrc.top + bmpArrowUr->bi.biHeight);
-						iBmp_bitBlt(obj->bmp, &lrc2, bmpArrowUr);
+						iBmp_bitBltMask(obj->bmp, &lrc2, bmpArrowUr);
 						// Lower left arrow
 						SetRect(&lrc2, lrc.right - bmpArrowLr->bi.biWidth, lrc.bottom - bmpArrowLr->bi.biHeight, lrc.right, lrc.bottom);
-						iBmp_bitBlt(obj->bmp, &lrc2, bmpArrowLr);
+						iBmp_bitBltMask(obj->bmp, &lrc2, bmpArrowLr);
 						// Lower right arrow
 						SetRect(&lrc2, lrc.left, lrc.bottom - bmpArrowLl->bi.biHeight, lrc.left + bmpArrowLl->bi.biWidth, lrc.bottom);
-						iBmp_bitBlt(obj->bmp, &lrc2, bmpArrowLl);
+						iBmp_bitBltMask(obj->bmp, &lrc2, bmpArrowLl);
 
 
 					//////////
 					// Form caption
 					//////
-						SetRect(&lrc2, lrc3.right + 8, lrc3.top, lrc4.right - 8, lrc3.bottom);
+						SetRect(&lrc2, lrc3.right + 8, lrc3.top + 2, lrc4.right - 8, lrc3.bottom);
 						lhfontOld = (HFONT)SelectObject(obj->bmp->hdc, subobj->font->hfont);
 						SetTextColor(obj->bmp->hdc, (COLORREF)RGB(subobj->captionColor.red, subobj->captionColor.grn, subobj->captionColor.blu));
 						SetBkMode(obj->bmp->hdc, TRANSPARENT);

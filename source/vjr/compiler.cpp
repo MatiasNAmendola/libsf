@@ -127,8 +127,8 @@
 	{
 		// Begin compiling
 		cvc->currentFunction	= &cvc->codeBlock->firstFunction;
-		cvc->currentAdhoc	= NULL;
-		cvc->line			= cvc->codeBlock->ecFirst;
+		cvc->currentAdhoc		= NULL;
+		cvc->line				= cvc->codeBlock->ecFirst;
 		while (cvc->line)
 		{
 			// Increase our line count

@@ -36,7 +36,7 @@
 
 
 
-void initialize(HACCEL* hAccelTable)
+void iInit_vjr(HACCEL* hAccelTable)
 {
 	HRESULT hRes;
 
@@ -65,22 +65,22 @@ void initialize(HACCEL* hAccelTable)
 	//////////
 	// Load our icons and images
 	//////
-		bmpVjrIcon	= iBmp_rawLoad(cgc_appIconBmp);
-		bmpVjrIcon	= iBmp_rawLoad(cgc_jdebiAppIconBmp);
+		bmpVjrIcon		= iBmp_rawLoad(cgc_appIconBmp);
+		bmpJDebiIcon	= iBmp_rawLoad(cgc_jdebiAppIconBmp);
 
 		// Create a 1x1 no image bitmap placeholder
-		bmpNoImage	= iBmp_allocate();
+		bmpNoImage		= iBmp_allocate();
 		iBmp_createBySize(bmpNoImage, 1, 1, 32);
 
-		bmpClose	= iBmp_rawLoad(cgc_closeBmp);
-		bmpMaximize	= iBmp_rawLoad(cgc_maximizeBmp);
-		bmpMinimize	= iBmp_rawLoad(cgc_minimizeBmp);
-		bmpMove		= iBmp_rawLoad(cgc_moveBmp);
+		bmpClose		= iBmp_rawLoad(cgc_closeBmp);
+		bmpMaximize		= iBmp_rawLoad(cgc_maximizeBmp);
+		bmpMinimize		= iBmp_rawLoad(cgc_minimizeBmp);
+		bmpMove			= iBmp_rawLoad(cgc_moveBmp);
 
-		bmpArrowUl	= iBmp_rawLoad(cgc_arrowUlBmp);
-		bmpArrowUr	= iBmp_rawLoad(cgc_arrowUrBmp);
-		bmpArrowLl	= iBmp_rawLoad(cgc_arrowLlBmp);
-		bmpArrowLr	= iBmp_rawLoad(cgc_arrowLrBmp);
+		bmpArrowUl		= iBmp_rawLoad(cgc_arrowUlBmp);
+		bmpArrowUr		= iBmp_rawLoad(cgc_arrowUrBmp);
+		bmpArrowLl		= iBmp_rawLoad(cgc_arrowLlBmp);
+		bmpArrowLr		= iBmp_rawLoad(cgc_arrowLrBmp);
 
 
 	// Create our message window
@@ -90,8 +90,16 @@ void initialize(HACCEL* hAccelTable)
 	iInit_createDefaultObjects();
 
 	// Create our main screen window
-	iInit_createScreenForm();
-	iInit_createJDebiForm();
+	iInit_create_screenObject();
+	iInit_create_jdebiObject();
+
+	// Initially render each one
+	iObj_render(gobj_screen, true, true);
+	iObj_render(gobj_jdebi, true, true);
+
+	// Attach them to physical windows
+	gWinScreen	= iObj_createWindowForForm(gobj_screen);
+	gWinJDebi	= iObj_createWindowForForm(gobj_jdebi);
 }
 
 
@@ -122,28 +130,7 @@ void initialize(HACCEL* hAccelTable)
 					classa.cbSize				= sizeof(WNDCLASSEXA);
 					classa.hInstance			= ghInstance;
 					classa.lpszClassName		= cgcMessageWindowClass;
-					classa.lpfnWndProc			= &iWndProc_messageWindow;
-
-					// Register
-					atom = RegisterClassExA(&classa);
-					if (!atom)
-						break;
-				}
-
-				// Register the general window class if need be
-				if (!GetClassInfoExA(ghInstance, cgcWindowClass, &classa))
-				{
-					// Initialize
-					memset(&classa, 0, sizeof(classa));
-
-					// Populate
-					classa.cbSize				= sizeof(WNDCLASSEXA);
-					classa.hInstance			= ghInstance;
-					classa.style				= CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
-					classa.lpszClassName		= cgcWindowClass;
-					classa.hIcon				= LoadIcon(ghInstance, MAKEINTRESOURCE(IDI_VJR));
-					classa.hCursor				= LoadCursor(NULL, IDC_ARROW);
-					classa.lpfnWndProc			= &iWndProc_screenWindow;
+					classa.lpfnWndProc			= &iMessage_wndProcWindow;
 
 					// Register
 					atom = RegisterClassExA(&classa);
@@ -215,7 +202,7 @@ void initialize(HACCEL* hAccelTable)
 // Processes internal messages to process things internally.
 //
 //////
-	LRESULT CALLBACK iWndProc_messageWindow(HWND hwnd, UINT m, WPARAM w, LPARAM l)
+	LRESULT CALLBACK iMessage_wndProcWindow(HWND hwnd, UINT m, WPARAM w, LPARAM l)
 	{
 		// Call Windows' default procedure handler
 		return(DefWindowProc(hwnd, m, w, l));
@@ -247,17 +234,17 @@ void initialize(HACCEL* hAccelTable)
 		//////////
 		// Create each initial subobj
 		//////
-			subobj_empty			= iSubobj_createEmpty(NULL, NULL);
-			subobj_form				= iSubobj_createForm(NULL, NULL);
-			subobj_subform			= iSubobj_createSubform(NULL, NULL);
-			subobj_label			= iSubobj_createLabel(NULL, NULL);
-			subobj_textbox			= iSubobj_createTextbox(NULL, NULL);
-			subobj_button			= iSubobj_createButton(NULL, NULL);
-			subobj_editbox			= iSubobj_createEditbox(NULL, NULL);
-			subobj_image			= iSubobj_createImage(NULL, NULL);
-			subobj_checkbox			= iSubobj_createCheckbox(NULL, NULL);
-			subobj_option			= iSubobj_createOption(NULL, NULL);
-			subobj_radio			= iSubobj_createRadio(NULL, NULL);
+			subobj_empty			= iSubobj_createEmpty		(NULL, NULL);
+			subobj_form				= iSubobj_createForm		(NULL, NULL);
+			subobj_subform			= iSubobj_createSubform		(NULL, NULL);
+			subobj_label			= iSubobj_createLabel		(NULL, NULL);
+			subobj_textbox			= iSubobj_createTextbox		(NULL, NULL);
+			subobj_button			= iSubobj_createButton		(NULL, NULL);
+			subobj_editbox			= iSubobj_createEditbox		(NULL, NULL);
+			subobj_image			= iSubobj_createImage		(NULL, NULL);
+			subobj_checkbox			= iSubobj_createCheckbox	(NULL, NULL);
+			subobj_option			= iSubobj_createOption		(NULL, NULL);
+			subobj_radio			= iSubobj_createRadio		(NULL, NULL);
 
 
 		//////////
@@ -265,84 +252,79 @@ void initialize(HACCEL* hAccelTable)
 		//////
 			gobj_defaultEmpty		= iObj_create(_OBJECT_TYPE_EMPTY,		(void*)subobj_empty);
 			gobj_defaultForm		= iObj_create(_OBJECT_TYPE_FORM,		(void*)subobj_form);
-			gobj_defaultSubform		= iObj_create(_OBJECT_TYPE_SUBFORM,	(void*)subobj_subform);
+			gobj_defaultSubform		= iObj_create(_OBJECT_TYPE_SUBFORM,		(void*)subobj_subform);
 			gobj_defaultLabel		= iObj_create(_OBJECT_TYPE_LABEL,		(void*)subobj_label);
-			gobj_defaultTextbox		= iObj_create(_OBJECT_TYPE_TEXTBOX,	(void*)subobj_textbox);
-			gobj_defaultButton		= iObj_create(_OBJECT_TYPE_BUTTON,	(void*)subobj_button);
+			gobj_defaultTextbox		= iObj_create(_OBJECT_TYPE_TEXTBOX,		(void*)subobj_textbox);
+			gobj_defaultButton		= iObj_create(_OBJECT_TYPE_BUTTON,		(void*)subobj_button);
 			gobj_defaultImage		= iObj_create(_OBJECT_TYPE_IMAGE,		(void*)subobj_image);
 			gobj_defaultCheckbox	= iObj_create(_OBJECT_TYPE_CHECKBOX,	(void*)subobj_checkbox);
-			gobj_defaultOption		= iObj_create(_OBJECT_TYPE_OPTION,	(void*)subobj_option);
+			gobj_defaultOption		= iObj_create(_OBJECT_TYPE_OPTION,		(void*)subobj_option);
 			gobj_defaultRadio		= iObj_create(_OBJECT_TYPE_RADIO,		(void*)subobj_radio);
+	}
 
 
-		/////////
-		// Delete each initial subobj since they've now been copied onto the default objects
+
+
+//////////
+//
+// Called to create the _screen object with all of its stuff.
+//
+//////
+	void iInit_create_screenObject(void)
+	{
+		s32				lnLeft, lnTop, lnWidth, lnHeight;
+		SSubObjForm*	sof;
+		RECT			lrc;
+
+
+		//////////
+		// Create the object
 		//////
-			iSubobj_deleteEmpty		(subobj_empty,		true);
-			iSubobj_deleteForm		(subobj_form,		true);
-			iSubobj_deleteSubform	(subobj_subform,	true);
-			iSubobj_deleteLabel		(subobj_label,		true);
-			iSubobj_deleteTextbox	(subobj_textbox,	true);
-			iSubobj_deleteButton		(subobj_button,		true);
-			iSubobj_deleteEditbox	(subobj_editbox,	true);
-			iSubobj_deleteImage		(subobj_image,		true);
-			iSubobj_deleteCheckbox	(subobj_checkbox,	true);
-			iSubobj_deleteOption		(subobj_option,		true);
-			iSubobj_deleteRadio		(subobj_radio,		true);
-	}
+			// Create sub-object
+			sof = iSubobj_createForm((SSubObjForm*)gobj_defaultForm->sub_obj, NULL);
+			if (!sof)
+				return;
+
+			// Create object
+			gobj_screen = iObj_create(_OBJECT_TYPE_FORM, sof);
+			if (!gobj_screen)
+			{
+				iSubobj_deleteForm(sof, true);
+				return;
+			}
+
+			// Set the app icon
+			iSubobj_form_setIcon(gobj_screen, bmpVjrIcon);
+
+			// Give it a caption
+			iSubobj_form_setCaption(gobj_screen, (s8*)cgcScreenTitle, sizeof(cgcScreenTitle) - 1);
+			iSubobj_form_setCaptionColor(gobj_screen, black.color);
+
+			// Set its colors
+			iSubobj_form_setBorderRgba(gobj_screen, NwColor.color, NeColor.color, SwColor.color, SeColor.color);
+			iSubobj_form_setBackColor(gobj_screen, white.color);
+			iSubobj_form_setForeColor(gobj_screen, black.color);
+
+			// Set it visible
+			iObj_setVisible(gobj_screen, true);
 
 
+		//////////
+		// Size it to just under half the screen initially
+		//////
+			GetWindowRect(GetDesktopWindow(), &lrc);
+			lnWidth		= (lrc.right - lrc.left) / 2;
+			lnHeight	= (lrc.bottom - lrc.top);
 
-
-//////////
-//
-// Called to find or create the KSI interface window
-//
-//////
-	SObject* iInit_createScreenForm(void)
-	{
-// 		s32				lnLeft, lnTop;
-// 		RECT			lrc;
-// 		SFont*			font;
-// 		SSize			client, nonclient, overall;
-// 
-// 
-// 		//////////
-// 		// Create the object
-// 		//////
-// 			gobj_screen	= iObjectCreate(_OBJECT_TYPE_FORM, gobj_defaultForm);
-// 
-// 
-// 		//////////
-// 		// Find out how big the window should be
-// 		//////
-// 			iComputeScreenWindowClientAreaDimensions(&client);
-// 			iComputeScreenWindowNonclientAreaDimensions(&nonclient);
-// 			overall.width	= client.width + nonclient.width;
-// 			overall.height	= client.height + nonclient.width;
-// 			iAdjustScreenWindowDimensions(&overall);
-// 
-// 
-// 		//////////
-// 		// Physically create the interface window
-// 		//////
-// 			GetWindowRect(GetDesktopWindow(), &lrc);
-// 			lnLeft	= ((lrc.right - lrc.left) - overall.width)  / 2;
-// 			lnTop	= ((lrc.bottom - lrc.top) - overall.height) / 2;
-// 
-// 
-// 		//////////
-// 		// Create the fonts
-// 		//////
-// 			font				= iFontCreate(cgcWindowTitleBarFont, 10,	FW_BOLD, false, false);
-// 			winScreen.font		= iFontDuplicate(font);
-// 
-// 
-// 		//////////
-// 		// Draw the initial window state
-// 		//////
-// 			iResizeScreenWindow(true);
-		return(NULL);
+		
+		//////////
+		// Size and position it
+		//////
+			lnLeft		= (lrc.right  - lrc.left)  / 32;
+			lnTop		= (lrc.bottom - lrc.top)   / 32;
+			lnWidth		-= lnLeft;
+			lnHeight	-= (2 * lnTop);
+			iObj_setSize(gobj_screen, lnLeft, lnTop, lnWidth, lnHeight);
 	}
 
 
@@ -353,273 +335,61 @@ void initialize(HACCEL* hAccelTable)
 // 
 //
 //////
-	SObject* iInit_createJDebiForm(void)
+	void iInit_create_jdebiObject(void)
 	{
-// 		s32				lnLeft, lnTop;
-// 		RECT			lrc;
-// 		SFont*			font;
-// 		SSize			client, nonclient, overall;
-// 
-// 
-// 		//////////
-// 		// Create the object
-// 		//////
-// 			gobj_jdebi	= iObjectCreate(_OBJECT_TYPE_FORM, gobj_defaultForm);
-// 
-// 
-// 			//////////
-// 			// Find out how big the window should be
-// 			//////
-// 				iComputeJDebiWindowClientAreaDimensions(&client);
-// 				iComputeJDebiWindowNonclientAreaDimensions(&nonclient);
-// 				overall.width	= client.width + nonclient.width;
-// 				overall.height	= client.height + nonclient.width;
-// 				iAdjustJDebiWindowDimensions(&overall);
-// 
-// 
-// 			//////////
-// 			// Physically create the interface window
-// 			//////
-// 				GetWindowRect(GetDesktopWindow(), &lrc);
-// 				lnLeft	= ((lrc.right - lrc.left) - overall.width)  / 2;
-// 				lnTop	= ((lrc.bottom - lrc.top) - overall.height) / 2;
-// 
-// 			//////////
-// 			// Create the font
-// 			//////
-// 				font				= iFontCreate(cgcWindowTitleBarFont, 10,	FW_BOLD, false, false);
-// 				winJDebi.font		= iFontDuplicate(font);
-// 
-// 
-// 			//////////
-// 			// Draw the initial window state
-// 			//////
-// 				iResizeJDebiWindow(true);
-		return(NULL);
-	}
+		s32		lnLeft, lnTop, lnWidth, lnHeight;
+		SSubObjForm*	sof;
+		RECT			lrc;
 
 
+		//////////
+		// Create the object
+		//////
+			// Create sub-object
+			sof = iSubobj_createForm((SSubObjForm*)gobj_defaultForm->sub_obj, NULL);
+			if (!sof)
+				return;
+
+			// Create object
+			gobj_jdebi = iObj_create(_OBJECT_TYPE_FORM, sof);
+			if (!gobj_jdebi)
+			{
+				iSubobj_deleteForm(sof, true);
+				return;
+			}
+
+			// Set the app icon
+			iSubobj_form_setIcon(gobj_jdebi, bmpJDebiIcon);
+
+			// Set it visible
+			iObj_setVisible(gobj_jdebi, true);
+
+			// Give it a caption
+			iSubobj_form_setCaption(gobj_jdebi, (s8*)cgcJDebiTitle, sizeof(cgcJDebiTitle) - 1);
+			iSubobj_form_setCaptionColor(gobj_jdebi, black.color);
+
+			// Set its colors
+			iSubobj_form_setBorderRgba(gobj_jdebi, NwColor.color, NeColor.color, SwColor.color, SeColor.color);
+			iSubobj_form_setBackColor(gobj_jdebi, white.color);
+			iSubobj_form_setForeColor(gobj_jdebi, black.color);
 
 
-//////////
-//
-// Called to resize the window if need be based upon new client size settings
-//
-//////
-	void iResizeScreenWindow(bool tlForce)
-	{
-// 		s32		lnLeft, lnTop;
-// 		RECT	lrcDesktop;
-// 		SSize	client, nonclient, overall;
-// 
-// 
-// 		//////////
-// 		// Find out how big the window should be
-// 		//////
-// 			iComputeScreenWindowClientAreaDimensions(&client);
-// 			iComputeScreenWindowNonclientAreaDimensions(&nonclient);
-// 			overall.width	= client.width + nonclient.width;
-// 			overall.height	= client.height + nonclient.width;
-// 			iAdjustScreenWindowDimensions(&overall);
-// 
-// 
-// 		//////////
-// 		// Determine the windows desktop size
-// 		//////
-// 			GetWindowRect(GetDesktopWindow(), &lrcDesktop);
-// 
-// 		
-// 		//////////
-// 		// If the window size is different than this, we need to resize it
-// 		//////
-// 			lnLeft	= (lrcDesktop.right  - lrcDesktop.left)  / 16;
-// 			lnTop	= (lrcDesktop.bottom - lrcDesktop.top)   / 16;
-// 			iSetScreenWindowSize(lnLeft, lnTop, overall.width, overall.height, tlForce);
-	}
+		//////////
+		// Size it to just under half the screen initially
+		//////
+			GetWindowRect(GetDesktopWindow(), &lrc);
+			lnWidth		= (lrc.right - lrc.left) / 2;
+			lnHeight	= (lrc.bottom - lrc.top);
 
-
-
-
-//////////
-//
-// Called to resize the JDebi window
-//
-//////
-	void iResizeJDebiWindow(bool tlForce)
-	{
-// 		s32		lnLeft, lnTop;
-// 		RECT	lrcDesktop;
-// 		SSize	client, nonclient, overall;
-// 		SSize	clientScreen, nonclientScreen, overallScreen;
-// 
-// 
-// 		//////////
-// 		// Find out how big the window should be
-// 		//////
-// 			iComputeJDebiWindowClientAreaDimensions(&client);
-// 			iComputeJDebiWindowNonclientAreaDimensions(&nonclient);
-// 			overall.width	= client.width + nonclient.width;
-// 			overall.height	= client.height + nonclient.width;
-// 			iAdjustJDebiWindowDimensions(&overall);
-// 			
-// 			// Main screen
-// 			iComputeScreenWindowClientAreaDimensions(&clientScreen);
-// 			iComputeScreenWindowNonclientAreaDimensions(&nonclientScreen);
-// 			overallScreen.width		= clientScreen.width + nonclientScreen.width;
-// 			overallScreen.height	= clientScreen.height + nonclientScreen.width;
-// 			iAdjustScreenWindowDimensions(&overallScreen);
-// 
-// 
-// 		//////////
-// 		// Determine the windows desktop size
-// 		//////
-// 			GetWindowRect(GetDesktopWindow(), &lrcDesktop);
-// 
-// 		
-// 		//////////
-// 		// If the window size is different than this, we need to resize it
-// 		//////
-// 			lnLeft	= winScreen.rc.right;
-// 			lnTop	= winScreen.rc.top;
-// 			iSetJDebiWindowSize(lnLeft, lnTop, ((lrcDesktop.right - lrcDesktop.left) - overallScreen.width) - (2 * winScreen.rc.left), overallScreen.height, tlForce);
-	}
-
-
-
-
-//////////
-//
-// Called to programmatically set the screen window size after a resize
-//
-//////
-	void iSetScreenWindowSize(s32 tnLeft, s32 tnTop, s32 tnWidth, s32 tnHeight, bool tlForce)
-	{
-// 		bool llChangedSomething;
-// 
-// 
-// 		// Do we need to resize?
-// 		if (!IsWindowVisible(ghwndScreen) && !tlForce)
-// 			return;
-// 
-// 		// Begin resizing
-// 		ShowWindow(ghwndScreen, SW_RESTORE);
-// 		llChangedSomething = tlForce;
-// 		if (winScreen.rc.right - winScreen.rc.left != tnWidth || winScreen.rc.bottom - winScreen.rc.top != tnHeight)
-// 		{
-// 			// Yes
-// 			llChangedSomething = true;
-// 			SetWindowPos(ghwndScreen, NULL, 0, 0, tnWidth, tnHeight,	SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOMOVE);
-// 		}
-// 
-// 
-// 		// Do we need to move?
-// 		if (winScreen.rc.left != tnLeft || winScreen.rc.top != tnTop)
-// 		{
-// 			// Yes
-// 			llChangedSomething = true;
-// 			SetWindowPos(ghwndScreen, NULL, tnLeft, tnTop, 0, 0, SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSIZE);
-// 		}
-// 
-// 
-// 		// Get the current size
-// 		SetRect(&winScreen.rc, tnLeft, tnTop, tnLeft + tnWidth, tnTop + tnHeight);
-// 
-// 
-// 		// Did we change anything?
-// 		if (llChangedSomething)
-// 		{
-// 			//////////
-// 			// If there's already an image, release it
-// 			//////
-// 				DeleteObject((HGDIOBJ)winScreen.bmp.hbmp);
-// 				DeleteDC(winScreen.bmp.hdc);
-// 				memset(&winScreen.bmp, 0, sizeof(SBitmap));
-// 
-// 
-// 			//////////
-// 			// Create the buffers for it
-// 			//////
-// 				winScreen.bmp.hdc		= CreateCompatibleDC(GetDC(GetDesktopWindow()));
-// 				winScreen.bmp.hbmp		= iCreateBitmap(winScreen.bmp.hdc, tnWidth, tnHeight, 1, 32, (void**)&winScreen.bmp.bd, &winScreen.bmp.bh, &winScreen.bmp.bi);
-// 				winScreen.bmp.rowWidth	= iBmpComputeRowWidth(&winScreen.bmp);
-// 				SelectObject(winScreen.bmp.hdc, winScreen.bmp.hbmp);
-// 
-// 
-// 			//////////
-// 			// Redraw the window
-// 			//////
-// 				GetClientRect(ghwndScreen, &winScreen.rcClient);
-// 				iRedrawScreen(&winScreen);
-// 		}
-	}
-
-
-
-
-//////////
-//
-// Called to programmatically set the JDebi window size after a resize
-//
-//////
-	void iSetJDebiWindowSize(s32 tnLeft, s32 tnTop, s32 tnWidth, s32 tnHeight, bool tlForce)
-	{
-// 		bool llChangedSomething;
-// 
-// 
-// 		// Do we need to resize?
-// 		if (!IsWindowVisible(ghwndJDebi) && !tlForce)
-// 			return;
-// 
-// 		// Begin resizing
-// 		ShowWindow(ghwndJDebi, SW_RESTORE);
-// 		llChangedSomething = tlForce;
-// 		if (winJDebi.rc.right - winJDebi.rc.left != tnWidth || winJDebi.rc.bottom - winJDebi.rc.top != tnHeight)
-// 		{
-// 			// Yes
-// 			llChangedSomething = true;
-// 			SetWindowPos(ghwndJDebi, NULL, 0, 0, tnWidth, tnHeight,	SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOMOVE);
-// 		}
-// 
-// 
-// 		// Do we need to move?
-// 		if (winJDebi.rc.left != tnLeft || winJDebi.rc.top != tnTop)
-// 		{
-// 			// Yes
-// 			llChangedSomething = true;
-// 			SetWindowPos(ghwndJDebi, NULL, tnLeft, tnTop, 0, 0, SWP_NOACTIVATE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOSIZE);
-// 		}
-// 
-// 
-// 		// Get the current size
-// 		SetRect(&winJDebi.rc, tnLeft, tnTop, tnLeft + tnWidth, tnTop + tnHeight);
-// 
-// 
-// 		// Did we change anything?
-// 		if (llChangedSomething)
-// 		{
-// 			//////////
-// 			// If there's already an image, release it
-// 			//////
-// 				DeleteObject((HGDIOBJ)winJDebi.bmp.hbmp);
-// 				DeleteDC(winJDebi.bmp.hdc);
-// 				memset(&winJDebi.bmp, 0, sizeof(SBitmap));
-// 
-// 
-// 			//////////
-// 			// Create the buffers for it
-// 			//////
-// 				winJDebi.bmp.hdc		= CreateCompatibleDC(GetDC(GetDesktopWindow()));
-// 				winJDebi.bmp.hbmp		= iCreateBitmap(winJDebi.bmp.hdc, tnWidth, tnHeight, 1, 32, (void**)&winJDebi.bmp.bd, &winJDebi.bmp.bh, &winJDebi.bmp.bi);
-// 				winJDebi.bmp.rowWidth	= iBmpComputeRowWidth(&winJDebi.bmp);
-// 				SelectObject(winJDebi.bmp.hdc, winJDebi.bmp.hbmp);
-// 
-// 
-// 			//////////
-// 			// Redraw the window
-// 			//////
-// 				GetClientRect(ghwndJDebi, &winJDebi.rcClient);
-// 				iRedrawJDebi(&winJDebi);
-// 		}
+		
+		//////////
+		// Size and position it
+		//////
+			lnLeft		= lnWidth;
+			lnTop		= (lrc.bottom - lrc.top) / 32;
+			lnWidth		-= ((lrc.right - lrc.left) / 32);
+			lnHeight	-= (2 * lnTop);
+			iObj_setSize(gobj_jdebi, lnLeft, lnTop, lnWidth, lnHeight);
 	}
 
 
@@ -630,99 +400,103 @@ void initialize(HACCEL* hAccelTable)
 // Processes messages from the interface window, to forward on to the original window
 //
 //////
-	LRESULT CALLBACK iWndProc_screenWindow(HWND h, UINT m, WPARAM w, LPARAM l)
+	LRESULT CALLBACK iWindow_wndProc(HWND h, UINT m, WPARAM w, LPARAM l)
 	{
+		SWindow*		win;
+		HDC				lhdc;
+		PAINTSTRUCT		ps;
+
+
+		// See if we know this hwnd
+		win = iWindow_findByHwnd(h);
+
+		if (win)
+		{
+			// It was one of our windows
+			switch (m)
+			{
+// 				case WM_LBUTTONDOWN:
+// 					glMouseLeftButton = true;
+// 					return(iProcessMouseMessage(m, w, l));
+// 					break;
 // 
-// // 		s32				id, event;
-// 		HDC				lhdc;
-// 		PAINTSTRUCT		ps;
+// 				case WM_LBUTTONUP:
+// 					if (glMoving || glResizing)
+// 						ReleaseCapture();
 // 
+// 					glMouseLeftButton = false;
+// 					return(iProcessMouseMessage(m, w, l));
+// 					break;
 // 
-// 		// See if we know this hwnd
-// 		// It was one of our windows
-// 		switch (m)
-// 		{
-// 			case WM_LBUTTONDOWN:
-// 				glMouseLeftButton = true;
-// 				return(iProcessMouseMessage(m, w, l));
-// 				break;
+// 				case WM_RBUTTONDOWN:
+// 					glMouseRightButton = true;
+// 					return(iProcessMouseMessage(m, w, l));
+// 					break;
 // 
-// 			case WM_LBUTTONUP:
-// 				if (glMoving || glResizing)
-// 					ReleaseCapture();
+// 				case WM_RBUTTONUP:
+// 					glMouseRightButton = false;
+// 					return(iProcessMouseMessage(m, w, l));
+// 					break;
 // 
-// 				glMouseLeftButton = false;
-// 				return(iProcessMouseMessage(m, w, l));
-// 				break;
+// 				case WM_MBUTTONDOWN:
+// 					glMouseMiddleButton = true;
+// 					return(iProcessMouseMessage(m, w, l));
+// 					break;
 // 
-// 			case WM_RBUTTONDOWN:
-// 				glMouseRightButton = true;
-// 				return(iProcessMouseMessage(m, w, l));
-// 				break;
+// 				case WM_MBUTTONUP:
+// 					glMouseMiddleButton = false;
+// 					return(iProcessMouseMessage(m, w, l));
+// 					break;
 // 
-// 			case WM_RBUTTONUP:
-// 				glMouseRightButton = false;
-// 				return(iProcessMouseMessage(m, w, l));
-// 				break;
+// 				case WM_RBUTTONDBLCLK:
+// 				case WM_LBUTTONDBLCLK:
+// 				case WM_MBUTTONDBLCLK:
+// 				case WM_MOUSEHWHEEL:
+// 				case WM_MOUSEWHEEL:
+// 				case WM_MOUSEMOVE:
+// 					glMouseLeftButton	= ((w & MK_LBUTTON) != 0);		// The left mouse button is down
+// 					glMouseMiddleButton	= ((w & MK_MBUTTON) != 0);		// The middle mouse button is down
+// 					glMouseRightButton	= ((w & MK_RBUTTON) != 0);		// The right mouse button is down
+// 					return(iProcessMouseMessage(m, w, l));
+// 					break;
 // 
-// 			case WM_MBUTTONDOWN:
-// 				glMouseMiddleButton = true;
-// 				return(iProcessMouseMessage(m, w, l));
-// 				break;
+// 				case WM_KEYDOWN:
+// 				case WM_KEYUP:
+// //				case WM_CHAR:
+// //				case WM_DEADCHAR:
+// 				case WM_SYSKEYDOWN:
+// 				case WM_SYSKEYUP:
+// //				case WM_SYSCHAR:
+// //				case WM_SYSDEADCHAR:
+// 					return 0;
+// 					break;
 // 
-// 			case WM_MBUTTONUP:
-// 				glMouseMiddleButton = false;
-// 				return(iProcessMouseMessage(m, w, l));
-// 				break;
+// 				case WM_CAPTURECHANGED:
+// 					if (glMoving)
+// 					{
+// 						// Stop the movement
+// // TODO:				iStopMove();
 // 
-// 			case WM_RBUTTONDBLCLK:
-// 			case WM_LBUTTONDBLCLK:
-// 			case WM_MBUTTONDBLCLK:
-// 			case WM_MOUSEHWHEEL:
-// 			case WM_MOUSEWHEEL:
-// 			case WM_MOUSEMOVE:
-// 				glMouseLeftButton	= ((w & MK_LBUTTON) != 0);		// The left mouse button is down
-// 				glMouseMiddleButton	= ((w & MK_MBUTTON) != 0);		// The middle mouse button is down
-// 				glMouseRightButton	= ((w & MK_RBUTTON) != 0);		// The right mouse button is down
-// 				return(iProcessMouseMessage(m, w, l));
-// 				break;
+// 					} else if (glResizing) {
+// 						// Stop the resize
+// // TODO:				iStopResize();
 // 
-// 			case WM_KEYDOWN:
-// 			case WM_KEYUP:
-// //			case WM_CHAR:
-// //			case WM_DEADCHAR:
-// 			case WM_SYSKEYDOWN:
-// 			case WM_SYSKEYUP:
-// //			case WM_SYSCHAR:
-// //			case WM_SYSDEADCHAR:
-// 				return 0;
-// 				break;
-// 
-// 			case WM_CAPTURECHANGED:
-// 				if (glMoving)
-// 				{
-// 					// Stop the movement
-// // TODO:					iStopMove();
-// 
-// 				} else if (glResizing) {
-// 					// Stop the resize
-// // TODO:					iStopResize();
-// 
-// 				} else {
-// 					// Make sure our flags are lowered
-// 					glMoving	= false;
-// 					glResizing	= false;
-// 				}
-// 				break;
-// 
-// 			case WM_PAINT:
-// 				// Paint it
-// 				lhdc = BeginPaint(h, &ps);
-// 				BitBlt(lhdc, 0, 0, winScreen.bmp.bi.biWidth, winScreen.bmp.bi.biHeight, winScreen.bmp.hdc, 0, 0, SRCCOPY);
-// 				EndPaint(h, &ps);
-// 				return 0;
-// 		}
-// 
+// 					} else {
+// 						// Make sure our flags are lowered
+// 						glMoving	= false;
+// 						glResizing	= false;
+// 					}
+// 					break;
+
+				case WM_PAINT:
+					// Paint it
+					lhdc = BeginPaint(h, &ps);
+					BitBlt(lhdc, 0, 0, win->obj->bmp->bi.biWidth, win->obj->bmp->bi.biHeight, win->obj->bmp->hdc, 0, 0, SRCCOPY);
+					EndPaint(h, &ps);
+					return 0;
+			}
+		}
+
 		// Call Windows' default procedure handler
 		return(DefWindowProc(h, m, w, l));
 	}
@@ -732,105 +506,182 @@ void initialize(HACCEL* hAccelTable)
 
 //////////
 //
-// 
+// Called to create the Windows-facing window for the indicated object.
+// Note:  Any object can be presented in a window, though typically on form objects are.
 //
 //////
-	LRESULT CALLBACK iWndProc_jDebiWindow(HWND h, UINT m, WPARAM w, LPARAM l)
+	SWindow* iWindow_createForObject(SObject* obj)
 	{
-// 
-// // 		s32				id, event;
-// 		HDC				lhdc;
-// 		PAINTSTRUCT		ps;
-// 
-// 
-// 		// See if we know this hwnd
-// 		// It was one of our windows
-// 		switch (m)
-// 		{
-// 			case WM_LBUTTONDOWN:
-// 				glMouseLeftButton = true;
-// 				return(iProcessMouseMessage(m, w, l));
-// 				break;
-// 
-// 			case WM_LBUTTONUP:
-// 				if (glMoving || glResizing)
-// 					ReleaseCapture();
-// 
-// 				glMouseLeftButton = false;
-// 				return(iProcessMouseMessage(m, w, l));
-// 				break;
-// 
-// 			case WM_RBUTTONDOWN:
-// 				glMouseRightButton = true;
-// 				return(iProcessMouseMessage(m, w, l));
-// 				break;
-// 
-// 			case WM_RBUTTONUP:
-// 				glMouseRightButton = false;
-// 				return(iProcessMouseMessage(m, w, l));
-// 				break;
-// 
-// 			case WM_MBUTTONDOWN:
-// 				glMouseMiddleButton = true;
-// 				return(iProcessMouseMessage(m, w, l));
-// 				break;
-// 
-// 			case WM_MBUTTONUP:
-// 				glMouseMiddleButton = false;
-// 				return(iProcessMouseMessage(m, w, l));
-// 				break;
-// 
-// 			case WM_RBUTTONDBLCLK:
-// 			case WM_LBUTTONDBLCLK:
-// 			case WM_MBUTTONDBLCLK:
-// 			case WM_MOUSEHWHEEL:
-// 			case WM_MOUSEWHEEL:
-// 			case WM_MOUSEMOVE:
-// 				glMouseLeftButton	= ((w & MK_LBUTTON) != 0);		// The left mouse button is down
-// 				glMouseMiddleButton	= ((w & MK_MBUTTON) != 0);		// The middle mouse button is down
-// 				glMouseRightButton	= ((w & MK_RBUTTON) != 0);		// The right mouse button is down
-// 				return(iProcessMouseMessage(m, w, l));
-// 				break;
-// 
-// 			case WM_KEYDOWN:
-// 			case WM_KEYUP:
-// //			case WM_CHAR:
-// //			case WM_DEADCHAR:
-// 			case WM_SYSKEYDOWN:
-// 			case WM_SYSKEYUP:
-// //			case WM_SYSCHAR:
-// //			case WM_SYSDEADCHAR:
-// 				return 0;
-// 				break;
-// 
-// 			case WM_CAPTURECHANGED:
-// 				if (glMoving)
-// 				{
-// 					// Stop the movement
-// // TODO:					iStopMove();
-// 
-// 				} else if (glResizing) {
-// 					// Stop the resize
-// // TODO:					iStopResize();
-// 
-// 				} else {
-// 					// Make sure our flags are lowered
-// 					glMoving	= false;
-// 					glResizing	= false;
-// 				}
-// 				break;
-// 
-// 			case WM_PAINT:
-// 				// Paint it
-// 				lhdc = BeginPaint(h, &ps);
-// 				BitBlt(lhdc, 0, 0, winJDebi.bmp.bi.biWidth, winJDebi.bmp.bi.biHeight, winJDebi.bmp.hdc, 0, 0, SRCCOPY);
-// 				EndPaint(h, &ps);
-// 				return 0;
-// 				break;
-// 		}
+		SWindow*		win;
+		WNDCLASSEXA		classex;
+		ATOM			atom;
+		s8				buffer[128];
 
-		// Call Windows' default procedure handler
-		return(DefWindowProc(h, m, w, l));
+
+		// Make sure our environment is sane
+		win = NULL;
+		if (obj)
+		{
+			// Create
+			win = iWindow_allocate();
+			if (win)
+			{
+				// Lock down
+				EnterCriticalSection(&win->cs);
+
+				// Initialize
+				memset(buffer, 0, sizeof(buffer));
+
+				// Populate
+				CopyRect(&win->rc, &obj->rc);
+				win->obj = obj;
+
+
+				//////////
+				// Register the general window class if need be
+				//////
+					if (!GetClassInfoExA(ghInstance, cgcWindowClass, &classex))
+					{
+						// Initialize
+						memset(&classex, 0, sizeof(classex));
+
+						// Populate
+						classex.cbSize				= sizeof(WNDCLASSEXA);
+						classex.hInstance			= ghInstance;
+						classex.style				= CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
+						classex.lpszClassName		= cgcWindowClass;
+						classex.hIcon				= LoadIcon(ghInstance, MAKEINTRESOURCE(IDI_VJR));
+						classex.hCursor				= LoadCursor(NULL, IDC_ARROW);
+						classex.lpfnWndProc			= &iWindow_wndProc;
+
+						// Register
+						atom = RegisterClassExA(&classex);
+					}
+
+
+				//////////
+				// Physically create the window
+				//////
+					// Window name
+					if (obj->name.data)		memcpy(buffer, obj->name.data,		min(obj->name.length, sizeof(buffer) - 1));
+					else					memcpy(buffer, cgcScreenTitle,		sizeof(cgcScreenTitle));
+
+					// Build it
+					win->hwnd = CreateWindow(cgcWindowClass, buffer, WS_POPUP, obj->rc.left, obj->rc.top, obj->rc.right - obj->rc.left, obj->rc.bottom - obj->rc.top, NULL, NULL, ghInstance, 0);
+
+					// If visible, show it
+					if (obj->isVisible)
+						ShowWindow(win->hwnd, SW_SHOW);
+
+				// Unlock
+				LeaveCriticalSection(&win->cs);
+			}
+		}
+
+		// Indicate our status
+		return(win);
+	}
+
+
+
+
+//////////
+//
+// Called to search the known windows for the indicated window by hwnd
+//
+//////
+	SWindow* iWindow_findByHwnd(HWND hwnd)
+	{
+		u32			lnI;
+		HWND		lnHwnd;
+		SWindow*	win;
+
+
+		for (lnI = 0; lnI < gWindows->populatedLength; lnI += sizeof(SWindow))
+		{
+			// Grab this one
+			win = (SWindow*)(gWindows->data + lnI);
+
+			// Lock it down
+			EnterCriticalSection(&win->cs);
+
+			// Grab the hwnd
+			lnHwnd = win->hwnd;
+
+			// Unlock it
+			LeaveCriticalSection(&win->cs);
+
+			// Is this our man?
+			if (lnHwnd == hwnd)
+			{
+				// Indicate our find
+				return(win);
+			}
+		}
+
+		// If we get here, not found
+		return(NULL);
+	}
+
+
+
+
+//////////
+//
+// Called to
+//
+//////
+	SWindow* iWindow_allocate(void)
+	{
+		u32			lnI;
+		bool		llFound;
+		SWindow*	win;
+		
+		
+		// Iterate through existing slots for isValid=false windows
+		for (lnI = 0; lnI < gWindows->populatedLength; lnI += sizeof(SWindow))
+		{
+			// Grab this one
+			win = (SWindow*)(gWindows->data + lnI);
+
+			// Lock it down
+			if (TryEnterCriticalSection(&win->cs))
+			{
+				// Is this one invalid?
+				if (!win->isValid)
+				{
+					// We can use this one
+					llFound			= true;
+					win->isValid	= true;
+
+				} else {
+					// We must continue looking
+					llFound			= false;
+				}
+
+				// Unlock it
+				LeaveCriticalSection(&win->cs);
+
+				// If we found it, use it
+				if (llFound)
+					return(win);
+			}
+		}
+
+		// If we get here, it wasn't found
+		win = (SWindow*)iBuilder_allocateBytes(gWindows, sizeof(SWindow));
+		if (win)
+		{
+			// Initialize
+			memset(win, 0, sizeof(SWindow));
+
+			// Initially populate
+			InitializeCriticalSection(&win->cs);
+			win->isValid = true;
+		}
+
+		// Indicate our status
+		return(win);
 	}
 
 
@@ -841,7 +692,7 @@ void initialize(HACCEL* hAccelTable)
 // Called to shutdown the system politely, closing everything that's open
 //
 //////
-	bool iShutdownPolitely(void)
+	bool iInit_shutdownPolitely(void)
 	{
 		return(true);
 	}
@@ -1568,11 +1419,11 @@ _asm int 3;
 //////
 	void iEditChainManager_free(SEditChainManager** root, bool tlFreeSelf)
 	{
-// TODO:  COMPLETELY UNTESTED.  BREAKPOINT AND EXAMINE.
-_asm int 3;
 		// Make sure our environment is sane
 		if (root && *root)
 		{
+// TODO:  COMPLETELY UNTESTED.  BREAKPOINT AND EXAMINE.
+_asm int 3;
 			//////////
 			// Free undo history
 			//////

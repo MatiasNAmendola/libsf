@@ -191,7 +191,6 @@ struct SCompileNote;
 	{
 		SVariable*	next;
 		SLL*		ll;
-		u32			uid;													// Names may change during edit-and-continue, but the references they possess remain the same
 		SVariable*	indirect;												// If non-NULL, this variable is an indirect reference to an underlying variable
 
 		// Variable data
@@ -209,6 +208,13 @@ struct SCompileNote;
 		// If assign or access
 		SFunction*	assign;													// Source code executed whenever this variable is assigned
 		SFunction*	access;													// Source code executed whenever this variable is accessed
+
+		// Used only during compilation
+		bool		isStale;												// Variables are marked stale if the line they're defined on changes and needs recompiled.
+																			// Once recompiled, if the variable declaration still exists, the isStale flag is lowered.
+																			// If the variable no longer exists, any lines of code referencing the old variable are
+																			// marked for recompilation and errors will likely be generated.
+																			// To avoid this issue, use symbol refactoring in the IDE.
 	};
 
 	struct SOp

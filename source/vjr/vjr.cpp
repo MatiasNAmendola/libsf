@@ -52,7 +52,7 @@ int CALLBACK WinMain(	HINSTANCE	hInstance,
 
 	// Initialize
 	ghInstance = hInstance;
-	initialize(&hAccelTable);
+	iInit_vjr(&hAccelTable);
 
 	// Read events
 	while (GetMessage(&msg, NULL, 0, 0))

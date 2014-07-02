@@ -39,18 +39,18 @@
 //////////
 // Global Variables
 //////
-	HINSTANCE			ghInstance;
-	ITaskbarList*		giTaskbar;
-	SBuilder*			gWindows;
-	SBuilder*			gFonts;
-	HWND				ghwndMsg;
+	HINSTANCE			ghInstance							= NULL;
+	ITaskbarList*		giTaskbar							= NULL;
+	SBuilder*			gWindows							= NULL;
+	SBuilder*			gFonts								= NULL;
+	HWND				ghwndMsg							= NULL;
 	CRITICAL_SECTION	gcsUniqueIdAccess;
 	u32					gnNextUniqueId						= 0;
-	s64					systemStartedMs;
+	s64					systemStartedMs						= 0;
 
 
 	// JDebi window items
-	SEditChainManager*	commandHistory;																// The command window history
+	SEditChainManager*	commandHistory						= NULL;									// The command window history
 
 	// App icons
 	SBitmap*			bmpVjrIcon							= NULL;
@@ -74,6 +74,8 @@
 	// Default screens used by VJr
 	SObject*			gobj_screen							= NULL;
 	SObject*			gobj_jdebi							= NULL;
+	SWindow*			gWinScreen							= NULL;
+	SWindow*			gWinJDebi							= NULL;
 
 	// Default class structures
 	SObject*			gobj_defaultEmpty					= NULL;

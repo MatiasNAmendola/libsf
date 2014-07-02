@@ -65,6 +65,9 @@
 	void					iObj_renderChildrenAndSiblings			(SObject* obj, bool tlRenderChildren, bool tlRenderSiblings);
 	u32						iObj_publish							(SBitmap* bmpDst, RECT* trc, SObject* obj, bool tlPublishChildren, bool tlPublishSiblings);
 	void					iObj_duplicateChain						(SObject** root, SObject* chain);
+	void					iObj_setSize							(SObject* obj, s32 tnLeft, s32 tnTop, s32 tnWidth, s32 tnHeight);
+	SWindow* 				iObj_createWindowForForm				(SObject* obj_form);
+	bool					iObj_setVisible							(SObject* obj, bool tlNewVisible);
 
 	// Creation of individual sub-objects
 	void*					iSubobj_copy							(SObject* template_obj);
@@ -79,6 +82,14 @@
 	SSubObjCheckbox*		iSubobj_createCheckbox					(SSubObjCheckbox*	template_subobj, SObject* parent);
 	SSubObjOption*			iSubobj_createOption					(SSubObjOption*		template_subobj, SObject* parent);
 	SSubObjRadio*			iSubobj_createRadio						(SSubObjRadio*		template_subobj, SObject* parent);
+
+	// For specific sub-objects
+	void					iSubobj_form_setIcon					(SObject* obj, SBitmap* bmp);
+	void					iSubobj_form_setCaption					(SObject* obj, s8* tcCaption, u32 tnCaptionLength);
+	void					iSubobj_form_setBorderRgba				(SObject* obj, u32 tnNwRgba, u32 tnNeRgba, u32 tnSwRgba, u32 tnSeRgba);
+	u32						iSubobj_form_setBackColor				(SObject* obj, u32 tnRgba);
+	u32						iSubobj_form_setForeColor				(SObject* obj, u32 tnRgba);
+	u32						iSubobj_form_setCaptionColor			(SObject* obj, u32 tnRgba);
 
 	// Delete individual sub-objects
 	void					iSubobj_deleteEmpty						(SSubObjEmpty*		subobj, bool tlFreeSelf);
@@ -142,22 +153,21 @@
 //////////
 // vjr_sup.cpp
 //////
-	void					initialize								(HACCEL* hAccelTable);
+	void					iInit_vjr								(HACCEL* hAccelTable);
 	void					iInit_createMessageWindow				(void);
 	bool					isValidWindow							(u32 tnWindow);
 	void					iInit_createDefaultObjects				(void);
-	SObject*				iInit_createScreenForm					(void);
-	SObject*				iInit_createJDebiForm					(void);
+	void					iInit_create_screenObject				(void);
+	void					iInit_create_jdebiObject				(void);
 
 	DWORD	WINAPI			iReadEvents_messageWindow				(LPVOID lpParameter);
-	LRESULT	CALLBACK		iWndProc_messageWindow					(HWND hwnd, UINT m, WPARAM w, LPARAM l);
-	LRESULT	CALLBACK		iWndProc_screenWindow					(HWND hwnd, UINT m, WPARAM w, LPARAM l);
-	bool					iShutdownPolitely						(void);
+	LRESULT	CALLBACK		iMessage_wndProcWindow					(HWND hwnd, UINT m, WPARAM w, LPARAM l);
+	LRESULT	CALLBACK		iWindow_wndProc							(HWND hwnd, UINT m, WPARAM w, LPARAM l);
+	SWindow* 				iWindow_createForObject					(SObject* obj);
+	SWindow*				iWindow_findByHwnd						(HWND hwnd);
+	SWindow*				iWindow_allocate						(void);
+	bool					iInit_shutdownPolitely					(void);
 
-	void					iResizeScreenWindow						(bool tlForce);
-	void					iResizeJDebiWindow						(bool tlForce);
-	void					iSetScreenWindowSize					(s32 tnLeft, s32 tnTop, s32 tnWidth, s32 tnHeight, bool tlForce);
-	void					iSetJDebiWindowSize						(s32 tnLeft, s32 tnTop, s32 tnWidth, s32 tnHeight, bool tlForce);
 	void					iComputeScreenWindowClientAreaDimensions	(SSize* size);
 	void					iComputeScreenWindowNonclientAreaDimensions	(SSize* size);
 	void					iAdjustScreenWindowDimensions				(SSize* size);
@@ -207,6 +217,7 @@
 	SBitmap*				iBmp_allocate							(void);
 	SBitmap*				iBmp_copy								(SBitmap* bmpSrc);
 	SBitmap*				iBmp_verifyCopyIsSameSize				(SBitmap* bmpCopy, SBitmap* bmp);
+	SBitmap*				iBmp_verifySizeOrResize					(SBitmap* bmp, u32 tnWidth, u32 tnHeight);
 	SBitmap*				iBmp_rawLoad							(cu8* bmpRawFileData);
 	void					iBmp_convertTo32Bits					(SBitmap* bmp);
 	void					iBmp_copy24To32							(SBitmap* bmp32, SBitmap* bmp24);

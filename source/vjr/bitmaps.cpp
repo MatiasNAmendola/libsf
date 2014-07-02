@@ -141,6 +141,47 @@
 
 //////////
 //
+// Called to verify the bitmap size is correct, and if not then it will create one of
+// the correct size and scale this one into it.
+//
+//////
+	SBitmap* iBmp_verifySizeOrResize(SBitmap* bmp, u32 tnWidth, u32 tnHeight)
+	{
+		SBitmap* bmpNew;
+
+
+		// Make sure our environment is sane
+		if (!bmp || bmp->bi.biWidth != tnWidth || bmp->bi.biHeight != tnHeight)
+		{
+			// Something has changed
+			bmpNew = iBmp_allocate();
+			iBmp_createBySize(bmpNew, tnWidth, tnHeight, ((bmp) ? bmp->bi.biBitCount : 32));
+
+			// Process the old
+			if (bmp)
+			{
+				// Scale to the new one
+				iBmp_scale(bmpNew, bmp);
+
+				// Delete the old version
+				iBmp_delete(bmp, true, true);
+			}
+			// All done!
+
+		} else {
+			// They're the same
+			bmpNew = bmp;
+		}
+
+		// Indicate our success
+		return(bmpNew);
+	}
+
+
+
+
+//////////
+//
 // Called to load a bitmap file that was loaded from disk, or simulated loaded from disk.
 //
 //////
@@ -204,6 +245,7 @@
 			{
 				// We need to convert it
 				// Create the 32-bit version
+				memset(&bmp32, 0, sizeof(SBitmap));
 				iBmp_createBySize(&bmp32, bmp->bi.biWidth, bmp->bi.biHeight, 32);
 
 				// Copy it
@@ -370,7 +412,7 @@
 		bmp->bi.biBitCount			= (u16)((tnBitCount == 24 || tnBitCount == 32) ? tnBitCount : 32);
 		bmp->bi.biXPelsPerMeter		= 2835;	// Assume 72 dpi
 		bmp->bi.biYPelsPerMeter		= 2835;
-		iBmp_computeRowWidth(bmp);
+		bmp->rowWidth				= iBmp_computeRowWidth(bmp);
 		bmp->bi.biSizeImage			= bmp->rowWidth * tnHeight;
 //////////
 // Note:  The compression formats can be:

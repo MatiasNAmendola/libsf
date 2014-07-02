@@ -93,7 +93,7 @@ struct SBitmap
 };
 
 
-// For scaling bitmaps
+// For processing the scaling of bitmaps
 struct SBitmapProcess
 {
 	// Holds the source canvas
@@ -152,10 +152,13 @@ struct SBitmapProcess
 
 struct SWindow
 {
-	SWindow*	next;													// Pointer to next window in the chain
-	HWND		hwnd;													// The window's hwnd
-	RECT		rc;														// Rectangle of window's physical position
-	SObject*	form;													// The object iself
+	bool				isValid;										// When windows fall out of scope they are marked not valid
+
+	HWND				hwnd;											// The window's hwnd
+	RECT				rc;												// Rectangle of window's physical position
+	SObject*			obj;											// The top-level object being rendered in this window
+
+	CRITICAL_SECTION	cs;												// Atomic access
 };
 
 struct SSize

@@ -274,10 +274,10 @@ struct SSubObjForm
 	SObject*	parent;													// parent object this object belongs to
 
 	SFont*		font;													// Default font instance
-	SBgra		borderNwColor;											// Northwest back color for border
-	SBgra		borderNeColor;											// Northeast back color for border
-	SBgra		borderSwColor;											// Southwest back color for border
-	SBgra		borderSeColor;											// Southeast back color for border
+	SBgra		nwRgba;													// Northwest back color for border
+	SBgra		neRgba;													// Northeast back color for border
+	SBgra		swRgba;													// Southwest back color for border
+	SBgra		seRgba;													// Southeast back color for border
 	SBgra		backColor;												// Back color for the client content
 	SBgra		foreColor;												// Default text fore color
 	SBgra		captionColor;											// Color of the caption
@@ -416,7 +416,7 @@ struct SSubObjEditbox
 	// Flags for data
 	u32			style;													// See _EDITBOX_STYLE_* constants (plain, 2D, 3D)
 	u32			alignment;												// 0=left, 1=right, 2=center, always centered vertically
-	SEditChainManager*	value;											// The content being edited
+	SEditChainManager*	codeBlock;										// The content being edited, typically source code
 	SDatum		comment;												// Comment
 	SDatum		toolTip;												// What to display if hovering
 
