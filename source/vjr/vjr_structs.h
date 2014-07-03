@@ -66,6 +66,7 @@ struct SUndo
 
 struct SEditChain
 {
+	SLL*		ll;
 	SEditChain*	prev;													// Pointer backward to previous text item
 	SEditChain*	next;													// Pointer forward to next text item
 	u32			uid;													// Unique id for this line, used for undos and identifying individual lines which may move about
@@ -212,8 +213,8 @@ struct SEvents
 
 struct SObject
 {
-	SObject*	next;													// Next object in chain (if any)
-	SObject*	parent;													// Parent object (if any)
+	SLL			ll;														// Linked list
+	SObject*	parent;													// Pointer to parent object for this instance
 	SObject*	firstChild;												// Pointer to child objects (all objects are containers)
 
 	// If a user defined class, class information

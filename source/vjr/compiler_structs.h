@@ -189,8 +189,7 @@ struct SCompileNote;
 
 	struct SVariable
 	{
-		SVariable*	next;
-		SLL*		ll;
+		SLL			ll;
 		SVariable*	indirect;												// If non-NULL, this variable is an indirect reference to an underlying variable
 
 		// Variable data
@@ -379,7 +378,7 @@ struct SCompileNote;
 	// For warnings, errors, and notes
 	struct SCompileNote
 	{
-		SLL*			ll;
+		SLL				ll;
 		u32				start;											// Column the note begins on
 		u32				end;											// Column the note ends on
 

@@ -173,6 +173,18 @@ typedef		const f64			cf64;
 	const s8			cgcWindowClass[]					= "VJr.Window";
 	const s8			cgcScreenTitle[]					= "Visual FreePro, Jr.";
 	const s8			cgcJDebiTitle[]						= "JDebi Debugger";
-	const s8			cgcUbuntu[]							= "Ubuntu";
-	const s8			cgcWindowTitleBarFont[]				= "Ubuntu";
+	const s8			cgcDefaultFont[]					= "Ubuntu";
+	const s8			cgcWindowTitleBarFont[]				= "Ubuntu Condensed";
 	const s8			cgcSubwindowTitleBarFont[]			= "Ubuntu Condensed";
+
+
+//////////
+// Base class control names
+//////
+	const s8			cgcName_form[]						= "form";
+	const s8			cgcName_icon[]						= "icon";
+	const s8			cgcCaption_icon[]					= "caption";
+	const s8			cgcName_iconMove[]					= "move";
+	const s8			cgcName_iconMinimize[]				= "minimize";
+	const s8			cgcName_iconMaximize[]				= "maximize";
+	const s8			cgcName_iconClose[]					= "close";

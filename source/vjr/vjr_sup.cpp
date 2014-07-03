@@ -59,7 +59,8 @@ void iInit_vjr(HACCEL* hAccelTable)
 	systemStartedMs = iTime_getLocalMs();
 
 	// Default font
-	gsFont = iFont_create(cgcUbuntu, 10, FW_NORMAL, 0, 0);
+	gsFont					= iFont_create(cgcDefaultFont,			10, FW_NORMAL,	0, 0);
+	gsWindowTitleBarFont	= iFont_create(cgcWindowTitleBarFont,	12, FW_NORMAL,	0, 0);
 
 
 	//////////
@@ -943,15 +944,16 @@ void iInit_vjr(HACCEL* hAccelTable)
 			//////////
 			// Create a copy
 			//////
-				font->hdc					= CreateCompatibleDC(GetDC(GetDesktopWindow()));
-				font->hfont					= CreateFont(fontSource->_sizeUsedForCreateFont, 0, 0, 0, fontSource->_weight, (fontSource->_italics != 0), (fontSource->_underline != 0), false, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, FF_DONTCARE, fontSource->name.data);
-				SelectObject(font->hdc, font->hfont);
+				// Initialize the copy
+				memcpy(font, fontSource, sizeof(SFont));
+				font->name.data		= NULL;
+				font->name.length	= 0;
 				iDatum_duplicate(&font->name, fontSource->name.data, fontSource->name.length);
-				font->_size					= fontSource->_size;
-				font->_weight				= fontSource->_weight;
-				font->_italics				= fontSource->_italics;
-				font->_underline			= fontSource->_underline;
-				memcpy(&font->tm, &fontSource->tm, sizeof(font->tm));
+
+				// Set unique parts
+				font->hdc						= CreateCompatibleDC(GetDC(GetDesktopWindow()));
+				font->hfont						= CreateFont(font->_sizeUsedForCreateFont, 0, 0, 0, font->_weight, (font->_italics != 0), (font->_underline != 0), false, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, FF_DONTCARE, font->name.data);
+				SelectObject(font->hdc, font->hfont);
 		}
 		// Indicate our success or failure
 		return(font);
@@ -1028,7 +1030,7 @@ void iInit_vjr(HACCEL* hAccelTable)
 		//////
 			font->hdc						= CreateCompatibleDC(GetDC(GetDesktopWindow()));
 			font->_sizeUsedForCreateFont	= -MulDiv(tnFontSize, GetDeviceCaps(GetDC(GetDesktopWindow()), LOGPIXELSY), 72);
-			font->hfont						= CreateFont(font->_sizeUsedForCreateFont, 0, 0, 0, tnFontWeight, (tnItalics != 0), (tnUnderline != 0), false, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, FF_DONTCARE, tcFontName);
+			font->hfont						= CreateFont(font->_sizeUsedForCreateFont, 0, 0, 0, tnFontWeight, (tnItalics != 0), (tnUnderline != 0), false, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_NATURAL_QUALITY, FF_SWISS, tcFontName);
 			SelectObject(font->hdc, font->hfont);
 			iDatum_duplicate(&font->name, (s8*)tcFontName, lnLength);
 			font->_size						= tnFontSize;

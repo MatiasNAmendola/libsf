@@ -131,10 +131,14 @@ struct SVariable;
 	SLL*					iSEChain_completelyMigrateSLLByNum			(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, u32 lnSrcNum, u32 tnHint, u32 tnBlockSize);
 	SMasterList*			iSEChain_migrateByNum						(SStartEnd* ptrSEDst, SStartEnd* ptrSESrc, u32 lnSrcNum, u32 tnHint, u32 tnBlockSize);
 
-	// Linked list functions
-	SLL*					iLl_appendNode								(SLL** root, SLL* nodeHint, SLL* nodeNext, SLL* nodePrev, u32 tnUniqueId, u32 tnSize);
-	SLL*					iLl_createNode								(                           SLL* nodePrev, SLL* nodeNext, u32 tnUniqueId, u32 tnSize);
-	SLL*					iLl_appendNodeAtEnd							(SLL** root, u32 tnSize);
+
+//////////
+// Linked list functions
+//////
+	SLL*					iLl_appendNewNode							(SLL** root, SLL* nodeHint, SLL* nodeNext, SLL* nodePrev, u32 tnUniqueId, u32 tnSize);
+	SLL*					iLl_createOrphanNode						(                           SLL* nodePrev, SLL* nodeNext, u32 tnUniqueId, u32 tnSize);
+	SLL*					iLl_appendNewNodeAtEnd						(SLL** root, u32 tnSize);
+	bool					iLl_appendExistingNodeAtEnd					(SLL** root, SLL* node);
 	SLL*					iLl_deleteNode								(SLL* node, bool tlDeleteSelf);
 	void					iLl_deleteNodesWithCallback					(SLLCallback* cb);
 	bool					iLl_insertNode								(SLL* node, SLL* nodeRef, bool tlAfter);
@@ -146,6 +150,10 @@ struct SVariable;
 	SLL*					iLl_getFirstNode							(SLL* node);
 	SLL*					iLl_getLastNode								(SLL* node);
 	u32						iLl_countNodesToEnd							(SLL* node);
+//////
+// END
+//////////
+
 
 	// Node functions
 	SNode*					iNode_create								(SNode** root, SNode* hint, u32 tnDirection, SNode* parent, SNode* prev, SNode* next, SNode* left, SNode* right);

@@ -874,7 +874,7 @@ void iiComps_decodeSyntax_returns(SCompileVxbmmContext* cvc)
 								//////////
 								// Allocate this entry
 								///////
-									comp = (SComp*)iLl_appendNode((SLL**)&line->compilerInfo->firstComp, (SLL*)compLast, NULL, (SLL*)compLast, iGetNextUid(), sizeof(SComp));
+									comp = (SComp*)iLl_appendNewNode((SLL**)&line->compilerInfo->firstComp, (SLL*)compLast, NULL, (SLL*)compLast, iGetNextUid(), sizeof(SComp));
 
 
 								//////////
@@ -2755,7 +2755,7 @@ _asm int 3;
 		if (compRef && line && line->compilerInfo)
 		{
 			// Allocate a new pointer
-			compNew = (SComp*)iLl_appendNode((SLL**)&line->compilerInfo->firstComp, NULL, NULL, NULL, iGetNextUid(), sizeof(SComp));
+			compNew = (SComp*)iLl_appendNewNode((SLL**)&line->compilerInfo->firstComp, NULL, NULL, NULL, iGetNextUid(), sizeof(SComp));
 			if (compNew)
 			{
 				// Initialize it
@@ -2836,7 +2836,7 @@ _asm int 3;
 			if (line && line->compilerInfo)
 			{
 				// Add the new component to line->comps
-				compNew = (SComp*)iLl_appendNode((SLL**)&line->compilerInfo->firstComp, NULL, NULL, NULL, iGetNextUid(), sizeof(SComp));
+				compNew = (SComp*)iLl_appendNewNode((SLL**)&line->compilerInfo->firstComp, NULL, NULL, NULL, iGetNextUid(), sizeof(SComp));
 
 			} else {
 				// Just create a rogue one
@@ -3177,7 +3177,7 @@ _asm int 3;
 // iterate from the root node forward.
 //
 //////
-	SLL* iLl_appendNode(SLL** root, SLL* nodeHint, SLL* nodeNext, SLL* nodePrev, u32 tnUniqueId, u32 tnSize)
+	SLL* iLl_appendNewNode(SLL** root, SLL* nodeHint, SLL* nodeNext, SLL* nodePrev, u32 tnUniqueId, u32 tnSize)
 	{
 		SLL* node;
 
@@ -3187,7 +3187,7 @@ _asm int 3;
 		if (root)
 		{
 			// Create a new node
-			node = iLl_createNode(nodePrev, nodeNext, tnUniqueId, tnSize);
+			node = iLl_createOrphanNode(nodePrev, nodeNext, tnUniqueId, tnSize);
 			
 			// Append it to the chain
 			if (*root)
@@ -3220,7 +3220,7 @@ _asm int 3;
 // Creates a new 2-way linked list with optional nodePrev and nodeNext info, using
 // the indicated size for the allocation (which is beyond the SLL portion at the head).
 //////
-	SLL* iLl_createNode(SLL* nodePrev, SLL* nodeNext, u32 tnUniqueId, u32 tnSize)
+	SLL* iLl_createOrphanNode(SLL* nodePrev, SLL* nodeNext, u32 tnUniqueId, u32 tnSize)
 	{
 		SLL* node;
 
@@ -3252,7 +3252,7 @@ _asm int 3;
 // Called to append the node at the end of the chain
 //
 //////
-	SLL* iLl_appendNodeAtEnd(SLL** root, u32 tnSize)
+	SLL* iLl_appendNewNodeAtEnd(SLL** root, u32 tnSize)
 	{
 		SLL* node;
 		SLL* nodeNew;
@@ -3290,6 +3290,47 @@ _asm int 3;
 
 		// Indicate our status
 		return(nodeNew);
+	}
+
+
+
+
+/////////
+//
+// Called to append a node which already exists to the end
+//
+//////
+	bool iLl_appendExistingNodeAtEnd(SLL** root, SLL* node)
+	{
+		bool	llAppended;
+		SLL*	nodeLast;
+
+
+		// Make sure our environment is sane
+		llAppended = false;
+		if (root && node)
+		{
+			// Determine where it goes
+			if (!*root)
+			{
+				// First entry
+				*root = node;
+
+			} else {
+				// Append to end
+				nodeLast = *root;
+				while (nodeLast->next)
+					nodeLast = nodeLast->next;
+
+				// Append here
+				nodeLast->next	= node;			// Last one currently existing points here
+				node->prev		= nodeLast;		// Node points back to previous last one
+				llAppended		= true;
+			}
+		}
+
+		// Indicate our status
+		return(llAppended);
 	}
 
 
@@ -4084,7 +4125,7 @@ _asm int 3;
 		if (func)
 		{
 			// We create an empty variable slot, one which will receive the variable content/value at some later time during computation
-			varNew = (SVariable*)iLl_appendNodeAtEnd((SLL**)&func->scoped, sizeof(SVariable));		// Create a new variable
+			varNew = (SVariable*)iLl_appendNewNodeAtEnd((SLL**)&func->scoped, sizeof(SVariable));		// Create a new variable
 		}
 
 		// Indicate our status
@@ -4522,7 +4563,7 @@ _asm int 3;
 
 
 		// Create the new note
-		note = (SCompileNote*)iLl_appendNodeAtEnd((SLL**)noteRoot, sizeof(SCompileNote));
+		note = (SCompileNote*)iLl_appendNewNodeAtEnd((SLL**)noteRoot, sizeof(SCompileNote));
 		if (note)
 		{
 			// Initialize it

@@ -105,7 +105,7 @@
 			//////////
 			// Update the next and parent, and clear out any bmpScaled
 			//////
-				obj->next		= next;
+				obj->ll.next	= (SLL*)next;
 				obj->parent		= parent;
 				obj->bmpScaled	= NULL;
 
@@ -246,16 +246,16 @@
 		//////////
 		// Render any siblings
 		//////
-			if (tlRenderSiblings && obj->next)
+			if (tlRenderSiblings && obj->ll.next)
 			{
-				objSib = obj->next;
+				objSib = (SObject*)obj->ll.next;
 				while (objSib)
 				{
 					// Render this sibling
 					iObj_render(objSib, true, true);
 
 					// Move to next sibling
-					objSib = objSib->next;
+					objSib = (SObject*)objSib->ll.next;
 				}
 			}
 	}
@@ -327,17 +327,17 @@
 		//////////
 		// Publish any siblings
 		//////
-			if (tlPublishSiblings && obj->next)
+			if (tlPublishSiblings && obj->ll.next)
 			{
 				// Begin at the next sibling
-				objSib = obj->next;
+				objSib = (SObject*)obj->ll.next;
 				while (objSib)
 				{
 					// Render this sibling
 					lnPixelsRendered += iObj_publish(bmpDst, trc, objSib, tlPublishChildren, false);
 
 					// Move to next sibling
-					objSib = objSib->next;
+					objSib = (SObject*)objSib->ll.next;
 				}
 			}
 
@@ -378,7 +378,7 @@
 					*oPrevPtr = obj;
 
 					// Setup the next forward pointer
-					oPrevPtr = &obj->next;
+					oPrevPtr = (SObject**)&obj->ll.next;
 
 					// Get the location of our sub-object update pointer
 					objDataPtr = &obj->sub_obj;
@@ -388,7 +388,54 @@
 				}
 
 				// Move to next item in the chain
-				chain = chain->next;
+				chain = (SObject*)chain->ll.next;
+			}
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to append the indicated object to the parent
+//
+//////
+	void iObj_appendObjToParent(SObject* parent, SObject* obj)
+	{
+		// Make sure our environment is sane
+		if (parent && obj)
+			iLl_appendExistingNodeAtEnd((SLL**)&parent->firstChild, (SLL*)obj);
+	}
+
+
+
+
+//////////
+//
+// Called to duplicate the child objects to this object
+//
+//////
+	void iObj_duplicateChildren(SObject* parent)
+	{
+		SObject*	objChild;
+		SObject*	objCopy;
+
+
+		// Make sure our environment is sane
+		if (parent && parent->firstChild)
+		{
+			// Duplicate this entry
+			objChild = parent->firstChild;
+			while (objChild)
+			{
+				// Copy this item
+
+				// Append any children here
+
+				// Move to next
+// TODO:  working here
+//				objChild
 			}
 		}
 	}
@@ -459,8 +506,8 @@
 			obj->isVisible	= tlNewVisible;
 		}
 
-		// Indicate our status
-		return(false);
+		// Indicate prior visible
+		return(llOldVisible);
 	}
 
 
@@ -594,7 +641,13 @@
 //////
 	SSubObjForm* iSubobj_createForm(SSubObjForm* template_subobj, SObject* parent)
 	{
-		SSubObjForm* subobj;
+		SSubObjForm*	subobj;
+		SObject*		icon;
+		SObject*		caption;
+		SObject*		move;
+		SObject*		minimize;
+		SObject*		maximize;
+		SObject*		close;
 
 
 		//////////
@@ -635,6 +688,9 @@
 					*(u32*)&subobj->activate	= *(u32*)&template_subobj->activate;
 					*(u32*)&subobj->deactivate	= *(u32*)&template_subobj->deactivate;
 
+					// Duplicate all children for this object
+					iObj_duplicateChildren(parent);
+
 				} else {
 					// Use VJr defaults
 					subobj->font				= iFont_duplicate(gsFont);
@@ -647,10 +703,35 @@
 					subobj->captionColor.color	= black.color;
 
 					subobj->bmpIcon				= iBmp_copy(bmpVjrIcon);
-					iDatum_duplicate(&subobj->caption, "Form", 4);
+					iDatum_duplicate(&subobj->caption, (s8*)cgcName_form, -1);
 
 					*(u32*)&subobj->activate	= (u32)&iDefaultCallback_activate;
 					*(u32*)&subobj->deactivate	= (u32)&iDefaultCallback_deactivate;
+
+					// Create the children for this object
+					icon		= iObj_create(_OBJECT_TYPE_IMAGE, gobj_defaultImage);
+					caption		= iObj_create(_OBJECT_TYPE_LABEL, gobj_defaultLabel);
+					move		= iObj_create(_OBJECT_TYPE_IMAGE, gobj_defaultImage);
+					minimize	= iObj_create(_OBJECT_TYPE_IMAGE, gobj_defaultImage);
+					maximize	= iObj_create(_OBJECT_TYPE_IMAGE, gobj_defaultImage);
+					close		= iObj_create(_OBJECT_TYPE_IMAGE, gobj_defaultImage);
+
+					// Give them names
+					iDatum_duplicate(&icon->name,		(s8*)cgcName_icon,			-1);
+					iDatum_duplicate(&caption->name,	(s8*)cgcCaption_icon,		-1);
+					iDatum_duplicate(&move->name,		(s8*)cgcName_iconMove,		-1);
+					iDatum_duplicate(&minimize->name,	(s8*)cgcName_iconMinimize,	-1);
+					iDatum_duplicate(&maximize->name,	(s8*)cgcName_iconMaximize,	-1);
+					iDatum_duplicate(&close->name,		(s8*)cgcName_iconClose,		-1);
+
+					// Append to the parent
+					iObj_appendObjToParent(parent, icon);
+					iObj_appendObjToParent(parent, caption);
+					iObj_appendObjToParent(parent, move);
+					iObj_appendObjToParent(parent, minimize);
+					iObj_appendObjToParent(parent, maximize);
+					iObj_appendObjToParent(parent, close);
+
 				}
 			}
 
@@ -1284,7 +1365,7 @@
 					// Create the two objects
 					subobj->firstOption					= iObj_create(_OBJECT_TYPE_LABEL, NULL);
 					if (subobj->firstOption)
-						subobj->firstOption->next		= iObj_create(_OBJECT_TYPE_LABEL, NULL);
+						subobj->firstOption->ll.next	= (SLL*)iObj_create(_OBJECT_TYPE_LABEL, NULL);
 
 					// Copy the events
 					*(u32*)&subobj->onSelect			= *(u32*)&iDefaultCallback_onSelect;
@@ -1917,19 +1998,19 @@
 					//////
 						// Form icon
 						SetRect(&lrc3,	bmpArrowUl->bi.biWidth + 8, 1, bmpArrowUl->bi.biWidth + 8 + subobj->bmpIcon->bi.biWidth, 1 + subobj->bmpIcon->bi.biHeight);
-						iBmp_bitBlt(obj->bmp, &lrc3, subobj->bmpIcon);
+						iBmp_bitBltMask(obj->bmp, &lrc3, subobj->bmpIcon);
 						// Close
 						SetRect(&lrc2,	lrc.right - bmpArrowUr->bi.biWidth - 8 - bmpClose->bi.biWidth, lrc.top + 1, lrc.right - bmpArrowUr->bi.biWidth - 8, lrc.bottom - 1);
-						iBmp_bitBlt(obj->bmp, &lrc2, bmpClose);
+						iBmp_bitBltMask(obj->bmp, &lrc2, bmpClose);
 						// Maximize
 						SetRect(&lrc2,	lrc2.left - bmpMaximize->bi.biWidth - 1, lrc2.top, lrc2.left - 1, lrc2.bottom);
-						iBmp_bitBlt(obj->bmp, &lrc2, bmpMaximize);
+						iBmp_bitBltMask(obj->bmp, &lrc2, bmpMaximize);
 						// Minimize
 						SetRect(&lrc2,	lrc2.left - bmpMinimize->bi.biWidth - 1, lrc2.top, lrc2.left - 1, lrc2.bottom);
-						iBmp_bitBlt(obj->bmp, &lrc2, bmpMinimize);
+						iBmp_bitBltMask(obj->bmp, &lrc2, bmpMinimize);
 						// Move
 						SetRect(&lrc4,	lrc2.left - bmpMove->bi.biWidth - 1, lrc2.top, lrc2.left - 1, lrc2.bottom);
-						iBmp_bitBlt(obj->bmp, &lrc4, bmpMove);
+						iBmp_bitBltMask(obj->bmp, &lrc4, bmpMove);
 
 
 					//////////
@@ -1952,11 +2033,11 @@
 					//////////
 					// Form caption
 					//////
-						SetRect(&lrc2, lrc3.right + 8, lrc3.top + 2, lrc4.right - 8, lrc3.bottom);
-						lhfontOld = (HFONT)SelectObject(obj->bmp->hdc, subobj->font->hfont);
+						SetRect(&lrc2, lrc3.right + 8, lrc3.top, lrc4.right - 8, lrc3.bottom);
+						lhfontOld = (HFONT)SelectObject(obj->bmp->hdc, gsWindowTitleBarFont->hfont);
 						SetTextColor(obj->bmp->hdc, (COLORREF)RGB(subobj->captionColor.red, subobj->captionColor.grn, subobj->captionColor.blu));
 						SetBkMode(obj->bmp->hdc, TRANSPARENT);
-						DrawTextA(obj->bmp->hdc, subobj->caption.data, subobj->caption.length, &lrc2, DT_VCENTER | DT_END_ELLIPSIS);
+						DrawTextA(obj->bmp->hdc, subobj->caption.data, subobj->caption.length, &lrc2, DT_VCENTER);
 						SelectObject(obj->bmp->hdc, lhfontOld);
 
 
@@ -1985,16 +2066,16 @@
 			//////////
 			// Render any siblings
 			//////
-				if (tlRenderSiblings && obj->next)
+				if (tlRenderSiblings && obj->ll.next)
 				{
-					objSib = obj->next;
+					objSib = (SObject*)obj->ll.next;
 					while (objSib)
 					{
 						// Render this sibling
 						lnPixelsRendered += iObj_render(objSib, tlRenderChildren, false);
 
 						// Move to next sibling
-						objSib = objSib->next;
+						objSib = (SObject*)objSib->ll.next;
 					}
 				}
 		}

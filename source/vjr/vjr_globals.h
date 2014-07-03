@@ -93,6 +93,7 @@
 	// General defaults
 	//////
 		SFont*			gsFont								= NULL;									// Default font, Ubuntu 10 pt
+		SFont*			gsWindowTitleBarFont				= NULL;									// Default font, Ubuntu Bold 12 pt
 		// Global colors
 		const SBgra		white								= { rgba(255, 255, 255, 255) };
 		const SBgra		black								= { rgba(0, 0, 0, 255) };

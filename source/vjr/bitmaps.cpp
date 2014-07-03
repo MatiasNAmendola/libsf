@@ -662,7 +662,7 @@
 								if (lnXDst >= 0 && lnXDst < bmpDst->bi.biWidth)
 								{
 									// Copy the pixel if it's not a mask pixel
-									if (lbgrSrc->red != 222 && lbgrSrc->grn != 22 && lbgrSrc->blu != 222)
+									if (!(lbgrSrc->red == 222 && lbgrSrc->grn == 22 && lbgrSrc->blu == 222))
 									{
 										lbgrDst->red	= lbgrSrc->red;
 										lbgrDst->grn	= lbgrSrc->grn;
@@ -684,7 +684,7 @@
 								if (lnXDst >= 0 && lnXDst < bmpDst->bi.biWidth)
 								{
 									// Copy the pixel if it's not a mask pixel
-									if (lbgrSrc->red != 222 && lbgrSrc->grn != 22 && lbgrSrc->blu != 222)
+									if (!(lbgrSrc->red == 222 && lbgrSrc->grn == 22 && lbgrSrc->blu == 222))
 									{
 										lbgraDst->alp	= 255;
 										lbgraDst->red	= lbgrSrc->red;
@@ -711,7 +711,7 @@
 								if (lnXDst >= 0 && lnXDst < bmpDst->bi.biWidth && lbgraSrc->alp != 0)
 								{
 									// Copy the pixel if it's not a mask pixel
-									if (lbgraSrc->red != 222 && lbgraSrc->grn != 22 && lbgraSrc->blu != 222)
+									if (!(lbgraSrc->red == 222 && lbgraSrc->grn == 22 && lbgraSrc->blu == 222))
 									{
 										lfAlp			= ((f64)lbgraSrc->alp / 255.0);
 										lfMalp			= 1.0 - lfAlp;
@@ -735,7 +735,7 @@
 								if (lnXDst >= 0 && lnXDst < bmpDst->bi.biWidth && lbgraSrc->alp != 0)
 								{
 									// Copy the pixel if it's not a mask pixel
-									if (lbgraSrc->red != 222 && lbgraSrc->grn != 22 && lbgraSrc->blu != 222)
+									if (!(lbgraSrc->red == 222 && lbgraSrc->grn == 22 && lbgraSrc->blu == 222))
 									{
 										lfAlp			= ((f64)lbgraSrc->alp / 255.0);
 										lfMalp			= 1.0 - lfAlp;

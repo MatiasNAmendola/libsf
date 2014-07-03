@@ -65,6 +65,8 @@
 	void					iObj_renderChildrenAndSiblings			(SObject* obj, bool tlRenderChildren, bool tlRenderSiblings);
 	u32						iObj_publish							(SBitmap* bmpDst, RECT* trc, SObject* obj, bool tlPublishChildren, bool tlPublishSiblings);
 	void					iObj_duplicateChain						(SObject** root, SObject* chain);
+	void					iObj_appendObjToParent					(SObject* parent, SObject* obj);
+	void					iObj_duplicateChildren					(SObject* parent);
 	void					iObj_setSize							(SObject* obj, s32 tnLeft, s32 tnTop, s32 tnWidth, s32 tnHeight);
 	SWindow* 				iObj_createWindowForForm				(SObject* obj_form);
 	bool					iObj_setVisible							(SObject* obj, bool tlNewVisible);
