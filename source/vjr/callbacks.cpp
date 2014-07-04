@@ -41,135 +41,145 @@
 // Default callbacks
 //
 //////
-	bool iDefaultCallback_load(SObject* o)
+	bool iDefaultCallback_onLoad(SObject* o)
 	{
 		// Assume it's okay to load
 		return(true);
 	}
 
-	void iDefaultCallback_init(SObject* o)
-	{
-	}
-
-	void iDefaultCallback_created(SObject* o)
-	{
-	}
-
-	void iDefaultCallback_resize(SObject* o, u32* widthRequired_out, u32* heightRequired_out)
-	{
-	}
-
-	bool iDefaultCallback_render(SObject* o)
-	{
-		// Assume it was rendered okay
-		return(true);
-	}
-
-	bool iDefaultCallback_publish(SObject* o)
-	{
-		// Assume it was published okay
-		return(true);
-	}
-
-	void iDefaultCallback_destroy(SObject* o)
-	{
-	}
-
-	void iDefaultCallback_unload(SObject* o)
-	{
-	}
-
-	bool iDefaultCallback_gotFocus(SObject* o)
+	bool iDefaultCallback_onInit(SObject* o)
 	{
 		// Assume we consumed the gotFocus, and that the parent doesn't need to receive it
 		return(false);
 	}
 
-	bool iDefaultCallback_lostFocus(SObject* o)
+	bool iDefaultCallback_onCreated(SObject* o)
+	{
+		// Assume we consumed the gotFocus, and that the parent doesn't need to receive it
+		return(false);
+	}
+
+	bool iDefaultCallback_onResize(SObject* o, u32* widthRequired_out, u32* heightRequired_out)
+	{
+		// Assume we consumed the gotFocus, and that the parent doesn't need to receive it
+		return(false);
+	}
+
+	bool iDefaultCallback_onRender(SObject* o)
+	{
+		// Assume it was rendered okay
+		return(true);
+	}
+
+	bool iDefaultCallback_onPublish(SObject* o)
+	{
+		// Assume it was published okay
+		return(true);
+	}
+
+	bool iDefaultCallback_onDestroy(SObject* o)
+	{
+		// Assume we consumed the gotFocus, and that the parent doesn't need to receive it
+		return(false);
+	}
+
+	bool iDefaultCallback_onUnload(SObject* o)
+	{
+		// Assume we consumed the gotFocus, and that the parent doesn't need to receive it
+		return(false);
+	}
+
+	bool iDefaultCallback_onGotFocus(SObject* o)
+	{
+		// Assume we consumed the gotFocus, and that the parent doesn't need to receive it
+		return(false);
+	}
+
+	bool iDefaultCallback_onLostFocus(SObject* o)
 	{
 		// Assume we consumed the lostFocus, and that the parent doesn't need to receive it
 		return(false);
 	}
 
-	bool iDefaultCallback_clickex(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick)
+	bool iDefaultCallback_onMouseClickEx(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick)
 	{
 		// Assume we consumed the mouse click, and that the parent doesn't need to receive it
 		return(false);
 	}
 
-	bool iDefaultCallback_wheel(SObject* o, s32 tnUnits)
+	bool iDefaultCallback_onMouseWheel(SObject* o, s32 tnUnits)
 	{
 		// Assume we consumed the mouse wheel, and that the parent doesn't need to receive it
 		return(false);
 	}
 
-	bool iDefaultCallback_move(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick)
+	bool iDefaultCallback_onMouseMove(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick)
 	{
 		// Assume we consumed the mouse move, and that the parent doesn't need to receive it
 		return(false);
 	}
 
-	bool iDefaultCallback_down(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick, u32 tnLastClick)
+	bool iDefaultCallback_onMouseDown(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick, u32 tnLastClick)
 	{
 		// Assume we consumed the mouse down event, and that the parent doesn't need to receive it
 		return(false);
 	}
 
-	bool iDefaultCallback_up(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick, u32 tnLastClick)
+	bool iDefaultCallback_onMouseUp(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick, u32 tnLastClick)
 	{
 		// Assume we consumed the mosue up event, and that the parent doesn't need to receive it
 		return(false);
 	}
 
-	bool iDefaultCallback_enter(SObject* o)
+	bool iDefaultCallback_onMouseEnter(SObject* o)
 	{
 		// Assume we consumed the enter, and that the parent doesn't need to receive it
 		return(false);
 	}
 
-	bool iDefaultCallback_leave(SObject* o)
+	bool iDefaultCallback_onMouseLeave(SObject* o)
 	{
 		// Assume we consumed the leave, and that the parent doesn't need to receive it
 		return(false);
 	}
 
-	bool iDefaultCallback_hover(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick)
+	bool iDefaultCallback_onMouseHover(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick)
 	{
 		// Assume we consumed the hover, and that the parent doesn't need to receive it
 		return(false);
 	}
 
-	bool iDefaultCallback_keyDown(SObject* o, bool tlCtrl, bool tlAlt, bool tlShift, s16 tcAscii, u16 tnVKey, bool tlIsCAS, bool tlIsAscii)
+	bool iDefaultCallback_onKeyDown(SObject* o, bool tlCtrl, bool tlAlt, bool tlShift, s16 tcAscii, u16 tnVKey, bool tlIsCAS, bool tlIsAscii)
 	{
 		// Assume we consumed the keydown, and that the parent doesn't need to receive it
 		return(false);
 	}
 
-	bool iDefaultCallback_keyUp(SObject* o, bool tlCtrl, bool tlAlt, bool tlShift, s16 tcAscii, u16 tnVKey, bool tlIsCAS, bool tlIsAscii)
+	bool iDefaultCallback_onKeyUp(SObject* o, bool tlCtrl, bool tlAlt, bool tlShift, s16 tcAscii, u16 tnVKey, bool tlIsCAS, bool tlIsAscii)
 	{
 		// Assume we consumed the keyup, and that the parent doesn't need to receive it
 		return(false);
 	}
 
-	bool iDefaultCallback_activate(SObject* o)
+	bool iDefaultCallback_onActivate(SObject* o)
 	{
 		// Assume we consumed the activate, and that the parent doesn't need to receive it
 		return(false);
 	}
 
-	bool iDefaultCallback_deactivate(SObject* o)
+	bool iDefaultCallback_onDeactivate(SObject* o)
 	{
 		// Assume we consumed the deactivate, and that the parent doesn't need to receive it
 		return(false);
 	}
 
-	bool iDefaultCallback_interactiveChange(SObject* o)
+	bool iDefaultCallback_onInteractiveChange(SObject* o)
 	{
 		// Assume we consumed the interactiveChange, and that the parent doesn't need to receive it
 		return(false);
 	}
 
-	bool iDefaultCallback_programmaticChange(SObject* o)
+	bool iDefaultCallback_onProgrammaticChange(SObject* o)
 	{
 		// Assume we consumed the programmaticChange, and that the parent doesn't need to receive it
 		return(false);
@@ -182,6 +192,42 @@
 	}
 
 	bool iDefaultCallback_onDeselect(SObject* o, SObject* oItem)
+	{
+		// Assume we consumed the onDeselect, and that the parent doesn't need to receive it
+		return(false);
+	}
+
+	bool iDefaultCallback_onMoved(SObject* o, u32* xOverride_out, u32* yOverride_out)
+	{
+		// Assume we consumed the onDeselect, and that the parent doesn't need to receive it
+		return(false);
+	}
+
+	bool iDefaultCallback_onQueryUnload(SObject* o)
+	{
+		// Assume we consumed the onDeselect, and that the parent doesn't need to receive it
+		return(false);
+	}
+
+	bool iDefaultCallback_onAddObject(SObject* o)
+	{
+		// Assume we consumed the onDeselect, and that the parent doesn't need to receive it
+		return(false);
+	}
+
+	bool iDefaultCallback_onAddProperty(SObject* o)
+	{
+		// Assume we consumed the onDeselect, and that the parent doesn't need to receive it
+		return(false);
+	}
+
+	bool iDefaultCallback_onError(SObject* o)
+	{
+		// Assume we consumed the onDeselect, and that the parent doesn't need to receive it
+		return(false);
+	}
+
+	bool iDefaultCallback_onScrolled(SObject* o)
 	{
 		// Assume we consumed the onDeselect, and that the parent doesn't need to receive it
 		return(false);

@@ -134,6 +134,55 @@ typedef		const f64			cf64;
 
 
 //////////
+// Form border styles
+//////
+	const u32			_BORDER_STYLE_NONE					= 0;						// No border, not sizable
+	const u32			_BORDER_STYLE_OUTLINE				= 1;						// Outline border, not sizable
+	const u32			_BORDER_STYLE_FIXED					= 2;						// Normal border, not sizable
+	const u32			_BORDER_STYLE_SIZABLE				= 3;						// Normal border, sizable
+
+
+//////////
+// Form scale mode
+//////
+	const u32			_SCALE_MODE_FOXELS					= 0;						// Foxels, based on sysmetrics() average font width and height
+	//const u32			_SCALE_MODE_INCHES					= 1;						// Inches, based on correlating inches to default dpi
+	const u32			_SCALE_MODE_PIXELS					= 3;						// Pixels, based on individual pixels
+
+
+//////////
+// Form window state
+//////
+	const u32			_WINDOW_STATE_NORMAL				= 0;						// Normal
+	const u32			_WINDOW_STATE_MINIMIZED				= 1;						// Minimized
+	const u32			_WINDOW_STATE_MAXIMIZED				= 2;						// Maximized
+
+
+//////////
+// Object mouse pointers
+//////
+	const u32			_MOUSE_POINTER_DEFAULT				= 0;
+	const u32			_MOUSE_POINTER_ARROW1				= 1;
+	const u32			_MOUSE_POINTER_CROSS				= 2;
+	const u32			_MOUSE_POINTER_I_BEAM				= 3;
+	const u32			_MOUSE_POINTER_ICON					= 4;
+	const u32			_MOUSE_POINTER_SIZE					= 5;
+	const u32			_MOUSE_POINTER_SIZE_NE_SW			= 6;
+	const u32			_MOUSE_POINTER_SIZE_NS				= 7;
+	const u32			_MOUSE_POINTER_SIZE_NW_SE			= 8;
+	const u32			_MOUSE_POINTER_SIZE_W_E				= 9;
+	const u32			_MOUSE_POINTER_UP_ARROW				= 10;
+	const u32			_MOUSE_POINTER_HOURGLASS			= 11;
+	const u32			_MOUSE_POINTER_NO_DROP				= 12;
+	const u32			_MOUSE_POINTER_HIDE_POINTER			= 13;
+	const u32			_MOUSE_POINTER_ARROW2				= 14;
+	const u32			_MOUSE_POINTER_HAND					= 15;
+	const u32			_MOUSE_POINTER_DOWN_ARROW			= 16;
+	const u32			_MOUSE_POINTER_MAGNIFYING_GLASS		= 17;
+	const u32			_MOUSE_POINTER_CUSTOM				= 18;
+
+
+//////////
 // Variable types
 //////
 	// Note:  Lower-bit is a flag:	0-variable, 1-reference to a variable
@@ -181,7 +230,7 @@ typedef		const f64			cf64;
 //////////
 // Base class control names
 //////
-	const s8			cgcName_form[]						= "form";
+	const s8			cgcName_form[]						= "Form";
 	const s8			cgcName_icon[]						= "icon";
 	const s8			cgcCaption_icon[]					= "caption";
 	const s8			cgcName_iconMove[]					= "move";

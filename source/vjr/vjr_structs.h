@@ -85,8 +85,12 @@ struct SEditChain
 
 struct SEditChainManager
 {
-	SEditChain*		ecFirst;											// First in the chain (first->prev is NULL)
-	SEditChain*		ecLast;												// Last in the chain (last->next is NULL)
+	SEditChain*			ecFirst;										// First in the chain (first->prev is NULL)
+	SEditChain*			ecLast;											// Last in the chain (last->next is NULL)
+
+	// If populated, this ECM is only a placeholder for this instance, and the this->reference points to the real ECM we should use
+	SEditChainManager*	indirect;										// If not NULL, this ECM points to another ECM which is the real code block
+	// NOTE:  Everything below is used ONLY IF INDIRECT IS NULL
 
 
 	//////////
@@ -143,11 +147,15 @@ struct SFont
 
 	// Current font instance flags
 	SDatum		name;						// Name of this font
+	s32			charset;					// Font charset
 	bool		isBold;						// Is the font bold? (Note: This is independent of the font name itself having bold in it, such as "Ubuntu Bold"
 	bool		isItalic;					// Is the font italic?
 	bool		isUnderline;				// Is the font underline?
 	bool		isStrikethrough;			// Is the font strikethrough?
 	bool		isCondensed;				// Is the font condensed?
+	bool		isExtended;					// Is the font extended?
+	bool		isOutline;					// Is the font outlined?
+	bool		isShadow;					// Is the font shadowed?
 
 	// Handles to the current font setting
 	HFONT		hfont;
@@ -161,54 +169,59 @@ struct SFont
 	TEXTMETRIC	tm;
 };
 
-struct SGeneralEvents
+struct SEventsGeneral
 {
-	// Called in this order
-	bool		(*load)			(SObject* o);							// Called to load anything needed by the init() event (holds a template/skeleton object)
-	// Note:  If load() returns false, the object is not created
-	void		(*init)			(SObject* o);							// Called to initialize anything
-	void		(*created)		(SObject* o);							// Called after initialization, before the object is sized
-	void		(*resize)		(SObject* o, u32* widthRequired_out, u32* heightRequired_out);	// Called to size or resize the object
-	bool		(*render)		(SObject* o);							// Called to render to bmp (returns if anything was drawn)
-	bool		(*publish)		(SObject* o);							// Called to publish the control onto the parent (which will populate bmpScale if need be)
-	void		(*destroy)		(SObject* o);							// Called when the object will be destroyed
-	void		(*unload)		(SObject* o);							// Called after the object has been destroyed, to unload anything (holds a template/skeleton object)
-	bool		(*gotFocus)		(SObject* o);							// Called when the object receives focus (note multiple items can have simultaneous focus)
-	bool		(*lostFocus)	(SObject* o);							// Called when the object loses focus
+	bool		(*onLoad)			(SObject* o);							// Called to load anything needed by the init() event (holds a template/skeleton object)
+	bool		(*onInit)			(SObject* o);							// Called to initialize anything
+	bool		(*onCreated)		(SObject* o);							// Called after initialization, before the object is sized
+	bool		(*onResize)			(SObject* o, u32* widthRequired_out, u32* heightRequired_out);	// Called to size or resize the object
+	bool		(*onMoved)			(SObject* o, u32* xOverride_out, u32* yOverride_out);			// Called when the object has been moved
+	bool		(*onRender)			(SObject* o);							// Called to render to bmp (returns if anything was drawn)
+	bool		(*onPublish)		(SObject* o);							// Called to publish the control onto the parent (which will populate bmpScale if need be)
+	bool		(*onQueryUnload)	(SObject* o);							// Called before onDestroy, determines if the form should actually be destroyed
+	bool		(*onDestroy)		(SObject* o);							// Called when the object will be destroyed
+	bool		(*onUnload)			(SObject* o);							// Called after the object has been destroyed, to unload anything (holds a template/skeleton object)
+	bool		(*onGotFocus)		(SObject* o);							// Called when the object receives focus (note multiple items can have simultaneous focus)
+	bool		(*onLostFocus)		(SObject* o);							// Called when the object loses focus
+	bool		(*onAddObject)		(SObject* o);							// Called when an object is added
+	bool		(*onAddProperty)	(SObject* o);							// Called when a property is added
+	bool		(*onError)			(SObject* o);							// Called when an error is triggered in code on an object
+	bool		(*onScrolled)		(SObject* o);							// Called when an object has been scrolled
 };
 
-struct SMouseEvent
+struct SEventsMouse
 {
 	// Holds status for changes
 	u32			_lastClick;
-	bool		isMouseOver;											// Used for signaling enter/leave events
-	u64			startHoverTimer;										// At each last mouseMove the startHoverTimer is set, if the interval elapses the hover event is triggered
+	bool		isMouseOver;												// Used for signaling enter/leave events
+	u64			startHoverTimer;											// At each last mouseMove the startHoverTimer is set, if the interval elapses the hover event is triggered
 
-	// Mouse callbacks
-	// Bool indicates if the event should be sent to its parent instead
-	bool		(*clickex)		(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick);	// 1=left, 2=middle, 4=right, 2^n bit positions indicate which buttons are clicked
-	bool		(*wheel)		(SObject* o, s32 tnUnits);				// Signed units indicating direction and velocity
-	bool		(*move)			(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick);	// Coordinates for the move
-	bool		(*down)			(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick, u32 tnLastClick);	// Coordinates for where the mouse button changed
-	bool		(*up)			(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick, u32 tnLastClick);	// Coordinates for where the mouse button changed
-	bool		(*enter)		(SObject* o);							// When mouse enters an object
-	bool		(*leave)		(SObject* o);							// When mouse leaves an object
-	bool		(*hover)		(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick);	// Coordinates where hovering
+	// Mouse callbacks issued by VJr to the internal object controller.
+	// These will be translated by the internal object controller into executable VJr VXB-- code.
+	// Return value indicates if the event should be sent to its parent instead (if NODEFAULT was issued during execution).
+	bool		(*onMouseClickEx)		(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick);	// 1=left, 2=middle, 4=right, 2^n bit positions indicate which buttons are clicked
+	bool		(*onMouseWheel)		(SObject* o, s32 tnUnits);				// Signed units indicating direction and velocity
+	bool		(*onMouseMove)		(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick);	// Coordinates for the move
+	bool		(*onMouseDown)		(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick, u32 tnLastClick);	// Coordinates for where the mouse button changed
+	bool		(*onMouseUp)		(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick, u32 tnLastClick);	// Coordinates for where the mouse button changed
+	bool		(*onMouseEnter)		(SObject* o);							// When mouse enters an object
+	bool		(*onMouseLeave)		(SObject* o);							// When mouse leaves an object
+	bool		(*onMouseHover)		(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick);	// Coordinates where hovering
 };
 
-struct SKeyboardEvent
+struct SEventsKeyboard
 {
 	// Keyboard callbacks
 	// Bool indicates if the event should be sent to its parent instead
-	bool		(*keyDown)		(SObject* o, bool tlCtrl, bool tlAlt, bool tlShift, s16 tcAscii, u16 tnVKey, bool tlIsCAS, bool tlIsAscii);
-	bool		(*keyUp)		(SObject* o, bool tlCtrl, bool tlAlt, bool tlShift, s16 tcAscii, u16 tnVKey, bool tlIsCAS, bool tlIsAscii);
+	bool		(*onKeyDown)		(SObject* o, bool tlCtrl, bool tlAlt, bool tlShift, s16 tcAscii, u16 tnVKey, bool tlIsCAS, bool tlIsAscii);
+	bool		(*onKeyUp)			(SObject* o, bool tlCtrl, bool tlAlt, bool tlShift, s16 tcAscii, u16 tnVKey, bool tlIsCAS, bool tlIsAscii);
 };
 
 struct SEvents
 {
-	SGeneralEvents	general;											// General object events
-	SMouseEvent		mouse;												// Mouse events for the object
-	SKeyboardEvent	keyboard;											// Keyboard events for the object
+	SEventsGeneral		general;										// General object events
+	SEventsMouse		mouse;											// Mouse events for the object
+	SEventsKeyboard		keyboard;										// Keyboard events for the object
 };
 
 struct SObject
@@ -217,16 +230,33 @@ struct SObject
 	SObject*	parent;													// Pointer to parent object for this instance
 	SObject*	firstChild;												// Pointer to child objects (all objects are containers)
 
-	// If a user defined class, class information
-	SDatum		className;												// The class this
-	SObject*	objClass;												// Pointer to the class object
+	// Information about the object itself
+	s32			tabIndex;												// The tab order
+	bool		tabStop;												// Does this object stop for tabs?
+	s32			helpContextId;											// Help context
+	bool		hasWhatsThisButton;										// Does it have a what's this button?
+	bool		hasWhatsThisHelp;										// Does it have what's this help?
+	s32			whatsThisHelpId;										// The what's this help id
 
-	// Object flags
+	// Defined class, class information
 	SDatum		name;													// If a user object, this object's name
 	u32			baseType;												// Object base type/class (see _OBJECT_TYPE_* constants)
+	SDatum		className;												// The class
+	SDatum		classLibrary;											// The class location
+	SDatum		comment;
+	SDatum		tooltip;
+	SDatum		tag;
+
+	// Mouse information
+	SBitmap*	mouseIcon;												// The mouse icon
+	u32			mousePointer;											// The mouse pointer to use
+
+	// Object flags
 	bool		isEnabled;												// If it is responding to events
 	bool		hasFocus;												// Does this object have focus?
+	bool		isMovable;												// Is this object movable?
 	bool		isRendered;												// Is it rendered (can be rendered even if it's not visible)?
+	bool		isPublished;											// Should this control be published?  Every object has a .lockScreen property which allows it to not be published while changes are made.
 	bool		isVisible;												// If it's visible
 	bool		isDirty;												// Is set if this or any child object needs re-rendered
 
@@ -274,6 +304,9 @@ struct SSubObjForm
 	// _OBJECT_TYPE_FORM
 	SObject*	parent;													// parent object this object belongs to
 
+	RECT		rcMax;													// The maximum rectangle for the form
+	RECT		rcMin;													// The minimum rectangle for the form
+
 	SFont*		font;													// Default font instance
 	SBgra		nwRgba;													// Northwest back color for border
 	SBgra		neRgba;													// Northeast back color for border
@@ -283,10 +316,68 @@ struct SSubObjForm
 	SBgra		foreColor;												// Default text fore color
 	SBgra		captionColor;											// Color of the caption
 
-	SBitmap*	bmpIcon;												// Icon for the form
+	SBitmap*	bmpFormIcon;											// Icon for the form
 	SDatum		caption;												// Caption
-	SDatum		comment;												// Comment
-	SDatum		toolTip;												// What to display if hovering
+
+	SDatum		pictureName;											// The name of the file used for the picture
+	SBitmap*	bmpPicture;												// The image for the picture
+
+	// General flags and settings
+	bool		allowOutput;											// Allow output to the form?
+	bool		alwaysOnBottom;											// Is this form always on the bottom of the Z-order?
+	bool		alwaysOnTop;											// Is this form always on the top of the z-order?
+	bool		autoCenter;												// Should this form auto-center itself relative to its parent?
+	s32			borderStyle;											// 0=none, 1=fixed, 2=fixed standard presentation, 3=sizable presentation
+	bool		isCloseable;											// Is the form closeable through user interaction?
+	bool		processKeyPreviewEvents;								// Do keystrokes for controls on the form go through the form's Key* events as well?
+	bool		hasControlBox;											// Does the form show its control box?
+	bool		hasMinButton;											// Is the minimize button shown?
+	bool		hasMaxButton;											// Is the maximize button shown?
+	bool		hasCloseButton;											// Is the close button shown?
+	s32			scaleMode;												// 0=foxels, 3=pixels (default)
+	bool		showInTaskBar;											// Is this form shown in a taskbar?  Only relates to top-level forms (no parent, or parent is _screen).
+	s32			windowstate;											// 0=normal, 1=minimized, 2=maximized
+
+	// The following are ignored, maintained only for backward compatibility
+	bool		bindControls;											// Are controls bound to their source?
+	s32			bufferMode;												// 0=none, 1=pessimistic, 1=optimistic, VJr always uses optimistic. Developers can use the LOCK command if they want a record explicitly locked.
+	bool		clipControls;											// Ignored. VJr always re-renders the entire control.
+	s32			colorSource;											// Ignored. VJr always uses its themed controls.
+	bool		continuousScroll;										// Ignored.
+	SObject*	dataSession;											// Ignored, always set to .NULL..
+	s32			dataSessionId;											// Ignored, always set to -1.
+	SDatum		declass;												// Ignored, always empty.
+	SDatum		declasslibrary;											// Ignored, always empty.
+	s32			defolecid;												// Ignored, always uses system locale.
+	bool		desktop;												// Ignored, all VJr forms can be shown anywhere.  To keep inside a window, parent it to _screen or a form.
+	bool		isDockable;												// Ignored, always set to .F., docking is not supported in VJr.
+	bool		isDocked;												// Ignored, always set to .F..
+	s32			dockPosition;											// Ignored, always set to -1.
+	s32			drawmode;												// Ignored, drawing is not supported in VJr this way.  See the _graphics object.
+	s32			drawstyle;												// Ignored, always set to 13.
+	s32			drawwidth;												// Ignored, always set to 1.
+	SBgra		fillColor;												// Ignored, always set to RGB(255,255,255).
+	s32			fillStyle;												// Ignored, always set to 0.
+	bool		halfHeightCaption;										// Ignored, always set to .F..
+	s32			hScrollSmallChange;										// Ignored, always uses system defaults.
+	s32			vScrollSmallChange;										// Ignored, always uses system defaults.
+	bool		macDesktop;												// Ignored, always set to .F..
+	bool		mdiForm;												// Ignroed, always set to .F..
+	s32			oleDragMode;											// Ignored, always set to 0.
+	SBitmap*	oleDragPicture;											// Ignored, always set to .NULL..
+	s32			oleDropEffects;											// Ignored, always set to 3.
+	s32			oleDropHasData;											// Ignored, always set to -1.
+	s32			oleDropMode;											// Ignored, always set to 0.
+	s32			releaseType;											// Ignored, always returns 0.
+	bool		rightToLeft;											// Ignored, always returns .F..
+	s32			scrollbars;												// Ignored, always returns 3 both, scrollbars are automatic in VJr.
+	s32			showTips;												// Ignored, always returns .T..
+	s32			showWindow;												// Ignored, always returns 2, all forms in VJr are top-level modeless forms. Min/max constraints can keep it in a fixed position it within a parent window.
+	bool		sizeBox;												// Ignored, always returns .F..
+	bool		themes;													// Ignored, always returns .T., VJr always uses its own themes for graphics.
+	s32			titleBar;												// Ignored, returns what is indicated by borderStyle.
+	s32			windowType;												// Ignored, always returns 0=modeless, all forms in VJr are modeless.
+	bool		zoomBox;												// Ignored, always returns .F.
 
 	// Events unique to this object
 	bool		(*activate)							(SObject* o);		// Called when activated
@@ -309,8 +400,6 @@ struct SSubObjSubform
 
 	SBitmap*	bmpIcon;												// Icon for the subform
 	SDatum		caption;												// Caption
-	SDatum		comment;												// Comment
-	SDatum		toolTip;												// What to display if hovering
 
 	// Events unique to this object
 	bool		(*activate)							(SObject* o);		// Called when activated
@@ -329,8 +418,6 @@ struct SSubObjLabel
 	// Data
 	u32			alignment;												// 0=left, 1=right, 2=center, always centered vertically
 	SDatum		caption;												// Caption
-	SDatum		comment;												// Comment
-	SDatum		toolTip;												// What to display if hovering
 
 	// Flags for rendering
 	bool		isOpaque;												// Is the label opaque?
@@ -359,8 +446,6 @@ struct SSubObjTextbox
 	u32			valueLength;											// Length of the field
 	SDatum		picture;												// Picture clause (value is formated to this form for input)
 	SDatum		mask;													// Only allow these input characters
-	SDatum		comment;												// Comment
-	SDatum		toolTip;												// What to display if hovering
 
 	// Flags for display and input
 	s32			cursor;													// Position of the flashing cursor, where input goes
@@ -394,8 +479,6 @@ struct SSubObjButton
 	u32			style;													// See _BUTTON_STYLE_* constants (plain, 2D, 3D)
 	u32			alignment;												// 0=left, 1=right, 2=center, always centered vertically
 	SDatum		caption;												// Caption
-	SDatum		comment;												// Comment
-	SDatum		toolTip;												// What to display if hovering
 
 	SBgra		disabledBackColor;										// Disabled background color
 	SBgra		disabledForeColor;										// Disabled foreground color
@@ -418,8 +501,6 @@ struct SSubObjEditbox
 	u32			style;													// See _EDITBOX_STYLE_* constants (plain, 2D, 3D)
 	u32			alignment;												// 0=left, 1=right, 2=center, always centered vertically
 	SEditChainManager*	codeBlock;										// The content being edited, typically source code
-	SDatum		comment;												// Comment
-	SDatum		toolTip;												// What to display if hovering
 
 	// Flags for display and input
 	s32			cursor;													// Position of the flashing cursor, where input goes
@@ -446,8 +527,6 @@ struct SSubObjImage
 	SObject*	parent;													// parent object this object belongs to
 
 	u32			style;													// See _EDITBOX_STYLE_* constants (plain, 2D, 3D)
-	SDatum		comment;												// Comment
-	SDatum		toolTip;												// What to display if hovering
 
 	SBitmap*	image;													// Image displayed when the mouse IS NOT over this control
 	SBitmap*	imageOver;												// Image displayed when the mouse IS over this control
@@ -469,9 +548,7 @@ struct SSubObjCheckbox
 	u32			alignment;												// 0=left, 1=right, 2=center, always centered vertically
 	u32			style;													// See _CHECKBOX_STYLE_* constants (plain, 2D, 3D)
 	s32			value;													// 0=unchecked, positive=checked, negative=multiple
-	SDatum		comment;												// Comment
 	SDatum		caption;												// Caption stored for this object (if any)
-	SDatum		toolTip;												// What to display if hovering
 
 	// Flags for rendering
 	bool		isOpaque;												// Is the label opaque?
@@ -496,8 +573,6 @@ struct SSubObjOption
 	// Data
 	u32			alignment;												// 0=left, 1=right, 2=center, always centered vertically
 	u32			style;													// See _RADIO_STYLE_* constants (radio, slider, spinner)
-	SDatum		comment;												// Comment
-	SDatum		toolTip;												// What to display if hovering
 
 	u32			optionCount;											// How many options are there?
 	SObject*	firstOption;											// Each option has its own set of properties, and each is of _OBJECT_TYPE_LABEL
@@ -526,8 +601,6 @@ struct SSubObjRadio
 	f64			minValue;												// Minimum value to display
 	f64			maxValue;												// Maximum value to display
 	f64			roundTo;												// Round 10=tens place, 1=whole integers, 0.1=one decimal place, 0.01=two decimal places, and so on
-	SDatum		comment;												// Comment
-	SDatum		toolTip;												// What to display if hovering
 
 	// Flags for rendering
 	bool		isOpaque;												// Is the label opaque?

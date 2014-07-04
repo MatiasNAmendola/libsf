@@ -261,6 +261,21 @@ void iInit_vjr(HACCEL* hAccelTable)
 			gobj_defaultCheckbox	= iObj_create(_OBJECT_TYPE_CHECKBOX,	(void*)subobj_checkbox);
 			gobj_defaultOption		= iObj_create(_OBJECT_TYPE_OPTION,		(void*)subobj_option);
 			gobj_defaultRadio		= iObj_create(_OBJECT_TYPE_RADIO,		(void*)subobj_radio);
+
+
+		//////////
+		// Set default values for each object and subobject
+		//////
+			iiObj_resetToDefault(gobj_defaultEmpty,		true, true);
+			iiObj_resetToDefault(gobj_defaultForm,		true, true);
+			iiObj_resetToDefault(gobj_defaultSubform,	true, true);
+			iiObj_resetToDefault(gobj_defaultLabel,		true, true);
+			iiObj_resetToDefault(gobj_defaultTextbox,	true, true);
+			iiObj_resetToDefault(gobj_defaultButton,	true, true);
+			iiObj_resetToDefault(gobj_defaultImage,		true, true);
+			iiObj_resetToDefault(gobj_defaultCheckbox,	true, true);
+			iiObj_resetToDefault(gobj_defaultOption,	true, true);
+			iiObj_resetToDefault(gobj_defaultRadio,		true, true);
 	}
 
 
@@ -1054,10 +1069,16 @@ void iInit_vjr(HACCEL* hAccelTable)
 // Free the indicated font resource
 //
 //////
-	void iFont_free(SFont* font, bool tlFreeSelf)
+	void iFont_delete(SFont** fontRoot, bool tlDeleteSelf)
 	{
-		if (font)
+		SFont* font;
+
+
+		if (fontRoot && *fontRoot)
 		{
+			// Grab our pointer
+			font = *fontRoot;
+
 			//////////
 			// Free components
 			//////
@@ -1068,8 +1089,11 @@ void iInit_vjr(HACCEL* hAccelTable)
 			//////////
 			// Free self
 			//////
-				if (tlFreeSelf)
+				if (tlDeleteSelf)
+				{
 					free(font);
+					*fontRoot = NULL;
+				}
 		}
 	}
 
@@ -1419,30 +1443,41 @@ _asm int 3;
 // Called to free the edit chain manager content, and optionally itself
 //
 //////
-	void iEditChainManager_free(SEditChainManager** root, bool tlFreeSelf)
+	void iEditChainManager_delete(SEditChainManager** root, bool tlDeleteSelf)
 	{
+		SEditChainManager* ecm;
+
+
 		// Make sure our environment is sane
 		if (root && *root)
 		{
 // TODO:  COMPLETELY UNTESTED.  BREAKPOINT AND EXAMINE.
 _asm int 3;
+			ecm = *root;
 			//////////
-			// Free undo history
+			// Are we really the thing?  Or just an indirect reference to the thing?
 			//////
-				if ((*root)->undoHistory)
-					iEditChainManager_free(&(*root)->undoHistory, true);
+				if (!ecm->indirect)
+				{
+					//////////
+					// We are the thing
+					// Free undo history
+					//////
+						if ((*root)->undoHistory)
+							iEditChainManager_delete(&(*root)->undoHistory, true);
 
 
-			//////////
-			// Free content
-			//////
-				iEditChain_free(&(*root)->ecFirst, true);
+					//////////
+					// Free content
+					//////
+						iEditChain_free(&(*root)->ecFirst, true);
+				}
 
 
 			//////////
 			// Free self
 			//////
-				if (tlFreeSelf)
+				if (tlDeleteSelf)
 				{
 					free(*root);
 					*root = NULL;
@@ -1455,10 +1490,24 @@ _asm int 3;
 
 //////////
 //
+// Called to delete the entire chain
+//
+//////
+	void iEditChainManager_deleteChain(SEditChainManager** root, bool tlDeleteSelf)
+	{
+// TODO:  write this code :-)
+_asm int 3;
+	}
+
+
+
+
+//////////
+//
 // Free the edit chain
 //
 //////
-	void iEditChain_free(SEditChain** root, bool tlFreeSelf)
+	void iEditChain_free(SEditChain** root, bool tlDeleteSelf)
 	{
 		SEditChain*		chain;
 		SEditChain*		chainNext;
@@ -1488,13 +1537,13 @@ _asm int 3;
 				//////////
 				// Delete this item's components
 				//////
-					iDatum_free(chain->sourceCode, true);
+					iDatum_delete(chain->sourceCode, true);
 
 
 				//////////
 				// Free self
 				//////
-					if (tlFreeSelf)
+					if (tlDeleteSelf)
 						free(chain);
 
 
@@ -1508,7 +1557,7 @@ _asm int 3;
 			//////////
 			// Free self
 			//////
-				if (tlFreeSelf)
+				if (tlDeleteSelf)
 					*root = NULL;	// It would've been freed above, so we just update the pointer
 		}
 	}
@@ -1585,7 +1634,7 @@ _asm int 3;
 // Called to free the extra info associated with this entry
 //
 //////
-	void iExtraInfo_free(SEditChainManager* ecm, SEditChain* ec, SExtraInfo** root, bool tlFreeSelf)
+	void iExtraInfo_free(SEditChainManager* ecm, SEditChain* ec, SExtraInfo** root, bool tlDeleteSelf)
 	{
 		SExtraInfo*		ei;
 		SExtraInfo*		eiNext;
@@ -1618,13 +1667,13 @@ _asm int 3;
 					}
 
 					// Now, manually free the actual info block itself
-					iDatum_free(&ei->info, false);
+					iDatum_delete(&ei->info, false);
 
 
 				//////////
 				// Free self if need be
 				//////
-					if (tlFreeSelf)
+					if (tlDeleteSelf)
 						free(ei);
 
 
@@ -1674,7 +1723,7 @@ _asm int 3;
 				dataLength = strlen(data);
 
 			// Release anything that's already there
-			iiDatum_free(datum);
+			iiDatum_delete(datum);
 
 			// Store the new data
 			datum->data = (s8*)malloc(dataLength);
@@ -1712,20 +1761,20 @@ _asm int 3;
 		return(lnResult);
 	}
 
-	void iDatum_free(SDatum* datum, bool tlFreeSelf)
+	void iDatum_delete(SDatum* datum, bool tlDeleteSelf)
 	{
 		if (datum)
 		{
 			// Delete the content
-			iiDatum_free(datum);
+			iiDatum_delete(datum);
 
 			// Delete self if need be
-			if (tlFreeSelf)
+			if (tlDeleteSelf)
 				free(datum);
 		}
 	}
 
-	void iiDatum_free(SDatum* datum)
+	void iiDatum_delete(SDatum* datum)
 	{
 		// Store the data
 		if (datum->data)

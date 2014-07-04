@@ -96,6 +96,7 @@
 		SFont*			gsWindowTitleBarFont				= NULL;									// Default font, Ubuntu Bold 12 pt
 		// Global colors
 		const SBgra		white								= { rgba(255, 255, 255, 255) };
+		const SBgra		dark_blue							= { rgba(0, 0, 128, 255) };
 		const SBgra		black								= { rgba(0, 0, 0, 255) };
 		const SBgra		gray								= { rgba(192, 192, 192, 255) };
 		const SBgra		selectedBackColor					= { rgba(32, 164, 255, 255) };

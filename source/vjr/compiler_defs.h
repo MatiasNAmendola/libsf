@@ -169,7 +169,7 @@ struct SVariable;
 	// Variable functions
 	SVariable*				iVariable_create							(void);
 	void					iVariable_delete							(SVariable* var, bool tlDeleteSelf);
-	void					iVariable_politelyDeleteChain				(SVariable** root);
+	void					iVariable_politelyDeleteChain				(SVariable** root, bool tlDeleteSelf);
 	void					iVariable_politelyDeleteChain_callback		(SLLCallback* cb);
 
 	// Op functions

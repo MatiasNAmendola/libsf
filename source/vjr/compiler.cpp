@@ -4032,7 +4032,7 @@ _asm int 3;
 			// Delete the variable chain
 			//////
 				if (node->firstVariable)
-					iVariable_politelyDeleteChain(&node->firstVariable);
+					iVariable_politelyDeleteChain(&node->firstVariable, true);
 
 
 			//////////
@@ -4231,7 +4231,7 @@ _asm int 3;
 					{
 						case _VAR_TYPE_EMPTYOBJECT:
 							// Delete the object
-							iObj_delete(var->obj, true);
+							iObj_delete(&var->obj, true);
 							break;
 
 // 						case _VAR_TYPE_THISCODE:
@@ -4240,7 +4240,7 @@ _asm int 3;
 
 						default:
 							// Delete the datum
-							iDatum_free(&var->value, false);
+							iDatum_delete(&var->value, false);
 							memset(&var->value, 0, sizeof(SDatum));
 							break;
 					}
@@ -4272,21 +4272,40 @@ _asm int 3;
 // to delete all of them
 //
 //////
-	void iVariable_politelyDeleteChain(SVariable** root)
+	void iVariable_politelyDeleteChain(SVariable** root, bool tlDeleteSelf)
 	{
-		SLLCallback	cb;
+		SVariable*		var;
+		SLLCallback		cb;
 
 
 		// Make sure our environment is sane
+// TODO:  Untested code.  Breakpoint and examine.
+_asm int 3;
 		if (root && *root)
 		{
 			// Use the linked list functions, which will callback repeatedly for every entry
+			var			= *root;
 			cb._func	= (u32)&iVariable_politelyDeleteChain_callback;
-			cb.node		= (SLL*)*root;
-			iLl_deleteNodeChainWithCallback(&cb);
 
 			// Mark the variables there empty
-			*root = NULL;
+			if (tlDeleteSelf)
+			{
+				// Delete all of them, and reset the first
+				cb.node	= (SLL*)var;
+				iLl_deleteNodeChainWithCallback(&cb);
+				*root	= NULL;
+
+			} else {
+				// We are only freeing everything after this
+				// Delete the first one, but don't free it
+				var = (SVariable*)iLl_deleteNode((SLL*)var, false);
+				if (var)
+				{
+					// Delete the rest in the chain
+					cb.node	= (SLL*)var;
+					iLl_deleteNodeChainWithCallback(&cb);
+				}
+			}
 		}
 	}
 
@@ -4411,7 +4430,7 @@ _asm int 3;
 							break;
 
 						case _OP_TYPE_OBJECT:
-							iObj_delete(op->obj, true);
+							iObj_delete(&op->obj, true);
 							break;
 
 // These types are only referenced

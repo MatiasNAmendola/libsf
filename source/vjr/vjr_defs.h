@@ -60,7 +60,7 @@
 //////
 	SObject*				iObj_create								(u32 tnBaseType, void* obj_data);
 	SObject*				iObj_copy								(SObject* template_obj, SObject* next, SObject* parent, bool tlCopyChildren, bool tlCopySubobjects, bool tlCreateSeparateBitmapBuffers);
-	void					iObj_delete								(SObject* obj, bool tlDeleteSelf);
+	void					iObj_delete								(SObject** obj, bool tlDeleteSelf);
 	u32						iObj_render								(SObject* obj, bool tlRenderChildren, bool tlRenderSiblings);
 	void					iObj_renderChildrenAndSiblings			(SObject* obj, bool tlRenderChildren, bool tlRenderSiblings);
 	u32						iObj_publish							(SBitmap* bmpDst, RECT* trc, SObject* obj, bool tlPublishChildren, bool tlPublishSiblings);
@@ -70,9 +70,11 @@
 	void					iObj_setSize							(SObject* obj, s32 tnLeft, s32 tnTop, s32 tnWidth, s32 tnHeight);
 	SWindow* 				iObj_createWindowForForm				(SObject* obj_form);
 	bool					iObj_setVisible							(SObject* obj, bool tlNewVisible);
+	void*					iObj_copySubobj							(SObject* template_obj);
+	void					iiObj_resetToDefault					(SObject* obj, bool tlResetProperties, bool tlResetMethods);
+	void					iiObj_resetToDefaultCommon				(SObject* obj, bool tlResetProperties, bool tlResetMethods);
 
 	// Creation of individual sub-objects
-	void*					iSubobj_copy							(SObject* template_obj);
 	SSubObjEmpty*			iSubobj_createEmpty						(SSubObjEmpty*		template_subobj, SObject* parent);
 	SSubObjForm*			iSubobj_createForm						(SSubObjForm*		template_subobj, SObject* parent);
 	SSubObjSubform*			iSubobj_createSubform					(SSubObjSubform*	template_subobj, SObject* parent);
@@ -85,6 +87,20 @@
 	SSubObjOption*			iSubobj_createOption					(SSubObjOption*		template_subobj, SObject* parent);
 	SSubObjRadio*			iSubobj_createRadio						(SSubObjRadio*		template_subobj, SObject* parent);
 
+	// For initialization
+	void					iiSubobj_resetToDefaultEmpty			(SSubObjEmpty*		subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
+	void					iiSubobj_resetToDefaultForm				(SSubObjForm*		subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
+	void					iiSubobj_resetToDefaultSubform			(SSubObjSubform*	subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
+	void					iiSubobj_resetToDefaultLabel			(SSubObjLabel*		subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
+	void					iiSubobj_resetToDefaultTextbox			(SSubObjTextbox*	subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
+	void					iiSubobj_resetToDefaultButton			(SSubObjButton*		subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
+	void					iiSubobj_resetToDefaultEditbox			(SSubObjEditbox*	subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
+	void					iiSubobj_resetToDefaultImage			(SSubObjImage*		subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
+	void					iiSubobj_resetToDefaultCheckbox			(SSubObjCheckbox*	subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
+	void					iiSubobj_resetToDefaultOption			(SSubObjOption*		subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
+	void					iiSubobj_resetToDefaultRadio			(SSubObjRadio*		subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
+
+
 	// For specific sub-objects
 	void					iSubobj_form_setIcon					(SObject* obj, SBitmap* bmp);
 	void					iSubobj_form_setCaption					(SObject* obj, s8* tcCaption, u32 tnCaptionLength);
@@ -94,17 +110,17 @@
 	u32						iSubobj_form_setCaptionColor			(SObject* obj, u32 tnRgba);
 
 	// Delete individual sub-objects
-	void					iSubobj_deleteEmpty						(SSubObjEmpty*		subobj, bool tlFreeSelf);
-	void					iSubobj_deleteForm						(SSubObjForm*		subobj, bool tlFreeSelf);
-	void					iSubobj_deleteSubform					(SSubObjSubform*	subobj, bool tlFreeSelf);
-	void					iSubobj_deleteLabel						(SSubObjLabel*		subobj, bool tlFreeSelf);
-	void					iSubobj_deleteTextbox					(SSubObjTextbox*	subobj, bool tlFreeSelf);
-	void					iSubobj_deleteButton					(SSubObjButton*		subobj, bool tlFreeSelf);
-	void					iSubobj_deleteEditbox					(SSubObjEditbox*	subobj, bool tlFreeSelf);
-	void					iSubobj_deleteImage						(SSubObjImage*		subobj, bool tlFreeSelf);
-	void					iSubobj_deleteCheckbox					(SSubObjCheckbox*	subobj, bool tlFreeSelf);
-	void					iSubobj_deleteOption					(SSubObjOption*		subobj, bool tlFreeSelf);
-	void					iSubobj_deleteRadio						(SSubObjRadio*		subobj, bool tlFreeSelf);
+	void					iSubobj_deleteEmpty						(SSubObjEmpty*		subobj, bool tlDeleteSelf);
+	void					iSubobj_deleteForm						(SSubObjForm*		subobj, bool tlDeleteSelf);
+	void					iSubobj_deleteSubform					(SSubObjSubform*	subobj, bool tlDeleteSelf);
+	void					iSubobj_deleteLabel						(SSubObjLabel*		subobj, bool tlDeleteSelf);
+	void					iSubobj_deleteTextbox					(SSubObjTextbox*	subobj, bool tlDeleteSelf);
+	void					iSubobj_deleteButton					(SSubObjButton*		subobj, bool tlDeleteSelf);
+	void					iSubobj_deleteEditbox					(SSubObjEditbox*	subobj, bool tlDeleteSelf);
+	void					iSubobj_deleteImage						(SSubObjImage*		subobj, bool tlDeleteSelf);
+	void					iSubobj_deleteCheckbox					(SSubObjCheckbox*	subobj, bool tlDeleteSelf);
+	void					iSubobj_deleteOption					(SSubObjOption*		subobj, bool tlDeleteSelf);
+	void					iSubobj_deleteRadio						(SSubObjRadio*		subobj, bool tlDeleteSelf);
 
 	// Default render of sub-objects
 	u32						iSubobj_renderEmpty						(SObject* obj,		SSubObjEmpty*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
@@ -123,32 +139,44 @@
 //////////
 // callbacks.cpp
 //////
-	bool					iDefaultCallback_load					(SObject* o);
-	void					iDefaultCallback_init					(SObject* o);
-	void					iDefaultCallback_created				(SObject* o);
-	void					iDefaultCallback_resize					(SObject* o, u32* widthRequired_out, u32* heightRequired_out);
-	bool					iDefaultCallback_render					(SObject* o);
-	bool					iDefaultCallback_publish				(SObject* o);
-	void					iDefaultCallback_destroy				(SObject* o);
-	void					iDefaultCallback_unload					(SObject* o);
-	bool					iDefaultCallback_gotFocus				(SObject* o);
-	bool					iDefaultCallback_lostFocus				(SObject* o);
-	bool					iDefaultCallback_clickex				(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick);
-	bool					iDefaultCallback_wheel					(SObject* o, s32 tnUnits);
-	bool					iDefaultCallback_move					(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick);
-	bool					iDefaultCallback_down					(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick, u32 tnLastClick);
-	bool					iDefaultCallback_up						(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick, u32 tnLastClick);
-	bool					iDefaultCallback_enter					(SObject* o);
-	bool					iDefaultCallback_leave					(SObject* o);
-	bool					iDefaultCallback_hover					(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick);
-	bool					iDefaultCallback_keyDown				(SObject* o, bool tlCtrl, bool tlAlt, bool tlShift, s16 tcAscii, u16 tnVKey, bool tlIsCAS, bool tlIsAscii);
-	bool					iDefaultCallback_keyUp					(SObject* o, bool tlCtrl, bool tlAlt, bool tlShift, s16 tcAscii, u16 tnVKey, bool tlIsCAS, bool tlIsAscii);
-	bool					iDefaultCallback_activate				(SObject* o);
-	bool					iDefaultCallback_deactivate				(SObject* o);
-	bool					iDefaultCallback_interactiveChange		(SObject* o);
-	bool					iDefaultCallback_programmaticChange		(SObject* o);
+	bool					iDefaultCallback_onLoad					(SObject* o);
+	bool					iDefaultCallback_onInit					(SObject* o);
+	bool					iDefaultCallback_onCreated				(SObject* o);
+	bool					iDefaultCallback_onResize				(SObject* o, u32* widthRequired_out, u32* heightRequired_out);
+	bool					iDefaultCallback_onRender				(SObject* o);
+	bool					iDefaultCallback_onPublish				(SObject* o);
+	bool					iDefaultCallback_onDestroy				(SObject* o);
+	bool					iDefaultCallback_onUnload				(SObject* o);
+	bool					iDefaultCallback_onGotFocus				(SObject* o);
+	bool					iDefaultCallback_onLostFocus			(SObject* o);
+	bool					iDefaultCallback_onMouseClickEx			(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick);
+	bool					iDefaultCallback_onMouseWheel			(SObject* o, s32 tnUnits);
+	bool					iDefaultCallback_onMouseMove			(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick);
+	bool					iDefaultCallback_onMouseDown			(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick, u32 tnLastClick);
+	bool					iDefaultCallback_onMouseUp				(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick, u32 tnLastClick);
+	bool					iDefaultCallback_onMouseEnter			(SObject* o);
+	bool					iDefaultCallback_onMouseLeave			(SObject* o);
+	bool					iDefaultCallback_onMouseHover			(SObject* o, u32 x, u32 y, bool tlCtrl, bool tlAlt, bool tlShift, u32 tnClick);
+	bool					iDefaultCallback_onKeyDown				(SObject* o, bool tlCtrl, bool tlAlt, bool tlShift, s16 tcAscii, u16 tnVKey, bool tlIsCAS, bool tlIsAscii);
+	bool					iDefaultCallback_onKeyUp				(SObject* o, bool tlCtrl, bool tlAlt, bool tlShift, s16 tcAscii, u16 tnVKey, bool tlIsCAS, bool tlIsAscii);
+	bool					iDefaultCallback_onActivate				(SObject* o);
+	bool					iDefaultCallback_onDeactivate			(SObject* o);
+	bool					iDefaultCallback_onInteractiveChange	(SObject* o);
+	bool					iDefaultCallback_onProgrammaticChange	(SObject* o);
 	bool					iDefaultCallback_onSelect				(SObject* o, SObject* oItem);
 	bool					iDefaultCallback_onDeselect				(SObject* o, SObject* oItem);
+	bool					iDefaultCallback_onMoved				(SObject* o, u32* xOverride_out, u32* yOverride_out);
+	bool					iDefaultCallback_onQueryUnload			(SObject* o);
+	bool					iDefaultCallback_onAddObject			(SObject* o);
+	bool					iDefaultCallback_onAddProperty			(SObject* o);
+	bool					iDefaultCallback_onError				(SObject* o);
+	bool					iDefaultCallback_onScrolled				(SObject* o);
+
+
+//////////
+// events.cpp
+//////
+	void					iEvents_resetToDefault					(SEvents* ev);
 
 
 
@@ -185,32 +213,33 @@
 	SFont*					iFont_allocate							(void);
 	SFont*					iFont_duplicate							(SFont* fontSource);
 	SFont*					iFont_create							(cs8* tcFontName, u32 tnFontSize, u32 tnFontWeight, u32 tnItalics, u32 tnUnderline);
-	void					iFont_free								(SFont* font, bool tlFreeSelf);
+	void					iFont_delete							(SFont** font, bool tlDeleteSelf);
 	u32						iFont_findClosestSizeMatch				(s8* tcText, s8* tcFontName, u32 tnFontSize, u32 tnFontBold, u32 tnFontItalic, u32 tnFontUnderline, u32 tnWidth, u32 tnHeight, u32 tnWidthDesired, u32 tnHeightDesired);
 	int						iProcessMouseMessage					(UINT m, WPARAM w, LPARAM l);
 	void					iTranslateMousePosition					(POINTS* pt);
 
 	// EditChainManager
 	bool					iEditChainManager_duplicate				(SEditChainManager** root, SEditChainManager* chain, bool tlIncludeUndoHistory);
-	void					iEditChainManager_free					(SEditChainManager** root, bool tlFreeSelf);
+	void					iEditChainManager_delete				(SEditChainManager** root, bool tlDeleteSelf);
+	void					iEditChainManager_deleteChain			(SEditChainManager** root, bool tlDeleteSelf);
 
 	// Edit Chain
-	void					iEditChain_free							(SEditChain** root, bool tlFreeSelf);
+	void					iEditChain_free							(SEditChain** root, bool tlDeleteSelf);
 
 	// Translate
 	void*					iTranslate_p1_to_p2						(SBuilder* root, void* ptr);
 	void*					iTranslate_p2_to_p1						(SBuilder* root, void* ptr);
 
 	// ExtraInfo
-	void					iExtraInfo_free							(SEditChainManager* ecm, SEditChain* ec, SExtraInfo** root, bool tlFreeSelf);
+	void					iExtraInfo_free							(SEditChainManager* ecm, SEditChain* ec, SExtraInfo** root, bool tlDeleteSelf);
 
 	// Datum
 	SDatum*					iDatum_allocate							(               s8* data, u32 dataLength);
 	void					iDatum_duplicate						(SDatum* datum, s8* data, u32 dataLength);
 	void					iDatum_duplicate						(SDatum* datumDst, SDatum* datumSrc);
 	s32						iDatum_compare							(SDatum* datumLeft, SDatum* datumRight);
-	void					iDatum_free								(SDatum* datum, bool tlFreeSelf);
-	void					iiDatum_free							(SDatum* datum);
+	void					iDatum_delete							(SDatum* datum, bool tlDeleteSelf);
+	void					iiDatum_delete							(SDatum* datum);
 
 
 //////////
@@ -227,7 +256,7 @@
 	s32						iBmp_computeRowWidth					(SBitmap* bmp);
 	void					iBmp_createBySize						(SBitmap* bmp, u32 width, u32 height, u32 tnBitCount);
 	void					iBmp_populateBitmapStructure			(SBitmap* bmp, u32 tnWidth, u32 tnHeight, u32 tnBitCount);
-	void					iBmp_delete								(SBitmap* bmp, bool tlFreeBits, bool tlFreeSelf);
+	void					iBmp_delete								(SBitmap** bmp, bool tlFreeBits, bool tlDeleteSelf);
 	void					iBmp_bitBltObject						(SBitmap* bmpDst, SObject* obj, SBitmap* bmpSrc);
 	void					iBmp_bitBltObjectMask					(SBitmap* bmpDst, SObject* obj, SBitmap* bmpSrc);
 	u32						iBmp_bitBlt								(SBitmap* bmpDst, RECT* trc, SBitmap* bmpSrc);

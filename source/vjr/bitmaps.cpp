@@ -118,7 +118,7 @@
 					return(bmpCopy);		// They're the same already
 
 				// If we get here, we need to delete the copy
-				iBmp_delete(bmpCopy, true, true);
+				iBmp_delete(&bmpCopy, true, true);
 				// Note:  From now on we use bmpNew, and return that
 			}
 
@@ -164,7 +164,7 @@
 				iBmp_scale(bmpNew, bmp);
 
 				// Delete the old version
-				iBmp_delete(bmp, true, true);
+				iBmp_delete(&bmp, true, true);
 			}
 			// All done!
 
@@ -252,7 +252,7 @@
 				iBmp_copy24To32(&bmp32, bmp);
 
 				// Free the (now old) bitmap
-				iBmp_delete(bmp, true, false);
+				iBmp_delete(&bmp, true, false);
 
 				// Copy our bitmap to the destination
 				memcpy(bmp, &bmp32, sizeof(SBitmap));
@@ -432,10 +432,16 @@
 //        the container SBitmap being deleted, but not the bits and related data within.
 //
 //////
-	void iBmp_delete(SBitmap* bmp, bool tlFreeBits, bool tlFreeSelf)
+	void iBmp_delete(SBitmap** bmpRoot, bool tlFreeBits, bool tlDeleteSelf)
 	{
-		if (bmp)
+		SBitmap* bmp;
+
+
+		if (bmpRoot && *bmpRoot)
 		{
+			// Grab the pointer
+			bmp = *bmpRoot;
+
 			// Do we need to free the internals?
 			if (tlFreeBits)
 			{
@@ -445,8 +451,11 @@
 			}
 
 			// Release the bitmap
-			if (tlFreeSelf)
+			if (tlDeleteSelf)
+			{
 				free(bmp);
+				*bmpRoot = NULL;
+			}
 		}
 	}
 
