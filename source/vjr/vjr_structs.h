@@ -277,7 +277,7 @@ struct SObject
 		RECT		rc;													// Object's current position in its parent
 		RECT		rco;												// Object's original position in its parent
 		RECT		rcp;												// Original size of parent at creation
-		u32			anchorMode;											// Method this item uses when its parent is resized
+		u32			anchor;												// Method this item uses when its parent is resized
 
 
 	//////////
@@ -390,15 +390,15 @@ struct SSubObjSubform
 	SObject*	parent;													// parent object this object belongs to
 
 	SFont*		font;													// Default font instance
-	SBgra		borderNwColor;											// Northwest back color for border
-	SBgra		borderNeColor;											// Northeast back color for border
-	SBgra		borderSwColor;											// Southwest back color for border
-	SBgra		borderSeColor;											// Southeast back color for border
+	SBgra		nwRgba;													// Northwest back color for border
+	SBgra		neRgba;													// Northeast back color for border
+	SBgra		swRgba;													// Southwest back color for border
+	SBgra		seRgba;													// Southeast back color for border
 	SBgra		backColor;												// Back color (only RGB() channels are used, but RGBA() channels are maintained)
 	SBgra		foreColor;												// Default text fore color
 	SBgra		captionColor;											// Color of the caption
 
-	SBitmap*	bmpIcon;												// Icon for the subform
+	SBitmap*	bmpFormIcon;												// Icon for the subform
 	SDatum		caption;												// Caption
 
 	// Events unique to this object

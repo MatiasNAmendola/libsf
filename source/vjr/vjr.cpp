@@ -50,18 +50,24 @@ int CALLBACK WinMain(	HINSTANCE	hInstance,
 	HACCEL	hAccelTable;
 
 
+	//////////
 	// Initialize
-	ghInstance = hInstance;
-	iInit_vjr(&hAccelTable);
+	//////
+		ghInstance = hInstance;
+		iInit_vjr(&hAccelTable);
 
+
+	//////////
 	// Read events
-	while (GetMessage(&msg, NULL, 0, 0))
-	{
-		if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+	//////
+		while (GetMessage(&msg, NULL, 0, 0))
 		{
-			TranslateMessage(&msg);
-			DispatchMessage(&msg);
+			if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+			{
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
 		}
-	}
-	return (int) msg.wParam;
+		// When the WM_QUIT message is received, we exit
+		return((int)msg.wParam);
 }

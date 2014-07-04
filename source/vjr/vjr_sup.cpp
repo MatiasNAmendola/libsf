@@ -219,63 +219,21 @@ void iInit_vjr(HACCEL* hAccelTable)
 //////
 	void iInit_createDefaultObjects(void)
 	{
-		SSubObjEmpty*		subobj_empty;
-		SSubObjForm*		subobj_form;
-		SSubObjSubform*		subobj_subform;
-		SSubObjLabel*		subobj_label;
-		SSubObjTextbox*		subobj_textbox;
-		SSubObjButton*		subobj_button;
-		SSubObjEditbox*		subobj_editbox;
-		SSubObjImage*		subobj_image;
-		SSubObjCheckbox*	subobj_checkbox;
-		SSubObjOption*		subobj_option;
-		SSubObjRadio*		subobj_radio;
-
-
-		//////////
-		// Create each initial subobj
-		//////
-			subobj_empty			= iSubobj_createEmpty		(NULL, NULL);
-			subobj_form				= iSubobj_createForm		(NULL, NULL);
-			subobj_subform			= iSubobj_createSubform		(NULL, NULL);
-			subobj_label			= iSubobj_createLabel		(NULL, NULL);
-			subobj_textbox			= iSubobj_createTextbox		(NULL, NULL);
-			subobj_button			= iSubobj_createButton		(NULL, NULL);
-			subobj_editbox			= iSubobj_createEditbox		(NULL, NULL);
-			subobj_image			= iSubobj_createImage		(NULL, NULL);
-			subobj_checkbox			= iSubobj_createCheckbox	(NULL, NULL);
-			subobj_option			= iSubobj_createOption		(NULL, NULL);
-			subobj_radio			= iSubobj_createRadio		(NULL, NULL);
-
-
 		//////////
 		// Create each default object
 		//////
-			gobj_defaultEmpty		= iObj_create(_OBJECT_TYPE_EMPTY,		(void*)subobj_empty);
-			gobj_defaultForm		= iObj_create(_OBJECT_TYPE_FORM,		(void*)subobj_form);
-			gobj_defaultSubform		= iObj_create(_OBJECT_TYPE_SUBFORM,		(void*)subobj_subform);
-			gobj_defaultLabel		= iObj_create(_OBJECT_TYPE_LABEL,		(void*)subobj_label);
-			gobj_defaultTextbox		= iObj_create(_OBJECT_TYPE_TEXTBOX,		(void*)subobj_textbox);
-			gobj_defaultButton		= iObj_create(_OBJECT_TYPE_BUTTON,		(void*)subobj_button);
-			gobj_defaultImage		= iObj_create(_OBJECT_TYPE_IMAGE,		(void*)subobj_image);
-			gobj_defaultCheckbox	= iObj_create(_OBJECT_TYPE_CHECKBOX,	(void*)subobj_checkbox);
-			gobj_defaultOption		= iObj_create(_OBJECT_TYPE_OPTION,		(void*)subobj_option);
-			gobj_defaultRadio		= iObj_create(_OBJECT_TYPE_RADIO,		(void*)subobj_radio);
-
-
-		//////////
-		// Set default values for each object and subobject
-		//////
-			iiObj_resetToDefault(gobj_defaultEmpty,		true, true);
-			iiObj_resetToDefault(gobj_defaultForm,		true, true);
-			iiObj_resetToDefault(gobj_defaultSubform,	true, true);
-			iiObj_resetToDefault(gobj_defaultLabel,		true, true);
-			iiObj_resetToDefault(gobj_defaultTextbox,	true, true);
-			iiObj_resetToDefault(gobj_defaultButton,	true, true);
-			iiObj_resetToDefault(gobj_defaultImage,		true, true);
-			iiObj_resetToDefault(gobj_defaultCheckbox,	true, true);
-			iiObj_resetToDefault(gobj_defaultOption,	true, true);
-			iiObj_resetToDefault(gobj_defaultRadio,		true, true);
+			gobj_defaultEmpty		= iObj_create(_OBJECT_TYPE_EMPTY,		NULL);
+			gobj_defaultLabel		= iObj_create(_OBJECT_TYPE_LABEL,		NULL);
+			gobj_defaultTextbox		= iObj_create(_OBJECT_TYPE_TEXTBOX,		NULL);
+			gobj_defaultButton		= iObj_create(_OBJECT_TYPE_BUTTON,		NULL);
+			gobj_defaultImage		= iObj_create(_OBJECT_TYPE_IMAGE,		NULL);
+			gobj_defaultCheckbox	= iObj_create(_OBJECT_TYPE_CHECKBOX,	NULL);
+			// Option and radio both have label controls within
+			gobj_defaultOption		= iObj_create(_OBJECT_TYPE_OPTION,		NULL);
+			gobj_defaultRadio		= iObj_create(_OBJECT_TYPE_RADIO,		NULL);
+			// Forms and subforms are created last because they have objects referenced within which must be created before
+			gobj_defaultForm		= iObj_create(_OBJECT_TYPE_FORM,		NULL);
+			gobj_defaultSubform		= iObj_create(_OBJECT_TYPE_SUBFORM,		NULL);
 	}
 
 
@@ -1495,8 +1453,11 @@ _asm int 3;
 //////
 	void iEditChainManager_deleteChain(SEditChainManager** root, bool tlDeleteSelf)
 	{
+		if (root && *root)
+		{
 // TODO:  write this code :-)
 _asm int 3;
+		}
 	}
 
 
@@ -1693,7 +1654,7 @@ _asm int 3;
 // Datum storage
 //
 //////
-	SDatum* iDatum_allocate(s8* data, u32 dataLength)
+	SDatum* iDatum_allocate(s8* data, s32 dataLength)
 	{
 		SDatum* datumNew;
 
@@ -1702,6 +1663,10 @@ _asm int 3;
 		datumNew = (SDatum*)malloc(sizeof(SDatum));
 		if (datumNew)
 		{
+			// We may need to set the length
+			if (dataLength < 1)
+				dataLength = max(strlen(data), 1);
+
 			// Initialize
 			memset(datumNew, 0, sizeof(SDatum));
 
@@ -1713,14 +1678,14 @@ _asm int 3;
 		return(datumNew);
 	}
 
-	void iDatum_duplicate(SDatum* datum, s8* data, u32 dataLength)
+	void iDatum_duplicate(SDatum* datum, s8* data, s32 dataLength)
 	{
 		// Make sure our environment is sane
 		if (datum && data)
 		{
 			// We may need to set the length
-			if (dataLength == -1)
-				dataLength = strlen(data);
+			if (dataLength < 1)
+				dataLength = max(strlen(data), 1);
 
 			// Release anything that's already there
 			iiDatum_delete(datum);
@@ -1735,6 +1700,11 @@ _asm int 3;
 				datum->length = dataLength;
 			}
 		}
+	}
+
+	void iDatum_duplicate(SDatum* datum, cs8* data, s32 dataLength)
+	{
+		iDatum_duplicate(datum, (s8*)data, dataLength);
 	}
 
 	void iDatum_duplicate(SDatum* datumDst, SDatum* datumSrc)

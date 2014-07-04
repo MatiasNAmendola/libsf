@@ -4279,10 +4279,10 @@ _asm int 3;
 
 
 		// Make sure our environment is sane
-// TODO:  Untested code.  Breakpoint and examine.
-_asm int 3;
 		if (root && *root)
 		{
+// TODO:  Untested code.  Breakpoint and examine.
+_asm int 3;
 			// Use the linked list functions, which will callback repeatedly for every entry
 			var			= *root;
 			cb._func	= (u32)&iVariable_politelyDeleteChain_callback;

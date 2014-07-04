@@ -183,6 +183,23 @@ typedef		const f64			cf64;
 
 
 //////////
+// Object anchor mode bit masks
+// Note:  If conflicting values are attempted, they are ignored.
+//////
+	const u32			_ANCHOR_FIXED_NORESIZE				= 0;
+	const u32			_ANCHOR_TOP_ABSOLUTE				= 1;
+	const u32			_ANCHOR_LEFT_ABSOLUTE				= 2;
+	const u32			_ANCHOR_BOTTOM_ABSOLUTE				= 4;
+	const u32			_ANCHOR_RIGHT_ABSOLUTE				= 8;
+	const u32			_ANCHOR_TOP_RELATIVE				= 16;
+	const u32			_ANCHOR_LEFT_RELATIVE				= 32;
+	const u32			_ANCHOR_BOTTOM_RELATIVE				= 64;
+	const u32			_ANCHOR_RIGHT_RELATIVE				= 128;
+	const u32			_ANCHOR_DO_NOT_RESIZE_HORIZONTALLY	= 256;
+	const u32			_ANCHOR_DO_NOT_RESIZE_VERTICALLY	= 512;
+
+
+//////////
 // Variable types
 //////
 	// Note:  Lower-bit is a flag:	0-variable, 1-reference to a variable
@@ -230,10 +247,25 @@ typedef		const f64			cf64;
 //////////
 // Base class control names
 //////
-	const s8			cgcName_form[]						= "Form";
-	const s8			cgcName_icon[]						= "icon";
-	const s8			cgcCaption_icon[]					= "caption";
-	const s8			cgcName_iconMove[]					= "move";
-	const s8			cgcName_iconMinimize[]				= "minimize";
-	const s8			cgcName_iconMaximize[]				= "maximize";
-	const s8			cgcName_iconClose[]					= "close";
+	const s8			cgcName_empty[]						= "empty";
+	const s8			cgcName_form[]						= "form";
+	const s8			cgcName_subform[]					= "subform";
+	const s8			cgcName_label[]						= "label";
+	const s8			cgcName_textbox[]					= "textbox";
+	const s8			cgcName_button[]					= "button";
+	const s8			cgcName_editbox[]					= "editbox";
+	const s8			cgcName_image[]						= "image";
+	const s8			cgcName_checkbox[]					= "checkbox";
+	const s8			cgcName_option[]					= "option";
+	const s8			cgcName_radio[]						= "radio";
+
+
+//////////
+// Auto-added child object names
+//////
+	const s8			cgcName_icon[]						= "_icon";								// Forms automatically get an app icon
+	const s8			cgcCaption_icon[]					= "_caption";							// Forms, subforms automatically get a caption
+	const s8			cgcName_iconMove[]					= "_move";								// Forms automatically get a move button (to move any subforms within using bars)
+	const s8			cgcName_iconMinimize[]				= "_minimize";							// Forms automatically get a minimize button
+	const s8			cgcName_iconMaximize[]				= "_maximize";							// Forms automatically get a maximize button
+	const s8			cgcName_iconClose[]					= "_close";								// Forms automatically get a close button

@@ -234,8 +234,9 @@
 	void					iExtraInfo_free							(SEditChainManager* ecm, SEditChain* ec, SExtraInfo** root, bool tlDeleteSelf);
 
 	// Datum
-	SDatum*					iDatum_allocate							(               s8* data, u32 dataLength);
-	void					iDatum_duplicate						(SDatum* datum, s8* data, u32 dataLength);
+	SDatum*					iDatum_allocate							(                s8* data, s32 dataLength);
+	void					iDatum_duplicate						(SDatum* datum,  s8* data, s32 dataLength);
+	void					iDatum_duplicate						(SDatum* datum, cs8* data, s32 dataLength);
 	void					iDatum_duplicate						(SDatum* datumDst, SDatum* datumSrc);
 	s32						iDatum_compare							(SDatum* datumLeft, SDatum* datumRight);
 	void					iDatum_delete							(SDatum* datum, bool tlDeleteSelf);
