@@ -3,7 +3,7 @@
 // /libsf/source/vjr/compiler_const.h
 //
 //////
-// Version 0.10
+// Version 0.30
 // Copyright (c) 2014 by Rick C. Hodgin
 //////
 // Last update:
@@ -100,24 +100,26 @@
 	const u32		_VAR_TYPE_EMPTYOBJECT							= 1;
 	const u32		_VAR_TYPE_THISCODE								= 2;
 	const u32		_VAR_TYPE_CHARACTER								= 3;
-	const u32		_VAR_TYPE_INTEGER								= 4;
-	const u32		_VAR_TYPE_FLOAT									= 5;
-	const u32		_VAR_TYPE_DOUBLE								= 6;
-	const u32		_VAR_TYPE_LOGICAL								= 7;
-	const u32		_VAR_TYPE_S32									= 8;
-	const u32		_VAR_TYPE_S64									= 9;
-	const u32		_VAR_TYPE_U32									= 10;
-	const u32		_VAR_TYPE_U64									= 11;
-	const u32		_VAR_TYPE_F32									= 12;
-	const u32		_VAR_TYPE_F64									= 13;
-	const u32		_VAR_TYPE_BI									= 14;
-	const u32		_VAR_TYPE_BFP									= 15;
-	const u32		_VAR_TYPE_S16									= 16;
-	const u32		_VAR_TYPE_S8									= 17;
-	const u32		_VAR_TYPE_U16									= 18;
-	const u32		_VAR_TYPE_U8									= 19;
-	const u32		_VAR_TYPE_DATE									= 20;
-	const u32		_VAR_TYPE_DATETIME								= 21;
+	const u32		_VAR_TYPE_INTEGER								= 4;			// Stored as an s32, a 4-byte signed integer
+	const u32		_VAR_TYPE_NUMERIC								= 5;			// Stored as a character (like "200.50"), but converted to numeric at each reference.
+	const u32		_VAR_TYPE_FLOAT									= 6;			// Stored as an f32
+	const u32		_VAR_TYPE_DOUBLE								= 7;			// Stored as an f64
+	const u32		_VAR_TYPE_LOGICAL								= 8;
+	const u32		_VAR_TYPE_S32									= 9;
+	const u32		_VAR_TYPE_S64									= 10;
+	const u32		_VAR_TYPE_U32									= 11;
+	const u32		_VAR_TYPE_U64									= 12;
+	const u32		_VAR_TYPE_F32									= 13;
+	const u32		_VAR_TYPE_F64									= 14;
+	const u32		_VAR_TYPE_BI									= 15;			// Uses the big number library for integers
+	const u32		_VAR_TYPE_BFP									= 16;			// Uses the big number library for floating points
+	const u32		_VAR_TYPE_S16									= 17;
+	const u32		_VAR_TYPE_S8									= 18;
+	const u32		_VAR_TYPE_U16									= 19;
+	const u32		_VAR_TYPE_U8									= 20;
+	const u32		_VAR_TYPE_DATE									= 21;
+	const u32		_VAR_TYPE_DATETIME								= 22;
+	const u32		_VAR_TYPE_CURRENCY								= 23;
 
 
 //////////
@@ -138,12 +140,20 @@
 	const u32		_ERROR_UNEXPECTED_COMMAND						= 2;
 	const u32		_ERROR_CONTEXT_HAS_CHANGED						= 3;
 	const u32		_ERROR_FULL_RECOMPILE_REQUIRED					= 4;
+	const u32		_ERROR_NOT_A_VARIABLE							= 5;
+	const u32		_ERROR_NUMERIC_OVERFLOW							= 6;
+	const u32		_ERROR_NOT_NUMERIC								= 7;
+	const u32		_ERROR_EMPTY_STRING								= 8;
 
 	// Messages
 	const s8		cgcOutOfMemory[]								= "out of memory";
 	const s8		cgcUnexpectedCommand[]							= "unexpected command";
 	const s8		cgcContextHasChanged[]							= "context has changed";
 	const s8		cgcFullRecompileRequired[]						= "full recompile required";
+	const s8		cgcNotAVariable[]								= "not a variable";
+	const s8		cgcNumericOverflow[]							= "numeric overflow";
+	const s8		cgcNotNumeric[]									= "not numeric";
+	const s8		cgcEmptyString[]								= "empty string";
 	
 
 //////////

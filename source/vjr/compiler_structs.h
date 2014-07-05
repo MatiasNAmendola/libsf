@@ -3,7 +3,7 @@
 // /libsf/source/vjr/compiler_structs.h
 //
 //////
-// Version 0.10
+// Version 0.30
 // Copyright (c) 2014 by Rick C. Hodgin
 //////
 // Last update:
@@ -56,13 +56,6 @@ struct SCompileNote;
 //////////
 // Structures taken from Visual FreePro
 //////
-	struct SLL
-	{
-		SLL*			next;					// Next entry in linked list
-		SLL*			prev;					// Previous entry in linked list
-		u32				uniqueId;				// Unique id associated with this object
-	};
-
 	struct SLLCallback
 	{
 		union
@@ -185,35 +178,6 @@ struct SCompileNote;
 		SFunction*			adhoc;
 		SFunction*			currentAdhoc;
 		SComp*				comp;
-	};
-
-	struct SVariable
-	{
-		SLL			ll;
-		SVariable*	indirect;												// If non-NULL, this variable is an indirect reference to an underlying variable
-
-		// Variable data
-		SDatum		name;													// Name of this variable
-
-		// Variable content based on type
-		u32			var_type;												// Variable type (see _VAR_TYPE_* constants)
-		bool		isVarAllocated;											// If true, this variable was allocated. If false, it references an object allocated elsewhere.
-		union {
-			SObject*		obj;											// If the lower-bit of type is clear, and it's an object, the object it relates to
-			SFunction*		thisCode;										// Pointer to the code block this relates to
-			SDatum			value;											// If the lower-bit of type is clear, the actual data value based on its type
-		};
-
-		// If assign or access
-		SFunction*	assign;													// Source code executed whenever this variable is assigned
-		SFunction*	access;													// Source code executed whenever this variable is accessed
-
-		// Used only during compilation
-		bool		isStale;												// Variables are marked stale if the line they're defined on changes and needs recompiled.
-																			// Once recompiled, if the variable declaration still exists, the isStale flag is lowered.
-																			// If the variable no longer exists, any lines of code referencing the old variable are
-																			// marked for recompilation and errors will likely be generated.
-																			// To avoid this issue, use symbol refactoring in the IDE.
 	};
 
 	struct SOp

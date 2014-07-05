@@ -3,7 +3,7 @@
 // /libsf/source/vjr/compiler.h
 //
 //////
-// Version 0.10
+// Version 0.30
 // Copyright (c) 2014 by Rick C. Hodgin
 //////
 // Last update:
@@ -167,10 +167,15 @@ struct SVariable;
 	void					iFunction_politelyDeleteCompiledInfo		(SFunction* func, bool tlDeleteSelf);
 
 	// Variable functions
-	SVariable*				iVariable_create							(void);
+	SVariable*				iVariable_create							(u32 tnVarType, SVariable* varIndirect);
 	void					iVariable_delete							(SVariable* var, bool tlDeleteSelf);
 	void					iVariable_politelyDeleteChain				(SVariable** root, bool tlDeleteSelf);
 	void					iVariable_politelyDeleteChain_callback		(SLLCallback* cb);
+	s32						iiVariable_getAs_s32							(SVariable* var, bool tlForceConvert, bool* tlError, u32* tnErrorNum);
+	// Support functions
+	void					iiVariable_computeYyyyMmDd_fromJulianDayNumber	(u32 tnJulianDayNumber, u32* year, u32* month, u32* day);
+	void					iiVariable_computeHhMmSsMss_fromf32			(f32 tfSeconds, u32* hour, u32* minute, u32* second, u32* millisecond);
+	s64						iiVariable_computeDatetimeDifference		(SVariable* dtVar1, SVariable* dtVar2);
 
 	// Op functions
 	bool					iOp_setNull									(SOp* op);

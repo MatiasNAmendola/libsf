@@ -3,7 +3,7 @@
 // /libsf/source/vjr/events.cpp
 //
 //////
-// Version 0.10
+// Version 0.30
 // Copyright (c) 2014 by Rick C. Hodgin
 //////
 // Last update:

@@ -1,16 +1,16 @@
 //////////
 //
-// /libsf/source/vjr/vjr.cpp
+// /libsf/source/vjr/command_defs.h
 //
 //////
 // Version 0.30
 // Copyright (c) 2014 by Rick C. Hodgin
 //////
 // Last update:
-//     Feb.12.2014
+//     Jul.05.2014
 //////
 // Change log:
-//     Feb.12.2014 - Initial creation
+//     Jul.05.2014 - Initial creation
 //////
 //
 // This software is released as Liberty Software under a Repeat License, as governed
@@ -36,38 +36,21 @@
 
 
 
-#include "vjr.h"
+struct SVariable;
 
 
+//////////
+// commands.cpp
+// Note:  This source file contains both commands and functions.  Each will be
+//        given by its name, such as "function_chr()" being a function.
+//////
+	// Temporary error reporting until the proper engine is constructed.
+	void				iError_report								(s8* errorText);
+	void				iError_reportByNumber						(u32 tnErrorNum);
 
 
-int CALLBACK WinMain(	HINSTANCE	hInstance,
-						HINSTANCE	hPrevInstance,
-						LPSTR		lpCmdLine,
-						int			nCmdShow	)
-{
-	MSG		msg;
-	HACCEL	hAccelTable;
-
-
-	//////////
-	// Initialize
-	//////
-		ghInstance = hInstance;
-		iInit_vjr(&hAccelTable);
-
-
-	//////////
-	// Read events
-	//////
-		while (GetMessage(&msg, NULL, 0, 0))
-		{
-			if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-			{
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
-			}
-		}
-		// When the WM_QUIT message is received, we exit
-		return((int)msg.wParam);
-}
+//////////
+// Functions
+//////
+	SVariable*			function_asc								(SVariable* p1);
+	SVariable*			function_chr								(SVariable* p1);

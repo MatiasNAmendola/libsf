@@ -3,7 +3,7 @@
 // /libsf/source/vjr/vjr_const.h
 //
 //////
-// Version 0.10
+// Version 0.30
 // Copyright (c) 2014 by Rick C. Hodgin
 //////
 // Last update:
@@ -34,6 +34,9 @@
 //
 
 
+
+
+struct SVariable;
 
 
 // Unsigned
@@ -76,6 +79,13 @@ typedef		const f64			cf64;
 
 
 //////////
+// Processing helpers
+//////
+	#define iVariable_isValid(var)					(var && var->value.data && var->value.length != 0)
+	#define iVariable_getType(var)					var->var_type
+
+
+//////////
 // Red,Grn,Blu,Alp color maker
 //////
 	#define rgba(r,g,b,a)					((a & 0xff) << 24) + \
@@ -92,6 +102,29 @@ typedef		const f64			cf64;
 	#define red(rgbaColor)					((rgbaColor >> 16) & 0xff)
 	#define grn(rgbaColor)					((rgbaColor >> 8)  & 0xff)
 	#define blu(rgbaColor)					( rgbaColor        & 0xff)
+
+
+//////////
+// Reference datetimes
+//////
+	SVariable*			_datetime_Jan_01_2000				= NULL;
+
+
+//////////
+// Min/max constants
+//////
+	const s8			_s8_min								= (s8)-128;
+	const s8			_s8_max								= 127;
+	const u8			_u8_max								= 255;
+	const s16			_s16_min							= (s16)-32768;
+	const s16			_s16_max							= 32767;
+	const u16			_u16_max							= 65535;
+	const s32			_s32_min							= 0xffffffff;
+	const s32			_s32_max							= 0x7fffffff;
+	const u32			_u32_max							= 0xffffffff;
+	const s64			_s64_min							= 0xffffffffffffffff;
+	const s64			_s64_max							= 0x7fffffffffffffff;
+	const u64			_u64_max							= 0xffffffffffffffff;
 
 
 //////////

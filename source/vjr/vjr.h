@@ -3,7 +3,7 @@
 // /libsf/source/vjr/vjr.h
 //
 //////
-// Version 0.10
+// Version 0.30
 // Copyright (c) 2014 by Rick C. Hodgin
 //////
 // Last update:
@@ -58,6 +58,9 @@
 #include "vjr_defs.h"
 #include "vjr_globals.h"
 
+#include "command_defs.h"
+#include "engine.h"
+
 #include "graphics\h\app_icon.h"
 #include "graphics\h\move.h"
 #include "graphics\h\minimize.h"
@@ -86,3 +89,5 @@
 #include "events.cpp"
 #include "bitmaps.cpp"
 #include "compiler.cpp"
+#include "commands.cpp"
+#include "engine.cpp"

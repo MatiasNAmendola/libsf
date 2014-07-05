@@ -1,16 +1,16 @@
 //////////
 //
-// /libsf/source/vjr/vjr.cpp
+// /libsf/source/vjr/engine.cpp
 //
 //////
 // Version 0.30
 // Copyright (c) 2014 by Rick C. Hodgin
 //////
 // Last update:
-//     Feb.12.2014
+//     Jul.05.2014
 //////
 // Change log:
-//     Feb.12.2014 - Initial creation
+//     Jul.05.2014 - Initial creation
 //////
 //
 // This software is released as Liberty Software under a Repeat License, as governed
@@ -36,38 +36,3 @@
 
 
 
-#include "vjr.h"
-
-
-
-
-int CALLBACK WinMain(	HINSTANCE	hInstance,
-						HINSTANCE	hPrevInstance,
-						LPSTR		lpCmdLine,
-						int			nCmdShow	)
-{
-	MSG		msg;
-	HACCEL	hAccelTable;
-
-
-	//////////
-	// Initialize
-	//////
-		ghInstance = hInstance;
-		iInit_vjr(&hAccelTable);
-
-
-	//////////
-	// Read events
-	//////
-		while (GetMessage(&msg, NULL, 0, 0))
-		{
-			if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-			{
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
-			}
-		}
-		// When the WM_QUIT message is received, we exit
-		return((int)msg.wParam);
-}

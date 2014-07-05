@@ -3,7 +3,7 @@
 // /libsf/source/vjr/vjr_globals.h
 //
 //////
-// Version 0.10
+// Version 0.30
 // Copyright (c) 2014 by Rick C. Hodgin
 //////
 // Last update:
@@ -50,6 +50,7 @@
 
 
 	// JDebi window items
+	SEditChainManager*	screenData							= NULL;									// The data displayed on the screen
 	SEditChainManager*	commandHistory						= NULL;									// The command window history
 
 	// App icons

@@ -3,7 +3,7 @@
 // /libsf/source/vjr/vjr_structs.h
 //
 //////
-// Version 0.10
+// Version 0.30
 // Copyright (c) 2014 by Rick C. Hodgin
 //////
 // Last update:
@@ -52,6 +52,12 @@ struct SExtraInfo
 	SExtraInfo*	(*extra_info_allocate)		(SEditChainManager* chainMgr, SEditChain* chain, SExtraInfo* extra_info);	// Called to allocate this.info per needs
 	SExtraInfo*	(*extra_info_duplicate)		(SEditChainManager* chainMgr, SEditChain* chain, SExtraInfo* extra_info);	// Called when a chain is duplicated, determines what if any of the source's data needs to be duplicated as well
 	SExtraInfo*	(*extra_info_free)			(SEditChainManager* chainMgr, SEditChain* chain, SExtraInfo* extra_info);	// Called to free any data in this.info
+};
+
+struct SDateTime
+{
+	u32		julian;														// Julian day number
+	f32		seconds;													// Seconds elapsed since midnight
 };
 
 struct SUndo

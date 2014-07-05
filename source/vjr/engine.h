@@ -1,16 +1,16 @@
 //////////
 //
-// /libsf/source/vjr/vjr.cpp
+// /libsf/source/vjr/engine.h
 //
 //////
 // Version 0.30
 // Copyright (c) 2014 by Rick C. Hodgin
 //////
 // Last update:
-//     Feb.12.2014
+//     Jul.05.2014
 //////
 // Change log:
-//     Feb.12.2014 - Initial creation
+//     Jul.05.2014 - Initial creation
 //////
 //
 // This software is released as Liberty Software under a Repeat License, as governed
@@ -36,38 +36,30 @@
 
 
 
-#include "vjr.h"
+//////////
+// Constants for .T. and .F. settings using LOGICALX()
+//
+//////
+	const u32	_TRUEFALSE_TF					= 1;
+	const u32	_TRUEFALSE_YN					= 2;
+	const u32	_TRUEFALSE_UD					= 3;
 
 
-
-
-int CALLBACK WinMain(	HINSTANCE	hInstance,
-						HINSTANCE	hPrevInstance,
-						LPSTR		lpCmdLine,
-						int			nCmdShow	)
-{
-	MSG		msg;
-	HACCEL	hAccelTable;
-
-
-	//////////
-	// Initialize
-	//////
-		ghInstance = hInstance;
-		iInit_vjr(&hAccelTable);
-
-
-	//////////
-	// Read events
-	//////
-		while (GetMessage(&msg, NULL, 0, 0))
-		{
-			if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-			{
-				TranslateMessage(&msg);
-				DispatchMessage(&msg);
-			}
-		}
-		// When the WM_QUIT message is received, we exit
-		return((int)msg.wParam);
-}
+//////////
+// SET settings. :-)
+// http://www.visual-freepro.org/wiki/index.php/VFrP_changes#SET_Options
+//////
+	bool		_set_indexMetaData				= false;
+	bool		_set_honorBarriers				= true;
+	bool		_set_variablesFirst				= false;
+	bool		_set_autoConvert				= false;
+	bool		_set_caseSensitiveNames			= false;
+	bool		_set_caseSensitiveCompares		= true;
+	bool		_set_namingConventions			= false;
+	bool		_set_trueFalse					= _TRUEFALSE_TF;
+	bool		_set_implicitParams				= false;
+	bool		_set_stickyParameters			= true;
+	bool		_set_tableEqualAssignments		= false;
+	bool		_set_tableObjects				= false;
+	bool		_set_sloppyPrinting				= false;
+	SDatum		_set_languageTo					= { "en", 2 };

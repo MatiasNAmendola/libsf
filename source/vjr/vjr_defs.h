@@ -3,7 +3,7 @@
 // /libsf/source/vjr/vjr_defs.h
 //
 //////
-// Version 0.10
+// Version 0.30
 // Copyright (c) 2014 by Rick C. Hodgin
 //////
 // Last update:
@@ -189,6 +189,7 @@
 	void					iInit_createDefaultObjects				(void);
 	void					iInit_create_screenObject				(void);
 	void					iInit_create_jdebiObject				(void);
+	void					iInit_createDefaultDatetimes			(void);
 
 	DWORD	WINAPI			iReadEvents_messageWindow				(LPVOID lpParameter);
 	LRESULT	CALLBACK		iMessage_wndProcWindow					(HWND hwnd, UINT m, WPARAM w, LPARAM l);
@@ -219,11 +220,13 @@
 	void					iTranslateMousePosition					(POINTS* pt);
 
 	// EditChainManager
+	SEditChainManager*		iEditChainManager_allocate				(void);
 	bool					iEditChainManager_duplicate				(SEditChainManager** root, SEditChainManager* chain, bool tlIncludeUndoHistory);
 	void					iEditChainManager_delete				(SEditChainManager** root, bool tlDeleteSelf);
 	void					iEditChainManager_deleteChain			(SEditChainManager** root, bool tlDeleteSelf);
 
 	// Edit Chain
+	SEditChain*				iEditChain_appendLine					(SEditChainManager* ecm, s8* tcText, u32 tnTextLength);
 	void					iEditChain_free							(SEditChain** root, bool tlDeleteSelf);
 
 	// Translate
@@ -234,6 +237,7 @@
 	void					iExtraInfo_free							(SEditChainManager* ecm, SEditChain* ec, SExtraInfo** root, bool tlDeleteSelf);
 
 	// Datum
+	void					iDatum_allocateSpace					(SDatum* datum,            s32 dataLength);
 	SDatum*					iDatum_allocate							(                s8* data, s32 dataLength);
 	void					iDatum_duplicate						(SDatum* datum,  s8* data, s32 dataLength);
 	void					iDatum_duplicate						(SDatum* datum, cs8* data, s32 dataLength);

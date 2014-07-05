@@ -3,7 +3,7 @@
 // /libsf/source/vjr/vjr_sup.cpp
 //
 //////
-// Version 0.10
+// Version 0.30
 // Copyright (c) 2014 by Rick C. Hodgin
 //////
 // Last update:
@@ -36,72 +36,84 @@
 
 
 
-void iInit_vjr(HACCEL* hAccelTable)
-{
-	HRESULT hRes;
+//////////
+//
+// Startup initialization, called from WinMain() only.
+//
+//////
+	void iInit_vjr(HACCEL* hAccelTable)
+	{
+		HRESULT hRes;
 
 
-	// Keyboard shortcuts
-	*hAccelTable = LoadAccelerators(ghInstance, MAKEINTRESOURCE(IDC_VJR));
+		// Keyboard shortcuts
+		*hAccelTable = LoadAccelerators(ghInstance, MAKEINTRESOURCE(IDC_VJR));
 
-	// Taskbar interface
-	hRes = OleInitialize(NULL);
-	CoCreateInstance(CLSID_TaskbarList, 0, CLSCTX_INPROC_SERVER, IID_ITaskbarList, (void**)&giTaskbar);
+		// Taskbar interface
+		hRes = OleInitialize(NULL);
+		CoCreateInstance(CLSID_TaskbarList, 0, CLSCTX_INPROC_SERVER, IID_ITaskbarList, (void**)&giTaskbar);
 
-	// Initialize our builder
-	iBuilder_createAndInitialize(&gWindows,	-1);
-	iBuilder_createAndInitialize(&gFonts,	-1);
+		// Initialize our builder
+		iBuilder_createAndInitialize(&gWindows,	-1);
+		iBuilder_createAndInitialize(&gFonts,	-1);
 
-	// Initialize our critical sections
-	InitializeCriticalSection(&gcsUniqueIdAccess);
+		// Initialize our critical sections
+		InitializeCriticalSection(&gcsUniqueIdAccess);
 
-	// Get startup time
-	systemStartedMs = iTime_getLocalMs();
+		// Get startup time
+		systemStartedMs = iTime_getLocalMs();
 
-	// Default font
-	gsFont					= iFont_create(cgcDefaultFont,			10, FW_NORMAL,	0, 0);
-	gsWindowTitleBarFont	= iFont_create(cgcWindowTitleBarFont,	12, FW_NORMAL,	0, 0);
-
-
-	//////////
-	// Load our icons and images
-	//////
-		bmpVjrIcon		= iBmp_rawLoad(cgc_appIconBmp);
-		bmpJDebiIcon	= iBmp_rawLoad(cgc_jdebiAppIconBmp);
-
-		// Create a 1x1 no image bitmap placeholder
-		bmpNoImage		= iBmp_allocate();
-		iBmp_createBySize(bmpNoImage, 1, 1, 32);
-
-		bmpClose		= iBmp_rawLoad(cgc_closeBmp);
-		bmpMaximize		= iBmp_rawLoad(cgc_maximizeBmp);
-		bmpMinimize		= iBmp_rawLoad(cgc_minimizeBmp);
-		bmpMove			= iBmp_rawLoad(cgc_moveBmp);
-
-		bmpArrowUl		= iBmp_rawLoad(cgc_arrowUlBmp);
-		bmpArrowUr		= iBmp_rawLoad(cgc_arrowUrBmp);
-		bmpArrowLl		= iBmp_rawLoad(cgc_arrowLlBmp);
-		bmpArrowLr		= iBmp_rawLoad(cgc_arrowLrBmp);
+		// Default font
+		gsFont					= iFont_create(cgcDefaultFont,			10, FW_NORMAL,	0, 0);
+		gsWindowTitleBarFont	= iFont_create(cgcWindowTitleBarFont,	12, FW_NORMAL,	0, 0);
 
 
-	// Create our message window
-	iInit_createMessageWindow();
+		//////////
+		// Load our icons and images
+		//////
+			bmpVjrIcon		= iBmp_rawLoad(cgc_appIconBmp);
+			bmpJDebiIcon	= iBmp_rawLoad(cgc_jdebiAppIconBmp);
 
-	// Create our default objects
-	iInit_createDefaultObjects();
+			// Create a 1x1 no image bitmap placeholder
+			bmpNoImage		= iBmp_allocate();
+			iBmp_createBySize(bmpNoImage, 1, 1, 32);
 
-	// Create our main screen window
-	iInit_create_screenObject();
-	iInit_create_jdebiObject();
+			bmpClose		= iBmp_rawLoad(cgc_closeBmp);
+			bmpMaximize		= iBmp_rawLoad(cgc_maximizeBmp);
+			bmpMinimize		= iBmp_rawLoad(cgc_minimizeBmp);
+			bmpMove			= iBmp_rawLoad(cgc_moveBmp);
 
-	// Initially render each one
-	iObj_render(gobj_screen, true, true);
-	iObj_render(gobj_jdebi, true, true);
+			bmpArrowUl		= iBmp_rawLoad(cgc_arrowUlBmp);
+			bmpArrowUr		= iBmp_rawLoad(cgc_arrowUrBmp);
+			bmpArrowLl		= iBmp_rawLoad(cgc_arrowLlBmp);
+			bmpArrowLr		= iBmp_rawLoad(cgc_arrowLrBmp);
 
-	// Attach them to physical windows
-	gWinScreen	= iObj_createWindowForForm(gobj_screen);
-	gWinJDebi	= iObj_createWindowForForm(gobj_jdebi);
-}
+
+		// Create the default reference datetimes
+		iInit_createDefaultDatetimes();
+
+		// Create our message window
+		iInit_createMessageWindow();
+
+		// Create our default objects
+		iInit_createDefaultObjects();
+
+		// Create the buffers for screen and command history
+		screenData		= iEditChainManager_allocate();
+		commandHistory	= iEditChainManager_allocate();
+
+		// Create our main screen window
+		iInit_create_screenObject();
+		iInit_create_jdebiObject();
+
+		// Initially render each one
+		iObj_render(gobj_screen, true, true);
+		iObj_render(gobj_jdebi, true, true);
+
+		// Attach them to physical windows
+		gWinScreen	= iObj_createWindowForForm(gobj_screen);
+		gWinJDebi	= iObj_createWindowForForm(gobj_jdebi);
+	}
 
 
 
@@ -364,6 +376,28 @@ void iInit_vjr(HACCEL* hAccelTable)
 			lnWidth		-= ((lrc.right - lrc.left) / 32);
 			lnHeight	-= (2 * lnTop);
 			iObj_setSize(gobj_jdebi, lnLeft, lnTop, lnWidth, lnHeight);
+	}
+
+
+
+
+//////////
+//
+// Called to create the default datetime variable that are constant references
+//
+//////
+	void iInit_createDefaultDatetimes(void)
+	{
+		SDateTime dt;
+
+
+		//////////
+		// Jan.01.2000 00:00:00.000
+		//////
+			_datetime_Jan_01_2000 = iVariable_create(_VAR_TYPE_DATETIME, NULL);
+			dt.julian	= 2451545;
+			dt.seconds	= 0.0f;
+			iDatum_duplicate(&_datetime_Jan_01_2000->value, (s8*)&dt, 8);
 	}
 
 
@@ -1197,6 +1231,31 @@ void iInit_vjr(HACCEL* hAccelTable)
 
 //////////
 //
+// Called to create a new EditChainManager (or ECM)
+//
+//////
+	SEditChainManager* iEditChainManager_allocate(void)
+	{
+		SEditChainManager* ecm;
+
+
+		// Allocate a new structure
+		ecm = (SEditChainManager*)malloc(sizeof(SEditChainManager));
+		if (ecm)
+		{
+			// Initialize
+			memset(ecm, 0, sizeof(SEditChainManager));
+		}
+
+		// Indicate our status
+		return(ecm);
+	}
+
+
+
+
+//////////
+//
 // EditChainManager processing
 //
 //////
@@ -1465,6 +1524,54 @@ _asm int 3;
 
 //////////
 //
+// Called to append a line of text to the indicated ECM.
+//
+//////
+	SEditChain* iEditChain_appendLine(SEditChainManager* ecm, s8* tcText, u32 tnTextLength)
+	{
+		u32				lnLineNum;
+		SEditChain*		ec;
+
+
+		// Make sure our environment is sane
+		// Note:  We do not test for tcText and tnTextLength because we can add blank lines
+		ec = NULL;
+		if (ecm)
+		{
+			// Allocate our new structure
+			if (ecm->ecLast)
+			{
+				// Append after the last line
+				lnLineNum	= ecm->ecLast->line + 1;
+				ec = (SEditChain*)iLl_appendNewNodeAtEnd((SLL**)ecm->ecLast, sizeof(SEditChain));
+
+			} else {
+				// This is the first line, add it and set the last line to the same
+				ec = (SEditChain*)iLl_appendNewNodeAtEnd((SLL**)ecm->ecFirst, sizeof(SEditChain));
+				if (ec)
+					ecm->ecLast = ec;
+			}
+
+			// Was it added?
+			if (ec)
+			{
+				// Initialize
+				memset(ec, 0, sizeof(SEditChain));
+
+				// Populate
+				ec->sourceCode = iDatum_allocate(tcText, tnTextLength);
+			}
+		}
+
+		// Indicate our status
+		return(ec);
+	}
+
+
+
+
+//////////
+//
 // Free the edit chain
 //
 //////
@@ -1654,6 +1761,30 @@ _asm int 3;
 // Datum storage
 //
 //////
+	void iDatum_allocateSpace(SDatum* datum, s32 dataLength)
+	{
+		// Make sure our environment is sane
+		if (datum)
+		{
+			if (datum->length != dataLength)
+			{
+				// Release anything that's already there
+				iiDatum_delete(datum);
+
+				// Allocate the space
+				if (dataLength > 0)
+					datum->data = (s8*)malloc(dataLength);
+
+				// Set the length
+				datum->length = dataLength;
+			}
+
+			// Initialize
+			if (datum->data)
+				memset(datum->data, 0, dataLength);
+		}
+	}
+
 	SDatum* iDatum_allocate(s8* data, s32 dataLength)
 	{
 		SDatum* datumNew;
@@ -1663,15 +1794,21 @@ _asm int 3;
 		datumNew = (SDatum*)malloc(sizeof(SDatum));
 		if (datumNew)
 		{
-			// We may need to set the length
-			if (dataLength < 1)
-				dataLength = max(strlen(data), 1);
-
 			// Initialize
-			memset(datumNew, 0, sizeof(SDatum));
+			memset(datumNew, 0, sizeof(datumNew));
 
-			// Populate
-			iDatum_duplicate(datumNew, data, dataLength);
+			if (data && dataLength)
+			{
+				// We may need to set the length
+				if (dataLength < 1)
+					dataLength = max(strlen(data), 1);
+
+				// Initialize
+				memset(datumNew, 0, sizeof(SDatum));
+
+				// Populate
+				iDatum_duplicate(datumNew, data, dataLength);
+			}
 		}
 
 		// Indicate our status
