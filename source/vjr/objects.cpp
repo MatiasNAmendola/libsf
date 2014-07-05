@@ -502,17 +502,17 @@
 // Called to duplicate the child objects to this object
 //
 //////
-	void iObj_duplicateChildren(SObject* parent)
+	void iObj_duplicateChildren(SObject* objDst, SObject* objSrc)
 	{
 		SObject*	objChild;
 		SObject*	objCopy;
 
 
 		// Make sure our environment is sane
-		if (parent && parent->firstChild)
+		if (objSrc && objSrc->firstChild)
 		{
 			// Duplicate this entry
-			objChild = parent->firstChild;
+			objChild = objSrc->firstChild;
 			while (objChild)
 			{
 				// Copy this item
@@ -849,7 +849,8 @@
 				// Initialize based on template
 				if (template_subobj)
 				{
-					// Note:  None are currently defined
+					// Copy from indicated template
+					iiSubobj_copyEmpty(subobj, template_subobj);
 
 				} else {
 					// Use VJr defaults
@@ -905,23 +906,7 @@
 				if (template_subobj)
 				{
 					// Copy from indicated template
-					subobj->font				= iFont_duplicate(template_subobj->font);
-					subobj->nwRgba.color		= template_subobj->nwRgba.color;
-					subobj->neRgba.color		= template_subobj->neRgba.color;
-					subobj->swRgba.color		= template_subobj->swRgba.color;
-					subobj->seRgba.color		= template_subobj->seRgba.color;
-					subobj->backColor.color		= template_subobj->backColor.color;
-					subobj->foreColor.color		= template_subobj->foreColor.color;
-					subobj->captionColor.color	= template_subobj->captionColor.color;
-
-					subobj->bmpFormIcon				= iBmp_copy(template_subobj->bmpFormIcon);
-					iDatum_duplicate(&subobj->caption, &template_subobj->caption);
-
-					*(u32*)&subobj->activate	= *(u32*)&template_subobj->activate;
-					*(u32*)&subobj->deactivate	= *(u32*)&template_subobj->deactivate;
-
-					// Duplicate all children for this object
-					iObj_duplicateChildren(parent);
+					iiSubobj_copyForm(subobj, template_subobj);
 
 				} else {
 					// Use VJr defaults
@@ -1003,20 +988,7 @@
 				if (template_subobj)
 				{
 					// Copy from indicated template
-					subobj->font				= iFont_duplicate(template_subobj->font);
-					subobj->nwRgba.color		= template_subobj->nwRgba.color;
-					subobj->neRgba.color		= template_subobj->neRgba.color;
-					subobj->swRgba.color		= template_subobj->swRgba.color;
-					subobj->seRgba.color		= template_subobj->seRgba.color;
-					subobj->backColor.color		= template_subobj->backColor.color;
-					subobj->foreColor.color		= template_subobj->foreColor.color;
-					subobj->captionColor.color	= template_subobj->captionColor.color;
-
-					subobj->bmpFormIcon				= iBmp_copy(template_subobj->bmpFormIcon);
-					iDatum_duplicate(&subobj->caption, &template_subobj->caption);
-
-					*(u32*)&subobj->activate	= *(u32*)&template_subobj->activate;
-					*(u32*)&subobj->deactivate	= *(u32*)&template_subobj->deactivate;
+					iiSubobj_copySubform(subobj, template_subobj);
 
 				} else {
 					// Use VJr defaults
@@ -1065,18 +1037,7 @@
 				if (template_subobj)
 				{
 					// Copy from indicated template
-					subobj->font						= iFont_duplicate(template_subobj->font);
-					subobj->backColor.color				= template_subobj->backColor.color;
-					subobj->foreColor.color				= template_subobj->foreColor.color;
-
-					subobj->alignment					= template_subobj->alignment;
-					iDatum_duplicate(&subobj->caption,	&template_subobj->caption);
-
-					subobj->isOpaque					= template_subobj->isOpaque;
-					subobj->isBorder					= template_subobj->isBorder;
-					subobj->borderColor.color			= template_subobj->borderColor.color;
-					subobj->disabledBackColor.color		= template_subobj->disabledBackColor.color;
-					subobj->disabledForeColor.color		= template_subobj->disabledForeColor.color;
+					iiSubobj_copyLabel(subobj, template_subobj);
 
 				} else {
 					// Use VJr defaults
@@ -1125,31 +1086,7 @@
 				if (template_subobj)
 				{
 					// Copy from indicated template
-					subobj->font						= iFont_duplicate(template_subobj->font);
-					subobj->backColor.color				= template_subobj->backColor.color;
-					subobj->foreColor.color				= template_subobj->foreColor.color;
-
-					subobj->style						= template_subobj->style;
-					subobj->alignment					= template_subobj->alignment;
-					iDatum_duplicate(&subobj->value,	&template_subobj->value);
-					subobj->valueLength					= template_subobj->valueLength;
-					iDatum_duplicate(&subobj->picture,	&template_subobj->picture);
-					iDatum_duplicate(&subobj->mask,		&template_subobj->mask);
-
-					subobj->cursor						= template_subobj->cursor;
-					subobj->selectStart					= template_subobj->selectStart;
-					subobj->selectEnd					= template_subobj->selectEnd;
-
-					subobj->isOpaque					= template_subobj->isOpaque;
-					subobj->isBorder					= template_subobj->isBorder;
-					subobj->borderColor.color			= template_subobj->borderColor.color;
-					subobj->selectedBackColor.color		= template_subobj->selectedBackColor.color;
-					subobj->selectedForeColor.color		= template_subobj->selectedForeColor.color;
-					subobj->disabledBackColor.color		= template_subobj->disabledBackColor.color;
-					subobj->disabledForeColor.color		= template_subobj->disabledForeColor.color;
-
-					*(u32*)&subobj->interactiveChange	= *(u32*)&template_subobj->interactiveChange;
-					*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
+					iiSubobj_copyTextbox(subobj, template_subobj);
 
 				} else {
 					// Use VJr defaults
@@ -1198,19 +1135,7 @@
 				if (template_subobj)
 				{
 					// Copy from indicated template
-					subobj->font						= iFont_duplicate(template_subobj->font);
-					subobj->backColor.color				= template_subobj->backColor.color;
-					subobj->foreColor.color				= template_subobj->foreColor.color;
-
-					subobj->style						= template_subobj->style;
-					subobj->alignment					= template_subobj->alignment;
-					iDatum_duplicate(&subobj->caption,	&template_subobj->caption);
-
-					subobj->disabledBackColor.color		= template_subobj->disabledBackColor.color;
-					subobj->disabledForeColor.color		= template_subobj->disabledForeColor.color;
-
-					*(u32*)&subobj->interactiveChange	= *(u32*)&template_subobj->interactiveChange;
-					*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
+					iiSubobj_copyButton(subobj, template_subobj);
 
 				} else {
 					// Use VJr defaults
@@ -1259,28 +1184,7 @@
 				if (template_subobj)
 				{
 					// Copy from indicated template
-					subobj->font						= iFont_duplicate(template_subobj->font);
-					subobj->backColor.color				= template_subobj->backColor.color;
-					subobj->foreColor.color				= template_subobj->foreColor.color;
-
-					subobj->style						= template_subobj->style;
-					subobj->alignment					= template_subobj->alignment;
-					iEditChainManager_duplicate(&subobj->codeBlock, template_subobj->codeBlock, true);
-
-					subobj->cursor						= template_subobj->cursor;
-					subobj->selectStart					= template_subobj->selectStart;
-					subobj->selectEnd					= template_subobj->selectEnd;
-
-					subobj->isOpaque					= template_subobj->isOpaque;
-					subobj->isBorder					= template_subobj->isBorder;
-					subobj->borderColor.color			= template_subobj->borderColor.color;
-					subobj->selectedBackColor.color		= template_subobj->selectedBackColor.color;
-					subobj->selectedForeColor.color		= template_subobj->selectedForeColor.color;
-					subobj->disabledBackColor.color		= template_subobj->disabledBackColor.color;
-					subobj->disabledForeColor.color		= template_subobj->disabledForeColor.color;
-
-					*(u32*)&subobj->interactiveChange	= *(u32*)&template_subobj->interactiveChange;
-					*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
+					iiSubobj_copyEditbox(subobj, template_subobj);
 
 				} else {
 					// Use VJr defaults
@@ -1329,11 +1233,7 @@
 				if (template_subobj)
 				{
 					// Copy from indicated template
-					subobj->style						= template_subobj->style;
-					subobj->image						= iBmp_copy(template_subobj->image);
-					subobj->imageOver					= iBmp_copy(template_subobj->imageOver);
-
-					*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
+					iiSubobj_copyImage(subobj, template_subobj);
 
 				} else {
 					// Use VJr defaults
@@ -1382,23 +1282,7 @@
 				if (template_subobj)
 				{
 					// Copy from indicated template
-					subobj->font						= iFont_duplicate(template_subobj->font);
-					subobj->backColor.color				= template_subobj->backColor.color;
-					subobj->foreColor.color				= template_subobj->foreColor.color;
-
-					subobj->alignment					= template_subobj->alignment;
-					subobj->style						= template_subobj->style;
-					subobj->value						= template_subobj->value;
-					iDatum_duplicate(&subobj->caption,	&template_subobj->caption);
-
-					subobj->isOpaque					= template_subobj->isOpaque;
-					subobj->isBorder					= template_subobj->isBorder;
-					subobj->borderColor.color			= template_subobj->borderColor.color;
-					subobj->disabledBackColor.color		= template_subobj->disabledBackColor.color;
-					subobj->disabledForeColor.color		= template_subobj->disabledForeColor.color;
-
-					*(u32*)&subobj->interactiveChange	= *(u32*)&template_subobj->interactiveChange;
-					*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
+					iiSubobj_copyCheckbox(subobj, template_subobj);
 
 				} else {
 					// Use VJr defaults
@@ -1447,23 +1331,7 @@
 				if (template_subobj)
 				{
 					// Copy from indicated template
-					subobj->backColor.color				= template_subobj->backColor.color;
-					subobj->foreColor.color				= template_subobj->foreColor.color;
-
-					subobj->alignment					= template_subobj->alignment;
-					subobj->style						= template_subobj->style;
-
-					subobj->optionCount					= template_subobj->optionCount;		// How many options are there?
-					subobj->multiSelect					= template_subobj->multiSelect;		// Can multiple items be selected?
-
-					// Copy the label objects
-					iObj_duplicateChain(&subobj->firstOption, template_subobj->firstOption);	// Each option has its own set of properties, and each is of _OBJECT_TYPE_LABEL
-
-					// Copy the events
-					*(u32*)&subobj->onSelect			= *(u32*)&template_subobj->onSelect;
-					*(u32*)&subobj->onDeselect			= *(u32*)&template_subobj->onDeselect;
-					*(u32*)&subobj->interactiveChange	= *(u32*)&template_subobj->interactiveChange;
-					*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
+					iiSubobj_copyOption(subobj, template_subobj);
 
 				} else {
 					// Use VJr defaults
@@ -1512,25 +1380,7 @@
 				if (template_subobj)
 				{
 					// Copy from indicated template
-					subobj->font						= iFont_duplicate(template_subobj->font);
-					subobj->backColor.color				= template_subobj->backColor.color;
-					subobj->foreColor.color				= template_subobj->foreColor.color;
-
-					subobj->alignment					= template_subobj->alignment;
-					subobj->style						= template_subobj->style;
-					subobj->value						= template_subobj->value;
-					subobj->minValue					= template_subobj->minValue;
-					subobj->maxValue					= template_subobj->maxValue;
-					subobj->roundTo						= template_subobj->roundTo;
-
-					subobj->isOpaque					= template_subobj->isOpaque;
-					subobj->isBorder					= template_subobj->isBorder;
-					subobj->borderColor.color			= template_subobj->borderColor.color;
-					subobj->disabledBackColor.color		= template_subobj->disabledBackColor.color;
-					subobj->disabledForeColor.color		= template_subobj->disabledForeColor.color;
-
-					*(u32*)&subobj->interactiveChange	= *(u32*)&template_subobj->interactiveChange;
-					*(u32*)&subobj->programmaticChange	= *(u32*)&template_subobj->programmaticChange;
+					iiSubobj_copyRadio(subobj, template_subobj);
 
 				} else {
 					// Use VJr defaults
@@ -1543,6 +1393,623 @@
 		// Indicate our success or failure
 		//////
 			return(subobj);
+	}
+
+
+
+
+//////////
+//
+// Called to copy the indicated empty from source to destination
+//
+//////
+	void iiSubobj_copyEmpty(SSubObjEmpty* subobjDst, SSubObjEmpty* subobjSrc)
+	{
+		//////////
+		// Duplicate all children for this object
+		//////
+			iObj_duplicateChildren(subobjDst->parent, subobjSrc->parent);
+	}
+
+
+
+
+//////////
+//
+// Called to copy the indicated form from source to destination
+//
+//////
+	void iiSubobj_copyForm(SSubObjForm* subobjDst, SSubObjForm* subobjSrc)
+	{
+		//////////
+		// Copy our min/max
+		//////
+			CopyRect(&subobjDst->rcMax, &subobjSrc->rcMax);
+			CopyRect(&subobjDst->rcMin, &subobjSrc->rcMin);
+
+
+		//////////
+		// Copy the font
+		//////
+			subobjDst->font						= iFont_duplicate(subobjSrc->font);
+
+
+		//////////
+		// Copy the colors
+		//////
+			subobjDst->nwRgba.color				= subobjSrc->nwRgba.color;
+			subobjDst->neRgba.color				= subobjSrc->neRgba.color;
+			subobjDst->swRgba.color				= subobjSrc->swRgba.color;
+			subobjDst->seRgba.color				= subobjSrc->seRgba.color;
+			subobjDst->backColor.color			= subobjSrc->backColor.color;
+			subobjDst->foreColor.color			= subobjSrc->foreColor.color;
+			subobjDst->captionColor.color		= subobjSrc->captionColor.color;
+
+
+		//////////
+		// Copy the form icon
+		//////
+			subobjDst->bmpFormIcon				= iBmp_copy(subobjSrc->bmpFormIcon);
+			iDatum_duplicate(&subobjDst->caption, &subobjSrc->caption);
+
+
+		//////////
+		// Copy the caption
+		//////
+			iDatum_duplicate(&subobjDst->caption, &subobjSrc->caption);
+
+
+		//////////
+		// Copy the picture
+		//////
+			iBmp_delete(&subobjDst->bmpPicture, true, true);
+			subobjDst->bmpPicture = iBmp_copy(subobjSrc->bmpPicture);
+			iDatum_duplicate(&subobjDst->pictureName, &subobjSrc->pictureName);
+
+
+		//////////
+		// General flags and settings
+		//////
+			subobjDst->allowOutput				= subobjSrc->allowOutput;
+			subobjDst->alwaysOnBottom			= subobjSrc->alwaysOnBottom;
+			subobjDst->alwaysOnTop				= subobjSrc->alwaysOnTop;
+			subobjDst->autoCenter				= subobjSrc->autoCenter;
+			subobjDst->borderStyle				= subobjSrc->borderStyle;
+			subobjDst->isCloseable				= subobjSrc->isCloseable;
+			subobjDst->processKeyPreviewEvents	= subobjSrc->processKeyPreviewEvents;
+			subobjDst->hasControlBox			= subobjSrc->hasControlBox;
+			subobjDst->hasMinButton				= subobjSrc->hasMinButton;
+			subobjDst->hasMaxButton				= subobjSrc->hasMaxButton;
+			subobjDst->hasCloseButton			= subobjSrc->hasCloseButton;
+			subobjDst->scaleMode				= subobjSrc->scaleMode;
+			subobjDst->showInTaskBar			= subobjSrc->showInTaskBar;
+			subobjDst->windowState				= subobjSrc->windowState;
+
+			// The following are ignored, maintained only for backward compatibility
+			subobjDst->bindControls				= subobjSrc->bindControls;
+			subobjDst->bufferMode				= subobjSrc->bufferMode;
+			subobjDst->clipControls				= subobjSrc->clipControls;
+			subobjDst->colorSource				= subobjSrc->colorSource;
+			subobjDst->continuousScroll			= subobjSrc->continuousScroll;
+			iObj_delete(&subobjDst->dataSession, true);
+			subobjDst->dataSessionId			= subobjSrc->dataSessionId;
+			iDatum_duplicate(&subobjDst->declass,			&subobjSrc->declass);
+			iDatum_duplicate(&subobjDst->declasslibrary,	&subobjSrc->declasslibrary);
+			subobjDst->defolecid				= subobjSrc->defolecid;
+			subobjDst->desktop					= subobjSrc->desktop;
+			subobjDst->isDockable				= subobjSrc->isDockable;
+			subobjDst->isDocked					= subobjSrc->isDocked;
+			subobjDst->dockPosition				= subobjSrc->dockPosition;
+			subobjDst->drawmode					= subobjSrc->drawmode;
+			subobjDst->drawstyle				= subobjSrc->drawstyle;
+			subobjDst->drawwidth				= subobjSrc->drawwidth;
+			subobjDst->fillColor.color			= subobjSrc->fillColor.color;
+			subobjDst->fillStyle				= subobjSrc->fillStyle;
+			subobjDst->halfHeightCaption		= subobjSrc->halfHeightCaption;
+			subobjDst->hScrollSmallChange		= subobjSrc->hScrollSmallChange;
+			subobjDst->vScrollSmallChange		= subobjSrc->vScrollSmallChange;
+			subobjDst->macDesktop				= subobjSrc->macDesktop;
+			subobjDst->mdiForm					= subobjSrc->mdiForm;
+			subobjDst->oleDragMode				= subobjSrc->oleDragMode;
+			iBmp_delete(&subobjDst->oleDragPicture, true, true);
+			subobjDst->oleDragPicture			= iBmp_copy(subobjSrc->oleDragPicture);
+			subobjDst->oleDropEffects			= subobjSrc->oleDropEffects;
+			subobjDst->oleDropHasData			= subobjSrc->oleDropHasData;
+			subobjDst->oleDropMode				= subobjSrc->oleDropMode;
+			subobjDst->releaseType				= subobjSrc->releaseType;
+			subobjDst->rightToLeft				= subobjSrc->rightToLeft;
+			subobjDst->scrollbars				= subobjSrc->scrollbars;
+			subobjDst->showTips					= subobjSrc->showTips;
+			subobjDst->showWindow				= subobjSrc->showWindow;
+			subobjDst->sizeBox					= subobjSrc->sizeBox;
+			subobjDst->themes					= subobjSrc->themes;
+			subobjDst->titleBar					= subobjSrc->titleBar;
+			subobjDst->windowType				= subobjSrc->windowType;
+			subobjDst->zoomBox					= subobjSrc->zoomBox;
+
+
+		//////////
+		// Copy the form-specific event handlers
+		//////
+			*(u32*)&subobjDst->activate			= (u32)&subobjSrc->activate;
+			*(u32*)&subobjDst->deactivate		= (u32)&subobjSrc->deactivate;
+
+
+		//////////
+		// Duplicate all children for this object
+		//////
+			iObj_duplicateChildren(subobjDst->parent, subobjSrc->parent);
+	}
+
+
+
+
+//////////
+//
+// Called to copy the indicated empty subfrom source to destination
+//
+//////
+	void iiSubobj_copySubform(SSubObjSubform* subobjDst, SSubObjSubform* subobjSrc)
+	{
+		//////////
+		// Copy our min/max
+		//////
+			CopyRect(&subobjDst->rcMax, &subobjSrc->rcMax);
+			CopyRect(&subobjDst->rcMin, &subobjSrc->rcMin);
+
+
+		//////////
+		// Copy the font
+		//////
+			subobjDst->font						= iFont_duplicate(subobjSrc->font);
+
+
+		//////////
+		// Copy the colors
+		//////
+			subobjDst->nwRgba.color				= subobjSrc->nwRgba.color;
+			subobjDst->neRgba.color				= subobjSrc->neRgba.color;
+			subobjDst->swRgba.color				= subobjSrc->swRgba.color;
+			subobjDst->seRgba.color				= subobjSrc->seRgba.color;
+			subobjDst->backColor.color			= subobjSrc->backColor.color;
+			subobjDst->foreColor.color			= subobjSrc->foreColor.color;
+			subobjDst->captionColor.color		= subobjSrc->captionColor.color;
+
+
+		//////////
+		// Copy the form icon
+		//////
+			subobjDst->bmpFormIcon				= iBmp_copy(subobjSrc->bmpFormIcon);
+			iDatum_duplicate(&subobjDst->caption, &subobjSrc->caption);
+
+
+		//////////
+		// Copy the caption
+		//////
+			iDatum_duplicate(&subobjDst->caption, &subobjSrc->caption);
+
+
+		//////////
+		// Copy the picture
+		//////
+			iBmp_delete(&subobjDst->bmpPicture, true, true);
+			subobjDst->bmpPicture = iBmp_copy(subobjSrc->bmpPicture);
+			iDatum_duplicate(&subobjDst->pictureName, &subobjSrc->pictureName);
+
+
+		//////////
+		// General flags and settings
+		//////
+			subobjDst->allowOutput				= subobjSrc->allowOutput;
+			subobjDst->borderStyle				= subobjSrc->borderStyle;
+			subobjDst->processKeyPreviewEvents	= subobjSrc->processKeyPreviewEvents;
+			subobjDst->scaleMode				= subobjSrc->scaleMode;
+			subobjDst->windowState				= subobjSrc->windowState;
+
+
+		//////////
+		// Copy the subform-specific event handlers
+		//////
+			*(u32*)&subobjDst->activate			= (u32)&subobjSrc->activate;
+			*(u32*)&subobjDst->deactivate		= (u32)&subobjSrc->deactivate;
+
+
+		//////////
+		// Duplicate all children for this object
+		//////
+			iObj_duplicateChildren(subobjDst->parent, subobjSrc->parent);
+	}
+
+
+
+
+//////////
+//
+// Called to copy the indicated label from source to destination
+//
+//////
+	void iiSubobj_copyLabel(SSubObjLabel* subobjDst, SSubObjLabel* subobjSrc)
+	{
+		//////////
+		// Copy the font
+		//////
+			subobjDst->font						= iFont_duplicate(subobjSrc->font);
+
+
+		//////////
+		// Copy the colors
+		//////
+			subobjDst->backColor.color			= subobjSrc->backColor.color;
+			subobjDst->foreColor.color			= subobjSrc->foreColor.color;
+
+
+		//////////
+		// Copy the caption
+		//////
+			iDatum_duplicate(&subobjDst->caption, &subobjSrc->caption);
+
+
+		//////////
+		// General settings
+		//////
+			subobjDst->alignment					= subobjSrc->alignment;
+			subobjDst->isOpaque						= subobjSrc->isOpaque;
+			subobjDst->isBorder						= subobjSrc->isBorder;
+			subobjDst->borderColor.color			= subobjSrc->borderColor.color;
+			subobjDst->disabledBackColor.color		= subobjSrc->disabledBackColor.color;
+			subobjDst->disabledForeColor.color		= subobjSrc->disabledForeColor.color;
+
+
+		//////////
+		// Duplicate all children for this object
+		//////
+			iObj_duplicateChildren(subobjDst->parent, subobjSrc->parent);
+	}
+
+
+
+
+//////////
+//
+// Called to copy the indicated textbox from source to destination
+//
+//////
+	void iiSubobj_copyTextbox(SSubObjTextbox* subobjDst, SSubObjTextbox* subobjSrc)
+	{
+		//////////
+		// Copy the font
+		//////
+			subobjDst->font						= iFont_duplicate(subobjSrc->font);
+
+
+		//////////
+		// Copy the colors
+		//////
+			subobjDst->backColor.color			= subobjSrc->backColor.color;
+			subobjDst->foreColor.color			= subobjSrc->foreColor.color;
+
+
+		//////////
+		// General settings
+		//////
+			subobjDst->style						= subobjSrc->style;
+			subobjDst->alignment					= subobjSrc->alignment;
+			iDatum_duplicate(&subobjDst->value,		&subobjSrc->value);
+			subobjDst->valueLength					= subobjSrc->valueLength;
+			iDatum_duplicate(&subobjDst->picture,	&subobjSrc->picture);
+			iDatum_duplicate(&subobjDst->mask,		&subobjSrc->mask);
+			subobjDst->isOpaque						= subobjSrc->isOpaque;
+			subobjDst->isBorder						= subobjSrc->isBorder;
+			subobjDst->borderColor.color			= subobjSrc->borderColor.color;
+			subobjDst->selectedBackColor.color		= subobjSrc->selectedBackColor.color;
+			subobjDst->selectedForeColor.color		= subobjSrc->selectedForeColor.color;
+			subobjDst->disabledBackColor.color		= subobjSrc->disabledBackColor.color;
+			subobjDst->disabledForeColor.color		= subobjSrc->disabledForeColor.color;
+
+
+		//////////
+		// Editor settings
+		//////
+			subobjDst->cursor						= subobjSrc->cursor;
+			subobjDst->selectStart					= subobjSrc->selectStart;
+			subobjDst->selectEnd					= subobjSrc->selectEnd;
+
+
+		//////////
+		// Copy the textbox-specific event handlers
+		//////
+			*(u32*)&subobjDst->interactiveChange	= *(u32*)&subobjSrc->interactiveChange;
+			*(u32*)&subobjDst->programmaticChange	= *(u32*)&subobjSrc->programmaticChange;
+
+
+		//////////
+		// Duplicate all children for this object
+		//////
+			iObj_duplicateChildren(subobjDst->parent, subobjSrc->parent);
+	}
+
+
+
+
+//////////
+//
+// Called to copy the indicated button from source to destination
+//
+//////
+	void iiSubobj_copyButton(SSubObjButton* subobjDst, SSubObjButton* subobjSrc)
+	{
+		//////////
+		// Copy the font
+		//////
+			subobjDst->font						= iFont_duplicate(subobjSrc->font);
+
+
+		//////////
+		// Copy the colors
+		//////
+			subobjDst->backColor.color			= subobjSrc->backColor.color;
+			subobjDst->foreColor.color			= subobjSrc->foreColor.color;
+
+
+		//////////
+		// General settings
+		//////
+			subobjDst->style						= subobjSrc->style;
+			subobjDst->alignment					= subobjSrc->alignment;
+			iDatum_duplicate(&subobjDst->caption,	&subobjSrc->caption);
+			subobjDst->disabledBackColor.color		= subobjSrc->disabledBackColor.color;
+			subobjDst->disabledForeColor.color		= subobjSrc->disabledForeColor.color;
+
+
+		//////////
+		// Copy the button-specific event handlers
+		//////
+			*(u32*)&subobjDst->interactiveChange	= *(u32*)&subobjSrc->interactiveChange;
+			*(u32*)&subobjDst->programmaticChange	= *(u32*)&subobjSrc->programmaticChange;
+
+
+		//////////
+		// Duplicate all children for this object
+		//////
+			iObj_duplicateChildren(subobjDst->parent, subobjSrc->parent);
+	}
+
+
+
+
+//////////
+//
+// Called to copy the indicated editbox from source to destination
+//
+//////
+	void iiSubobj_copyEditbox(SSubObjEditbox* subobjDst, SSubObjEditbox* subobjSrc)
+	{
+		//////////
+		// Copy the font
+		//////
+			subobjDst->font						= iFont_duplicate(subobjSrc->font);
+
+
+		//////////
+		// Copy the colors
+		//////
+			subobjDst->backColor.color			= subobjSrc->backColor.color;
+			subobjDst->foreColor.color			= subobjSrc->foreColor.color;
+
+
+		//////////
+		// General settings
+		//////
+			subobjDst->style						= subobjSrc->style;
+			subobjDst->alignment					= subobjSrc->alignment;
+			iEditChainManager_duplicate(&subobjDst->codeBlock, subobjSrc->codeBlock, true);
+			subobjDst->isOpaque						= subobjSrc->isOpaque;
+			subobjDst->isBorder						= subobjSrc->isBorder;
+			subobjDst->borderColor.color			= subobjSrc->borderColor.color;
+			subobjDst->selectedBackColor.color		= subobjSrc->selectedBackColor.color;
+			subobjDst->selectedForeColor.color		= subobjSrc->selectedForeColor.color;
+			subobjDst->disabledBackColor.color		= subobjSrc->disabledBackColor.color;
+			subobjDst->disabledForeColor.color		= subobjSrc->disabledForeColor.color;
+
+
+		//////////
+		// Editor settings
+		//////
+			subobjDst->cursor						= subobjSrc->cursor;
+			subobjDst->selectStart					= subobjSrc->selectStart;
+			subobjDst->selectEnd					= subobjSrc->selectEnd;
+
+
+		//////////
+		// Copy the editbox-specific event handlers
+		//////
+			*(u32*)&subobjDst->interactiveChange	= *(u32*)&subobjSrc->interactiveChange;
+			*(u32*)&subobjDst->programmaticChange	= *(u32*)&subobjSrc->programmaticChange;
+
+
+		//////////
+		// Duplicate all children for this object
+		//////
+			iObj_duplicateChildren(subobjDst->parent, subobjSrc->parent);
+	}
+
+
+
+
+//////////
+//
+// Called to copy the indicated image from source to destination
+//
+//////
+	void iiSubobj_copyImage(SSubObjImage* subobjDst, SSubObjImage* subobjSrc)
+	{
+		//////////
+		// General settings
+		//////
+			subobjDst->style						= subobjSrc->style;
+			subobjDst->image						= iBmp_copy(subobjSrc->image);
+			subobjDst->imageOver					= iBmp_copy(subobjSrc->imageOver);
+
+
+		//////////
+		// Copy the editbox-specific event handlers
+		//////
+			*(u32*)&subobjDst->programmaticChange	= *(u32*)&subobjSrc->programmaticChange;
+
+
+		//////////
+		// Duplicate all children for this object
+		//////
+			iObj_duplicateChildren(subobjDst->parent, subobjSrc->parent);
+	}
+
+
+
+
+//////////
+//
+// Called to copy the indicated checkbox from source to destination
+//
+//////
+	void iiSubobj_copyCheckbox(SSubObjCheckbox* subobjDst, SSubObjCheckbox* subobjSrc)
+	{
+		//////////
+		// Copy the font
+		//////
+			subobjDst->font						= iFont_duplicate(subobjSrc->font);
+
+
+		//////////
+		// Copy the colors
+		//////
+			subobjDst->backColor.color			= subobjSrc->backColor.color;
+			subobjDst->foreColor.color			= subobjSrc->foreColor.color;
+
+
+		//////////
+		// General settings
+		//////
+			subobjDst->alignment					= subobjSrc->alignment;
+			subobjDst->style						= subobjSrc->style;
+			subobjDst->value						= subobjSrc->value;
+			iDatum_duplicate(&subobjDst->caption,	&subobjSrc->caption);
+			subobjDst->isOpaque						= subobjSrc->isOpaque;
+			subobjDst->isBorder						= subobjSrc->isBorder;
+			subobjDst->borderColor.color			= subobjSrc->borderColor.color;
+			subobjDst->disabledBackColor.color		= subobjSrc->disabledBackColor.color;
+			subobjDst->disabledForeColor.color		= subobjSrc->disabledForeColor.color;
+
+
+		//////////
+		// Copy the checkbox-specific event handlers
+		//////
+			*(u32*)&subobjDst->interactiveChange	= *(u32*)&subobjSrc->interactiveChange;
+			*(u32*)&subobjDst->programmaticChange	= *(u32*)&subobjSrc->programmaticChange;
+
+
+		//////////
+		// Duplicate all children for this object
+		//////
+			iObj_duplicateChildren(subobjDst->parent, subobjSrc->parent);
+	}
+
+
+
+
+//////////
+//
+// Called to copy the indicated option from source to destination
+//
+//////
+	void iiSubobj_copyOption(SSubObjOption* subobjDst, SSubObjOption* subobjSrc)
+	{
+		//////////
+		// Copy the colors
+		//////
+			subobjDst->backColor.color			= subobjSrc->backColor.color;
+			subobjDst->foreColor.color			= subobjSrc->foreColor.color;
+
+
+		//////////
+		// General settings
+		//////
+			subobjDst->alignment					= subobjSrc->alignment;
+			subobjDst->style						= subobjSrc->style;
+			subobjDst->optionCount					= subobjSrc->optionCount;		// How many options are there?
+			subobjDst->multiSelect					= subobjSrc->multiSelect;		// Can multiple items be selected?
+
+
+		//////////
+		// Copy the label objects
+		//////
+			iObj_duplicateChain(&subobjDst->firstOption, subobjSrc->firstOption);	// Each option has its own set of properties, and each is of _OBJECT_TYPE_LABEL
+
+
+		//////////
+		// Copy the option-specific event handlers
+		//////
+			*(u32*)&subobjDst->onSelect				= *(u32*)&subobjSrc->onSelect;
+			*(u32*)&subobjDst->onDeselect			= *(u32*)&subobjSrc->onDeselect;
+			*(u32*)&subobjDst->interactiveChange	= *(u32*)&subobjSrc->interactiveChange;
+			*(u32*)&subobjDst->programmaticChange	= *(u32*)&subobjSrc->programmaticChange;
+
+
+		//////////
+		// Duplicate all children for this object
+		//////
+			iObj_duplicateChildren(subobjDst->parent, subobjSrc->parent);
+	}
+
+
+
+
+//////////
+//
+// Called to copy the indicated radio from source to destination
+//
+//////
+	void iiSubobj_copyRadio(SSubObjRadio* subobjDst, SSubObjRadio* subobjSrc)
+	{
+		//////////
+		// Copy the font
+		//////
+			subobjDst->font						= iFont_duplicate(subobjSrc->font);
+
+
+		//////////
+		// Copy the colors
+		//////
+			subobjDst->backColor.color			= subobjSrc->backColor.color;
+			subobjDst->foreColor.color			= subobjSrc->foreColor.color;
+
+
+		//////////
+		// General settings
+		//////
+			subobjDst->alignment					= subobjSrc->alignment;
+			subobjDst->style						= subobjSrc->style;
+			subobjDst->value						= subobjSrc->value;
+			subobjDst->minValue						= subobjSrc->minValue;
+			subobjDst->maxValue						= subobjSrc->maxValue;
+			subobjDst->roundTo						= subobjSrc->roundTo;
+			subobjDst->isOpaque						= subobjSrc->isOpaque;
+			subobjDst->isBorder						= subobjSrc->isBorder;
+			subobjDst->borderColor.color			= subobjSrc->borderColor.color;
+			subobjDst->disabledBackColor.color		= subobjSrc->disabledBackColor.color;
+			subobjDst->disabledForeColor.color		= subobjSrc->disabledForeColor.color;
+
+
+		//////////
+		// Copy the option-specific event handlers
+		//////
+			*(u32*)&subobjDst->interactiveChange	= *(u32*)&subobjSrc->interactiveChange;
+			*(u32*)&subobjDst->programmaticChange	= *(u32*)&subobjSrc->programmaticChange;
+
+
+		//////////
+		// Duplicate all children for this object
+		//////
+			iObj_duplicateChildren(subobjDst->parent, subobjSrc->parent);
 	}
 
 
@@ -1668,7 +2135,7 @@
 			subobj->hasCloseButton					= true;
 			subobj->scaleMode						= _SCALE_MODE_PIXELS;
 			subobj->showInTaskBar					= true;
-			subobj->windowstate						= _WINDOW_STATE_NORMAL;
+			subobj->windowState						= _WINDOW_STATE_NORMAL;
 
 			// The following are ignored, maintained only for backward compatibility
 			subobj->bindControls					= true;

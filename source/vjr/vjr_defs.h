@@ -66,7 +66,7 @@
 	u32						iObj_publish							(SBitmap* bmpDst, RECT* trc, SObject* obj, bool tlPublishChildren, bool tlPublishSiblings);
 	void					iObj_duplicateChain						(SObject** root, SObject* chain);
 	void					iObj_appendObjToParent					(SObject* parent, SObject* obj);
-	void					iObj_duplicateChildren					(SObject* parent);
+	void					iObj_duplicateChildren					(SObject* objDst, SObject* objSrc);
 	void					iObj_setSize							(SObject* obj, s32 tnLeft, s32 tnTop, s32 tnWidth, s32 tnHeight);
 	SWindow* 				iObj_createWindowForForm				(SObject* obj_form);
 	bool					iObj_setVisible							(SObject* obj, bool tlNewVisible);
@@ -86,6 +86,19 @@
 	SSubObjCheckbox*		iSubobj_createCheckbox					(SSubObjCheckbox*	template_subobj, SObject* parent);
 	SSubObjOption*			iSubobj_createOption					(SSubObjOption*		template_subobj, SObject* parent);
 	SSubObjRadio*			iSubobj_createRadio						(SSubObjRadio*		template_subobj, SObject* parent);
+
+	// For copy operations
+	void					iiSubobj_copyEmpty						(SSubObjEmpty*		subobjDst,	SSubObjEmpty*		subobjSrc);
+	void					iiSubobj_copyForm						(SSubObjForm*		subobjDst,	SSubObjForm*		subobjSrc);
+	void					iiSubobj_copySubform					(SSubObjSubform*	subobjDst,	SSubObjSubform*		subobjSrc);
+	void					iiSubobj_copyLabel						(SSubObjLabel*		subobjDst,	SSubObjLabel*		subobjSrc);
+	void					iiSubobj_copyTextbox					(SSubObjTextbox*	subobjDst,	SSubObjTextbox*		subobjSrc);
+	void					iiSubobj_copyButton						(SSubObjButton*		subobjDst,	SSubObjButton*		subobjSrc);
+	void					iiSubobj_copyEditbox					(SSubObjEditbox*	subobjDst,	SSubObjEditbox*		subobjSrc);
+	void					iiSubobj_copyImage						(SSubObjImage*		subobjDst,	SSubObjImage*		subobjSrc);
+	void					iiSubobj_copyCheckbox					(SSubObjCheckbox*	subobjDst,	SSubObjCheckbox*	subobjSrc);
+	void					iiSubobj_copyOption						(SSubObjOption*		subobjDst,	SSubObjOption*		subobjSrc);
+	void					iiSubobj_copyRadio						(SSubObjRadio*		subobjDst,	SSubObjRadio*		subobjSrc);
 
 	// For initialization
 	void					iiSubobj_resetToDefaultEmpty			(SSubObjEmpty*		subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
