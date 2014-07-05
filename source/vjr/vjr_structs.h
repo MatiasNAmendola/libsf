@@ -342,7 +342,7 @@ struct SSubObjForm
 	bool		hasCloseButton;											// Is the close button shown?
 	s32			scaleMode;												// 0=foxels, 3=pixels (default)
 	bool		showInTaskBar;											// Is this form shown in a taskbar?  Only relates to top-level forms (no parent, or parent is _screen).
-	s32			windowstate;											// 0=normal, 1=minimized, 2=maximized
+	s32			windowState;											// 0=normal, 1=minimized, 2=maximized
 
 	// The following are ignored, maintained only for backward compatibility
 	bool		bindControls;											// Are controls bound to their source?
@@ -395,17 +395,30 @@ struct SSubObjSubform
 	// _OBJECT_TYPE_SUBFORM
 	SObject*	parent;													// parent object this object belongs to
 
+	RECT		rcMax;													// The maximum rectangle for the form
+	RECT		rcMin;													// The minimum rectangle for the form
+
 	SFont*		font;													// Default font instance
 	SBgra		nwRgba;													// Northwest back color for border
 	SBgra		neRgba;													// Northeast back color for border
 	SBgra		swRgba;													// Southwest back color for border
 	SBgra		seRgba;													// Southeast back color for border
-	SBgra		backColor;												// Back color (only RGB() channels are used, but RGBA() channels are maintained)
+	SBgra		backColor;												// Back color for the client content
 	SBgra		foreColor;												// Default text fore color
 	SBgra		captionColor;											// Color of the caption
 
-	SBitmap*	bmpFormIcon;												// Icon for the subform
+	SBitmap*	bmpFormIcon;											// Icon for the form
 	SDatum		caption;												// Caption
+
+	SDatum		pictureName;											// The name of the file used for the picture
+	SBitmap*	bmpPicture;												// The image for the picture
+
+	// General flags and settings
+	bool		allowOutput;											// Allow output to the form?
+	s32			borderStyle;											// 0=none, 1=fixed, 2=fixed standard presentation, 3=sizable presentation
+	bool		processKeyPreviewEvents;								// Do keystrokes for controls on the form go through the form's Key* events as well?
+	s32			scaleMode;												// 0=foxels, 3=pixels (default)
+	s32			windowState;											// 0=normal, 1=minimized
 
 	// Events unique to this object
 	bool		(*activate)							(SObject* o);		// Called when activated
