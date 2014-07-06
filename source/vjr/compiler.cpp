@@ -364,7 +364,7 @@
 			//////////
 			// Move to the next line
 			//////
-				cvc->line = cvc->line->next;
+				cvc->line = (SEditChain*)cvc->line->ll.next;
 		}
 	}
 
@@ -4165,7 +4165,7 @@ _asm int 3;
 
 				// Move to next line
 				lineLast	= line;
-				line		= line->next;
+				line		= (SEditChain*)line->ll.next;
 
 			} while (lineLast != func->lastLine && line);
 

@@ -60,7 +60,7 @@
 			}
 
 			// Is there room from where we are to the new line length?
-			if (line->sourceCode->length >= newLineLength)
+			if (line->sourceCode->length > newLineLength)
 				return(true);		// We're good
 
 			// If we get here, we need to reallocate
@@ -96,7 +96,7 @@ _asm int 3;
 				//////////
 				// Note next item in chain
 				//////
-					chainNext = chain->next;
+					chainNext = (SEditChain*)chain->ll.next;
 
 
 				//////////
@@ -148,14 +148,22 @@ _asm int 3;
 
 
 		// Make sure our environment is sane
-		if (ecm && !ecm->isReadOnly && ecm->ecCursorLine)
+		if (ecm && !ecm->isReadOnly && ecm->ecCursorLine && ecm->ecCursorLine->sourceCode)
 		{
 			// Make sure there's room enough for the keystroke
 			line = ecm->ecCursorLine;
 			if (iEditChain_ensureLineLength(ecm, ecm->ecCursorLine->sourceCodePopulated + 1))
 			{
+				// They could've been beyond the end of line, and if so then we need to insert spaces between the end and here
+				if (ecm->column > line->sourceCodePopulated)
+				{
+					// Fill with spaces
+					for (lnI = line->sourceCodePopulated; lnI < ecm->column; lnI++)
+						line->sourceCode->data[lnI] = ' ';
+				}
+
 				// Move everything from the end of the line to where we are right one character
-				for (lnI = line->sourceCodePopulated; lnI > ecm->column && lnI > 0; lnI--)
+				for (lnI = line->sourceCodePopulated + 1; lnI > ecm->column && lnI > 0; lnI--)
 					line->sourceCode->data[lnI] = line->sourceCode->data[lnI - 1];
 
 				// Insert the character
@@ -163,6 +171,13 @@ _asm int 3;
 
 				// Move to the next column
 				++ecm->column;
+
+				// Increase the populated length
+				++line->sourceCodePopulated;
+
+				// If we're past the end, we need to indicate our populated line length
+				if (ecm->column > line->sourceCodePopulated)
+					line->sourceCodePopulated = ecm->column;
 
 				// Indicate success
 				return(true);
@@ -178,16 +193,17 @@ _asm int 3;
 
 //////////
 //
-// 
+// Called to overwrite the existing character wherever we are
 //
 //////
 	bool iEditChain_characterOverwrite(SEditChainManager* ecm, u8 asciiChar)
 	{
-		SEditChain* line;
+		s32				lnI;
+		SEditChain*		line;
 
 
 		// Make sure our environment is sane
-		if (ecm && !ecm->isReadOnly && ecm->ecCursorLine)
+		if (ecm && !ecm->isReadOnly && ecm->ecCursorLine && ecm->ecCursorLine->sourceCode)
 		{
 			// Is there room to inject it?
 			line = ecm->ecCursorLine;
@@ -198,11 +214,64 @@ _asm int 3;
 
 			} else {
 				// We can overwrite it
+
+				// They could've been beyond the end of line, and if so then we need to insert spaces between the end and here
+				if (ecm->column > line->sourceCodePopulated)
+				{
+					// Fill with spaces
+					for (lnI = line->sourceCodePopulated; lnI < ecm->column; lnI++)
+						line->sourceCode->data[lnI] = ' ';
+				}
+
 				// Overwrite the character
 				line->sourceCode->data[ecm->column] = asciiChar;
 
 				// Move to the next column
 				++ecm->column;
+
+				// If we're past the end, we need to indicate our populated line length
+				if (ecm->column > line->sourceCodePopulated)
+					line->sourceCodePopulated = ecm->column;
+
+				// Indicate success
+				return(true);
+			}
+		}
+
+		// If we get here, we could not overwrite
+		return(false);
+	}
+
+
+
+
+//////////
+//
+// Called to delete the character where we are, which, depending on insert mode,
+// will affect the line in different ways.
+//
+//////
+	bool iEditChain_characterDelete(SEditChainManager* ecm)
+	{
+		s32			lnI;
+		SEditChain* line;
+
+
+		// Make sure our environment is sane
+		if (ecm && !ecm->isReadOnly && ecm->ecCursorLine && ecm->ecCursorLine->sourceCode)
+		{
+			// Grab the line
+			line = ecm->ecCursorLine;
+
+			// If we're in the populated area
+			if (ecm->column < line->sourceCodePopulated)
+			{
+				// Move everything left one character
+				for (lnI = ecm->column; lnI < line->sourceCodePopulated; lnI++)
+					line->sourceCode->data[lnI] = line->sourceCode->data[lnI + 1];
+
+				// Reduce the length of the populated portion of the line by one
+				--line->sourceCodePopulated;
 
 				// Indicate success
 				return(true);

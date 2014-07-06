@@ -279,6 +279,7 @@ typedef		const f64			cf64;
 	const s8			cgcScreenTitle[]					= "Visual FreePro, Jr.";
 	const s8			cgcJDebiTitle[]						= "JDebi Debugger";
 	const s8			cgcDefaultFont[]					= "Ubuntu";
+	const s8			cgcDefaultFixedFont[]				= "Ubuntu Mono";
 	const s8			cgcWindowTitleBarFont[]				= "Ubuntu Condensed";
 	const s8			cgcSubwindowTitleBarFont[]			= "Ubuntu Condensed";
 

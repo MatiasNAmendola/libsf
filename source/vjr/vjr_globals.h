@@ -100,6 +100,12 @@
 		const SBgra		dark_blue							= { rgba(0, 0, 128, 255) };
 		const SBgra		black								= { rgba(0, 0, 0, 255) };
 		const SBgra		gray								= { rgba(192, 192, 192, 255) };
+		const SBgra		breadcrumbBackColor					= { rgba(180, 220, 240, 255) };			// Cyanish
+		const SBgra		breadcrumbForeColor					= { rgba(0, 0, 164, 255) };				// Semidark blue
+		const SBgra		breakpointBackColor					= { rgba(180, 140, 220, 255) };			// Purplish
+		const SBgra		breakpointForeColor					= { rgba(255, 255, 128, 255) };			// Pastel yellow
+		const SBgra		currentStatementBackColor			= { rgba(200, 255, 164, 255) };			// Pastel lime greenish
+		const SBgra		currentStatementForeColor			= { rgba(0, 64, 0, 255) };				// Dark green
 		const SBgra		selectedBackColor					= { rgba(32, 164, 255, 255) };
 		const SBgra		selectedForeColor					= { rgba(255, 255, 255, 255) };
 		const SBgra		disabledBackColor					= { rgba(255, 255, 255, 255) };

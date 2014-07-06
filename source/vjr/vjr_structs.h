@@ -72,9 +72,7 @@ struct SUndo
 
 struct SEditChain
 {
-	SLL*		ll;
-	SEditChain*	prev;													// Pointer backward to previous text item
-	SEditChain*	next;													// Pointer forward to next text item
+	SLL			ll;														// Link list throughout
 	u32			uid;													// Unique id for this line, used for undos and identifying individual lines which may move about
 
 	u32			line;													// This line's number
@@ -103,11 +101,12 @@ struct SEditChainManager
 	//////////
 	// For display
 	//////
-		SEditChain*		ecTop;											// Top item in the current view
+		SEditChain*		ecTopLine;										// Top item in the current view
 		SEditChain*		ecCursorLine;									// Line where the cursor is
 		SEditChain*		ecCursorLineLast;								// The last location before movement was made
-		bool			isInsert;										// Are we in insert mode?
-		s32				column;											// Column we're currently on
+		bool			isOverwrite;									// Are we in overwrite mode?
+		s32				column;											// Column we're currently inputting
+		s32				leftColumn;										// The column we're displaying at the left-most position (of horizontally scrolled, this will be greater than 0)
 
 
 	//////////
@@ -439,7 +438,6 @@ struct SSubObjSubform
 	// Events unique to this object
 	bool		(*activate)							(SObject* o);		// Called when activated
 	bool		(*deactivate)						(SObject* o);		// Called when deactivated
-
 
 	// Updating each render
 	RECT		rcClient;												// The client area of the subform

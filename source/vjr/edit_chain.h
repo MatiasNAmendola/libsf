@@ -45,3 +45,4 @@
 	// For editing
 	bool					iEditChain_characterInsert				(SEditChainManager* ecm, u8 asciiChar);
 	bool					iEditChain_characterOverwrite			(SEditChainManager* ecm, u8 asciiChar);
+	bool					iEditChain_characterDelete				(SEditChainManager* ecm);

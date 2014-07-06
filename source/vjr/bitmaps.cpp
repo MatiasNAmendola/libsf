@@ -464,6 +464,54 @@
 
 //////////
 //
+// Called to invert the colors in the indicated block
+//
+//////
+	void iBmp_invert(SBitmap* bmp, s32 tnUlX, s32 tnUlY, s32 tnLrX, s32 tnLrY)
+	{
+		s32		lnX, lnY;
+		SBgr*	lbgr;
+		SBgra*	lbgra;
+
+
+		// Iterate through every row
+		for (lnY = tnUlY; lnY < tnLrY && lnY < bmp->bi.biHeight; lnY++)
+		{
+			if (bmp->bi.biBitCount == 24)
+			{
+				// Grab our pointers
+				lbgr = (SBgr*)(bmp->bd + ((bmp->bi.biHeight - lnY - 1) * bmp->rowWidth) + (tnUlX * 3));
+
+				// Iterate though every column
+				for (lnX = tnUlX; lnX < tnLrX && lnX < bmp->bi.biWidth; lnX++, lbgr++)
+				{
+					// Copy the pixel
+					lbgr->red	= 255 - lbgr->red;
+					lbgr->grn	= 255 - lbgr->grn;
+					lbgr->blu	= 255 - lbgr->blu;
+				}
+
+			} else if (bmp->bi.biBitCount == 32) {
+				// Grab our pointers
+				lbgra	= (SBgra*)(bmp->bd + ((bmp->bi.biHeight - lnY - 1) * bmp->rowWidth) + (tnUlX * 4));
+
+				// Iterate through every column
+				for (lnX = tnUlX; lnX < tnLrX && lnX < bmp->bi.biWidth; lnX++, lbgra++)
+				{
+					// Copy the pixel
+					lbgra->red	= 255 - lbgra->red;
+					lbgra->grn	= 255 - lbgra->grn;
+					lbgra->blu	= 255 - lbgra->blu;
+				}
+			}
+		}
+	}
+
+
+
+
+//////////
+//
 // Draw the indicated object
 //
 //////

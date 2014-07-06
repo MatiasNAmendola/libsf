@@ -50,7 +50,11 @@
 	void					iEditChainManager_delete				(SEditChainManager** root, bool tlDeleteSelf);
 	void					iEditChainManager_deleteChain			(SEditChainManager** root, bool tlDeleteSelf);
 	SEditChain*				iEditChainManager_appendLine			(SEditChainManager* ecm, s8* tcText, s32 tnTextLength);
-	void					iEditChainManager_getRect				(SEditChainManager* ecm, SObject* obj, RECT* rc);
+	SFont*					iEditChainManager_getRectAndFont		(SEditChainManager* ecm, SObject* obj, RECT* rc);
+	void					iEditChainManager_getColors				(SEditChainManager* ecm, SObject* obj, SBgra& backColor, SBgra& foreColor);
+	void					iEditChainManager_render				(SEditChainManager* ecm, SObject* obj);
+	bool					iEditChainManager_verifyCursorIsVisible	(SEditChainManager* ecm, RECT* rc, SFont* font);
+
 
 	// Editor movements
 	bool					iEditChainManager_keystroke				(SEditChainManager* ecm, SObject* obj, u8 asciiChar);
@@ -62,6 +66,7 @@
 	bool					iEditChainManager_toggleInsert			(SEditChainManager* ecm, SObject* obj);
 	bool					iEditChainManager_tabIn					(SEditChainManager* ecm, SObject* obj);
 	bool					iEditChainManager_tabOut				(SEditChainManager* ecm, SObject* obj);
+	bool					iEditChainManager_returnKey				(SEditChainManager* ecm, SObject* obj);
 	bool					iEditChainManager_selectAll				(SEditChainManager* ecm, SObject* obj);
 	bool					iEditChainManager_cut					(SEditChainManager* ecm, SObject* obj);
 	bool					iEditChainManager_copy					(SEditChainManager* ecm, SObject* obj);
@@ -80,3 +85,7 @@
 	bool					iEditChainManager_selectLineToggle		(SEditChainManager* ecm, SObject* obj);
 	bool					iEditChainManager_selectWordLeft		(SEditChainManager* ecm, SObject* obj);
 	bool					iEditChainManager_selectWordRight		(SEditChainManager* ecm, SObject* obj);
+	bool					iEditChainManager_deleteLeft			(SEditChainManager* ecm, SObject* obj);
+	bool					iEditChainManager_deleteRight			(SEditChainManager* ecm, SObject* obj);
+	bool					iEditChainManager_deleteWordLeft		(SEditChainManager* ecm, SObject* obj);
+	bool					iEditChainManager_deleteWordRight		(SEditChainManager* ecm, SObject* obj);

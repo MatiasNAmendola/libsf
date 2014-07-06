@@ -361,6 +361,9 @@
 			iSubobj_form_setBackColor(gobj_jdebi, white.color);
 			iSubobj_form_setForeColor(gobj_jdebi, black.color);
 
+			// Give it a fixed point font
+			iSubobj_form_setFont(gobj_jdebi, (s8*)cgcDefaultFixedFont, 10, false, false, false, false, false, false);
+
 
 		//////////
 		// Size it to just under half the screen initially
@@ -374,9 +377,9 @@
 		// Size and position it
 		//////
 			lnLeft		= lnWidth;
-			lnTop		= (lrc.bottom - lrc.top) / 32;
+			lnTop		= 3 * lnHeight / 4;
 			lnWidth		-= ((lrc.right - lrc.left) / 32);
-			lnHeight	-= (2 * lnTop);
+			lnHeight	= lnHeight / 4 - ((lrc.bottom - lrc.top) / 32);
 			iObj_setSize(gobj_jdebi, lnLeft, lnTop, lnWidth, lnHeight);
 	}
 
@@ -469,11 +472,11 @@
 					break;
 
 				case WM_KEYDOWN:
-				case WM_KEYUP:
+//				case WM_KEYUP:
 //				case WM_CHAR:
 //				case WM_DEADCHAR:
-				case WM_SYSKEYDOWN:
-				case WM_SYSKEYUP:
+//				case WM_SYSKEYDOWN:
+//				case WM_SYSKEYUP:
 //				case WM_SYSCHAR:
 //				case WM_SYSDEADCHAR:
 					return(iKeyboard_processMessage(win, m, w, l));
@@ -701,6 +704,24 @@
 
 		// Indicate our status
 		return(win);
+	}
+
+
+
+
+//////////
+//
+// Called to re-render the indicated window
+//
+//////
+	void iWindow_render(SWindow* win)
+	{
+		// Make sure we have something to render
+		if (win && win->obj)
+		{
+			iObj_render(win->obj, true, true);
+			InvalidateRect(win->hwnd, 0, FALSE);
+		}
 	}
 
 
@@ -1511,6 +1532,7 @@
 		// See if it's a printable character
 		//////
 			lnScanCode	= (tnScanCode & 0xff000) >> 12;
+			lnAsciiChar	= 0;
 			GetKeyboardState(&keyboardState[0]);
 			llIsAscii	= (ToAscii(vKey, lnScanCode, &keyboardState[0], (LPWORD)&lnAsciiChar, 0) >= 1);
 
@@ -1519,61 +1541,83 @@
 		// Are we already inputting?
 		// If not, and it's a printable character, we can start
 		//////
-			if (llIsAscii)
+			if (!llCtrl && !llShift && !llAlt)
 			{
-				// It's a regular input key
-				iEditChainManager_keystroke(commandHistory, win->obj, (u8)lnAsciiChar);
-
-			} else if (!llCtrl && !llShift && !llAlt) {
 				// Regular key without special flags
 				switch (vKey)
 				{
 					case VK_UP:
-						iEditChainManager_navigate(commandHistory, win->obj, -1, 0);
-						break;
+						if (iEditChainManager_navigate(commandHistory, win->obj, -1, 0))
+							iWindow_render(win);
+						return(1);
 
 					case VK_DOWN:
-						iEditChainManager_navigate(commandHistory, win->obj, 1, 0);
-						break;
+						if (iEditChainManager_navigate(commandHistory, win->obj, 1, 0))
+							iWindow_render(win);
+						return(1);
 
 					case VK_PRIOR:		// Page up
-						iEditChainManager_navigatePages(commandHistory, win->obj, -1);
-						break;
+						if (iEditChainManager_navigatePages(commandHistory, win->obj, -1))
+							iWindow_render(win);
+						return(1);
 
 					case VK_NEXT:		// Page down
-						iEditChainManager_navigatePages(commandHistory, win->obj, 1);
-						break;
+						if (iEditChainManager_navigatePages(commandHistory, win->obj, 1))
+							iWindow_render(win);
+						return(1);
 
 					case VK_ESCAPE:		// They hit escape, and are cancelling the input
-						iEditChainManager_clearLine(commandHistory, win->obj);
-						break;
+						if (iEditChainManager_clearLine(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 
 					case VK_TAB:
-						iEditChainManager_tabIn(commandHistory, win->obj);
-						break;
+						if (iEditChainManager_tabIn(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 
 					case VK_RETURN:
-						break;
+						if (iEditChainManager_returnKey(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 
 					case VK_LEFT:
-						iEditChainManager_navigate(commandHistory, win->obj, 0, -1);
-						break;
+						if (iEditChainManager_navigate(commandHistory, win->obj, 0, -1))
+							iWindow_render(win);
+						return(1);
 
 					case VK_RIGHT:
-						iEditChainManager_navigate(commandHistory, win->obj, 0, 1);
-						break;
+						if (iEditChainManager_navigate(commandHistory, win->obj, 0, 1))
+							iWindow_render(win);
+						return(1);
 
 					case VK_HOME:
-						iEditChainManager_navigate(commandHistory, win->obj, 0, -(commandHistory->column));
-						break;
+						if (iEditChainManager_navigate(commandHistory, win->obj, 0, -(commandHistory->column)))
+							iWindow_render(win);
+						return(1);
 
 					case VK_END:
-						iEditChainManager_navigate(commandHistory, win->obj, 0, commandHistory->ecCursorLine->sourceCode->length);
-						break;
+						if (commandHistory->column != commandHistory->ecCursorLine->sourceCodePopulated)
+						{
+							iEditChainManager_navigate(commandHistory, win->obj, 0, commandHistory->ecCursorLine->sourceCodePopulated - commandHistory->column);
+							iWindow_render(win);
+						}
+						return(1);
 
 					case VK_INSERT:
-						iEditChainManager_toggleInsert(commandHistory, win->obj);
-						break;
+						if (iEditChainManager_toggleInsert(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
+
+					case VK_BACK:
+						if (iEditChainManager_deleteLeft(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
+
+					case VK_DELETE:
+					if (iEditChainManager_deleteRight(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 				}
 
 			} else if (llCtrl && !llShift && !llAlt) {
@@ -1581,20 +1625,24 @@
 				switch (vKey)
 				{
 					case 'A':		// Select all
-						iEditChainManager_selectAll(commandHistory, win->obj);
-						break;
+						if (iEditChainManager_selectAll(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 
 					case 'X':		// Cut
-						iEditChainManager_cut(commandHistory, win->obj);
-						break;
+						if (iEditChainManager_cut(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 
 					case 'C':		// Copy
-						iEditChainManager_copy(commandHistory, win->obj);
-						break;
+						if (iEditChainManager_copy(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 
 					case 'V':		// Paste
-						iEditChainManager_paste(commandHistory, win->obj);
-						break;
+						if (iEditChainManager_paste(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 
 					case 'W':		// Save and close
 						break;
@@ -1603,20 +1651,34 @@
 						break;
 
 					case VK_LEFT:	// Word left
-						iEditChainManager_navigateWordLeft(commandHistory, win->obj);
-						break;
+						if (iEditChainManager_navigateWordLeft(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 
 					case VK_RIGHT:	// Word right
-						iEditChainManager_navigateWordRight(commandHistory, win->obj);
-						break;
+						if (iEditChainManager_navigateWordRight(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 
 					case VK_HOME:	// Home (go to top of content)
-						iEditChainManager_navigateTop(commandHistory, win->obj);
-						break;
+						if (iEditChainManager_navigateTop(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 
 					case VK_END:	// Page down (go to end of content)
-						iEditChainManager_navigateEnd(commandHistory, win->obj);
-						break;
+						if (iEditChainManager_navigateEnd(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
+
+					case VK_BACK:
+						if (iEditChainManager_deleteWordLeft(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
+
+					case VK_DELETE:
+						if (iEditChainManager_deleteWordRight(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 				}
 
 			} else if (!llCtrl && llShift && !llAlt) {
@@ -1624,32 +1686,39 @@
 				switch (vKey)
 				{
 					case VK_UP:		// Select line up
-						iEditChainManager_selectLineUp(commandHistory, win->obj);
-						break;
+						if (iEditChainManager_selectLineUp(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 
 					case VK_DOWN:	// Select line down
-						iEditChainManager_selectLineDown(commandHistory, win->obj);
-						break;
+						if (iEditChainManager_selectLineDown(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 
 					case VK_LEFT:	// Select left
-						iEditChainManager_selectLeft(commandHistory, win->obj);
-						break;
+						if (iEditChainManager_selectLeft(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 
 					case VK_RIGHT:	// Select right
-						iEditChainManager_selectRight(commandHistory, win->obj);
-						break;
+						if (iEditChainManager_selectRight(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 
 					case VK_END:	// Select to end
-						iEditChainManager_selectToEndOfLine(commandHistory, win->obj);
-						break;
+						if (iEditChainManager_selectToEndOfLine(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 
 					case VK_HOME:	// Select to start
-						iEditChainManager_selectToBeginOfLine(commandHistory, win->obj);
-						break;
+						if (iEditChainManager_selectToBeginOfLine(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 
 					case VK_TAB:	// Shift tab
-						iEditChainManager_tabOut(commandHistory, win->obj);
-						break;
+						if (iEditChainManager_tabOut(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 				}
 
 			} else if (!llCtrl && !llShift && llAlt) {
@@ -1657,12 +1726,14 @@
 				switch (vKey)
 				{
 					case 'K':		// Select column mode
-						iEditChainManager_selectColumnToggle(commandHistory, win->obj);
-						break;
+						if (iEditChainManager_selectColumnToggle(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 
 					case 'L':		// Select full line mode
-						iEditChainManager_selectLineToggle(commandHistory, win->obj);
-						break;
+						if (iEditChainManager_selectLineToggle(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 				}
 
 			} else if (llCtrl && llShift && !llAlt) {
@@ -1670,12 +1741,14 @@
 				switch (vKey)
 				{
 					case VK_LEFT:	// Select word left
-						iEditChainManager_selectWordLeft(commandHistory, win->obj);
-						break;
+						if (iEditChainManager_selectWordLeft(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 
 					case VK_RIGHT:	// Select word right
-						iEditChainManager_selectWordRight(commandHistory, win->obj);
-						break;
+						if (iEditChainManager_selectWordRight(commandHistory, win->obj))
+							iWindow_render(win);
+						return(1);
 				}
 
 			} else if (llCtrl && !llShift && llAlt) {
@@ -1687,6 +1760,16 @@
 			} else if (llCtrl && llShift && llAlt) {
 				// CTRL+ALT+SHIFT+
 			}
+
+			// If we get here, it wasn't processed above.  Try to stick it in the buffer
+			if (llIsAscii)
+			{
+				// It's a regular input key
+				if (iEditChainManager_keystroke(commandHistory, win->obj, (u8)lnAsciiChar))
+					iWindow_render(win);
+				return(1);
+			}
+
 
 		// All done
 		return(0);
@@ -1857,7 +1940,7 @@ _asm int 3;
 		if (datumNew)
 		{
 			// Initialize
-			memset(datumNew, 0, sizeof(datumNew));
+			memset(datumNew, 0, sizeof(SDatum));
 
 			if (data && dataLength)
 			{
@@ -1936,7 +2019,8 @@ _asm int 3;
 					memset(ptr + datum->length, 0, newDataLength - datum->length);
 
 				// Delete the old data
-				free(datum->data);
+				if (datum->data)
+					free(datum->data);
 
 				// And populate with the new data
 				datum->data		= ptr;

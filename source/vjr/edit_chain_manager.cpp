@@ -67,192 +67,192 @@
 //////
 	bool iEditChainManager_duplicate(SEditChainManager** root, SEditChainManager* ecmSource, bool tlIncludeUndoHistory)
 	{
-		SEditChainManager*	ecmNew;
-		SEditChain*			ecSource;
-		SEditChain*			ecNew;
-		SEditChain*			ecLast;
-		SEditChain**		ecPrev;
-		SExtraInfo*			eiSource;
-		SExtraInfo*			eiNew;
-		SExtraInfo**		eiPrev;
-		SBuilder*			xlatRoot;
-		STranslate*			xlat;
+// 		SEditChainManager*	ecmNew;
+// 		SEditChain*			ecSource;
+// 		SEditChain*			ecNew;
+// 		SEditChain*			ecLast;
+// 		SEditChain**		ecPrev;
+// 		SExtraInfo*			eiSource;
+// 		SExtraInfo*			eiNew;
+// 		SExtraInfo**		eiPrev;
+// 		SBuilder*			xlatRoot;
+// 		STranslate*			xlat;
 
 
 		// Create the master record
 // TODO:  COMPLETELY UNTESTED.  BREAKPOINT AND EXAMINE.
 _asm int 3;
-		ecmNew = (SEditChainManager*)malloc(sizeof(SEditChainManager));
-		if (ecmNew)
-		{
-			//////////
-			// Initialize
-			//////
-				memcpy(ecmNew, ecmSource, sizeof(SEditChainManager));
-
-
-			//////////
-			// Remove the connection to any undo history
-			// Note:  The undo history will be copied and translated separately if need be
-			//////
-				ecmNew->undoHistory = NULL;
-				iBuilder_createAndInitialize(&xlatRoot, -1);
-				// Note:  We create the translation regardless so we can update the ecmNew-> members which relate to cursor line, highlighted, etc.
-
-
-			//////////
-			// Update caller
-			//////
-				*root = ecmNew;
-				// Right now:
-				//		ecmNew		-- our new SEC
-				//		ecmSource	-- SEC to duplicate
-
-
-			//////////
-			// Indicate where we'll be updating
-			//////
-				ecPrev	= &ecmNew->ecFirst;
-				ecLast	= NULL;
-
-
-			//////////
-			// Duplicate the chain
-			//////
-				ecSource = ecmSource->ecFirst;
-				while (ecSource)
-				{
-					//////////
-					// Create a new entry for this one
-					//////
-						ecNew = (SEditChain*)malloc(sizeof(SEditChain));
-						if (ecNew)
-						{
-							// Create a translation for original pointers to new pointers
-							if (tlIncludeUndoHistory)
-							{
-								// Create the translation for this ecSource <--> ecNew
-								xlat = (STranslate*)iBuilder_allocateBytes(xlatRoot, sizeof(STranslate));
-								if (xlat)
-								{
-									// Create the translation
-									xlat->p1	= ecSource;									// The old pointer in the undoHistory will point to
-									xlat->p2	= ecNew;									// the new pointer
-								}
-							}
-
-						} else {
-							// Should not happen.
-							return(false);
-						}
-
-
-					//////////
-					// Copy source information to new
-					//////
-						memcpy(ecNew, ecSource, sizeof(SEditChain));
-						*ecPrev		= ecNew;												// Update the prior record to point here
-						ecNew->prev	= ecLast;												// Point backward to the previous entry
-						ecNew->next	= NULL;													// Currently points forward to nothing
-
-
-					//////////
-					// Duplicate its data
-					//////
-						ecNew->sourceCode = NULL;
-						iDatum_duplicate(ecNew->sourceCode, ecSource->sourceCode);
-
-
-					//////////
-					// General purpose extra data
-					//////
-						if (ecSource->extra_info)
-						{
-							// Copy any extra_info that's relevant
-							eiPrev		= &ecNew->extra_info;
-							eiSource	= ecSource->extra_info;
-							while (eiSource)
-							{
-								//////////
-								// Duplicate this entry
-								//////
-									// Are we duplicating by a function call?  Or manually?
-									if (*(u32*)&eiSource->extra_info_duplicate != 0)
-									{
-										// Function call
-										eiNew = eiSource->extra_info_duplicate(ecmSource, ecSource, ecSource->extra_info);
-										// Right now, eiNew has either been updated or not depending on the decision making process in extra_info_duplicate().
-
-									} else {
-										// Manual duplication
-										eiNew = (SExtraInfo*)malloc(sizeof(SExtraInfo));
-										if (eiNew)
-										{
-											// Copy everything
-											memcpy(eiNew, eiSource, sizeof(SExtraInfo));
-
-											// Clear, and then duplicate the info datum
-											memset(&eiNew->info, 0, sizeof(eiNew->info));
-											iDatum_duplicate(&eiNew->info, &eiSource->info);
-
-										} else {
-											// Should not happen
-											return(false);
-										}
-									}
-
-
-								//////////
-								// Update the back-link if need be
-								//////
-									if (eiNew)
-									{
-										*eiPrev	= eiNew;
-										eiPrev	= &eiNew->next;
-									}
-
-
-								//////////
-								// Move to next extra_info
-								//////
-									eiSource = eiSource->next;
-							}
-						}
-
-
-					//////////
-					// Move to next entry to duplicate
-					//////
-						ecLast		= ecNew;
-						ecPrev		= &ecNew->next;
-						ecSource	= ecSource->next;
-				}
-
-
-			//////////
-			// Translate each of the ecmSource pointers for ecmNew
-			// Note:  The rest of them use uid lookups
-			//////
-				ecmNew->ecFirst				= (SEditChain*)iTranslate_p1_to_p2(xlatRoot, ecmSource->ecFirst);
-				ecmNew->ecLast				= (SEditChain*)iTranslate_p1_to_p2(xlatRoot, ecmSource->ecLast);
-				ecmNew->ecTop				= (SEditChain*)iTranslate_p1_to_p2(xlatRoot, ecmSource->ecTop);
-				ecmNew->ecCursorLine		= (SEditChain*)iTranslate_p1_to_p2(xlatRoot, ecmSource->ecCursorLine);
-				ecmNew->ecCursorLineLast	= (SEditChain*)iTranslate_p1_to_p2(xlatRoot, ecmSource->ecCursorLineLast);
-				ecmNew->ecSelectedLineStart	= (SEditChain*)iTranslate_p1_to_p2(xlatRoot, ecmSource->ecSelectedLineStart);
-				ecmNew->ecSelectedLineEnd	= (SEditChain*)iTranslate_p1_to_p2(xlatRoot, ecmSource->ecSelectedLineEnd);
-
-
-			//////////
-			// Free the pointers
-			//////
-				iBuilder_freeAndRelease(&xlatRoot);
-
-
-			//////////
-			// Indicate success
-			//////
-				return(true);
-		}
+// 		ecmNew = (SEditChainManager*)malloc(sizeof(SEditChainManager));
+// 		if (ecmNew)
+// 		{
+// 			//////////
+// 			// Initialize
+// 			//////
+// 				memcpy(ecmNew, ecmSource, sizeof(SEditChainManager));
+// 
+// 
+// 			//////////
+// 			// Remove the connection to any undo history
+// 			// Note:  The undo history will be copied and translated separately if need be
+// 			//////
+// 				ecmNew->undoHistory = NULL;
+// 				iBuilder_createAndInitialize(&xlatRoot, -1);
+// 				// Note:  We create the translation regardless so we can update the ecmNew-> members which relate to cursor line, highlighted, etc.
+// 
+// 
+// 			//////////
+// 			// Update caller
+// 			//////
+// 				*root = ecmNew;
+// 				// Right now:
+// 				//		ecmNew		-- our new SEC
+// 				//		ecmSource	-- SEC to duplicate
+// 
+// 
+// 			//////////
+// 			// Indicate where we'll be updating
+// 			//////
+// 				ecPrev	= &ecmNew->ecFirst;
+// 				ecLast	= NULL;
+// 
+// 
+// 			//////////
+// 			// Duplicate the chain
+// 			//////
+// 				ecSource = ecmSource->ecFirst;
+// 				while (ecSource)
+// 				{
+// 					//////////
+// 					// Create a new entry for this one
+// 					//////
+// 						ecNew = (SEditChain*)malloc(sizeof(SEditChain));
+// 						if (ecNew)
+// 						{
+// 							// Create a translation for original pointers to new pointers
+// 							if (tlIncludeUndoHistory)
+// 							{
+// 								// Create the translation for this ecSource <--> ecNew
+// 								xlat = (STranslate*)iBuilder_allocateBytes(xlatRoot, sizeof(STranslate));
+// 								if (xlat)
+// 								{
+// 									// Create the translation
+// 									xlat->p1	= ecSource;									// The old pointer in the undoHistory will point to
+// 									xlat->p2	= ecNew;									// the new pointer
+// 								}
+// 							}
+// 
+// 						} else {
+// 							// Should not happen.
+// 							return(false);
+// 						}
+// 
+// 
+// 					//////////
+// 					// Copy source information to new
+// 					//////
+// 						memcpy(ecNew, ecSource, sizeof(SEditChain));
+// 						*ecPrev		= ecNew;												// Update the prior record to point here
+// 						ecNew->prev	= ecLast;												// Point backward to the previous entry
+// 						ecNew->next	= NULL;													// Currently points forward to nothing
+// 
+// 
+// 					//////////
+// 					// Duplicate its data
+// 					//////
+// 						ecNew->sourceCode = NULL;
+// 						iDatum_duplicate(ecNew->sourceCode, ecSource->sourceCode);
+// 
+// 
+// 					//////////
+// 					// General purpose extra data
+// 					//////
+// 						if (ecSource->extra_info)
+// 						{
+// 							// Copy any extra_info that's relevant
+// 							eiPrev		= &ecNew->extra_info;
+// 							eiSource	= ecSource->extra_info;
+// 							while (eiSource)
+// 							{
+// 								//////////
+// 								// Duplicate this entry
+// 								//////
+// 									// Are we duplicating by a function call?  Or manually?
+// 									if (*(u32*)&eiSource->extra_info_duplicate != 0)
+// 									{
+// 										// Function call
+// 										eiNew = eiSource->extra_info_duplicate(ecmSource, ecSource, ecSource->extra_info);
+// 										// Right now, eiNew has either been updated or not depending on the decision making process in extra_info_duplicate().
+// 
+// 									} else {
+// 										// Manual duplication
+// 										eiNew = (SExtraInfo*)malloc(sizeof(SExtraInfo));
+// 										if (eiNew)
+// 										{
+// 											// Copy everything
+// 											memcpy(eiNew, eiSource, sizeof(SExtraInfo));
+// 
+// 											// Clear, and then duplicate the info datum
+// 											memset(&eiNew->info, 0, sizeof(eiNew->info));
+// 											iDatum_duplicate(&eiNew->info, &eiSource->info);
+// 
+// 										} else {
+// 											// Should not happen
+// 											return(false);
+// 										}
+// 									}
+// 
+// 
+// 								//////////
+// 								// Update the back-link if need be
+// 								//////
+// 									if (eiNew)
+// 									{
+// 										*eiPrev	= eiNew;
+// 										eiPrev	= &eiNew->next;
+// 									}
+// 
+// 
+// 								//////////
+// 								// Move to next extra_info
+// 								//////
+// 									eiSource = eiSource->next;
+// 							}
+// 						}
+// 
+// 
+// 					//////////
+// 					// Move to next entry to duplicate
+// 					//////
+// 						ecLast		= ecNew;
+// 						ecPrev		= &ecNew->next;
+// 						ecSource	= ecSource->next;
+// 				}
+// 
+// 
+// 			//////////
+// 			// Translate each of the ecmSource pointers for ecmNew
+// 			// Note:  The rest of them use uid lookups
+// 			//////
+// 				ecmNew->ecFirst				= (SEditChain*)iTranslate_p1_to_p2(xlatRoot, ecmSource->ecFirst);
+// 				ecmNew->ecLast				= (SEditChain*)iTranslate_p1_to_p2(xlatRoot, ecmSource->ecLast);
+// 				ecmNew->ecTopLine				= (SEditChain*)iTranslate_p1_to_p2(xlatRoot, ecmSource->ecTopLine);
+// 				ecmNew->ecCursorLine		= (SEditChain*)iTranslate_p1_to_p2(xlatRoot, ecmSource->ecCursorLine);
+// 				ecmNew->ecCursorLineLast	= (SEditChain*)iTranslate_p1_to_p2(xlatRoot, ecmSource->ecCursorLineLast);
+// 				ecmNew->ecSelectedLineStart	= (SEditChain*)iTranslate_p1_to_p2(xlatRoot, ecmSource->ecSelectedLineStart);
+// 				ecmNew->ecSelectedLineEnd	= (SEditChain*)iTranslate_p1_to_p2(xlatRoot, ecmSource->ecSelectedLineEnd);
+// 
+// 
+// 			//////////
+// 			// Free the pointers
+// 			//////
+// 				iBuilder_freeAndRelease(&xlatRoot);
+// 
+// 
+// 			//////////
+// 			// Indicate success
+// 			//////
+// 				return(true);
+// 		}
 
 		// If we get here, failure
 		return(false);
@@ -349,28 +349,91 @@ _asm int 3;
 			{
 				// Append after the last line
 				lnLineNum	= ecm->ecLast->line + 1;
-				ec = (SEditChain*)iLl_appendNewNodeAtEnd((SLL**)ecm->ecLast, sizeof(SEditChain));
+				ec = (SEditChain*)iLl_appendNewNodeAtEnd((SLL**)&ecm->ecLast, sizeof(SEditChain));
 
 			} else {
 				// This is the first line, add it and set the last line to the same
-				ec = (SEditChain*)iLl_appendNewNodeAtEnd((SLL**)ecm->ecFirst, sizeof(SEditChain));
+				ec = (SEditChain*)iLl_appendNewNodeAtEnd((SLL**)&ecm->ecFirst, sizeof(SEditChain));
 				if (ec)
-					ecm->ecLast = ec;
+				{
+					// Update defaults
+					ecm->ecLast					= ec;
+					ecm->ecCursorLine			= ec;
+					ecm->ecCursorLineLast		= ec;
+					ecm->ecTopLine				= ec;
+					ecm->ecSelectedLineStart	= NULL;
+					ecm->ecSelectedLineEnd		= NULL;
+				}
 			}
 
-			// Was it added?
+			// Populate if added
 			if (ec)
-			{
-				// Initialize
-				memset(ec, 0, sizeof(SEditChain));
-
-				// Populate
 				ec->sourceCode = iDatum_allocate(tcText, tnTextLength);
-			}
 		}
 
 		// Indicate our status
 		return(ec);
+	}
+
+
+
+
+//////////
+//
+// Called to get the colors
+//
+//////
+	void iEditChainManager_getColors(SEditChainManager* ecm, SObject* obj, SBgra& backColor, SBgra& foreColor)
+	{
+		union {
+			SSubObjForm*		form;
+			SSubObjSubform*		subform;
+			SSubObjEditbox*		editbox;
+		};
+
+
+		// Make sure our environment is sane
+		if (ecm && obj && obj->sub_obj)
+		{
+			// What is the object?
+			switch (obj->objType)
+			{
+				case _OBJ_TYPE_FORM:
+					// Use the rcClient
+					form		= (SSubObjForm*)obj->sub_obj;
+					backColor	= form->backColor;
+					foreColor	= form->foreColor;
+					break;
+
+				case _OBJ_TYPE_SUBFORM:
+					// Use the rcClient
+					subform		= (SSubObjSubform*)obj->sub_obj;
+					backColor	= subform->backColor;
+					foreColor	= subform->foreColor;
+					break;
+
+				case _OBJ_TYPE_EDITBOX:
+					// Use the object default
+					editbox		= (SSubObjEditbox*)obj->sub_obj;
+					backColor	= editbox->backColor;
+					foreColor	= editbox->foreColor;
+					break;
+
+				default:
+					// Use the system fonts
+					form		= (SSubObjForm*)gobj_defaultForm->sub_obj;
+					backColor	= form->backColor;
+					foreColor	= form->foreColor;
+					break;
+			}
+			// When we get here, we have our rect in relative coordinates.
+
+		} else {
+			// It's insane, so we set our rc to something that will prevent processing
+			form		= (SSubObjForm*)gobj_defaultForm->sub_obj;
+			backColor	= form->backColor;
+			foreColor	= form->foreColor;
+		}
 	}
 
 
@@ -383,15 +446,18 @@ _asm int 3;
 // otherwise we use the object's rc.
 //
 //////
-	void iEditChainManager_getRect(SEditChainManager* ecm, SObject* obj, RECT* rc)
+	SFont* iEditChainManager_getRectAndFont(SEditChainManager* ecm, SObject* obj, RECT* rc)
 	{
+		SFont* font;
 		union {
-			SSubObjForm*	form;
-			SSubObjSubform*	subform;
+			SSubObjForm*		form;
+			SSubObjSubform*		subform;
+			SSubObjEditbox*		editbox;
 		};
 
 
 		// Make sure our environment is sane
+		font = gsFont;
 		if (ecm && obj && obj->sub_obj)
 		{
 			// What is the object?
@@ -400,26 +466,195 @@ _asm int 3;
 				case _OBJ_TYPE_FORM:
 					// Use the rcClient
 					form = (SSubObjForm*)obj->sub_obj;
+					font = form->font;
 					CopyRect(rc, &form->rcClient);
 					break;
 
 				case _OBJ_TYPE_SUBFORM:
 					// Use the rcClient
-					subform = (SSubObjSubform*)obj->sub_obj;
+					subform	= (SSubObjSubform*)obj->sub_obj;
+					font	= subform->font;
 					CopyRect(rc, &subform->rcClient);
 					break;
 
+				case _OBJ_TYPE_EDITBOX:
+					// Use the object default
+					editbox	= (SSubObjEditbox*)obj->sub_obj;
+					font	= editbox->font;
+					CopyRect(rc, &obj->rc);
+					break;
+
 				default:
-					// Use the rc
+					// Use the rc and use the system font
 					CopyRect(rc, &obj->rc);
 					break;
 			}
-			// When we get here, we have our rect
+			// When we get here, we have our rect in relative coordinates.
 
 		} else {
 			// It's insane, so we set our rc to something that will prevent processing
 			SetRect(rc, 0, 0, 0, 0);
 		}
+
+		// Return the font
+		return(font);
+	}
+
+
+
+
+//////////
+//
+// Called to render the ECM in the indicated rectangle on the object's bitmap
+//
+//////
+	void iEditChainManager_render(SEditChainManager* ecm, SObject* obj)
+	{
+		s32				lnTop, lnLeft, lnRight;
+		SFont*			font;
+		SEditChain*		line;
+		SBitmap*		bmp;
+		HGDIOBJ			hfontOld;
+		SBgra			foreColor;
+		SBgra			backColor;
+		RECT			rc, lrc, lrc2, lrc3;
+
+
+		// Make sure our environment is sane
+		if (ecm && ecm->ecTopLine && obj)
+		{
+			// Get the top line and continue down as far as we can
+			line	= ecm->ecTopLine;
+			bmp		= obj->bmp;
+			lnTop	= 0;
+
+			// Grab font, coordinates, and colors
+			font = iEditChainManager_getRectAndFont(ecm, obj, &rc);
+			iEditChainManager_getColors(ecm, obj, backColor, foreColor);
+
+			// Prepare
+			CopyRect(&lrc, &rc);
+			hfontOld = SelectObject(bmp->hdc, font->hfont);
+
+			// Iterate for every visible line
+			while (line && lrc.top < rc.bottom)
+			{
+				//////////
+				// Determine the position
+				//////
+					SetRect(&lrc, rc.left, rc.top + lnTop, rc.right, rc.top + lnTop + font->tm.tmHeight - 1);
+					if (lrc.bottom > rc.bottom)
+						lrc.bottom = rc.bottom;
+
+
+				//////////
+				// Determine the color
+				//////
+					if (ecm->ecCursorLine == line)
+					{
+						// Display in the cursor color line
+						SetBkColor(bmp->hdc, RGB(currentStatementBackColor.red, currentStatementBackColor.grn, currentStatementBackColor.blu));
+						SetBkMode(bmp->hdc, OPAQUE);
+						SetTextColor(bmp->hdc, RGB(currentStatementForeColor.red, currentStatementForeColor.grn, currentStatementForeColor.blu));
+						backColor.color = currentStatementBackColor.color;
+
+					} else {
+						// Display in normal background color
+						SetBkColor(bmp->hdc, RGB(backColor.red, backColor.grn, backColor.blu));
+						SetBkMode(bmp->hdc, OPAQUE);
+						SetTextColor(bmp->hdc, RGB(foreColor.red, foreColor.grn, foreColor.blu));
+						hfontOld = SelectObject(bmp->hdc, font->hfont);
+					}
+
+
+				//////////
+				// Determine the render rectangles (populated area on left, area to clear on right)
+				//////
+					CopyRect(&lrc2, &lrc);
+					// Will we fit?
+					if (ecm->leftColumn < line->sourceCodePopulated)
+					{
+						// Draw the portion that will fit
+						DrawText(bmp->hdc, line->sourceCode->data + ecm->leftColumn, line->sourceCodePopulated - ecm->leftColumn, &lrc2, DT_END_ELLIPSIS | DT_VCENTER | DT_LEFT | DT_SINGLELINE | DT_CALCRECT);
+
+					} else {
+						// We're scrolled past this line, so the entire area must be filled in
+						SetRect(&lrc2, rc.left, lrc.top, rc.left, lrc.bottom);
+					}
+					// Set the clear border
+					SetRect(&lrc3, lrc2.right, lrc.top, rc.right, lrc.bottom + 1);
+
+
+				//////////
+				// Draw the text
+				//////
+					if (ecm->leftColumn < line->sourceCodePopulated)
+						DrawText(bmp->hdc, line->sourceCode->data + ecm->leftColumn, line->sourceCodePopulated - ecm->leftColumn, &lrc2, DT_END_ELLIPSIS | DT_VCENTER | DT_LEFT | DT_SINGLELINE);
+					
+
+				//////////
+				// Clear the rest of the line
+				//////
+					iBmp_fillRect(bmp, &lrc3, backColor, backColor, backColor, backColor, false);
+
+
+				//////////
+				// Draw the cursor if on the cursor line
+				//////
+					if (ecm->ecCursorLine == line)
+					{
+						lnLeft	= rc.left + ((ecm->column - ecm->leftColumn) * font->tm.tmAveCharWidth);
+						lnRight	= lnLeft + font->tm.tmAveCharWidth;
+						iBmp_invert(bmp, lnLeft, ((ecm->isOverwrite) ? lrc.bottom - 2 : lrc.top), lnRight, lrc.bottom);
+					}
+
+
+				//////////
+				// Move down to the next row
+				//////
+					lnTop += font->tm.tmHeight;
+					line = (SEditChain*)line->ll.next;
+			}
+
+			// Reset the font
+			SelectObject(bmp->hdc, hfontOld);
+		}
+	}
+
+
+
+
+//////////
+//
+// Called to verify the cursor is visible by adjuting ecm->leftColumn
+//
+//////
+	bool iEditChainManager_verifyCursorIsVisible(SEditChainManager* ecm, RECT* rc, SFont* font)
+	{
+		bool llChanged;
+
+
+		// Make sure our environment is sane
+		llChanged = false;
+		if (ecm)
+		{
+			// Make sure we're not before it to the left
+			if (ecm->column < ecm->leftColumn)
+			{
+				ecm->leftColumn	= ecm->column;
+				llChanged		= true;
+			}
+
+			// Make sure we're not beyond it to the right
+			if ((ecm->column - ecm->leftColumn) * font->tm.tmAveCharWidth > rc->right)
+			{
+				ecm->leftColumn	+= (rc->right - ((ecm->column - ecm->leftColumn) * font->tm.tmAveCharWidth)) / font->tm.tmAveCharWidth;
+				llChanged		= true;
+			}
+		}
+
+		// Indicate our status
+		return(llChanged);
 	}
 
 
@@ -432,19 +667,21 @@ _asm int 3;
 //////
 	bool iEditChainManager_keystroke(SEditChainManager* ecm, SObject* obj, u8 asciiChar)
 	{
-		bool	llRender;
+		bool	llDirty;
+		SFont*	font;
 		RECT	lrc;
 
 
 		//////////
 		// Indicate initially that no changes were made that require a re-render
 		//////
-			llRender = false;
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			llDirty = false;
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// Make sure our environment is sane
-		if (ecm)
+// TODO:  Added the extra test on ecm->column because of a bug when scrolling... will fix. :-)
+		if (ecm && ecm->column < _ECM_MINIMUM_LINE_ALLOCATION_LENGTH - 10)
 		{
 			//////////
 			// Are we on a line?
@@ -463,7 +700,7 @@ _asm int 3;
 			//////////
 			// Are we in insert mode?
 			//////
-				if (ecm->isInsert)
+				if (!ecm->isOverwrite)
 				{
 					// We are inserting
 					if (ecm->ecSelectedLineStart != NULL)
@@ -473,7 +710,7 @@ _asm int 3;
 
 					} else {
 						// We are just overwriting whatever's there
-						return(iEditChain_characterInsert(ecm, asciiChar));
+						llDirty = iEditChain_characterInsert(ecm, asciiChar);
 					}
 
 				} else {
@@ -485,13 +722,17 @@ _asm int 3;
 
 					} else {
 						// We are just overwriting whatever's there
-						return(iEditChain_characterOverwrite(ecm, asciiChar));
+						llDirty = iEditChain_characterOverwrite(ecm, asciiChar);
 					}
 				}
 		}
 
-		// If we get here, indicate failure
-		return(false);
+		// If we updated something, mark the object dirty
+		if (llDirty)
+			obj->isDirty = true;
+
+		// Indicate our status
+		return(llDirty);
 	}
 
 
@@ -504,13 +745,119 @@ _asm int 3;
 //////
 	bool iEditChainManager_navigate(SEditChainManager* ecm, SObject* obj, s32 deltaY, s32 deltaX)
 	{
-		RECT	lrc;
+		s32				lnI, lnTop, lnBottom;
+		bool			llResetTopLine;
+		SFont*			font;
+		SEditChain*		line;
+		SEditChain*		lineRunner;
+		RECT			lrc;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
+
+
+		//////////
+		// Make sure we're valid
+		//////
+			if (ecm && !ecm->isReadOnly && ecm->ecCursorLine)
+			{
+				//////////
+				// Grab the line and form
+				//////
+					line = ecm->ecCursorLine;
+
+
+				//////////
+				// Navigate by lines
+				//////
+					if (deltaY != 0)
+					{
+						if (deltaY > 0)
+						{
+							// Going forward
+							for (lnI = 0; line->ll.next && lnI != deltaY; lnI++)
+								line = (SEditChain*)line->ll.next;
+
+							// We need to scan forward from ecTopLine to see if we'd be off screen.
+							// If so, we drag ecTopLine forward until we reach the visible portion
+							lnTop		= lrc.top;
+							lnBottom	= lrc.bottom - font->tm.tmHeight;
+							lineRunner	= ecm->ecTopLine;
+							while (ecm->ecTopLine->ll.next && lineRunner != line)
+							{
+								//////////
+								// Are we still on screen?
+								//////
+									if (lnTop > lnBottom)
+									{
+										// We're off screen, so we're dragging the top forward
+										ecm->ecTopLine = (SEditChain*)ecm->ecTopLine->ll.next;
+
+									} else {
+										// Still on the same page
+										lnTop += font->tm.tmHeight;
+									}
+
+
+								//////////
+								// Move to next line
+								//////
+									lineRunner = (SEditChain*)lineRunner->ll.next;
+							}
+
+						} else {
+							// Going backward
+							llResetTopLine = false;
+							for (lnI = 0; line->ll.prev && lnI != deltaY; lnI--)
+							{
+								// Are we dragging the top line with us yet?
+								if (ecm->ecTopLine == line)
+									llResetTopLine = true;
+
+								// Move back one line
+								line = (SEditChain*)line->ll.prev;
+							}
+
+							if (llResetTopLine)
+								ecm->ecTopLine = line;
+						}
+
+					//////////
+					// Update the pointers
+					//////
+						ecm->ecCursorLine = line;
+				}
+
+
+				//////////
+				// Move columns
+				//////
+					if (deltaX != 0)
+					{
+						if (deltaX < 0)
+						{
+							// Moving left
+							ecm->column = max(ecm->column + deltaX, 0);
+
+						} else {
+							// Moving right
+							ecm->column += deltaX;
+						}
+					}
+
+
+				//////////
+				// Verify we're visible
+				//////
+					iEditChainManager_verifyCursorIsVisible(ecm, &lrc, font);
+
+
+				// Indicate success
+				return(true);
+			}
 
 
 		// If we get here, indicate failure
@@ -528,12 +875,13 @@ _asm int 3;
 	bool iEditChainManager_navigatePages(SEditChainManager* ecm, SObject* obj, s32 deltaY)
 	{
 		RECT	lrc;
+		SFont*	font;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// Is there room to navigate back?
@@ -558,12 +906,13 @@ _asm int 3;
 	bool iEditChainManager_clearLine(SEditChainManager* ecm, SObject* obj)
 	{
 		RECT	lrc;
+		SFont*	font;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// If we get here, indicate failure
@@ -581,12 +930,13 @@ _asm int 3;
 	bool iEditChainManager_clearToEndOfLine(SEditChainManager* ecm, SObject* obj)
 	{
 		RECT	lrc;
+		SFont*	font;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// If we get here, indicate failure
@@ -604,12 +954,13 @@ _asm int 3;
 	bool iEditChainManager_clearToBeginningOfLine(SEditChainManager* ecm, SObject* obj)
 	{
 		RECT	lrc;
+		SFont*	font;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// If we get here, indicate failure
@@ -626,14 +977,14 @@ _asm int 3;
 //////
 	bool iEditChainManager_toggleInsert(SEditChainManager* ecm, SObject* obj)
 	{
-		RECT	lrc;
+		if (ecm)
+		{
+			// Toggle the flag
+			ecm->isOverwrite = !ecm->isOverwrite;
 
-
-		//////////
-		// Grab the rectangle we're working in
-		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
-
+			// Toggling insert changes the shape of the cursor, so we always redraw
+			return(true);
+		}
 
 		// If we get here, indicate failure
 		return(false);
@@ -650,12 +1001,13 @@ _asm int 3;
 	bool iEditChainManager_tabIn(SEditChainManager* ecm, SObject* obj)
 	{
 		RECT	lrc;
+		SFont*	font;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// If we get here, indicate failure
@@ -673,12 +1025,37 @@ _asm int 3;
 	bool iEditChainManager_tabOut(SEditChainManager* ecm, SObject* obj)
 	{
 		RECT	lrc;
+		SFont*	font;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
+
+
+		// If we get here, indicate failure
+		return(false);
+	}
+
+
+
+
+//////////
+//
+// 
+//
+//////
+	bool iEditChainManager_returnKey(SEditChainManager* ecm, SObject* obj)
+	{
+		RECT	lrc;
+		SFont*	font;
+
+
+		//////////
+		// Grab the rectangle we're working in
+		//////
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// If we get here, indicate failure
@@ -696,12 +1073,13 @@ _asm int 3;
 	bool iEditChainManager_selectAll(SEditChainManager* ecm, SObject* obj)
 	{
 		RECT	lrc;
+		SFont*	font;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// If we get here, indicate failure
@@ -719,12 +1097,13 @@ _asm int 3;
 	bool iEditChainManager_cut(SEditChainManager* ecm, SObject* obj)
 	{
 		RECT	lrc;
+		SFont*	font;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// If we get here, indicate failure
@@ -742,12 +1121,13 @@ _asm int 3;
 	bool iEditChainManager_copy(SEditChainManager* ecm, SObject* obj)
 	{
 		RECT	lrc;
+		SFont*	font;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// If we get here, indicate failure
@@ -765,12 +1145,13 @@ _asm int 3;
 	bool iEditChainManager_paste(SEditChainManager* ecm, SObject* obj)
 	{
 		RECT	lrc;
+		SFont*	font;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// If we get here, indicate failure
@@ -788,12 +1169,13 @@ _asm int 3;
 	bool iEditChainManager_navigateWordLeft(SEditChainManager* ecm, SObject* obj)
 	{
 		RECT	lrc;
+		SFont*	font;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// If we get here, indicate failure
@@ -811,12 +1193,13 @@ _asm int 3;
 	bool iEditChainManager_navigateWordRight(SEditChainManager* ecm, SObject* obj)
 	{
 		RECT	lrc;
+		SFont*	font;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// If we get here, indicate failure
@@ -833,13 +1216,19 @@ _asm int 3;
 //////
 	bool iEditChainManager_navigateTop(SEditChainManager* ecm, SObject* obj)
 	{
-		RECT	lrc;
+		// Make sure the environment is sane
+		if (ecm && ecm->ecFirst)
+		{
+			// Save previous position
+			ecm->ecCursorLineLast	= ecm->ecCursorLine;
 
+			// Move to top of the document
+			ecm->ecTopLine			= ecm->ecFirst;
+			ecm->ecCursorLine		= ecm->ecFirst;
 
-		//////////
-		// Grab the rectangle we're working in
-		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			// Indicate we did something
+			return(true);
+		}
 
 
 		// If we get here, indicate failure
@@ -856,13 +1245,68 @@ _asm int 3;
 //////
 	bool iEditChainManager_navigateEnd(SEditChainManager* ecm, SObject* obj)
 	{
-		RECT	lrc;
+		s32				lnTop, lnBottom;
+		SFont*			font;
+		SEditChain*		line;
+		RECT			lrc;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
+
+
+		//////////
+		// Make sure we're valid
+		//////
+			if (ecm && !ecm->isReadOnly && ecm->ecCursorLine && ecm->column > 0)
+			{
+				//////////
+				// Grab the line and form
+				//////
+					line = ecm->ecCursorLine;
+
+
+				//////////
+				// Navigate to the end
+				//////
+					// We need to scan forward from ecTopLine to see if we'd be off screen.
+					// If so, we drag ecTopLine forward until we reach the visible portion
+					lnTop		= lrc.top;
+					lnBottom	= lrc.bottom - font->tm.tmHeight;
+					while (ecm->ecTopLine->ll.next && line->ll.next)
+					{
+						//////////
+						// Are we still on screen?
+						//////
+							if (lnTop > lnBottom)
+							{
+								// We're off screen, so we're dragging the top forward
+								ecm->ecTopLine = (SEditChain*)ecm->ecTopLine->ll.next;
+
+							} else {
+								// Still on the same page
+								lnTop += font->tm.tmHeight;
+							}
+
+
+						//////////
+						// Move to next line
+						//////
+							line = (SEditChain*)line->ll.next;
+					}
+
+
+				//////////
+				// Verify we're visible
+				//////
+					iEditChainManager_verifyCursorIsVisible(ecm, &lrc, font);
+
+
+				// Indicate success
+				return(true);
+			}
 
 
 		// If we get here, indicate failure
@@ -882,12 +1326,13 @@ _asm int 3;
 	bool iEditChainManager_selectLineUp(SEditChainManager* ecm, SObject* obj)
 	{
 		RECT	lrc;
+		SFont*	font;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// If we get here, indicate failure
@@ -907,12 +1352,13 @@ _asm int 3;
 	bool iEditChainManager_selectLineDown(SEditChainManager* ecm, SObject* obj)
 	{
 		RECT	lrc;
+		SFont*	font;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// If we get here, indicate failure
@@ -932,12 +1378,13 @@ _asm int 3;
 	bool iEditChainManager_selectLeft(SEditChainManager* ecm, SObject* obj)
 	{
 		RECT	lrc;
+		SFont*	font;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// If we get here, indicate failure
@@ -955,12 +1402,13 @@ _asm int 3;
 	bool iEditChainManager_selectRight(SEditChainManager* ecm, SObject* obj)
 	{
 		RECT	lrc;
+		SFont*	font;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// If we get here, indicate failure
@@ -978,12 +1426,13 @@ _asm int 3;
 	bool iEditChainManager_selectToEndOfLine(SEditChainManager* ecm, SObject* obj)
 	{
 		RECT	lrc;
+		SFont*	font;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// If we get here, indicate failure
@@ -1001,12 +1450,13 @@ _asm int 3;
 	bool iEditChainManager_selectToBeginOfLine(SEditChainManager* ecm, SObject* obj)
 	{
 		RECT	lrc;
+		SFont*	font;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// If we get here, indicate failure
@@ -1024,12 +1474,13 @@ _asm int 3;
 	bool iEditChainManager_selectColumnToggle(SEditChainManager* ecm, SObject* obj)
 	{
 		RECT	lrc;
+		SFont*	font;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// If we get here, indicate failure
@@ -1047,12 +1498,13 @@ _asm int 3;
 	bool iEditChainManager_selectLineToggle(SEditChainManager* ecm, SObject* obj)
 	{
 		RECT	lrc;
+		SFont*	font;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// If we get here, indicate failure
@@ -1073,12 +1525,13 @@ _asm int 3;
 	bool iEditChainManager_selectWordLeft(SEditChainManager* ecm, SObject* obj)
 	{
 		RECT	lrc;
+		SFont*	font;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// If we get here, indicate failure
@@ -1099,12 +1552,165 @@ _asm int 3;
 	bool iEditChainManager_selectWordRight(SEditChainManager* ecm, SObject* obj)
 	{
 		RECT	lrc;
+		SFont*	font;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
-			iEditChainManager_getRect(ecm, obj, &lrc);
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
+
+
+		// If we get here, indicate failure
+		return(false);
+	}
+
+
+
+
+//////////
+//
+// Called to delete one character left (backspace)
+//
+//////
+	bool iEditChainManager_deleteLeft(SEditChainManager* ecm, SObject* obj)
+	{
+		SEditChain*	line;
+		SFont*		font;
+		RECT		lrc;
+
+
+		//////////
+		// Grab the rectangle we're working in
+		//////
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
+
+
+		//////////
+		// Make sure we're valid
+		//////
+			if (ecm && !ecm->isReadOnly && ecm->ecCursorLine && ecm->column > 0)
+			{
+				// Grab the line
+				line = ecm->ecCursorLine;
+
+				// Do we need to do anything?
+				if (ecm->column > 0 && ecm->column <= line->sourceCodePopulated)
+				{
+					// Reduce our column position
+					--ecm->column;
+
+					// Based on insert, handle it different
+					if (!ecm->isOverwrite)
+					{
+						// We're in insert mode, so we drag everything with us
+						iEditChain_characterDelete(ecm);
+
+					} else {
+						// We're in overwrite mode, so we just insert a space
+						iEditChain_characterOverwrite(ecm, ' ');
+
+						// The overwrite moves us back right again, so we reduce our column position
+						--ecm->column;
+					}
+				}
+
+
+				//////////
+				// Verify we're visible
+				//////
+					iEditChainManager_verifyCursorIsVisible(ecm, &lrc, font);
+
+
+				// Indicate success
+				return(true);
+			}
+
+
+		// If we get here, indicate failure
+		return(false);
+	}
+
+
+
+
+//////////
+//
+// Called to select one character right (delete key)
+//
+//////
+	bool iEditChainManager_deleteRight(SEditChainManager* ecm, SObject* obj)
+	{
+		SFont*	font;
+		RECT	lrc;
+
+
+		//////////
+		// Grab the rectangle we're working in
+		//////
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
+
+
+		//////////
+		// Make sure we're valid
+		//////
+			if (ecm && !ecm->isReadOnly && ecm->ecCursorLine)
+			{
+				// Delete everything to the right
+				iEditChain_characterDelete(ecm);
+
+
+				// Indicate success
+				return(true);
+			}
+
+
+		// If we get here, indicate failure
+		return(false);
+	}
+
+
+
+
+//////////
+//
+// Called to delete one word left (ctrl+backspace)
+//
+//////
+	bool iEditChainManager_deleteWordLeft(SEditChainManager* ecm, SObject* obj)
+	{
+		RECT	lrc;
+		SFont*	font;
+
+
+		//////////
+		// Grab the rectangle we're working in
+		//////
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
+
+
+		// If we get here, indicate failure
+		return(false);
+	}
+
+
+
+
+//////////
+//
+// Called to delete one word right (ctrl+delete)
+//
+//////
+	bool iEditChainManager_deleteWordRight(SEditChainManager* ecm, SObject* obj)
+	{
+		RECT	lrc;
+		SFont*	font;
+
+
+		//////////
+		// Grab the rectangle we're working in
+		//////
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// If we get here, indicate failure

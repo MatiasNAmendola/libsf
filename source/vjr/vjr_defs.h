@@ -101,17 +101,17 @@
 	void					iiSubobj_copyRadio						(SSubObjRadio*		subobjDst,	SSubObjRadio*		subobjSrc);
 
 	// For initialization
-	void					iiSubobj_resetToDefaultEmpty			(SSubObjEmpty*		subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
-	void					iiSubobj_resetToDefaultForm				(SSubObjForm*		subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
-	void					iiSubobj_resetToDefaultSubform			(SSubObjSubform*	subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
-	void					iiSubobj_resetToDefaultLabel			(SSubObjLabel*		subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
-	void					iiSubobj_resetToDefaultTextbox			(SSubObjTextbox*	subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
-	void					iiSubobj_resetToDefaultButton			(SSubObjButton*		subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
-	void					iiSubobj_resetToDefaultEditbox			(SSubObjEditbox*	subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
-	void					iiSubobj_resetToDefaultImage			(SSubObjImage*		subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
-	void					iiSubobj_resetToDefaultCheckbox			(SSubObjCheckbox*	subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
-	void					iiSubobj_resetToDefaultOption			(SSubObjOption*		subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
-	void					iiSubobj_resetToDefaultRadio			(SSubObjRadio*		subobj, bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
+	void					iiSubobj_resetToDefaultEmpty			(SSubObjEmpty*		empty,		bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
+	void					iiSubobj_resetToDefaultForm				(SSubObjForm*		form,		bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
+	void					iiSubobj_resetToDefaultSubform			(SSubObjSubform*	subform,	bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
+	void					iiSubobj_resetToDefaultLabel			(SSubObjLabel*		label,		bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
+	void					iiSubobj_resetToDefaultTextbox			(SSubObjTextbox*	textbox,	bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
+	void					iiSubobj_resetToDefaultButton			(SSubObjButton*		button,		bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
+	void					iiSubobj_resetToDefaultEditbox			(SSubObjEditbox*	editbox,	bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
+	void					iiSubobj_resetToDefaultImage			(SSubObjImage*		image,		bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
+	void					iiSubobj_resetToDefaultCheckbox			(SSubObjCheckbox*	checkbox,	bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
+	void					iiSubobj_resetToDefaultOption			(SSubObjOption*		option,		bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
+	void					iiSubobj_resetToDefaultRadio			(SSubObjRadio*		radio,		bool tlResetObject, bool tlResetProperties, bool tlResetMethods);
 
 
 	// For specific sub-objects
@@ -121,32 +121,33 @@
 	u32						iSubobj_form_setBackColor				(SObject* obj, u32 tnRgba);
 	u32						iSubobj_form_setForeColor				(SObject* obj, u32 tnRgba);
 	u32						iSubobj_form_setCaptionColor			(SObject* obj, u32 tnRgba);
+	void					iSubobj_form_setFont					(SObject* obj, s8* tcFontName, u32 tnPointSize, bool tlBold, bool tlItalics, bool tlUnderline, bool tlStrikethrough, bool tlCondensed, bool tlExtended);
 
 	// Delete individual sub-objects
-	void					iSubobj_deleteEmpty						(SSubObjEmpty*		subobj, bool tlDeleteSelf);
-	void					iSubobj_deleteForm						(SSubObjForm*		subobj, bool tlDeleteSelf);
-	void					iSubobj_deleteSubform					(SSubObjSubform*	subobj, bool tlDeleteSelf);
-	void					iSubobj_deleteLabel						(SSubObjLabel*		subobj, bool tlDeleteSelf);
-	void					iSubobj_deleteTextbox					(SSubObjTextbox*	subobj, bool tlDeleteSelf);
-	void					iSubobj_deleteButton					(SSubObjButton*		subobj, bool tlDeleteSelf);
-	void					iSubobj_deleteEditbox					(SSubObjEditbox*	subobj, bool tlDeleteSelf);
-	void					iSubobj_deleteImage						(SSubObjImage*		subobj, bool tlDeleteSelf);
-	void					iSubobj_deleteCheckbox					(SSubObjCheckbox*	subobj, bool tlDeleteSelf);
-	void					iSubobj_deleteOption					(SSubObjOption*		subobj, bool tlDeleteSelf);
-	void					iSubobj_deleteRadio						(SSubObjRadio*		subobj, bool tlDeleteSelf);
+	void					iSubobj_deleteEmpty						(SSubObjEmpty*		empty,		bool tlDeleteSelf);
+	void					iSubobj_deleteForm						(SSubObjForm*		form,		bool tlDeleteSelf);
+	void					iSubobj_deleteSubform					(SSubObjSubform*	subform,	bool tlDeleteSelf);
+	void					iSubobj_deleteLabel						(SSubObjLabel*		label,		bool tlDeleteSelf);
+	void					iSubobj_deleteTextbox					(SSubObjTextbox*	textbox,	bool tlDeleteSelf);
+	void					iSubobj_deleteButton					(SSubObjButton*		button,		bool tlDeleteSelf);
+	void					iSubobj_deleteEditbox					(SSubObjEditbox*	editbox,	bool tlDeleteSelf);
+	void					iSubobj_deleteImage						(SSubObjImage*		image,		bool tlDeleteSelf);
+	void					iSubobj_deleteCheckbox					(SSubObjCheckbox*	checkbox,	bool tlDeleteSelf);
+	void					iSubobj_deleteOption					(SSubObjOption*		option,		bool tlDeleteSelf);
+	void					iSubobj_deleteRadio						(SSubObjRadio*		radio,		bool tlDeleteSelf);
 
 	// Default render of sub-objects
-	u32						iSubobj_renderEmpty						(SObject* obj,		SSubObjEmpty*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
-	u32						iSubobj_renderForm						(SObject* obj,		SSubObjForm*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
-	u32						iSubobj_renderSubform					(SObject* obj,		SSubObjSubform*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
-	u32						iSubobj_renderLabel						(SObject* obj,		SSubObjLabel*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
-	u32						iSubobj_renderTextbox					(SObject* obj,		SSubObjTextbox*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
-	u32						iSubobj_renderButton					(SObject* obj,		SSubObjButton*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
-	u32						iSubobj_renderEditbox					(SObject* obj,		SSubObjEditbox*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
-	u32						iSubobj_renderImage						(SObject* obj,		SSubObjImage*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
-	u32						iSubobj_renderCheckbox					(SObject* obj,		SSubObjCheckbox*	subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
-	u32						iSubobj_renderOption					(SObject* obj,		SSubObjOption*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
-	u32						iSubobj_renderRadio						(SObject* obj,		SSubObjRadio*		subobj,		bool tlRenderChildren,	bool tlRenderSiblings);
+	u32						iSubobj_renderEmpty						(SObject* obj,		SSubObjEmpty*		empty,		bool tlRenderChildren,	bool tlRenderSiblings);
+	u32						iSubobj_renderForm						(SObject* obj,		SSubObjForm*		form,		bool tlRenderChildren,	bool tlRenderSiblings);
+	u32						iSubobj_renderSubform					(SObject* obj,		SSubObjSubform*		subform,	bool tlRenderChildren,	bool tlRenderSiblings);
+	u32						iSubobj_renderLabel						(SObject* obj,		SSubObjLabel*		label,		bool tlRenderChildren,	bool tlRenderSiblings);
+	u32						iSubobj_renderTextbox					(SObject* obj,		SSubObjTextbox*		textbox,	bool tlRenderChildren,	bool tlRenderSiblings);
+	u32						iSubobj_renderButton					(SObject* obj,		SSubObjButton*		button,		bool tlRenderChildren,	bool tlRenderSiblings);
+	u32						iSubobj_renderEditbox					(SObject* obj,		SSubObjEditbox*		editbox,	bool tlRenderChildren,	bool tlRenderSiblings);
+	u32						iSubobj_renderImage						(SObject* obj,		SSubObjImage*		image,		bool tlRenderChildren,	bool tlRenderSiblings);
+	u32						iSubobj_renderCheckbox					(SObject* obj,		SSubObjCheckbox*	checkbox,	bool tlRenderChildren,	bool tlRenderSiblings);
+	u32						iSubobj_renderOption					(SObject* obj,		SSubObjOption*		option,		bool tlRenderChildren,	bool tlRenderSiblings);
+	u32						iSubobj_renderRadio						(SObject* obj,		SSubObjRadio*		radio,		bool tlRenderChildren,	bool tlRenderSiblings);
 
 
 //////////
@@ -210,6 +211,7 @@
 	SWindow* 				iWindow_createForObject					(SObject* obj, SWindow* win);
 	SWindow*				iWindow_findByHwnd						(HWND hwnd);
 	SWindow*				iWindow_allocate						(void);
+	void					iWindow_render							(SWindow* win);
 	bool					iInit_shutdownPolitely					(void);
 
 	void					iComputeScreenWindowClientAreaDimensions	(SSize* size);
@@ -280,6 +282,7 @@
 	void					iBmp_createBySize						(SBitmap* bmp, u32 width, u32 height, u32 tnBitCount);
 	void					iBmp_populateBitmapStructure			(SBitmap* bmp, u32 tnWidth, u32 tnHeight, u32 tnBitCount);
 	void					iBmp_delete								(SBitmap** bmp, bool tlFreeBits, bool tlDeleteSelf);
+	void					iBmp_invert								(SBitmap* bmp, s32 tnUlX, s32 tnUlY, s32 tnLrX, s32 tnLrY);
 	void					iBmp_bitBltObject						(SBitmap* bmpDst, SObject* obj, SBitmap* bmpSrc);
 	void					iBmp_bitBltObjectMask					(SBitmap* bmpDst, SObject* obj, SBitmap* bmpSrc);
 	u32						iBmp_bitBlt								(SBitmap* bmpDst, RECT* trc, SBitmap* bmpSrc);
