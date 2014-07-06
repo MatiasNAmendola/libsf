@@ -235,7 +235,10 @@
 	void					iiMouse_translatePosition				(SWindow* win, POINTS* pt);
 	s32						iiMouse_processMouseEvents_client		(SWindow* win, UINT m, WPARAM w, LPARAM l);
 	s32						iiMouse_processMouseEvents_nonclient	(SWindow* win, UINT m, WPARAM w, LPARAM l);
-	void					iiMouse_getFlags						(bool* tlCtrl, bool* tlAlt, bool* tlShift, bool* tlLeft, bool* tlMiddle, bool* tlRight);
+	void					iiMouse_getFlags						(bool* tlCtrl, bool* tlAlt, bool* tlShift, bool* tlLeft, bool* tlMiddle, bool* tlRight, bool* tlCaps);
+
+	// For processing keystrokes
+	s32						iKeyboard_processMessage				(SWindow* win, UINT m, WPARAM w, LPARAM l);
 
 	// EditChainManager
 	SEditChainManager*		iEditChainManager_allocate				(void);

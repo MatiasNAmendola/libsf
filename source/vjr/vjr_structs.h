@@ -105,6 +105,8 @@ struct SEditChainManager
 		SEditChain*		ecTop;											// Top item in the current view
 		SEditChain*		ecCursorLine;									// Line where the cursor is
 		SEditChain*		ecCursorLineLast;								// The last location before movement was made
+		bool			isInsert;										// Are we in insert mode?
+		u32				column;											// Column we're currently on
 
 
 	//////////

@@ -476,7 +476,7 @@
 				case WM_SYSKEYUP:
 //				case WM_SYSCHAR:
 //				case WM_SYSDEADCHAR:
-					return 0;
+					return(iKeyboard_processMessage(win, m, w, l));
 					break;
 
 				case WM_CAPTURECHANGED:
@@ -1300,7 +1300,7 @@
 	s32 iiMouse_processMouseEvents_nonclient(SWindow* win, UINT m, WPARAM w, LPARAM l)
 	{
 		s32				lnResult, lnDeltaX, lnDeltaY, lnWidth, lnHeight, lnLeft, lnTop;
-		bool			llCtrl, llAlt, llShift, llLeft, llRight, llMiddle;
+		bool			llCtrl, llAlt, llShift, llLeft, llRight, llMiddle, llCaps;
 		SObject*		obj;
 		SSubObjForm*	form;
 		RECT			lrc;
@@ -1317,7 +1317,7 @@
 		//////////
 		// Determine mouse button and keyboard key attributes
 		//////
-			iiMouse_getFlags(&llCtrl, &llAlt, &llShift, &llLeft, &llMiddle, &llRight);
+			iiMouse_getFlags(&llCtrl, &llAlt, &llShift, &llLeft, &llMiddle, &llRight, &llCaps);
 
 
 		//////////
@@ -1460,7 +1460,7 @@
 // determined by the VK_MENU key's current state.
 //
 //////
-	void iiMouse_getFlags(bool* tlCtrl, bool* tlAlt, bool* tlShift, bool* tlLeft, bool* tlMiddle, bool* tlRight)
+	void iiMouse_getFlags(bool* tlCtrl, bool* tlAlt, bool* tlShift, bool* tlLeft, bool* tlMiddle, bool* tlRight, bool* tlCaps)
 	{
 // 		//////////
 // 		// If we had WPARAM, we could use these:
@@ -1476,12 +1476,219 @@
 		//////////
 		// Grab each one asynchronously
 		//////
-			*tlCtrl		= ((GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0);
-			*tlAlt		= (GetKeyState(VK_MENU)	< 0);
-			*tlShift	= ((GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0);
-			*tlLeft		= ((GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0);
-			*tlMiddle	= ((GetAsyncKeyState(VK_MBUTTON) & 0x8000) != 0);
-			*tlRight	= ((GetAsyncKeyState(VK_RBUTTON) & 0x8000) != 0);
+			*tlCtrl		= ((GetAsyncKeyState(VK_CONTROL)	& 0x8000)	!= 0);
+			*tlAlt		= (GetKeyState(VK_MENU)							< 0);
+			*tlShift	= ((GetAsyncKeyState(VK_SHIFT)		& 0x8000)	!= 0);
+			*tlLeft		= ((GetAsyncKeyState(VK_LBUTTON)	& 0x8000)	!= 0);
+			*tlMiddle	= ((GetAsyncKeyState(VK_MBUTTON)	& 0x8000)	!= 0);
+			*tlRight	= ((GetAsyncKeyState(VK_RBUTTON)	& 0x8000)	!= 0);
+			*tlCaps		= (GetAsyncKeyState(VK_CAPITAL)		& 0x8000)	!= 0;
+	}
+
+
+
+
+//////////
+//
+// Process the indicated keystroke
+//
+//////
+	s32 iKeyboard_processMessage(SWindow* win, UINT m, WPARAM vKey, LPARAM tnScanCode)
+	{
+		s32		lnI;
+		bool	llFirst;
+		s16		lnAsciiChar;
+		u32		lnScanCode;
+		bool	llCtrl, llAlt, llShift, llLeft, llMiddle, llRight, llCaps, llIsAscii;
+		u8		keyboardState[256];
+
+
+		//////////
+		// Grab our key states
+		//////
+			iiMouse_getFlags(&llCtrl, &llAlt, &llShift, &llLeft, &llMiddle, &llRight, &llCaps);
+
+
+		//////////
+		// See if it's a printable character
+		//////
+			lnScanCode	= (tnScanCode & 0xff000) >> 12;
+			GetKeyboardState(&keyboardState[0]);
+			llIsAscii	= (ToAscii(vKey, lnScanCode, &keyboardState[0], (LPWORD)&lnAsciiChar, 0) >= 1);
+
+
+		//////////
+		// Are we already inputting?
+		// If not, and it's a printable character, we can start
+		//////
+			if (llIsAscii)
+			{
+				// It's a regular input key
+				iEditChainManager_keystroke(&commandHistory, (u8)lnAsciiChar);
+
+			} else if (!llCtrl && !llShift && !llAlt) {
+				// Regular key without special flags
+				switch (vKey)
+				{
+					case VK_UP:
+						iEditChainManager_navigate(win->obj, &commandHistory, -1, 0);
+						break;
+
+					case VK_DOWN:
+						iEditChainManager_navigate(win->obj, &commandHistory, 1, 0);
+						break;
+
+					case VK_PRIOR:		// Page up
+						iEditChainManager_navigatePages(win->obj, &commandHistory, -1);
+						break;
+
+					case VK_NEXT:		// Page down
+						iEditChainManager_navigatePages(win->obj, &commandHistory, 1);
+						break;
+
+					case VK_ESCAPE:		// They hit escape, and are cancelling the input
+						iEditChainManager_clearLine(win->obj, &commandHistory);
+						break;
+
+					case VK_TAB:
+						for (lnI = commandHistory->column, llFirst = ((lnI % 4) == 0); llFirst || lnI % 4 != 0; lnI++, llFirst = false)
+							iEditChainManager_keystroke(win->obj, &commandHistory, ' ');
+						break;
+
+					case VK_RETURN:
+						break;
+
+					case VK_LEFT:
+						iEditChainManager_navigate(win->obj, &commandHistory, 0, -1);
+						break;
+
+					case VK_RIGHT:
+						iEditChainManager_navigate(win->obj, &commandHistory, 0, 1);
+						break;
+
+					case VK_HOME:
+						iEditChainManager_navigate(win->obj, &commandHistory, 0, -(commandHistory->column));
+						break;
+
+					case VK_END:
+						iEditChainManager_navigate(win->obj, &commandHistory, 0, commandHistory->ecCursorLine->sourceCode->length);
+						break;
+
+					case VK_INSERT:
+						iEditChainManager_toggleInsert(win->obj, &commandHistory);
+						break;
+				}
+
+			} else if (llCtrl && !llShift && !llAlt) {
+				// CTRL+
+				switch (vKey)
+				{
+					case 'A':		// Select all
+						iEditChainManager_selectAll(win->obj, &commandHistory);
+						break;
+
+					case 'X':		// Cut
+						iEditChainManager_cut(win->obj, &commandHistory);
+						break;
+
+					case 'C':		// Copy
+						iEditChainManager_copy(win->obj, &commandHistory);
+						break;
+
+					case 'V':		// Paste
+						iEditChainManager_paste(win->obj, &commandHistory);
+						break;
+
+					case 'W':		// Save and close
+						break;
+
+					case 'Q':		// Quit
+						break;
+
+					case VK_LEFT:	// Word left
+						iEditChainManager_navigateWordLeft(win->obj, &commandHistory);
+						break;
+
+					case VK_RIGHT:	// Word right
+						iEditChainManager_navigateWordRight(win->obj, &commandHistory);
+						break;
+
+					case VK_HOME:	// Home (go to top of content)
+						iEditChainManager_navigateTop(win->obj, &commandHistory);
+						break;
+
+					case VK_END:	// Page down (go to end of content)
+						iEditChainManager_navigateEnd(win->obj, &commandHistory);
+						break;
+				}
+
+			} else if (!llCtrl && llShift && !llAlt) {
+				// SHIFT+
+				switch (vKey)
+				{
+					case VK_UP:		// Select line up
+						iEditChainManager_selectLineUp(win->obj, &commandHistory);
+						break;
+
+					case VK_DOWN:	// Select line down
+						iEditChainManager_selectLineDown(win->obj, &commandHistory);
+						break;
+
+					case VK_LEFT:	// Select left
+						iEditChainManager_selectLeft(win->obj, &commandHistory);
+						break;
+
+					case VK_RIGHT:	// Select right
+						iEditChainManager_selectRight(win->obj, &commandHistory);
+						break;
+
+					case VK_END:	// Select to end
+						iEditChainManager_selectToEndOfLine(win->obj, &commandHistory);
+						break;
+
+					case VK_HOME:	// Select to start
+						iEditChainManager_selectToBeginOfLine(win->obj, &commandHistory);
+						break;
+				}
+
+			} else if (!llCtrl && !llShift && llAlt) {
+				// ALT+
+				switch (vKey)
+				{
+					case 'K':		// Select column mode
+						iEditChainManager_selectColumnToggle(win->obj, &commandHistory);
+						break;
+
+					case 'L':		// Select full line mode
+						iEditChainManager_selectLineToggle(win->obj, &commandHistory);
+						break;
+				}
+
+			} else if (llCtrl && llShift && !llAlt) {
+				// CTRL+SHIFT+
+				switch (vKey)
+				{
+					case VK_LEFT:	// Select word left
+						iEditChainManager_selectWordLeft(win->obj, &commandHistory);
+						break;
+
+					case VK_RIGHT:	// Select word right
+						iEditChainManager_selectWordRight(win->obj, &commandHistory);
+						break;
+				}
+
+			} else if (llCtrl && !llShift && llAlt) {
+				// CTRL+ALT+
+
+			} else if (!llCtrl && llShift && llAlt) {
+				// SHIFT+ALT
+
+			} else if (llCtrl && llShift && llAlt) {
+				// CTRL+ALT+SHIFT+
+			}
+
+		// All done
+		return(0);
 	}
 
 
