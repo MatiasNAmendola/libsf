@@ -130,17 +130,17 @@ typedef		const f64			cf64;
 //////////
 // Object types
 //////
-	const u32			_OBJECT_TYPE_EMPTY					= 0;						// Empty, used as a placeholder object that is not drawn
-	const u32			_OBJECT_TYPE_FORM					= 1;						// Form class, the main outer window the OS sees
-	const u32			_OBJECT_TYPE_SUBFORM				= 2;						// A new class which has its own drawing content and can be moved about using UI features
-	const u32			_OBJECT_TYPE_LABEL					= 3;						// A label
-	const u32			_OBJECT_TYPE_TEXTBOX				= 4;						// An input textbox
-	const u32			_OBJECT_TYPE_BUTTON					= 5;						// A push button
-	const u32			_OBJECT_TYPE_EDITBOX				= 6;						// An input multi-line editbox
-	const u32			_OBJECT_TYPE_IMAGE					= 7;						// A graphical image
-	const u32			_OBJECT_TYPE_CHECKBOX				= 8;						// A checkbox
-	const u32			_OBJECT_TYPE_OPTION					= 9;						// A combination selection
-	const u32			_OBJECT_TYPE_RADIO					= 10;						// A radio dial, which can also present as a slider or spinner
+	const u32			_OBJ_TYPE_EMPTY						= 0;						// Empty, used as a placeholder object that is not drawn
+	const u32			_OBJ_TYPE_FORM						= 1;						// Form class, the main outer window the OS sees
+	const u32			_OBJ_TYPE_SUBFORM					= 2;						// A new class which has its own drawing content and can be moved about using UI features
+	const u32			_OBJ_TYPE_LABEL						= 3;						// A label
+	const u32			_OBJ_TYPE_TEXTBOX					= 4;						// An input textbox
+	const u32			_OBJ_TYPE_BUTTON					= 5;						// A push button
+	const u32			_OBJ_TYPE_EDITBOX					= 6;						// An input multi-line editbox
+	const u32			_OBJ_TYPE_IMAGE						= 7;						// A graphical image
+	const u32			_OBJ_TYPE_CHECKBOX					= 8;						// A checkbox
+	const u32			_OBJ_TYPE_OPTION					= 9;						// A combination selection
+	const u32			_OBJ_TYPE_RADIO						= 10;						// A radio dial, which can also present as a slider or spinner
 
 
 //////////

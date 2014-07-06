@@ -61,7 +61,7 @@
 				memset(obj, 0, sizeof(SObject));
 
 				// Initially populate
-				obj->baseType = tnBaseType;
+				obj->objType = tnBaseType;
 
 				// If they gave us a child, we'll use that
 				if (obj_data)
@@ -73,67 +73,67 @@
 					// We need to create it
 					switch (tnBaseType)
 					{
-						case _OBJECT_TYPE_EMPTY:		// Empty, used as a placeholder object that is not drawn
+						case _OBJ_TYPE_EMPTY:		// Empty, used as a placeholder object that is not drawn
 							iDatum_duplicate(&obj->name,		cgcName_empty, -1);
 							iDatum_duplicate(&obj->className,	cgcName_empty, -1);
 							obj->sub_obj = (void*)iSubobj_createEmpty(NULL, obj);
 							break;
 
-						case _OBJECT_TYPE_FORM:			// Form class, the main outer window the OS sees
+						case _OBJ_TYPE_FORM:			// Form class, the main outer window the OS sees
 							iDatum_duplicate(&obj->name,		cgcName_form, -1);
 							iDatum_duplicate(&obj->className,	cgcName_form, -1);
 							obj->sub_obj = (void*)iSubobj_createForm(NULL, obj);
 							break;
 
-						case _OBJECT_TYPE_SUBFORM:		// A new class which has its own drawing content and can be moved about using UI features
+						case _OBJ_TYPE_SUBFORM:		// A new class which has its own drawing content and can be moved about using UI features
 							iDatum_duplicate(&obj->name,		cgcName_subform, -1);
 							iDatum_duplicate(&obj->className,	cgcName_subform, -1);
 							obj->sub_obj = (void*)iSubobj_createSubform(NULL, obj);
 							break;
 
-						case _OBJECT_TYPE_LABEL:		// A label
+						case _OBJ_TYPE_LABEL:		// A label
 							iDatum_duplicate(&obj->name,		cgcName_label, -1);
 							iDatum_duplicate(&obj->className,	cgcName_label, -1);
 							obj->sub_obj = (void*)iSubobj_createLabel(NULL, obj);
 							break;
 
-						case _OBJECT_TYPE_TEXTBOX:		// An input textbox
+						case _OBJ_TYPE_TEXTBOX:		// An input textbox
 							iDatum_duplicate(&obj->name,		cgcName_textbox, -1);
 							iDatum_duplicate(&obj->className,	cgcName_textbox, -1);
 							obj->sub_obj = (void*)iSubobj_createTextbox(NULL, obj);
 							break;
 
-						case _OBJECT_TYPE_BUTTON:		// A push button
+						case _OBJ_TYPE_BUTTON:		// A push button
 							iDatum_duplicate(&obj->name,		cgcName_button, -1);
 							iDatum_duplicate(&obj->className,	cgcName_button, -1);
 							obj->sub_obj = (void*)iSubobj_createButton(NULL, obj);
 							break;
 
-						case _OBJECT_TYPE_EDITBOX:		// An input multi-line editbox
+						case _OBJ_TYPE_EDITBOX:		// An input multi-line editbox
 							iDatum_duplicate(&obj->name,		cgcName_editbox, -1);
 							iDatum_duplicate(&obj->className,	cgcName_editbox, -1);
 							obj->sub_obj = (void*)iSubobj_createEditbox(NULL, obj);
 							break;
 
-						case _OBJECT_TYPE_IMAGE:		// A graphical image
+						case _OBJ_TYPE_IMAGE:		// A graphical image
 							iDatum_duplicate(&obj->name,		cgcName_image, -1);
 							iDatum_duplicate(&obj->className,	cgcName_image, -1);
 							obj->sub_obj = (void*)iSubobj_createImage(NULL, obj);
 							break;
 
-						case _OBJECT_TYPE_CHECKBOX:		// A checkbox
+						case _OBJ_TYPE_CHECKBOX:		// A checkbox
 							iDatum_duplicate(&obj->name,		cgcName_checkbox, -1);
 							iDatum_duplicate(&obj->className,	cgcName_checkbox, -1);
 							obj->sub_obj = (void*)iSubobj_createCheckbox(NULL, obj);
 							break;
 
-						case _OBJECT_TYPE_OPTION:		// A combination selection
+						case _OBJ_TYPE_OPTION:		// A combination selection
 							iDatum_duplicate(&obj->name,		cgcName_option, -1);
 							iDatum_duplicate(&obj->className,	cgcName_option, -1);
 							obj->sub_obj = (void*)iSubobj_createOption(NULL, obj);
 							break;
 
-						case _OBJECT_TYPE_RADIO:		// A radio dial, which can also present as a slider or spinner
+						case _OBJ_TYPE_RADIO:		// A radio dial, which can also present as a slider or spinner
 							iDatum_duplicate(&obj->name,		cgcName_radio, -1);
 							iDatum_duplicate(&obj->className,	cgcName_radio, -1);
 							obj->sub_obj = (void*)iSubobj_createRadio(NULL, obj);
@@ -253,49 +253,49 @@
 		lnPixelsRendered = 0;
 		if (obj)
 		{
-			switch (obj->baseType)
+			switch (obj->objType)
 			{
-				case _OBJECT_TYPE_EMPTY:		// Empty, used as a placeholder object that is not drawn
+				case _OBJ_TYPE_EMPTY:		// Empty, used as a placeholder object that is not drawn
 					lnPixelsRendered += iSubobj_renderEmpty(obj, (SSubObjEmpty*)obj->sub_obj, tlRenderChildren, tlRenderSiblings);
 					break;
 
-				case _OBJECT_TYPE_FORM:			// Form class, the main outer window the OS sees
+				case _OBJ_TYPE_FORM:			// Form class, the main outer window the OS sees
 					lnPixelsRendered += iSubobj_renderForm(obj, (SSubObjForm*)obj->sub_obj, tlRenderChildren, tlRenderSiblings);
 					break;
 
-				case _OBJECT_TYPE_SUBFORM:		// A new class which has its own drawing content and can be moved about using UI features
+				case _OBJ_TYPE_SUBFORM:		// A new class which has its own drawing content and can be moved about using UI features
 					lnPixelsRendered += iSubobj_renderSubform(obj, (SSubObjSubform*)obj->sub_obj, tlRenderChildren, tlRenderSiblings);
 					break;
 
-				case _OBJECT_TYPE_LABEL:		// A label
+				case _OBJ_TYPE_LABEL:		// A label
 					lnPixelsRendered += iSubobj_renderLabel(obj, (SSubObjLabel*)obj->sub_obj, tlRenderChildren, tlRenderSiblings);
 					break;
 
-				case _OBJECT_TYPE_TEXTBOX:		// An input textbox
+				case _OBJ_TYPE_TEXTBOX:		// An input textbox
 					lnPixelsRendered += iSubobj_renderTextbox(obj, (SSubObjTextbox*)obj->sub_obj, tlRenderChildren, tlRenderSiblings);
 					break;
 
-				case _OBJECT_TYPE_BUTTON:		// A push button
+				case _OBJ_TYPE_BUTTON:		// A push button
 					lnPixelsRendered += iSubobj_renderButton(obj, (SSubObjButton*)obj->sub_obj, tlRenderChildren, tlRenderSiblings);
 					break;
 
-				case _OBJECT_TYPE_EDITBOX:		// An input multi-line editbox
+				case _OBJ_TYPE_EDITBOX:		// An input multi-line editbox
 					lnPixelsRendered += iSubobj_renderEditbox(obj, (SSubObjEditbox*)obj->sub_obj, tlRenderChildren, tlRenderSiblings);
 					break;
 
-				case _OBJECT_TYPE_IMAGE:		// A graphical image
+				case _OBJ_TYPE_IMAGE:		// A graphical image
 					lnPixelsRendered += iSubobj_renderImage(obj, (SSubObjImage*)obj->sub_obj, tlRenderChildren, tlRenderSiblings);
 					break;
 
-				case _OBJECT_TYPE_CHECKBOX:		// A checkbox
+				case _OBJ_TYPE_CHECKBOX:		// A checkbox
 					lnPixelsRendered += iSubobj_renderCheckbox(obj, (SSubObjCheckbox*)obj->sub_obj, tlRenderChildren, tlRenderSiblings);
 					break;
 
-				case _OBJECT_TYPE_OPTION:		// A combination selection
+				case _OBJ_TYPE_OPTION:		// A combination selection
 					lnPixelsRendered += iSubobj_renderOption(obj, (SSubObjOption*)obj->sub_obj, tlRenderChildren, tlRenderSiblings);
 					break;
 
-				case _OBJECT_TYPE_RADIO:		// A radio dial, which can also present as a slider or spinner
+				case _OBJ_TYPE_RADIO:		// A radio dial, which can also present as a slider or spinner
 					lnPixelsRendered += iSubobj_renderRadio(obj, (SSubObjRadio*)obj->sub_obj, tlRenderChildren, tlRenderSiblings);
 					break;
 
@@ -613,49 +613,49 @@
 		if (template_obj)
 		{
 			// Update the sub-object data
-			switch (template_obj->baseType)
+			switch (template_obj->objType)
 			{
-				case _OBJECT_TYPE_EMPTY:		// Empty, used as a placeholder object that is not drawn
+				case _OBJ_TYPE_EMPTY:		// Empty, used as a placeholder object that is not drawn
 					ptr = (void*)iSubobj_createEmpty((SSubObjEmpty*)template_obj->sub_obj, template_obj);
 					break;
 
-				case _OBJECT_TYPE_FORM:			// Form class, the main outer window the OS sees
+				case _OBJ_TYPE_FORM:			// Form class, the main outer window the OS sees
 					ptr = (void*)iSubobj_createForm((SSubObjForm*)template_obj->sub_obj, template_obj);
 					break;
 
-				case _OBJECT_TYPE_SUBFORM:		// A new class which has its own drawing content and can be moved about using UI features
+				case _OBJ_TYPE_SUBFORM:		// A new class which has its own drawing content and can be moved about using UI features
 					ptr = (void*)iSubobj_createSubform((SSubObjSubform*)template_obj->sub_obj, template_obj);
 					break;
 
-				case _OBJECT_TYPE_LABEL:		// A label
+				case _OBJ_TYPE_LABEL:		// A label
 					ptr = (void*)iSubobj_createLabel((SSubObjLabel*)template_obj->sub_obj, template_obj);
 					break;
 
-				case _OBJECT_TYPE_TEXTBOX:		// An input textbox
+				case _OBJ_TYPE_TEXTBOX:		// An input textbox
 					ptr = (void*)iSubobj_createTextbox((SSubObjTextbox*)template_obj->sub_obj, template_obj);
 					break;
 
-				case _OBJECT_TYPE_BUTTON:		// A push button
+				case _OBJ_TYPE_BUTTON:		// A push button
 					ptr = (void*)iSubobj_createButton((SSubObjButton*)template_obj->sub_obj, template_obj);
 					break;
 
-				case _OBJECT_TYPE_EDITBOX:		// An input multi-line editbox
+				case _OBJ_TYPE_EDITBOX:		// An input multi-line editbox
 					ptr = (void*)iSubobj_createEditbox((SSubObjEditbox*)template_obj->sub_obj, template_obj);
 					break;
 
-				case _OBJECT_TYPE_IMAGE:		// A graphical image
+				case _OBJ_TYPE_IMAGE:		// A graphical image
 					ptr = (void*)iSubobj_createImage((SSubObjImage*)template_obj->sub_obj, template_obj);
 					break;
 
-				case _OBJECT_TYPE_CHECKBOX:		// A checkbox
+				case _OBJ_TYPE_CHECKBOX:		// A checkbox
 					ptr = (void*)iSubobj_createCheckbox((SSubObjCheckbox*)template_obj->sub_obj, template_obj);
 					break;
 
-				case _OBJECT_TYPE_OPTION:		// A combination selection
+				case _OBJ_TYPE_OPTION:		// A combination selection
 					ptr = (void*)iSubobj_createOption((SSubObjOption*)template_obj->sub_obj, template_obj);
 					break;
 
-				case _OBJECT_TYPE_RADIO:		// A radio dial, which can also present as a slider or spinner
+				case _OBJ_TYPE_RADIO:		// A radio dial, which can also present as a slider or spinner
 					ptr = (void*)iSubobj_createRadio((SSubObjRadio*)template_obj->sub_obj, template_obj);
 					break;
 
@@ -686,49 +686,49 @@
 		if (obj)
 		{
 			// Update the sub-object data
-			switch (obj->baseType)
+			switch (obj->objType)
 			{
-				case _OBJECT_TYPE_EMPTY:		// Empty, used as a placeholder object that is not drawn
+				case _OBJ_TYPE_EMPTY:		// Empty, used as a placeholder object that is not drawn
 					iiSubobj_resetToDefaultEmpty((SSubObjEmpty*)obj->sub_obj, true, tlResetProperties, tlResetMethods);
 					break;
 
-				case _OBJECT_TYPE_FORM:			// Form class, the main outer window the OS sees
+				case _OBJ_TYPE_FORM:			// Form class, the main outer window the OS sees
 					iiSubobj_resetToDefaultForm((SSubObjForm*)obj->sub_obj, true, tlResetProperties, tlResetMethods);
 					break;
 
-				case _OBJECT_TYPE_SUBFORM:		// A new class which has its own drawing content and can be moved about using UI features
+				case _OBJ_TYPE_SUBFORM:		// A new class which has its own drawing content and can be moved about using UI features
 					iiSubobj_resetToDefaultSubform((SSubObjSubform*)obj->sub_obj, true, tlResetProperties, tlResetMethods);
 					break;
 
-				case _OBJECT_TYPE_LABEL:		// A label
+				case _OBJ_TYPE_LABEL:		// A label
 					iiSubobj_resetToDefaultLabel((SSubObjLabel*)obj->sub_obj, true, tlResetProperties, tlResetMethods);
 					break;
 
-				case _OBJECT_TYPE_TEXTBOX:		// An input textbox
+				case _OBJ_TYPE_TEXTBOX:		// An input textbox
 					iiSubobj_resetToDefaultTextbox((SSubObjTextbox*)obj->sub_obj, true, tlResetProperties, tlResetMethods);
 					break;
 
-				case _OBJECT_TYPE_BUTTON:		// A push button
+				case _OBJ_TYPE_BUTTON:		// A push button
 					iiSubobj_resetToDefaultButton((SSubObjButton*)obj->sub_obj, true, tlResetProperties, tlResetMethods);
 					break;
 
-				case _OBJECT_TYPE_EDITBOX:		// An input multi-line editbox
+				case _OBJ_TYPE_EDITBOX:		// An input multi-line editbox
 					iiSubobj_resetToDefaultEditbox((SSubObjEditbox*)obj->sub_obj, true, tlResetProperties, tlResetMethods);
 					break;
 
-				case _OBJECT_TYPE_IMAGE:		// A graphical image
+				case _OBJ_TYPE_IMAGE:		// A graphical image
 					iiSubobj_resetToDefaultImage((SSubObjImage*)obj->sub_obj, true, tlResetProperties, tlResetMethods);
 					break;
 
-				case _OBJECT_TYPE_CHECKBOX:		// A checkbox
+				case _OBJ_TYPE_CHECKBOX:		// A checkbox
 					iiSubobj_resetToDefaultCheckbox((SSubObjCheckbox*)obj->sub_obj, true, tlResetProperties, tlResetMethods);
 					break;
 
-				case _OBJECT_TYPE_OPTION:		// A combination selection
+				case _OBJ_TYPE_OPTION:		// A combination selection
 					iiSubobj_resetToDefaultOption((SSubObjOption*)obj->sub_obj, true, tlResetProperties, tlResetMethods);
 					break;
 
-				case _OBJECT_TYPE_RADIO:		// A radio dial, which can also present as a slider or spinner
+				case _OBJ_TYPE_RADIO:		// A radio dial, which can also present as a slider or spinner
 					iiSubobj_resetToDefaultRadio((SSubObjRadio*)obj->sub_obj, true, tlResetProperties, tlResetMethods);
 					break;
 
@@ -916,12 +916,12 @@
 					//////////
 					// Create the default children for this object
 					//////
-						icon		= iObj_create(_OBJECT_TYPE_IMAGE, NULL);
-						caption		= iObj_create(_OBJECT_TYPE_LABEL, NULL);
-						move		= iObj_create(_OBJECT_TYPE_IMAGE, NULL);
-						minimize	= iObj_create(_OBJECT_TYPE_IMAGE, NULL);
-						maximize	= iObj_create(_OBJECT_TYPE_IMAGE, NULL);
-						close		= iObj_create(_OBJECT_TYPE_IMAGE, NULL);
+						icon		= iObj_create(_OBJ_TYPE_IMAGE, NULL);
+						caption		= iObj_create(_OBJ_TYPE_LABEL, NULL);
+						move		= iObj_create(_OBJ_TYPE_IMAGE, NULL);
+						minimize	= iObj_create(_OBJ_TYPE_IMAGE, NULL);
+						maximize	= iObj_create(_OBJ_TYPE_IMAGE, NULL);
+						close		= iObj_create(_OBJ_TYPE_IMAGE, NULL);
 
 
 					//////////
@@ -2499,9 +2499,9 @@
 			subobj->multiSelect					= false;
 
 			// Create the two objects
-			subobj->firstOption					= iObj_create(_OBJECT_TYPE_LABEL, NULL);
+			subobj->firstOption					= iObj_create(_OBJ_TYPE_LABEL, NULL);
 			if (subobj->firstOption)
-				subobj->firstOption->ll.next	= (SLL*)iObj_create(_OBJECT_TYPE_LABEL, NULL);
+				subobj->firstOption->ll.next	= (SLL*)iObj_create(_OBJ_TYPE_LABEL, NULL);
 
 			// Copy the events
 			*(u32*)&subobj->onSelect			= *(u32*)&iDefaultCallback_onSelect;
@@ -2556,7 +2556,7 @@
 
 
 		// Make sure our environment is sane
-		if (obj && bmp && obj->baseType == _OBJECT_TYPE_FORM)
+		if (obj && bmp && obj->objType == _OBJ_TYPE_FORM)
 		{
 			// Grab the form data
 			subobj = (SSubObjForm*)obj->sub_obj;
@@ -2588,7 +2588,7 @@
 
 
 		// Make sure our environment is sane
-		if (obj && obj->baseType == _OBJECT_TYPE_FORM)
+		if (obj && obj->objType == _OBJ_TYPE_FORM)
 		{
 			// Grab the form data
 			subobj = (SSubObjForm*)obj->sub_obj;
@@ -2612,7 +2612,7 @@
 
 
 		// Make sure our environment is sane
-		if (obj && obj->baseType == _OBJECT_TYPE_FORM)
+		if (obj && obj->objType == _OBJ_TYPE_FORM)
 		{
 			// Grab the form data
 			subobj = (SSubObjForm*)obj->sub_obj;
@@ -2641,7 +2641,7 @@
 
 		// Make sure our environment is sane
 		lnOldColor = 0;
-		if (obj && obj->baseType == _OBJECT_TYPE_FORM)
+		if (obj && obj->objType == _OBJ_TYPE_FORM)
 		{
 			// Grab the form data
 			subobj = (SSubObjForm*)obj->sub_obj;
@@ -2671,7 +2671,7 @@
 
 		// Make sure our environment is sane
 		lnOldColor = 0;
-		if (obj && obj->baseType == _OBJECT_TYPE_FORM)
+		if (obj && obj->objType == _OBJ_TYPE_FORM)
 		{
 			// Grab the form data
 			subobj = (SSubObjForm*)obj->sub_obj;
@@ -2701,7 +2701,7 @@
 
 		// Make sure our environment is sane
 		lnOldColor = 0;
-		if (obj && obj->baseType == _OBJECT_TYPE_FORM)
+		if (obj && obj->objType == _OBJ_TYPE_FORM)
 		{
 			// Grab the form data
 			subobj = (SSubObjForm*)obj->sub_obj;

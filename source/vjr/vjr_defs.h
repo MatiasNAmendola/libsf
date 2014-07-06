@@ -241,14 +241,10 @@
 	s32						iKeyboard_processMessage				(SWindow* win, UINT m, WPARAM w, LPARAM l);
 
 	// EditChainManager
-	SEditChainManager*		iEditChainManager_allocate				(void);
-	bool					iEditChainManager_duplicate				(SEditChainManager** root, SEditChainManager* chain, bool tlIncludeUndoHistory);
-	void					iEditChainManager_delete				(SEditChainManager** root, bool tlDeleteSelf);
-	void					iEditChainManager_deleteChain			(SEditChainManager** root, bool tlDeleteSelf);
+	// Moved to edit_chain_manager.cpp
 
 	// Edit Chain
-	SEditChain*				iEditChain_appendLine					(SEditChainManager* ecm, s8* tcText, u32 tnTextLength);
-	void					iEditChain_free							(SEditChain** root, bool tlDeleteSelf);
+	// Moved to edit_chain.cpp
 
 	// Translate
 	void*					iTranslate_p1_to_p2						(SBuilder* root, void* ptr);
@@ -263,6 +259,7 @@
 	void					iDatum_duplicate						(SDatum* datum,  s8* data, s32 dataLength);
 	void					iDatum_duplicate						(SDatum* datum, cs8* data, s32 dataLength);
 	void					iDatum_duplicate						(SDatum* datumDst, SDatum* datumSrc);
+	bool					iDatum_resize							(SDatum* datum, s32 newDataLength);
 	s32						iDatum_compare							(SDatum* datumLeft, SDatum* datumRight);
 	void					iDatum_delete							(SDatum* datum, bool tlDeleteSelf);
 	void					iiDatum_delete							(SDatum* datum);

@@ -79,7 +79,7 @@ struct SEditChain
 
 	u32			line;													// This line's number
 	SDatum*		sourceCode;												// The text on this line is LEFT(d.data, dPopulated)
-	u32			sourceCodePopulated;									// The actual populated length of d (d is allocated in blocks to allow for minor edits without constantly reallocating)
+	s32			sourceCodePopulated;									// The actual populated length of d (d is allocated in blocks to allow for minor edits without constantly reallocating)
 
 	// Compiler information (see compiler.cpp)
 	bool		forceRecompile;											// A flag that if set forces a recompile of this line
@@ -93,6 +93,7 @@ struct SEditChainManager
 {
 	SEditChain*			ecFirst;										// First in the chain (first->prev is NULL)
 	SEditChain*			ecLast;											// Last in the chain (last->next is NULL)
+	bool				isReadOnly;										// If read-only no changes are allowed, only navigation
 
 	// If populated, this ECM is only a placeholder for this instance, and the this->reference points to the real ECM we should use
 	SEditChainManager*	indirect;										// If not NULL, this ECM points to another ECM which is the real code block
@@ -106,7 +107,7 @@ struct SEditChainManager
 		SEditChain*		ecCursorLine;									// Line where the cursor is
 		SEditChain*		ecCursorLineLast;								// The last location before movement was made
 		bool			isInsert;										// Are we in insert mode?
-		u32				column;											// Column we're currently on
+		s32				column;											// Column we're currently on
 
 
 	//////////
@@ -248,7 +249,7 @@ struct SObject
 
 	// Defined class, class information
 	SDatum		name;													// If a user object, this object's name
-	u32			baseType;												// Object base type/class (see _OBJECT_TYPE_* constants)
+	u32			objType;												// Object base type/class (see _OBJECT_TYPE_* constants)
 	SDatum		className;												// The class
 	SDatum		classLibrary;											// The class location
 	SDatum		comment;
@@ -438,6 +439,12 @@ struct SSubObjSubform
 	// Events unique to this object
 	bool		(*activate)							(SObject* o);		// Called when activated
 	bool		(*deactivate)						(SObject* o);		// Called when deactivated
+
+
+	// Updating each render
+	RECT		rcClient;												// The client area of the subform
+	RECT		rcCaption;												// The caption area (used for moving the subform around)
+	RECT		rcIcon;													// The subform icon
 };
 
 struct SSubObjLabel

@@ -44,7 +44,7 @@
 	void iError_report(s8* errorText)
 	{
 		// Append the error to the ECM
-		iEditChain_appendLine(screenData, errorText, -1);
+		iEditChainManager_appendLine(screenData, errorText, -1);
 	}
 
 

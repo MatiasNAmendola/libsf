@@ -236,18 +236,18 @@
 		//////////
 		// Create each default object
 		//////
-			gobj_defaultEmpty		= iObj_create(_OBJECT_TYPE_EMPTY,		NULL);
-			gobj_defaultLabel		= iObj_create(_OBJECT_TYPE_LABEL,		NULL);
-			gobj_defaultTextbox		= iObj_create(_OBJECT_TYPE_TEXTBOX,		NULL);
-			gobj_defaultButton		= iObj_create(_OBJECT_TYPE_BUTTON,		NULL);
-			gobj_defaultImage		= iObj_create(_OBJECT_TYPE_IMAGE,		NULL);
-			gobj_defaultCheckbox	= iObj_create(_OBJECT_TYPE_CHECKBOX,	NULL);
+			gobj_defaultEmpty		= iObj_create(_OBJ_TYPE_EMPTY,		NULL);
+			gobj_defaultLabel		= iObj_create(_OBJ_TYPE_LABEL,		NULL);
+			gobj_defaultTextbox		= iObj_create(_OBJ_TYPE_TEXTBOX,		NULL);
+			gobj_defaultButton		= iObj_create(_OBJ_TYPE_BUTTON,		NULL);
+			gobj_defaultImage		= iObj_create(_OBJ_TYPE_IMAGE,		NULL);
+			gobj_defaultCheckbox	= iObj_create(_OBJ_TYPE_CHECKBOX,	NULL);
 			// Option and radio both have label controls within
-			gobj_defaultOption		= iObj_create(_OBJECT_TYPE_OPTION,		NULL);
-			gobj_defaultRadio		= iObj_create(_OBJECT_TYPE_RADIO,		NULL);
+			gobj_defaultOption		= iObj_create(_OBJ_TYPE_OPTION,		NULL);
+			gobj_defaultRadio		= iObj_create(_OBJ_TYPE_RADIO,		NULL);
 			// Forms and subforms are created last because they have objects referenced within which must be created before
-			gobj_defaultForm		= iObj_create(_OBJECT_TYPE_FORM,		NULL);
-			gobj_defaultSubform		= iObj_create(_OBJECT_TYPE_SUBFORM,		NULL);
+			gobj_defaultForm		= iObj_create(_OBJ_TYPE_FORM,		NULL);
+			gobj_defaultSubform		= iObj_create(_OBJ_TYPE_SUBFORM,		NULL);
 	}
 
 
@@ -274,7 +274,7 @@
 				return;
 
 			// Create object
-			gobj_screen = iObj_create(_OBJECT_TYPE_FORM, sof);
+			gobj_screen = iObj_create(_OBJ_TYPE_FORM, sof);
 			if (!gobj_screen)
 			{
 				iSubobj_deleteForm(sof, true);
@@ -339,7 +339,7 @@
 				return;
 
 			// Create object
-			gobj_jdebi = iObj_create(_OBJECT_TYPE_FORM, sof);
+			gobj_jdebi = iObj_create(_OBJ_TYPE_FORM, sof);
 			if (!gobj_jdebi)
 			{
 				iSubobj_deleteForm(sof, true);
@@ -1495,8 +1495,6 @@
 //////
 	s32 iKeyboard_processMessage(SWindow* win, UINT m, WPARAM vKey, LPARAM tnScanCode)
 	{
-		s32		lnI;
-		bool	llFirst;
 		s16		lnAsciiChar;
 		u32		lnScanCode;
 		bool	llCtrl, llAlt, llShift, llLeft, llMiddle, llRight, llCaps, llIsAscii;
@@ -1524,58 +1522,57 @@
 			if (llIsAscii)
 			{
 				// It's a regular input key
-				iEditChainManager_keystroke(&commandHistory, (u8)lnAsciiChar);
+				iEditChainManager_keystroke(commandHistory, win->obj, (u8)lnAsciiChar);
 
 			} else if (!llCtrl && !llShift && !llAlt) {
 				// Regular key without special flags
 				switch (vKey)
 				{
 					case VK_UP:
-						iEditChainManager_navigate(win->obj, &commandHistory, -1, 0);
+						iEditChainManager_navigate(commandHistory, win->obj, -1, 0);
 						break;
 
 					case VK_DOWN:
-						iEditChainManager_navigate(win->obj, &commandHistory, 1, 0);
+						iEditChainManager_navigate(commandHistory, win->obj, 1, 0);
 						break;
 
 					case VK_PRIOR:		// Page up
-						iEditChainManager_navigatePages(win->obj, &commandHistory, -1);
+						iEditChainManager_navigatePages(commandHistory, win->obj, -1);
 						break;
 
 					case VK_NEXT:		// Page down
-						iEditChainManager_navigatePages(win->obj, &commandHistory, 1);
+						iEditChainManager_navigatePages(commandHistory, win->obj, 1);
 						break;
 
 					case VK_ESCAPE:		// They hit escape, and are cancelling the input
-						iEditChainManager_clearLine(win->obj, &commandHistory);
+						iEditChainManager_clearLine(commandHistory, win->obj);
 						break;
 
 					case VK_TAB:
-						for (lnI = commandHistory->column, llFirst = ((lnI % 4) == 0); llFirst || lnI % 4 != 0; lnI++, llFirst = false)
-							iEditChainManager_keystroke(win->obj, &commandHistory, ' ');
+						iEditChainManager_tabIn(commandHistory, win->obj);
 						break;
 
 					case VK_RETURN:
 						break;
 
 					case VK_LEFT:
-						iEditChainManager_navigate(win->obj, &commandHistory, 0, -1);
+						iEditChainManager_navigate(commandHistory, win->obj, 0, -1);
 						break;
 
 					case VK_RIGHT:
-						iEditChainManager_navigate(win->obj, &commandHistory, 0, 1);
+						iEditChainManager_navigate(commandHistory, win->obj, 0, 1);
 						break;
 
 					case VK_HOME:
-						iEditChainManager_navigate(win->obj, &commandHistory, 0, -(commandHistory->column));
+						iEditChainManager_navigate(commandHistory, win->obj, 0, -(commandHistory->column));
 						break;
 
 					case VK_END:
-						iEditChainManager_navigate(win->obj, &commandHistory, 0, commandHistory->ecCursorLine->sourceCode->length);
+						iEditChainManager_navigate(commandHistory, win->obj, 0, commandHistory->ecCursorLine->sourceCode->length);
 						break;
 
 					case VK_INSERT:
-						iEditChainManager_toggleInsert(win->obj, &commandHistory);
+						iEditChainManager_toggleInsert(commandHistory, win->obj);
 						break;
 				}
 
@@ -1584,19 +1581,19 @@
 				switch (vKey)
 				{
 					case 'A':		// Select all
-						iEditChainManager_selectAll(win->obj, &commandHistory);
+						iEditChainManager_selectAll(commandHistory, win->obj);
 						break;
 
 					case 'X':		// Cut
-						iEditChainManager_cut(win->obj, &commandHistory);
+						iEditChainManager_cut(commandHistory, win->obj);
 						break;
 
 					case 'C':		// Copy
-						iEditChainManager_copy(win->obj, &commandHistory);
+						iEditChainManager_copy(commandHistory, win->obj);
 						break;
 
 					case 'V':		// Paste
-						iEditChainManager_paste(win->obj, &commandHistory);
+						iEditChainManager_paste(commandHistory, win->obj);
 						break;
 
 					case 'W':		// Save and close
@@ -1606,19 +1603,19 @@
 						break;
 
 					case VK_LEFT:	// Word left
-						iEditChainManager_navigateWordLeft(win->obj, &commandHistory);
+						iEditChainManager_navigateWordLeft(commandHistory, win->obj);
 						break;
 
 					case VK_RIGHT:	// Word right
-						iEditChainManager_navigateWordRight(win->obj, &commandHistory);
+						iEditChainManager_navigateWordRight(commandHistory, win->obj);
 						break;
 
 					case VK_HOME:	// Home (go to top of content)
-						iEditChainManager_navigateTop(win->obj, &commandHistory);
+						iEditChainManager_navigateTop(commandHistory, win->obj);
 						break;
 
 					case VK_END:	// Page down (go to end of content)
-						iEditChainManager_navigateEnd(win->obj, &commandHistory);
+						iEditChainManager_navigateEnd(commandHistory, win->obj);
 						break;
 				}
 
@@ -1627,27 +1624,31 @@
 				switch (vKey)
 				{
 					case VK_UP:		// Select line up
-						iEditChainManager_selectLineUp(win->obj, &commandHistory);
+						iEditChainManager_selectLineUp(commandHistory, win->obj);
 						break;
 
 					case VK_DOWN:	// Select line down
-						iEditChainManager_selectLineDown(win->obj, &commandHistory);
+						iEditChainManager_selectLineDown(commandHistory, win->obj);
 						break;
 
 					case VK_LEFT:	// Select left
-						iEditChainManager_selectLeft(win->obj, &commandHistory);
+						iEditChainManager_selectLeft(commandHistory, win->obj);
 						break;
 
 					case VK_RIGHT:	// Select right
-						iEditChainManager_selectRight(win->obj, &commandHistory);
+						iEditChainManager_selectRight(commandHistory, win->obj);
 						break;
 
 					case VK_END:	// Select to end
-						iEditChainManager_selectToEndOfLine(win->obj, &commandHistory);
+						iEditChainManager_selectToEndOfLine(commandHistory, win->obj);
 						break;
 
 					case VK_HOME:	// Select to start
-						iEditChainManager_selectToBeginOfLine(win->obj, &commandHistory);
+						iEditChainManager_selectToBeginOfLine(commandHistory, win->obj);
+						break;
+
+					case VK_TAB:	// Shift tab
+						iEditChainManager_tabOut(commandHistory, win->obj);
 						break;
 				}
 
@@ -1656,11 +1657,11 @@
 				switch (vKey)
 				{
 					case 'K':		// Select column mode
-						iEditChainManager_selectColumnToggle(win->obj, &commandHistory);
+						iEditChainManager_selectColumnToggle(commandHistory, win->obj);
 						break;
 
 					case 'L':		// Select full line mode
-						iEditChainManager_selectLineToggle(win->obj, &commandHistory);
+						iEditChainManager_selectLineToggle(commandHistory, win->obj);
 						break;
 				}
 
@@ -1669,11 +1670,11 @@
 				switch (vKey)
 				{
 					case VK_LEFT:	// Select word left
-						iEditChainManager_selectWordLeft(win->obj, &commandHistory);
+						iEditChainManager_selectWordLeft(commandHistory, win->obj);
 						break;
 
 					case VK_RIGHT:	// Select word right
-						iEditChainManager_selectWordRight(win->obj, &commandHistory);
+						iEditChainManager_selectWordRight(commandHistory, win->obj);
 						break;
 				}
 
@@ -1689,409 +1690,6 @@
 
 		// All done
 		return(0);
-	}
-
-
-
-
-//////////
-//
-// Called to create a new EditChainManager (or ECM)
-//
-//////
-	SEditChainManager* iEditChainManager_allocate(void)
-	{
-		SEditChainManager* ecm;
-
-
-		// Allocate a new structure
-		ecm = (SEditChainManager*)malloc(sizeof(SEditChainManager));
-
-		// Initialize
-		if (ecm)
-			memset(ecm, 0, sizeof(SEditChainManager));
-
-		// Indicate our status
-		return(ecm);
-	}
-
-
-
-
-//////////
-//
-// EditChainManager processing
-//
-//////
-	bool iEditChainManager_duplicate(SEditChainManager** root, SEditChainManager* ecmSource, bool tlIncludeUndoHistory)
-	{
-		SEditChainManager*	ecmNew;
-		SEditChain*			ecSource;
-		SEditChain*			ecNew;
-		SEditChain*			ecLast;
-		SEditChain**		ecPrev;
-		SExtraInfo*			eiSource;
-		SExtraInfo*			eiNew;
-		SExtraInfo**		eiPrev;
-		SBuilder*			xlatRoot;
-		STranslate*			xlat;
-
-
-		// Create the master record
-// TODO:  COMPLETELY UNTESTED.  BREAKPOINT AND EXAMINE.
-_asm int 3;
-		ecmNew = (SEditChainManager*)malloc(sizeof(SEditChainManager));
-		if (ecmNew)
-		{
-			//////////
-			// Initialize
-			//////
-				memcpy(ecmNew, ecmSource, sizeof(SEditChainManager));
-
-
-			//////////
-			// Remove the connection to any undo history
-			// Note:  The undo history will be copied and translated separately if need be
-			//////
-				ecmNew->undoHistory = NULL;
-				iBuilder_createAndInitialize(&xlatRoot, -1);
-				// Note:  We create the translation regardless so we can update the ecmNew-> members which relate to cursor line, highlighted, etc.
-
-
-			//////////
-			// Update caller
-			//////
-				*root = ecmNew;
-				// Right now:
-				//		ecmNew		-- our new SEC
-				//		ecmSource	-- SEC to duplicate
-
-
-			//////////
-			// Indicate where we'll be updating
-			//////
-				ecPrev	= &ecmNew->ecFirst;
-				ecLast	= NULL;
-
-
-			//////////
-			// Duplicate the chain
-			//////
-				ecSource = ecmSource->ecFirst;
-				while (ecSource)
-				{
-					//////////
-					// Create a new entry for this one
-					//////
-						ecNew = (SEditChain*)malloc(sizeof(SEditChain));
-						if (ecNew)
-						{
-							// Create a translation for original pointers to new pointers
-							if (tlIncludeUndoHistory)
-							{
-								// Create the translation for this ecSource <--> ecNew
-								xlat = (STranslate*)iBuilder_allocateBytes(xlatRoot, sizeof(STranslate));
-								if (xlat)
-								{
-									// Create the translation
-									xlat->p1	= ecSource;									// The old pointer in the undoHistory will point to
-									xlat->p2	= ecNew;									// the new pointer
-								}
-							}
-
-						} else {
-							// Should not happen.
-							return(false);
-						}
-
-
-					//////////
-					// Copy source information to new
-					//////
-						memcpy(ecNew, ecSource, sizeof(SEditChain));
-						*ecPrev		= ecNew;												// Update the prior record to point here
-						ecNew->prev	= ecLast;												// Point backward to the previous entry
-						ecNew->next	= NULL;													// Currently points forward to nothing
-
-
-					//////////
-					// Duplicate its data
-					//////
-						ecNew->sourceCode = NULL;
-						iDatum_duplicate(ecNew->sourceCode, ecSource->sourceCode);
-
-
-					//////////
-					// General purpose extra data
-					//////
-						if (ecSource->extra_info)
-						{
-							// Copy any extra_info that's relevant
-							eiPrev		= &ecNew->extra_info;
-							eiSource	= ecSource->extra_info;
-							while (eiSource)
-							{
-								//////////
-								// Duplicate this entry
-								//////
-									// Are we duplicating by a function call?  Or manually?
-									if (*(u32*)&eiSource->extra_info_duplicate != 0)
-									{
-										// Function call
-										eiNew = eiSource->extra_info_duplicate(ecmSource, ecSource, ecSource->extra_info);
-										// Right now, eiNew has either been updated or not depending on the decision making process in extra_info_duplicate().
-
-									} else {
-										// Manual duplication
-										eiNew = (SExtraInfo*)malloc(sizeof(SExtraInfo));
-										if (eiNew)
-										{
-											// Copy everything
-											memcpy(eiNew, eiSource, sizeof(SExtraInfo));
-
-											// Clear, and then duplicate the info datum
-											memset(&eiNew->info, 0, sizeof(eiNew->info));
-											iDatum_duplicate(&eiNew->info, &eiSource->info);
-
-										} else {
-											// Should not happen
-											return(false);
-										}
-									}
-
-
-								//////////
-								// Update the back-link if need be
-								//////
-									if (eiNew)
-									{
-										*eiPrev	= eiNew;
-										eiPrev	= &eiNew->next;
-									}
-
-
-								//////////
-								// Move to next extra_info
-								//////
-									eiSource = eiSource->next;
-							}
-						}
-
-
-					//////////
-					// Move to next entry to duplicate
-					//////
-						ecLast		= ecNew;
-						ecPrev		= &ecNew->next;
-						ecSource	= ecSource->next;
-				}
-
-
-			//////////
-			// Translate each of the ecmSource pointers for ecmNew
-			// Note:  The rest of them use uid lookups
-			//////
-				ecmNew->ecFirst				= (SEditChain*)iTranslate_p1_to_p2(xlatRoot, ecmSource->ecFirst);
-				ecmNew->ecLast				= (SEditChain*)iTranslate_p1_to_p2(xlatRoot, ecmSource->ecLast);
-				ecmNew->ecTop				= (SEditChain*)iTranslate_p1_to_p2(xlatRoot, ecmSource->ecTop);
-				ecmNew->ecCursorLine		= (SEditChain*)iTranslate_p1_to_p2(xlatRoot, ecmSource->ecCursorLine);
-				ecmNew->ecCursorLineLast	= (SEditChain*)iTranslate_p1_to_p2(xlatRoot, ecmSource->ecCursorLineLast);
-				ecmNew->ecSelectedLineStart	= (SEditChain*)iTranslate_p1_to_p2(xlatRoot, ecmSource->ecSelectedLineStart);
-				ecmNew->ecSelectedLineEnd	= (SEditChain*)iTranslate_p1_to_p2(xlatRoot, ecmSource->ecSelectedLineEnd);
-
-
-			//////////
-			// Free the pointers
-			//////
-				iBuilder_freeAndRelease(&xlatRoot);
-
-
-			//////////
-			// Indicate success
-			//////
-				return(true);
-		}
-
-		// If we get here, failure
-		return(false);
-	}
-
-
-
-
-//////////
-//
-// Called to free the edit chain manager content, and optionally itself
-//
-//////
-	void iEditChainManager_delete(SEditChainManager** root, bool tlDeleteSelf)
-	{
-		SEditChainManager* ecm;
-
-
-		// Make sure our environment is sane
-		if (root && *root)
-		{
-// TODO:  COMPLETELY UNTESTED.  BREAKPOINT AND EXAMINE.
-_asm int 3;
-			ecm = *root;
-			//////////
-			// Are we really the thing?  Or just an indirect reference to the thing?
-			//////
-				if (!ecm->indirect)
-				{
-					//////////
-					// We are the thing
-					// Free undo history
-					//////
-						if ((*root)->undoHistory)
-							iEditChainManager_delete(&(*root)->undoHistory, true);
-
-
-					//////////
-					// Free content
-					//////
-						iEditChain_free(&(*root)->ecFirst, true);
-				}
-
-
-			//////////
-			// Free self
-			//////
-				if (tlDeleteSelf)
-				{
-					free(*root);
-					*root = NULL;
-				}
-		}
-	}
-
-
-
-
-//////////
-//
-// Called to delete the entire chain
-//
-//////
-	void iEditChainManager_deleteChain(SEditChainManager** root, bool tlDeleteSelf)
-	{
-		if (root && *root)
-		{
-// TODO:  write this code :-)
-_asm int 3;
-		}
-	}
-
-
-
-
-//////////
-//
-// Called to append a line of text to the indicated ECM.
-//
-//////
-	SEditChain* iEditChain_appendLine(SEditChainManager* ecm, s8* tcText, u32 tnTextLength)
-	{
-		u32				lnLineNum;
-		SEditChain*		ec;
-
-
-		// Make sure our environment is sane
-		// Note:  We do not test for tcText and tnTextLength because we can add blank lines
-		ec = NULL;
-		if (ecm)
-		{
-			// Allocate our new structure
-			if (ecm->ecLast)
-			{
-				// Append after the last line
-				lnLineNum	= ecm->ecLast->line + 1;
-				ec = (SEditChain*)iLl_appendNewNodeAtEnd((SLL**)ecm->ecLast, sizeof(SEditChain));
-
-			} else {
-				// This is the first line, add it and set the last line to the same
-				ec = (SEditChain*)iLl_appendNewNodeAtEnd((SLL**)ecm->ecFirst, sizeof(SEditChain));
-				if (ec)
-					ecm->ecLast = ec;
-			}
-
-			// Was it added?
-			if (ec)
-			{
-				// Initialize
-				memset(ec, 0, sizeof(SEditChain));
-
-				// Populate
-				ec->sourceCode = iDatum_allocate(tcText, tnTextLength);
-			}
-		}
-
-		// Indicate our status
-		return(ec);
-	}
-
-
-
-
-//////////
-//
-// Free the edit chain
-//
-//////
-	void iEditChain_free(SEditChain** root, bool tlDeleteSelf)
-	{
-		SEditChain*		chain;
-		SEditChain*		chainNext;
-
-
-// TODO:  COMPLETELY UNTESTED.  BREAKPOINT AND EXAMINE.
-_asm int 3;
-		// Make sure our environment is sane
-		if (root && *root)
-		{
-			// Repeat throughout the entire chain
-			chain = *root;
-			while (chain)
-			{
-				//////////
-				// Note next item in chain
-				//////
-					chainNext = chain->next;
-
-
-				//////////
-				// Delete any extra information associated with this chain entry
-				//////
-					iExtraInfo_free(NULL, chain, &chain->extra_info, true);
-
-
-				//////////
-				// Delete this item's components
-				//////
-					iDatum_delete(chain->sourceCode, true);
-
-
-				//////////
-				// Free self
-				//////
-					if (tlDeleteSelf)
-						free(chain);
-
-
-				//////////
-				// Move to next item in the chain
-				//////
-					chain = chainNext;
-			}
-
-
-			//////////
-			// Free self
-			//////
-				if (tlDeleteSelf)
-					*root = NULL;	// It would've been freed above, so we just update the pointer
-		}
 	}
 
 
@@ -2310,8 +1908,52 @@ _asm int 3;
 
 	void iDatum_duplicate(SDatum* datumDst, SDatum* datumSrc)
 	{
+		// Make sure our environment is sane
 		if (datumDst && datumSrc && datumSrc->data)
 			iDatum_duplicate(datumDst, datumSrc->data, datumSrc->length);
+	}
+
+	bool iDatum_resize(SDatum* datum, s32 newDataLength)
+	{
+		s8* ptr;
+
+
+		// Make sure our environment is sane
+		if (datum && newDataLength != 0)
+		{
+			if (datum->length == newDataLength)
+				return(true);		// It's already the same length
+
+			// Allocate our new block
+			ptr = (s8*)malloc(newDataLength);
+			if (ptr)
+			{
+				// Copy everything that will fit
+				memcpy(ptr, datum->data, min(newDataLength, datum->length));
+
+				// Fill the remainder with NULLs if any
+				if (newDataLength > datum->length)
+					memset(ptr + datum->length, 0, newDataLength - datum->length);
+
+				// Delete the old data
+				free(datum->data);
+
+				// And populate with the new data
+				datum->data		= ptr;
+				datum->length	= newDataLength;
+
+				// All done
+				return(true);
+
+			} else {
+				// Failure
+				return(false);
+			}
+
+		} else {
+			// No data to work with
+			return(false);
+		}
 	}
 
 	// Returns -1, 0, or 1 (indicating left is less than, equal to, or greater than right)
@@ -2322,6 +1964,8 @@ _asm int 3;
 
 		// Default to invalid data
 		lnResult = -2;
+
+		// Make sure our environment is sane
 		if (datumLeft && datumRight)
 		{
 			// Do a standard compare
@@ -2334,6 +1978,7 @@ _asm int 3;
 
 	void iDatum_delete(SDatum* datum, bool tlDeleteSelf)
 	{
+		// Make sure our environment is sane
 		if (datum)
 		{
 			// Delete the content
@@ -2347,7 +1992,7 @@ _asm int 3;
 
 	void iiDatum_delete(SDatum* datum)
 	{
-		// Store the data
+		// Make sure our environment is sane
 		if (datum->data)
 		{
 			free(datum->data);

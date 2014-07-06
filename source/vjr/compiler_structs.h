@@ -260,7 +260,7 @@ struct SCompileNote;
 		// Information about the component
 		SEditChain*		line;											// The line this component relates to
 		u32				iCode;											// Refer to _VVMMC_COMP_* structs in mc_const.h
-		u32				start;											// Start into the indicates line's source code
+		s32				start;											// Start into the indicates line's source code
 		s32				length;											// Length of the component
 	};
 

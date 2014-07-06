@@ -207,7 +207,7 @@ struct SDatum
 		s8*		data;													// Content
 		u8*		udata;													// Access to it as unsigned
 	};
-	u32			length;													// Content length
+	s32			length;													// Content length
 };
 
 struct STranslate

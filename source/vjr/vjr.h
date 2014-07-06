@@ -60,6 +60,8 @@
 
 #include "command_defs.h"
 #include "engine.h"
+#include "edit_chain_manager.h"
+#include "edit_chain.h"
 
 #include "graphics\h\app_icon.h"
 #include "graphics\h\move.h"
@@ -91,3 +93,5 @@
 #include "compiler.cpp"
 #include "commands.cpp"
 #include "engine.cpp"
+#include "edit_chain_manager.cpp"
+#include "edit_chain.cpp"
