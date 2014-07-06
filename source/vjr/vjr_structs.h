@@ -388,6 +388,19 @@ struct SSubObjForm
 	// Events unique to this object
 	bool		(*activate)							(SObject* o);		// Called when activated
 	bool		(*deactivate)						(SObject* o);		// Called when deactivated
+
+	// Updating each render
+	RECT		rcClient;												// The client area of the form
+	RECT		rcCaption;												// The caption area (used for moving the form around)
+	RECT		rcArrowUl;												// The upper-left resize arrow is
+	RECT		rcArrowUr;												// The upper-right resize arrow is
+	RECT		rcArrowLl;												// The lower-left resize arrow is
+	RECT		rcArrowLr;												// The lower-right resize arrow is
+	RECT		rcIcon;													// The form icon
+	RECT		rcMove;													// The move button of the form
+	RECT		rcMinimize;												// The minimize button of the form
+	RECT		rcMaximize;												// The maximize button of the form
+	RECT		rcClose;												// The close button of the form
 };
 
 struct SSubObjSubform

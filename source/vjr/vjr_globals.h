@@ -114,21 +114,18 @@
 	//////////
 	// Mouse options
 	//////
-		bool			glMoving							= false;								// When the user clicks and drags the title bar area, the window will move
-		bool			glResizing							= false;								// When the user clicks and drags the corner triangle areas, the window will resize, resulting in larger or smaller scaling
-		u32				gnResizingFrom						= 0;									// The _UPPER_LEFT.._LOWER_LEFT constants from below
-// 		RECT			grcMoveStart						= { 0, 0, 0, 0 };
-// 		RECT			grcResizeStart						= { 0, 0, 0, 0 };
-		SXYS32			gMousePositionMoveStart				= { -1, -1 };							// Mouse position when the move started
-		SXYS32			gMousePositionMoveEnd				= { -1, -1 };							// Mouse position when the move ended
-		SXYS32			gMousePositionResizeStart			= { -1, -1 };							// Mouse position when the resize started
-		SXYS32			gMousePositionResizeEnd				= { -1, -1 };							// Mouse position when the resize ended
-
-		SXYS32			gMousePosition						= { -1, -1 };							// Mouse position indicated by windows in the interface window
-		bool			glMouseInClientArea					= false;								// When the mouse is in the client area, this flag is raised
-		SXYS32			gMousePositionClientArea			= { -1, -1 };							// Mouse position in the client area of the interface window
-		SXYS32			gnMouseDelta						= { 0, 0 };								// Change in position
-		bool			glMouseLeftButton					= false;
-		bool			glMouseMiddleButton					= false;
-		bool			glMouseRightButton					= false;
+		bool			glIsMoving							= false;
+		bool			glIsResizing						= false;
+// 		SXYS32			gMousePositionMoveStart				= { -1, -1 };							// Mouse position when the move started
+// 		SXYS32			gMousePositionMoveEnd				= { -1, -1 };							// Mouse position when the move ended
+// 		SXYS32			gMousePositionResizeStart			= { -1, -1 };							// Mouse position when the resize started
+// 		SXYS32			gMousePositionResizeEnd				= { -1, -1 };							// Mouse position when the resize ended
+// 
+// 		SXYS32			gMousePosition						= { -1, -1 };							// Mouse position indicated by windows in the interface window
+// 		bool			glMouseInClientArea					= false;								// When the mouse is in the client area, this flag is raised
+// 		SXYS32			gMousePositionClientArea			= { -1, -1 };							// Mouse position in the client area of the interface window
+// 		SXYS32			gnMouseDelta						= { 0, 0 };								// Change in position
+// 		bool			glMouseLeftButton					= false;
+// 		bool			glMouseMiddleButton					= false;
+// 		bool			glMouseRightButton					= false;
 

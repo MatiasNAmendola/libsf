@@ -68,7 +68,7 @@
 	void					iObj_appendObjToParent					(SObject* parent, SObject* obj);
 	void					iObj_duplicateChildren					(SObject* objDst, SObject* objSrc);
 	void					iObj_setSize							(SObject* obj, s32 tnLeft, s32 tnTop, s32 tnWidth, s32 tnHeight);
-	SWindow* 				iObj_createWindowForForm				(SObject* obj_form);
+	SWindow* 				iObj_createWindowForForm				(SObject* obj_form, SWindow* win);
 	bool					iObj_setVisible							(SObject* obj, bool tlNewVisible);
 	void*					iObj_copySubobj							(SObject* template_obj);
 	void					iiObj_resetToDefault					(SObject* obj, bool tlResetProperties, bool tlResetMethods);
@@ -207,7 +207,7 @@
 	DWORD	WINAPI			iReadEvents_messageWindow				(LPVOID lpParameter);
 	LRESULT	CALLBACK		iMessage_wndProcWindow					(HWND hwnd, UINT m, WPARAM w, LPARAM l);
 	LRESULT	CALLBACK		iWindow_wndProc							(HWND hwnd, UINT m, WPARAM w, LPARAM l);
-	SWindow* 				iWindow_createForObject					(SObject* obj);
+	SWindow* 				iWindow_createForObject					(SObject* obj, SWindow* win);
 	SWindow*				iWindow_findByHwnd						(HWND hwnd);
 	SWindow*				iWindow_allocate						(void);
 	bool					iInit_shutdownPolitely					(void);
@@ -229,8 +229,13 @@
 	SFont*					iFont_create							(cs8* tcFontName, u32 tnFontSize, u32 tnFontWeight, u32 tnItalics, u32 tnUnderline);
 	void					iFont_delete							(SFont** font, bool tlDeleteSelf);
 	u32						iFont_findClosestSizeMatch				(s8* tcText, s8* tcFontName, u32 tnFontSize, u32 tnFontBold, u32 tnFontItalic, u32 tnFontUnderline, u32 tnWidth, u32 tnHeight, u32 tnWidthDesired, u32 tnHeightDesired);
-	int						iProcessMouseMessage					(UINT m, WPARAM w, LPARAM l);
-	void					iTranslateMousePosition					(POINTS* pt);
+
+	// Mouse processing (callback from iWindow_wndProc()
+	s32						iMouse_processMessage					(SWindow* win, UINT m, WPARAM w, LPARAM l);
+	void					iiMouse_translatePosition				(SWindow* win, POINTS* pt);
+	s32						iiMouse_processMouseEvents_client		(SWindow* win, UINT m, WPARAM w, LPARAM l);
+	s32						iiMouse_processMouseEvents_nonclient	(SWindow* win, UINT m, WPARAM w, LPARAM l);
+	void					iiMouse_getFlags						(bool* tlCtrl, bool* tlAlt, bool* tlShift, bool* tlLeft, bool* tlMiddle, bool* tlRight);
 
 	// EditChainManager
 	SEditChainManager*		iEditChainManager_allocate				(void);

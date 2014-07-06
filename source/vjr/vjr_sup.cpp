@@ -111,8 +111,10 @@
 		iObj_render(gobj_jdebi, true, true);
 
 		// Attach them to physical windows
-		gWinScreen	= iObj_createWindowForForm(gobj_screen);
-		gWinJDebi	= iObj_createWindowForForm(gobj_jdebi);
+		gWinScreen	= iWindow_allocate();
+		gWinJDebi	= iWindow_allocate();
+		iObj_createWindowForForm(gobj_screen,	gWinScreen);
+		iObj_createWindowForForm(gobj_jdebi,	gWinJDebi);
 	}
 
 
@@ -417,84 +419,82 @@
 
 		// See if we know this hwnd
 		win = iWindow_findByHwnd(h);
-
 		if (win)
 		{
 			// It was one of our windows
 			switch (m)
 			{
-// 				case WM_LBUTTONDOWN:
-// 					glMouseLeftButton = true;
-// 					return(iProcessMouseMessage(m, w, l));
-// 					break;
-// 
-// 				case WM_LBUTTONUP:
-// 					if (glMoving || glResizing)
-// 						ReleaseCapture();
-// 
-// 					glMouseLeftButton = false;
-// 					return(iProcessMouseMessage(m, w, l));
-// 					break;
-// 
-// 				case WM_RBUTTONDOWN:
-// 					glMouseRightButton = true;
-// 					return(iProcessMouseMessage(m, w, l));
-// 					break;
-// 
-// 				case WM_RBUTTONUP:
-// 					glMouseRightButton = false;
-// 					return(iProcessMouseMessage(m, w, l));
-// 					break;
-// 
-// 				case WM_MBUTTONDOWN:
-// 					glMouseMiddleButton = true;
-// 					return(iProcessMouseMessage(m, w, l));
-// 					break;
-// 
-// 				case WM_MBUTTONUP:
-// 					glMouseMiddleButton = false;
-// 					return(iProcessMouseMessage(m, w, l));
-// 					break;
-// 
-// 				case WM_RBUTTONDBLCLK:
-// 				case WM_LBUTTONDBLCLK:
-// 				case WM_MBUTTONDBLCLK:
-// 				case WM_MOUSEHWHEEL:
-// 				case WM_MOUSEWHEEL:
-// 				case WM_MOUSEMOVE:
-// 					glMouseLeftButton	= ((w & MK_LBUTTON) != 0);		// The left mouse button is down
-// 					glMouseMiddleButton	= ((w & MK_MBUTTON) != 0);		// The middle mouse button is down
-// 					glMouseRightButton	= ((w & MK_RBUTTON) != 0);		// The right mouse button is down
-// 					return(iProcessMouseMessage(m, w, l));
-// 					break;
-// 
-// 				case WM_KEYDOWN:
-// 				case WM_KEYUP:
-// //				case WM_CHAR:
-// //				case WM_DEADCHAR:
-// 				case WM_SYSKEYDOWN:
-// 				case WM_SYSKEYUP:
-// //				case WM_SYSCHAR:
-// //				case WM_SYSDEADCHAR:
-// 					return 0;
-// 					break;
-// 
-// 				case WM_CAPTURECHANGED:
-// 					if (glMoving)
-// 					{
-// 						// Stop the movement
-// // TODO:				iStopMove();
-// 
-// 					} else if (glResizing) {
-// 						// Stop the resize
-// // TODO:				iStopResize();
-// 
-// 					} else {
-// 						// Make sure our flags are lowered
-// 						glMoving	= false;
-// 						glResizing	= false;
-// 					}
-// 					break;
+				case WMVJR_FIRST_CREATION:
+					// Currently unused
+					break;
+
+				case WM_DESTROY:
+					// Currently unused
+					break;
+
+				case WM_LBUTTONDOWN:
+					return(iMouse_processMessage(win, m, w, l));
+					break;
+
+				case WM_LBUTTONUP:
+					return(iMouse_processMessage(win, m, w, l));
+					break;
+
+				case WM_RBUTTONDOWN:
+					return(iMouse_processMessage(win, m, w, l));
+					break;
+
+				case WM_RBUTTONUP:
+					return(iMouse_processMessage(win, m, w, l));
+					break;
+
+				case WM_MBUTTONDOWN:
+					return(iMouse_processMessage(win, m, w, l));
+					break;
+
+				case WM_MBUTTONUP:
+					return(iMouse_processMessage(win, m, w, l));
+					break;
+
+				case WM_RBUTTONDBLCLK:
+				case WM_LBUTTONDBLCLK:
+				case WM_MBUTTONDBLCLK:
+				case WM_MOUSEHWHEEL:
+				case WM_MOUSEWHEEL:
+				case WM_MOUSEMOVE:
+					win->isMouseLeftButton		= ((w & MK_LBUTTON) != 0);		// The left mouse button is down
+					win->isMouseMiddleButton	= ((w & MK_MBUTTON) != 0);		// The middle mouse button is down
+					win->isMouseRightButton		= ((w & MK_RBUTTON) != 0);		// The right mouse button is down
+					return(iMouse_processMessage(win, m, w, l));
+					break;
+
+				case WM_KEYDOWN:
+				case WM_KEYUP:
+//				case WM_CHAR:
+//				case WM_DEADCHAR:
+				case WM_SYSKEYDOWN:
+				case WM_SYSKEYUP:
+//				case WM_SYSCHAR:
+//				case WM_SYSDEADCHAR:
+					return 0;
+					break;
+
+				case WM_CAPTURECHANGED:
+					if (win->isMoving)
+					{
+						// Stop the movement
+//						iStopMove();
+
+					} else if (win->isResizing) {
+						// Stop the resize
+//						iStopResize();
+
+					} else {
+						// Make sure our flags are lowered
+						win->isMoving	= false;
+						win->isResizing	= false;
+					}
+					break;
 
 				case WM_PAINT:
 					// Paint it
@@ -518,76 +518,87 @@
 // Note:  Any object can be presented in a window, though typically on form objects are.
 //
 //////
-	SWindow* iWindow_createForObject(SObject* obj)
+	SWindow* iWindow_createForObject(SObject* obj, SWindow* win)
 	{
-		SWindow*		win;
+		SWindow*		winNew;
 		WNDCLASSEXA		classex;
 		ATOM			atom;
 		s8				buffer[128];
 
 
 		// Make sure our environment is sane
-		win = NULL;
+		winNew = NULL;
 		if (obj)
 		{
-			// Create
-			win = iWindow_allocate();
-			if (win)
-			{
-				// Lock down
-				EnterCriticalSection(&win->cs);
-
-				// Initialize
-				memset(buffer, 0, sizeof(buffer));
-
-				// Populate
-				CopyRect(&win->rc, &obj->rc);
-				win->obj = obj;
+			//////////
+			// Create if need be
+			//////
+				if (!win)		winNew = iWindow_allocate();
+				else			winNew = win;
 
 
-				//////////
-				// Register the general window class if need be
-				//////
-					if (!GetClassInfoExA(ghInstance, cgcWindowClass, &classex))
-					{
-						// Initialize
-						memset(&classex, 0, sizeof(classex));
+			//////////
+			// If we have a window, prepare it
+			//////
+				if (winNew)
+				{
+					// Lock down
+					EnterCriticalSection(&winNew->cs);
 
-						// Populate
-						classex.cbSize				= sizeof(WNDCLASSEXA);
-						classex.hInstance			= ghInstance;
-						classex.style				= CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
-						classex.lpszClassName		= cgcWindowClass;
-						classex.hIcon				= LoadIcon(ghInstance, MAKEINTRESOURCE(IDI_VJR));
-						classex.hCursor				= LoadCursor(NULL, IDC_ARROW);
-						classex.lpfnWndProc			= &iWindow_wndProc;
+					// Initialize
+					memset(buffer, 0, sizeof(buffer));
 
-						// Register
-						atom = RegisterClassExA(&classex);
-					}
+					// Populate
+					CopyRect(&winNew->rc, &obj->rc);
+					winNew->obj = obj;
 
 
-				//////////
-				// Physically create the window
-				//////
-					// Window name
-					if (obj->name.data)		memcpy(buffer, obj->name.data,		min(obj->name.length, sizeof(buffer) - 1));
-					else					memcpy(buffer, cgcScreenTitle,		sizeof(cgcScreenTitle));
+					//////////
+					// Register the general window class if need be
+					//////
+						if (!GetClassInfoExA(ghInstance, cgcWindowClass, &classex))
+						{
+							// Initialize
+							memset(&classex, 0, sizeof(classex));
 
-					// Build it
-					win->hwnd = CreateWindow(cgcWindowClass, buffer, WS_POPUP, obj->rc.left, obj->rc.top, obj->rc.right - obj->rc.left, obj->rc.bottom - obj->rc.top, NULL, NULL, ghInstance, 0);
+							// Populate
+							classex.cbSize				= sizeof(WNDCLASSEXA);
+							classex.hInstance			= ghInstance;
+							classex.style				= CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
+							classex.lpszClassName		= cgcWindowClass;
+							classex.hIcon				= LoadIcon(ghInstance, MAKEINTRESOURCE(IDI_VJR));
+							classex.hCursor				= LoadCursor(NULL, IDC_ARROW);
+							classex.lpfnWndProc			= &iWindow_wndProc;
 
-					// If visible, show it
-					if (obj->isVisible)
-						ShowWindow(win->hwnd, SW_SHOW);
+							// Register
+							atom = RegisterClassExA(&classex);
+						}
 
-				// Unlock
-				LeaveCriticalSection(&win->cs);
-			}
+
+					//////////
+					// Physically create the window
+					//////
+						// Window name
+						if (obj->name.data)		memcpy(buffer, obj->name.data,		min(obj->name.length, sizeof(buffer) - 1));
+						else					memcpy(buffer, cgcScreenTitle,		sizeof(cgcScreenTitle));
+
+						// Build it
+						winNew->hwnd = CreateWindow(cgcWindowClass, buffer, WS_POPUP, obj->rc.left, obj->rc.top, obj->rc.right - obj->rc.left, obj->rc.bottom - obj->rc.top, NULL, NULL, ghInstance, 0);
+
+						// Initialize it internally
+						PostMessage(winNew->hwnd, WMVJR_FIRST_CREATION, 0, 0);
+
+						// If visible, show it
+						if (obj->isVisible)
+							ShowWindow(winNew->hwnd, SW_SHOW);
+
+					// Unlock
+					LeaveCriticalSection(&winNew->cs);
+				}
 		}
 
 		// Indicate our status
-		return(win);
+		return(winNew);
 	}
 
 
@@ -605,6 +616,7 @@
 		SWindow*	win;
 
 
+		// Iterate through all known windows and see which one is which
 		for (lnI = 0; lnI < gWindows->populatedLength; lnI += sizeof(SWindow))
 		{
 			// Grab this one
@@ -626,7 +638,6 @@
 				return(win);
 			}
 		}
-
 		// If we get here, not found
 		return(NULL);
 	}
@@ -1158,24 +1169,22 @@
 // Called to process the mouse messages.
 //
 //////
-	int iProcessMouseMessage(UINT m, WPARAM w, LPARAM l)
+	s32 iMouse_processMessage(SWindow* win, UINT m, WPARAM w, LPARAM l)
 	{
-		// Translate the mouse from the scaled position to its real position
-		iTranslateMousePosition((POINTS*)&l);
+		//////////
+		// If we're a valid window, process the mouse
+		//////
+			if (win && win->obj && win->obj->sub_obj && win->obj->rc.right > win->obj->rc.left)
+			{
+				// Translate the mouse from the scaled position to its real position
+				iiMouse_translatePosition(win, (POINTS*)&l);
 
-		// If it's not in the client area, 
-		if (glMouseInClientArea)
-		{
-			// It's in the client area
-
-// TODO:			iProcessClientMouseEvents((POINTS*)&l);
-
-		} else {
-			// It's in the non-client area
-// TODO:			iProcessNonclientMouseEvents((POINTS*)&l);
-		}
-
-		return 0;
+				// Signal the event(s)
+				if (win->isMouseInClientArea)		return(iiMouse_processMouseEvents_client(win, m, w, l));			// In the client area
+				else								return(iiMouse_processMouseEvents_nonclient(win, m, w, l));		// In the non-client area
+			}
+			// If we get here, invalid
+			return(-1);
 	}
 
 
@@ -1184,46 +1193,295 @@
 //////////
 //
 // Called to translate the mouse position for the source window.
+// Note:  The win parameter is required.
 //
 //////
-	void iTranslateMousePosition(POINTS* pt)
+	void iiMouse_translatePosition(SWindow* win, POINTS* pt)
 	{
-// 		POINT lpt;
-// 
-// 
+		SSubObjForm*	form;
+		POINT			lpt;
+
+
+		//////////
+		// Grab the related form object
+		//////
+			form = (SSubObjForm*)win->obj->sub_obj;
+
+
+		//////////
+		// If we're moving or resizing, we're reading screen coordinate mouse data
+		//////
+			if (win->isMoving || win->isResizing)
+				GetCursorPos(&lpt);		// Get the mouse pointer in screen coordinates
+
+
+		//////////
+		// Translate our SHORT points structure to the LONG point structure
+		//////
+			lpt.x						= pt->x;
+			lpt.y						= pt->y;
+			win->mousePosition.x		= lpt.x;
+			win->mousePosition.y		= lpt.y;
+
+
+		//////////
+		// If we're moving or resizing, we're reading screen coordinate mouse data
+		//////
+			if (win->isMoving || win->isResizing)
+				return;
+
+		
+		//////////
+		// Store the mouse position on the form in form coordinates
+		//////
+			win->mouseLastPosition.x	= lpt.x -= (SHORT)form->rcClient.left;
+			win->mouseLastPosition.y	= lpt.x -= (SHORT)form->rcClient.top;
+
+
+		//////////
+		// Are we inside the client area?
+		//////
+			if (PtInRect(&form->rcClient, lpt))
+			{
+				// Yes
+				win->isMouseInClientArea	= true;
+
+				// Update our caller for the translated point
+				pt->x	= (s16)win->mousePosition.x;
+				pt->y	= (s16)win->mousePosition.y;
+
+			} else {
+				// We're not in the client area
+				win->isMouseInClientArea	= false;
+				win->isMouseInClientArea	= false;
+			}
+	}
+
+
+
+
+//////////
+//
+// Process the mouse events in the client area for this form
+//
+//////
+	s32 iiMouse_processMouseEvents_client(SWindow* win, UINT m, WPARAM w, LPARAM l)
+	{
+		s32				lnResult;
+		SObject*		obj;
+		SSubObjForm*	form;
+
+
+		//////////
+		// Grab our pointers
+		//////
+			obj		= win->obj;
+			form	= (SSubObjForm*)obj->sub_obj;
+
+
+		//////////
+		// Iterate through objects to see where it is the mouse is traipsing
+		//////
+
+
+		// Indicate our status
+		lnResult = 0;
+		return(lnResult);
+	}
+
+
+
+
+//////////
+//
+// Process the mouse events in the non-client area for this form
+//
+//////
+	s32 iiMouse_processMouseEvents_nonclient(SWindow* win, UINT m, WPARAM w, LPARAM l)
+	{
+		s32				lnResult, lnDeltaX, lnDeltaY, lnWidth, lnHeight, lnLeft, lnTop;
+		bool			llCtrl, llAlt, llShift, llLeft, llRight, llMiddle;
+		SObject*		obj;
+		SSubObjForm*	form;
+		RECT			lrc;
+		POINT			pt, ptScreen;
+
+
+		//////////
+		// Grab our pointers
+		//////
+			obj		= win->obj;
+			form	= (SSubObjForm*)obj->sub_obj;
+
+
+		//////////
+		// Determine mouse button and keyboard key attributes
+		//////
+			iiMouse_getFlags(&llCtrl, &llAlt, &llShift, &llLeft, &llMiddle, &llRight);
+
+
+		//////////
+		// Iterate through the known objects
+		//////
+			pt.x = win->mouseLastPosition.x;
+			pt.y = win->mouseLastPosition.y;
+
+			// They clicked on something
+			if (m == WM_LBUTTONDOWN)
+			{
+				// Close button
+				if (PtInRect(&form->rcClose, pt))
+				{
+					// Send the quit message
+					PostQuitMessage(0);
+
+				// Minimize button
+				} else if (PtInRect(&form->rcMinimize, pt)) {
+					// Minimize the window
+					CloseWindow(win->hwnd);
+
+				} else {
+					// The mouse has gone down in a nonclient area.
+					// Note where the mouse went down in case they are beginning a move.
+					win->mousePositionClick.x = pt.x;
+					win->mousePositionClick.y = pt.y;
+
+					// Get the current mouse position
+					GetCursorPos(&ptScreen);
+					win->mousePositionClickScreen.x = ptScreen.x;
+					win->mousePositionClickScreen.y = ptScreen.y;
+				}
+
+			} else if (m == WM_MOUSEMOVE) {
+				// The mouse is moving
+				if (win->isMoving)
+				{
+					// Update to the new position
+					// Get the current mouse position
+					GetCursorPos(&ptScreen);
+
+					// Determine the deltas
+					lnDeltaX = ptScreen.x - win->mousePositionClickScreen.x;
+					lnDeltaY = ptScreen.y - win->mousePositionClickScreen.y;
+
+					// Position the window at that delta
+					GetWindowRect(win->hwnd, &lrc);
+
+					// It has moved since the last positioning
+					SetWindowPos(win->hwnd, NULL,
+									obj->rc.left + lnDeltaX,
+									obj->rc.top + lnDeltaY,
+									obj->rc.right  - obj->rc.left,
+									obj->rc.bottom - obj->rc.top,
+									SWP_NOSIZE | SWP_NOREPOSITION);
+
+				} else if (win->isResizing) {
+					// Update to the new size
+
+				} else if (!glIsMoving && !glIsResizing) {
+					// They may be beginning a move or resize
+					if (llLeft)
+					{
+						// Did they move in a button?
+						if (!(PtInRect(&form->rcIcon, pt) || PtInRect(&form->rcMove, pt) || PtInRect(&form->rcMinimize, pt) || PtInRect(&form->rcMaximize, pt) || PtInRect(&form->rcClose, pt)))
+						{
+							// Nope.  Are they moving in a resizing arrow?
+							if (PtInRect(&form->rcArrowUl, pt) || PtInRect(&form->rcArrowUr, pt) || PtInRect(&form->rcArrowLl, pt) || PtInRect(&form->rcArrowLr, pt))
+							{
+								// We are beginning a resize
+								win->isResizing	= true;
+								glIsResizing	= true;
+								SetCapture(win->hwnd);
+// TODO:  write the resizing code
+
+							} else {
+								// We are beginning a move
+								win->isMoving	= true;
+								glIsMoving		= true;
+								SetCapture(win->hwnd);
+							}
+						}
+					}
+				}
+
+			} else if (m == WM_LBUTTONUP) {
+				// They've released the mouse
+				if (win->isMoving)
+				{
+					// We're done moving
+					win->isMoving	= false;
+					glIsMoving		= false;
+					ReleaseCapture();
+
+					// Get the current mouse position
+					GetCursorPos(&ptScreen);
+
+					// Determine the deltas
+					lnDeltaX = ptScreen.x - win->mousePositionClickScreen.x;
+					lnDeltaY = ptScreen.y - win->mousePositionClickScreen.y;
+
+					// Position the window finally
+					lnWidth		= obj->rc.right  - obj->rc.left;
+					lnHeight	= obj->rc.bottom - obj->rc.top;
+					lnLeft		= obj->rc.left   + lnDeltaX;
+					lnTop		= obj->rc.top    + lnDeltaY;
+					SetRect(&obj->rc, lnLeft, lnTop, lnLeft + lnWidth, lnTop + lnHeight);
+
+					// Position the window at that delta
+					SetWindowPos(win->hwnd, NULL, lnLeft, lnTop, lnWidth, lnHeight, SWP_NOSIZE | SWP_NOREPOSITION);
+
+				} else if (win->isResizing) {
+					// We're done resizing
+					win->isResizing = false;
+					glIsResizing	= false;
+					ReleaseCapture();
+
+				} else {
+					// The mouse is simply released.  How nice. :-)
+					win->isMoving	= false;
+					win->isResizing = false;
+					glIsMoving		= false;
+					glIsResizing	= false;
+				}
+			}
+
+
+		// Indicate our status
+		lnResult = 0;
+		return(lnResult);
+	}
+
+
+
+
+//////////
+//
+// Based upon the WPARAM we determine the keys, except Alt, which is
+// determined by the VK_MENU key's current state.
+//
+//////
+	void iiMouse_getFlags(bool* tlCtrl, bool* tlAlt, bool* tlShift, bool* tlLeft, bool* tlMiddle, bool* tlRight)
+	{
 // 		//////////
-// 		// If we're a valid window, process the mouse
+// 		// If we had WPARAM, we could use these:
 // 		//////
-// 			if (winScreen.rc.right > winScreen.rc.left)
-// 			{
-// 				// Get the mouse pointer in screen coordinates
-// 				if (glMoving || glResizing)
-// 					GetCursorPos(&lpt);
-// 
-// 				// Translate our SHORT points structure to the LONG point structure
-// 				lpt.x				= pt->x;
-// 				lpt.y				= pt->y;
-// 				gMousePosition.x	= lpt.x;
-// 				gMousePosition.y	= lpt.y;
-// 
-// 				if (glMoving || glResizing)
-// 					return;
-// 
-// 				// Are we inside the client area?
-// 				if (PtInRect(&winScreen.rcClient, lpt))
-// 				{
-// 					// We are.  We are.  We are in the client area. :-)
-// 					glMouseInClientArea = true;
-// 
-// 					// Update our caller for the translated point
-// 					pt->x	= (s16)gMousePosition.x;
-// 					pt->y	= (s16)gMousePosition.y;
-// 
-// 				} else {
-// 					glMouseInClientArea = false;
-// 				}
-// 			}
-// 			// else leave the mouse state as it is
+// 			*tlCtrl		= ((w & MK_CONTROL)		!= 0);
+// 			*tlAlt		= (GetKeyState(VK_MENU)	< 0);
+// 			*tlShift	= ((w & MK_SHIFT)		!= 0);
+// 			*tlLeft		= ((w & MK_LBUTTON)		!= 0);
+// 			*tlRight	= ((w & MK_RBUTTON)		!= 0);
+// 			*tlMiddle	= ((w & MK_MBUTTON)		!= 0);
+
+
+		//////////
+		// Grab each one asynchronously
+		//////
+			*tlCtrl		= ((GetAsyncKeyState(VK_CONTROL) & 0x8000) != 0);
+			*tlAlt		= (GetKeyState(VK_MENU)	< 0);
+			*tlShift	= ((GetAsyncKeyState(VK_SHIFT) & 0x8000) != 0);
+			*tlLeft		= ((GetAsyncKeyState(VK_LBUTTON) & 0x8000) != 0);
+			*tlMiddle	= ((GetAsyncKeyState(VK_MBUTTON) & 0x8000) != 0);
+			*tlRight	= ((GetAsyncKeyState(VK_RBUTTON) & 0x8000) != 0);
 	}
 
 
@@ -1241,11 +1499,10 @@
 
 		// Allocate a new structure
 		ecm = (SEditChainManager*)malloc(sizeof(SEditChainManager));
+
+		// Initialize
 		if (ecm)
-		{
-			// Initialize
 			memset(ecm, 0, sizeof(SEditChainManager));
-		}
 
 		// Indicate our status
 		return(ecm);

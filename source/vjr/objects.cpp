@@ -521,7 +521,7 @@
 
 				// Move to next
 // TODO:  working here
-//				objChild
+				objChild = (SObject*)objChild->ll.next;
 			}
 		}
 	}
@@ -556,18 +556,18 @@
 // used as an off-screen buffer in that way.
 //
 //////
-	SWindow* iObj_createWindowForForm(SObject* obj_form)
+	SWindow* iObj_createWindowForForm(SObject* obj_form, SWindow* win)
 	{
-		SWindow* win;
+		SWindow* winNew;
 
 
 		// Make sure our environment is sane
-		win = NULL;
+		winNew = NULL;
 		if (obj_form)
-			win = iWindow_createForObject(obj_form);
+			winNew = iWindow_createForObject(obj_form, win);
 
 		// Indicate our status
-		return(win);
+		return(winNew);
 	}
 
 
@@ -3048,6 +3048,8 @@
 						// Draw the client area
 						SetRect(&lrc2, 8, subobj->bmpFormIcon->bi.biHeight + 2, lrc.right - subobj->bmpFormIcon->bi.biHeight - 2, lrc.bottom - subobj->bmpFormIcon->bi.biHeight - 1);
 						iBmp_fillRect(obj->bmp, &lrc2, white, white, white, white, false);
+// These rc* copies were added temporarily until the full object structure is coded and working
+CopyRect(&subobj->rcClient, &lrc2);
 
 						// Put a border around the client area
 						InflateRect(&lrc2, 1, 1);
@@ -3060,18 +3062,27 @@
 						// Form icon
 						SetRect(&lrc3,	bmpArrowUl->bi.biWidth + 8, 1, bmpArrowUl->bi.biWidth + 8 + subobj->bmpFormIcon->bi.biWidth, 1 + subobj->bmpFormIcon->bi.biHeight);
 						iBmp_bitBltMask(obj->bmp, &lrc3, subobj->bmpFormIcon);
+CopyRect(&subobj->rcIcon, &lrc3);
+
 						// Close
 						SetRect(&lrc2,	lrc.right - bmpArrowUr->bi.biWidth - 8 - bmpClose->bi.biWidth, lrc.top + 1, lrc.right - bmpArrowUr->bi.biWidth - 8, lrc.bottom - 1);
 						iBmp_bitBltMask(obj->bmp, &lrc2, bmpClose);
+CopyRect(&subobj->rcClose, &lrc2);
+
 						// Maximize
 						SetRect(&lrc2,	lrc2.left - bmpMaximize->bi.biWidth - 1, lrc2.top, lrc2.left - 1, lrc2.bottom);
 						iBmp_bitBltMask(obj->bmp, &lrc2, bmpMaximize);
+CopyRect(&subobj->rcMaximize, &lrc2);
+
 						// Minimize
 						SetRect(&lrc2,	lrc2.left - bmpMinimize->bi.biWidth - 1, lrc2.top, lrc2.left - 1, lrc2.bottom);
 						iBmp_bitBltMask(obj->bmp, &lrc2, bmpMinimize);
+CopyRect(&subobj->rcMinimize, &lrc2);
+
 						// Move
 						SetRect(&lrc4,	lrc2.left - bmpMove->bi.biWidth - 1, lrc2.top, lrc2.left - 1, lrc2.bottom);
 						iBmp_bitBltMask(obj->bmp, &lrc4, bmpMove);
+CopyRect(&subobj->rcMove, &lrc4);
 
 
 					//////////
@@ -3080,21 +3091,29 @@
 						// Upper left arrow
 						SetRect(&lrc2, lrc.left, lrc.top, lrc.left + bmpArrowUl->bi.biWidth, lrc.top + bmpArrowUl->bi.biHeight);
 						iBmp_bitBltMask(obj->bmp, &lrc2, bmpArrowUl);
+CopyRect(&subobj->rcArrowUl, &lrc2);
+
 						// Upper right arrow
 						SetRect(&lrc2, lrc.right - bmpArrowUr->bi.biWidth, lrc.top, lrc.right, lrc.top + bmpArrowUr->bi.biHeight);
 						iBmp_bitBltMask(obj->bmp, &lrc2, bmpArrowUr);
+CopyRect(&subobj->rcArrowUr, &lrc2);
+
 						// Lower left arrow
 						SetRect(&lrc2, lrc.right - bmpArrowLr->bi.biWidth, lrc.bottom - bmpArrowLr->bi.biHeight, lrc.right, lrc.bottom);
 						iBmp_bitBltMask(obj->bmp, &lrc2, bmpArrowLr);
+CopyRect(&subobj->rcArrowLl, &lrc2);
+
 						// Lower right arrow
 						SetRect(&lrc2, lrc.left, lrc.bottom - bmpArrowLl->bi.biHeight, lrc.left + bmpArrowLl->bi.biWidth, lrc.bottom);
 						iBmp_bitBltMask(obj->bmp, &lrc2, bmpArrowLl);
+CopyRect(&subobj->rcArrowLr, &lrc2);
 
 
 					//////////
 					// Form caption
 					//////
 						SetRect(&lrc2, lrc3.right + 8, lrc3.top, lrc4.right - 8, lrc3.bottom);
+CopyRect(&subobj->rcCaption, &lrc2);
 						lhfontOld = (HFONT)SelectObject(obj->bmp->hdc, gsWindowTitleBarFont->hfont);
 						SetTextColor(obj->bmp->hdc, (COLORREF)RGB(subobj->captionColor.red, subobj->captionColor.grn, subobj->captionColor.blu));
 						SetBkMode(obj->bmp->hdc, TRANSPARENT);

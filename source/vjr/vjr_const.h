@@ -266,6 +266,12 @@ typedef		const f64			cf64;
 
 
 //////////
+// Internal messages
+//////
+	const u32			WMVJR_FIRST_CREATION				= WM_USER + 1;
+
+
+//////////
 // Constant strings
 //////
 	const s8			cgcMessageWindowClass[]				= "VJr.MessageWindow";

@@ -150,17 +150,6 @@ struct SBitmapProcess
 	bool				spans3V;			// Spans at least 3 pixels vertically, meaning it begins somewhere in 1.x, for example, and ends somewhere beyond 3.x
 };
 
-struct SWindow
-{
-	bool				isValid;										// When windows fall out of scope they are marked not valid
-
-	HWND				hwnd;											// The window's hwnd
-	RECT				rc;												// Rectangle of window's physical position
-	SObject*			obj;											// The top-level object being rendered in this window
-
-	CRITICAL_SECTION	cs;												// Atomic access
-};
-
 struct SSize
 {
 	union {
@@ -185,6 +174,31 @@ struct SXYS32
 {
 	s32			x;
 	s32			y;
+};
+
+struct SWindow
+{
+	bool				isValid;										// When windows fall out of scope they are marked not valid
+
+	HWND				hwnd;											// The window's hwnd
+	RECT				rc;												// Rectangle of window's physical position
+	SObject*			obj;											// The top-level object being rendered in this window
+
+	SXYS32				mousePosition;									// Mouse position in this window
+	bool				isMouseLeftButton;								// Is the left mouse button down?
+	bool				isMouseMiddleButton;							// Is the middle mouse button down?
+	bool				isMouseRightButton;								// Is the right mouse button down?
+	bool				isMoving;										// Is this window moving?
+	bool				isResizing;										// Is this window resizing?
+	u32					resizingFrom;									// If resizing, the arrow (upper-left, upper-right, lower-left, lower-right)
+
+	// Updated as the mouse moves across the form
+	SXYS32				mouseLastPosition;								// The last recorded position of the mouse on the form (the mouse may have moved off the form and is somewhere else, but this is the last point)
+	SXYS32				mousePositionClick;								// When the mouse was last left-clicked, this is where it was clicked
+	SXYS32				mousePositionClickScreen;						// In screen coordinates, the location where the mouse was last left-button clicked down
+	bool				isMouseInClientArea;							// When the mouse is in the client area (not on the form border)
+
+	CRITICAL_SECTION	cs;												// Atomic access
 };
 
 struct SDatum
