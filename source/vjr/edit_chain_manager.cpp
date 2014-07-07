@@ -335,8 +335,7 @@ _asm int 3;
 //////
 	SEditChain* iEditChainManager_appendLine(SEditChainManager* ecm, s8* tcText, s32 tnTextLength)
 	{
-		u32				lnLineNum;
-		SEditChain*		ec;
+		SEditChain* ec;
 
 
 		// Make sure our environment is sane
@@ -348,7 +347,6 @@ _asm int 3;
 			if (ecm->ecLast)
 			{
 				// Append after the last line
-				lnLineNum	= ecm->ecLast->line + 1;
 				ec = (SEditChain*)iLl_appendNewNodeAtEnd((SLL**)&ecm->ecLast, sizeof(SEditChain));
 
 			} else {
@@ -373,6 +371,93 @@ _asm int 3;
 
 		// Indicate our status
 		return(ec);
+	}
+
+
+
+
+//////////
+//
+// Called to insert a line before or after the indicated line
+//
+//////
+	SEditChain* iEditChainManager_insertLine(SEditChainManager* ecm, s8* tcText, s32 tnTextLength, SEditChain* line, bool tlInsertAfter)
+	{
+		SEditChain* lineNew;
+
+
+		// Make sure our environment is sane
+		// Note:  We do not test for tcText and tnTextLength because we can add blank lines
+		lineNew = NULL;
+		if (ecm && line)
+		{
+			// Create a new entry
+			lineNew = (SEditChain*)malloc(sizeof(SEditChain));
+			if (lineNew)
+			{
+				// Initialize
+				memset(lineNew, 0, sizeof(SEditChain));
+
+				// Append a blank line
+				lineNew->sourceCode = iDatum_allocate(tcText, tnTextLength);
+
+				// Insert before or after the indicated line
+				if (tlInsertAfter)
+				{
+					//////////
+					// [line->] [<-after]
+					// becomes:
+					// [line->] [<-lineNew->] [<after]
+					//////
+						lineNew->ll.next	= line->ll.next;
+						lineNew->ll.prev	= (SLL*)line;
+						line->ll.next		= (SLL*)lineNew;
+
+
+					//////////
+					// If there's one after this, have it point back
+					//////
+						if (lineNew->ll.next)
+						{
+							// Insert it after
+							lineNew->ll.prev		= lineNew->ll.next->prev;
+							lineNew->ll.next->prev	= (SLL*)lineNew;
+
+						} else {
+							// None after, so we update ecLast
+							ecm->ecLast = lineNew;
+						}
+
+				} else {
+					//////////
+					// [before->] [<-line]
+					// becomes:
+					// [before->] [<-lineNew->] [<-line]
+					//////
+						lineNew->ll.prev	= line->ll.prev;
+						lineNew->ll.next	= (SLL*)line;
+						line->ll.prev		= (SLL*)lineNew;
+
+
+					//////////
+					// If there's one before this, have it point forward
+					//////
+						if (lineNew->ll.next)
+						{
+							// Insert it before
+							lineNew->ll.next		= lineNew->ll.prev->next;
+							lineNew->ll.prev->next	= (SLL*)lineNew;
+
+						} else {
+							// None after, so we update ecLast
+							ecm->ecFirst = lineNew;
+						}
+				}
+			}
+		}
+
+		// Indicate our status
+		return(lineNew);
 	}
 
 
@@ -515,8 +600,7 @@ _asm int 3;
 		SEditChain*		line;
 		SBitmap*		bmp;
 		HGDIOBJ			hfontOld;
-		SBgra			foreColor;
-		SBgra			backColor;
+		SBgra			foreColor, backColor, fillColor;
 		RECT			rc, lrc, lrc2, lrc3;
 
 
@@ -556,7 +640,7 @@ _asm int 3;
 						SetBkColor(bmp->hdc, RGB(currentStatementBackColor.red, currentStatementBackColor.grn, currentStatementBackColor.blu));
 						SetBkMode(bmp->hdc, OPAQUE);
 						SetTextColor(bmp->hdc, RGB(currentStatementForeColor.red, currentStatementForeColor.grn, currentStatementForeColor.blu));
-						backColor.color = currentStatementBackColor.color;
+						fillColor.color = currentStatementBackColor.color;
 
 					} else {
 						// Display in normal background color
@@ -564,6 +648,7 @@ _asm int 3;
 						SetBkMode(bmp->hdc, OPAQUE);
 						SetTextColor(bmp->hdc, RGB(foreColor.red, foreColor.grn, foreColor.blu));
 						hfontOld = SelectObject(bmp->hdc, font->hfont);
+						fillColor.color = backColor.color;
 					}
 
 
@@ -595,7 +680,7 @@ _asm int 3;
 				//////////
 				// Clear the rest of the line
 				//////
-					iBmp_fillRect(bmp, &lrc3, backColor, backColor, backColor, backColor, false);
+					iBmp_fillRect(bmp, &lrc3, fillColor, fillColor, fillColor, fillColor, false);
 
 
 				//////////
@@ -612,8 +697,8 @@ _asm int 3;
 				//////////
 				// Move down to the next row
 				//////
-					lnTop += font->tm.tmHeight;
-					line = (SEditChain*)line->ll.next;
+					lnTop	+= font->tm.tmHeight;
+					line	= (SEditChain*)line->ll.next;
 			}
 
 			// Reset the font
@@ -681,7 +766,7 @@ _asm int 3;
 
 		// Make sure our environment is sane
 // TODO:  Added the extra test on ecm->column because of a bug when scrolling... will fix. :-)
-		if (ecm && ecm->column < _ECM_MINIMUM_LINE_ALLOCATION_LENGTH - 10)
+		if (ecm && !ecm->isReadOnly && ecm->column < _ECM_MINIMUM_LINE_ALLOCATION_LENGTH - 10)
 		{
 			//////////
 			// Are we on a line?
@@ -762,7 +847,7 @@ _asm int 3;
 		//////////
 		// Make sure we're valid
 		//////
-			if (ecm && !ecm->isReadOnly && ecm->ecCursorLine)
+			if (ecm && ecm->ecCursorLine && ecm->ecCursorLine->sourceCode)
 			{
 				//////////
 				// Grab the line and form
@@ -874,8 +959,9 @@ _asm int 3;
 //////
 	bool iEditChainManager_navigatePages(SEditChainManager* ecm, SObject* obj, s32 deltaY)
 	{
-		RECT	lrc;
+		s32		lnI;
 		SFont*	font;
+		RECT	lrc;
 
 
 		//////////
@@ -884,11 +970,49 @@ _asm int 3;
 			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
-		// Is there room to navigate back?
-		if (ecm->ecCursorLine != ecm->ecFirst)
-		{
-			// Determine how many lines we can move based upon the object's render size
-		}
+		//////////
+		// Make sure we're valid
+		//////
+			if (ecm && ecm->ecCursorLine && ecm->ecCursorLine->sourceCode && deltaY != 0)
+			{
+				//////////
+				// Determine how many visible lines there are and move that far
+				//////
+					deltaY = deltaY * ((lrc.bottom - lrc.top) / font->tm.tmHeight);
+					if (deltaY > 0)
+					{
+						// Going forward
+						for (lnI = 0; ecm->ecCursorLine->ll.next && lnI != deltaY; lnI++)
+						{
+							// Move the top line to the next line
+							ecm->ecTopLine		= (SEditChain*)ecm->ecTopLine->ll.next;
+							ecm->ecCursorLine	= (SEditChain*)ecm->ecCursorLine->ll.next;
+						}
+
+					} else {
+						// Going backward
+						for (lnI = 0; ecm->ecCursorLine->ll.prev && lnI != deltaY; lnI--)
+						{
+							// Move the top line up (if we can)
+							if (ecm->ecTopLine->ll.prev)
+								ecm->ecTopLine	= (SEditChain*)ecm->ecTopLine->ll.prev;
+
+							// Move the cursor line up
+							ecm->ecCursorLine	= (SEditChain*)ecm->ecCursorLine->ll.prev;
+						}
+
+					}
+
+
+				//////////
+				// Verify we're visible
+				//////
+					iEditChainManager_verifyCursorIsVisible(ecm, &lrc, font);
+
+
+				// Indicate success
+				return(true);
+			}
 
 
 		// If we get here, indicate failure
@@ -1058,6 +1182,29 @@ _asm int 3;
 			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
+		// Make sure the environment is sane
+		if (ecm && !ecm->isReadOnly && ecm->ecCursorLine && obj)
+		{
+			// If we're in insert mode, we split the line
+			if (!ecm->isOverwrite)
+			{
+				// Insert mode
+				iEditChainManager_insertLine(ecm, NULL, 0, ecm->ecCursorLine, true);	// Append a new line after the cursor line
+
+			} else {
+				// Overwrite mode
+				if (!ecm->ecCursorLine->ll.next)
+					iEditChainManager_appendLine(ecm, NULL, 0);		// Append a new line at the end
+			}
+
+			// Move to the new line, and to the start of that line
+			iEditChainManager_navigate(ecm, obj, 1, -ecm->column);
+
+			// Indicate success
+			return(true);
+		}
+
+
 		// If we get here, indicate failure
 		return(false);
 	}
@@ -1168,14 +1315,93 @@ _asm int 3;
 //////
 	bool iEditChainManager_navigateWordLeft(SEditChainManager* ecm, SObject* obj)
 	{
-		RECT	lrc;
-		SFont*	font;
+		SFont*			font;
+		SEditChain*		line;
+		RECT			lrc;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
 			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
+
+
+		//////////
+		// Make sure we're valid
+		//////
+			if (ecm && ecm->ecCursorLine && ecm->ecCursorLine->sourceCode)
+			{
+				//////////
+				// Grab the line and form
+				//////
+					line = ecm->ecCursorLine;
+
+
+				//////////
+				// Iterate until we find a space
+				//////
+					if (ecm->column == 0 || line->sourceCodePopulated == 0)
+					{
+						// We have to go to the previous line (if we can)
+						if (ecm->ecFirst != line)
+						{
+							// Go up one line
+							iEditChainManager_navigate(ecm, obj, -1, 0);
+
+							// Go to the end of this line
+							iEditChainManager_navigate(ecm, obj, 0, ecm->ecCursorLine->sourceCodePopulated);
+
+							// Continue looking word left on this line
+							return(iEditChainManager_navigateWordLeft(ecm, obj));
+						}
+
+					} else if (line->sourceCodePopulated < ecm->column) {
+						// We're beyond end of line, move to the end of line
+						iEditChainManager_navigate(ecm, obj, 0, ecm->ecCursorLine->sourceCodePopulated - ecm->column);
+
+						// Then continue looking word left on this line
+						return(iEditChainManager_navigateWordLeft(ecm, obj));
+
+					} else {
+						//////////
+						// We're somewhere on the line, move one column left first
+						//////
+							--ecm->column;
+
+
+						//////////
+						// If we're on a whitespace character, scan left until we reach a non-whitespace character
+						//////
+							// When we get to the first non-whitespace, we break
+							for ( ; ecm->column > 0 && (line->sourceCode->data[ecm->column] == 32 || line->sourceCode->data[ecm->column] == 9); )
+								--ecm->column;
+
+
+						//////////
+						// If we're not at the beginning of the line, then we look for the first whitespace character
+						//////
+							if (ecm->column != 0)
+							{
+								// Search left for the first whitespace or comma
+								for ( ; ecm->column > 0; ecm->column--)
+								{
+									// Did we find a whitespace to our left?
+									if (line->sourceCode->data[ecm->column - 1] == 32 || line->sourceCode->data[ecm->column - 1] == 9 || line->sourceCode->data[ecm->column - 1] == ',')
+										break;	// Yes
+								}
+							}
+					}
+
+
+				//////////
+				// Verify we're visible
+				//////
+					iEditChainManager_verifyCursorIsVisible(ecm, &lrc, font);
+
+
+				// Indicate success
+				return(true);
+			}
 
 
 		// If we get here, indicate failure
@@ -1192,14 +1418,102 @@ _asm int 3;
 //////
 	bool iEditChainManager_navigateWordRight(SEditChainManager* ecm, SObject* obj)
 	{
-		RECT	lrc;
-		SFont*	font;
+		SFont*			font;
+		SEditChain*		line;
+		RECT			lrc;
 
 
 		//////////
 		// Grab the rectangle we're working in
 		//////
 			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
+
+
+		//////////
+		// Make sure we're valid
+		//////
+			if (ecm && ecm->ecCursorLine && ecm->ecCursorLine->sourceCode)
+			{
+				//////////
+				// Grab the line and form
+				//////
+					line = ecm->ecCursorLine;
+
+
+				//////////
+				// Iterate until we find a space
+				//////
+					if (ecm->column >= line->sourceCodePopulated)
+					{
+						// We have to go to the next line (if we can)
+						if (ecm->ecLast != line)
+						{
+							// Go down one line
+							iEditChainManager_navigate(ecm, obj, 1, 0);
+
+							// Go to the start of the line
+							if (ecm->column > 0)
+								iEditChainManager_navigate(ecm, obj, 0, -ecm->column);
+
+							// Continue looking word left on this line
+							return(iEditChainManager_navigateWordRight(ecm, obj));
+						}
+
+					} else {
+						//////////
+						// We're somewhere on the line, move one column right first
+						//////
+							++ecm->column;
+
+
+						//////////
+						// If we're on a whitespace character, scan left until we reach a non-whitespace character
+						//////
+							// When we get to the first non-whitespace, we break
+							for ( ; ecm->column < line->sourceCodePopulated && (line->sourceCode->data[ecm->column] == 32 || line->sourceCode->data[ecm->column] == 9); )
+								++ecm->column;
+
+
+						//////////
+						// If we're not at the end of the line, then we look for the first whitespace character
+						//////
+							if (ecm->column < line->sourceCodePopulated)
+							{
+								// Search right for the first whitespace or comma
+								for ( ; ecm->column < line->sourceCodePopulated; ecm->column++)
+								{
+									// Did we find a whitespace to our left?
+									if (line->sourceCode->data[ecm->column + 1] == 32 || line->sourceCode->data[ecm->column + 1] == 9 || line->sourceCode->data[ecm->column + 1] == ',')
+										break;	// Yes
+								}
+
+							} else {
+								// We have to go to the next line (if we can)
+								if (ecm->ecLast != line)
+								{
+									// Go down one line
+									iEditChainManager_navigate(ecm, obj, 1, 0);
+
+									// Go to the start of the line
+									if (ecm->column > 0)
+										iEditChainManager_navigate(ecm, obj, 0, -ecm->column);
+
+									// Continue looking word left on this line
+									return(iEditChainManager_navigateWordLeft(ecm, obj));
+								}
+							}
+					}
+
+
+				//////////
+				// Verify we're visible
+				//////
+					iEditChainManager_verifyCursorIsVisible(ecm, &lrc, font);
+
+
+				// Indicate success
+				return(true);
+			}
 
 
 		// If we get here, indicate failure

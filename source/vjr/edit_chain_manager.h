@@ -50,6 +50,7 @@
 	void					iEditChainManager_delete				(SEditChainManager** root, bool tlDeleteSelf);
 	void					iEditChainManager_deleteChain			(SEditChainManager** root, bool tlDeleteSelf);
 	SEditChain*				iEditChainManager_appendLine			(SEditChainManager* ecm, s8* tcText, s32 tnTextLength);
+	SEditChain*				iEditChainManager_insertLine			(SEditChainManager* ecm, s8* tcText, s32 tnTextLength, SEditChain* line, bool tlInsertAfter);
 	SFont*					iEditChainManager_getRectAndFont		(SEditChainManager* ecm, SObject* obj, RECT* rc);
 	void					iEditChainManager_getColors				(SEditChainManager* ecm, SObject* obj, SBgra& backColor, SBgra& foreColor);
 	void					iEditChainManager_render				(SEditChainManager* ecm, SObject* obj);

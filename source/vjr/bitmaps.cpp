@@ -614,7 +614,7 @@
 							}
 						}
 
-					} else {
+					} else if (bmpSrc->bi.biBitCount == 32) {
 						// 32-bit source
 						if (bmpDst->bi.biBitCount == 24)
 						{
@@ -626,11 +626,21 @@
 								if (lnXDst >= 0 && lnXDst < bmpDst->bi.biWidth && lbgraSrc->alp != 0)
 								{
 									// Copy the pixel
-									lfAlp			= ((f64)lbgraSrc->alp / 255.0);
-									lfMalp			= 1.0 - lfAlp;
-									lbgrDst->red	= (u8)min(max(((f64)lbgrDst->red * lfMalp) + (lbgraSrc->red * lfAlp), 0.0), 255.0);
-									lbgrDst->grn	= (u8)min(max(((f64)lbgrDst->grn * lfMalp) + (lbgraSrc->grn * lfAlp), 0.0), 255.0);
-									lbgrDst->blu	= (u8)min(max(((f64)lbgrDst->blu * lfMalp) + (lbgraSrc->blu * lfAlp), 0.0), 255.0);
+									if (lbgraSrc->alp == 255)
+									{
+										// Opaque
+										lbgrDst->red	= lbgraSrc->red;
+										lbgrDst->grn	= lbgraSrc->grn;
+										lbgrDst->blu	= lbgraSrc->blu;
+
+									} else {
+										// Some degree of transparency
+										lfAlp			= ((f64)lbgraSrc->alp / 255.0);
+										lfMalp			= 1.0 - lfAlp;
+										lbgrDst->red	= (u8)min(max(((f64)lbgrDst->red * lfMalp) + (lbgraSrc->red * lfAlp), 0.0), 255.0);
+										lbgrDst->grn	= (u8)min(max(((f64)lbgrDst->grn * lfMalp) + (lbgraSrc->grn * lfAlp), 0.0), 255.0);
+										lbgrDst->blu	= (u8)min(max(((f64)lbgrDst->blu * lfMalp) + (lbgraSrc->blu * lfAlp), 0.0), 255.0);
+									}
 									++lnPixelsRendered;
 								}
 
@@ -648,12 +658,18 @@
 								if (lnXDst >= 0 && lnXDst < bmpDst->bi.biWidth && lbgraSrc->alp != 0)
 								{
 									// Copy the pixel
-									lfAlp			= ((f64)lbgraSrc->alp / 255.0);
-									lfMalp			= 1.0 - lfAlp;
-// 									lbgraDst->alp	= lbgraSrc->alp;
-									lbgraDst->red	= (u8)min(max(((f64)lbgraDst->red * lfMalp) + (lbgraSrc->red * lfAlp), 0.0), 255.0);
-									lbgraDst->grn	= (u8)min(max(((f64)lbgraDst->grn * lfMalp) + (lbgraSrc->grn * lfAlp), 0.0), 255.0);
-									lbgraDst->blu	= (u8)min(max(((f64)lbgraDst->blu * lfMalp) + (lbgraSrc->blu * lfAlp), 0.0), 255.0);
+									if (lbgraSrc->alp == 255)
+									{
+										// Opaque
+									} else {
+										// Some degree of transparency
+										lfAlp			= ((f64)lbgraSrc->alp / 255.0);
+										lfMalp			= 1.0 - lfAlp;
+//	 									lbgraDst->alp	= lbgraSrc->alp;
+										lbgraDst->red	= (u8)min(max(((f64)lbgraDst->red * lfMalp) + (lbgraSrc->red * lfAlp), 0.0), 255.0);
+										lbgraDst->grn	= (u8)min(max(((f64)lbgraDst->grn * lfMalp) + (lbgraSrc->grn * lfAlp), 0.0), 255.0);
+										lbgraDst->blu	= (u8)min(max(((f64)lbgraDst->blu * lfMalp) + (lbgraSrc->blu * lfAlp), 0.0), 255.0);
+									}
 									++lnPixelsRendered;
 								}
 
@@ -770,11 +786,21 @@
 									// Copy the pixel if it's not a mask pixel
 									if (!(lbgraSrc->red == 222 && lbgraSrc->grn == 22 && lbgraSrc->blu == 222))
 									{
-										lfAlp			= ((f64)lbgraSrc->alp / 255.0);
-										lfMalp			= 1.0 - lfAlp;
-										lbgrDst->red	= (u8)min(max(((f64)lbgrDst->red * lfMalp) + (lbgraSrc->red * lfAlp), 0.0), 255.0);
-										lbgrDst->grn	= (u8)min(max(((f64)lbgrDst->grn * lfMalp) + (lbgraSrc->grn * lfAlp), 0.0), 255.0);
-										lbgrDst->blu	= (u8)min(max(((f64)lbgrDst->blu * lfMalp) + (lbgraSrc->blu * lfAlp), 0.0), 255.0);
+										if (lbgraSrc->alp == 255)
+										{
+											// Opaque
+											lbgrDst->red	= lbgraSrc->red;
+											lbgrDst->grn	= lbgraSrc->grn;
+											lbgrDst->blu	= lbgraSrc->blu;
+
+										} else {
+											// Some degree of transparency
+											lfAlp			= ((f64)lbgraSrc->alp / 255.0);
+											lfMalp			= 1.0 - lfAlp;
+											lbgrDst->red	= (u8)min(max(((f64)lbgrDst->red * lfMalp) + (lbgraSrc->red * lfAlp), 0.0), 255.0);
+											lbgrDst->grn	= (u8)min(max(((f64)lbgrDst->grn * lfMalp) + (lbgraSrc->grn * lfAlp), 0.0), 255.0);
+											lbgrDst->blu	= (u8)min(max(((f64)lbgrDst->blu * lfMalp) + (lbgraSrc->blu * lfAlp), 0.0), 255.0);
+										}
 									}
 								}
 
@@ -794,12 +820,22 @@
 									// Copy the pixel if it's not a mask pixel
 									if (!(lbgraSrc->red == 222 && lbgraSrc->grn == 22 && lbgraSrc->blu == 222))
 									{
-										lfAlp			= ((f64)lbgraSrc->alp / 255.0);
-										lfMalp			= 1.0 - lfAlp;
-//										lbgraDst->alp	= lbgraSrc->alp;
-										lbgraDst->red	= (u8)min(max(((f64)lbgraDst->red * lfMalp) + (lbgraSrc->red * lfAlp), 0.0), 255.0);
-										lbgraDst->grn	= (u8)min(max(((f64)lbgraDst->grn * lfMalp) + (lbgraSrc->grn * lfAlp), 0.0), 255.0);
-										lbgraDst->blu	= (u8)min(max(((f64)lbgraDst->blu * lfMalp) + (lbgraSrc->blu * lfAlp), 0.0), 255.0);
+										if (lbgraSrc->alp == 255)
+										{
+											// Opaque
+											lbgraDst->red	= lbgraSrc->red;
+											lbgraDst->grn	= lbgraSrc->grn;
+											lbgraDst->blu	= lbgraSrc->blu;
+
+										} else {
+											// Some degree of transparency
+											lfAlp			= ((f64)lbgraSrc->alp / 255.0);
+											lfMalp			= 1.0 - lfAlp;
+//											lbgraDst->alp	= lbgraSrc->alp;
+											lbgraDst->red	= (u8)min(max(((f64)lbgraDst->red * lfMalp) + (lbgraSrc->red * lfAlp), 0.0), 255.0);
+											lbgraDst->grn	= (u8)min(max(((f64)lbgraDst->grn * lfMalp) + (lbgraSrc->grn * lfAlp), 0.0), 255.0);
+											lbgraDst->blu	= (u8)min(max(((f64)lbgraDst->blu * lfMalp) + (lbgraSrc->blu * lfAlp), 0.0), 255.0);
+										}
 									}
 								}
 

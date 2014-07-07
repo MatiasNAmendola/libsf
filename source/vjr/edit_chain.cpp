@@ -207,34 +207,37 @@ _asm int 3;
 		{
 			// Is there room to inject it?
 			line = ecm->ecCursorLine;
-			if (ecm->column > line->sourceCodePopulated)
+			if (iEditChain_ensureLineLength(ecm, ecm->ecCursorLine->sourceCodePopulated + 1))
 			{
-				// We need to insert it because we're at the end of the populated length
-				return(iEditChain_characterInsert(ecm, asciiChar));
-
-			} else {
-				// We can overwrite it
-
-				// They could've been beyond the end of line, and if so then we need to insert spaces between the end and here
 				if (ecm->column > line->sourceCodePopulated)
 				{
-					// Fill with spaces
-					for (lnI = line->sourceCodePopulated; lnI < ecm->column; lnI++)
-						line->sourceCode->data[lnI] = ' ';
+					// We need to insert it because we're at the end of the populated length
+					return(iEditChain_characterInsert(ecm, asciiChar));
+
+				} else {
+					// We can overwrite it
+
+					// They could've been beyond the end of line, and if so then we need to insert spaces between the end and here
+					if (ecm->column > line->sourceCodePopulated)
+					{
+						// Fill with spaces
+						for (lnI = line->sourceCodePopulated; lnI < ecm->column; lnI++)
+							line->sourceCode->data[lnI] = ' ';
+					}
+
+					// Overwrite the character
+					line->sourceCode->data[ecm->column] = asciiChar;
+
+					// Move to the next column
+					++ecm->column;
+
+					// If we're past the end, we need to indicate our populated line length
+					if (ecm->column > line->sourceCodePopulated)
+						line->sourceCodePopulated = ecm->column;
+
+					// Indicate success
+					return(true);
 				}
-
-				// Overwrite the character
-				line->sourceCode->data[ecm->column] = asciiChar;
-
-				// Move to the next column
-				++ecm->column;
-
-				// If we're past the end, we need to indicate our populated line length
-				if (ecm->column > line->sourceCodePopulated)
-					line->sourceCodePopulated = ecm->column;
-
-				// Indicate success
-				return(true);
 			}
 		}
 
