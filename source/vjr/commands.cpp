@@ -123,7 +123,7 @@
 
 
 		//////////
-        // Parameter 1 must be numeric
+        // Parameter 1 must be character
 		//////
 			if (!iVariable_isValid(p1) || iVariable_getType(p1) != _VAR_TYPE_CHARACTER)
 			{
