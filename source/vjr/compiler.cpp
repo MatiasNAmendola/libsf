@@ -3355,7 +3355,11 @@ _asm int 3;
 			//////////
 			// Disconnect
 			//////
-				nodeNext = node->next;
+				// find out what would be the next one they'll need to point to
+				if (node->next)		nodeNext = node->next;
+				else				nodeNext = node->prev;
+
+				// Orphanize if need be
 				if (node->prev || node->next)
 					iLl_orphanizeNode(node);
 

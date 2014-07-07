@@ -465,6 +465,47 @@ _asm int 3;
 
 //////////
 //
+// Delete the indicated line
+//
+//////
+	void iEditChainManager_deleteLine(SEditChainManager* ecm)
+	{
+		SEditChain* lineDeleted;
+		SEditChain* lineNewCursorLine;
+
+
+		// Make sure the environment is sane
+		if (ecm && !ecm->isReadOnly && ecm->ecCursorLine)
+		{
+			// Delete any content on this line
+			if (ecm->ecCursorLine->sourceCode)
+				iDatum_delete(ecm->ecCursorLine->sourceCode, true);
+
+// TODO:  delete compiler info, and extra info
+
+			// Delete the line itself, and determine which one would be the new line
+			lineDeleted			= ecm->ecCursorLine;
+			lineNewCursorLine	= (SEditChain*)iLl_deleteNode((SLL*)ecm->ecCursorLine, true);
+
+			// Update anything that may have changed as a result
+			if (ecm->ecLast == lineDeleted)
+				ecm->ecLast = lineNewCursorLine;
+
+			if (ecm->ecFirst == lineDeleted)
+				ecm->ecFirst = lineNewCursorLine;
+
+			if (ecm->ecTopLine == lineDeleted)
+				ecm->ecTopLine = lineNewCursorLine;
+
+			ecm->ecCursorLine = lineNewCursorLine;
+		}
+	}
+
+
+
+
+//////////
+//
 // Called to get the colors
 //
 //////
@@ -700,6 +741,10 @@ _asm int 3;
 					lnTop	+= font->tm.tmHeight;
 					line	= (SEditChain*)line->ll.next;
 			}
+
+			// Fill in the remainder of the display
+			SetRect(&lrc, rc.left, rc.top + lnTop, rc.right, rc.bottom);
+			iBmp_fillRect(bmp, &lrc, backColor, backColor, backColor, backColor, false);
 
 			// Reset the font
 			SelectObject(bmp->hdc, hfontOld);
@@ -1574,7 +1619,7 @@ _asm int 3;
 		//////////
 		// Make sure we're valid
 		//////
-			if (ecm && !ecm->isReadOnly && ecm->ecCursorLine && ecm->column > 0)
+			if (ecm && !ecm->isReadOnly && ecm->ecCursorLine)
 			{
 				//////////
 				// Grab the line and form
@@ -1610,6 +1655,12 @@ _asm int 3;
 						//////
 							line = (SEditChain*)line->ll.next;
 					}
+
+
+				//////////
+				// Update the cursor line
+				//////
+					ecm->ecCursorLine = line;
 
 
 				//////////
@@ -1890,6 +1941,7 @@ _asm int 3;
 	bool iEditChainManager_deleteLeft(SEditChainManager* ecm, SObject* obj)
 	{
 		SEditChain*	line;
+		SEditChain*	lineLast;
 		SFont*		font;
 		RECT		lrc;
 
@@ -1903,29 +1955,66 @@ _asm int 3;
 		//////////
 		// Make sure we're valid
 		//////
-			if (ecm && !ecm->isReadOnly && ecm->ecCursorLine && ecm->column > 0)
+			if (ecm && !ecm->isReadOnly && ecm->ecCursorLine)
 			{
 				// Grab the line
-				line = ecm->ecCursorLine;
+				line		= ecm->ecCursorLine;
+				lineLast	= ecm->ecLast;
 
-				// Do we need to do anything?
-				if (ecm->column > 0 && ecm->column <= line->sourceCodePopulated)
+				// If there's nothing on this line, delete it
+				if (ecm->ecCursorLine->sourceCodePopulated == 0)
 				{
-					// Reduce our column position
-					--ecm->column;
-
-					// Based on insert, handle it different
-					if (!ecm->isOverwrite)
+					if (ecm->ecFirst != ecm->ecLast)
 					{
-						// We're in insert mode, so we drag everything with us
-						iEditChain_characterDelete(ecm);
+						// Delete the current line
+						iEditChainManager_deleteLine(ecm);
 
-					} else {
-						// We're in overwrite mode, so we just insert a space
-						iEditChain_characterOverwrite(ecm, ' ');
+						if (lineLast != line)
+						{
+							// Navigate up one line
+							iEditChainManager_navigate(ecm, obj, -1, 0);
+						}
 
-						// The overwrite moves us back right again, so we reduce our column position
+						// Navigate to the end of the current line
+						iEditChainManager_navigate(ecm, obj, 0, ecm->ecCursorLine->sourceCodePopulated - ecm->column);
+					}
+
+				} else {
+					// Do we need to do anything?
+					if (ecm->column == 0)
+					{
+						if (ecm->ecFirst != ecm->ecLast)
+						{
+							// Delete the current line
+							iEditChainManager_deleteLine(ecm);
+
+							if (lineLast != line)
+							{
+								// Navigate up one line
+								iEditChainManager_navigate(ecm, obj, -1, 0);
+							}
+
+							// Navigate to the end of the current line
+							iEditChainManager_navigate(ecm, obj, 0, ecm->ecCursorLine->sourceCodePopulated - ecm->column);
+						}
+
+					} else if (ecm->column > 0 && ecm->column <= line->sourceCodePopulated) {
+						// Reduce our column position
 						--ecm->column;
+
+						// Based on insert, handle it different
+						if (!ecm->isOverwrite)
+						{
+							// We're in insert mode, so we drag everything with us
+							iEditChain_characterDelete(ecm);
+
+						} else {
+							// We're in overwrite mode, so we just insert a space
+							iEditChain_characterOverwrite(ecm, ' ');
+
+							// The overwrite moves us back right again, so we reduce our column position
+							--ecm->column;
+						}
 					}
 				}
 
@@ -1970,8 +2059,22 @@ _asm int 3;
 		//////
 			if (ecm && !ecm->isReadOnly && ecm->ecCursorLine)
 			{
-				// Delete everything to the right
-				iEditChain_characterDelete(ecm);
+				if (ecm->ecCursorLine->sourceCodePopulated == 0)
+				{
+					// There's no data on this line, if we're in insert mode delete the line
+					if (!ecm->isOverwrite)
+						iEditChainManager_deleteLine(ecm);
+
+				} else {
+					// Delete everything to the right
+					iEditChain_characterDelete(ecm);
+				}
+
+
+				//////////
+				// Verify we're visible
+				//////
+					iEditChainManager_verifyCursorIsVisible(ecm, &lrc, font);
 
 
 				// Indicate success
