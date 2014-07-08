@@ -662,7 +662,7 @@ _asm int 3;
 			hfontOld = SelectObject(bmp->hdc, font->hfont);
 
 			// Iterate for every visible line
-			while (line && lrc.top < rc.bottom)
+			while (line && lrc.top + font->tm.tmHeight < rc.bottom)
 			{
 				//////////
 				// Determine the position
@@ -701,21 +701,23 @@ _asm int 3;
 					if (ecm->leftColumn < line->sourceCodePopulated)
 					{
 						// Draw the portion that will fit
-						DrawText(bmp->hdc, line->sourceCode->data + ecm->leftColumn, line->sourceCodePopulated - ecm->leftColumn, &lrc2, DT_END_ELLIPSIS | DT_VCENTER | DT_LEFT | DT_SINGLELINE | DT_CALCRECT);
+						DrawText(bmp->hdc, line->sourceCode->data + ecm->leftColumn, line->sourceCodePopulated - ecm->leftColumn, &lrc2, DT_VCENTER | DT_LEFT | DT_SINGLELINE | DT_CALCRECT);
+						lrc2.right	= min(rc.right,  lrc2.right);
+						lrc2.bottom	= min(rc.bottom, lrc2.bottom);
 
 					} else {
 						// We're scrolled past this line, so the entire area must be filled in
 						SetRect(&lrc2, rc.left, lrc.top, rc.left, lrc.bottom);
 					}
 					// Set the clear border
-					SetRect(&lrc3, lrc2.right, lrc.top, rc.right, lrc.bottom + 1);
+					SetRect(&lrc3, lrc2.right, lrc2.top, rc.right, lrc2.bottom);
 
 
 				//////////
 				// Draw the text
 				//////
 					if (ecm->leftColumn < line->sourceCodePopulated)
-						DrawText(bmp->hdc, line->sourceCode->data + ecm->leftColumn, line->sourceCodePopulated - ecm->leftColumn, &lrc2, DT_END_ELLIPSIS | DT_VCENTER | DT_LEFT | DT_SINGLELINE);
+						DrawText(bmp->hdc, line->sourceCode->data + ecm->leftColumn, line->sourceCodePopulated - ecm->leftColumn, &lrc2, DT_VCENTER | DT_LEFT | DT_SINGLELINE);
 					
 
 				//////////
@@ -759,29 +761,129 @@ _asm int 3;
 // Called to verify the cursor is visible by adjuting ecm->leftColumn
 //
 //////
-	bool iEditChainManager_verifyCursorIsVisible(SEditChainManager* ecm, RECT* rc, SFont* font)
+	bool iEditChainManager_verifyCursorIsVisible(SEditChainManager* ecm, SObject* obj)
 	{
-		bool llChanged;
+		s32				lnI, lnUp, lnDn, lnOldLeftColumn, lnNewLeftColumn, lnCols, lnRows, lnWidth, lnHeight;
+		bool			llChanged;
+		SEditChain*		lineUp;
+		SEditChain*		lineDn;
+		SFont*			font;
+		RECT			lrc;
 
 
+		//////////
+		// Indicate initially that no changes were made that require a re-render
+		//////
+			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
+
+
+		//////////
 		// Make sure our environment is sane
-		llChanged = false;
-		if (ecm)
-		{
-			// Make sure we're not before it to the left
-			if (ecm->column < ecm->leftColumn)
+		//////
+			llChanged = false;
+			if (ecm)
 			{
-				ecm->leftColumn	= ecm->column;
-				llChanged		= true;
+				//////////
+				// Compute our maximum rows and cols based on visible display area
+				//////
+					lnWidth		= (lrc.right - lrc.left);
+					lnHeight	= (lrc.bottom - lrc.top);
+					lnCols		= max((lnWidth  / font->tm.tmAveCharWidth) - ((lnWidth  % font->tm.tmAveCharWidth) != 0 ? 1 : 0), 1);
+					lnRows		= max((lnHeight / font->tm.tmHeight)       - ((lnHeight % font->tm.tmHeight)       != 0 ? 1 : 0), 1);
+
+
+				//////////
+				// Make sure we're not before it to the left
+				//////
+					if (ecm->column < ecm->leftColumn)
+					{
+						ecm->leftColumn	= ecm->column;
+						llChanged		= true;
+					}
+
+
+				//////////
+				// Make sure we're not beyond it to the right
+				//////
+					lnOldLeftColumn	= ecm->leftColumn;
+					lnNewLeftColumn = ecm->column - lnCols;
+					if (ecm->leftColumn - lnNewLeftColumn < 0)
+					{
+						ecm->leftColumn	= lnNewLeftColumn;
+						llChanged		= true;
+					}
+
+				//////////
+				// Make sure we're on-screen vertically
+				//////
+					if (!ecm->ecCursorLine)
+					{
+						// No cursor line has been set
+						if (!ecm->ecTopLine)
+						{
+							// Set the top line
+							ecm->ecTopLine		= ecm->ecFirst;
+							ecm->ecCursorLine	= ecm->ecFirst;
+
+						} else {
+							// Position it at the top line
+							ecm->ecCursorLine = ecm->ecTopLine;
+						}
+						llChanged = true;
+
+					} else {
+						// Find out how many rows away the cursor line is from the top line by scanning up and down
+						lineUp	= ecm->ecTopLine;
+						lineDn	= ecm->ecTopLine;
+						for (lnUp = 0, lnDn = 0; (lineUp || lineDn) && lineUp != ecm->ecCursorLine && lineDn != ecm->ecCursorLine; )
+						{
+							//////////
+							// Can we go up?
+							//////
+								if (lineUp)
+								{
+									lineUp = (SEditChain*)lineUp->ll.prev;
+									++lnUp;
+								}
+
+
+							//////////
+							// Can we go down?
+							//////
+								if (lineDn)
+								{
+									lineDn = (SEditChain*)lineDn->ll.next;
+									++lnDn;
+								}
+						}
+						// When we get here, either lineUp or lineDn found the cursor line
+
+						if (lineUp == ecm->ecCursorLine)
+						{
+							// We went up, so set the top line to this location
+							ecm->ecTopLine = ecm->ecCursorLine;
+							llChanged = true;
+
+						} else if (lineDn == ecm->ecCursorLine) {
+							// We went down to find it
+							if (lnDn > lnRows)
+							{
+								// And the position is too far down
+								for (lnI = 0; lnI < lnDn - lnRows; lnI++)
+									ecm->ecTopLine = (SEditChain*)ecm->ecTopLine->ll.next;
+
+								// Indicate the change
+								llChanged = true;
+							}
+
+						} else {
+							// If we get here, it wasn't found
+							ecm->ecTopLine = ecm->ecCursorLine;
+							llChanged = true;
+						}
+					}
 			}
 
-			// Make sure we're not beyond it to the right
-			if ((ecm->column - ecm->leftColumn) * font->tm.tmAveCharWidth > rc->right)
-			{
-				ecm->leftColumn	+= (rc->right - ((ecm->column - ecm->leftColumn) * font->tm.tmAveCharWidth)) / font->tm.tmAveCharWidth;
-				llChanged		= true;
-			}
-		}
 
 		// Indicate our status
 		return(llChanged);
@@ -797,7 +899,7 @@ _asm int 3;
 //////
 	bool iEditChainManager_keystroke(SEditChainManager* ecm, SObject* obj, u8 asciiChar)
 	{
-		bool	llDirty;
+		bool	llChanged;
 		SFont*	font;
 		RECT	lrc;
 
@@ -805,13 +907,13 @@ _asm int 3;
 		//////////
 		// Indicate initially that no changes were made that require a re-render
 		//////
-			llDirty = false;
+			llChanged = false;
 			font = iEditChainManager_getRectAndFont(ecm, obj, &lrc);
 
 
 		// Make sure our environment is sane
 // TODO:  Added the extra test on ecm->column because of a bug when scrolling... will fix. :-)
-		if (ecm && !ecm->isReadOnly && ecm->column < _ECM_MINIMUM_LINE_ALLOCATION_LENGTH - 10)
+		if (ecm && !ecm->isReadOnly)
 		{
 			//////////
 			// Are we on a line?
@@ -840,7 +942,7 @@ _asm int 3;
 
 					} else {
 						// We are just overwriting whatever's there
-						llDirty = iEditChain_characterInsert(ecm, asciiChar);
+						llChanged = iEditChain_characterInsert(ecm, asciiChar);
 					}
 
 				} else {
@@ -852,17 +954,23 @@ _asm int 3;
 
 					} else {
 						// We are just overwriting whatever's there
-						llDirty = iEditChain_characterOverwrite(ecm, asciiChar);
+						llChanged = iEditChain_characterOverwrite(ecm, asciiChar);
 					}
 				}
 		}
 
 		// If we updated something, mark the object dirty
-		if (llDirty)
+		if (llChanged)
+		{
+			// Indicate the object needs re-rendered
 			obj->isDirty = true;
 
+			// Verify our cursor is visible
+			iEditChainManager_verifyCursorIsVisible(ecm, obj);
+		}
+
 		// Indicate our status
-		return(llDirty);
+		return(llChanged);
 	}
 
 
@@ -982,7 +1090,7 @@ _asm int 3;
 				//////////
 				// Verify we're visible
 				//////
-					iEditChainManager_verifyCursorIsVisible(ecm, &lrc, font);
+					iEditChainManager_verifyCursorIsVisible(ecm, obj);
 
 
 				// Indicate success
@@ -1052,7 +1160,7 @@ _asm int 3;
 				//////////
 				// Verify we're visible
 				//////
-					iEditChainManager_verifyCursorIsVisible(ecm, &lrc, font);
+					iEditChainManager_verifyCursorIsVisible(ecm, obj);
 
 
 				// Indicate success
@@ -1441,7 +1549,7 @@ _asm int 3;
 				//////////
 				// Verify we're visible
 				//////
-					iEditChainManager_verifyCursorIsVisible(ecm, &lrc, font);
+					iEditChainManager_verifyCursorIsVisible(ecm, obj);
 
 
 				// Indicate success
@@ -1509,6 +1617,8 @@ _asm int 3;
 						// We're somewhere on the line, move one column right first
 						//////
 							++ecm->column;
+							if (ecm->column == 1 && line->sourceCodePopulated == 1)
+								return(true);
 
 
 						//////////
@@ -1553,7 +1663,7 @@ _asm int 3;
 				//////////
 				// Verify we're visible
 				//////
-					iEditChainManager_verifyCursorIsVisible(ecm, &lrc, font);
+					iEditChainManager_verifyCursorIsVisible(ecm, obj);
 
 
 				// Indicate success
@@ -1666,7 +1776,7 @@ _asm int 3;
 				//////////
 				// Verify we're visible
 				//////
-					iEditChainManager_verifyCursorIsVisible(ecm, &lrc, font);
+					iEditChainManager_verifyCursorIsVisible(ecm, obj);
 
 
 				// Indicate success
@@ -2022,7 +2132,7 @@ _asm int 3;
 				//////////
 				// Verify we're visible
 				//////
-					iEditChainManager_verifyCursorIsVisible(ecm, &lrc, font);
+					iEditChainManager_verifyCursorIsVisible(ecm, obj);
 
 
 				// Indicate success
@@ -2074,7 +2184,7 @@ _asm int 3;
 				//////////
 				// Verify we're visible
 				//////
-					iEditChainManager_verifyCursorIsVisible(ecm, &lrc, font);
+					iEditChainManager_verifyCursorIsVisible(ecm, obj);
 
 
 				// Indicate success

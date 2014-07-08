@@ -55,7 +55,7 @@
 	SFont*					iEditChainManager_getRectAndFont		(SEditChainManager* ecm, SObject* obj, RECT* rc);
 	void					iEditChainManager_getColors				(SEditChainManager* ecm, SObject* obj, SBgra& backColor, SBgra& foreColor);
 	void					iEditChainManager_render				(SEditChainManager* ecm, SObject* obj);
-	bool					iEditChainManager_verifyCursorIsVisible	(SEditChainManager* ecm, RECT* rc, SFont* font);
+	bool					iEditChainManager_verifyCursorIsVisible	(SEditChainManager* ecm, SObject* obj);
 
 
 	// Editor movements
