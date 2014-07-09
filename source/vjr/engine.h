@@ -40,9 +40,28 @@
 // Constants for .T. and .F. settings using LOGICALX()
 //
 //////
-	const u32	_TRUEFALSE_TF					= 1;
-	const u32	_TRUEFALSE_YN					= 2;
-	const u32	_TRUEFALSE_UD					= 3;
+	const u32	_LOGICAL_TF						= 1;
+	const u32	_LOGICAL_YN						= 2;
+	const u32	_LOGICAL_UD						= 3;
+
+
+//////////
+// Constants for date formats
+//////
+	const u32	_SET_DATE_AMERICAN				= 1;			// mm/dd/yy
+	const u32	_SET_DATE_ANSI					= 2;			// yy.mm.dd
+	const u32	_SET_DATE_BRITISH				= 3;			// dd/mm/yy
+	const u32	_SET_DATE_FRENCH				= 4;			// dd/mm/yy
+	const u32	_SET_DATE_GERMAN				= 5;			// dd.mm.yy
+	const u32	_SET_DATE_ITALIAN				= 6;			// dd-mm-yy
+	const u32	_SET_DATE_JAPAN					= 7;			// yy/mm/dd
+	const u32	_SET_DATE_TAIWAN				= 8;			// yy/mm/dd
+	const u32	_SET_DATE_LONG					= 9;			// Dayofweek, Month dd, yyyy
+	const u32	_SET_DATE_SHORT					= 10;			// m/d/yy
+	const u32	_SET_DATE_USA					= 11;			// mm-dd-yy
+	const u32	_SET_DATE_DMY					= 12;			// dd/mm/yy
+	const u32	_SET_DATE_MDY					= 13;			// mm/dd/yy
+	const u32	_SET_DATE_YMD					= 14;			// yy/mm/dd
 
 
 //////////
@@ -56,10 +75,20 @@
 	bool		_set_caseSensitiveNames			= false;
 	bool		_set_caseSensitiveCompares		= true;
 	bool		_set_namingConventions			= false;
-	bool		_set_trueFalse					= _TRUEFALSE_TF;
+	s32			_set_logical					= _LOGICAL_TF;
 	bool		_set_implicitParams				= false;
 	bool		_set_stickyParameters			= true;
 	bool		_set_tableEqualAssignments		= false;
 	bool		_set_tableObjects				= false;
 	bool		_set_sloppyPrinting				= false;
 	SDatum		_set_languageTo					= { "en", 2 };
+	s32			_set_decimals					= 2;
+	s32			_set_date						= _SET_DATE_AMERICAN;		// See _SET_DATE_* constants above
+	bool		_set_century					= true;
+
+
+//////////
+// Forward declarations
+//////
+	bool					iEngine_executeStandaloneCommand		(SEditChain* line);
+	SVariable*				iEngine_getVariableFromComponent		(SComp* comp, bool* tlManufactured);

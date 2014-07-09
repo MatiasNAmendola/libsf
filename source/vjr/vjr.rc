@@ -35,6 +35,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // remains consistent on all systems.
 IDI_VJR                 ICON                    "vjr.ico"
 IDI_SMALL               ICON                    "small.ico"
+IDI_JDEBI               ICON                    "jdebi.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //

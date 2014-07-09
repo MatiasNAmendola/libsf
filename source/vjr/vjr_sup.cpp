@@ -113,8 +113,8 @@
 		// Attach them to physical windows
 		gWinScreen	= iWindow_allocate();
 		gWinJDebi	= iWindow_allocate();
-		iObj_createWindowForForm(gobj_screen,	gWinScreen);
-		iObj_createWindowForForm(gobj_jdebi,	gWinJDebi);
+		iObj_createWindowForForm(gobj_screen,	gWinScreen,	IDI_VJR);
+		iObj_createWindowForForm(gobj_jdebi,	gWinJDebi,	IDI_JDEBI);
 	}
 
 
@@ -521,12 +521,13 @@
 // Note:  Any object can be presented in a window, though typically on form objects are.
 //
 //////
-	SWindow* iWindow_createForObject(SObject* obj, SWindow* win)
+	SWindow* iWindow_createForObject(SObject* obj, SWindow* win, s32 icon)
 	{
 		SWindow*		winNew;
 		WNDCLASSEXA		classex;
 		ATOM			atom;
 		s8				buffer[128];
+		s8				bufferClass[256];
 
 
 		// Make sure our environment is sane
@@ -559,7 +560,9 @@
 					//////////
 					// Register the general window class if need be
 					//////
-						if (!GetClassInfoExA(ghInstance, cgcWindowClass, &classex))
+						icon = ((icon <= 0) ? IDI_VJR : icon);
+						sprintf(bufferClass, "%s%u\0", (s8*)cgcWindowClass, icon);
+						if (!GetClassInfoExA(ghInstance, bufferClass, &classex))
 						{
 							// Initialize
 							memset(&classex, 0, sizeof(classex));
@@ -568,8 +571,8 @@
 							classex.cbSize				= sizeof(WNDCLASSEXA);
 							classex.hInstance			= ghInstance;
 							classex.style				= CS_OWNDC | CS_HREDRAW | CS_VREDRAW;
-							classex.lpszClassName		= cgcWindowClass;
-							classex.hIcon				= LoadIcon(ghInstance, MAKEINTRESOURCE(IDI_VJR));
+							classex.lpszClassName		= bufferClass;
+							classex.hIcon				= LoadIcon(ghInstance, MAKEINTRESOURCE(icon));
 							classex.hCursor				= LoadCursor(NULL, IDC_ARROW);
 							classex.lpfnWndProc			= &iWindow_wndProc;
 
@@ -586,7 +589,7 @@
 						else					memcpy(buffer, cgcScreenTitle,		sizeof(cgcScreenTitle));
 
 						// Build it
-						winNew->hwnd = CreateWindow(cgcWindowClass, buffer, WS_POPUP, obj->rc.left, obj->rc.top, obj->rc.right - obj->rc.left, obj->rc.bottom - obj->rc.top, NULL, NULL, ghInstance, 0);
+						winNew->hwnd = CreateWindow(bufferClass, buffer, WS_POPUP, obj->rc.left, obj->rc.top, obj->rc.right - obj->rc.left, obj->rc.bottom - obj->rc.top, NULL, NULL, ghInstance, 0);
 
 						// Initialize it internally
 						PostMessage(winNew->hwnd, WMVJR_FIRST_CREATION, 0, 0);
@@ -722,6 +725,44 @@
 			iObj_render(win->obj, true, true);
 			InvalidateRect(win->hwnd, 0, FALSE);
 		}
+	}
+
+
+
+
+//////////
+//
+// Adjusts the brightness of the indicated color by the indicated percentage.
+//
+//////
+	void iColor_adjustBrightness(SBgra& color, f32 tfPercent)
+	{
+		f32 red, grn, blu;
+
+
+		//////////
+		// Adjust the color
+		//////
+			tfPercent	= (100.0f + tfPercent) / 100.0f;
+			red			= (f32)color.red * tfPercent;
+			grn			= (f32)color.grn * tfPercent;
+			blu			= (f32)color.blu * tfPercent;
+
+
+		//////////
+		// Constrict it into range
+		//////
+			red			= min(max(red, 0.0f), 255.0f);
+			grn			= min(max(grn, 0.0f), 255.0f);
+			blu			= min(max(blu, 0.0f), 255.0f);
+
+
+		//////////
+		// Set the color back
+		//////
+			color.red	= (u8)red;
+			color.grn	= (u8)grn;
+			color.blu	= (u8)blu;
 	}
 
 
@@ -1546,6 +1587,17 @@
 				// Regular key without special flags
 				switch (vKey)
 				{
+					case VK_F6:
+					case VK_F10:
+						// Execute this line of code
+						if (commandHistory && commandHistory->ecCursorLine && commandHistory->ecCursorLine->sourceCodePopulated > 0 && iEngine_executeStandaloneCommand(commandHistory->ecCursorLine))
+							iWindow_render(gWinScreen);
+
+						// Move to next line and redraw
+						if (iEditChainManager_navigate(commandHistory, win->obj, 1, -commandHistory->column))
+							iWindow_render(win);
+						break;
+
 					case VK_UP:
 						if (iEditChainManager_navigate(commandHistory, win->obj, -1, 0))
 							iWindow_render(win);
@@ -1577,8 +1629,19 @@
 						return(1);
 
 					case VK_RETURN:
-						if (iEditChainManager_returnKey(commandHistory, win->obj))
-							iWindow_render(win);
+						//////////
+						// Are we on the last line?
+						//////
+							if (commandHistory && commandHistory->ecCursorLine && !commandHistory->ecCursorLine->ll.next && commandHistory->ecCursorLine->sourceCodePopulated > 0 && iEngine_executeStandaloneCommand(commandHistory->ecCursorLine))
+								iWindow_render(gWinScreen);
+
+
+						//////////
+						// Draw it like normal
+						//////
+							if (iEditChainManager_returnKey(commandHistory, win->obj))
+								iWindow_render(win);
+
 						return(1);
 
 					case VK_LEFT:

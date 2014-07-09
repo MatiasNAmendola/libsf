@@ -266,7 +266,7 @@ struct SVariable
 	SDatum		name;													// Name of this variable
 
 	// Variable content based on type
-	u32			var_type;												// Variable type (see _VAR_TYPE_* constants)
+	u32			varType;												// Variable type (see _VAR_TYPE_* constants)
 	bool		isVarAllocated;											// If true, it was a variable that was allocated, and needs to be released.
 	union {
 		SObject*		obj;											// If the lower-bit of type is clear, and it's an object, the object it relates to

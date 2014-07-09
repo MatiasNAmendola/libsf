@@ -68,7 +68,7 @@
 	void					iObj_appendObjToParent					(SObject* parent, SObject* obj);
 	void					iObj_duplicateChildren					(SObject* objDst, SObject* objSrc);
 	void					iObj_setSize							(SObject* obj, s32 tnLeft, s32 tnTop, s32 tnWidth, s32 tnHeight);
-	SWindow* 				iObj_createWindowForForm				(SObject* obj_form, SWindow* win);
+	SWindow* 				iObj_createWindowForForm				(SObject* obj_form, SWindow* win, s32 icon);
 	bool					iObj_setVisible							(SObject* obj, bool tlNewVisible);
 	void*					iObj_copySubobj							(SObject* template_obj);
 	void					iiObj_resetToDefault					(SObject* obj, bool tlResetProperties, bool tlResetMethods);
@@ -208,10 +208,11 @@
 	DWORD	WINAPI			iReadEvents_messageWindow				(LPVOID lpParameter);
 	LRESULT	CALLBACK		iMessage_wndProcWindow					(HWND hwnd, UINT m, WPARAM w, LPARAM l);
 	LRESULT	CALLBACK		iWindow_wndProc							(HWND hwnd, UINT m, WPARAM w, LPARAM l);
-	SWindow* 				iWindow_createForObject					(SObject* obj, SWindow* win);
+	SWindow* 				iWindow_createForObject					(SObject* obj, SWindow* win, s32 icon);
 	SWindow*				iWindow_findByHwnd						(HWND hwnd);
 	SWindow*				iWindow_allocate						(void);
 	void					iWindow_render							(SWindow* win);
+	void					iColor_adjustBrightness					(SBgra& color, f32 tfPercent);
 	bool					iInit_shutdownPolitely					(void);
 
 	void					iComputeScreenWindowClientAreaDimensions	(SSize* size);
@@ -247,6 +248,9 @@
 
 	// Edit Chain
 	// Moved to edit_chain.cpp
+
+	// Engine
+	// Moved to engine.cpp
 
 	// Translate
 	void*					iTranslate_p1_to_p2						(SBuilder* root, void* ptr);

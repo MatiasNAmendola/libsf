@@ -556,7 +556,7 @@
 // used as an off-screen buffer in that way.
 //
 //////
-	SWindow* iObj_createWindowForForm(SObject* obj_form, SWindow* win)
+	SWindow* iObj_createWindowForForm(SObject* obj_form, SWindow* win, s32 icon)
 	{
 		SWindow* winNew;
 
@@ -564,7 +564,7 @@
 		// Make sure our environment is sane
 		winNew = NULL;
 		if (obj_form)
-			winNew = iWindow_createForObject(obj_form, win);
+			winNew = iWindow_createForObject(obj_form, win, icon);
 
 		// Indicate our status
 		return(winNew);

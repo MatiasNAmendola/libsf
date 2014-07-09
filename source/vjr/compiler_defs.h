@@ -168,10 +168,11 @@ struct SVariable;
 
 	// Variable functions
 	SVariable*				iVariable_create							(u32 tnVarType, SVariable* varIndirect);
+	SVariable*				iVariable_convertForDisplay					(SVariable* var);
 	void					iVariable_delete							(SVariable* var, bool tlDeleteSelf);
 	void					iVariable_politelyDeleteChain				(SVariable** root, bool tlDeleteSelf);
 	void					iVariable_politelyDeleteChain_callback		(SLLCallback* cb);
-	s32						iiVariable_getAs_s32							(SVariable* var, bool tlForceConvert, bool* tlError, u32* tnErrorNum);
+	s32						iiVariable_getAs_s32						(SVariable* var, bool tlForceConvert, bool* tlError, u32* tnErrorNum);
 	// Support functions
 	void					iiVariable_computeYyyyMmDd_fromJulianDayNumber	(u32 tnJulianDayNumber, u32* year, u32* month, u32* day);
 	void					iiVariable_computeHhMmSsMss_fromf32			(f32 tfSeconds, u32* hour, u32* minute, u32* second, u32* millisecond);

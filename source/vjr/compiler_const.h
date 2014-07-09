@@ -144,6 +144,7 @@
 	const u32		_ERROR_NUMERIC_OVERFLOW							= 6;
 	const u32		_ERROR_NOT_NUMERIC								= 7;
 	const u32		_ERROR_EMPTY_STRING								= 8;
+	const u32		_ERROR_SYNTAX									= 9;
 
 	// Messages
 	const s8		cgcOutOfMemory[]								= "out of memory";
@@ -154,6 +155,7 @@
 	const s8		cgcNumericOverflow[]							= "numeric overflow";
 	const s8		cgcNotNumeric[]									= "not numeric";
 	const s8		cgcEmptyString[]								= "empty string";
+	const s8		cgcSyntaxError[]								= "syntax error";
 	
 
 //////////
@@ -177,6 +179,21 @@
 	const s8		cgcCaskTildeClose[]								= "|~";
 
 	const s8		cgcPseudoFunctionName[]							= "__top_of_code_block";
+	const s8		cgcNullText[]									= ".NULL.";
+	const s8		cgcTText[]										= ".T.";
+	const s8		cgcFText[]										= ".F.";
+	const s8		cgcYText[]										= ".Y.";
+	const s8		cgcNText[]										= ".N.";
+	const s8		cgcUText[]										= ".U.";
+	const s8		cgcDText[]										= ".D.";
+	const s8		cgcOxText[]										= ".o.";		// Other
+	const s8		cgcPxText[]										= ".p.";		// Partial
+	const s8		cgcYxText[]										= ".y.";		// Yet another
+	const s8		cgcZxText[]										= ".z.";		// Zat's all folks! :-)
+	const s8		cgcBigInteger[]									= "(BigInteger)";
+	const s8		cgcBigFloatingPoint[]							= "(BigFloatingPoint)";
+	const s8		cgcFeatureNotYetSupported[]						= "feature not yet supported";
+
 
 	const u32		_ICODE_CASK_ROUND_OPEN_PARAMS					= 1000001;
 	const u32		_ICODE_CASK_ROUND_CLOSE_PARAMS					= 1000002;

@@ -82,7 +82,7 @@ typedef		const f64			cf64;
 // Processing helpers
 //////
 	#define iVariable_isValid(var)					(var && var->value.data && var->value.length != 0)
-	#define iVariable_getType(var)					var->var_type
+	#define iVariable_getType(var)					var->varType
 
 
 //////////

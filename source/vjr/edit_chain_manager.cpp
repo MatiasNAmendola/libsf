@@ -355,7 +355,6 @@ _asm int 3;
 				if (ec)
 				{
 					// Update defaults
-					ecm->ecLast					= ec;
 					ecm->ecCursorLine			= ec;
 					ecm->ecCursorLineLast		= ec;
 					ecm->ecTopLine				= ec;
@@ -364,9 +363,19 @@ _asm int 3;
 				}
 			}
 
-			// Populate if added
+			// Update and populate if added
 			if (ec)
+			{
+				// We've added it to the end
+				ecm->ecLast = ec;
+
+				// Make sure the length is valid
+				if (tnTextLength == -1)
+					tnTextLength = strlen(tcText);
+
+				// Append the indicated text
 				ec->sourceCode = iDatum_allocate(tcText, tnTextLength);
+			}
 		}
 
 		// Indicate our status
@@ -404,6 +413,10 @@ _asm int 3;
 				// Insert before or after the indicated line
 				if (tlInsertAfter)
 				{
+					// Have we added one at the end?
+					if (ecm->ecLast == line)
+						ecm->ecLast = lineNew;
+
 					//////////
 					// [line->] [<-after]
 					// becomes:
@@ -429,6 +442,10 @@ _asm int 3;
 						}
 
 				} else {
+					// Have we added one before the beginning?
+					if (ecm->ecFirst == line)
+						ecm->ecFirst = lineNew;
+
 					//////////
 					// [before->] [<-line]
 					// becomes:
@@ -641,7 +658,7 @@ _asm int 3;
 		SEditChain*		line;
 		SBitmap*		bmp;
 		HGDIOBJ			hfontOld;
-		SBgra			foreColor, backColor, fillColor;
+		SBgra			foreColor, backColor, fillColor, backColorLast, foreColorLast;
 		RECT			rc, lrc, lrc2, lrc3;
 
 
@@ -653,9 +670,17 @@ _asm int 3;
 			bmp		= obj->bmp;
 			lnTop	= 0;
 
+
+			//////////
 			// Grab font, coordinates, and colors
-			font = iEditChainManager_getRectAndFont(ecm, obj, &rc);
-			iEditChainManager_getColors(ecm, obj, backColor, foreColor);
+			//////
+				font = iEditChainManager_getRectAndFont(ecm, obj, &rc);
+				iEditChainManager_getColors(ecm, obj, backColor, foreColor);
+				backColorLast.color = backColor.color;
+				foreColorLast.color = foreColor.color;
+				iColor_adjustBrightness(backColorLast, -10.0f);
+				iColor_adjustBrightness(foreColorLast, 10.0f);
+
 
 			// Prepare
 			CopyRect(&lrc, &rc);
@@ -683,13 +708,21 @@ _asm int 3;
 						SetTextColor(bmp->hdc, RGB(currentStatementForeColor.red, currentStatementForeColor.grn, currentStatementForeColor.blu));
 						fillColor.color = currentStatementBackColor.color;
 
-					} else {
+					} else if (line->ll.next) {
 						// Display in normal background color
 						SetBkColor(bmp->hdc, RGB(backColor.red, backColor.grn, backColor.blu));
 						SetBkMode(bmp->hdc, OPAQUE);
 						SetTextColor(bmp->hdc, RGB(foreColor.red, foreColor.grn, foreColor.blu));
 						hfontOld = SelectObject(bmp->hdc, font->hfont);
 						fillColor.color = backColor.color;
+
+					} else {
+						// This is the last line, display in the last line color
+						SetBkColor(bmp->hdc, RGB(backColorLast.red, backColorLast.grn, backColorLast.blu));
+						SetBkMode(bmp->hdc, OPAQUE);
+						SetTextColor(bmp->hdc, RGB(foreColorLast.red, foreColorLast.grn, foreColorLast.blu));
+						hfontOld = SelectObject(bmp->hdc, font->hfont);
+						fillColor.color = backColorLast.color;
 					}
 
 
