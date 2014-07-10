@@ -112,8 +112,9 @@ struct SCompileNote;
 		const s8*		keyword;										// Text keyword being searched
 		s32				length;											// Length of the keyword (negative for case sensitive, positive case insensitive, 0 for termination entry)
 		bool			repeats;										// Can this item repeat?  Or is this a one-shot keyword?
-		u32				iCode;											// An associated code to store when this entry is found
+		s32				iCode;											// An associated code to store when this entry is found
 		bool			firstOnLine;									// Should this item ONLY be the first on line?
+		s32				iCat;											// This entry's general category (function, operator, keyword, flow)
 
 		// Used for an explicit callback to validate if this match (as by text) is really a match (as by context)
 		union {
@@ -259,7 +260,8 @@ struct SCompileNote;
 
 		// Information about the component
 		SEditChain*		line;											// The line this component relates to
-		u32				iCode;											// Refer to _VVMMC_COMP_* structs in mc_const.h
+		u32				iCode;											// Refer to _ICODE_* constants
+		u32				iCat;											// Refer to _ICAT_* constants
 		s32				start;											// Start into the indicates line's source code
 		s32				length;											// Length of the component
 	};

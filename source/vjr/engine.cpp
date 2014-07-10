@@ -50,25 +50,28 @@
 		SVariable*	varText;
 
 
-// TODO:  Unfinished code
-return(false);
-
 		// Make sure our environment is sane
 		if (line && line->sourceCode && line->sourceCode->data && line->sourceCodePopulated > 0)
 		{
-// TODO:  Working here
-
+			//////////
 			// If we have existing compiler data, get rid of it
-			if (line->compilerInfo)		iCompiler_delete(&line->compilerInfo, false);
-			else						line->compilerInfo = iCompiler_allocate(line);		// Allocate a new one
+			//////
+				if (line->compilerInfo)		iCompiler_delete(&line->compilerInfo, false);
+				else						line->compilerInfo = iCompiler_allocate(line);		// Allocate a new one
 
+
+			//////////
 			// Parse out the line
-			iComps_translateSourceLineTo(&cgcFundamentalSymbols[0], line);
-			if (!line->compilerInfo->firstComp)
-				return(false);		// Nothing to compile on this line
-			
+			//////
+				iComps_translateSourceLineTo(&cgcFundamentalSymbols[0], line);
+				if (!line->compilerInfo->firstComp)
+					return(false);		// Nothing to compile on this line
+
+
+			//////////
 			// Get the first component
-			comp = line->compilerInfo->firstComp;
+			//////
+				comp = line->compilerInfo->firstComp;
 
 
 			//////////
@@ -90,11 +93,14 @@ return(false);
 			// Translate sequences to known keywords
 			//////
 				iComps_translateToOthers(&cgcKeywordKeywords[0], line);
+				if (!line->compilerInfo->firstComp)
+					return(false);		// Nothing to compile on this line
 
 
 			//////////
 			// Based on the first keyword, process it
 			//////
+				comp = line->compilerInfo->firstComp;
 				switch (comp->iCode)
 				{
 					case _ICODE_QUESTION_MARK:
@@ -107,17 +113,35 @@ return(false);
 
 						} else {
 							// It's a number, display it
-							if (var = iEngine_getVariableFromComponent(compNext, &llManufactured))
+							if (compNext->iCat == _ICAT_FUNCTION)
 							{
-								// We have a variable we can display its contents
-								varText = iVariable_convertForDisplay(var);
+								// It is something like "? func(x)"
+								if (!(var = iEngine_getFunctionResult(compNext, llManufactured)))
+								{
+									// Unknown function, or parameters were not correct
+									// In any case, the iEngine_getFunctionResult() has reported the error
+									return(false);
+								}
 
-// TODO:  Working here
-
-								// Release the variable if it was manufactured
-								if (llManufactured)
-									iVariable_delete(varText, true);
+							} else if (compNext->iCat == _ICAT_GENERIC) {
+								// It is something like "? k" or "? 29"
+								if (!(var = iEngine_getVariableFromComponent(compNext, llManufactured)))
+								{
+									// Unknown parameter
+									iError_report(cgcUnrecognizedParameter);
+									return(false);
+								}
 							}
+							// We have a variable we can display its contents
+							varText = iVariable_convertForDisplay(var);
+
+							// Add its contents to _screen
+							iEditChainManager_appendLine(screenData, varText->value.data, varText->value.length);
+
+							// Release the variable if it was manufactured
+							iVariable_delete(varText, true);
+							if (llManufactured)
+								iVariable_delete(var, true);
 						}
 						break;
 
@@ -163,7 +187,92 @@ return(false);
 // reference.
 //
 //////
-	SVariable* iEngine_getVariableFromComponent(SComp* comp, bool* tlManufactured)
+	SVariable* iEngine_getVariableFromComponent(SComp* comp, bool& tlManufactured)
+	{
+		SVariable*	var;
+		s64			value;
+
+
+		// Make sure our environment is sane
+		if (comp)
+		{
+			switch (comp->iCode)
+			{
+				case _ICODE_NUMERIC:
+					// It's a raw number
+					// Grab its value
+					value = iiVariable_getCompAs_s64(comp);
+
+
+					//////////
+					// Create and populate our output variable
+					//////
+						tlManufactured = true;
+						if (value >= (s64)_s32_min && value <= (s64)_s32_max)
+						{
+							// Store as 32-bits
+							var						= iVariable_create(_VAR_TYPE_S32, NULL);
+							*(s32*)var->value.data	= (s32)value;
+
+						} else {
+							// Store as 64-bits
+							var						= iVariable_create(_VAR_TYPE_S64, NULL);
+							*(s64*)var->value.data	= value;
+						}
+
+
+					//////////
+					// Return our result
+					//////
+						return(var);
+
+
+				case _ICODE_ALPHANUMERIC:
+				case _ICODE_ALPHA:
+					// It's some kind of text, could be a field or variable
+_asm int 3;
+					break;
+
+
+				case _ICODE_SINGLE_QUOTED_TEXT:
+				case _ICODE_DOUBLE_QUOTED_TEXT:		// It's quoted text
+					//////////
+					// Create our output variable
+					//////
+						var				= iVariable_create(_VAR_TYPE_CHARACTER, NULL);
+						tlManufactured	= true;
+
+
+					//////////
+					// Populate
+					//////
+						iDatum_duplicate(&var->value, comp->line->sourceCode->data + comp->start + 1, comp->length - 2);
+
+
+					//////////
+					// Return our result
+					//////
+						return(var);
+
+
+				default:
+					// Unknown
+					break;
+			}
+		}
+		// If we get here, failure
+		return(NULL);
+	}
+
+
+
+
+//////////
+//
+// Called to find the function, execute it, and return the result
+//
+//////
+	SVariable* iEngine_getFunctionResult(SComp* comp, bool& tlManufactured)
 	{
 // TODO:  working here
 		return(NULL);

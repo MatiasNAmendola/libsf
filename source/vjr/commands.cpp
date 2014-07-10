@@ -41,6 +41,11 @@
 // Reports an error.
 //
 //////
+	void iError_report(cs8* constantErrorText)
+	{
+		iError_report((s8*)constantErrorText);
+	}
+
 	void iError_report(s8* errorText)
 	{
 		// Append the error to the ECM
@@ -89,6 +94,14 @@
 
 			case _ERROR_EMPTY_STRING:
 				iError_report((s8*)cgcEmptyString);
+				break;
+
+			case _ERROR_SYNTAX:
+				iError_report((s8*)cgcSyntaxError);
+				break;
+
+			case _ERROR_UNRECOGNIZED_PARAMETER:
+				iError_report((s8*)cgcUnrecognizedParameter);
 				break;
 		}
 	}

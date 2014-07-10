@@ -125,6 +125,7 @@
 		iEditChainManager_appendLine(screenData, NULL, 0);
 		iEditChainManager_appendLine(screenData, "Please report any bugs:  http://www.visual-freepro.org/forum", -1);
 		iEditChainManager_appendLine(screenData, "Thank you, and may the Lord Jesus Christ bless you richly. :-)", -1);
+		iEditChainManager_appendLine(screenData, NULL, 0);
 		iEditChainManager_appendLine(screenData, "              _____", -1);
 		iEditChainManager_appendLine(screenData, "             |     |", -1);
 		iEditChainManager_appendLine(screenData, "             |     |", -1);
@@ -150,6 +151,7 @@
 		iEditChainManager_appendLine(commandHistory, "*** For now, this can be thought of as a command window ... with a twist.", -1);
 		iEditChainManager_appendLine(commandHistory, "*** It works like an editor window.  You can insert new lines, edit old ones, etc.", -1);
 		iEditChainManager_appendLine(commandHistory, "*** To execute a command, press F6 or Enter if you're on the last line, or use F6 on any line.", -1);
+		iEditChainManager_appendLine(commandHistory, "*** You can use ? 999 and ? \"sample\" in this daily build.", -1);
 		iEditChainManager_appendLine(commandHistory, "-----", -1);
 		iEditChainManager_appendLine(commandHistory, NULL, 0);
 		iEditChainManager_navigateEnd(commandHistory, gobj_jdebi);

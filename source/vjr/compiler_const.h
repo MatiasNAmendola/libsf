@@ -145,6 +145,7 @@
 	const u32		_ERROR_NOT_NUMERIC								= 7;
 	const u32		_ERROR_EMPTY_STRING								= 8;
 	const u32		_ERROR_SYNTAX									= 9;
+	const u32		_ERROR_UNRECOGNIZED_PARAMETER					= 10;
 
 	// Messages
 	const s8		cgcOutOfMemory[]								= "out of memory";
@@ -156,6 +157,7 @@
 	const s8		cgcNotNumeric[]									= "not numeric";
 	const s8		cgcEmptyString[]								= "empty string";
 	const s8		cgcSyntaxError[]								= "syntax error";
+	const s8		cgcUnrecognizedParameter[]						= "unrecognized parameter";
 	
 
 //////////
@@ -328,6 +330,19 @@
 	const u32		_ICODE_NOT										= 500;
 	const u32		_ICODE_AND										= 501;
 	const u32		_ICODE_OR										= 502;
+
+	// Stand-alones
+	const u32	    _ICODE_TRUE										= 600;
+	const u32	    _ICODE_FALSE									= 601;
+	const u32	    _ICODE_YES										= 602;
+	const u32	    _ICODE_NO										= 603;
+	const u32	    _ICODE_UP										= 604;
+	const u32	    _ICODE_DOWN										= 605;
+	const u32	    _ICODE_OTHER									= 606;
+	const u32	    _ICODE_PARTIAL									= 607;
+	const u32	    _ICODE_YET_ANOTHER								= 608;
+	const u32	    _ICODE_ZATS_ALL_FOLKS							= 609;
+
 
 	// Functions
 	const u32		_ICODE_ABS										= 1000;
@@ -1035,3 +1050,13 @@
 	const u32       _ICODE_WINDOW                                   = 2269;
 	const u32       _ICODE_WITH                                     = 2270;
 	const u32       _ICODE_ZAP                                      = 2271;
+
+
+//////////
+// Category codes
+//////
+	const u32		_ICAT_GENERIC									= 0;
+	const u32		_ICAT_COMMAND									= 1;
+	const u32		_ICAT_FUNCTION									= 2;
+	const u32		_ICAT_FLOW										= 3;
+	const u32		_ICAT_OPERATOR									= 4;

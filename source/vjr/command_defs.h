@@ -45,6 +45,7 @@ struct SVariable;
 //        given by its name, such as "function_chr()" being a function.
 //////
 	// Temporary error reporting until the proper engine is constructed.
+	void				iError_report								(cs8* constantErrorText);
 	void				iError_report								(s8* errorText);
 	void				iError_reportByNumber						(u32 tnErrorNum);
 
@@ -54,3 +55,29 @@ struct SVariable;
 //////
 	SVariable*			function_asc								(SVariable* p1);
 	SVariable*			function_chr								(SVariable* p1);
+
+
+//////////
+// Translation
+//////
+	struct SFunctionList
+	{
+		s32		iCode;
+		union {
+			u32			_func;
+			SVariable*	(*func_1p)		(SVariable* p1);
+			SVariable*	(*func_2p)		(SVariable* p1, SVariable* p2);
+			SVariable*	(*func_3p)		(SVariable* p1, SVariable* p2, SVariable* p3);
+			SVariable*	(*func_4p)		(SVariable* p1, SVariable* p2, SVariable* p3, SVariable* p4);
+			SVariable*	(*func_5p)		(SVariable* p1, SVariable* p2, SVariable* p3, SVariable* p4, SVariable* p5);
+		};
+		s32		parameters;
+	};
+
+	SFunctionList gsKnownFunctions[] = {
+		{	_ICODE_ASC,			(u32)&function_asc,		1	},
+		{	_ICODE_CHR,			(u32)&function_chr,		1	},
+
+		// Do not delete this line, it is used to terminate the searching list
+		{	0,					NULL,					0	}
+	};

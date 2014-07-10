@@ -994,6 +994,7 @@ void iiComps_decodeSyntax_returns(SCompileVxbmmContext* cvc)
 							{
 								// Convert it, translate it, whatever you want to call it, just make it be the new code, per the user's request, got it? :-)
 								comp->iCode = tacs->iCode;
+								comp->iCat	= tacs->iCat;
 								// All done with this component
 								break;
 							}
@@ -4902,6 +4903,20 @@ _asm int 3;
 		*tlError	= true;
 		*tnErrorNum	= _ERROR_NOT_NUMERIC;
 		return(0);
+	}
+
+
+
+
+//////////
+//
+// Called to get the value stored in the component as an s64.
+// Note:  We simply process the component's content here.  No type checking.
+//
+//////
+	s64 iiVariable_getCompAs_s64(SComp* comp)
+	{
+		return(_atoi64(comp->line->sourceCode->data + comp->start));
 	}
 
 

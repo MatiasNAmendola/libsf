@@ -91,4 +91,5 @@
 // Forward declarations
 //////
 	bool					iEngine_executeStandaloneCommand		(SEditChain* line);
-	SVariable*				iEngine_getVariableFromComponent		(SComp* comp, bool* tlManufactured);
+	SVariable*				iEngine_getVariableFromComponent		(SComp* comp, bool& tlManufactured);
+	SVariable*				iEngine_getFunctionResult				(SComp* comp, bool& tlManufactured);
