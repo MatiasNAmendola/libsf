@@ -102,6 +102,10 @@
 		screenData		= iEditChainManager_allocate();
 		commandHistory	= iEditChainManager_allocate();
 
+		// Set the cursor line data on commandHistory only
+		commandHistory->showCursorLine	= true;
+		commandHistory->showEndLine		= true;
+
 		// Create our main screen window
 		iInit_create_screenObject();
 		iInit_create_jdebiObject();
@@ -115,6 +119,42 @@
 		gWinJDebi	= iWindow_allocate();
 		iObj_createWindowForForm(gobj_screen,	gWinScreen,	IDI_VJR);
 		iObj_createWindowForForm(gobj_jdebi,	gWinJDebi,	IDI_JDEBI);
+
+		// Initially populate _screen
+		iEditChainManager_appendLine(screenData, (s8*)cgcScreenTitle, -1);
+		iEditChainManager_appendLine(screenData, NULL, 0);
+		iEditChainManager_appendLine(screenData, "Please report any bugs:  http://www.visual-freepro.org/forum", -1);
+		iEditChainManager_appendLine(screenData, "Thank you, and may the Lord Jesus Christ bless you richly. :-)", -1);
+		iEditChainManager_appendLine(screenData, "              _____", -1);
+		iEditChainManager_appendLine(screenData, "             |     |", -1);
+		iEditChainManager_appendLine(screenData, "             |     |", -1);
+		iEditChainManager_appendLine(screenData, "     ________|     |________     In God's sight we've come together.", -1);
+		iEditChainManager_appendLine(screenData, "    |                       |    We've come together to help each other.", -1);
+		iEditChainManager_appendLine(screenData, "    |________       ________|    Let's grow this project up ... together!", -1);
+		iEditChainManager_appendLine(screenData, "             |     |             In service and love to The Lord, forever!", -1);
+		iEditChainManager_appendLine(screenData, "             |     |", -1);
+		iEditChainManager_appendLine(screenData, "             |     |             Sponsored by:", -1);
+		iEditChainManager_appendLine(screenData, "             |     |                LibSF -- Liberty Software Foundation", -1);
+		iEditChainManager_appendLine(screenData, "             |     |", -1);
+		iEditChainManager_appendLine(screenData, "             |     |             We need more coders. Please consider helping out.", -1);
+		iEditChainManager_appendLine(screenData, "             |     |             Your contribution would make a difference.", -1);
+		iEditChainManager_appendLine(screenData, "             |     |", -1);
+		iEditChainManager_appendLine(screenData, "             |_____|", -1);
+		iEditChainManager_appendLine(screenData, NULL, 0);
+		iEditChainManager_navigateEnd(screenData, gobj_screen);
+		gobj_screen->isDirty = true;
+		iObj_render(gobj_screen, true, true);
+
+		// Initially populate _jdebi
+		iEditChainManager_appendLine(commandHistory, "*** Welcome to Visual FreePro, Junior! :-)", -1);
+		iEditChainManager_appendLine(commandHistory, "*** For now, this can be thought of as a command window ... with a twist.", -1);
+		iEditChainManager_appendLine(commandHistory, "*** It works like an editor window.  You can insert new lines, edit old ones, etc.", -1);
+		iEditChainManager_appendLine(commandHistory, "*** To execute a command, press F6 or Enter if you're on the last line, or use F6 on any line.", -1);
+		iEditChainManager_appendLine(commandHistory, "-----", -1);
+		iEditChainManager_appendLine(commandHistory, NULL, 0);
+		iEditChainManager_navigateEnd(commandHistory, gobj_jdebi);
+		gobj_jdebi->isDirty = true;
+		iObj_render(gobj_jdebi, true, true);
 	}
 
 
@@ -292,6 +332,9 @@
 			iSubobj_form_setBorderRgba(gobj_screen, NwColor.color, NeColor.color, SwColor.color, SeColor.color);
 			iSubobj_form_setBackColor(gobj_screen, white.color);
 			iSubobj_form_setForeColor(gobj_screen, black.color);
+
+			// Give it a fixed point font
+			iSubobj_form_setFont(gobj_screen, (s8*)cgcDefaultFixedFont, 9, false, false, false, false, false, false);
 
 			// Set it visible
 			iObj_setVisible(gobj_screen, true);

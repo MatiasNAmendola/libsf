@@ -198,6 +198,7 @@ struct SVariable;
 
 	// Compiler functions
 	SCompiler*				iCompiler_allocate							(SEditChain* parent);
+	void					iCompiler_delete							(SCompiler** root, bool tlDeleteSelf);
 
 	// Compile note functions
 	SCompileNote*			iCompileNote_create							(SCompileNote** noteRoot, u32 tnStart, u32 tnEnd, u32 tnNumber, s8* tcMessage);

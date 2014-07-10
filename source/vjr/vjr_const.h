@@ -276,8 +276,8 @@ typedef		const f64			cf64;
 //////
 	const s8			cgcMessageWindowClass[]				= "VJr.MessageWindow";
 	const s8			cgcWindowClass[]					= "VJr.Window";
-	const s8			cgcScreenTitle[]					= "Visual FreePro, Jr. 0.29 -- Jul.08.2014";
-	const s8			cgcJDebiTitle[]						= "JDebi Debugger 0.29 -- Jul.08.2014";
+	const s8			cgcScreenTitle[]					= "Visual FreePro, Jr. 0.29 -- Jul.09.2014";
+	const s8			cgcJDebiTitle[]						= "JDebi Debugger 0.29 -- Jul.09.2014";
 	const s8			cgcDefaultFont[]					= "Ubuntu";
 	const s8			cgcDefaultFixedFont[]				= "Ubuntu Mono";
 	const s8			cgcWindowTitleBarFont[]				= "Ubuntu Condensed";

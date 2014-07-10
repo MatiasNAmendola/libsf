@@ -105,6 +105,9 @@ struct SEditChainManager
 		SEditChain*		ecCursorLine;									// Line where the cursor is
 		SEditChain*		ecCursorLineLast;								// The last location before movement was made
 		bool			isOverwrite;									// Are we in overwrite mode?
+		bool			showCursorLine;									// Should we render the cursor line?
+		bool			showEndLine;									// Should we render the end line in a different color?
+
 		s32				column;											// Column we're currently inputting
 		s32				leftColumn;										// The column we're displaying at the left-most position (of horizontally scrolled, this will be greater than 0)
 

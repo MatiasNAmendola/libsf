@@ -50,13 +50,18 @@
 		SVariable*	varText;
 
 
-// Incomplete function
+// TODO:  Unfinished code
 return(false);
-
 
 		// Make sure our environment is sane
 		if (line && line->sourceCode && line->sourceCode->data && line->sourceCodePopulated > 0)
 		{
+// TODO:  Working here
+
+			// If we have existing compiler data, get rid of it
+			if (line->compilerInfo)		iCompiler_delete(&line->compilerInfo, false);
+			else						line->compilerInfo = iCompiler_allocate(line);		// Allocate a new one
+
 			// Parse out the line
 			iComps_translateSourceLineTo(&cgcFundamentalSymbols[0], line);
 			if (!line->compilerInfo->firstComp)

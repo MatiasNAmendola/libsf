@@ -264,9 +264,7 @@
 							// We need to clear out anything from any prior compile
 							//////
 								iComps_removeAll(cvc->line);
-								iCompileNote_removeAll(&cvc->line->compilerInfo->warnings);
-								iCompileNote_removeAll(&cvc->line->compilerInfo->errors);
-								iNode_politelyDeleteAll(&cvc->line->compilerInfo->firstNode, true, true, true, true, true, true);
+								iCompiler_delete(&cvc->line->compilerInfo, false);
 
 
 							//////////
@@ -5256,6 +5254,32 @@ _asm int 3;
 		// Indicate our status
 		//////
 			return(compilerNew);
+	}
+
+
+
+
+//////////
+//
+// Called to delete the previous allocated compiler data
+//
+//////
+	void iCompiler_delete(SCompiler** root, bool tlDeleteSelf)
+	{
+		SCompiler* compilerInfo;
+
+
+		// Make sure our environment is sane
+		if (root && *root)
+		{
+			// Grab the pointer
+			compilerInfo = *root;
+
+			// Delete the items here
+			iCompileNote_removeAll(&compilerInfo->warnings);
+			iCompileNote_removeAll(&compilerInfo->errors);
+			iNode_politelyDeleteAll(&compilerInfo->firstNode, true, true, true, true, true, true);
+		}
 	}
 
 

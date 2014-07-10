@@ -374,7 +374,8 @@ _asm int 3;
 					tnTextLength = strlen(tcText);
 
 				// Append the indicated text
-				ec->sourceCode = iDatum_allocate(tcText, tnTextLength);
+				ec->sourceCode			= iDatum_allocate(tcText, tnTextLength);
+				ec->sourceCodePopulated	= tnTextLength;
 			}
 		}
 
@@ -700,7 +701,7 @@ _asm int 3;
 				//////////
 				// Determine the color
 				//////
-					if (ecm->ecCursorLine == line)
+					if (ecm->ecCursorLine == line && ecm->showCursorLine)
 					{
 						// Display in the cursor color line
 						SetBkColor(bmp->hdc, RGB(currentStatementBackColor.red, currentStatementBackColor.grn, currentStatementBackColor.blu));
@@ -708,7 +709,7 @@ _asm int 3;
 						SetTextColor(bmp->hdc, RGB(currentStatementForeColor.red, currentStatementForeColor.grn, currentStatementForeColor.blu));
 						fillColor.color = currentStatementBackColor.color;
 
-					} else if (line->ll.next) {
+					} else if (line->ll.next || !ecm->showCursorLine || ecm->showEndLine) {
 						// Display in normal background color
 						SetBkColor(bmp->hdc, RGB(backColor.red, backColor.grn, backColor.blu));
 						SetBkMode(bmp->hdc, OPAQUE);
@@ -762,7 +763,7 @@ _asm int 3;
 				//////////
 				// Draw the cursor if on the cursor line
 				//////
-					if (ecm->ecCursorLine == line)
+					if (ecm->ecCursorLine == line && ecm->showCursorLine)
 					{
 						lnLeft	= rc.left + ((ecm->column - ecm->leftColumn) * font->tm.tmAveCharWidth);
 						lnRight	= lnLeft + font->tm.tmAveCharWidth;
